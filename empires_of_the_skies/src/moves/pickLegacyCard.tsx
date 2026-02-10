@@ -1,7 +1,8 @@
-import { Ctx, Move } from "boardgame.io";
+import { Move } from "boardgame.io";
 import { MyGameState } from "../types";
-import { EventsAPI } from "boardgame.io/dist/types/src/plugins/plugin-events";
-import { RandomAPI } from "boardgame.io/dist/types/src/plugins/random/random";
+
+// Broken imports removed.
+// The types for 'events' and 'random' are automatically provided by the Move<G> type.
 
 const pickLegacyCard: Move<MyGameState> = (
   {
@@ -10,23 +11,22 @@ const pickLegacyCard: Move<MyGameState> = (
     playerID,
     events,
     random,
-  }: {
-    G: MyGameState;
-    ctx: Ctx;
-    playerID: string;
-    events: EventsAPI;
-    random: RandomAPI;
   },
   ...args: any[]
 ) => {
   const card = args[0];
 
-  G.playerInfo[playerID].resources.legacyCard = card;
+  if (G.playerInfo[playerID]) {
+    G.playerInfo[playerID].resources.legacyCard = card;
+  }
 
-  if (ctx.playOrderPos === ctx.numPlayers - 1) {
-    events.endPhase();
-  } else {
-    events.endTurn();
+  // Ensure events exists before calling (it is usually available in moves)
+  if (events) {
+    if (ctx.playOrderPos === ctx.numPlayers - 1) {
+      events.endPhase();
+    } else {
+      events.endTurn();
+    }
   }
 };
 

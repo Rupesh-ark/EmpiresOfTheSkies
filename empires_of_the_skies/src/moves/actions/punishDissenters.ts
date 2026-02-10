@@ -1,4 +1,6 @@
 import { Move } from "boardgame.io";
+// FIX: Import Ctx from the main package
+import { Ctx } from "boardgame.io";
 import { MyGameState } from "../../types";
 import { INVALID_MOVE } from "boardgame.io/core";
 import { checkCounsellorsNotZero } from "../moveValidation";
@@ -9,31 +11,25 @@ import {
   removeOneCounsellor,
   removeVPAmount,
 } from "../resourceUpdates";
-import { Ctx } from "boardgame.io/dist/types/src/types";
-import { EventsAPI } from "boardgame.io/dist/types/src/plugins/plugin-events";
-import { RandomAPI } from "boardgame.io/dist/types/src/plugins/random/random";
+
+// FIX: Removed broken imports (EventsAPI, RandomAPI)
+
 //TODO: add functionality for executing prisoners
 const punishDissenters: Move<MyGameState> = (
   {
     G,
-    ctx,
+    ctx, // ctx is used for numPlayers
     playerID,
-    events,
-    random,
-  }: {
-    G: MyGameState;
-    ctx: Ctx;
-    playerID: string;
-    events: EventsAPI;
-    random: RandomAPI;
   },
   ...args: any[]
 ) => {
-  const value: keyof typeof G.boardState.punishDissenters = args[0] + 1;
+  // Cast args to the correct key type
+  const value = (args[0] + 1) as keyof typeof G.boardState.punishDissenters;
+  
   if (checkCounsellorsNotZero(playerID, G) !== undefined) {
     return INVALID_MOVE;
   }
-  if (value > ctx.numPlayers) {
+  if (args[0] + 1 > ctx.numPlayers) {
     console.log(
       "Player has selected a move which is only available in games with more players"
     );
@@ -43,6 +39,7 @@ const punishDissenters: Move<MyGameState> = (
     console.log("Player has selected a move which is already taken");
     return INVALID_MOVE;
   }
+
   let hasPunishedDissentersAlready = false;
   Object.values(G.boardState.punishDissenters).forEach((id) => {
     if (id === playerID) hasPunishedDissentersAlready = true;
@@ -54,11 +51,14 @@ const punishDissenters: Move<MyGameState> = (
 
   const playerInfo = G.playerInfo[playerID];
 
+  // Safety check
+  if (!playerInfo) return INVALID_MOVE;
+
   if (playerInfo.prisoners === 3) {
     return INVALID_MOVE;
   }
 
-  const cost = {
+  const cost: Record<number, () => void | typeof INVALID_MOVE> = {
     1: () => removeVPAmount(G, playerID, 3),
     2: () => {
       if (playerInfo.resources.counsellors < 2) {
@@ -72,9 +72,17 @@ const punishDissenters: Move<MyGameState> = (
     5: () => removeGoldAmount(G, playerID, 1),
     6: () => {},
   };
-  if (cost[value]() === INVALID_MOVE) {
-    return INVALID_MOVE;
+
+  const costFunction = cost[value as number];
+  if (costFunction) {
+      if (costFunction() === INVALID_MOVE) {
+        return INVALID_MOVE;
+      }
+  } else {
+      // Fallback if value isn't 1-6 (though UI should prevent this)
+      return INVALID_MOVE;
   }
+
   removeOneCounsellor(G, playerID);
   playerInfo.prisoners += 1;
 

@@ -6,7 +6,7 @@ import {
 } from "../types";
 import { fortuneOfWarCards } from "../codifiedGameInfo";
 import { Ctx } from "boardgame.io";
-import { EventsAPI } from "boardgame.io/dist/types/src/plugins/events/events";
+// FIX: Removed broken import of EventsAPI
 import {
   findNextBattle,
   findNextConquest,
@@ -188,7 +188,7 @@ export const drawFortuneOfWarCard = (G: MyGameState): FortuneOfWarCardInfo => {
 export const checkIfCurrentPlayerIsInCurrentBattle = (
   G: MyGameState,
   ctx: Ctx,
-  events: EventsAPI
+  events: any
 ) => {
   const [x, y] = G.mapState.currentBattle;
   console.log("current battlemap:");
@@ -221,4 +221,4 @@ export const checkIfCurrentPlayerIsInCurrentBattle = (
         break;
     }
   }
-};
+}; 

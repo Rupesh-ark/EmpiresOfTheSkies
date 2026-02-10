@@ -7,26 +7,19 @@ import {
   removeOneCounsellor,
   removeVPAmount,
 } from "../resourceUpdates";
-import { EventsAPI } from "boardgame.io/dist/types/src/plugins/events/events";
-import { RandomAPI } from "boardgame.io/dist/types/src/plugins/random/random";
-import { Ctx } from "boardgame.io/dist/types/src/types";
+
+// FIX: Removed broken internal imports (Ctx, EventsAPI, RandomAPI).
+// FIX: Removed unused arguments (ctx, events, random) from the signature.
 
 const conscriptLevies: Move<MyGameState> = (
-  {
-    G,
-    ctx,
-    playerID,
-    events,
-    random,
-  }: {
-    G: MyGameState;
-    ctx: Ctx;
-    playerID: string;
-    events: EventsAPI;
-    random: RandomAPI;
-  },
+  { G, playerID },
   ...args: any[]
 ) => {
+  // Safety check
+  if (!G.playerInfo[playerID]) {
+    return INVALID_MOVE;
+  }
+
   if (G.playerInfo[playerID].playerBoardCounsellorLocations.conscriptLevies) {
     console.log(
       "Player has attempted to conscript levies twice in the same phase of play"
@@ -44,10 +37,14 @@ const conscriptLevies: Move<MyGameState> = (
     console.log("Player has attempted to conscript 0 levies");
     return INVALID_MOVE;
   }
+
+  // Logic: Cost is 1 VP per 3 Levies?
   const cost = levyAmount / 3;
+
   removeOneCounsellor(G, playerID);
   removeVPAmount(G, playerID, cost);
   addLevyAmount(G, playerID, levyAmount);
+  
   G.playerInfo[playerID].playerBoardCounsellorLocations.conscriptLevies = true;
   G.playerInfo[playerID].turnComplete = true;
 };

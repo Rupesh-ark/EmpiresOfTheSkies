@@ -1,29 +1,22 @@
 import { Move } from "boardgame.io";
+// FIX: Import Ctx from the main package
+import { Ctx } from "boardgame.io";
+import { INVALID_MOVE } from "boardgame.io/core";
 import { PlayerOrder, MyGameState } from "../../types";
 import { checkCounsellorsNotZero } from "../moveValidation";
-import { INVALID_MOVE } from "boardgame.io/core";
 import { removeOneCounsellor } from "../resourceUpdates";
-import { EventsAPI } from "boardgame.io/dist/types/src/plugins/plugin-events";
-import { RandomAPI } from "boardgame.io/dist/types/src/plugins/random/random";
-import { Ctx } from "boardgame.io/dist/types/src/types";
+
+// FIX: Removed broken imports (EventsAPI, RandomAPI) and manual type definitions.
+// TypeScript infers the types automatically from Move<MyGameState>.
 
 export const alterPlayerOrder: Move<MyGameState> = (
-  {
-    G,
-    ctx,
-    events,
-    random,
-  }: {
-    G: MyGameState;
-    ctx: Ctx;
-    playerID: string;
-    events: EventsAPI;
-    random: RandomAPI;
-  },
+  { G, ctx },
   ...args: any[]
 ) => {
-  const newPosition: keyof PlayerOrder = args[0] + 1;
+  // logic remains exactly the same
+  const newPosition = (args[0] + 1) as keyof PlayerOrder;
   const playerID = ctx.currentPlayer;
+
   if (checkCounsellorsNotZero(playerID, G) !== undefined) {
     return INVALID_MOVE;
   }

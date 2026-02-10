@@ -7,27 +7,19 @@ import {
   removeGoldAmount,
   removeOneCounsellor,
 } from "../resourceUpdates";
-import { EventsAPI } from "boardgame.io/dist/types/src/plugins/plugin-events";
-import { RandomAPI } from "boardgame.io/dist/types/src/plugins/random/random";
-import { Ctx } from "boardgame.io/dist/types/src/types";
 
-export const influencePrelates: Move<MyGameState> = (
+// FIX: Removed broken internal imports (Ctx, EventsAPI, RandomAPI)
+// FIX: Removed unused arguments (ctx, events, random)
+
+const influencePrelates: Move<MyGameState> = (
   {
     G,
-    ctx,
     playerID,
-    events,
-    random,
-  }: {
-    G: MyGameState;
-    ctx: Ctx;
-    playerID: string;
-    events: EventsAPI;
-    random: RandomAPI;
   },
   ...args: any[]
 ) => {
-  const value: keyof typeof G.boardState.influencePrelates = args[0] + 1;
+  // Cast value to the correct key type for influencePrelates
+  const value = (args[0] + 1) as keyof typeof G.boardState.influencePrelates;
 
   if (checkCounsellorsNotZero(playerID, G) !== undefined) {
     return INVALID_MOVE;
@@ -37,7 +29,8 @@ export const influencePrelates: Move<MyGameState> = (
     console.log("Player has selected a move which has already been taken");
     return INVALID_MOVE;
   }
-  let recipientOfPayment;
+  
+  let recipientOfPayment: string | undefined;
   let cost = 1;
 
   const kingdomToIDMap: { [key: number]: string | null } = {
@@ -52,7 +45,8 @@ export const influencePrelates: Move<MyGameState> = (
   };
 
   Object.entries(G.playerInfo).forEach(([id, playerInfo]) => {
-    if (playerInfo.colour === kingdomToIDMap[value]) {
+    // Ensure value is treated as a number for the map lookup
+    if (playerInfo.colour === kingdomToIDMap[value as number]) {
       recipientOfPayment = id;
       cost = playerInfo.cathedrals;
     }
