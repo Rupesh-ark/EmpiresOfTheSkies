@@ -1,9 +1,8 @@
+import { EventsAPI } from "boardgame.io/dist/types/src/plugins/plugin-events";
 import { MyGameState } from "../types";
 import legacyResolutions from "./legacyResolutions";
 
-// FIX: Removed the broken import from 'boardgame.io/dist/types/...'
-// FIX: Changed 'events: EventsAPI' to 'events: any' to avoid the type error.
-const resolveRound = (G: MyGameState, events: any) => {
+const resolveRound = (G: MyGameState, events: EventsAPI) => {
   const resourceCounterMap: Record<string, number> = {
     mithril: 0,
     dragonScales: 0,
@@ -70,13 +69,7 @@ const resolveRound = (G: MyGameState, events: any) => {
   const tradeAmounts = [...Object.values(tradeGainsMap)];
   const highestTradeAmount = Math.max(...tradeAmounts);
 
-  // If no trades happened, we might still need to end the game if it's the final round?
-  // The original code returned early if highestTradeAmount === 0.
-  
-  if (highestTradeAmount === 0) {
-     // If this function is also responsible for checking endGame conditions, returning early might skip that check.
-     return;
-  }
+  if (highestTradeAmount === 0) return;
 
   while (tradeAmounts.includes(highestTradeAmount)) {
     tradeAmounts.splice(tradeAmounts.indexOf(highestTradeAmount), 1);
@@ -84,8 +77,8 @@ const resolveRound = (G: MyGameState, events: any) => {
 
   const secondHighestTradeAmount = Math.max(...tradeAmounts);
 
-  while (tradeAmounts.includes(secondHighestTradeAmount)) {
-    tradeAmounts.splice(tradeAmounts.indexOf(secondHighestTradeAmount), 1);
+  while (tradeAmounts.includes(highestTradeAmount)) {
+    tradeAmounts.splice(tradeAmounts.indexOf(highestTradeAmount), 1);
   }
 
   const thirdHighestTradeAmount = Math.max(...tradeAmounts);
@@ -103,9 +96,7 @@ const resolveRound = (G: MyGameState, events: any) => {
       thirdPlace.push(id);
     }
   });
-  
   const vpAmounts = tradeVictoryPoints(G);
-  
   if (winners.length >= 3) {
     const awardedAmount = Math.round(
       (vpAmounts[0] + vpAmounts[1] + vpAmounts[2]) / winners.length
@@ -113,7 +104,7 @@ const resolveRound = (G: MyGameState, events: any) => {
     winners.forEach((id) => {
       G.playerInfo[id].resources.victoryPoints += awardedAmount;
     });
-    // return; // Removed explicit return to allow falling through to end game check
+    return;
   } else if (winners.length === 2) {
     const awardedAmount = Math.round((vpAmounts[0] + vpAmounts[1]) / 2);
     winners.forEach((id) => {
@@ -155,9 +146,7 @@ const resolveRound = (G: MyGameState, events: any) => {
 
   if (G.round === G.finalRound) {
     legacyResolutions(G);
-    if (events && events.endGame) {
-      events.endGame();
-    }
+    events.endGame();
   }
 };
 

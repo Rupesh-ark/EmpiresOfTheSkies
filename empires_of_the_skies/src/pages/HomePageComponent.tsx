@@ -8,20 +8,10 @@ import {
   ToggleButton,
   Button,
 } from "@mui/material";
-// FIX: Import from the main entry point, not the internal dist folder
-import { LobbyClient } from "boardgame.io/client";
-import React, { useState } from "react";
+import { LobbyClient } from "boardgame.io/dist/types/packages/client";
+import { useState } from "react";
+import React from "react";
 import background from "../boards_and_assets/box_image.png";
-
-interface HomePageComponentProps {
-  startGame: boolean;
-  setStartGame: React.Dispatch<React.SetStateAction<boolean>>;
-  matchReady: string | undefined;
-  setMatchReady: React.Dispatch<React.SetStateAction<string | undefined>>;
-  numPlayers: number;
-  setNumPlayers: React.Dispatch<React.SetStateAction<number>>;
-  lobbyClient: LobbyClient;
-}
 
 const createMatch = async (
   lobbyClient: LobbyClient,
@@ -37,8 +27,6 @@ const createMatch = async (
     return;
   }
 
-  // Optional: You might not need this enquiry if you trust the response, 
-  // but keeping logic as is.
   const enquiry = await lobbyClient.getMatch(
     "empires-of-the-skies",
     response.matchID
@@ -52,20 +40,16 @@ const HomePageComponent = (props: HomePageComponentProps) => {
   const [joinOrCreate, setJoinOrCreate] = useState<"join" | "create">("join");
   const [playerName, setName] = useState("");
   const [matchIDInput, setMatchIDInput] = useState("");
-
   return (
     <div
       style={{
         width: "100%",
         height: "100vh",
-        backgroundImage: `url(${background})`, // Standard CSS property
+        background: `url(${background}) no-repeat`,
         backgroundSize: "contain",
         backgroundRepeat: "no-repeat",
         backgroundPosition: "center",
-        // Flexbox needs display: flex to work with justifyContent on a div
-        display: "flex", 
         justifyContent: "center",
-        alignItems: "center" // Helps center vertically if that was the intent
       }}
     >
       <div
@@ -106,7 +90,6 @@ const HomePageComponent = (props: HomePageComponentProps) => {
           ></TextField>
           Please select the number of players
           <Select
-            value={props.numPlayers} // Controlled component needs 'value' usually
             defaultValue={2}
             sx={{ marginBottom: 2 }}
             onChange={(event: SelectChangeEvent<number>) => {
@@ -125,7 +108,7 @@ const HomePageComponent = (props: HomePageComponentProps) => {
             value={joinOrCreate}
             exclusive
             onChange={(event, value) => {
-              if (value) setJoinOrCreate(value);
+              setJoinOrCreate(value);
             }}
           >
             <ToggleButton value="join">Join</ToggleButton>
@@ -164,7 +147,6 @@ const HomePageComponent = (props: HomePageComponentProps) => {
               target="_blank"
               style={{ display: "inline" }}
               href={`/match/${props.matchReady}/${playerName}`}
-              rel="noreferrer" // Good security practice for target="_blank"
             >
               Click here to join the match.
             </a>{" "}
@@ -174,5 +156,15 @@ const HomePageComponent = (props: HomePageComponentProps) => {
     </div>
   );
 };
+
+interface HomePageComponentProps {
+  startGame: boolean;
+  setStartGame: React.Dispatch<React.SetStateAction<boolean>>;
+  matchReady: string | undefined;
+  setMatchReady: React.Dispatch<React.SetStateAction<string | undefined>>;
+  numPlayers: number;
+  setNumPlayers: React.Dispatch<React.SetStateAction<number>>;
+  lobbyClient: LobbyClient;
+}
 
 export default HomePageComponent;

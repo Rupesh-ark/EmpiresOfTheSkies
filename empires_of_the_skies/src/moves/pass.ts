@@ -1,7 +1,8 @@
 import { Move } from "boardgame.io";
 import { MyGameState } from "../types";
-
-// FIX: Removed broken imports (Ctx, EventsAPI, RandomAPI)
+import { Ctx } from "boardgame.io/dist/types/src/types";
+import { EventsAPI } from "boardgame.io/dist/types/src/plugins/plugin-events";
+import { RandomAPI } from "boardgame.io/dist/types/src/plugins/random/random";
 
 const pass: Move<MyGameState> = (
   {
@@ -10,17 +11,16 @@ const pass: Move<MyGameState> = (
     playerID,
     events,
     random,
+  }: {
+    G: MyGameState;
+    ctx: Ctx;
+    playerID: string;
+    events: EventsAPI;
+    random: RandomAPI;
   },
   ...args: any[]
 ) => {
-  // Ensure player exists
-  if (G.playerInfo[playerID]) {
-    G.playerInfo[playerID].passed = true;
-  }
-
-  // Ensure events is defined (standard safety check)
-  if (!events) return;
-
+  G.playerInfo[playerID].passed = true;
   if (ctx.phase === "discovery") {
     G.firstTurnOfRound = false;
     if (ctx.playOrderPos === ctx.numPlayers - 1) {

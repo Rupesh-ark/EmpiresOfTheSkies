@@ -7,28 +7,34 @@ import {
   removeGoldAmount,
   removeOneCounsellor,
 } from "../resourceUpdates";
-
-// FIX: Removed broken internal imports (Ctx, EventsAPI, RandomAPI)
+import { EventsAPI } from "boardgame.io/dist/types/src/plugins/plugin-events";
+import { RandomAPI } from "boardgame.io/dist/types/src/plugins/random/random";
+import { Ctx } from "boardgame.io/dist/types/src/types";
 
 const recruitRegiments: Move<MyGameState> = (
   {
     G,
+    ctx,
     playerID,
+    events,
+    random,
+  }: {
+    G: MyGameState;
+    ctx: Ctx;
+    playerID: string;
+    events: EventsAPI;
+    random: RandomAPI;
   },
   ...args: any[]
 ) => {
   if (checkCounsellorsNotZero(playerID, G)) {
     return INVALID_MOVE;
   }
-  
-  // Cast value to key type
-  const value = (args[0] + 1) as keyof typeof G.boardState.recruitRegiments;
-
+  const value: keyof typeof G.boardState.recruitRegiments = args[0] + 1;
   if (G.boardState.recruitRegiments[value] !== undefined) {
     console.log("Player has chosen an action which has already been taken");
     return INVALID_MOVE;
   }
-  
   const cost: { [key: number]: number } = {
     1: 0,
     2: 1,
@@ -45,16 +51,9 @@ const recruitRegiments: Move<MyGameState> = (
     5: 7,
     6: 9,
   };
-
-  // Safety check to ensure cost/reward exists
-  if (cost[value as number] === undefined || reward[value as number] === undefined) {
-      return INVALID_MOVE;
-  }
-
   removeOneCounsellor(G, playerID);
-  removeGoldAmount(G, playerID, cost[value as number]);
-  addRegiments(G, playerID, reward[value as number]);
-  
+  removeGoldAmount(G, playerID, cost[value]);
+  addRegiments(G, playerID, reward[value]);
   G.boardState.recruitRegiments[value] = playerID;
   G.playerInfo[playerID].turnComplete = true;
 };

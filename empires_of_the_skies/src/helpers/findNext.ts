@@ -1,11 +1,9 @@
 import { Ctx } from "boardgame.io";
 import { MyGameState } from "../types";
 import { sortPlayersInPlayerOrder } from "./helpers";
+import { EventsAPI } from "boardgame.io/dist/types/src/plugins/events/events";
 
-// FIX: Removed broken import
-// FIX: Replaced 'EventsAPI' with 'any' in function signatures
-
-export const findNextBattle = (G: MyGameState, events: any) => {
+export const findNextBattle = (G: MyGameState, events: EventsAPI) => {
   for (let y = G.mapState.currentBattle[1]; y < 4; y++) {
     for (let x = 0; x < 8; x++) {
       if (
@@ -34,7 +32,7 @@ export const findNextBattle = (G: MyGameState, events: any) => {
   events.endPhase();
 };
 
-export const findNextPlunder = (G: MyGameState, events: any): void => {
+export const findNextPlunder = (G: MyGameState, events: EventsAPI): void => {
   for (let y = G.mapState.currentBattle[1]; y < 4; y++) {
     for (let x = 0; x < 8; x++) {
       if (
@@ -63,7 +61,7 @@ export const findNextPlunder = (G: MyGameState, events: any): void => {
 };
 export const findNextGroundBattle = (
   G: MyGameState,
-  events: any
+  events: EventsAPI
 ): void => {
   for (let y = G.mapState.currentBattle[1]; y < 4; y++) {
     for (let x = 0; x < 8; x++) {
@@ -94,7 +92,7 @@ export const findNextGroundBattle = (
   events.endPhase();
 };
 
-export const findNextConquest = (G: MyGameState, events: any) => {
+export const findNextConquest = (G: MyGameState, events: EventsAPI) => {
   for (let y = G.mapState.currentBattle[1]; y < 4; y++) {
     for (let x = 0; x < 8; x++) {
       if (
@@ -127,7 +125,7 @@ export const findNextPlayerInBattleSequence = (
   playerID: string,
   ctx: Ctx,
   G: MyGameState,
-  events: any
+  events: EventsAPI
 ): void => {
   G.battleState = undefined;
   const playerIDs: string[] = [

@@ -8,21 +8,28 @@ import {
 } from "../resourceUpdates";
 import { INVALID_MOVE } from "boardgame.io/core";
 import { blessingOrCurseVPAmount } from "../../helpers/helpers";
-
-// FIX: Broken internal imports removed.
+import { EventsAPI } from "boardgame.io/dist/types/src/plugins/plugin-events";
+import { RandomAPI } from "boardgame.io/dist/types/src/plugins/random/random";
+import { Ctx } from "boardgame.io/dist/types/src/types";
 
 const issueHolyDecree: Move<MyGameState> = (
   {
     G,
+    ctx,
     playerID,
-    // ctx, events, and random were unused in the function body, 
-    // so I removed them from destructuring to prevent linter warnings.
+    events,
+    random,
+  }: {
+    G: MyGameState;
+    ctx: Ctx;
+    playerID: string;
+    events: EventsAPI;
+    random: RandomAPI;
   },
   ...args: any[]
 ) => {
   const value = args[0];
   const id = args[1];
-
   if (!G.playerInfo[playerID].isArchprelate) {
     console.log(
       "One who has not been anointed by God has attempted to issue a holy decree."

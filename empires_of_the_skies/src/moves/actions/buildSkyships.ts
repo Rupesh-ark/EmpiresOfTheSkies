@@ -7,20 +7,27 @@ import {
   removeGoldAmount,
   removeOneCounsellor,
 } from "../resourceUpdates";
-
-// FIX: Removed broken internal imports (Ctx, EventsAPI, RandomAPI).
-// FIX: Removed unused arguments (ctx, events, random) from the signature.
+import { Ctx } from "boardgame.io/dist/types/src/types.js";
+import { EventsAPI } from "boardgame.io/dist/types/src/plugins/plugin-events.js";
+import { RandomAPI } from "boardgame.io/dist/types/src/plugins/random/random.js";
 
 const buildSkyships: Move<MyGameState> = (
-  { G, playerID },
+  {
+    G,
+    ctx,
+    playerID,
+    events,
+    random,
+  }: {
+    G: MyGameState;
+    ctx: Ctx;
+    playerID: string;
+    events: EventsAPI;
+    random: RandomAPI;
+  },
   ...args: any[]
 ) => {
   if (checkCounsellorsNotZero(playerID, G) !== undefined) {
-    return INVALID_MOVE;
-  }
-
-  // Safety check to ensure player exists
-  if (!G.playerInfo[playerID]) {
     return INVALID_MOVE;
   }
 
@@ -42,14 +49,11 @@ const buildSkyships: Move<MyGameState> = (
 
   removeOneCounsellor(G, playerID);
   removeGoldAmount(G, playerID, cost);
-  
-  // Logic: for every gold spent (cost), you get 1 skyship? 
-  // The loop runs 'cost' times, adding 1 skyship each time.
   for (let i = 0; i < cost; i++) {
     addSkyship(G, playerID);
   }
-  
   G.playerInfo[playerID].playerBoardCounsellorLocations.buildSkyships = true;
+
   G.playerInfo[playerID].turnComplete = true;
 };
 

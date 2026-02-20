@@ -1,6 +1,4 @@
 import { Move } from "boardgame.io";
-// FIX: Import Ctx from the main package
-import { Ctx } from "boardgame.io";
 import { MyGameState } from "../../types";
 import { INVALID_MOVE } from "boardgame.io/core";
 import { checkCounsellorsNotZero } from "../moveValidation";
@@ -9,28 +7,35 @@ import {
   removeGoldAmount,
   removeOneCounsellor,
 } from "../resourceUpdates";
-
-// FIX: Removed broken imports (EventsAPI, RandomAPI)
+import { EventsAPI } from "boardgame.io/dist/types/src/plugins/plugin-events";
+import { RandomAPI } from "boardgame.io/dist/types/src/plugins/random/random";
+import { Ctx } from "boardgame.io/dist/types/src/types";
 
 const purchaseSkyships: Move<MyGameState> = (
   {
     G,
+    ctx,
     playerID,
+    events,
+    random,
+  }: {
+    G: MyGameState;
+    ctx: Ctx;
+    playerID: string;
+    events: EventsAPI;
+    random: RandomAPI;
   },
   ...args: any[]
 ) => {
   if (checkCounsellorsNotZero(playerID, G)) {
     return INVALID_MOVE;
   }
-  
-  // Cast value to key type
-  const value = (args[0] + 1) as keyof typeof G.boardState.purchaseSkyships;
+  const value: keyof typeof G.boardState.purchaseSkyships = args[0] + 1;
 
   if (G.boardState.purchaseSkyships[value] !== undefined) {
     console.log("Player has chosen an action which has already been taken");
     return INVALID_MOVE;
   }
-  
   // update this to reflect rules regarding the orthodox vs heretic issues
   const cost: { [key: number]: number } = {
     1: 1,
@@ -50,18 +55,11 @@ const purchaseSkyships: Move<MyGameState> = (
     6: 2,
   };
 
-  // Safety check: Ensure cost/reward exists for the given value
-  if (cost[value as number] === undefined || reward[value as number] === undefined) {
-      return INVALID_MOVE;
-  }
-
   removeOneCounsellor(G, playerID);
-  removeGoldAmount(G, playerID, cost[value as number]);
-  
-  for (let i = 0; i < reward[value as number]; i++) {
+  removeGoldAmount(G, playerID, cost[value]);
+  for (let i = 0; i < reward[value]; i++) {
     addSkyship(G, playerID);
   }
-  
   G.boardState.purchaseSkyships[value] = playerID;
   G.playerInfo[playerID].turnComplete = true;
 };

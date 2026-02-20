@@ -1,5 +1,4 @@
-// FIX: Import from the public entry point
-import { BoardProps } from "boardgame.io/react";
+import { BoardProps } from "boardgame.io/dist/types/packages/react";
 
 export interface MyGameProps extends BoardProps<MyGameState> {}
 

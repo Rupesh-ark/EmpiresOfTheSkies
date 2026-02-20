@@ -1,42 +1,39 @@
 import { Move } from "boardgame.io";
-// FIX: Import Ctx from the main package
-import { Ctx } from "boardgame.io";
 import { MyGameState } from "../../types";
 import { findPossibleDestinations } from "../../helpers/helpers";
 import { INVALID_MOVE } from "boardgame.io/core";
 import { removeGoldAmount, removeOneCounsellor } from "../resourceUpdates";
 import { checkCounsellorsNotZero } from "../moveValidation";
-
-// FIX: Removed broken imports (EventsAPI, RandomAPI)
+import { EventsAPI } from "boardgame.io/dist/types/src/plugins/events/events";
+import { RandomAPI } from "boardgame.io/dist/types/src/plugins/random/random";
+import { Ctx } from "boardgame.io/dist/types/src/types";
 
 const deployFleet: Move<MyGameState> = (
-  { G, playerID },
+  {
+    G,
+    ctx,
+    playerID,
+    events,
+    random,
+  }: {
+    G: MyGameState;
+    ctx: Ctx;
+    playerID: string;
+    events: EventsAPI;
+    random: RandomAPI;
+  },
   ...args: any[]
 ) => {
   if (checkCounsellorsNotZero(playerID, G) !== undefined) {
     return INVALID_MOVE;
   }
-  
-  // Safety check for player existence
-  if (!G.playerInfo[playerID]) {
-    return INVALID_MOVE;
-  }
-
   const selectedFleetIndex = args[0];
 
   const currentPlayer = G.playerInfo[playerID];
   const fleet = currentPlayer.fleetInfo[selectedFleetIndex];
 
-  // Safety check for fleet existence
-  if (!fleet) {
-     console.log("Fleet not found");
-     return INVALID_MOVE;
-  }
-
   const startingCoords = fleet.location;
 
-  // Destructure with safety check in case args are missing
-  if (!args[1]) return INVALID_MOVE;
   const [x, y] = args[1];
 
   const skyshipCount = args[2];
@@ -45,7 +42,6 @@ const deployFleet: Move<MyGameState> = (
 
   const unladen = fleet.regiments === 0 && fleet.levies === 0;
 
-  // Logic: Check if player has resources (assuming [4,0] is "base" or "reserve")
   if (fleet.location[0] === 4 && fleet.location[1] === 0) {
     if (
       currentPlayer.resources.skyships < skyshipCount ||
@@ -63,33 +59,23 @@ const deployFleet: Move<MyGameState> = (
     return INVALID_MOVE;
   }
 
-  // Update fleet composition
   fleet.skyships = skyshipCount;
   fleet.regiments = regimentCount;
   fleet.levies = levyCount;
 
-  // Deduct resources from player
   currentPlayer.resources.skyships -= skyshipCount;
   currentPlayer.resources.regiments -= regimentCount;
   currentPlayer.resources.levies -= levyCount;
   G.playerInfo[playerID].turnComplete = true;
 
-  // Validate Destination
   let destinationValid = false;
 
-  // Use the helper to find valid moves
-  // findPossibleDestinations returns [allValid, cost1, cost2, cost3]
-  const possibleDestinations = findPossibleDestinations(G, startingCoords, unladen);
-  
-  // Ensure we got back valid arrays
-  if (!possibleDestinations || possibleDestinations.length < 4) {
-      return INVALID_MOVE;
-  }
-
-  const validDestinations = possibleDestinations[0];
-  const coordsCostingOneGold = possibleDestinations[1];
-  const coordsCostingTwoGold = possibleDestinations[2];
-  const coordsCostingThreeGold = possibleDestinations[3];
+  const [
+    validDestinations,
+    coordsCostingOneGold,
+    coordsCostingTwoGold,
+    coordsCostingThreeGold,
+  ] = findPossibleDestinations(G, startingCoords, unladen);
 
   validDestinations.forEach((coords) => {
     if (coords[0] === x && coords[1] === y) {
@@ -104,7 +90,6 @@ const deployFleet: Move<MyGameState> = (
     return INVALID_MOVE;
   }
 
-  // Calculate Cost
   let cost = 0;
 
   coordsCostingThreeGold.forEach((coords) => {
@@ -122,37 +107,27 @@ const deployFleet: Move<MyGameState> = (
       cost = 1;
     }
   });
+  G.playerInfo[playerID].fleetInfo[fleet.fleetId].location = [x, y];
 
-  // Update Fleet Location
-  // We need to verify fleet exists in fleetInfo array before assignment
-  if (G.playerInfo[playerID].fleetInfo[fleet.fleetId]) {
-      G.playerInfo[playerID].fleetInfo[fleet.fleetId].location = [x, y];
+  G.mapState.battleMap[startingCoords[1]][startingCoords[0]].splice(
+    G.mapState.battleMap[startingCoords[1]][startingCoords[0]].indexOf(
+      playerID
+    ),
+    1
+  );
+
+  if (!G.mapState.battleMap[y][x].includes(playerID)) {
+    G.mapState.battleMap[y][x].push(playerID);
   }
+  console.log(G.mapState.battleMap[y][x]);
 
-  // Update Battle Map
-  // Remove player from old location
-  if (G.mapState.battleMap[startingCoords[1]] && G.mapState.battleMap[startingCoords[1]][startingCoords[0]]) {
-      const oldLocList = G.mapState.battleMap[startingCoords[1]][startingCoords[0]];
-      const index = oldLocList.indexOf(playerID);
-      if (index > -1) {
-          oldLocList.splice(index, 1);
-      }
-  }
-
-  // Add player to new location
-  if (G.mapState.battleMap[y] && G.mapState.battleMap[y][x]) {
-    if (!G.mapState.battleMap[y][x].includes(playerID)) {
-        G.mapState.battleMap[y][x].push(playerID);
-    }
-    console.log(G.mapState.battleMap[y][x]);
-  }
-
-  // Finalize Move
   removeGoldAmount(G, playerID, cost);
-  G.playerInfo[playerID].playerBoardCounsellorLocations.dispatchSkyshipFleet = true;
+  G.playerInfo[playerID].playerBoardCounsellorLocations.dispatchSkyshipFleet =
+    true;
 
   removeOneCounsellor(G, playerID);
-  G.playerInfo[playerID].playerBoardCounsellorLocations.dispatchDisabled = args[0];
+  G.playerInfo[playerID].playerBoardCounsellorLocations.dispatchDisabled =
+    args[0];
 
   G.playerInfo[playerID].turnComplete = true;
 };
@@ -160,5 +135,9 @@ const deployFleet: Move<MyGameState> = (
 export default deployFleet;
 
 const doCoordsMatch = (coordsA: number[], coordsB: number[]): boolean => {
-  return coordsA[0] === coordsB[0] && coordsA[1] === coordsB[1];
+  if (coordsA[0] === coordsB[0] && coordsA[1] === coordsB[1]) {
+    return true;
+  } else {
+    return false;
+  }
 };

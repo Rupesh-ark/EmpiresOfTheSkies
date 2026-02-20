@@ -2,22 +2,26 @@ import { Move } from "boardgame.io";
 import { MyGameState } from "../../types";
 import { INVALID_MOVE } from "boardgame.io/core";
 import { removeOneCounsellor } from "../resourceUpdates";
-
-// FIX: Removed broken imports (EventsAPI, RandomAPI, Ctx)
-// FIX: Removed unused arguments (ctx, events, random) from the signature
+import { EventsAPI } from "boardgame.io/dist/types/src/plugins/events/events";
+import { RandomAPI } from "boardgame.io/dist/types/src/plugins/random/random";
+import { Ctx } from "boardgame.io/dist/types/src/types";
 
 const enableDispatchButtons: Move<MyGameState> = (
   {
     G,
+    ctx,
     playerID,
+    events,
+    random,
+  }: {
+    G: MyGameState;
+    ctx: Ctx;
+    playerID: string;
+    events: EventsAPI;
+    random: RandomAPI;
   },
   ...args: any[]
 ) => {
-  // Safety check for player existence
-  if (!G.playerInfo[playerID]) {
-    return INVALID_MOVE;
-  }
-
   if (
     G.playerInfo[playerID].playerBoardCounsellorLocations.dispatchSkyshipFleet
   ) {
@@ -26,7 +30,6 @@ const enableDispatchButtons: Move<MyGameState> = (
     );
     return INVALID_MOVE;
   }
-  // Currently, it only validates that it hasn't happened yet.
 };
 
 export default enableDispatchButtons;

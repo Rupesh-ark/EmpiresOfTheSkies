@@ -1,73 +1,71 @@
-# React + TypeScript + Vite
+# Boardgame.io + Vite + React Template
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This is a template for creating multiplayer board games using [boardgame.io](https://boardgame.io/), React, and Vite.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- TypeScript support
+- React for UI components
+- Vite for fast development
+- Multiplayer support with Socket.IO
+- Clean, modern UI
+- Match creation and joining system
+- Debug panel included
 
-## React Compiler
+## Getting Started
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+You can create a new project based on this template using degit:
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npx degit sayginburak/vite-template-boardgame-io my-game
+cd my-game
+npm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Then:
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+1. Start the development server:
+   ```bash
+   npm run dev
+   ```
+2. Start the game server (in a separate terminal):
+   ```bash
+   npm run server
+   ```
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## Playing the Game
+
+1. Open http://localhost:5173 in two browser windows
+2. In the first window:
+   - Click "Create New Game"
+   - Copy the Match ID that appears
+3. In the second window:
+   - Paste the Match ID
+   - Click "Join Game"
+4. Play the game!
+
+
+## Customizing the Game
+
+1. Modify `src/game/SimpleGame.ts` to change game rules and logic
+2. Update `src/components/Game.tsx` to customize the game board
+3. Adjust styles in `src/App.css`
+
+## Available Scripts
+
+- `npm run dev` - Start the development server
+- `npm run server` - Start the game server
+- `npm run build` - Build for production
+- `npm run preview` - Preview production build
+- `npm run lint` - Run ESLint
+
+## Notes
+
+- The game server runs on port 8000
+- The development server runs on port 5173
+- Debug panel is enabled by default (can be disabled in App.tsx)
+- TypeScript is configured for strict mode
+
+## License
+
+MIT

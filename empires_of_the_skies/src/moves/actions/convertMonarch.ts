@@ -1,6 +1,4 @@
 import { Move } from "boardgame.io";
-// FIX: Import Ctx from the main package
-import { Ctx } from "boardgame.io";
 import { MyGameState } from "../../types";
 import {
   removeGoldAmount,
@@ -9,20 +7,28 @@ import {
 } from "../resourceUpdates";
 import { INVALID_MOVE } from "boardgame.io/core";
 import { checkCounsellorsNotZero } from "../moveValidation";
-
-// FIX: Removed broken imports (EventsAPI, RandomAPI)
+import { EventsAPI } from "boardgame.io/dist/types/src/plugins/events/events";
+import { RandomAPI } from "boardgame.io/dist/types/src/plugins/random/random";
+import { Ctx } from "boardgame.io/dist/types/src/types";
 
 const convertMonarch: Move<MyGameState> = (
   {
     G,
-    ctx, // ctx is used for numPlayers, so we keep it
+    ctx,
     playerID,
+    events,
+    random,
+  }: {
+    G: MyGameState;
+    ctx: Ctx;
+    playerID: string;
+    events: EventsAPI;
+    random: RandomAPI;
   },
   ...args: any[]
 ) => {
-  const value = (args[0] + 1) as keyof typeof G.boardState.convertMonarch;
+  const value: keyof typeof G.boardState.convertMonarch = args[0] + 1;
   const playerInfo = G.playerInfo[playerID];
-
   if (checkCounsellorsNotZero(playerID, G) !== undefined) {
     return INVALID_MOVE;
   }
@@ -47,7 +53,7 @@ const convertMonarch: Move<MyGameState> = (
     return INVALID_MOVE;
   }
 
-  const cost: Record<number, () => void | typeof INVALID_MOVE> = {
+  const cost = {
     1: () => {
       if (playerInfo.resources.counsellors < 3) {
         return INVALID_MOVE;
@@ -76,12 +82,9 @@ const convertMonarch: Move<MyGameState> = (
       removeGoldAmount(G, playerID, 1);
     },
   };
-
-  // We need to check if the specific cost function returns INVALID_MOVE
-  if (cost[value as number] && cost[value as number]() === INVALID_MOVE) {
+  if (cost[value]() === INVALID_MOVE) {
     return INVALID_MOVE;
   }
-  
   if (playerInfo.hereticOrOrthodox === "heretic") {
     playerInfo.hereticOrOrthodox = "orthodox";
     playerInfo.heresyTracker -= playerInfo.prisoners;
