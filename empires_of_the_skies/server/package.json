@@ -8,7 +8,9 @@
     }
   },
   "scripts": {
-    "dev": "tsx watch src/server.ts"
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc -p src/tsconfig.json",
+    "start": "node dist/server.js"
   },
   "dependencies": {
     "boardgame.io": "^0.50.2"
