@@ -1,4 +1,3 @@
-import React from "react";
 import { Lobby } from "boardgame.io/react";
 import { MyGame } from "./Game";
 import { ActionBoardsAndMap } from "./components/ActionBoardsAndMap";

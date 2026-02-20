@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
@@ -10,7 +10,7 @@ const HomePage = () => {
   const [startGame, setStartGame] = useState(false);
   const [matchReady, setMatchReady] = useState<string | undefined>(undefined);
   const [numPlayers, setNumPlayers] = useState(2);
-  const server = "http://localhost:8000";
+  const server = import.meta.env.VITE_SERVER_URL as string;
   const lobbyClient = new LobbyClient({ server: server });
 
   return (
