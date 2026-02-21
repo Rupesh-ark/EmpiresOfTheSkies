@@ -1,69 +1,207 @@
 # Empires of the Skies
 
-Empires of the Skies is a multiplayer strategy board game. It was originally built using Create React App and Node 16, and has been migrated to a modern stack using Vite, React, and TypeScript.
+Empires of the Skies is a full-stack digital adaptation of a complex multiplayer strategy board game.
+The project implements complete rule logic, phase-based gameplay, and real-time multiplayer synchronization using boardgame.io.
 
-The game simulates kingdom building, warfare, and politics. Players manage factions (such as Angland, Castillia, and Constantium), resolve aerial and ground battles, and compete for resources and political influence.
+Players control competing kingdoms, manage resources, resolve aerial and ground battles, and compete for political dominance across a dynamic world map.
+
+This project was developed as part of research exploring digital board game implementation and multiplayer architecture.
+
+---
+
+## Live Demo
+
+Frontend
+[https://empires-of-the-skies-tan.vercel.app](https://empires-of-the-skies-tan.vercel.app)
+
+Backend
+[https://empiresoftheskies.onrender.com](https://empiresoftheskies.onrender.com)
+
+---
+
+## Architecture
+
+This project uses a monorepo structure with shared game logic:
+
+```
+packages/
+  game/                  Shared game rules and core logic
+empires_of_the_skies/    React frontend (Vite)
+empires_of_the_skies/server/  boardgame.io backend server
+```
+
+The shared game package ensures:
+
+* Single source of truth for rules
+* Clean separation between UI and game engine
+* Server-authoritative multiplayer
+* Easier deployment and scaling
+
+---
 
 ## Technology Stack
 
-* **Frontend:** React with TypeScript
-* **Game Engine:** Boardgame.io (handles state management and multiplayer networking)
-* **Build Tool:** Vite
-* **UI Library:** Material UI (MUI) and Emotion
-* **Runtime:** Node.js (v18 or higher recommended)
-* **Package Manager:** pnpm
+Frontend
+
+* React
+* TypeScript
+* Vite
+* Material UI (MUI)
+* Emotion
+
+Backend
+
+* Node.js (v22 recommended)
+* boardgame.io
+* Koa (via boardgame.io server)
+
+Infrastructure
+
+* Vercel (frontend hosting)
+* Render (backend hosting)
+* pnpm workspaces
+
+---
 
 ## Getting Started
 
 ### Prerequisites
 
-You need Node.js installed (version 18+ is recommended). This project uses pnpm for dependency management.
+* Node.js 22.x recommended
+* pnpm
 
-If you do not have pnpm installed, you can install it globally:
+Install pnpm if needed:
 
-    npm install -g pnpm
+```
+npm install -g pnpm
+```
 
-### Installation
+---
 
-1.  Clone the repository:
+## Installation
 
-        git clone <repository-url>
-        cd empires_of_the_skies
+Clone the repository:
 
-2.  Install the project dependencies:
+```
+git clone <repository-url>
+cd EmpiresOfTheSkies
+```
 
-        pnpm install
+Install dependencies:
 
-## Running the Project
+```
+pnpm install
+```
 
-### Development Client
-To run the game client in your browser (defaults to single-player/local mode unless connected to a server):
+---
 
-    pnpm dev
+## Running Locally
 
-Open http://localhost:5173 to view the game.
+### Run the Backend Server
 
-### Multiplayer Server
-To run the Boardgame.io backend server which handles multiplayer moves and state:
+```
+pnpm --filter empires-server dev
+```
 
-    pnpm serve
+Server runs on:
 
-The server typically runs on port 8000.
+```
+http://localhost:8000
+```
 
-## Project Structure
+---
 
-* **src/boards_and_assets/**: Contains static game assets like SVGs for ships, map tiles, and icons.
-* **src/components/**: React components for the UI, including:
-    * **ActionBoard/**: The main interface for selecting player actions.
-    * **AerialBattle/** & **GroundBattle/**: Dialogs and logic for resolving combat.
-    * **PlayerBoard/**: Displays individual player stats and resources.
-* **src/moves/**: Contains the game logic and state mutations (similar to Redux reducers).
-* **src/server/**: The backend server entry point using Boardgame.io's Server module.
-* **src/Game.ts**: The main game definition file.
+### Run the Frontend Client
 
-## Migration Notes
+In another terminal:
 
-This project was migrated from an older Create React App setup.
+```
+pnpm --filter empires_of_the_skies dev
+```
 
-* **Node Polyfills**: The project uses `vite-plugin-node-polyfills` to support necessary Node.js modules (like crypto and buffer) in the browser environment.
-* **SVG Handling**: SVGs are imported directly as URLs for use in image tags.
+Open:
+
+```
+http://localhost:5173
+```
+
+---
+
+## Building for Production
+
+Build shared game logic:
+
+```
+pnpm --filter @eots/game build
+```
+
+Build frontend:
+
+```
+pnpm --filter empires_of_the_skies build
+```
+
+Build server:
+
+```
+pnpm --filter empires-server build
+```
+
+---
+
+## Game Features
+
+* Phase-based gameplay system
+* Multiplayer state synchronization
+* Aerial and ground battle resolution
+* Resource management and economy
+* Political election system
+* Modular move architecture
+* Dynamic map discovery
+* Per-turn undo functionality
+
+---
+
+## Key Directories
+
+packages/game/
+Contains the core game engine:
+
+* Game definition
+* Move logic
+* Helper functions
+* Shared types
+* Rule enforcement
+
+empires_of_the_skies/
+Contains:
+
+* React UI components
+* Game board rendering
+* Battle dialogs
+* Client integration with boardgame.io
+
+empires_of_the_skies/server/
+Contains:
+
+* boardgame.io server
+* Multiplayer synchronization
+* CORS configuration
+* Production server configuration
+
+---
+
+## Design Principles
+
+* Deterministic rule logic
+* Server-authoritative multiplayer
+* Strong TypeScript typing
+* Clear separation of UI and game state
+* Scalable monorepo architecture
+
+---
+
+## License
+
+This project is for academic and research purposes.
+
