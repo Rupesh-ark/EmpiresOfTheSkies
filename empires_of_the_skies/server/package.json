@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "build": "tsc -p src/tsconfig.json",
-    "start": "node dist/server.js"
+   "start": "node --enable-source-maps --trace-warnings dist/server.js"
   },
   "dependencies": {
     "@koa/cors": "^5.0.0",
