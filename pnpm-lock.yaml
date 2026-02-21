@@ -101,6 +101,9 @@ importers:
 
   empires_of_the_skies/server:
     dependencies:
+      '@eots/game':
+        specifier: workspace:*
+        version: link:../../packages/game
       '@koa/cors':
         specifier: ^5.0.0
         version: 5.0.0
