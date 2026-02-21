@@ -3,5 +3,8 @@
     "overrides": {
       "is-generator-function": "1.0.10"
     }
-  }
+  },
+  "engines": {
+  "node": "22.x"
+}
 }
