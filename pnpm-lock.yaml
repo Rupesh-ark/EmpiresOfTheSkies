@@ -101,6 +101,9 @@ importers:
 
   empires_of_the_skies/server:
     dependencies:
+      '@koa/cors':
+        specifier: ^5.0.0
+        version: 5.0.0
       boardgame.io:
         specifier: ^0.50.2
         version: 0.50.2
@@ -650,6 +653,10 @@ packages:
   '@koa/cors@3.4.3':
     resolution: {integrity: sha512-WPXQUaAeAMVaLTEFpoq3T2O1C+FstkjJnDQqy95Ck1UdILajsRhu6mhJ8H2f4NFPRBoCNN+qywTJfq/gGki5mw==}
     engines: {node: '>= 8.0.0'}
+
+  '@koa/cors@5.0.0':
+    resolution: {integrity: sha512-x/iUDjcS90W69PryLDIMgFyV21YLTnG9zOpPXS7Bkt2b8AsY3zZsIpOLBkYr9fBcF3HbkKaER5hOBZLfpLgYNw==}
+    engines: {node: '>= 14.0.0'}
 
   '@koa/router@10.1.1':
     resolution: {integrity: sha512-ORNjq5z4EmQPriKbR0ER3k4Gh7YGNhWDL7JBW+8wXDrHLbWYKYSJaOJ9aN06npF5tbTxe2JBOsurpJDAvjiXKw==}
@@ -3034,6 +3041,10 @@ snapshots:
       '@jridgewell/sourcemap-codec': 1.5.5
 
   '@koa/cors@3.4.3':
+    dependencies:
+      vary: 1.1.2
+
+  '@koa/cors@5.0.0':
     dependencies:
       vary: 1.1.2
 

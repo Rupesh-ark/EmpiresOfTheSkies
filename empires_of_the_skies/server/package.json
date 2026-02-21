@@ -8,6 +8,7 @@
     "start": "node dist/server.js"
   },
   "dependencies": {
+    "@koa/cors": "^5.0.0",
     "boardgame.io": "^0.50.2",
     "dotenv": "^17.3.1"
   },
