@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-import { MyGameProps } from "../../types";
+import { MyGameProps } from "@eots/game";
 import WorldMap from "../WorldMap/WorldMap";
 import {
   Button,
