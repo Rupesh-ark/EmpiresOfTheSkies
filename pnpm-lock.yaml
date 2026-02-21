@@ -111,6 +111,9 @@ importers:
         specifier: ^17.3.1
         version: 17.3.1
     devDependencies:
+      '@types/koa__cors':
+        specifier: ^5.0.1
+        version: 5.0.1
       '@types/node':
         specifier: ^22.19.11
         version: 22.19.11
@@ -1010,6 +1013,9 @@ packages:
 
   '@types/koa@2.15.0':
     resolution: {integrity: sha512-7QFsywoE5URbuVnG3loe03QXuGajrnotr3gQkXcEBShORai23MePfFYdhz90FEtBBpkyIYQbVD+evKtloCgX3g==}
+
+  '@types/koa__cors@5.0.1':
+    resolution: {integrity: sha512-xZckuh3B6ycSBAIYnBImG1VDHyBNZsltGAuGb4THuZllccdLgD5DUs4RA7TAUjB58THg00SSZ1e//duQef7WRw==}
 
   '@types/koa__router@8.0.11':
     resolution: {integrity: sha512-WXgKWpBsbS14kzmzD9LeFapOIa678h7zvUHxDwXwSx4ETKXhXLVUAToX6jZ/U7EihM7qwyD9W/BZvB0MRu7MTQ==}
@@ -3350,6 +3356,10 @@ snapshots:
       '@types/keygrip': 1.0.6
       '@types/koa-compose': 3.2.9
       '@types/node': 22.19.11
+
+  '@types/koa__cors@5.0.1':
+    dependencies:
+      '@types/koa': 2.15.0
 
   '@types/koa__router@8.0.11':
     dependencies:
