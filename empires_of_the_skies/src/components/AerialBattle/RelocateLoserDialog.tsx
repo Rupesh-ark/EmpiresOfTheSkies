@@ -9,7 +9,7 @@ import {
   DialogContent,
   DialogTitle,
 } from "@mui/material";
-import { findPossibleDestinations } from "../../helpers/helpers";
+import { findPossibleDestinations } from "@eots/game";
 
 const RelocateLoserDialog = (props: RelocateLoserDialogProps) => {
   const [open, setOpen] = useState(true);

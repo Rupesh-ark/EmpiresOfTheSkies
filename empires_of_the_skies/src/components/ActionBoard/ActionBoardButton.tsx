@@ -1,5 +1,5 @@
-import React, { ReactElement, useRef, useState } from "react";
-import { MyGameProps, PlayerColour } from "../../types";
+import { ReactElement, useState } from "react";
+import { MyGameProps, PlayerColour } from "@eots/game";
 import {
   Box,
   Button,
@@ -11,7 +11,7 @@ import {
   DialogTitle,
 } from "@mui/material";
 import WorldMap from "../WorldMap/WorldMap";
-import { clearMoves } from "../../helpers/helpers";
+import { clearMoves } from "@eots/game";
 import CounsellorIcon from "../Icons/CounsellorIcon";
 
 export const ActionBoardButton = (props: ActionBoardButtonProps) => {

@@ -1,5 +1,5 @@
 import React from "react";
-import { FleetInfo } from "../../types";
+import { FleetInfo } from "@eots/game";
 import { Button, Stack } from "@mui/material";
 
 const FleetDisplay = (props: FleetDisplayProps) => {

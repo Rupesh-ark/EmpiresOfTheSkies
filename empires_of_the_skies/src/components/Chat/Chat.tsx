@@ -12,7 +12,7 @@ import {
   Paper,
 } from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
-import { MyGameProps } from "../../types";
+import { MyGameProps } from "@eots/game";
 import { ChatMessage } from "boardgame.io";
 import { ChangeEventHandler } from "react";
 import ElectionDialog from "../Election/ElectionDialog";

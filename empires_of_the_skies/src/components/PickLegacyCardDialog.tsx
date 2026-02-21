@@ -7,7 +7,7 @@ import {
   DialogTitle,
   Button,
 } from "@mui/material";
-import { MyGameProps, LegacyCard } from "../types";
+import { MyGameProps, LegacyCard } from "@eots/game";
 import svgNameToElementMap from "./WorldMap/nameToElementMap";
 
 const PickLegacyCardDialog = (props: DrawOrPickCardDialogProps) => {

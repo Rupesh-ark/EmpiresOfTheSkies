@@ -1,5 +1,5 @@
 import React from "react";
-import { MyGameProps } from "../../types";
+import { MyGameProps } from "@eots/game";
 
 const ShipYardDisplay = (props: MyGameProps) => {
   let shipyards: JSX.Element[] = [];

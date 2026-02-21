@@ -1,5 +1,5 @@
 import { Dialog, DialogContent, DialogTitle } from "@mui/material";
-import { MyGameProps } from "../types";
+import { MyGameProps } from "@eots/game";
 import React from "react";
 import PlayerTable from "./PlayerTable/PlayerTable";
 

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-import { MyGameProps } from "../types";
+import { MyGameProps } from "@eots/game";
 import { ActionBoard } from "./ActionBoard/ActionBoard";
 import WorldMap from "./WorldMap/WorldMap";
 import { PlayerBoard } from "./PlayerBoard/PlayerBoard";

@@ -8,7 +8,7 @@ import {
   TableBody,
   TableHead,
 } from "@mui/material";
-import { MyGameProps } from "../../types";
+import { MyGameProps } from "@eots/game";
 const HeresyTracker = (props: HeresyTrackerProps) => {
   const tableRows = Object.values(props.G.playerInfo).map((player) => {
     const tableCells: JSX.Element[] = [];

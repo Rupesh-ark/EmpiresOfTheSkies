@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { MyGameProps } from "../../types";
+import { MyGameProps } from "@eots/game";
 import {
   Dialog,
   DialogTitle,
@@ -8,7 +8,7 @@ import {
   Button,
 } from "@mui/material";
 
-import { colourToKingdomMap } from "../../codifiedGameInfo";
+import { colourToKingdomMap } from "@eots/game";
 import WorldMap from "../WorldMap/WorldMap";
 
 const DefendOrYieldDialog = (props: DefendOrYieldDialogProps) => {

@@ -4,7 +4,7 @@ import buildSkyships from "../../boards_and_assets/player_boards/buttons/build_s
 import conscriptLevies from "../../boards_and_assets/player_boards/buttons/conscript_levies.svg";
 import dispatchSkyshipFleet from "../../boards_and_assets/player_boards/buttons/dispatch_skyship_fleet.svg";
 import { ButtonRow } from "../ActionBoard/ActionBoardButtonRow";
-import { MyGameProps } from "../../types";
+import { MyGameProps } from "@eots/game";
 import { PlayerBoardButton } from "./PlayerBoardButton";
 import {
   Button,
@@ -19,7 +19,7 @@ import FortuneOfWarCardDisplay from "./FortuneOfWarCardDisplay";
 import ShipYardDisplay from "./ShipYardDisplay";
 import FleetDisplay from "./FleetDisplay";
 import WorldMap from "../WorldMap/WorldMap";
-import { clearMoves, findPossibleDestinations } from "../../helpers/helpers";
+import { clearMoves, findPossibleDestinations } from "@eots/game";
 import svgNameToElementMap from "../WorldMap/nameToElementMap";
 
 // displays buttons which can build cathedrals, palaces and skyships

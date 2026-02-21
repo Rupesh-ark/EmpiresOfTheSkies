@@ -1,6 +1,6 @@
 import { Button } from "@mui/material";
 import React from "react";
-import { MyGameProps } from "../../types";
+import { MyGameProps } from "@eots/game";
 
 export const KingdomButton = (props: KingdomButtonProps) => {
   const colourToKingdomMap = {

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import "../../App.css";
 // import { ReactComponent as ActionBoardSvg } from "../boards_and_assets/action_board.svg";
 import { ActionBoardButton, ActionBoardButtonLarge } from "./ActionBoardButton";
@@ -41,7 +41,7 @@ import convertMonarch4 from "../../boards_and_assets/convert_monarch4.svg";
 import convertMonarch5 from "../../boards_and_assets/convert_monarch5.svg";
 import convertMonarch6 from "../../boards_and_assets/convert_monarch6.svg";
 import issueHolyDecree from "../../boards_and_assets/issue_holy_decree.svg";
-import { MyGameProps, PlayerColour } from "../../types";
+import { MyGameProps, PlayerColour } from "@eots/game";
 import { ThemeProvider } from "@emotion/react";
 import { generalTheme, influencePrelatesTheme } from "../themes";
 import { Button, Tooltip } from "@mui/material";

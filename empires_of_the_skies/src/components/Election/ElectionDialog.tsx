@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { MyGameProps } from "../../types";
+import { MyGameProps } from "@eots/game";
 import {
   Box,
   Button,

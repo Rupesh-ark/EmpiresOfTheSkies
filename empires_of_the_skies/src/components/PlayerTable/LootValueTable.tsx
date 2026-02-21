@@ -1,5 +1,5 @@
 import React, { ReactNode } from "react";
-import { MyGameProps } from "../../types";
+import { MyGameProps } from "@eots/game";
 import { Paper } from "@mui/material";
 
 const LootValueTable = (props: MyGameProps) => {

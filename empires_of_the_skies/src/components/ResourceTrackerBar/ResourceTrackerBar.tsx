@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { MyGameProps } from "../../types";
+import { MyGameProps } from "@eots/game";
 import {
   AppBar,
   Button,
@@ -16,7 +16,7 @@ import { generalTheme } from "../themes";
 import {
   checkPlayerIDAndReturnPlayerInfo,
   clearMoves,
-} from "../../helpers/helpers";
+} from "@eots/game";
 import { Person4Sharp } from "@mui/icons-material";
 import ArchprelateIcon from "../Icons/ArchprelateIcon";
 

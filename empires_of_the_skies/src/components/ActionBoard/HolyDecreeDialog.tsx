@@ -5,11 +5,11 @@ import {
   Button,
   DialogActions,
 } from "@mui/material";
-import { MyGameProps } from "../../types";
+import { MyGameProps } from "@eots/game";
 import {
   findMostHereticalKingdoms,
   findMostOrthodoxKingdoms,
-} from "../../helpers/helpers";
+} from "@eots/game";
 import React, { useState } from "react";
 import { ButtonRow } from "./ActionBoardButtonRow";
 import { KingdomButton } from "../shared/KingdomButton";

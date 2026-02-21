@@ -1,5 +1,5 @@
 import React from "react";
-import { MyGameProps } from "../../types";
+import { MyGameProps } from "@eots/game";
 import fortuneOfWarCardBack from "../../boards_and_assets/fortunes_of_war_card_back.svg";
 import svgNameToElementMap from "../WorldMap/nameToElementMap";
 

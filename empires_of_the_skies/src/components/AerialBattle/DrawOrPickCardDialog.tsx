@@ -7,7 +7,7 @@ import {
   DialogTitle,
   Button,
 } from "@mui/material";
-import { MyGameProps } from "../../types";
+import { MyGameProps } from "@eots/game";
 import FortuneOfWarCardDisplay from "../PlayerBoard/FortuneOfWarCardDisplay";
 import WorldMap from "../WorldMap/WorldMap";
 

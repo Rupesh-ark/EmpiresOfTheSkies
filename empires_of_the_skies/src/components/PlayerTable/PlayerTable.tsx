@@ -1,5 +1,5 @@
 import React from "react";
-import { MyGameProps } from "../../types";
+import { MyGameProps } from "@eots/game";
 import {
   Paper,
   Table,
@@ -9,7 +9,7 @@ import {
   TableHead,
   TableRow,
 } from "@mui/material";
-import { colourToKingdomMap } from "../../codifiedGameInfo";
+import { colourToKingdomMap } from "@eots/game";
 
 const PlayerTable = (props: PlayerTableProps) => {
   return (
