@@ -10,7 +10,8 @@
   "dependencies": {
     "@koa/cors": "^5.0.0",
     "boardgame.io": "^0.50.2",
-    "dotenv": "^17.3.1"
+    "dotenv": "^17.3.1",
+    "@eots/game": "workspace:*"
   },
   "devDependencies": {
     "@types/koa": "^3.0.1",
