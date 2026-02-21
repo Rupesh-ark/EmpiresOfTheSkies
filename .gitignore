@@ -8,10 +8,6 @@
 **/build/
 **/build-server/
 
-# --- env files (never commit) ---
-**/.env
-**/.env.*
-!**/.env.example
 
 # --- local overrides ---
 **/*.local
@@ -41,3 +37,9 @@
 **/*.njsproj
 **/*.sln
 **/*.sw?
+
+# env files (Vite / Node)
+**/.env
+**/.env.*
+**/.env.*.local
+

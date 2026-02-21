@@ -1,0 +1,1 @@
+export { MyGame } from "./Game";

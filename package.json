@@ -1,0 +1,7 @@
+{
+  "pnpm": {
+    "overrides": {
+      "is-generator-function": "1.0.10"
+    }
+  }
+}

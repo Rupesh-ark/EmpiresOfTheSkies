@@ -1,6 +1,6 @@
 import "dotenv/config";
 import { Server } from "boardgame.io/server";
-import { MyGame } from "../../src/Game";
+import { MyGame } from "@eots/game";
 
 const PORT = Number(process.env.PORT) || 8000;
 
