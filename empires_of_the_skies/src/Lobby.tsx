@@ -1,5 +1,5 @@
 import { Lobby } from "boardgame.io/react";
-import { MyGame } from "./Game";
+import { MyGame } from "@eots/game";
 import { ActionBoardsAndMap } from "./components/ActionBoardsAndMap";
 
 export const LobbyComp = () => {

@@ -2,7 +2,7 @@ import { Client } from "boardgame.io/react";
 import { SocketIO } from "boardgame.io/multiplayer";
 import { useState } from "react";
 import { useParams } from "react-router-dom";
-import { MyGame } from "../Game";
+import { MyGame } from "@eots/game";
 import { ActionBoardsAndMap } from "../components/ActionBoardsAndMap";
 // import { joinMatch } from "./HomePage";
 import React from "react";
