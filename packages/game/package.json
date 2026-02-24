@@ -3,22 +3,34 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+
+  "main": "./dist/cjs/index.cjs",
+  "module": "./dist/esm/index.js",
+  "types": "./dist/types/index.d.ts",
+
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.cjs"
     }
   },
+
   "files": ["dist"],
+
   "scripts": {
-    "build": "tsc -p tsconfig.json"
+    "clean": "rimraf dist",
+    "build:types": "tsc -p tsconfig.types.json",
+    "build:esm": "tsc -p tsconfig.esm.json",
+    "build:cjs": "tsc -p tsconfig.cjs.json && node -e \"const fs=require('fs'); fs.renameSync('dist/cjs/index.js','dist/cjs/index.cjs');\"",
+    "build": "pnpm run build:types && pnpm run build:esm && pnpm run build:cjs"
   },
+
   "dependencies": {
     "boardgame.io": "^0.50.2"
   },
   "devDependencies": {
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "rimraf": "^6.0.1"
   }
 }
