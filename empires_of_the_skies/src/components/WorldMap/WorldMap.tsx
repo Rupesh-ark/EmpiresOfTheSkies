@@ -3,7 +3,7 @@ import React, { ReactElement } from "react";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import { Grid } from "@mui/material";
 import { WorldMapTile } from "./WorldMapTile";
-import { MyGameProps } from "../../types";
+import { MyGameProps } from "@eots/game";
 
 const WorldMap = (props: WorldMapProps) => {
   const GridItems = (props: WorldMapProps) => {

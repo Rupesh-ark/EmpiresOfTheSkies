@@ -40,116 +40,116 @@ const HomePageComponent = (props: HomePageComponentProps) => {
   const [joinOrCreate, setJoinOrCreate] = useState<"join" | "create">("join");
   const [playerName, setName] = useState("");
   const [matchIDInput, setMatchIDInput] = useState("");
+
   return (
     <div
       style={{
         width: "100%",
         height: "100vh",
-        background: `url(${background}) no-repeat`,
-        backgroundSize: "contain",
+        backgroundImage: `url(${background})`,
+        backgroundSize: "cover", // Changed to cover to prevent white gaps
         backgroundRepeat: "no-repeat",
         backgroundPosition: "center",
+        display: "flex",        // Added flex to center the child
         justifyContent: "center",
+        alignItems: "center",   // Centers the modal vertically
       }}
     >
       <div
         style={{
           display: "flex",
           flexDirection: "column",
-          maxWidth: "100%",
-          margin: 2,
-          justifyContent: "center",
-          alignContent: "center",
           alignItems: "center",
-          justifyItems: "center",
+          width: "100%",
+          gap: "20px"
         }}
       >
         <Paper
+          elevation={6}
           sx={{
             display: "flex",
             flexDirection: "column",
-            maxWidth: 500,
-            margin: 2,
-            padding: 5,
+            width: "100%",
+            maxWidth: 400,
+            padding: 4,
+            backgroundColor: "rgba(255, 255, 255, 0.9)", // Subtle transparency
+            borderRadius: 2,
+            gap: 1.5, // Automatically spaces out children
           }}
         >
-          Please enter your name/username
+          <label style={{ fontSize: '0.9rem', fontWeight: 'bold', color: '#444' }}>
+            Player Name
+          </label>
           <TextField
-            sx={{ paddingBottom: 2 }}
-            onChange={(event) => {
-              setName(event.target.value);
-            }}
-          ></TextField>
-          Please enter your matchID
+            size="small"
+            fullWidth
+            placeholder="Enter username..."
+            onChange={(e) => setName(e.target.value)}
+          />
+
+          <label style={{ fontSize: '0.9rem', fontWeight: 'bold', color: '#444' }}>
+            Match ID
+          </label>
           <TextField
-            sx={{ paddingBottom: 2 }}
+            size="small"
+            fullWidth
             disabled={joinOrCreate === "create"}
-            onChange={(event) => {
-              setMatchIDInput(event.target.value);
-            }}
-          ></TextField>
-          Please select the number of players
+            placeholder={joinOrCreate === "create" ? "N/A (Creating New)" : "Enter ID..."}
+            onChange={(e) => setMatchIDInput(e.target.value)}
+          />
+
+          <label style={{ fontSize: '0.9rem', fontWeight: 'bold', color: '#444' }}>
+            Number of Players
+          </label>
           <Select
-            defaultValue={2}
-            sx={{ marginBottom: 2 }}
-            onChange={(event: SelectChangeEvent<number>) => {
-              props.setNumPlayers(event.target.value as number);
-            }}
+            size="small"
+            value={props.numPlayers}
+            onChange={(event) => props.setNumPlayers(Number(event.target.value))}
           >
-            <MenuItem value={1}>1</MenuItem>
-            <MenuItem value={2}>2</MenuItem>
-            <MenuItem value={3}>3</MenuItem>
-            <MenuItem value={4}>4</MenuItem>
-            <MenuItem value={5}>5</MenuItem>
-            <MenuItem value={6}>6</MenuItem>
+            {[1, 2, 3, 4, 5, 6].map((n) => (
+              <MenuItem key={n} value={n}>{n}</MenuItem>
+            ))}
           </Select>
+
           <ToggleButtonGroup
-            sx={{ marginBottom: 2 }}
+            color="primary"
             value={joinOrCreate}
             exclusive
-            onChange={(event, value) => {
-              setJoinOrCreate(value);
-            }}
+            fullWidth
+            onChange={(_, value) => value && setJoinOrCreate(value)}
+            sx={{ mt: 1 }}
           >
             <ToggleButton value="join">Join</ToggleButton>
             <ToggleButton value="create">Create</ToggleButton>
           </ToggleButtonGroup>
+
           <Button
+            fullWidth
+            size="large"
             color="success"
             variant="contained"
-            onClick={(event) => {
+            sx={{ mt: 1, fontWeight: 'bold' }}
+            onClick={() => {
               joinOrCreate === "create"
-                ? createMatch(
-                    props.lobbyClient,
-                    props.numPlayers,
-                    props.setMatchReady
-                  )
+                ? createMatch(props.lobbyClient, props.numPlayers, props.setMatchReady)
                 : window.open(`/match/${matchIDInput}/${playerName}`);
             }}
           >
-            {joinOrCreate === "join" ? "join" : "create"} game
+            {joinOrCreate === "join" ? "JOIN" : "CREATE"} GAME
           </Button>
         </Paper>
 
         {props.matchReady && (
-          <Paper
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              maxWidth: 500,
-              margin: 2,
-              padding: 5,
-            }}
-          >
-            Your match ID is {props.matchReady} share it with the other players
-            so that they can join your game.
-            <a
-              target="_blank"
-              style={{ display: "inline" }}
+          <Paper sx={{ p: 3, maxWidth: 400, textAlign: 'center', border: '2px solid #2e7d32' }}>
+            <strong>Match Created!</strong>
+            <p style={{ margin: '10px 0' }}>ID: <code>{props.matchReady}</code></p>
+            <Button 
+              variant="outlined" 
               href={`/match/${props.matchReady}/${playerName}`}
+              target="_blank"
             >
-              Click here to join the match.
-            </a>{" "}
+              Enter Lobby
+            </Button>
           </Paper>
         )}
       </div>
