@@ -100,7 +100,9 @@ pnpm install
 ### Run the Backend Server
 
 ```
-pnpm --filter empires-server dev
+cd empires_of_the_skies/server
+pnpm build
+pnpm start
 ```
 
 Server runs on:
@@ -116,35 +118,14 @@ http://localhost:8000
 In another terminal:
 
 ```
-pnpm --filter empires_of_the_skies dev
+cd empires_of_the_skies
+pnpm dev
 ```
 
 Open:
 
 ```
 http://localhost:5173
-```
-
----
-
-## Building for Production
-
-Build shared game logic:
-
-```
-pnpm --filter @eots/game build
-```
-
-Build frontend:
-
-```
-pnpm --filter empires_of_the_skies build
-```
-
-Build server:
-
-```
-pnpm --filter empires-server build
 ```
 
 ---

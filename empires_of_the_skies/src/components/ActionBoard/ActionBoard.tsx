@@ -86,7 +86,7 @@ on their position in the order of play.
             
 Taxation is awarded as follows:
 1st: \t\t4 gold
-2nd: \t5 gold
+2nd: \t\t5 gold
 3rd: \t\t6 gold
 4th: \t\t7 gold
 5th: \t\t8 gold
