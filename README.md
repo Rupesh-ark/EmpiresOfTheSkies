@@ -97,12 +97,18 @@ pnpm install
 
 ## Running Locally
 
+### Build 
+
+Build packages, frontend, backend:
+
+```
+pnpm build:all
+```
+
 ### Run the Backend Server
 
 ```
-cd empires_of_the_skies/server
-pnpm build
-pnpm start
+pnpm dev:server
 ```
 
 Server runs on:
@@ -118,8 +124,7 @@ http://localhost:8000
 In another terminal:
 
 ```
-cd empires_of_the_skies
-pnpm dev
+pnpm dev:frontend
 ```
 
 Open:
