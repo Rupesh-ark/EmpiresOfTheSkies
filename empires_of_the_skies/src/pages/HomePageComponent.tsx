@@ -7,12 +7,12 @@ import {
   ToggleButton,
   Button,
   Typography,
+  Box, 
 } from "@mui/material";
 import { LobbyClient } from "boardgame.io/dist/types/packages/client";
 import { useState } from "react";
 import React from "react";
 import background from "../boards_and_assets/box_art.png";
-// Ensure you provide this image or point to your existing parchment texture
 import parchmentTexture from "../boards_and_assets/parchment_texture.png";
 
 const createMatch = async (
@@ -43,68 +43,68 @@ const HomePageComponent = (props: HomePageComponentProps) => {
   const [playerName, setName] = useState("");
   const [matchIDInput, setMatchIDInput] = useState("");
 
-  // Define some standard colors for the theme
+  // Define thematic colors and fonts
   const fontColorAgedInk = "#3e2723";
   const bronzeBorderColor = "#a67c52";
   const agedGreenGradient = "linear-gradient(to bottom, #2c6e49, #1b4d3e)";
-  const thematicFont = "'Cinzel', serif"; // Assumes Google Font 'Cinzel' is loaded
+  const thematicFont = "'Cinzel', serif"; 
 
   return (
-   <div
-      style={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        
+    <Box
+      sx={{
+        minHeight: "100vh", 
+        width: "100%",
         backgroundImage: `url(${background})`,
-        backgroundSize: "90%",
+        backgroundSize: "cover", 
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat",
+        backgroundAttachment: "fixed", 
         
+        // 2. RESPONSIVE LAYOUT
         display: "flex",
-        justifyContent: "flex-start",
+        justifyContent: { xs: "center", md: "flex-start" }, 
         alignItems: "center",
-        padding: "0 13vw 15vh 13vw", 
         
-  
+
+        padding: { xs: "0 5%", md: "0 10vw 15vh 10vw" }, 
+        boxSizing: "border-box", 
       }}
     >
-      <div
-        style={{
+      <Box
+        sx={{
           display: "flex",
           flexDirection: "column",
-          alignItems: "flex-start",
+          alignItems: { xs: "center", md: "flex-start" }, 
           width: "100%",
           gap: "20px",
         }}
       >
         <Paper
-          elevation={4}
+          elevation={6}
           sx={{
             display: "flex",
             flexDirection: "column",
-            width: "100%",
-            maxWidth: 300,
-            padding: 4,
-            backgroundImage: `url(${parchmentTexture})`, 
+            
+            width: { xs: "100%", sm: "350px", md: "400px" },
+            maxWidth: "400px",
+            padding: { xs: 3, md: 4 }, 
+            
+            backgroundImage: `url(${parchmentTexture})`,
             backgroundSize: "cover",
             backgroundColor: "rgba(240, 230, 210, 0.85)", 
-            backgroundBlendMode: "overlay",
+            backgroundBlendMode: "overlay", 
             border: `2px solid ${bronzeBorderColor}`, 
             boxShadow: "inset 0 0 10px rgba(0, 0, 0, 0.3)", 
             borderRadius: 1, 
             gap: 1.5,
           }}
         >
-         
           <Typography
             variant="h5"
             sx={{
-              fontFamily: thematicFont, 
+              fontFamily: thematicFont,
               fontWeight: "700",
-              color: fontColorAgedInk, 
+              color: fontColorAgedInk,
               textAlign: "center",
               letterSpacing: "0.1em",
               mb: 1,
@@ -113,13 +113,14 @@ const HomePageComponent = (props: HomePageComponentProps) => {
             COMMAND CENTER
           </Typography>
 
-          {/* CHANGE: THEMATIC LABELS */}
           <label
             style={{
+              width: "100%",       
+              textAlign: "left",   
               fontSize: "0.95rem",
               fontWeight: "bold",
-              fontFamily: thematicFont, // Thematic font
-              color: fontColorAgedInk, // Aged ink color
+              fontFamily: thematicFont,
+              color: fontColorAgedInk,
               letterSpacing: "0.05em",
             }}
           >
@@ -130,26 +131,23 @@ const HomePageComponent = (props: HomePageComponentProps) => {
             fullWidth
             placeholder="Enter username..."
             onChange={(e) => setName(e.target.value)}
-            // CHANGE: THEMATIC INPUTS
             sx={{
               "& .MuiInputBase-root": {
                 fontFamily: thematicFont,
                 color: fontColorAgedInk,
-                backgroundColor: "rgba(255, 255, 255, 0.6)", // Warmer tinted background
+                backgroundColor: "rgba(255, 255, 255, 0.6)",
                 borderRadius: "2px",
-                border: `1px solid ${bronzeBorderColor}`, // Metallic border
-                "&:hover": {
-                  borderColor: "#d2b48c", // Lighter brass on hover
-                },
+                border: `1px solid ${bronzeBorderColor}`,
+                "&:hover": { borderColor: "#d2b48c" },
               },
-              "& .MuiOutlinedInput-notchedOutline": {
-                border: "none", // Replace standard MUI outline with our custom styles
-              },
+              "& .MuiOutlinedInput-notchedOutline": { border: "none" },
             }}
           />
 
           <label
-            style={{
+           style={{
+              width: "100%",       
+              textAlign: "left", 
               fontSize: "0.95rem",
               fontWeight: "bold",
               fontFamily: thematicFont,
@@ -167,28 +165,27 @@ const HomePageComponent = (props: HomePageComponentProps) => {
               joinOrCreate === "create" ? "N/A (Creating New)" : "Enter ID..."
             }
             onChange={(e) => setMatchIDInput(e.target.value)}
-            // CHANGE: THEMATIC INPUTS
             sx={{
               "& .MuiInputBase-root": {
                 fontFamily: thematicFont,
                 color: fontColorAgedInk,
-                backgroundColor: "rgba(255, 255, 255, 0.6)", // Tinted warmer background
+                backgroundColor: "rgba(255, 255, 255, 0.6)",
                 borderRadius: "2px",
                 border: `1px solid ${bronzeBorderColor}`,
                 "&.Mui-disabled": {
-                  backgroundColor: "rgba(0, 0, 0, 0.05)", // Grayish on disabled
+                  backgroundColor: "rgba(0, 0, 0, 0.05)",
                   borderColor: "rgba(0, 0, 0, 0.2)",
                   color: "rgba(0, 0, 0, 0.5)",
                 },
               },
-              "& .MuiOutlinedInput-notchedOutline": {
-                border: "none",
-              },
+              "& .MuiOutlinedInput-notchedOutline": { border: "none" },
             }}
           />
 
           <label
             style={{
+              width: "100%",       
+              textAlign: "left",   
               fontSize: "0.95rem",
               fontWeight: "bold",
               fontFamily: thematicFont,
@@ -202,22 +199,15 @@ const HomePageComponent = (props: HomePageComponentProps) => {
             size="small"
             value={props.numPlayers}
             onChange={(event) => props.setNumPlayers(Number(event.target.value))}
-            // CHANGE: THEMATIC SELECT Input
             sx={{
               fontFamily: thematicFont,
               color: fontColorAgedInk,
-              backgroundColor: "rgba(255, 255, 255, 0.6)", // Tinted background
+              backgroundColor: "rgba(255, 255, 255, 0.6)",
               borderRadius: "2px",
-              border: `1px solid ${bronzeBorderColor}`, // Metallic border
-              "&:hover": {
-                borderColor: "#d2b48c",
-              },
-              "& .MuiSelect-select": {
-                color: fontColorAgedInk,
-              },
-              "& .MuiOutlinedInput-notchedOutline": {
-                border: "none",
-              },
+              border: `1px solid ${bronzeBorderColor}`,
+              "&:hover": { borderColor: "#d2b48c" },
+              "& .MuiSelect-select": { color: fontColorAgedInk },
+              "& .MuiOutlinedInput-notchedOutline": { border: "none" },
             }}
           >
             {[1, 2, 3, 4, 5, 6].map((n) => (
@@ -227,9 +217,8 @@ const HomePageComponent = (props: HomePageComponentProps) => {
             ))}
           </Select>
 
-          {/* CHANGE: THEMATIC Toggle Button Group */}
           <ToggleButtonGroup
-            color="secondary" // Use secondary for thematic unselected state
+            color="secondary"
             value={joinOrCreate}
             exclusive
             fullWidth
@@ -242,17 +231,12 @@ const HomePageComponent = (props: HomePageComponentProps) => {
                 border: `1px solid ${bronzeBorderColor}`,
                 backgroundColor: "rgba(250, 245, 235, 0.9)",
                 "&.Mui-selected": {
-                  // Aged metal for selected button
-                  backgroundColor: "#a67c52", // Copper color
+                  backgroundColor: "#a67c52",
                   backgroundImage: "none",
                   color: "rgba(255, 255, 255, 0.9)",
-                  "&:hover": {
-                    backgroundColor: "#b89062", // Brighter copper on hover
-                  },
+                  "&:hover": { backgroundColor: "#b89062" },
                 },
-                "&:hover": {
-                    backgroundColor: "rgba(250, 245, 235, 1)",
-                }
+                "&:hover": { backgroundColor: "rgba(250, 245, 235, 1)" },
               },
             }}
           >
@@ -260,7 +244,6 @@ const HomePageComponent = (props: HomePageComponentProps) => {
             <ToggleButton value="create">Create</ToggleButton>
           </ToggleButtonGroup>
 
-          {/* CHANGE: THEMATIC ACTION Button */}
           <Button
             fullWidth
             size="large"
@@ -268,17 +251,16 @@ const HomePageComponent = (props: HomePageComponentProps) => {
             variant="contained"
             sx={{
               mt: 1,
-              fontFamily: thematicFont, // Regal font
+              fontFamily: thematicFont,
               letterSpacing: "0.1em",
               fontWeight: "700",
               textTransform: "uppercase",
-              // CHANGE: Green/Bronze etched metal plaque effect
-              background: agedGreenGradient, // Deep green gradient background
-              border: `2px solid #5c4033`, // Dark brass/bronze edge frame
-              boxShadow: "0 2px 4px rgba(0, 0, 0, 0.3)", // Button shadow
-              color: "rgba(255, 255, 255, 0.9)", // White text
+              background: agedGreenGradient,
+              border: `2px solid #5c4033`,
+              boxShadow: "0 2px 4px rgba(0, 0, 0, 0.3)",
+              color: "rgba(255, 255, 255, 0.9)",
               "&:hover": {
-                background: "linear-gradient(to bottom, #1b5e20, #134e35)", // Darker on hover
+                background: "linear-gradient(to bottom, #1b5e20, #134e35)",
                 borderColor: "#4d3122",
               },
             }}
@@ -300,20 +282,19 @@ const HomePageComponent = (props: HomePageComponentProps) => {
           <Paper
             sx={{
               p: 3,
-              maxWidth: 400,
+              width: { xs: "100%", sm: "350px", md: "400px" },
+              maxWidth: "400px",
               textAlign: "center",
-              // CHANGE: Thematic style for "Match Created" box to match main form
-              backgroundImage: `url(${parchmentTexture})`,
-              backgroundColor: "rgba(240, 230, 210, 0.9)", // Sepia parchment
+              backgroundColor: "rgba(240, 230, 210, 0.9)",
               backgroundBlendMode: "overlay",
-              border: `2px solid ${bronzeBorderColor}`, // Aged metal edge
+              border: `2px solid ${bronzeBorderColor}`,
               borderRadius: 1,
               fontFamily: thematicFont,
-              color: fontColorAgedInk, // Aged ink color
+              color: fontColorAgedInk,
             }}
           >
             <Typography variant="h6" sx={{ fontFamily: thematicFont }}>
-                <strong>Match Created!</strong>
+              <strong>Match Created!</strong>
             </Typography>
             <p style={{ margin: "10px 0" }}>
               ID: <code>{props.matchReady}</code>
@@ -322,11 +303,10 @@ const HomePageComponent = (props: HomePageComponentProps) => {
               variant="outlined"
               href={`/match/${props.matchReady}/${playerName}`}
               target="_blank"
-              // CHANGE: Thematic style for outlined button to match frame
               sx={{
                 fontFamily: thematicFont,
                 color: fontColorAgedInk,
-                borderColor: bronzeBorderColor, // Copper border
+                borderColor: bronzeBorderColor,
                 "&:hover": {
                   borderColor: "#b89062",
                   backgroundColor: "rgba(0, 0, 0, 0.02)",
@@ -337,8 +317,8 @@ const HomePageComponent = (props: HomePageComponentProps) => {
             </Button>
           </Paper>
         )}
-      </div>
-    </div>
+      </Box>
+    </Box>
   );
 };
 
