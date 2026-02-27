@@ -2,7 +2,7 @@ import React, { useState, useRef, useCallback } from "react";
 
 import ReactCardFlip from "react-card-flip";
 import { useLongPress } from "use-long-press";
-import { MyGameProps } from "../../types";
+import { MyGameProps } from "@eots/game";
 import { Button, Tooltip } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
 import { generalTheme } from "../themes";
