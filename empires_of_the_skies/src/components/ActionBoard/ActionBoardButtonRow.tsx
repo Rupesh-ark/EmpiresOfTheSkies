@@ -1,4 +1,8 @@
-import { ReactNode, ReactFragment, ReactPortal } from "react";
+import { ReactNode } from "react";
+
+type ActionBoardButtonRowChildProps = {
+  children?: ReactNode;
+};
 
 export const ButtonRow = ({ children }: ActionBoardButtonRowChildProps) => {
   return (
@@ -9,21 +13,10 @@ export const ButtonRow = ({ children }: ActionBoardButtonRowChildProps) => {
         position: "relative",
         whiteSpace: "pre-line",
         flexWrap: "wrap",
-        // alignContent: "center",
         alignItems: "center",
       }}
     >
       {children}
     </div>
   );
-};
-
-type ActionBoardButtonRowChildProps = {
-  children:
-    | ReactNode
-    | ReactFragment
-    | ReactPortal
-    | boolean
-    | null
-    | undefined;
 };

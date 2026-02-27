@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { MyGameProps } from "@eots/game";
 import FleetDisplay from "../PlayerBoard/FleetDisplay";
 import WorldMap from "../WorldMap/WorldMap";

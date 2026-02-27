@@ -1,5 +1,5 @@
 import { useState } from "react";
-import "../../App.css";
+import "../../game.css";
 // import { ReactComponent as ActionBoardSvg } from "../boards_and_assets/action_board.svg";
 import { ActionBoardButton, ActionBoardButtonLarge } from "./ActionBoardButton";
 import { ButtonRow } from "./ActionBoardButtonRow";

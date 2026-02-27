@@ -3,7 +3,6 @@ import { MyGameProps, PlayerColour } from "@eots/game";
 import {
   Box,
   Button,
-  Container,
   Dialog,
   DialogActions,
   DialogContent,

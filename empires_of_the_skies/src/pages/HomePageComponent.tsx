@@ -13,7 +13,6 @@ import { LobbyClient } from "boardgame.io/dist/types/packages/client";
 import { useState } from "react";
 import React from "react";
 import background from "../boards_and_assets/box_art.png";
-import parchmentTexture from "../boards_and_assets/parchment_texture.png";
 
 const createMatch = async (
   lobbyClient: LobbyClient,
@@ -51,48 +50,50 @@ const HomePageComponent = (props: HomePageComponentProps) => {
 
   return (
     <Box
-      sx={{
-        minHeight: "100vh", 
-        width: "100%",
-        backgroundImage: `url(${background})`,
-        backgroundSize: "cover", 
-        backgroundPosition: "center",
-        backgroundRepeat: "no-repeat",
-        backgroundAttachment: "fixed", 
-        
-        // 2. RESPONSIVE LAYOUT
-        display: "flex",
-        justifyContent: { xs: "center", md: "flex-start" }, 
-        alignItems: "center",
-        
-
-        padding: { xs: "0 5%", md: "0 10vw 15vh 10vw" }, 
-        boxSizing: "border-box", 
-      }}
-    >
-      <Box
         sx={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: { xs: "center", md: "flex-start" }, 
+          minHeight: "100dvh",
           width: "100%",
-          gap: "20px",
+          overflowY: "auto",
+          backgroundImage: `url(${background})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+          backgroundAttachment: { xs: "scroll", md: "fixed" },
+
+          display: "flex",
+          alignItems: { xs: "flex-start", md: "center" },
+          justifyContent: { xs: "center", md: "flex-start" },
+
+          px: { xs: "clamp(12px, 3vw, 24px)", md: "clamp(24px, 4vw, 96px)" },
+          py: { xs: "clamp(16px, 4vh, 40px)", md: "clamp(24px, 4vh, 64px)" },
+          pb: { xs: "calc(env(safe-area-inset-bottom) + 16px)", md: "clamp(24px, 10vh, 64px)" },
+
+          boxSizing: "border-box",
         }}
       >
+      <Box
+            sx={{
+              width: "100%",
+              maxWidth: { xs: 520, md: 520 }, 
+              display: "flex",
+              flexDirection: "column",
+              alignItems: { xs: "stretch", md: "flex-start" },
+              gap: { xs: 2, md: 2.5 },
+            }}
+          >
         <Paper
           elevation={6}
           sx={{
             display: "flex",
             flexDirection: "column",
             
-            width: { xs: "100%", sm: "350px", md: "400px" },
-            maxWidth: "400px",
+            width: "100%",
+            maxWidth: "420px",
+            p: { xs: 2.5, sm: 3, md: 4 },
             padding: { xs: 3, md: 4 }, 
-            
-            backgroundImage: `url(${parchmentTexture})`,
             backgroundSize: "cover",
-            backgroundColor: "rgba(240, 230, 210, 0.85)", 
-            backgroundBlendMode: "overlay", 
+            backgroundColor: "rgba(240, 230, 210, 0.75)", 
+            backgroundBlendMode: "lighten",
             border: `2px solid ${bronzeBorderColor}`, 
             boxShadow: "inset 0 0 10px rgba(0, 0, 0, 0.3)", 
             borderRadius: 1, 
@@ -281,9 +282,9 @@ const HomePageComponent = (props: HomePageComponentProps) => {
         {props.matchReady && (
           <Paper
             sx={{
-              p: 3,
-              width: { xs: "100%", sm: "350px", md: "400px" },
-              maxWidth: "400px",
+              width: "100%",
+              maxWidth: "420px",
+              p: { xs: 2.5, sm: 3, md: 4 },
               textAlign: "center",
               backgroundColor: "rgba(240, 230, 210, 0.9)",
               backgroundBlendMode: "overlay",
