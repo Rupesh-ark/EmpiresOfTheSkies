@@ -10,7 +10,7 @@
   "node": "22.x"
   },
   "scripts": {
-    "dev:frontend": "pnpm --filter empires_of_the_skies dev",
+    "dev:app": "pnpm --filter empires_of_the_skies dev",
     "dev:server": "pnpm --filter empires-server start",
     "build:all": "pnpm --filter @eots/game build && pnpm --filter empires-server build && pnpm --filter empires_of_the_skies build"
   }

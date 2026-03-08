@@ -1,13 +1,14 @@
 import { createTheme } from "@mui/material/styles";
+import { colors, fonts, sizes } from "../designTokens";
 
 export const generalTheme = createTheme({
   typography: {
-    fontFamily: "dauphinn",
-    fontSize: 20,
+    fontFamily: fonts.primary,
+    fontSize: sizes.fontSize.base,
     button: {
       textTransform: "none",
-      border: "1px solid black",
-      color: "#000000",
+      border: `1px solid ${colors.black}`,
+      color: colors.black,
       textOverflow: "ellipsis",
       width: "fit-content",
       whiteSpace: "pre",
@@ -20,7 +21,7 @@ export const generalTheme = createTheme({
       styleOverrides: {
         tooltip: {
           whiteSpace: "pre",
-          fontSize: 18,
+          fontSize: sizes.fontSize.tooltip,
         },
       },
     },
@@ -33,27 +34,25 @@ export const generalTheme = createTheme({
     },
     MuiButton: {
       styleOverrides: {
-        textPrimary: "#000000",
+        textPrimary: colors.black,
       },
     },
     MuiTab: {
       styleOverrides: { root: { border: "0px" } },
     },
     MuiTableCell: {
-      styleOverrides: { root: { fontSize: 18.5 } },
+      styleOverrides: { root: { fontSize: sizes.fontSize.tableCell } },
     },
   },
 });
 
 export const influencePrelatesTheme = createTheme({
   typography: {
-    fontSize: 18,
-    fontFamily: "dauphinn",
-
+    fontSize: sizes.fontSize.small,
+    fontFamily: fonts.primary,
     button: {
       textTransform: "none",
-
-      border: "1px solid black",
+      border: `1px solid ${colors.black}`,
       width: "fit-content",
       justifyContent: "center",
     },

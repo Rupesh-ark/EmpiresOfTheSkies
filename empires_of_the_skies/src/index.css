@@ -1,5 +1,51 @@
 :root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+
+  --font-primary: "dauphinn", sans-serif;
+  --font-accent: "Cinzel", serif;
+  --font-system: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+
+  /* Game mechanics */
+  --color-orthodox: #a74383;
+  --color-heresy: #e77b00;
+
+  /* SVG strokes */
+  --color-svg-stroke: #1a1a18;
+
+  /* Units */
+  --color-levy-fill: #b1b2b2;
+
+  /* World map */
+  --color-tile-unrevealed: #298932;
+
+  /* Action buttons */
+  --color-action-btn-default: #e0e0e0;
+  --color-action-btn-large: #5ebf85;
+
+  /* Loot goods */
+  --color-loot-mithril: #eceded;
+  --color-loot-magic-dust: #f6b1b5;
+  --color-loot-dragon-scales: #52a6b2;
+  --color-loot-kraken-skin: #b1ac7e;
+  --color-loot-sticky-ichor: #008bd2;
+  --color-loot-pipeweed: #ae9675;
+
+  /* Shipyard */
+  --color-shipyard-gold: #d7b469;
+  --color-shipyard-grey: #d9dada;
+
+  /* Home page */
+  --color-home-text: #3e2723;
+  --color-home-border: #a67c52;
+  --color-home-gradient-top: #2c6e49;
+  --color-home-gradient-bottom: #1b4d3e;
+  --color-home-parchment-bg: rgba(240, 230, 210, 0.75);
+
+  /* Dimensions */
+  --size-card-width: 137px;
+  --size-card-height: 250px;
+  --size-tile: 150px;
+
+  font-family: var(--font-system);
   line-height: 1.5;
   font-weight: 400;
   font-synthesis: none;
