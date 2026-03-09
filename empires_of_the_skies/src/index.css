@@ -1,58 +1,8 @@
-:root {
-
-  --font-primary: "dauphinn", sans-serif;
-  --font-accent: "Cinzel", serif;
-  --font-system: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
-
-  /* Game mechanics */
-  --color-orthodox: #a74383;
-  --color-heresy: #e77b00;
-
-  /* SVG strokes */
-  --color-svg-stroke: #1a1a18;
-
-  /* Units */
-  --color-levy-fill: #b1b2b2;
-
-  /* World map */
-  --color-tile-unrevealed: #298932;
-
-  /* Action buttons */
-  --color-action-btn-default: #e0e0e0;
-  --color-action-btn-large: #5ebf85;
-
-  /* Loot goods */
-  --color-loot-mithril: #eceded;
-  --color-loot-magic-dust: #f6b1b5;
-  --color-loot-dragon-scales: #52a6b2;
-  --color-loot-kraken-skin: #b1ac7e;
-  --color-loot-sticky-ichor: #008bd2;
-  --color-loot-pipeweed: #ae9675;
-
-  /* Shipyard */
-  --color-shipyard-gold: #d7b469;
-  --color-shipyard-grey: #d9dada;
-
-  /* Home page */
-  --color-home-text: #3e2723;
-  --color-home-border: #a67c52;
-  --color-home-gradient-top: #2c6e49;
-  --color-home-gradient-bottom: #1b4d3e;
-  --color-home-parchment-bg: rgba(240, 230, 210, 0.75);
-
-  /* Dimensions */
-  --size-card-width: 137px;
-  --size-card-height: 250px;
-  --size-tile: 150px;
-
-  font-family: var(--font-system);
-  line-height: 1.5;
-  font-weight: 400;
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
+/* ============================================================
+   Global resets
+   MUI's CssBaseline handles browser normalisation.
+   Only truly global layout concerns live here.
+   ============================================================ */
 
 html,
 body {
@@ -69,5 +19,113 @@ body {
 
 #root {
   width: 100%;
-  min-height: 100dvh; 
+  min-height: 100dvh;
+}
+
+/* ============================================================
+   Table reset
+   Ensures MUI tables aren't affected by browser defaults.
+   ============================================================ */
+
+table {
+  border-collapse: collapse;
+}
+
+/* ============================================================
+   Legacy lobby / pre-game layout classes
+   These apply only to the lobby page (not inside the MUI app).
+   ============================================================ */
+
+.app {
+  padding-top: 40px;
+}
+
+.match-info {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background-color: #4caf50;
+  color: white;
+  padding: 10px;
+  text-align: center;
+  z-index: 1000;
+  font-weight: bold;
+}
+
+.lobby {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+.create-game,
+.join-game {
+  background-color: #f5f5f5;
+  border-radius: 8px;
+  padding: 20px;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 500px;
+}
+
+/* Scoped to .lobby so MUI buttons are not affected */
+.lobby button {
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  text-align: center;
+  display: inline-block;
+  font-size: 16px;
+  margin: 10px 2px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.match-id {
+  background-color: #e9f5e9;
+  padding: 15px;
+  border-radius: 4px;
+  margin: 15px 0;
+  font-size: 18px;
+}
+
+.match-id span {
+  font-weight: bold;
+  color: #4caf50;
+  font-size: 24px;
+}
+
+/* Scoped to .lobby so MUI inputs are not affected */
+.lobby input {
+  padding: 10px;
+  margin: 10px 0;
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.join-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.game {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.status {
+  margin-bottom: 20px;
+  font-size: 18px;
+  font-weight: bold;
 }

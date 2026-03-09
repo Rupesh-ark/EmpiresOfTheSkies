@@ -2,6 +2,7 @@ import { useState } from "react";
 import { MyGameProps, GAME_PHASES } from "@eots/game";
 import {
   AppBar,
+  Box,
   Button,
   Chip,
   Dialog,
@@ -29,10 +30,12 @@ import LevyIcon from "../Icons/LevyIcon";
 import VictoryPointIcon from "../Icons/VictoryPointIcon";
 
 const chipSx = {
-  backgroundColor: "rgba(0,0,0,0.35)",
-  color: "white",
+  backgroundColor: "rgba(255,255,255,1)",
+  color: "black",
   height: 36,
+  border: "1px solid rgba(255,255,255,0.22)",
   "& .MuiChip-icon": { fontSize: 26 },
+  "& .MuiChip-label": { fontWeight: 600 },
 };
 
 const ResourceTrackerBar = (props: ResourceTrackerBarProps) => {
@@ -62,7 +65,7 @@ const ResourceTrackerBar = (props: ResourceTrackerBarProps) => {
     }
   };
   return (
-    <AppBar position={"sticky"}>
+    <AppBar position={"sticky"} sx={{ background: "linear-gradient(90deg, #1a0a14 0%, #0d0d0d 50%, #1a0a00 100%)", boxShadow: "0 2px 12px rgba(0,0,0,0.6)" }}>
       <Toolbar sx={{ justifyContent: "space-between", flexWrap: "wrap", gap: 1, py: 0.5 }}>
         <div style={{ display: "flex", alignItems: "center", gap: "24px" }}>
           <Tooltip title="Click to see all phases" disableInteractive>
@@ -190,6 +193,20 @@ const ResourceTrackerBar = (props: ResourceTrackerBarProps) => {
           )}
         </div>
       </Toolbar>
+      <Box
+        sx={{
+          height: 3,
+          background: currentPlayer.hereticOrOrthodox === "heretic"
+            ? "linear-gradient(90deg, #E77B00, #FFB04D, #E77B00, #FFB04D, #E77B00)"
+            : "linear-gradient(90deg, #A74383, #D06AAD, #A74383, #D06AAD, #A74383)",
+          backgroundSize: "300% 100%",
+          animation: "shimmer 8s linear infinite",
+          "@keyframes shimmer": {
+            "0%": { backgroundPosition: "0% 0%" },
+            "100%": { backgroundPosition: "300% 0%" },
+          },
+        }}
+      />
       <Dialog open={phaseDialogOpen} onClose={() => setPhaseDialogOpen(false)}>
         <DialogTitle>Game Phases</DialogTitle>
         <DialogContent sx={{ p: 0 }}>
