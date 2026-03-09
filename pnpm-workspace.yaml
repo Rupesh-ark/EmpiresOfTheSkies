@@ -1,4 +1,4 @@
 packages:
   - "empires_of_the_skies"
-  - "empires_of_the_skies/server"
+  - "server"
   - "packages/*"
