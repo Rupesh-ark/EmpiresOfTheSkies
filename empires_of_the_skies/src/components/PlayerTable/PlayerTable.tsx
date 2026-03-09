@@ -1,4 +1,3 @@
-import React from "react";
 import { MyGameProps } from "@eots/game";
 import {
   Paper,
@@ -13,7 +12,6 @@ import {
   Chip,
 } from "@mui/material";
 import { colourToKingdomMap } from "@eots/game";
-import { colors } from "../../designTokens";
 
 const tableHeaderCellSx = { 
   fontWeight: "bold",
@@ -43,7 +41,6 @@ const PlayerTable = (props: PlayerTableProps) => {
             <TableCell align="right" sx={tableHeaderCellSx}>Cathedrals</TableCell>
             <TableCell align="right" sx={tableHeaderCellSx}>Palaces</TableCell>
             <TableCell align="right" sx={tableHeaderCellSx}>Shipyards</TableCell>
-            <TableCell align="center" sx={tableHeaderCellSx}>Allegiance</TableCell>
             <TableCell align="right" sx={tableHeaderCellSx}>Victory Points</TableCell>
           </TableRow>
         </TableHead>
@@ -95,24 +92,6 @@ const PlayerTable = (props: PlayerTableProps) => {
               <TableCell align="right">{value.cathedrals}</TableCell>
               <TableCell align="right">{value.palaces}</TableCell>
               <TableCell align="right">{value.shipyards}</TableCell>
-              
-              <TableCell align="center">
-                <Chip
-                  label={value.hereticOrOrthodox}
-                  size="small"
-                  sx={{
-                    backgroundColor:
-                      value.hereticOrOrthodox === "orthodox"
-                        ? colors.orthodox
-                        : colors.heresy,
-                    color: colors.white,
-                    textTransform: "capitalize",
-                    fontWeight: "bold",
-                    minWidth: 80,
-                  }}
-                />
-              </TableCell>
-              
               <TableCell align="right">
                 <Typography variant="body2" fontWeight="bold">
                   {value.resources.victoryPoints}

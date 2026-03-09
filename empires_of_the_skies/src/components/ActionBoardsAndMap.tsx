@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { lazy, Suspense, useState } from "react";
 
 import { MyGameProps } from "@eots/game";
-import { ActionBoard } from "./ActionBoard/ActionBoard";
-import WorldMap from "./WorldMap/WorldMap";
-import { PlayerBoard } from "./PlayerBoard/PlayerBoard";
+const ActionBoard = lazy(() => import("./ActionBoard/ActionBoard").then(m => ({ default: m.ActionBoard })));
+const WorldMap = lazy(() => import("./WorldMap/WorldMap"));
+const PlayerBoard = lazy(() => import("./PlayerBoard/PlayerBoard").then(m => ({ default: m.PlayerBoard })));
+const Chat = lazy(() => import("./Chat/Chat"));
 
 import {
   Box,
@@ -31,10 +32,8 @@ import RetrieveFleetsDialog from "./Resolution/RetrieveFleetsDialog";
 
 import PlayerTable from "./PlayerTable/PlayerTable";
 import HeresyTracker from "./PlayerTable/HeresyTracker";
-import Chat from "./Chat/Chat";
 import { generalTheme } from "./themes";
 import { Campaign, ChatBubble, Dashboard, Map, Person, TableChart } from "@mui/icons-material";
-import heresyTrackerIcon from "../boards_and_assets/heresy_tracker_icon.svg";
 import PickLegacyCardDialog from "./PickLegacyCardDialog";
 import GameOverView from "./GameOverView";
 import LootValueTable from "./PlayerTable/LootValueTable";
@@ -88,11 +87,6 @@ export const ActionBoardsAndMap = (props: MyGameProps) => {
                 <Tab icon={<Tooltip title="World Map" placement="left"><Map sx={{ color: kingdomColour }} /></Tooltip>} value={"2"} sx={tabSx} />
                 <Tab icon={<Tooltip title="Player Table" placement="left"><TableChart sx={{ color: kingdomColour }} /></Tooltip>} value={"3"} sx={tabSx} />
                 <Tab
-                  icon={<Tooltip title="Heresy Tracker" placement="left"><img src={heresyTrackerIcon} width={50} height={50} /></Tooltip>}
-                  value={"4"}
-                  sx={tabSx}
-                />
-                <Tab
                   icon={
                     props.ctx.phase === "election" &&
                     props.playerID === props.ctx.currentPlayer ? (
@@ -101,44 +95,44 @@ export const ActionBoardsAndMap = (props: MyGameProps) => {
                       <Tooltip title="Group Chat" placement="left"><ChatBubble sx={{ color: kingdomColour }} /></Tooltip>
                     )
                   }
-                  value={"5"}
+                  value={"4"}
                   sx={tabSx}
                 />
               </Tabs>
               </Box>
               <Box sx={{ flexGrow: 1 }}>
-                <TabPanel value={"0"} tabIndex={0}>
-                  <ActionBoard {...props} />
-                </TabPanel>
-                <TabPanel value={"1"} tabIndex={1}>
-                  <PlayerBoard {...props} />
-                </TabPanel>
-                <TabPanel value={"2"} tabIndex={2}>
-                  <WorldMap {...props} />
-                </TabPanel>
-                <TabPanel value={"3"} tabIndex={3}>
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                      width: "100%",
-                      flexDirection: "column",
-                    }}
-                  >
-                    <div style={{ padding: 10 }}>
-                      Round number: {props.G.round}/{props.G.finalRound}
+                <Suspense fallback={null}>
+                  <TabPanel value={"0"} tabIndex={0}>
+                    <ActionBoard {...props} />
+                  </TabPanel>
+                  <TabPanel value={"1"} tabIndex={1}>
+                    <PlayerBoard {...props} />
+                  </TabPanel>
+                  <TabPanel value={"2"} tabIndex={2}>
+                    <WorldMap {...props} />
+                  </TabPanel>
+                  <TabPanel value={"3"} tabIndex={3}>
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        width: "100%",
+                        flexDirection: "column",
+                      }}
+                    >
+                      <div style={{ padding: 10 }}>
+                        Round number: {props.G.round}/{props.G.finalRound}
+                      </div>
+                      <HeresyTracker {...props} />
+                      <PlayerTable {...props} />
+                      <LootValueTable {...props} />
                     </div>
-                    <PlayerTable {...props} />
-                    <LootValueTable {...props} />
-                  </div>
-                </TabPanel>
-                <TabPanel value={"4"} tabIndex={4}>
-                  <HeresyTracker {...props} />
-                </TabPanel>
-                <TabPanel value={"5"} tabIndex={5}>
-                  <Chat {...props} />
-                </TabPanel>
+                  </TabPanel>
+                  <TabPanel value={"4"} tabIndex={4}>
+                    <Chat {...props} />
+                  </TabPanel>
+                </Suspense>
               </Box>
              
             </Box>
