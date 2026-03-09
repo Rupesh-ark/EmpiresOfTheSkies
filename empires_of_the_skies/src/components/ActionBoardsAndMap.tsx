@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { fonts, sizes } from "../designTokens";
 
 import { MyGameProps } from "@eots/game";
 import { ActionBoard } from "./ActionBoard/ActionBoard";
@@ -37,6 +38,12 @@ import PickLegacyCardDialog from "./PickLegacyCardDialog";
 import GameOverView from "./GameOverView";
 import LootValueTable from "./PlayerTable/LootValueTable";
 
+const tabStyle = {
+  fontFamily: fonts.primary,
+  fontSize: sizes.fontSize.tab,
+  textTransform: "none",
+} as const;
+
 export const ActionBoardsAndMap = (props: MyGameProps) => {
   const [value, setValue] = useState("0");
   const handleChange = (event: React.SyntheticEvent, newValue: string) => {
@@ -58,38 +65,22 @@ export const ActionBoardsAndMap = (props: MyGameProps) => {
               <Tab
                 label="Action Board"
                 value={"0"}
-                style={{
-                  fontFamily: "dauphinn",
-                  fontSize: 26,
-                  textTransform: "none",
-                }}
+                style={tabStyle}
               />
               <Tab
                 label="Player Board"
                 value={"1"}
-                style={{
-                  fontFamily: "dauphinn",
-                  fontSize: 26,
-                  textTransform: "none",
-                }}
+                style={tabStyle}
               />
               <Tab
                 label="World Map"
                 value={"2"}
-                style={{
-                  fontFamily: "dauphinn",
-                  fontSize: 26,
-                  textTransform: "none",
-                }}
+                style={tabStyle}
               />
               <Tab
                 label="Player Table"
                 value={"3"}
-                style={{
-                  fontFamily: "dauphinn",
-                  fontSize: 26,
-                  textTransform: "none",
-                }}
+                style={tabStyle}
               />{" "}
               <Tab
                 label={
@@ -99,11 +90,7 @@ export const ActionBoardsAndMap = (props: MyGameProps) => {
                     : "Group Chat"
                 }
                 value={"4"}
-                style={{
-                  fontFamily: "dauphinn",
-                  fontSize: 26,
-                  textTransform: "none",
-                }}
+                style={tabStyle}
                 icon={
                   props.ctx.phase === "election" &&
                   props.playerID === props.ctx.currentPlayer ? (

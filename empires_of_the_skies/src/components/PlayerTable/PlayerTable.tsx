@@ -10,6 +10,9 @@ import {
   TableRow,
 } from "@mui/material";
 import { colourToKingdomMap } from "@eots/game";
+import { colors } from "../../designTokens";
+
+const tableHeaderCellSx = { fontWeight: "bold" } as const;
 
 const PlayerTable = (props: PlayerTableProps) => {
   return (
@@ -17,43 +20,19 @@ const PlayerTable = (props: PlayerTableProps) => {
       <Table size="medium">
         <TableHead>
           <TableRow>
-            <TableCell sx={{ fontWeight: "bold" }}>Kingdom</TableCell>
-            <TableCell align="right" sx={{ fontWeight: "bold" }}>
-              Counsellors
-            </TableCell>
-            <TableCell align="right" sx={{ fontWeight: "bold" }}>
-              Gold
-            </TableCell>
-            <TableCell align="right" sx={{ fontWeight: "bold" }}>
-              Skyships
-            </TableCell>
-            <TableCell align="right" sx={{ fontWeight: "bold" }}>
-              Regiments
-            </TableCell>
-            <TableCell align="right" sx={{ fontWeight: "bold" }}>
-              Levies
-            </TableCell>
-            <TableCell align="right" sx={{ fontWeight: "bold" }}>
-              Fortune Of War Cards
-            </TableCell>
-            <TableCell align="right" sx={{ fontWeight: "bold" }}>
-              Prisoners
-            </TableCell>
-            <TableCell align="right" sx={{ fontWeight: "bold" }}>
-              Cathedrals
-            </TableCell>
-            <TableCell align="right" sx={{ fontWeight: "bold" }}>
-              Palaces
-            </TableCell>
-            <TableCell align="right" sx={{ fontWeight: "bold" }}>
-              Shipyards
-            </TableCell>
-            <TableCell align="right" sx={{ fontWeight: "bold" }}>
-              Allegiance
-            </TableCell>
-            <TableCell align="right" sx={{ fontWeight: "bold" }}>
-              Victory Points
-            </TableCell>
+            <TableCell sx={tableHeaderCellSx}>Kingdom</TableCell>
+            <TableCell align="right" sx={tableHeaderCellSx}>Counsellors</TableCell>
+            <TableCell align="right" sx={tableHeaderCellSx}>Gold</TableCell>
+            <TableCell align="right" sx={tableHeaderCellSx}>Skyships</TableCell>
+            <TableCell align="right" sx={tableHeaderCellSx}>Regiments</TableCell>
+            <TableCell align="right" sx={tableHeaderCellSx}>Levies</TableCell>
+            <TableCell align="right" sx={tableHeaderCellSx}>Fortune Of War Cards</TableCell>
+            <TableCell align="right" sx={tableHeaderCellSx}>Prisoners</TableCell>
+            <TableCell align="right" sx={tableHeaderCellSx}>Cathedrals</TableCell>
+            <TableCell align="right" sx={tableHeaderCellSx}>Palaces</TableCell>
+            <TableCell align="right" sx={tableHeaderCellSx}>Shipyards</TableCell>
+            <TableCell align="right" sx={tableHeaderCellSx}>Allegiance</TableCell>
+            <TableCell align="right" sx={tableHeaderCellSx}>Victory Points</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -84,9 +63,9 @@ const PlayerTable = (props: PlayerTableProps) => {
                 sx={{
                   backgroundColor:
                     value.hereticOrOrthodox === "orthodox"
-                      ? "#A74383"
-                      : "#E77B00",
-                  color: "white",
+                      ? colors.orthodox
+                      : colors.heresy,
+                  color: colors.white,
                 }}
               >
                 {value.hereticOrOrthodox}

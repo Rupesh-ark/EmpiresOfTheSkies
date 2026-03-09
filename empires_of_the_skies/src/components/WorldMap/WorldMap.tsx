@@ -1,4 +1,4 @@
-import React, { ReactElement } from "react";
+import { ReactElement } from "react";
 
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import { Grid } from "@mui/material";
@@ -23,8 +23,7 @@ const WorldMap = (props: WorldMapProps) => {
         });
         tiles[y].push(
           <Grid
-            item
-            lg={1}
+            size={{ lg: 1 }}
             maxWidth={150}
             minWidth={150}
             key={`World Map Tile at (${x.toString()}, ${y.toString()})`}

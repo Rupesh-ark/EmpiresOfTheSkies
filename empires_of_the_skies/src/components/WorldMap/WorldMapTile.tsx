@@ -1,4 +1,5 @@
 import React, { useState, useRef, useCallback } from "react";
+import { keyframes } from "@emotion/react";
 
 import ReactCardFlip from "react-card-flip";
 import { useLongPress } from "use-long-press";
@@ -132,17 +133,28 @@ Loot:
       <Button
         value={currentTile.name}
         sx={{
-          backgroundColor: "#298932",
-          fontSize: "30px",
+          background: "linear-gradient(135deg, #005a82 0%, #007ab5 35%, #009ee3 65%, #005a82 100%)",
+          backgroundSize: "400% 400%",
+          animation: `${keyframes`
+            0%   { background-position: 0% 50%; }
+            50%  { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+          `} 6s ease infinite`,
           height: "100%",
           width: "150px",
           maxWidth: "100%",
           minHeight: "150px",
           minWidth: "150px",
-          fontFamily: "dauphinn",
-          color: "black",
-          justifyContent: "center",
           borderRadius: 0,
+          border: "1px solid rgba(0,122,181,0.25)",
+          boxShadow: "inset 0 0 20px rgba(0,158,227,0.3), inset 0 0 5px rgba(0,200,255,0.15)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          transition: "filter 0.2s ease",
+          "&:hover": {
+            filter: "brightness(1.4) saturate(1.4)",
+          },
         }}
         onClick={
           !props.alternateOnClick
@@ -158,7 +170,17 @@ Loot:
         }
         {...bind}
       >
-        ?
+        <span
+          style={{
+            fontSize: "40px",
+            opacity: 0.4,
+            userSelect: "none",
+            lineHeight: 1,
+            filter: "drop-shadow(0 0 6px rgba(0,200,255,0.8))",
+          }}
+        >
+          🔍
+        </span>
       </Button>
       <ThemeProvider theme={generalTheme}>
         <Tooltip

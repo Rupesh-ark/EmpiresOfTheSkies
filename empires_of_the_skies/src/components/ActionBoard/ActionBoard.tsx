@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { fonts } from "../../designTokens";
 import "../../game.css";
 // import { ReactComponent as ActionBoardSvg } from "../boards_and_assets/action_board.svg";
 import { ActionBoardButton, ActionBoardButtonLarge } from "./ActionBoardButton";
@@ -294,7 +295,7 @@ Taxation is awarded as follows:
                 backgroundImage: `url(${issueHolyDecree})`,
                 backgroundSize: "contain",
                 backgroundRepeat: "no-repeat",
-                fontFamily: "dauphinn",
+                fontFamily: fonts.primary,
                 fontSize: "18px",
                 cursor: "pointer",
                 justifyContent: "right",

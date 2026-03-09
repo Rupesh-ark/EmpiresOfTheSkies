@@ -15,6 +15,18 @@ import {
   ThemeProvider,
 } from "@mui/material";
 import { influencePrelatesTheme } from "../themes";
+import { colors } from "../../designTokens";
+
+const counterButtonSx = (disabledState = false) =>
+  ({
+    backgroundColor: "transparent",
+    border: "none",
+    width: "30px",
+    height: "100%",
+    fontSize: "30px",
+    cursor: disabledState ? "not-allowed" : "pointer",
+    color: disabledState ? "grey" : colors.black,
+  }) as const;
 import FortuneOfWarCardDisplay from "./FortuneOfWarCardDisplay";
 import ShipYardDisplay from "./ShipYardDisplay";
 import FleetDisplay from "./FleetDisplay";
@@ -152,15 +164,7 @@ export const PlayerBoard = (props: PlayerBoardProps) => {
                 onClick={() => {
                   setLevyCount(levyCount + 3);
                 }}
-                sx={{
-                  backgroundColor: "transparent",
-                  border: "none",
-                  width: "30px",
-                  height: "100%",
-                  fontSize: "30px",
-                  cursor: "pointer",
-                  color: "#000000",
-                }}
+                sx={counterButtonSx()}
                 disabled={levyCount === 12}
               >
                 +
@@ -208,15 +212,7 @@ export const PlayerBoard = (props: PlayerBoardProps) => {
                 onClick={() => {
                   setLevyCount(levyCount - 3);
                 }}
-                sx={{
-                  backgroundColor: "transparent",
-                  border: "none",
-                  width: "30px",
-                  height: "100%",
-                  fontSize: "30px",
-                  cursor: "pointer",
-                  color: "#000000",
-                }}
+                sx={counterButtonSx()}
                 disabled={levyCount === 0}
               >
                 -
@@ -245,15 +241,7 @@ export const PlayerBoard = (props: PlayerBoardProps) => {
                 onClick={() => {
                   setSkyshipCount(skyshipCount + 1);
                 }}
-                sx={{
-                  backgroundColor: "transparent",
-                  border: "none",
-                  width: "30px",
-                  height: "100%",
-                  fontSize: "30px",
-                  cursor: dispatchDisabled ? "not-allowed" : "pointer",
-                  color: dispatchDisabled ? "grey" : "#000000",
-                }}
+                sx={counterButtonSx(dispatchDisabled)}
                 disabled={
                   dispatchDisabled ||
                   currentFleetAlreadyDispatched ||
@@ -327,15 +315,7 @@ export const PlayerBoard = (props: PlayerBoardProps) => {
                     setSkyshipCount(skyshipCount - 1);
                   }
                 }}
-                sx={{
-                  backgroundColor: "transparent",
-                  border: "none",
-                  width: "30px",
-                  height: "100%",
-                  fontSize: "30px",
-                  cursor: dispatchDisabled ? "not-allowed" : "pointer",
-                  color: dispatchDisabled ? "grey" : "#000000",
-                }}
+                sx={counterButtonSx(dispatchDisabled)}
                 disabled={
                   dispatchDisabled ||
                   skyshipCount <= 0 ||
@@ -348,15 +328,7 @@ export const PlayerBoard = (props: PlayerBoardProps) => {
                 onClick={() => {
                   setRegimentCount(regimentCount + 1);
                 }}
-                sx={{
-                  backgroundColor: "transparent",
-                  border: "none",
-                  width: "30px",
-                  height: "100%",
-                  fontSize: "30px",
-                  cursor: dispatchDisabled ? "not-allowed" : "pointer",
-                  color: dispatchDisabled ? "grey" : "#000000",
-                }}
+                sx={counterButtonSx(dispatchDisabled)}
                 disabled={
                   dispatchDisabled ||
                   currentFleetAlreadyDispatched ||
@@ -409,15 +381,7 @@ export const PlayerBoard = (props: PlayerBoardProps) => {
                 onClick={() => {
                   setRegimentCount(regimentCount - 1);
                 }}
-                sx={{
-                  backgroundColor: "transparent",
-                  border: "none",
-                  width: "30px",
-                  height: "100%",
-                  fontSize: "30px",
-                  cursor: dispatchDisabled ? "not-allowed" : "pointer",
-                  color: dispatchDisabled ? "grey" : "#000000",
-                }}
+                sx={counterButtonSx(dispatchDisabled)}
                 disabled={dispatchDisabled || regimentCount <= 0}
               >
                 -
@@ -426,15 +390,7 @@ export const PlayerBoard = (props: PlayerBoardProps) => {
                 onClick={() => {
                   setLevyCountForDispatch(levyCountForDispatch + 1);
                 }}
-                sx={{
-                  backgroundColor: "transparent",
-                  border: "none",
-                  width: "30px",
-                  height: "100%",
-                  fontSize: "30px",
-                  cursor: dispatchDisabled ? "not-allowed" : "pointer",
-                  color: dispatchDisabled ? "grey" : "#000000",
-                }}
+                sx={counterButtonSx(dispatchDisabled)}
                 disabled={
                   dispatchDisabled ||
                   currentFleetAlreadyDispatched ||
@@ -487,15 +443,7 @@ export const PlayerBoard = (props: PlayerBoardProps) => {
                 onClick={() => {
                   setLevyCountForDispatch(levyCountForDispatch - 1);
                 }}
-                sx={{
-                  backgroundColor: "transparent",
-                  border: "none",
-                  width: "30px",
-                  height: "100%",
-                  fontSize: "30px",
-                  cursor: dispatchDisabled ? "not-allowed" : "pointer",
-                  color: dispatchDisabled ? "grey" : "#000000",
-                }}
+                sx={counterButtonSx(dispatchDisabled)}
                 disabled={
                   dispatchDisabled ||
                   levyCountForDispatch <= 0 ||
