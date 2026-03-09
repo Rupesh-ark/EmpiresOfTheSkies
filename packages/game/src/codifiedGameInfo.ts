@@ -1,4 +1,51 @@
-import { FortuneOfWarCardInfo, KingdomName, TileInfoProps } from "./types";
+import { FortuneOfWarCardInfo, KingdomName, LegacyCard, TileInfoProps } from "./types";
+
+// ── Game configuration ────────────────────────────────────────────────────────
+
+export const MAX_PLAYERS = 6;
+export const MIN_PLAYERS = 1;
+export const FINAL_ROUND = 4;
+export const BASE_GOLD_INCOME = 4;
+
+export const STARTING_RESOURCES = {
+  gold: 6,
+  victoryPoints: 10,
+  counsellors: 6,
+  skyships: 3,
+  regiments: 6,
+} as const;
+
+export const LEGACY_CARDS: LegacyCard[] = [
+  "the builder",
+  "the conqueror",
+  "the explorer",
+  "the great",
+  "the magnificent",
+  "the merchant",
+  "the mighty",
+  "the navigator",
+  "the pious",
+  "the builder",
+  "the conqueror",
+  "the explorer",
+  "the great",
+  "the magnificent",
+  "the merchant",
+  "the mighty",
+  "the navigator",
+  "the pious",
+];
+
+export const GAME_PHASES: { key: string; label: string }[] = [
+  { key: "legacy_card",     label: "Legacy Card" },
+  { key: "discovery",       label: "Discovery" },
+  { key: "actions",         label: "Actions" },
+  { key: "battle",          label: "Battle" },
+  { key: "plunder_legends", label: "Plunder Legends" },
+  { key: "conquest",        label: "Conquest" },
+  { key: "election",        label: "Election" },
+  { key: "resolution",      label: "Resolution" },
+];
 
 export const colourToKingdomMap: Record<string, KingdomName> = {
   "#DC5454": "Angland",

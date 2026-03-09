@@ -28,8 +28,7 @@ export const findNextBattle = (G: MyGameState, events: EventsAPI) => {
     }
   }
   G.mapState.currentBattle = [0, 0];
-  G.stage = "plunder legends";
-  events.endPhase();
+  findNextGroundBattle(G, events);
 };
 
 export const findNextPlunder = (G: MyGameState, events: EventsAPI): void => {
@@ -56,7 +55,7 @@ export const findNextPlunder = (G: MyGameState, events: EventsAPI): void => {
     }
   }
   G.mapState.currentBattle = [0, 0];
-  G.stage = "ground battle";
+  G.stage = "conquest";
   events.endPhase();
 };
 export const findNextGroundBattle = (
@@ -88,7 +87,7 @@ export const findNextGroundBattle = (
     }
   }
   G.mapState.currentBattle = [0, 0];
-  G.stage = "conquest";
+  G.stage = "plunder legends";
   events.endPhase();
 };
 
