@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { MyGameProps } from "@eots/game";
+import { MyGameProps, GAME_PHASES } from "@eots/game";
 import {
   AppBar,
   Button,
@@ -8,6 +8,9 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  List,
+  ListItem,
+  ListItemText,
   Toolbar,
   Tooltip,
 } from "@mui/material";
@@ -34,6 +37,7 @@ const chipSx = {
 
 const ResourceTrackerBar = (props: ResourceTrackerBarProps) => {
   const [passDialogOpen, setPassDialogOpen] = useState(false);
+  const [phaseDialogOpen, setPhaseDialogOpen] = useState(false);
   if (!props.playerID) {
     return <></>;
   }
@@ -61,8 +65,11 @@ const ResourceTrackerBar = (props: ResourceTrackerBarProps) => {
     <AppBar position={"sticky"}>
       <Toolbar sx={{ justifyContent: "space-between", flexWrap: "wrap", gap: 1, py: 0.5 }}>
         <div style={{ display: "flex", alignItems: "center", gap: "24px" }}>
-          <Tooltip title="Current Phase" disableInteractive>
-            <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+          <Tooltip title="Click to see all phases" disableInteractive>
+            <span
+              onClick={() => setPhaseDialogOpen(true)}
+              style={{ display: "flex", alignItems: "center", gap: "6px", cursor: "pointer" }}
+            >
               <GiTrumpetFlag style={{ fontSize: "28px" }} />
               <span style={{ textTransform: "capitalize" }}>{props.G.stage}</span>
             </span>
@@ -72,7 +79,15 @@ const ResourceTrackerBar = (props: ResourceTrackerBarProps) => {
               <Person4Sharp
                 sx={{ color: props.G.playerInfo[props.ctx.currentPlayer].colour }}
               />
-              {props.G.playerInfo[props.ctx.currentPlayer].kingdomName}
+              {(() => {
+                const currentPlayerData = props.G.playerInfo[props.ctx.currentPlayer];
+                const playerName = props.matchData?.find(
+                  (p) => String(p.id) === props.ctx.currentPlayer
+                )?.name;
+                return playerName
+                  ? `${playerName} (${currentPlayerData.kingdomName})'s turn`
+                  : `${currentPlayerData.kingdomName}'s turn`;
+              })()}
             </span>
           </Tooltip>
           {props.G.playerInfo[props.playerID ?? props.ctx.currentPlayer]
@@ -175,6 +190,35 @@ const ResourceTrackerBar = (props: ResourceTrackerBarProps) => {
           )}
         </div>
       </Toolbar>
+      <Dialog open={phaseDialogOpen} onClose={() => setPhaseDialogOpen(false)}>
+        <DialogTitle>Game Phases</DialogTitle>
+        <DialogContent sx={{ p: 0 }}>
+          <List dense>
+            {GAME_PHASES.map((phase) => (
+              <ListItem
+                key={phase.key}
+                sx={
+                  props.ctx.phase === phase.key
+                    ? { backgroundColor: "action.selected", fontWeight: "bold" }
+                    : {}
+                }
+              >
+                <ListItemText
+                  primary={phase.label}
+                  slotProps={
+                    props.ctx.phase === phase.key
+                      ? { primary: { fontWeight: "bold" } }
+                      : {}
+                  }
+                />
+              </ListItem>
+            ))}
+          </List>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setPhaseDialogOpen(false)}>Close</Button>
+        </DialogActions>
+      </Dialog>
       <Dialog open={passDialogOpen}>
         <DialogTitle>Are you sure you want to pass?</DialogTitle>
         <DialogContent>

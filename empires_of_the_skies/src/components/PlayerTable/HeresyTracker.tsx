@@ -10,7 +10,7 @@ import {
 } from "@mui/material";
 import { MyGameProps } from "@eots/game";
 const HeresyTracker = (props: HeresyTrackerProps) => {
-  const tableRows = Object.values(props.G.playerInfo).map((player) => {
+  const tableRows = Object.entries(props.G.playerInfo).map(([playerId, player]) => {
     const tableCells: JSX.Element[] = [];
     for (let i = -11; i < 13; i++) {
       tableCells.push(
@@ -23,7 +23,7 @@ const HeresyTracker = (props: HeresyTrackerProps) => {
         ></TableCell>
       );
     }
-    return <TableRow>{tableCells}</TableRow>;
+    return <TableRow key={playerId}>{tableCells}</TableRow>;
   });
   return (
     <TableContainer component={Paper} style={{ maxWidth: 1230, marginTop: 20 }}>

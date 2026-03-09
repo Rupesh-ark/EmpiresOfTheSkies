@@ -4,7 +4,8 @@ import { keyframes } from "@emotion/react";
 import ReactCardFlip from "react-card-flip";
 import { useLongPress } from "use-long-press";
 import { MyGameProps } from "@eots/game";
-import { Button, Tooltip } from "@mui/material";
+import { Box, Button, Dialog, DialogContent, DialogTitle, IconButton, Typography } from "@mui/material";
+import { Close } from "@mui/icons-material";
 import { ThemeProvider } from "@mui/material/styles";
 import { generalTheme } from "../themes";
 import FortIcon from "../Icons/FortIcon";
@@ -121,6 +122,11 @@ Loot:
   const [flip, setFlip] = useState(
     props.G.mapState.discoveredTiles[yLocation][xLocation]
   );
+  const [detailOpen, setDetailOpen] = useState(false);
+
+  const isOcean = currentTile.type === "ocean";
+  const isCenterTile = xLocation === 4 && yLocation === 0;
+  const canShowDetail = flip && !isOcean && !isCenterTile;
 
   const altOnClick = () => {
     if (props.alternateOnClick) {
@@ -183,41 +189,50 @@ Loot:
         </span>
       </Button>
       <ThemeProvider theme={generalTheme}>
-        <Tooltip
-          title={tooltipText}
-          arrow
-          disableFocusListener={
-            !flip ||
-            currentTile.type === "ocean" ||
-            (xLocation === 4 && yLocation === 0)
-          }
-          placement="right-start"
-          sx={{ whiteSpace: "pre-line", fontSize: "20px" }}
-          disableHoverListener={
-            (xLocation === 4 && yLocation === 0) || currentTile.type === "ocean"
-          }
+        <Button
+          className="front"
+          sx={{
+            backgroundImage: `url(${svgNameToElementMap[currentTile.name]})`,
+            backgroundSize: "cover",
+            backgroundRepeat: "no-repeat",
+            height: "100%",
+            width: "150px",
+            maxWidth: "100%",
+            minHeight: "150px",
+            minWidth: "150px",
+            border: props.selectable ? "5px solid yellow" : "0px ",
+            borderRadius: 0,
+          }}
+          onClick={props.selectable ? altOnClick : canShowDetail ? () => setDetailOpen(true) : undefined}
         >
-          <Button
-            className="front"
-            sx={{
-              backgroundImage: `url(${svgNameToElementMap[currentTile.name]})`,
-              backgroundSize: "cover",
-              backgroundRepeat: "no-repeat",
-              height: "100%",
-              width: "150px",
-              maxWidth: "100%",
-              minHeight: "150px",
-              minWidth: "150px",
-              border: props.selectable ? "5px solid yellow" : "0px ",
-              borderRadius: 0,
-            }}
-            onClick={props.selectable ? altOnClick : undefined}
-          >
-            {building()}
-            {fort ? <FortIcon colour={fortColour ?? "white"}></FortIcon> : null}
-            {xLocation !== 4 || yLocation !== 0 ? fleets : null}
-          </Button>
-        </Tooltip>
+          {building()}
+          {fort ? <FortIcon colour={fortColour ?? "white"}></FortIcon> : null}
+          {xLocation !== 4 || yLocation !== 0 ? fleets : null}
+        </Button>
+        <Dialog open={detailOpen} onClose={() => setDetailOpen(false)} maxWidth="sm" fullWidth>
+          <DialogTitle sx={{ display: "flex", justifyContent: "flex-end", alignItems: "center", pb: 0 }}>
+            <IconButton size="small" onClick={() => setDetailOpen(false)}><Close /></IconButton>
+          </DialogTitle>
+          <DialogContent>
+            <Box
+              sx={{
+                width: "100%",
+                height: 300,
+                backgroundImage: `url(${svgNameToElementMap[currentTile.name]})`,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+                borderRadius: 1,
+                mb: 2,
+              }}
+            />
+            <Typography>⚔️ Attack: {currentTile.sword}</Typography>
+            <Typography>🛡️ Defence: {currentTile.shield}</Typography>
+            <Typography sx={{ mt: 1 }}>🏕️ Outpost loot:</Typography>
+            <Typography sx={{ whiteSpace: "pre-line", pl: 2 }}>{outpostLoot() || "  None"}</Typography>
+            <Typography sx={{ mt: 1 }}>🏰 Colony loot:</Typography>
+            <Typography sx={{ whiteSpace: "pre-line", pl: 2 }}>{colonyLoot() || "  None"}</Typography>
+          </DialogContent>
+        </Dialog>
       </ThemeProvider>
     </ReactCardFlip>
   );

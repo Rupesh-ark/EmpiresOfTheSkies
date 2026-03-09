@@ -1,6 +1,4 @@
 //based on code from https://frontendshape.com/post/create-a-chat-ui-in-react-with-mui-5
-// king svg from King by Alina Oleynik from <a href="https://thenounproject.com/browse/icons/term/king/" target="_blank" title="King Icons">Noun Project</a>
-
 import * as React from "react";
 import {
   Box,
@@ -12,6 +10,7 @@ import {
   Paper,
 } from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
+import PersonIcon from "@mui/icons-material/Person";
 import { MyGameProps } from "@eots/game";
 import { ChatMessage } from "boardgame.io";
 import { ChangeEventHandler } from "react";
@@ -74,7 +73,7 @@ const Chat = (props: MyGameProps) => {
             </Box>
             <Box sx={{ p: 2, backgroundColor: "background.default" }}>
               <Grid container spacing={2}>
-                <Grid item xs={10}>
+                <Grid size={10}>
                   <TextField
                     size="small"
                     fullWidth
@@ -89,7 +88,7 @@ const Chat = (props: MyGameProps) => {
                     }}
                   />
                 </Grid>
-                <Grid item xs={2}>
+                <Grid size={2}>
                   <Button
                     fullWidth
                     color="primary"
@@ -103,16 +102,7 @@ const Chat = (props: MyGameProps) => {
               </Grid>
             </Box>
           </Box>
-          <text style={{ fontSize: 16 }}>
-            King SVG from King by Alina Oleynik from{" "}
-            <a
-              href="https://thenounproject.com/browse/icons/term/king/"
-              target="_blank"
-              title="King Icons"
-            >
-              Noun Project
-            </a>
-          </text>
+
         </div>
       </div>
     </div>
@@ -139,21 +129,7 @@ const Message = (props: MessageProps) => {
         <Avatar
           sx={{ bgcolor: props.G.playerInfo[props.message.sender].colour }}
         >
-          <svg
-            version="1.1"
-            x="0px"
-            y="0px"
-            viewBox="0 0 100 115"
-            enable-background="new 0 0 100 100"
-          >
-            <circle cx="50.04" cy="16.438" r="3.5" />
-            <circle cx="60.727" cy="63.874" r="3.5" />
-            <circle cx="39.352" cy="63.874" r="3.5" />
-            <circle cx="84.462" cy="27.731" r="2.773" />
-            <circle cx="15.538" cy="27.731" r="2.773" />
-            <path d="M70.519,35.944c-7.931-1.015-14.741-5.691-20.479-10.987c-5.738,5.295-12.548,9.971-20.479,10.987  c-3.877,0.496-7.998-0.103-11.25-2.271l4.302,20.785c0,0,13.937-3.833,27.427-3.833c13.49,0,27.427,3.833,27.427,3.833l4.302-20.785  C78.516,35.841,74.396,36.441,70.519,35.944z M49.96,45.749l-3.42-6.167l3.42-5.917l3.42,5.917L49.96,45.749z" />
-            <path d="M55.977,75.374c-3.531-0.813-5.938,1.438-5.938,1.438s-2.406-2.25-5.938-1.438c-4.785,1.101-6.355,8.71-12,6.875  c0,0,1.219,4.75,8.188,4.813s9.75-5.438,9.75-5.438s2.781,5.5,9.75,5.438s8.188-4.813,8.188-4.813  C62.332,84.084,60.762,76.475,55.977,75.374z" />
-          </svg>
+          <PersonIcon />
         </Avatar>
         <Paper
           variant="outlined"

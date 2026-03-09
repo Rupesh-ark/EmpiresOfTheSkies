@@ -1,6 +1,5 @@
 import { ReactElement } from "react";
 
-import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import { Grid } from "@mui/material";
 import { WorldMapTile } from "./WorldMapTile";
 import { MyGameProps } from "@eots/game";
@@ -53,19 +52,15 @@ const WorldMap = (props: WorldMapProps) => {
         width: "100%",
       }}
     >
-      <TransformWrapper>
-        <TransformComponent>
-          <Grid
-            container
-            spacing={0}
-            columns={8}
-            maxWidth={1220}
-            minWidth={1220}
-          >
-            <GridItems {...props} />
-          </Grid>
-        </TransformComponent>
-      </TransformWrapper>
+      <Grid
+        container
+        spacing={0}
+        columns={8}
+        maxWidth={1220}
+        minWidth={1220}
+      >
+        <GridItems {...props} />
+      </Grid>
     </div>
   );
 };

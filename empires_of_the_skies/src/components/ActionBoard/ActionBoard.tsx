@@ -74,7 +74,7 @@ export const ActionBoard = (props: ActionBoardProps) => {
           style={{
             display: "flex",
             flexDirection: "column",
-            maxWidth: 1225,
+            maxWidth: 1600,
             // minWidth: 1220,
           }}
         >
