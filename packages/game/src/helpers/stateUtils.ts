@@ -1,9 +1,4 @@
-import { Move } from "boardgame.io";
 import { MyGameState } from "../types";
-import { INVALID_MOVE } from "boardgame.io/core";
-import { Ctx } from "boardgame.io/dist/types/src/types";
-import { EventsAPI } from "boardgame.io/dist/types/src/plugins/plugin-events";
-import { RandomAPI } from "boardgame.io/dist/types/src/plugins/random/random";
 
 export const removeOneCounsellor = (G: MyGameState, playerID: string) => {
   G.playerInfo[playerID].resources.counsellors -= 1;
@@ -66,47 +61,10 @@ export const addRegiments = (
   G.playerInfo[playerID].resources.regiments += amount;
 };
 
-export const increaseHeresy: Move<MyGameState> = (
-  {
-    G,
-    ctx,
-    playerID,
-    events,
-    random,
-  }: {
-    G: MyGameState;
-    ctx: Ctx;
-    playerID: string;
-    events: EventsAPI;
-    random: RandomAPI;
-  },
-  ...args: any[]
-) => {
-  increaseHeresyWithinMove(G, playerID);
-};
-
 export const increaseHeresyWithinMove = (G: MyGameState, playerID: string) => {
   if (G.playerInfo[playerID].heresyTracker < 12) {
     G.playerInfo[playerID].heresyTracker += 1;
   }
-};
-export const increaseOrthodoxy: Move<MyGameState> = (
-  {
-    G,
-    ctx,
-    playerID,
-    events,
-    random,
-  }: {
-    G: MyGameState;
-    ctx: Ctx;
-    playerID: string;
-    events: EventsAPI;
-    random: RandomAPI;
-  },
-  ...args: any[]
-) => {
-  increaseOrthodoxyWithinMove(G, playerID);
 };
 
 export const increaseOrthodoxyWithinMove = (
@@ -116,57 +74,6 @@ export const increaseOrthodoxyWithinMove = (
   if (G.playerInfo[playerID].heresyTracker > -11) {
     G.playerInfo[playerID].heresyTracker -= 1;
   }
-};
-export const checkAndPlaceFort: Move<MyGameState> = (
-  { G, playerID }: { G: MyGameState; playerID: string },
-  coords: [number, number]
-) => {
-  const [x, y] = coords;
-  const tileInfo = G.mapState.buildings[y][x];
-  if (tileInfo === undefined) {
-    return INVALID_MOVE;
-  }
-  let hasRelevantPresence = false;
-  if (tileInfo.player) {
-    if (
-      tileInfo.player.id === playerID &&
-      (tileInfo.buildings === "colony" || tileInfo.buildings === "outpost") &&
-      tileInfo.fort === false &&
-      tileInfo.garrisonedRegiments
-        ? tileInfo.garrisonedRegiments > 0
-        : false
-    ) {
-      hasRelevantPresence = true;
-    }
-  }
-
-  if (!hasRelevantPresence) {
-    return INVALID_MOVE;
-  }
-
-  tileInfo.fort = true;
-  G.playerInfo[playerID].turnComplete = true;
-};
-
-export const flipCards: Move<MyGameState> = (
-  {
-    G,
-    ctx,
-    playerID,
-    events,
-    random,
-  }: {
-    G: MyGameState;
-    ctx: Ctx;
-    playerID: string;
-    events: EventsAPI;
-    random: RandomAPI;
-  },
-  ...args: any[]
-) => {
-  G.playerInfo[playerID].resources.fortuneCards.forEach((card) => {
-    card.flipped = true;
-  });
 };
 
 export const removeLevyAmount = (
