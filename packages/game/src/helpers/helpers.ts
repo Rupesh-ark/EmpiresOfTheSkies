@@ -39,10 +39,7 @@ export const checkPlayerIDAndReturnPlayerInfo = (
 };
 
 export const fullResetFortuneOfWarCardDeck = (): FortuneOfWarCardInfo[] => {
-  const fullDeck: FortuneOfWarCardInfo[] =
-    fortuneOfWarCards.concat(fortuneOfWarCards);
-
-  return [...fullDeck];
+  return [...fortuneOfWarCards];
 };
 
 export const resetFortuneOfWarCardDeck = (props: MyGameState) => {

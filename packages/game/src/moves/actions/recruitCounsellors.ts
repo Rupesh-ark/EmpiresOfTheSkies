@@ -3,6 +3,7 @@ import { Move } from "boardgame.io";
 import { checkCounsellorsNotZero } from "../moveValidation";
 import { addOneCounsellor, removeGoldAmount } from "../resourceUpdates";
 import { INVALID_MOVE } from "boardgame.io/core";
+import { CounsellorSlot, MAX_COUNSELLORS } from "../../codifiedGameInfo";
 import { EventsAPI } from "boardgame.io/dist/types/src/plugins/plugin-events";
 import { RandomAPI } from "boardgame.io/dist/types/src/plugins/random/random";
 import { Ctx } from "boardgame.io/dist/types/src/types";
@@ -32,8 +33,15 @@ export const recruitCounsellors: Move<MyGameState> = (
     console.log("Player selected a move which has already been taken");
     return INVALID_MOVE;
   }
-  const costs: { [key: number]: number } = { 1: 0, 2: 1, 3: 3 };
-  if (value === 3) {
+  const costs = {
+    [CounsellorSlot.First]:  1,
+    [CounsellorSlot.Second]: 1,
+    [CounsellorSlot.Third]:  2,
+  };
+  if (value === CounsellorSlot.Third) {
+    if (G.playerInfo[playerID].resources.counsellors >= MAX_COUNSELLORS) {
+      return INVALID_MOVE;
+    }
     addOneCounsellor(G, playerID);
   }
   G.boardState.recruitCounsellors[value] = playerID;

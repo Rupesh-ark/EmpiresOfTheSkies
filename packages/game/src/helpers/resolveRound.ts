@@ -2,7 +2,30 @@ import { EventsAPI } from "boardgame.io/dist/types/src/plugins/plugin-events";
 import { MyGameState } from "../types";
 import legacyResolutions from "./legacyResolutions";
 
+const collectFactoryIncome = (G: MyGameState) => {
+  let pool = 0;
+  G.mapState.buildings.forEach((row) => {
+    row.forEach((cell) => {
+      if (cell.buildings === "outpost" || cell.buildings === "colony") {
+        pool += 1;
+      }
+    });
+  });
+
+  const sortedPlayers = Object.values(G.playerInfo).sort(
+    (a, b) => b.factories - a.factories
+  );
+
+  sortedPlayers.forEach((player) => {
+    if (pool <= 0) return;
+    const income = Math.min(player.factories, pool);
+    player.resources.gold += income;
+    pool -= income;
+  });
+};
+
 const resolveRound = (G: MyGameState, events: EventsAPI) => {
+  collectFactoryIncome(G);
   const resourceCounterMap: Record<string, number> = {
     mithril: 0,
     dragonScales: 0,

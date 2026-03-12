@@ -3,6 +3,7 @@ import { MyGameState } from "../../types";
 import { INVALID_MOVE } from "boardgame.io/core";
 import { checkCounsellorsNotZero } from "../moveValidation";
 import { removeOneCounsellor } from "../resourceUpdates";
+import { BuildingSlot } from "../../codifiedGameInfo";
 import { EventsAPI } from "boardgame.io/dist/types/src/plugins/plugin-events";
 import { RandomAPI } from "boardgame.io/dist/types/src/plugins/random/random";
 import { Ctx } from "boardgame.io/dist/types/src/types";
@@ -30,10 +31,10 @@ const foundBuildings: Move<MyGameState> = (
   const value: keyof typeof G.boardState.foundBuildings = args[0] + 1;
 
   const specialisedBuildingFunctions = {
-    1: foundCathedral,
-    2: foundPalace,
-    3: foundShipyard,
-    4: foundFort,
+    [BuildingSlot.Cathedral]: foundCathedral,
+    [BuildingSlot.Palace]:    foundPalace,
+    [BuildingSlot.Shipyard]:  foundShipyard,
+    [BuildingSlot.Fort]:      foundFort,
   };
 
   return specialisedBuildingFunctions[value](G, playerID, events, args);
@@ -51,14 +52,14 @@ const foundCathedral = (
   if (G.playerInfo[playerID].hereticOrOrthodox === "heretic") {
     return INVALID_MOVE;
   }
-  const cost = 5 + G.boardState.foundBuildings[1].length;
+  const cost = 5 + G.boardState.foundBuildings[BuildingSlot.Cathedral].length;
   G.playerInfo[playerID].resources.gold -= cost;
   G.playerInfo[playerID].cathedrals += 1;
   G.playerInfo[playerID].resources.victoryPoints += 2;
   if (G.playerInfo[playerID].heresyTracker > -11) {
     G.playerInfo[playerID].heresyTracker -= 1;
   }
-  G.boardState.foundBuildings[1].push(playerID);
+  G.boardState.foundBuildings[BuildingSlot.Cathedral].push(playerID);
   removeOneCounsellor(G, playerID);
   G.playerInfo[playerID].turnComplete = true;
 };
@@ -73,7 +74,7 @@ const foundPalace = (
     return INVALID_MOVE;
   }
 
-  const cost = 5 + G.boardState.foundBuildings[2].length;
+  const cost = 5 + G.boardState.foundBuildings[BuildingSlot.Palace].length;
 
   G.playerInfo[playerID].resources.gold -= cost;
   G.playerInfo[playerID].palaces += 1;
@@ -82,7 +83,7 @@ const foundPalace = (
   } else {
     G.playerInfo[playerID].resources.victoryPoints += 1;
   }
-  G.boardState.foundBuildings[2].push(playerID);
+  G.boardState.foundBuildings[BuildingSlot.Palace].push(playerID);
   removeOneCounsellor(G, playerID);
 
   G.playerInfo[playerID].turnComplete = true;
@@ -97,11 +98,11 @@ const foundShipyard = (
   if (G.playerInfo[playerID].shipyards === 3) {
     return INVALID_MOVE;
   }
-  const cost = 3 + G.boardState.foundBuildings[3].length;
+  const cost = 3 + G.boardState.foundBuildings[BuildingSlot.Shipyard].length;
 
   G.playerInfo[playerID].resources.gold -= cost;
   G.playerInfo[playerID].shipyards += 1;
-  G.boardState.foundBuildings[3].push(playerID);
+  G.boardState.foundBuildings[BuildingSlot.Shipyard].push(playerID);
   removeOneCounsellor(G, playerID);
 
   G.playerInfo[playerID].turnComplete = true;
@@ -114,9 +115,10 @@ const foundFort = (
   events: EventsAPI,
   args: any[]
 ): void | typeof INVALID_MOVE => {
-  const cost = 3;
+  const cost = 2 + G.boardState.foundBuildings[BuildingSlot.Fort].length;
 
   G.playerInfo[playerID].resources.gold -= cost;
+  G.boardState.foundBuildings[BuildingSlot.Fort].push(playerID);
   removeOneCounsellor(G, playerID);
 
   G.playerInfo[playerID].turnComplete = false;

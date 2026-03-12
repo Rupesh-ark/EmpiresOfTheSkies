@@ -11,6 +11,19 @@ export const MAX_FACTORIES = 6;
 export const MAX_HERESY = 19;
 export const MAX_LEVIES = 12;
 
+export const CounsellorSlot = {
+  First:  1,
+  Second: 2,
+  Third:  3,
+} as const;
+
+export const BuildingSlot = {
+  Cathedral: 1,
+  Palace:    2,
+  Shipyard:  3,
+  Fort:      4,
+} as const;
+
 export const STARTING_RESOURCES = {
   gold: 6,
   victoryPoints: 10,

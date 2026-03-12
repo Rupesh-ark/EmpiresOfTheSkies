@@ -16,6 +16,7 @@ import recruitCounsellors from "./moves/actions/recruitCounsellors";
 import recruitRegiments from "./moves/actions/recruitRegiments";
 import purchaseSkyships from "./moves/actions/purchaseSkyships";
 import foundBuildings from "./moves/actions/foundBuildings";
+import foundFactory from "./moves/actions/foundFactory";
 import {
   checkAndPlaceFort,
   flipCards,
@@ -60,7 +61,7 @@ import vote from "./moves/election/vote";
 import retrieveFleets from "./moves/resolution/retrieveFleets";
 import setTurnCompleteFalse from "./moves/setTurnCompleteFalse";
 
-import { findNextBattle, findNextPlunder } from "./helpers/findNext";
+import { findNextBattle, findNextGroundBattle, findNextPlunder } from "./helpers/findNext";
 import { TurnOrder } from "boardgame.io/core";
 import resolveRound from "./helpers/resolveRound";
 import pickLegacyCard from "./moves/pickLegacyCard";
@@ -310,6 +311,7 @@ const MyGame: Game<MyGameState> = {
         recruitRegiments,
         purchaseSkyships,
         foundBuildings,
+        foundFactory,
         increaseHeresy,
         increaseOrthodoxy,
         checkAndPlaceFort,
@@ -332,17 +334,45 @@ const MyGame: Game<MyGameState> = {
           playerInfo.passed = false;
         });
       },
-      next: "battle",
+      next: "aerial_battle",
     },
-    battle: {
+    aerial_battle: {
       onBegin: (context) => {
-        console.log("Battle phase has begun");
+        console.log("Aerial battle phase has begun");
         findNextBattle(context.G, context.events);
       },
       turn: {
         onBegin: (context) => {
           console.log(
-            `It is now player ${context.ctx.currentPlayer}'s turn in the battle phase`
+            `It is now player ${context.ctx.currentPlayer}'s turn in the aerial battle phase`
+          );
+          checkIfCurrentPlayerIsInCurrentBattle(
+            context.G,
+            context.ctx,
+            context.events
+          );
+        },
+      },
+      next: "ground_battle",
+      moves: {
+        doNotAttack,
+        attackOtherPlayersFleet,
+        retaliate,
+        evadeAttackingFleet,
+        drawCard,
+        pickCard,
+        relocateDefeatedFleet,
+      },
+    },
+    ground_battle: {
+      onBegin: (context) => {
+        console.log("Ground battle phase has begun");
+        findNextGroundBattle(context.G, context.events);
+      },
+      turn: {
+        onBegin: (context) => {
+          console.log(
+            `It is now player ${context.ctx.currentPlayer}'s turn in the ground battle phase`
           );
           checkIfCurrentPlayerIsInCurrentBattle(
             context.G,
@@ -353,13 +383,6 @@ const MyGame: Game<MyGameState> = {
       },
       next: "plunder_legends",
       moves: {
-        doNotAttack,
-        attackOtherPlayersFleet,
-        retaliate,
-        evadeAttackingFleet,
-        drawCard,
-        pickCard,
-        relocateDefeatedFleet,
         attackPlayersBuilding,
         doNotGroundAttack,
         defendGroundAttack,

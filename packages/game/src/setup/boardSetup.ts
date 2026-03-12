@@ -1,4 +1,5 @@
 import { ActionBoardInfo } from "../types";
+import { BuildingSlot, CounsellorSlot } from "../codifiedGameInfo";
 
 export const initialBoardState: ActionBoardInfo = {
   alterPlayerOrder: {
@@ -10,9 +11,9 @@ export const initialBoardState: ActionBoardInfo = {
     6: undefined,
   },
   recruitCounsellors: {
-    1: undefined,
-    2: undefined,
-    3: undefined,
+    [CounsellorSlot.First]:  undefined,
+    [CounsellorSlot.Second]: undefined,
+    [CounsellorSlot.Third]:  undefined,
   },
   recruitRegiments: {
     1: undefined,
@@ -31,10 +32,10 @@ export const initialBoardState: ActionBoardInfo = {
     2: undefined,
   },
   foundBuildings: {
-    1: [],
-    2: [],
-    3: [],
-    4: [],
+    [BuildingSlot.Cathedral]: [],
+    [BuildingSlot.Palace]:    [],
+    [BuildingSlot.Shipyard]:  [],
+    [BuildingSlot.Fort]:      [],
   },
   foundFactories: {
     1: undefined,

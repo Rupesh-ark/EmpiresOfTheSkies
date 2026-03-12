@@ -28,7 +28,7 @@ export const findNextBattle = (G: MyGameState, events: EventsAPI) => {
     }
   }
   G.mapState.currentBattle = [0, 0];
-  findNextGroundBattle(G, events);
+  events.endPhase();
 };
 
 export const findNextPlunder = (G: MyGameState, events: EventsAPI): void => {
@@ -122,7 +122,7 @@ export const findNextConquest = (G: MyGameState, events: EventsAPI) => {
 
 export const findNextPlayerInBattleSequence = (
   playerID: string,
-  ctx: Ctx,
+  _ctx: Ctx,
   G: MyGameState,
   events: EventsAPI
 ): void => {
