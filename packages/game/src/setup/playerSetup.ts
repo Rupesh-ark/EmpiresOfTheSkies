@@ -42,8 +42,9 @@ export const buildPlayerInfoMap = (ctx: Ctx): { [id: string]: PlayerInfo } => {
         skyships: STARTING_RESOURCES.skyships,
         regiments: STARTING_RESOURCES.regiments,
         levies: 0,
+        eliteRegiments: 0,
         fortuneCards: [],
-        advantageCard: "",
+        advantageCard: undefined,
         eventCards: [""],
         legacyCard: undefined,
       },
@@ -52,6 +53,7 @@ export const buildPlayerInfoMap = (ctx: Ctx): { [id: string]: PlayerInfo } => {
         buildSkyships: false,
         conscriptLevies: false,
         dispatchSkyshipFleet: false,
+        trainTroops: false,
         dispatchDisabled: true,
       },
       hereticOrOrthodox: "orthodox",
@@ -65,6 +67,7 @@ export const buildPlayerInfoMap = (ctx: Ctx): { [id: string]: PlayerInfo } => {
       heresyTracker: 0,
       prisoners: 0,
       shipyards: 0,
+      factories: STARTING_RESOURCES.factories,
     };
   });
 

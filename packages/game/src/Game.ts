@@ -77,6 +77,14 @@ const MyGame: Game<MyGameState> = {
       discoveredRaces: [],
       battleMap: initialBattleMapState(),
       currentBattle: [0, 0],
+      goodsPriceMarkers: {
+        mithril: 4,
+        dragonScales: 3,
+        krakenSkin: 3,
+        magicDust: 4,
+        stickyIchor: 3,
+        pipeweed: 3,
+      },
     };
 
     return {

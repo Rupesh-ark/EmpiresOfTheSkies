@@ -27,9 +27,10 @@ const trainTroops: Move<MyGameState> = (
   if (checkCounsellorsNotZero(playerID, G) !== undefined) {
     return INVALID_MOVE;
   }
-  const value: keyof typeof G.boardState.trainTroops = args[0] + 1;
+  const value = (args[0] + 1) as 1 | 2;
+  const playerBoard = G.playerInfo[playerID].playerBoardCounsellorLocations;
 
-  if (G.boardState.trainTroops[value] !== undefined) {
+  if (playerBoard.trainTroops) {
     console.log("Player has selected a move which has already been taken.");
     return INVALID_MOVE;
   }
@@ -45,7 +46,7 @@ const trainTroops: Move<MyGameState> = (
   if (value === 2) {
     removeGoldAmount(G, playerID, 1);
   }
-  G.boardState.trainTroops[value] = playerID;
+  playerBoard.trainTroops = true;
   G.playerInfo[playerID].turnComplete = true;
 };
 

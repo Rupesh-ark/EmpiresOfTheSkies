@@ -22,23 +22,25 @@ export const initialBoardState: ActionBoardInfo = {
     5: undefined,
     6: undefined,
   },
-  trainTroops: {
+  purchaseSkyshipsZeeland: {
     1: undefined,
     2: undefined,
   },
-  purchaseSkyships: {
+  purchaseSkyshipsVenoa: {
     1: undefined,
     2: undefined,
-    3: undefined,
-    4: undefined,
-    5: undefined,
-    6: undefined,
   },
   foundBuildings: {
     1: [],
     2: [],
     3: [],
     4: [],
+  },
+  foundFactories: {
+    1: undefined,
+    2: undefined,
+    3: undefined,
+    4: undefined,
   },
   influencePrelates: {
     1: undefined,

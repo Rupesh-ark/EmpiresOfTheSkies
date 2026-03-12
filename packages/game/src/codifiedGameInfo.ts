@@ -6,33 +6,39 @@ export const MAX_PLAYERS = 6;
 export const MIN_PLAYERS = 1;
 export const FINAL_ROUND = 4;
 export const BASE_GOLD_INCOME = 4;
+export const MAX_COUNSELLORS = 7;
+export const MAX_FACTORIES = 6;
+export const MAX_HERESY = 19;
+export const MAX_LEVIES = 12;
 
 export const STARTING_RESOURCES = {
   gold: 6,
   victoryPoints: 10,
-  counsellors: 6,
+  counsellors: 4,
   skyships: 3,
   regiments: 6,
+  levies: 0,
+  factories: 1,
 } as const;
 
 export const LEGACY_CARDS: LegacyCard[] = [
   "the builder",
   "the conqueror",
-  "the explorer",
+  "the navigator",
   "the great",
   "the magnificent",
   "the merchant",
   "the mighty",
-  "the navigator",
+  "the aviator",
   "the pious",
   "the builder",
   "the conqueror",
-  "the explorer",
+  "the navigator",
   "the great",
   "the magnificent",
   "the merchant",
   "the mighty",
-  "the navigator",
+  "the aviator",
   "the pious",
 ];
 
@@ -998,19 +1004,36 @@ export const knownWorldTiles: TileInfoProps[] = [
 ];
 
 export const fortuneOfWarCards: FortuneOfWarCardInfo[] = [
-  {
-    name: "SwordOne",
-    sword: 1,
-    shield: 0,
-  },
-  { name: "SwordTwo", sword: 2, shield: 0 },
-  { name: "SwordThree", sword: 3, shield: 0 },
-  { name: "SwordFour", sword: 4, shield: 0 },
-  { name: "SwordFive", sword: 5, shield: 0 },
-  { name: "ShieldFour", sword: 0, shield: 4 },
-  { name: "ShieldFive", sword: 0, shield: 5 },
-  { name: "ShieldSix", sword: 0, shield: 6 },
-  { name: "ShieldSeven", sword: 0, shield: 7 },
-  { name: "ShieldEight", sword: 0, shield: 8 },
-  { name: "NoEffect", sword: 0, shield: 0 },
+  { name: "SwordOne_1", sword: 1, shield: 0 },
+  { name: "SwordOne_2", sword: 1, shield: 0 },
+  { name: "SwordOne_3", sword: 1, shield: 0 },
+  { name: "SwordTwo_1", sword: 2, shield: 0 },
+  { name: "SwordTwo_2", sword: 2, shield: 0 },
+  { name: "SwordTwo_3", sword: 2, shield: 0 },
+  { name: "SwordThree_1", sword: 3, shield: 0 },
+  { name: "SwordThree_2", sword: 3, shield: 0 },
+  { name: "SwordThree_3", sword: 3, shield: 0 },
+  { name: "SwordFour_1", sword: 4, shield: 0 },
+  { name: "SwordFour_2", sword: 4, shield: 0 },
+  { name: "SwordFour_3", sword: 4, shield: 0 },
+  { name: "SwordFive_1", sword: 5, shield: 0 },
+  { name: "SwordFive_2", sword: 5, shield: 0 },
+  { name: "SwordFive_3", sword: 5, shield: 0 },
+  { name: "ShieldOne_1", sword: 0, shield: 1 },
+  { name: "ShieldOne_2", sword: 0, shield: 1 },
+  { name: "ShieldOne_3", sword: 0, shield: 1 },
+  { name: "ShieldTwo_1", sword: 0, shield: 2 },
+  { name: "ShieldTwo_2", sword: 0, shield: 2 },
+  { name: "ShieldTwo_3", sword: 0, shield: 2 },
+  { name: "ShieldThree_1", sword: 0, shield: 3 },
+  { name: "ShieldThree_2", sword: 0, shield: 3 },
+  { name: "ShieldThree_3", sword: 0, shield: 3 },
+  { name: "ShieldFour_1", sword: 0, shield: 4 },
+  { name: "ShieldFour_2", sword: 0, shield: 4 },
+  { name: "ShieldFour_3", sword: 0, shield: 4 },
+  { name: "ShieldFive_1", sword: 0, shield: 5 },
+  { name: "ShieldFive_2", sword: 0, shield: 5 },
+  { name: "ShieldFive_3", sword: 0, shield: 5 },
+  { name: "NoEffect_1", sword: 0, shield: 0 },
+  { name: "NoEffect_2", sword: 0, shield: 0 },
 ];

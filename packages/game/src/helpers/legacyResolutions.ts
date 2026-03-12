@@ -9,7 +9,7 @@ const legacyResolutions = (G: MyGameState) => {
       case "the conqueror":
         theConqueror(player, G);
         break;
-      case "the explorer":
+      case "the navigator":
         theExplorer(player, G);
         break;
       case "the great":
@@ -24,7 +24,7 @@ const legacyResolutions = (G: MyGameState) => {
       case "the mighty":
         theMighty(player, G);
         break;
-      case "the navigator":
+      case "the aviator":
         theNavigator(player);
         break;
       case "the pious":
