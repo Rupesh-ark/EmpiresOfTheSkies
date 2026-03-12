@@ -18,7 +18,12 @@ const ShipYardDisplay = (props: MyGameProps) => {
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
         opacity={i + 1 > numberOfShipyards ? 0.3 : 1}
-        style={{ marginTop: "10px", width: "100%", maxWidth: "300px", height: "auto" }}
+        style={{
+          marginTop: i === 0 ? "0px" : "6px",
+          width: "100%",
+          maxWidth: "100%",
+          height: "auto",
+        }}
         key={`shipyard-${i}`}
       >
         <rect
@@ -153,7 +158,16 @@ const ShipYardDisplay = (props: MyGameProps) => {
     );
   }
   return (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%" }}>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "stretch",
+        width: "min(100%, 500px)",
+        padding: "2px 4px",
+        margin: "0",
+      }}
+    >
       {shipyards}
     </div>
   );
