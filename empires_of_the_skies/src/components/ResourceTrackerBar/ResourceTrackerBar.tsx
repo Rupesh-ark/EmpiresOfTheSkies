@@ -17,11 +17,8 @@ import {
 } from "@mui/material";
 import { IoMdCube } from "react-icons/io";
 import { GiTrumpetFlag } from "react-icons/gi";
-import {
-  checkPlayerIDAndReturnPlayerInfo,
-  clearMoves,
-} from "@eots/game";
-import { Person4Sharp } from "@mui/icons-material";
+import { checkPlayerIDAndReturnPlayerInfo, clearMoves } from "../../utils/gameHelpers";
+import { Factory, Person4Sharp } from "@mui/icons-material";
 import ArchprelateIcon from "../Icons/ArchprelateIcon";
 import CounsellorIcon from "../Icons/CounsellorIcon";
 import SkyshipIcon from "../Icons/SkyshipIcon";
@@ -52,6 +49,7 @@ const ResourceTrackerBar = (props: ResourceTrackerBarProps) => {
   const colour = currentPlayer.colour;
   const victoryPoints = currentPlayer.resources.victoryPoints;
   const levies = currentPlayer.resources.levies;
+  const factories = currentPlayer.factories;
   const turnComplete =
     props.G.playerInfo[props.playerID ?? props.ctx.currentPlayer].turnComplete;
 
@@ -142,6 +140,13 @@ const ResourceTrackerBar = (props: ResourceTrackerBarProps) => {
             <Chip
               icon={<LevyIcon colour={colour} />}
               label={levies}
+              sx={chipSx}
+            />
+          </Tooltip>
+          <Tooltip title="Factories" disableInteractive>
+            <Chip
+              icon={<Factory sx={{ color: "#8B6914" }} />}
+              label={factories ?? 0}
               sx={chipSx}
             />
           </Tooltip>

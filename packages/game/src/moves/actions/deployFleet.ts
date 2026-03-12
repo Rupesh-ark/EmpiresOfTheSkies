@@ -2,7 +2,7 @@ import { Move } from "boardgame.io";
 import { MyGameState } from "../../types";
 import { findPossibleDestinations } from "../../helpers/helpers";
 import { INVALID_MOVE } from "boardgame.io/core";
-import { removeGoldAmount, removeOneCounsellor } from "../resourceUpdates";
+import { removeGoldAmount, removeOneCounsellor } from "../../helpers/stateUtils";
 import { checkCounsellorsNotZero } from "../moveValidation";
 import { EventsAPI } from "boardgame.io/dist/types/src/plugins/events/events";
 import { RandomAPI } from "boardgame.io/dist/types/src/plugins/random/random";

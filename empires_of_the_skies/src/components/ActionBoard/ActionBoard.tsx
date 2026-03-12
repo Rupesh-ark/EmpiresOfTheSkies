@@ -194,6 +194,22 @@ Taxation is awarded as follows:
               true
             )}
           </ButtonRow>
+          {/* button row with the found factory buttons */}
+          <ButtonRow key={"found factory buttons"}>
+            Found Factories
+            {generateButtonsList(
+              4,
+              props.moves.foundFactory,
+              [],
+              "98px",
+              props,
+              props.G.boardState.foundFactories,
+              undefined,
+              ["#C8A96E", "#C8A96E", "#C8A96E", "#C8A96E"],
+              false,
+              ["Slot 1", "Slot 2", "Slot 3", "Slot 4"]
+            )}
+          </ButtonRow>
           {/* button row with the influence prelates buttons */}
           <ButtonRow key={"influence prelates buttons"}>
             <ThemeProvider theme={influencePrelatesTheme}>

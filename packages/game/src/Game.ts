@@ -2,7 +2,7 @@ import type { Game, Ctx } from "boardgame.io";
 
 import { LegacyCard, MyGameState, MapState } from "./types";
 
-import { FINAL_ROUND, LEGACY_CARDS } from "./codifiedGameInfo";
+import { ALL_KA_CARDS, FINAL_ROUND, LEGACY_CARDS } from "./codifiedGameInfo";
 import { initialBoardState, initialBattleMapState } from "./setup/boardSetup";
 import {
   getRandomisedMapTileArray,
@@ -17,12 +17,9 @@ import recruitRegiments from "./moves/actions/recruitRegiments";
 import purchaseSkyships from "./moves/actions/purchaseSkyships";
 import foundBuildings from "./moves/actions/foundBuildings";
 import foundFactory from "./moves/actions/foundFactory";
-import {
-  checkAndPlaceFort,
-  flipCards,
-  increaseHeresy,
-  increaseOrthodoxy,
-} from "./moves/resourceUpdates";
+import checkAndPlaceFort from "./moves/actions/checkAndPlaceFort";
+import flipCards from "./moves/actions/flipCards";
+import { increaseHeresy, increaseOrthodoxy } from "./moves/actions/heresyMoves";
 import punishDissenters from "./moves/actions/punishDissenters";
 import convertMonarch from "./moves/actions/convertMonarch";
 import influencePrelates from "./moves/actions/influencePrelates";
@@ -65,6 +62,7 @@ import { findNextBattle, findNextGroundBattle, findNextPlunder } from "./helpers
 import { TurnOrder } from "boardgame.io/core";
 import resolveRound from "./helpers/resolveRound";
 import pickLegacyCard from "./moves/pickLegacyCard";
+import pickKingdomAdvantageCard from "./moves/kingdomAdvantage/pickKingdomAdvantageCard";
 
 const MyGame: Game<MyGameState> = {
   turn: { minMoves: 1 },
@@ -103,6 +101,7 @@ const MyGame: Game<MyGameState> = {
       cardDecks: {
         fortuneOfWarCards: fullResetFortuneOfWarCardDeck(),
         discardedFortuneOfWarCards: [],
+        kingdomAdvantagePool: [...ALL_KA_CARDS],
       },
       stage: "discovery",
       electionResults: {},
@@ -152,10 +151,29 @@ const MyGame: Game<MyGameState> = {
     setTurnCompleteFalse,
   },
   phases: {
-    legacy_card: {
+    kingdom_advantage: {
       start: true,
+      moves: { pickKingdomAdvantageCard },
+      next: "legacy_card",
+      onBegin: (context) => {
+        context.G.cardDecks.kingdomAdvantagePool = context.random.Shuffle(
+          context.G.cardDecks.kingdomAdvantagePool
+        );
+      },
+      turn: {
+        order: {
+          first: () => 0,
+          next: (context) =>
+            context.ctx.playOrderPos + 1 < context.ctx.playOrder.length
+              ? context.ctx.playOrderPos + 1
+              : undefined,
+          playOrder: (context) => [...context.ctx.playOrder].reverse(),
+        },
+      },
+    },
+    legacy_card: {
       moves: { pickLegacyCard },
-      next: "discovery",
+      next: "events",
       onBegin: (context) => {
         context.G.stage = "pick legacy card";
         const cards: LegacyCard[] = [...LEGACY_CARDS];
@@ -167,6 +185,16 @@ const MyGame: Game<MyGameState> = {
           }
         });
       },
+    },
+    events: {
+      turn: { order: TurnOrder.ONCE },
+      onBegin: (context) => {
+        context.G.stage = "events";
+        console.log("Events phase has begun");
+        context.events.endPhase();
+      },
+      moves: {},
+      next: "discovery",
     },
     discovery: {
       onBegin: (context) => {
@@ -278,7 +306,9 @@ const MyGame: Game<MyGameState> = {
         console.log("Taxes phase has begun");
         context.ctx.playOrder.forEach((id, index) => {
           context.G.playerInfo[id].resources.gold += getGoldIncomeForPlayer(index);
-          // TODO C1: add +2 Gold for the player holding the `more_efficient_taxation` KA card (Track A2/B12)
+          if (context.G.playerInfo[id].resources.advantageCard === "more_efficient_taxation") {
+            context.G.playerInfo[id].resources.gold += 2;
+          }
         });
         context.events.endPhase();
       },
@@ -459,7 +489,16 @@ const MyGame: Game<MyGameState> = {
         console.log(`Round number:${context.G.round}`);
       },
       moves: { retrieveFleets },
-      next: "discovery",
+      next: "reset",
+    },
+    reset: {
+      turn: { order: TurnOrder.ONCE },
+      onBegin: (context) => {
+        console.log("Reset phase has begun");
+        context.events.endPhase();
+      },
+      moves: {},
+      next: "events",
     },
   },
   maxPlayers: 6,

@@ -1,4 +1,4 @@
-import { FortuneOfWarCardInfo, KingdomName, LegacyCard, TileInfoProps } from "./types";
+import { FortuneOfWarCardInfo, KingdomAdvantageCard, KingdomName, LegacyCard, TileInfoProps } from "./types";
 
 // ── Game configuration ────────────────────────────────────────────────────────
 
@@ -33,6 +33,16 @@ export const STARTING_RESOURCES = {
   levies: 0,
   factories: 1,
 } as const;
+
+export const ALL_KA_CARDS: KingdomAdvantageCard[] = [
+  "elite_regiments",
+  "improved_training",
+  "licenced_smugglers",
+  "more_efficient_taxation",
+  "more_prisons",
+  "patriarch_of_the_church",
+  "sanctioned_piracy",
+];
 
 export const LEGACY_CARDS: LegacyCard[] = [
   "the builder",

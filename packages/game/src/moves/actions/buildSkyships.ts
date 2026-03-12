@@ -6,7 +6,7 @@ import {
   addSkyship,
   removeGoldAmount,
   removeOneCounsellor,
-} from "../resourceUpdates";
+} from "../../helpers/stateUtils";
 import { Ctx } from "boardgame.io/dist/types/src/types.js";
 import { EventsAPI } from "boardgame.io/dist/types/src/plugins/plugin-events.js";
 import { RandomAPI } from "boardgame.io/dist/types/src/plugins/random/random.js";

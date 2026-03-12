@@ -52,6 +52,7 @@ interface BattlePlayerInfo extends PlayerInfo {
 export type CardDeckInfo = {
   fortuneOfWarCards: FortuneOfWarCardInfo[];
   discardedFortuneOfWarCards: FortuneOfWarCardInfo[];
+  kingdomAdvantagePool: KingdomAdvantageCard[];
 };
 
 export type FortuneOfWarCardInfo = {

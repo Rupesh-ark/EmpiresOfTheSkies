@@ -51,6 +51,7 @@ const PlayerTable = (props: PlayerTableProps) => {
               <TableCell align="right" sx={colHeaderCellSx}>Cathedrals</TableCell>
               <TableCell align="right" sx={colHeaderCellSx}>Palaces</TableCell>
               <TableCell align="right" sx={colHeaderCellSx}>Shipyards</TableCell>
+              <TableCell align="right" sx={colHeaderCellSx}>Factories</TableCell>
               <TableCell align="right" sx={colHeaderCellSx}>Victory Points</TableCell>
             </TableRow>
           </TableHead>
@@ -101,6 +102,7 @@ const PlayerTable = (props: PlayerTableProps) => {
                 <TableCell align="right">{value.cathedrals}</TableCell>
                 <TableCell align="right">{value.palaces}</TableCell>
                 <TableCell align="right">{value.shipyards}</TableCell>
+                <TableCell align="right">{value.factories}</TableCell>
                 <TableCell align="right">
                   <Typography variant="body2" fontWeight="bold">
                     {value.resources.victoryPoints}

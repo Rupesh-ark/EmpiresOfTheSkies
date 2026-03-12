@@ -1,7 +1,7 @@
 import { Move } from "boardgame.io";
 import { MyGameState } from "../../types";
 import { INVALID_MOVE } from "boardgame.io/core";
-import { removeOneCounsellor } from "../resourceUpdates";
+import { removeOneCounsellor } from "../../helpers/stateUtils";
 import { EventsAPI } from "boardgame.io/dist/types/src/plugins/events/events";
 import { RandomAPI } from "boardgame.io/dist/types/src/plugins/random/random";
 import { Ctx } from "boardgame.io/dist/types/src/types";

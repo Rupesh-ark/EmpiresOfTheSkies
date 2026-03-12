@@ -2,7 +2,7 @@ import { Move } from "boardgame.io";
 import { PlayerOrder, MyGameState } from "../../types";
 import { checkCounsellorsNotZero } from "../moveValidation";
 import { INVALID_MOVE } from "boardgame.io/core";
-import { removeOneCounsellor } from "../resourceUpdates";
+import { removeOneCounsellor } from "../../helpers/stateUtils";
 import { EventsAPI } from "boardgame.io/dist/types/src/plugins/plugin-events";
 import { RandomAPI } from "boardgame.io/dist/types/src/plugins/random/random";
 import { Ctx } from "boardgame.io/dist/types/src/types";

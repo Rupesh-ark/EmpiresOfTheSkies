@@ -5,7 +5,7 @@ import {
   advanceAllHeresyTrackers,
   removeVPAmount,
   retreatAllHeresyTrackers,
-} from "../resourceUpdates";
+} from "../../helpers/stateUtils";
 import { INVALID_MOVE } from "boardgame.io/core";
 import { blessingOrCurseVPAmount } from "../../helpers/helpers";
 import { EventsAPI } from "boardgame.io/dist/types/src/plugins/plugin-events";

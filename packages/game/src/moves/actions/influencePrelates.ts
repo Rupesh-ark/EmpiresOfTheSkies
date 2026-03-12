@@ -6,7 +6,7 @@ import {
   addGoldAmount,
   removeGoldAmount,
   removeOneCounsellor,
-} from "../resourceUpdates";
+} from "../../helpers/stateUtils";
 import { EventsAPI } from "boardgame.io/dist/types/src/plugins/plugin-events";
 import { RandomAPI } from "boardgame.io/dist/types/src/plugins/random/random";
 import { Ctx } from "boardgame.io/dist/types/src/types";

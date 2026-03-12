@@ -14,9 +14,10 @@ const collectFactoryIncome = (G: MyGameState) => {
     });
   });
 
-  const sortedPlayers = Object.values(G.playerInfo).sort(
-    (a, b) => b.factories - a.factories
-  );
+  const sortedPlayers = Object.values(G.playerInfo).sort((a, b) => {
+    if (b.factories !== a.factories) return b.factories - a.factories;
+    return G.turnOrder.indexOf(a.id) - G.turnOrder.indexOf(b.id);
+  });
 
   sortedPlayers.forEach((player) => {
     if (pool <= 0) return;

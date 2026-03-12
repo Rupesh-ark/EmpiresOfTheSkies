@@ -1,7 +1,7 @@
 import { INVALID_MOVE } from "boardgame.io/core/";
 import { MyGameState } from "../../types";
 import { Move } from "boardgame.io";
-import { advanceAllHeresyTrackers } from "../resourceUpdates";
+import { advanceAllHeresyTrackers } from "../../helpers/stateUtils";
 import { EventsAPI } from "boardgame.io/dist/types/src/plugins/plugin-events";
 import { RandomAPI } from "boardgame.io/dist/types/src/plugins/random/random";
 import { Ctx } from "boardgame.io/dist/types/src/types";
@@ -55,7 +55,11 @@ export const discoverTile: Move<MyGameState> = (
   // splits the tile name on any number
   const tileRace = currentTile.name.split(/(\d+)/)[0].toLowerCase();
 
-  if (tileRace !== "ocean" && !G.mapState.discoveredRaces.includes(tileRace)) {
+  if (currentTile.type === "legend") {
+    // Every legend tile revealed advances all heresy trackers
+    advanceAllHeresyTrackers(G);
+  } else if (tileRace !== "ocean" && !G.mapState.discoveredRaces.includes(tileRace)) {
+    // First tile of a new race advances all heresy trackers
     advanceAllHeresyTrackers(G);
     G.mapState.discoveredRaces.push(tileRace);
   }

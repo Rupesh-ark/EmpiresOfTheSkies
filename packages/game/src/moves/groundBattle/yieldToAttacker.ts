@@ -1,7 +1,7 @@
 import { Move } from "boardgame.io";
 import { MyGameState } from "../../types";
 
-import { addLevyAmount, addRegiments } from "../resourceUpdates";
+import { addLevyAmount, addRegiments } from "../../helpers/stateUtils";
 import { findNextGroundBattle } from "../../helpers/findNext";
 
 const yieldToAttacker: Move<MyGameState> = (

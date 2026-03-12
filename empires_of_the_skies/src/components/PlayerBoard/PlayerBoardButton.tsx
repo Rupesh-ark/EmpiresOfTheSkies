@@ -1,7 +1,7 @@
 import React from "react";
 import { MyGameProps, PlayerColour } from "@eots/game";
 import { Button } from "@mui/material";
-import { clearMoves } from "@eots/game";
+import { clearMoves } from "../../utils/gameHelpers";
 import CounsellorIcon from "../Icons/CounsellorIcon";
 
 export const PlayerBoardButton = (props: PlayerBoardButtonProps) => {

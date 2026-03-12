@@ -11,7 +11,7 @@ import {
   DialogTitle,
 } from "@mui/material";
 import WorldMap from "../WorldMap/WorldMap";
-import { clearMoves } from "@eots/game";
+import { clearMoves } from "../../utils/gameHelpers";
 import CounsellorIcon from "../Icons/CounsellorIcon";
 
 export const ActionBoardButton = (props: ActionBoardButtonProps) => {
@@ -208,7 +208,7 @@ export const ActionBoardButtonLarge = (props: ActionBoardButtonProps) => {
                 color="success"
                 disabled={selectedTile[0] === 4 && selectedTile[1] === 0}
                 onClick={() => {
-                  props.moves.checkAndPlaceFort(selectedTile, props);
+                  props.moves.checkAndPlaceFort(selectedTile);
 
                   setWorldMapDialogOpen(false);
                 }}

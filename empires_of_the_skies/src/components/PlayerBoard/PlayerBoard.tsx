@@ -31,7 +31,8 @@ import FortuneOfWarCardDisplay from "./FortuneOfWarCardDisplay";
 import ShipYardDisplay from "./ShipYardDisplay";
 import FleetDisplay from "./FleetDisplay";
 import WorldMap from "../WorldMap/WorldMap";
-import { clearMoves, findPossibleDestinations } from "@eots/game";
+import { findPossibleDestinations } from "@eots/game";
+import { clearMoves } from "../../utils/gameHelpers";
 import svgNameToElementMap from "../WorldMap/nameToElementMap";
 
 // displays buttons which can build cathedrals, palaces and skyships
