@@ -263,21 +263,32 @@ const MyGame: Game<MyGameState> = {
         discoverTile,
         pass,
       },
-      next: "actions",
+      next: "taxes",
       onEnd: (context) => {
         Object.values(context.G.playerInfo).forEach((playerInfo: any) => {
           playerInfo.passed = false;
         });
       },
     },
+    taxes: {
+      turn: { order: TurnOrder.ONCE },
+      onBegin: (context) => {
+        context.G.stage = "taxes";
+        console.log("Taxes phase has begun");
+        context.ctx.playOrder.forEach((id, index) => {
+          context.G.playerInfo[id].resources.gold += getGoldIncomeForPlayer(index);
+          // TODO C1: add +2 Gold for the player holding the `more_efficient_taxation` KA card (Track A2/B12)
+        });
+        context.events.endPhase();
+      },
+      moves: {},
+      next: "actions",
+    },
     actions: {
       onBegin: (context) => {
         context.G.firstTurnOfRound = true;
         context.G.stage = "actions";
         console.log("Actions phase has begun");
-        context.ctx.playOrder.forEach((id, index) => {
-          context.G.playerInfo[id].resources.gold += getGoldIncomeForPlayer(index);
-        });
       },
       turn: {
         onBegin: (context) => {
