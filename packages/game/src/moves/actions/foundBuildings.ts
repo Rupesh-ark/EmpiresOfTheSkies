@@ -2,7 +2,7 @@ import { Move } from "boardgame.io";
 import { MyGameState } from "../../types";
 import { INVALID_MOVE } from "boardgame.io/core";
 import { checkCounsellorsNotZero } from "../moveValidation";
-import { removeOneCounsellor } from "../resourceUpdates";
+import { removeOneCounsellor } from "../../helpers/stateUtils";
 import { BuildingSlot } from "../../codifiedGameInfo";
 import { EventsAPI } from "boardgame.io/dist/types/src/plugins/plugin-events";
 import { RandomAPI } from "boardgame.io/dist/types/src/plugins/random/random";
@@ -115,11 +115,18 @@ const foundFort = (
   events: EventsAPI,
   args: any[]
 ): void | typeof INVALID_MOVE => {
-  const cost = 2 + G.boardState.foundBuildings[BuildingSlot.Fort].length;
+  // B11: flat 2 Gold + 1 extra counsellor (plus the placed counsellor = 2 total)
+  if (G.playerInfo[playerID].resources.counsellors < 2) {
+    return INVALID_MOVE;
+  }
+  if (G.playerInfo[playerID].resources.gold < 2) {
+    return INVALID_MOVE;
+  }
 
-  G.playerInfo[playerID].resources.gold -= cost;
+  G.playerInfo[playerID].resources.gold -= 2;
   G.boardState.foundBuildings[BuildingSlot.Fort].push(playerID);
-  removeOneCounsellor(G, playerID);
+  removeOneCounsellor(G, playerID); // extra counsellor payment
+  removeOneCounsellor(G, playerID); // counsellor placed on board
 
   G.playerInfo[playerID].turnComplete = false;
 };

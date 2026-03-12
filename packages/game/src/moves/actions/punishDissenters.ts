@@ -7,78 +7,62 @@ import {
   increaseOrthodoxyWithinMove,
   removeGoldAmount,
   removeOneCounsellor,
-  removeVPAmount,
-} from "../resourceUpdates";
+} from "../../helpers/stateUtils";
 import { Ctx } from "boardgame.io/dist/types/src/types";
-import { EventsAPI } from "boardgame.io/dist/types/src/plugins/plugin-events";
-import { RandomAPI } from "boardgame.io/dist/types/src/plugins/random/random";
-//TODO: add functionality for executing prisoners
+
+// TODO: add functionality for executing prisoners
 const punishDissenters: Move<MyGameState> = (
-  {
-    G,
-    ctx,
-    playerID,
-    events,
-    random,
-  }: {
-    G: MyGameState;
-    ctx: Ctx;
-    playerID: string;
-    events: EventsAPI;
-    random: RandomAPI;
-  },
+  { G, ctx, playerID }: { G: MyGameState; ctx: Ctx; playerID: string },
   ...args: any[]
 ) => {
   const value: keyof typeof G.boardState.punishDissenters = args[0] + 1;
+  const paymentType: "gold" | "counsellor" = args[1];
+
   if (checkCounsellorsNotZero(playerID, G) !== undefined) {
     return INVALID_MOVE;
   }
   if (value > ctx.numPlayers) {
-    console.log(
-      "Player has selected a move which is only available in games with more players"
-    );
+    console.log("Player has selected a slot only available in larger games");
     return INVALID_MOVE;
   }
   if (G.boardState.punishDissenters[value] !== undefined) {
-    console.log("Player has selected a move which is already taken");
+    console.log("Player has selected a slot which is already taken");
     return INVALID_MOVE;
   }
-  let hasPunishedDissentersAlready = false;
-  Object.values(G.boardState.punishDissenters).forEach((id) => {
-    if (id === playerID) hasPunishedDissentersAlready = true;
-  });
-  if (hasPunishedDissentersAlready) {
-    console.log("Player has already punished dissenters");
+
+  const alreadyPunishing = Object.values(G.boardState.punishDissenters).some(
+    (id) => id === playerID
+  );
+  if (alreadyPunishing) {
+    console.log("Player has already punished dissenters this round");
     return INVALID_MOVE;
   }
 
   const playerInfo = G.playerInfo[playerID];
 
-  if (playerInfo.prisoners === 3) {
+  if (playerInfo.prisoners >= 3) {
     return INVALID_MOVE;
   }
 
-  const cost = {
-    1: () => removeVPAmount(G, playerID, 3),
-    2: () => {
-      if (playerInfo.resources.counsellors < 2) {
-        return INVALID_MOVE;
-      } else {
-        removeOneCounsellor(G, playerID);
-      }
-    },
-    3: () => removeVPAmount(G, playerID, 2),
-    4: () => removeVPAmount(G, playerID, 1),
-    5: () => removeGoldAmount(G, playerID, 1),
-    6: () => {},
-  };
-  if (cost[value]() === INVALID_MOVE) {
+  // B6: cost = 2 Gold OR 1 extra counsellor (player's choice via paymentType arg)
+  if (paymentType === "gold") {
+    if (playerInfo.resources.gold < 2) {
+      return INVALID_MOVE;
+    }
+    removeGoldAmount(G, playerID, 2);
+  } else if (paymentType === "counsellor") {
+    if (playerInfo.resources.counsellors < 2) {
+      return INVALID_MOVE;
+    }
+    removeOneCounsellor(G, playerID); // extra counsellor payment
+  } else {
     return INVALID_MOVE;
   }
-  removeOneCounsellor(G, playerID);
+
+  removeOneCounsellor(G, playerID); // counsellor placed on board
   playerInfo.prisoners += 1;
 
-  if (G.playerInfo[playerID].hereticOrOrthodox === "orthodox") {
+  if (playerInfo.hereticOrOrthodox === "orthodox") {
     increaseOrthodoxyWithinMove(G, playerID);
   } else {
     increaseHeresyWithinMove(G, playerID);

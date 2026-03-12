@@ -6,31 +6,12 @@ import {
   addLevyAmount,
   removeOneCounsellor,
   removeVPAmount,
-} from "../resourceUpdates";
-import { EventsAPI } from "boardgame.io/dist/types/src/plugins/events/events";
-import { RandomAPI } from "boardgame.io/dist/types/src/plugins/random/random";
-import { Ctx } from "boardgame.io/dist/types/src/types";
+} from "../../helpers/stateUtils";
+import { MAX_LEVIES } from "../../codifiedGameInfo";
 
-const conscriptLevies: Move<MyGameState> = (
-  {
-    G,
-    ctx,
-    playerID,
-    events,
-    random,
-  }: {
-    G: MyGameState;
-    ctx: Ctx;
-    playerID: string;
-    events: EventsAPI;
-    random: RandomAPI;
-  },
-  ...args: any[]
-) => {
+const conscriptLevies: Move<MyGameState> = ({ G, playerID }, ...args: any[]) => {
   if (G.playerInfo[playerID].playerBoardCounsellorLocations.conscriptLevies) {
-    console.log(
-      "Player has attempted to conscript levies twice in the same phase of play"
-    );
+    console.log("Player has attempted to conscript levies twice in the same phase of play");
     return INVALID_MOVE;
   }
 
@@ -40,11 +21,17 @@ const conscriptLevies: Move<MyGameState> = (
 
   const levyAmount: number = args[0];
 
-  if (levyAmount === 0) {
-    console.log("Player has attempted to conscript 0 levies");
+  if (levyAmount <= 0) {
     return INVALID_MOVE;
   }
-  const cost = levyAmount / 3;
+
+  // B4: enforce MAX_LEVIES cap
+  if (G.playerInfo[playerID].resources.levies + levyAmount > MAX_LEVIES) {
+    return INVALID_MOVE;
+  }
+
+  // B4: ceil so a partial final group still costs 1 VP
+  const cost = Math.ceil(levyAmount / 3);
   removeOneCounsellor(G, playerID);
   removeVPAmount(G, playerID, cost);
   addLevyAmount(G, playerID, levyAmount);
