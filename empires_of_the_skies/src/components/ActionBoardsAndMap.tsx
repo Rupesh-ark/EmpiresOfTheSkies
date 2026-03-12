@@ -36,6 +36,7 @@ import HeresyTracker from "./PlayerTable/HeresyTracker";
 import { generalTheme } from "./themes";
 import { Campaign, ChatBubble, Close, Dashboard, Map, Person, TableChart } from "@mui/icons-material";
 import PickLegacyCardDialog from "./PickLegacyCardDialog";
+import PickKingdomAdvantageCardDialog from "./PickKingdomAdvantageCardDialog";
 import GameOverView from "./GameOverView";
 import LootValueTable from "./PlayerTable/LootValueTable";
 
@@ -174,6 +175,9 @@ export const ActionBoardsAndMap = (props: MyGameProps) => {
             </Box>
           </Box>
 
+          {props.ctx.phase === "kingdom_advantage" && (
+            <PickKingdomAdvantageCardDialog {...props} />
+          )}
           {props.G.stage === "pick legacy card" && (
             <PickLegacyCardDialog {...props} />
           )}

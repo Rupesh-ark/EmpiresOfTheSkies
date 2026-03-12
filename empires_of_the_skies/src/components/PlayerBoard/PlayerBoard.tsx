@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import buildSkyships from "../../boards_and_assets/player_boards/buttons/build_skyships.svg";
 import conscriptLevies from "../../boards_and_assets/player_boards/buttons/conscript_levies.svg";
 import dispatchSkyshipFleet from "../../boards_and_assets/player_boards/buttons/dispatch_skyship_fleet.svg";
+import trainTroopsSvg from "../../boards_and_assets/train_troops1.svg";
 import { ButtonRow } from "../ActionBoard/ActionBoardButtonRow";
 import { MyGameProps } from "@eots/game";
 import { PlayerBoardButton } from "./PlayerBoardButton";
@@ -218,6 +219,22 @@ export const PlayerBoard = (props: PlayerBoardProps) => {
               >
                 -
               </Button>
+            </ButtonRow>
+            <ButtonRow>
+              Train Troops
+              <PlayerBoardButton
+                onClick={() => {
+                  props.moves.trainTroops();
+                }}
+                backgroundImage={trainTroopsSvg}
+                colour={colour}
+                width="98px"
+                height="59px"
+                counsellor={
+                  playerInfo?.playerBoardCounsellorLocations.trainTroops
+                }
+                {...props}
+              />
             </ButtonRow>
             <ButtonRow>
               Dispatch Skyship Fleet
@@ -513,22 +530,38 @@ Selected tile: [${fleetDestination[0] + 1}, ${
             <ButtonRow>{fleets}</ButtonRow>
             <div style={{ display: "flex", flexDirection: "row" }}>
               {fortuneOfWarCards}
-              <svg
-                style={{
-                  backgroundImage: `url(${
-                    svgNameToElementMap[
-                      props.G.playerInfo[
-                        props.playerID ?? props.ctx.currentPlayer
-                      ].resources.legacyCard ?? "the builder"
-                    ]
-                  })`,
-                  backgroundRepeat: "no-repeat",
-                  backgroundSize: "contain",
-                  width: "137px",
-                  height: "250px",
-                  margin: "5px",
-                }}
-              ></svg>
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+                <svg
+                  style={{
+                    backgroundImage: `url(${
+                      svgNameToElementMap[
+                        props.G.playerInfo[
+                          props.playerID ?? props.ctx.currentPlayer
+                        ].resources.legacyCard ?? "the builder"
+                      ]
+                    })`,
+                    backgroundRepeat: "no-repeat",
+                    backgroundSize: "contain",
+                    width: "137px",
+                    height: "250px",
+                    margin: "5px",
+                  }}
+                ></svg>
+                {playerInfo.resources.advantageCard && (
+                  <div
+                    style={{
+                      fontSize: "11px",
+                      background: "#C8A96E",
+                      borderRadius: "4px",
+                      padding: "2px 6px",
+                      textAlign: "center",
+                      marginTop: "4px",
+                    }}
+                  >
+                    {playerInfo.resources.advantageCard.replace(/_/g, " ")}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
           <div

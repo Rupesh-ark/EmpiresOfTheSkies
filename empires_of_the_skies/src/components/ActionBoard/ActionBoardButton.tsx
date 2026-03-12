@@ -39,6 +39,7 @@ export const ActionBoardButton = (props: ActionBoardButtonProps) => {
           : "#e0e0e0",
         overflow: "hidden",
       }}
+      disabled={props.disabled}
       onClick={() => {
         clearMoves(props);
         props.onClickFunction(props.value);
@@ -232,4 +233,5 @@ export interface ActionBoardButtonProps extends MyGameProps {
   text?: string;
   width?: string;
   backgroundColour?: string;
+  disabled?: boolean;
 }

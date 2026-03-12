@@ -7,20 +7,16 @@ import playerOrderTile from "../../boards_and_assets/player_order_tile.svg";
 import recuitCounsillor1 from "../../boards_and_assets/recruit_counsillor1.svg";
 import recuitCounsillor2 from "../../boards_and_assets/recruit_counsillor2.svg";
 import recuitCounsillor3 from "../../boards_and_assets/recruit_counsillor3.svg";
-import trainTroops1 from "../../boards_and_assets/train_troops1.svg";
-import trainTroops2 from "../../boards_and_assets/train_troops2.svg";
 import recruitRegiments1 from "../../boards_and_assets/recruit_regiments1.svg";
 import recruitRegiments2 from "../../boards_and_assets/recruit_regiments2.svg";
 import recruitRegiments3 from "../../boards_and_assets/recruit_regiments3.svg";
 import recruitRegiments4 from "../../boards_and_assets/recruit_regiments4.svg";
 import recruitRegiments5 from "../../boards_and_assets/recruit_regiments5.svg";
 import recruitRegiments6 from "../../boards_and_assets/recruit_regiments6.svg";
-import purchaseSkyships1 from "../../boards_and_assets/build_skyships_zeeland1.svg";
-import purchaseSkyships2 from "../../boards_and_assets/build_skyships_zeeland2.svg";
-import purchaseSkyships3 from "../../boards_and_assets/build_skyships_zeeland3.svg";
-import purchaseSkyships4 from "../../boards_and_assets/build_skyships_venoa1.svg";
-import purchaseSkyships5 from "../../boards_and_assets/build_skyships_venoa2.svg";
-import purchaseSkyships6 from "../../boards_and_assets/build_skyships_venoa3.svg";
+import purchaseSkyshipsZeeland1 from "../../boards_and_assets/build_skyships_zeeland1.svg";
+import purchaseSkyshipsZeeland2 from "../../boards_and_assets/build_skyships_zeeland2.svg";
+import purchaseSkyshipsVenoa1 from "../../boards_and_assets/build_skyships_venoa1.svg";
+import purchaseSkyshipsVenoa2 from "../../boards_and_assets/build_skyships_venoa2.svg";
 import buildCathedral from "../../boards_and_assets/build_cathedral.svg";
 import buildPalace from "../../boards_and_assets/build_palace.svg";
 import buildShipyard from "../../boards_and_assets/build_shipyards.svg";
@@ -126,15 +122,6 @@ Taxation is awarded as follows:
               props,
               props.G.boardState.recruitCounsellors
             )}
-            Train Troops
-            {generateButtonsList(
-              2,
-              props.moves.trainTroops,
-              [trainTroops1, trainTroops2],
-              "98px",
-              props,
-              props.G.boardState.trainTroops
-            )}
           </ButtonRow>
           {/* button row with the recruit regiments buttons  */}
           <ButtonRow key={"recruit regiments buttons"}>
@@ -156,27 +143,45 @@ Taxation is awarded as follows:
               props.G.boardState.recruitRegiments
             )}
           </ButtonRow>
-          {/* button row with the purchase skyships buttons   */}
-          <ButtonRow key={"purchase skyships buttons"}>
-            Purchase Skyships
+          {/* button row with the purchase skyships (Zeeland) buttons */}
+          <ButtonRow key={"purchase skyships zeeland buttons"}>
+            Purchase Skyships (Zeeland)
             {generateButtonsList(
-              6,
+              2,
               props.moves.purchaseSkyships,
-
-              [
-                purchaseSkyships1,
-                purchaseSkyships2,
-                purchaseSkyships3,
-                purchaseSkyships4,
-                purchaseSkyships5,
-                purchaseSkyships6,
-              ],
+              [purchaseSkyshipsZeeland1, purchaseSkyshipsZeeland2],
               "98px",
               props,
-              props.G.boardState.purchaseSkyships,
+              props.G.boardState.purchaseSkyshipsZeeland,
               undefined,
-              ["#FE9F10", "#FE9F10", "#FE9F10", "#FE9ACC", "#FE9ACC", "#FE9ACC"]
+              ["#FE9F10", "#FE9F10"]
             )}
+          </ButtonRow>
+          {/* button row with the purchase skyships (Venoa) buttons — disabled until backend move is implemented */}
+          <ButtonRow key={"purchase skyships venoa buttons"}>
+            Purchase Skyships (Venoa)
+            <ActionBoardButton
+              onClickFunction={() => {}}
+              backgroundImage={purchaseSkyshipsVenoa1}
+              backgroundColour="#FE9ACC"
+              text=""
+              width="98px"
+              key="venoa-slot-1"
+              value={0}
+              disabled
+              {...props}
+            />
+            <ActionBoardButton
+              onClickFunction={() => {}}
+              backgroundImage={purchaseSkyshipsVenoa2}
+              backgroundColour="#FE9ACC"
+              text=""
+              width="98px"
+              key="venoa-slot-2"
+              value={1}
+              disabled
+              {...props}
+            />
           </ButtonRow>
           {/* button row with the found buildings buttons   */}
           <ButtonRow key={"found buildings buttons"}>
