@@ -28,6 +28,11 @@ const pickKingdomAdvantageCard: Move<MyGameState> = (
     (c) => c !== cardName
   );
 
+  if (cardName === "elite_regiments") {
+    G.playerInfo[playerID].resources.regiments -= 3;
+    G.playerInfo[playerID].resources.eliteRegiments += 3;
+  }
+
   const allPicked = Object.values(G.playerInfo).every(
     (p) => p.resources.advantageCard !== undefined
   );

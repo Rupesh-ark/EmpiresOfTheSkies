@@ -7,52 +7,40 @@ import {
   removeGoldAmount,
   removeOneCounsellor,
 } from "../../helpers/stateUtils";
-import { EventsAPI } from "boardgame.io/dist/types/src/plugins/plugin-events";
-import { RandomAPI } from "boardgame.io/dist/types/src/plugins/random/random";
-import { Ctx } from "boardgame.io/dist/types/src/types";
 
 const purchaseSkyships: Move<MyGameState> = (
-  {
-    G,
-    ctx,
-    playerID,
-    events,
-    random,
-  }: {
-    G: MyGameState;
-    ctx: Ctx;
-    playerID: string;
-    events: EventsAPI;
-    random: RandomAPI;
-  },
-  ...args: any[]
+  { G, playerID }: { G: MyGameState; playerID: string },
+  slotIndex: number,
+  republic: "zeeland" | "venoa"
 ) => {
   if (checkCounsellorsNotZero(playerID, G)) {
     return INVALID_MOVE;
   }
-  const value: keyof typeof G.boardState.purchaseSkyshipsZeeland = args[0] + 1;
 
-  if (G.boardState.purchaseSkyshipsZeeland[value] !== undefined) {
+  const boardSlots =
+    republic === "venoa"
+      ? G.boardState.purchaseSkyshipsVenoa
+      : G.boardState.purchaseSkyshipsZeeland;
+
+  const slot: keyof typeof boardSlots = (slotIndex + 1) as 1 | 2;
+
+  if (boardSlots[slot] !== undefined) {
     console.log("Player has chosen an action which has already been taken");
     return INVALID_MOVE;
   }
-  // update this to reflect rules regarding the orthodox vs heretic issues
-  const cost: { [key: number]: number } = {
-    1: 1,
-    2: 3,
-  };
 
-  const reward: { [key: number]: number } = {
-    1: 1,
-    2: 2,
-  };
+  // v4.2: cost = 2 Gold + 1 per counsellor in this slot including the one just placed
+  // slot 1 (takenSlots=0): 2+1 = 3 Gold; slot 2 (takenSlots=1): 2+2 = 4 Gold
+  const takenSlots = Object.values(boardSlots).filter(
+    (v) => v !== undefined
+  ).length;
+  const cost = 2 + takenSlots + 1;
 
   removeOneCounsellor(G, playerID);
-  removeGoldAmount(G, playerID, cost[value]);
-  for (let i = 0; i < reward[value]; i++) {
-    addSkyship(G, playerID);
-  }
-  G.boardState.purchaseSkyshipsZeeland[value] = playerID;
+  removeGoldAmount(G, playerID, cost);
+  addSkyship(G, playerID);
+  addSkyship(G, playerID);
+  boardSlots[slot] = playerID;
   G.playerInfo[playerID].turnComplete = true;
 };
 

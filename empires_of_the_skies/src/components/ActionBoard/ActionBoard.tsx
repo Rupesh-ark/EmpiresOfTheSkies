@@ -146,42 +146,36 @@ Taxation is awarded as follows:
           {/* button row with the purchase skyships (Zeeland) buttons */}
           <ButtonRow key={"purchase skyships zeeland buttons"}>
             Purchase Skyships (Zeeland)
-            {generateButtonsList(
-              2,
-              props.moves.purchaseSkyships,
-              [purchaseSkyshipsZeeland1, purchaseSkyshipsZeeland2],
-              "98px",
-              props,
-              props.G.boardState.purchaseSkyshipsZeeland,
-              undefined,
-              ["#FE9F10", "#FE9F10"]
-            )}
+            {([0, 1] as const).map((i) => (
+              <ActionBoardButton
+                key={`zeeland-slot-${i + 1}`}
+                onClickFunction={(slot) => props.moves.purchaseSkyships(slot, "zeeland")}
+                backgroundImage={[purchaseSkyshipsZeeland1, purchaseSkyshipsZeeland2][i]}
+                backgroundColour="#FE9F10"
+                text=""
+                width="98px"
+                value={i}
+                counsellor={props.G.boardState.purchaseSkyshipsZeeland[i + 1 as 1 | 2]}
+                {...props}
+              />
+            ))}
           </ButtonRow>
-          {/* button row with the purchase skyships (Venoa) buttons — disabled until backend move is implemented */}
+          {/* button row with the purchase skyships (Venoa) buttons */}
           <ButtonRow key={"purchase skyships venoa buttons"}>
             Purchase Skyships (Venoa)
-            <ActionBoardButton
-              onClickFunction={() => {}}
-              backgroundImage={purchaseSkyshipsVenoa1}
-              backgroundColour="#FE9ACC"
-              text=""
-              width="98px"
-              key="venoa-slot-1"
-              value={0}
-              disabled
-              {...props}
-            />
-            <ActionBoardButton
-              onClickFunction={() => {}}
-              backgroundImage={purchaseSkyshipsVenoa2}
-              backgroundColour="#FE9ACC"
-              text=""
-              width="98px"
-              key="venoa-slot-2"
-              value={1}
-              disabled
-              {...props}
-            />
+            {([0, 1] as const).map((i) => (
+              <ActionBoardButton
+                key={`venoa-slot-${i + 1}`}
+                onClickFunction={(slot) => props.moves.purchaseSkyships(slot, "venoa")}
+                backgroundImage={[purchaseSkyshipsVenoa1, purchaseSkyshipsVenoa2][i]}
+                backgroundColour="#FE9ACC"
+                text=""
+                width="98px"
+                value={i}
+                counsellor={props.G.boardState.purchaseSkyshipsVenoa[i + 1 as 1 | 2]}
+                {...props}
+              />
+            ))}
           </ButtonRow>
           {/* button row with the found buildings buttons   */}
           <ButtonRow key={"found buildings buttons"}>
