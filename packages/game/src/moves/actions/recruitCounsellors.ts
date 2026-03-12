@@ -23,12 +23,11 @@ export const recruitCounsellors: Move<MyGameState> = (
     [CounsellorSlot.Second]: 1,
     [CounsellorSlot.Third]:  2,
   };
-  if (value === CounsellorSlot.Third) {
-    if (G.playerInfo[playerID].resources.counsellors >= MAX_COUNSELLORS) {
-      return INVALID_MOVE;
-    }
-    addOneCounsellor(G, playerID);
+  if (G.playerInfo[playerID].resources.counsellors >= MAX_COUNSELLORS) {
+    return INVALID_MOVE;
   }
+
+  addOneCounsellor(G, playerID);
   G.boardState.recruitCounsellors[value] = playerID;
   removeGoldAmount(G, playerID, costs[value]);
   G.playerInfo[playerID].turnComplete = true;

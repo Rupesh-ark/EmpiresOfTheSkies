@@ -4,6 +4,7 @@ import { MyGameProps } from "@eots/game";
 const ActionBoard = lazy(() => import("./ActionBoard/ActionBoard").then(m => ({ default: m.ActionBoard })));
 const WorldMap = lazy(() => import("./WorldMap/WorldMap"));
 const PlayerBoard = lazy(() => import("./PlayerBoard/PlayerBoard").then(m => ({ default: m.PlayerBoard })));
+const RulesReference = lazy(() => import("./RulesReference"));
 const Chat = lazy(() => import("./Chat/Chat"));
 
 import {
@@ -34,7 +35,7 @@ import RetrieveFleetsDialog from "./Resolution/RetrieveFleetsDialog";
 import PlayerTable from "./PlayerTable/PlayerTable";
 import HeresyTracker from "./PlayerTable/HeresyTracker";
 import { generalTheme } from "./themes";
-import { Campaign, ChatBubble, Close, Dashboard, Map, Person, TableChart } from "@mui/icons-material";
+import { Campaign, ChatBubble, Close, Dashboard, Map, MenuBook, Person, TableChart } from "@mui/icons-material";
 import PickLegacyCardDialog from "./PickLegacyCardDialog";
 import PickKingdomAdvantageCardDialog from "./PickKingdomAdvantageCardDialog";
 import GameOverView from "./GameOverView";
@@ -89,6 +90,7 @@ export const ActionBoardsAndMap = (props: MyGameProps) => {
                 <Tab icon={<Tooltip title="Player Board" placement="left"><Person sx={{ color: kingdomColour }} /></Tooltip>} value={"1"} sx={tabSx} />
                 <Tab icon={<Tooltip title="World Map" placement="left"><Map sx={{ color: kingdomColour }} /></Tooltip>} value={"2"} sx={tabSx} />
                 <Tab icon={<Tooltip title="Player Table" placement="left"><TableChart sx={{ color: kingdomColour }} /></Tooltip>} value={"3"} sx={tabSx} />
+                <Tab icon={<Tooltip title="Rules" placement="left"><MenuBook sx={{ color: kingdomColour }} /></Tooltip>} value={"4"} sx={tabSx} />
               </Tabs>
               </Box>
               <Box sx={{ flexGrow: 1 }}>
@@ -126,6 +128,9 @@ export const ActionBoardsAndMap = (props: MyGameProps) => {
                       <PlayerTable {...props} />
                       <LootValueTable {...props} />
                     </Box>
+                  </TabPanel>
+                  <TabPanel value={"4"} tabIndex={4} sx={{ p: 0 }}>
+                    <RulesReference />
                   </TabPanel>
                 </Suspense>
               </Box>

@@ -1,22 +1,29 @@
-import React, { useState } from "react";
+import React, { ReactNode, useState } from "react";
 
 import buildSkyships from "../../boards_and_assets/player_boards/buttons/build_skyships.svg";
 import conscriptLevies from "../../boards_and_assets/player_boards/buttons/conscript_levies.svg";
 import dispatchSkyshipFleet from "../../boards_and_assets/player_boards/buttons/dispatch_skyship_fleet.svg";
 import trainTroopsSvg from "../../boards_and_assets/train_troops1.svg";
-import { ButtonRow } from "../ActionBoard/ActionBoardButtonRow";
-import { MyGameProps } from "@eots/game";
+import { findPossibleDestinations, MyGameProps } from "@eots/game";
 import { PlayerBoardButton } from "./PlayerBoardButton";
 import {
+  Box,
   Button,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
   ThemeProvider,
+  Typography,
 } from "@mui/material";
 import { influencePrelatesTheme } from "../themes";
-import { colors } from "../../designTokens";
+import { colors, fonts } from "../../designTokens";
+import FortuneOfWarCardDisplay from "./FortuneOfWarCardDisplay";
+import ShipYardDisplay from "./ShipYardDisplay";
+import FleetDisplay from "./FleetDisplay";
+import WorldMap from "../WorldMap/WorldMap";
+import { clearMoves } from "../../utils/gameHelpers";
+import svgNameToElementMap from "../WorldMap/nameToElementMap";
 
 const counterButtonSx = (disabledState = false) =>
   ({
@@ -28,13 +35,91 @@ const counterButtonSx = (disabledState = false) =>
     cursor: disabledState ? "not-allowed" : "pointer",
     color: disabledState ? "grey" : colors.black,
   }) as const;
-import FortuneOfWarCardDisplay from "./FortuneOfWarCardDisplay";
-import ShipYardDisplay from "./ShipYardDisplay";
-import FleetDisplay from "./FleetDisplay";
-import WorldMap from "../WorldMap/WorldMap";
-import { findPossibleDestinations } from "@eots/game";
-import { clearMoves } from "../../utils/gameHelpers";
-import svgNameToElementMap from "../WorldMap/nameToElementMap";
+
+const rowCardSx = {
+  mb: 1.5,
+  p: { xs: 1.1, lg: 1.3 },
+  borderRadius: 2,
+  border: "1px solid rgba(15,23,42,0.12)",
+  background:
+    "linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(246,248,251,0.95) 100%)",
+  boxShadow: "0 4px 12px rgba(15,23,42,0.08)",
+} as const;
+
+const PlayerRowCard = ({
+  title,
+  meta,
+  accent,
+  children,
+}: {
+  title: string;
+  meta?: string;
+  accent?: string;
+  children: ReactNode;
+}) => {
+  return (
+    <Box sx={rowCardSx}>
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: { xs: "1fr", lg: "280px minmax(0, 1fr)" },
+          columnGap: 1.5,
+          rowGap: 1,
+          alignItems: "center",
+        }}
+      >
+        <Box
+          sx={{
+            borderLeft: `4px solid ${accent ?? "#386fa4"}`,
+            pl: 1,
+            minWidth: 0,
+          }}
+        >
+          <Typography
+            sx={{
+              fontFamily: fonts.system,
+              fontWeight: 800,
+              lineHeight: 1.1,
+              fontSize: "1.02rem",
+              color: "#1a2733",
+              mb: 0.35,
+            }}
+          >
+            {title}
+          </Typography>
+          {meta ? (
+            <Typography
+              sx={{
+                fontFamily: fonts.system,
+                fontSize: "0.9rem",
+                lineHeight: 1.25,
+                color: "rgba(0,0,0,0.74)",
+              }}
+            >
+              {meta}
+            </Typography>
+          ) : null}
+        </Box>
+        <Box sx={{ minWidth: 0 }}>{children}</Box>
+      </Box>
+    </Box>
+  );
+};
+
+const ControlRow = ({ children }: { children: ReactNode }) => (
+  <Box
+    sx={{
+      display: "flex",
+      gap: 1,
+      position: "relative",
+      flexWrap: "wrap",
+      alignItems: "center",
+      whiteSpace: "pre-line",
+    }}
+  >
+    {children}
+  </Box>
+);
 
 // displays buttons which can build cathedrals, palaces and skyships
 // also displays the button to imprison dissenters and to dispatch skyship fleets
@@ -102,35 +187,23 @@ export const PlayerBoard = (props: PlayerBoardProps) => {
       .playerBoardCounsellorLocations.dispatchSkyshipFleet;
   return (
     <ThemeProvider theme={influencePrelatesTheme}>
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          width: "100%",
-          marginLeft: "20px",
-          marginRight: "20px",
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            alignContent: "center",
-            maxWidth: 1220,
+      <Box sx={{ width: "100%", display: "flex", justifyContent: "center", px: { xs: 1, md: 2 } }}>
+        <Box
+          sx={{
+            width: "100%",
+            maxWidth: 1600,
+            display: "grid",
+            gridTemplateColumns: { xs: "1fr", xl: "minmax(0, 3fr) minmax(280px, 1fr)" },
+            gap: 1.5,
           }}
         >
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              maxWidth: "75%",
-              marginRight: 10,
-            }}
-          >
-            <ButtonRow>
-              Build Skyships
+          <Box sx={{ minWidth: 0 }}>
+            <PlayerRowCard
+              title="Build Skyships"
+              meta="Spend 1 counsellor to gain skyships from your shipyards."
+              accent="#1d8f8d"
+            >
+              <ControlRow>
               <PlayerBoardButton
                 onClick={() => {
                   props.moves.enableDispatchButtons(true);
@@ -145,9 +218,14 @@ export const PlayerBoard = (props: PlayerBoardProps) => {
                 colour={colour}
                 {...props}
               />
-            </ButtonRow>
-            <ButtonRow>
-              Conscript Levies
+              </ControlRow>
+            </PlayerRowCard>
+            <PlayerRowCard
+              title="Conscript Levies"
+              meta="Choose levy amount in steps of 3, then conscript."
+              accent="#54708f"
+            >
+              <ControlRow>
               <PlayerBoardButton
                 onClick={() => {
                   props.moves.enableDispatchButtons(true);
@@ -219,9 +297,14 @@ export const PlayerBoard = (props: PlayerBoardProps) => {
               >
                 -
               </Button>
-            </ButtonRow>
-            <ButtonRow>
-              Train Troops
+              </ControlRow>
+            </PlayerRowCard>
+            <PlayerRowCard
+              title="Train Troops"
+              meta="Convert resources into trained regiments."
+              accent="#4f6e87"
+            >
+              <ControlRow>
               <PlayerBoardButton
                 onClick={() => {
                   props.moves.trainTroops();
@@ -235,9 +318,14 @@ export const PlayerBoard = (props: PlayerBoardProps) => {
                 }
                 {...props}
               />
-            </ButtonRow>
-            <ButtonRow>
-              Dispatch Skyship Fleet
+              </ControlRow>
+            </PlayerRowCard>
+            <PlayerRowCard
+              title="Dispatch Skyship Fleet"
+              meta="Pick a fleet and deploy to a legal destination."
+              accent="#376f96"
+            >
+              <ControlRow>
               <PlayerBoardButton
                 onClick={() => {
                   setDispatchFleetMapVisible(true);
@@ -248,13 +336,18 @@ export const PlayerBoard = (props: PlayerBoardProps) => {
                 width="60px"
                 counsellor={
                   playerInfo?.playerBoardCounsellorLocations
-                    .dispatchSkyshipFleet
+                  .dispatchSkyshipFleet
                 }
                 {...props}
               />
-            </ButtonRow>
-            <ButtonRow>
-              Construct Skyship Fleet
+              </ControlRow>
+            </PlayerRowCard>
+            <PlayerRowCard
+              title="Construct Skyship Fleet"
+              meta="Allocate skyships, regiments, and levies before dispatch."
+              accent="#6d7a39"
+            >
+              <ControlRow>
               <Button
                 onClick={() => {
                   setSkyshipCount(skyshipCount + 1);
@@ -470,7 +563,8 @@ export const PlayerBoard = (props: PlayerBoardProps) => {
               >
                 -
               </Button>
-            </ButtonRow>
+              </ControlRow>
+            </PlayerRowCard>
             <Dialog open={dispatchFleetMapVisible} maxWidth={false}>
               <DialogTitle>{`Select a tile to deploy your fleet to. 
 Selected tile: [${fleetDestination[0] + 1}, ${
@@ -527,10 +621,47 @@ Selected tile: [${fleetDestination[0] + 1}, ${
                 </Button>
               </DialogActions>
             </Dialog>
-            <ButtonRow>{fleets}</ButtonRow>
-            <div style={{ display: "flex", flexDirection: "row" }}>
-              {fortuneOfWarCards}
-              <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+            <PlayerRowCard
+              title="Fleet Overview"
+              meta="Select a fleet to view and configure for dispatch."
+              accent="#365c8b"
+            >
+              <ControlRow>{fleets}</ControlRow>
+            </PlayerRowCard>
+            <Box sx={rowCardSx}>
+              <Box
+                sx={{
+                  borderLeft: "4px solid #80612e",
+                  pl: 1,
+                  mb: 1.2,
+                }}
+              >
+                <Typography
+                  sx={{
+                    fontFamily: fonts.system,
+                    fontWeight: 800,
+                    lineHeight: 1.1,
+                    fontSize: "1.02rem",
+                    color: "#1a2733",
+                    mb: 0.35,
+                  }}
+                >
+                  Card Holdings
+                </Typography>
+                <Typography
+                  sx={{
+                    fontFamily: fonts.system,
+                    fontSize: "0.9rem",
+                    lineHeight: 1.25,
+                    color: "rgba(0,0,0,0.74)",
+                  }}
+                >
+                  Fortune of War, Legacy, and kingdom advantage cards.
+                </Typography>
+              </Box>
+              <div style={{ display: "flex", flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
+                {fortuneOfWarCards}
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
                 <svg
                   style={{
                     backgroundImage: `url(${
@@ -562,18 +693,42 @@ Selected tile: [${fleetDestination[0] + 1}, ${
                   </div>
                 )}
               </div>
-            </div>
-          </div>
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              maxWidth: "25%",
-              marginLeft: 10,
-            }}
-          >
-            <ButtonRow>
-              Prison
+              </div>
+            </Box>
+          </Box>
+          <Box sx={{ minWidth: 0 }}>
+            <Box sx={rowCardSx}>
+              <Box
+                sx={{
+                  borderLeft: "4px solid #8d3f3f",
+                  pl: 1,
+                  mb: 1.2,
+                }}
+              >
+                <Typography
+                  sx={{
+                    fontFamily: fonts.system,
+                    fontWeight: 800,
+                    lineHeight: 1.1,
+                    fontSize: "1.02rem",
+                    color: "#1a2733",
+                    mb: 0.35,
+                  }}
+                >
+                  Prison
+                </Typography>
+                <Typography
+                  sx={{
+                    fontFamily: fonts.system,
+                    fontSize: "0.9rem",
+                    lineHeight: 1.25,
+                    color: "rgba(0,0,0,0.74)",
+                  }}
+                >
+                  Imprisoned dissenters are shown here (max 3).
+                </Typography>
+              </Box>
+              <ControlRow>
               <svg
                 width="124"
                 height="59"
@@ -796,12 +951,44 @@ Selected tile: [${fleetDestination[0] + 1}, ${
                   strokeWidth="3"
                 />
               </svg>
-            </ButtonRow>
-            Shipyards
-            <ShipYardDisplay {...props} />
-          </div>
-        </div>
-      </div>
+              </ControlRow>
+            </Box>
+            <Box sx={rowCardSx}>
+              <Box
+                sx={{
+                  borderLeft: "4px solid #2f9a68",
+                  pl: 1,
+                  mb: 1.2,
+                }}
+              >
+                <Typography
+                  sx={{
+                    fontFamily: fonts.system,
+                    fontWeight: 800,
+                    lineHeight: 1.1,
+                    fontSize: "1.02rem",
+                    color: "#1a2733",
+                    mb: 0.35,
+                  }}
+                >
+                  Shipyards
+                </Typography>
+                <Typography
+                  sx={{
+                    fontFamily: fonts.system,
+                    fontSize: "0.9rem",
+                    lineHeight: 1.25,
+                    color: "rgba(0,0,0,0.74)",
+                  }}
+                >
+                  Progress tracks and production output by shipyard level.
+                </Typography>
+              </Box>
+              <ShipYardDisplay {...props} />
+            </Box>
+          </Box>
+        </Box>
+      </Box>
     </ThemeProvider>
   );
 };

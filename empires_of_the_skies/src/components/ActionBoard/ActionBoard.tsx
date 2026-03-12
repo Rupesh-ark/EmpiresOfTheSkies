@@ -1,8 +1,7 @@
-import { useState } from "react";
+import { ReactNode, useState } from "react";
 import { fonts } from "../../designTokens";
 // import { ReactComponent as ActionBoardSvg } from "../boards_and_assets/action_board.svg";
 import { ActionBoardButton, ActionBoardButtonLarge } from "./ActionBoardButton";
-import { ButtonRow } from "./ActionBoardButtonRow";
 import playerOrderTile from "../../boards_and_assets/player_order_tile.svg";
 import recuitCounsillor1 from "../../boards_and_assets/recruit_counsillor1.svg";
 import recuitCounsillor2 from "../../boards_and_assets/recruit_counsillor2.svg";
@@ -21,15 +20,12 @@ import buildCathedral from "../../boards_and_assets/build_cathedral.svg";
 import buildPalace from "../../boards_and_assets/build_palace.svg";
 import buildShipyard from "../../boards_and_assets/build_shipyards.svg";
 import buildForts from "../../boards_and_assets/build_forts.svg";
-import InfluencePrelatesExplanation from "../../boards_and_assets/influence_prelates_explination.svg";
-import PunishDissenters from "../../boards_and_assets/punish_dissenters_explination.svg";
 import punishDissenters1 from "../../boards_and_assets/punish_dissenters1.svg";
 import punishDissenters2 from "../../boards_and_assets/punish_dissenters2.svg";
 import punishDissenters3 from "../../boards_and_assets/punish_dissenters3.svg";
 import punishDissenters4 from "../../boards_and_assets/punish_dissenters4.svg";
 import punishDissenters5 from "../../boards_and_assets/punish_dissenters5.svg";
 import punishDissenters6 from "../../boards_and_assets/punish_dissenters6.svg";
-import ConvertMonarchExplanation from "../../boards_and_assets/convert_monarch_explination.svg";
 import convertMonarch1 from "../../boards_and_assets/convert_monarch1.svg";
 import convertMonarch2 from "../../boards_and_assets/convert_monarch2.svg";
 import convertMonarch3 from "../../boards_and_assets/convert_monarch3.svg";
@@ -40,10 +36,121 @@ import issueHolyDecree from "../../boards_and_assets/issue_holy_decree.svg";
 import { MyGameProps, PlayerColour } from "@eots/game";
 import { ThemeProvider } from "@emotion/react";
 import { generalTheme, influencePrelatesTheme } from "../themes";
-import { Button, Tooltip } from "@mui/material";
+import { Box, Button, Typography } from "@mui/material";
 import HolyDecreeDialog from "./HolyDecreeDialog";
 import CounsellorIcon from "../Icons/CounsellorIcon";
-import { InfoOutlined } from "@mui/icons-material";
+
+const rowBadgeStyle = {
+  fontSize: "11px",
+  border: "1px solid rgba(32,58,84,0.2)",
+  borderRadius: "999px",
+  padding: "2px 9px",
+  backgroundColor: "rgba(225, 236, 246, 0.78)",
+  color: "#1f3b58",
+  lineHeight: 1.3,
+};
+
+const RowHeader = ({
+  label,
+  meta,
+  badges,
+  accent,
+}: {
+  label: string;
+  meta?: Array<{ label: string; value: string }>;
+  badges?: string[];
+  accent?: string;
+}) => {
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        gap: 0.75,
+        maxWidth: "100%",
+        borderLeft: `4px solid ${accent ?? "#386fa4"}`,
+        pl: 1,
+      }}
+    >
+      <Typography
+        sx={{
+          fontFamily: fonts.system,
+          fontWeight: 800,
+          whiteSpace: "pre-line",
+          lineHeight: 1.1,
+          fontSize: "1.02rem",
+          color: "#1a2733",
+        }}
+      >
+        {label}
+      </Typography>
+      {meta && meta.length > 0 ? (
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 0.2 }}>
+          {meta.map((item) => (
+            <Typography
+              key={`${item.label}-${item.value}`}
+              sx={{
+                fontFamily: fonts.system,
+                fontSize: "0.9rem",
+                lineHeight: 1.25,
+                color: "rgba(0,0,0,0.74)",
+              }}
+            >
+              <Box
+                component="span"
+                sx={{ fontWeight: 700, color: "#2b445e", mr: 0.5 }}
+              >
+                {item.label}:
+              </Box>
+              {item.value}
+            </Typography>
+          ))}
+        </Box>
+      ) : null}
+      {badges && badges.length > 0 ? (
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginTop: "2px" }}>
+          {badges.map((badge, index) => (
+            <span key={`${badge}-${index}`} style={rowBadgeStyle}>
+              {badge}
+            </span>
+          ))}
+        </div>
+      ) : null}
+    </Box>
+  );
+};
+
+const ActionRow = ({
+  header,
+  children,
+}: {
+  header: ReactNode;
+  children: ReactNode;
+}) => {
+  return (
+    <Box
+      sx={{
+        display: "grid",
+        gridTemplateColumns: { xs: "1fr", lg: "360px minmax(0, 1fr)" },
+        columnGap: 1.5,
+        rowGap: 1,
+        alignItems: "center",
+        mb: 1.5,
+        p: { xs: 1.1, lg: 1.3 },
+        borderRadius: 2,
+        border: "1px solid rgba(15,23,42,0.12)",
+        background:
+          "linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(246,248,251,0.95) 100%)",
+        boxShadow: "0 4px 12px rgba(15,23,42,0.08)",
+      }}
+    >
+      <Box sx={{ minWidth: 0 }}>{header}</Box>
+      <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, alignItems: "flex-start" }}>
+        {children}
+      </Box>
+    </Box>
+  );
+};
 
 //method which returns the complete action board
 
@@ -74,23 +181,18 @@ export const ActionBoard = (props: ActionBoardProps) => {
           }}
         >
           {/* button row with the player order buttons */}
-          <ButtonRow key={"player order buttons"}>
-            {"Alter Player \n Order"}
-            <Tooltip
-              title={`Players are awarded taxes depending 
-on their position in the order of play.
-            
-Taxation is awarded as follows:
-1st: \t\t4 gold
-2nd: \t\t5 gold
-3rd: \t\t6 gold
-4th: \t\t7 gold
-5th: \t\t8 gold
-6th: \t\t9 gold
-            `}
-            >
-              <InfoOutlined />
-            </Tooltip>
+          <ActionRow
+            header={
+              <RowHeader
+                label={"Alter Player\nOrder"}
+                meta={[
+                  { label: "Timing", value: "Applies at Reset" },
+                  { label: "Taxes", value: "1st 4g -> 6th 9g" },
+                ]}
+                accent="#2a7fa5"
+              />
+            }
+          >
             {generateButtonsList(
               6,
               props.moves.alterPlayerOrder,
@@ -110,10 +212,21 @@ Taxation is awarded as follows:
               false,
               ["1st\t", "2nd\t", "3rd\t", "4th\t", "5th\t", "6th\t"]
             )}
-          </ButtonRow>
+          </ActionRow>
           {/* button row with the recruit counsellor buttons */}
-          <ButtonRow key={"recruit counsellor buttons"}>
-            Recruit Counsellors
+          <ActionRow
+            header={
+              <RowHeader
+                label="Recruit Counsellors"
+                meta={[
+                  { label: "Cost", value: "1g + row count" },
+                  { label: "Gain", value: "+1 counsellor" },
+                  { label: "Max", value: "7" },
+                ]}
+                accent="#6b7280"
+              />
+            }
+          >
             {generateButtonsList(
               3,
               props.moves.recruitCounsellors,
@@ -122,10 +235,21 @@ Taxation is awarded as follows:
               props,
               props.G.boardState.recruitCounsellors
             )}
-          </ButtonRow>
+          </ActionRow>
           {/* button row with the recruit regiments buttons  */}
-          <ButtonRow key={"recruit regiments buttons"}>
-            Recruit Regiments
+          <ActionRow
+            header={
+              <RowHeader
+                label="Recruit Regiments"
+                meta={[
+                  { label: "Cost", value: "1g + row count" },
+                  { label: "Gain", value: "+4 regiments in kingdom" },
+                  { label: "Max", value: "30" },
+                ]}
+                accent="#4b5563"
+              />
+            }
+          >
             {generateButtonsList(
               6,
               props.moves.recruitRegiments,
@@ -142,10 +266,21 @@ Taxation is awarded as follows:
               props,
               props.G.boardState.recruitRegiments
             )}
-          </ButtonRow>
+          </ActionRow>
           {/* button row with the purchase skyships (Zeeland) buttons */}
-          <ButtonRow key={"purchase skyships zeeland buttons"}>
-            Purchase Skyships (Zeeland)
+          <ActionRow
+            header={
+              <RowHeader
+                label="Purchase Skyships (Zeeland)"
+                meta={[
+                  { label: "Cost", value: "2g + row count" },
+                  { label: "Gain", value: "+2 skyships from Zeeland" },
+                  { label: "Max", value: "24" },
+                ]}
+                accent="#c77700"
+              />
+            }
+          >
             {([0, 1] as const).map((i) => (
               <ActionBoardButton
                 key={`zeeland-slot-${i + 1}`}
@@ -159,10 +294,21 @@ Taxation is awarded as follows:
                 {...props}
               />
             ))}
-          </ButtonRow>
+          </ActionRow>
           {/* button row with the purchase skyships (Venoa) buttons */}
-          <ButtonRow key={"purchase skyships venoa buttons"}>
-            Purchase Skyships (Venoa)
+          <ActionRow
+            header={
+              <RowHeader
+                label="Purchase Skyships (Venoa)"
+                meta={[
+                  { label: "Cost", value: "2g + row count" },
+                  { label: "Gain", value: "+2 skyships from Venoa" },
+                  { label: "Max", value: "24" },
+                ]}
+                accent="#b54785"
+              />
+            }
+          >
             {([0, 1] as const).map((i) => (
               <ActionBoardButton
                 key={`venoa-slot-${i + 1}`}
@@ -176,10 +322,24 @@ Taxation is awarded as follows:
                 {...props}
               />
             ))}
-          </ButtonRow>
+          </ActionRow>
           {/* button row with the found buildings buttons   */}
-          <ButtonRow key={"found buildings buttons"}>
-            Found Buildings
+          <ActionRow
+            header={
+              <RowHeader
+                label="Found Buildings"
+                meta={[
+                  {
+                    label: "Costs",
+                    value: "Cathedral 5g, Palace 5g, Shipyard 3g, Fort 2g",
+                  },
+                  { label: "Modifier", value: "+ row count cost" },
+                ]}
+                badges={["Cathedral: Orthodox only"]}
+                accent="#2f9a68"
+              />
+            }
+          >
             {generateButtonsList(
               4,
               props.moves.foundBuildings,
@@ -192,10 +352,21 @@ Taxation is awarded as follows:
               [],
               true
             )}
-          </ButtonRow>
+          </ActionRow>
           {/* button row with the found factory buttons */}
-          <ButtonRow key={"found factory buttons"}>
-            Found Factories
+          <ActionRow
+            header={
+              <RowHeader
+                label="Found Factories"
+                meta={[
+                  { label: "Cost", value: "1g + row count" },
+                  { label: "Gain", value: "+1 factory" },
+                  { label: "Max", value: "6" },
+                ]}
+                accent="#8f6f34"
+              />
+            }
+          >
             {generateButtonsList(
               4,
               props.moves.foundFactory,
@@ -208,11 +379,22 @@ Taxation is awarded as follows:
               false,
               ["Slot 1", "Slot 2", "Slot 3", "Slot 4"]
             )}
-          </ButtonRow>
+          </ActionRow>
           {/* button row with the influence prelates buttons */}
-          <ButtonRow key={"influence prelates buttons"}>
+          <ActionRow
+            header={
+              <RowHeader
+                label="Influence Prelates"
+                meta={[
+                  { label: "Own Slot", value: "Free" },
+                  { label: "Realm Slot", value: "1g" },
+                  { label: "Rival Slot", value: "Pay cathedral count in gold" },
+                ]}
+                accent="#6f7f8e"
+              />
+            }
+          >
             <ThemeProvider theme={influencePrelatesTheme}>
-              <img src={InfluencePrelatesExplanation}></img>
               {generateButtonsList(
                 8,
                 props.moves.influencePrelates,
@@ -244,10 +426,21 @@ Taxation is awarded as follows:
                 ]
               )}
             </ThemeProvider>
-          </ButtonRow>
+          </ActionRow>
           {/* button row with the punish dissenters buttons  */}
-          <ButtonRow key={"punish dissenters buttons"}>
-            <img src={PunishDissenters}></img>
+          <ActionRow
+            header={
+              <RowHeader
+                label="Punish Dissenters"
+                meta={[
+                  { label: "Cost", value: "2g or 1 unspent counsellor" },
+                  { label: "Shift", value: "Heresy up/down (up to 3)" },
+                  { label: "Penalty", value: "Execution is -1 VP each" },
+                ]}
+                accent="#437ca0"
+              />
+            }
+          >
             {generateButtonsList(
               6,
               props.moves.punishDissenters,
@@ -266,10 +459,21 @@ Taxation is awarded as follows:
               undefined,
               ["#9EE8FF", "#9EE8FF", "#9EE8FF", "#9EE8FF", "#9EE8FF", "#9EE8FF"]
             )}
-          </ButtonRow>
+          </ActionRow>
           {/* button row with the convert monarch buttons   */}
-          <ButtonRow key={"convert monarch buttons"}>
-            <img src={ConvertMonarchExplanation}></img>
+          <ActionRow
+            header={
+              <RowHeader
+                label="Convert Monarch"
+                meta={[
+                  { label: "Cost", value: "2g + 1 unspent counsellor" },
+                  { label: "Effect", value: "Flip Orthodox/Heretic" },
+                  { label: "Also", value: "Release imprisoned dissenters" },
+                ]}
+                accent="#3a7f95"
+              />
+            }
+          >
             {generateButtonsList(
               6,
               props.moves.convertMonarch,
@@ -288,9 +492,23 @@ Taxation is awarded as follows:
               undefined,
               ["#9EE8FF", "#9EE8FF", "#9EE8FF", "#9EE8FF", "#9EE8FF", "#9EE8FF"]
             )}
-          </ButtonRow>
+          </ActionRow>
           {/* button row with the issue holy decree button    */}
-          <ButtonRow key={"issue holy decree button"}>
+          <ActionRow
+            header={
+              <RowHeader
+                label="Issue Holy Decree"
+                meta={[
+                  {
+                    label: "Choose",
+                    value: "Bless, Curse, Reform Dogma, or Confirm Dogma",
+                  },
+                ]}
+                badges={["Archprelate only", "Once per round"]}
+                accent="#8b3a3a"
+              />
+            }
+          >
             <Button
               disabled={
                 !isArchPrelate ||
@@ -319,7 +537,7 @@ Taxation is awarded as follows:
                 <CounsellorIcon colour="#AD4482" />
               ) : null}
             </Button>
-          </ButtonRow>
+          </ActionRow>
           <HolyDecreeDialog
             open={holyDegreeOpen}
             {...props}

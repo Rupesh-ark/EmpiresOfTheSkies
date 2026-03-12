@@ -4,9 +4,9 @@
  * Tests for recruitCounsellors (v4.2).
  *
  * Rules:
- *   - 3 slots on the action board; slots 1 and 2 cost 1 Gold each (no net counsellor gain)
- *   - Slot 3 costs 2 Gold AND gives +1 counsellor (net counsellors: place 1, gain 1 → net 0; but gain is applied first)
- *   - Slot 3 is INVALID if player is already at MAX_COUNSELLORS (7)
+ *   - 3 slots on the action board; slots 1 and 2 cost 1 Gold each, slot 3 costs 2 Gold
+ *   - Any valid slot grants +1 counsellor
+ *   - Move is INVALID if player is already at MAX_COUNSELLORS (7)
  *   - INVALID_MOVE if: 0 counsellors, slot already taken
  *   - Marks turnComplete = true
  */
@@ -23,27 +23,26 @@ function callMove(G: ReturnType<typeof buildInitialG>, playerID: string, slotInd
 }
 
 describe("recruitCounsellors — costs", () => {
-  it("slot 0 (first) costs 1 Gold and does NOT grant a counsellor", () => {
+  it("slot 0 (first) costs 1 Gold and grants +1 counsellor", () => {
     const G = buildInitialG();
     const goldBefore = G.playerInfo["0"].resources.gold;
     const counsellorsBefore = G.playerInfo["0"].resources.counsellors;
     callMove(G, "0", 0);
     expect(G.playerInfo["0"].resources.gold).toBe(goldBefore - 1);
-    // Slot 0/1 does not grant an extra counsellor — net change is −1 (the placed one)
-    expect(G.playerInfo["0"].resources.counsellors).toBe(counsellorsBefore);
+    expect(G.playerInfo["0"].resources.counsellors).toBe(counsellorsBefore + 1);
   });
 
-  it("slot 1 (second) costs 1 Gold and does NOT grant a counsellor", () => {
+  it("slot 1 (second) costs 1 Gold and grants +1 counsellor", () => {
     const G = buildInitialG();
     G.boardState.recruitCounsellors[1] = "1"; // slot 0 taken
     const goldBefore = G.playerInfo["0"].resources.gold;
     const counsellorsBefore = G.playerInfo["0"].resources.counsellors;
     callMove(G, "0", 1);
     expect(G.playerInfo["0"].resources.gold).toBe(goldBefore - 1);
-    expect(G.playerInfo["0"].resources.counsellors).toBe(counsellorsBefore);
+    expect(G.playerInfo["0"].resources.counsellors).toBe(counsellorsBefore + 1);
   });
 
-  it("slot 2 (third) costs 2 Gold and grants +1 counsellor (net 0 counsellors vs before)", () => {
+  it("slot 2 (third) costs 2 Gold and grants +1 counsellor", () => {
     const G = buildInitialG();
     G.boardState.recruitCounsellors[1] = "1";
     G.boardState.recruitCounsellors[2] = "1";
@@ -51,9 +50,6 @@ describe("recruitCounsellors — costs", () => {
     const counsellorsBefore = G.playerInfo["0"].resources.counsellors;
     callMove(G, "0", 2);
     expect(G.playerInfo["0"].resources.gold).toBe(goldBefore - 2);
-    // addOneCounsellor is called, then no removeOneCounsellor for this slot
-    // the move only calls addOneCounsellor, NOT removeOneCounsellor
-    // so counsellors = before + 1 (the gain) and the board placement doesn't consume one
     expect(G.playerInfo["0"].resources.counsellors).toBe(counsellorsBefore + 1);
   });
 });
@@ -86,14 +82,12 @@ describe("recruitCounsellors — INVALID_MOVE conditions", () => {
     expect(result).toBe(INVALID_MOVE);
   });
 
-  it("returns INVALID_MOVE on slot 2 when player is already at MAX_COUNSELLORS", () => {
+  it("returns INVALID_MOVE when player is already at MAX_COUNSELLORS", () => {
     const G = buildInitialG([
       buildPlayer("0", { resources: buildResources({ counsellors: MAX_COUNSELLORS }) }),
       buildPlayer("1"),
     ]);
-    G.boardState.recruitCounsellors[1] = "1";
-    G.boardState.recruitCounsellors[2] = "1";
-    const result = callMove(G, "0", 2);
+    const result = callMove(G, "0", 0);
     expect(result).toBe(INVALID_MOVE);
   });
 });
