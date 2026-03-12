@@ -4,7 +4,6 @@ import { INVALID_MOVE } from "boardgame.io/core";
 import { Ctx } from "boardgame.io/dist/types/src/types";
 import { EventsAPI } from "boardgame.io/dist/types/src/plugins/plugin-events";
 import { RandomAPI } from "boardgame.io/dist/types/src/plugins/random/random";
-import { clearMoves } from "../helpers/helpers";
 
 export const removeOneCounsellor = (G: MyGameState, playerID: string) => {
   G.playerInfo[playerID].resources.counsellors -= 1;
@@ -119,26 +118,12 @@ export const increaseOrthodoxyWithinMove = (
   }
 };
 export const checkAndPlaceFort: Move<MyGameState> = (
-  {
-    G,
-    ctx,
-    playerID,
-    events,
-    random,
-  }: {
-    G: MyGameState;
-    ctx: Ctx;
-    playerID: string;
-    events: EventsAPI;
-    random: RandomAPI;
-  },
-  ...args: any[]
+  { G, playerID }: { G: MyGameState; playerID: string },
+  coords: [number, number]
 ) => {
-  const [x, y] = args[0];
-  const props = args[1];
-  let tileInfo = G.mapState.buildings[y][x];
+  const [x, y] = coords;
+  const tileInfo = G.mapState.buildings[y][x];
   if (tileInfo === undefined) {
-    clearMoves(props);
     return INVALID_MOVE;
   }
   let hasRelevantPresence = false;
@@ -156,7 +141,6 @@ export const checkAndPlaceFort: Move<MyGameState> = (
   }
 
   if (!hasRelevantPresence) {
-    clearMoves(props);
     return INVALID_MOVE;
   }
 

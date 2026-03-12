@@ -1,7 +1,9 @@
 import { EventsAPI } from "boardgame.io/dist/types/src/plugins/plugin-events";
 import { MyGameState } from "../types";
 import legacyResolutions from "./legacyResolutions";
+import { enactPiracy } from "./piracy";
 
+// B2: factory income — pool = total outposts + colonies on map
 const collectFactoryIncome = (G: MyGameState) => {
   let pool = 0;
   G.mapState.buildings.forEach((row) => {
@@ -24,62 +26,65 @@ const collectFactoryIncome = (G: MyGameState) => {
   });
 };
 
-const resolveRound = (G: MyGameState, events: EventsAPI) => {
-  collectFactoryIncome(G);
-  const resourceCounterMap: Record<string, number> = {
-    mithril: 0,
-    dragonScales: 0,
-    krakenSkin: 0,
-    magicDust: 0,
-    stickyIchor: 0,
-    pipeweed: 0,
-  };
+// D4: player with most palaces scores (their count − 2nd highest) VP; tied = nobody scores
+const palaceBonus = (G: MyGameState) => {
+  const counts = Object.values(G.playerInfo).map((p) => p.palaces);
+  const highest = Math.max(...counts);
+  if (highest === 0) return;
 
-  Object.values(G.playerInfo).forEach((player) => {
-    Object.entries(player.resources).forEach(([resourceName, value]) => {
-      if (resourceCounterMap[resourceName] !== undefined) {
-        resourceCounterMap[resourceName] += value;
+  const playersWithMost = Object.values(G.playerInfo).filter(
+    (p) => p.palaces === highest
+  );
+  if (playersWithMost.length > 1) return;
+
+  const secondHighest = Math.max(...counts.filter((c) => c !== highest), 0);
+  playersWithMost[0].resources.victoryPoints += highest - secondHighest;
+};
+
+// D3: only players with ≥1 outpost or colony are eligible for trade VP ranking
+const hasTradeAccess = (G: MyGameState, playerID: string): boolean => {
+  for (const row of G.mapState.buildings) {
+    for (const cell of row) {
+      if (
+        cell.player?.id === playerID &&
+        (cell.buildings === "outpost" || cell.buildings === "colony")
+      ) {
+        return true;
       }
-    });
-  });
+    }
+  }
+  return false;
+};
 
-  const finalValuesMap: Record<string, number> = {
-    mithril: magicDustAndMithrilValueCalculator(resourceCounterMap["mithril"]),
-    dragonScales: krakenSkinAndDragonScalesValueCalculator(
-      resourceCounterMap["dragonScales"]
-    ),
-    krakenSkin: krakenSkinAndDragonScalesValueCalculator(
-      resourceCounterMap["krakenSkin"]
-    ),
-    magicDust: magicDustAndMithrilValueCalculator(
-      resourceCounterMap["magicDust"]
-    ),
-    stickyIchor: stickyIchorAndPipeweedValueCalculator(
-      resourceCounterMap["stickyIchor"]
-    ),
-    pipeweed: stickyIchorAndPipeweedValueCalculator(
-      resourceCounterMap["pipeweed"]
-    ),
-  };
+// D7: final round bonus — 1 VP per 5 Gold
+const applyFinalRoundBonus = (G: MyGameState) => {
+  Object.values(G.playerInfo).forEach((player) => {
+    player.resources.victoryPoints += Math.floor(player.resources.gold / 5);
+  });
+};
+
+const resolveRound = (G: MyGameState, events: EventsAPI) => {
+  palaceBonus(G);
+
+  // D1: price marker lookup — replaces abundance functions
+  const goodsKeys = Object.keys(G.mapState.goodsPriceMarkers) as Array<
+    keyof typeof G.mapState.goodsPriceMarkers
+  >;
   const tradeGainsMap: Record<string, number> = {};
 
   Object.values(G.playerInfo).forEach((player) => {
-    Object.entries(player.resources).forEach(([resourceName, value]) => {
-      if (finalValuesMap[resourceName] !== undefined) {
-        player.resources.gold += finalValuesMap[resourceName] * value;
-        if (tradeGainsMap[player.id] === undefined) {
-          tradeGainsMap[player.id] = value;
-        } else {
-          tradeGainsMap[player.id] += value;
+    const canTrade = hasTradeAccess(G, player.id);
+
+    goodsKeys.forEach((good) => {
+      const quantity = player.resources[good];
+      if (quantity > 0) {
+        player.resources.gold += G.mapState.goodsPriceMarkers[good] * quantity;
+        // D3: only eligible players enter the trade VP ranking
+        if (canTrade) {
+          tradeGainsMap[player.id] = (tradeGainsMap[player.id] ?? 0) + quantity;
         }
       }
     });
-
-    if (player.resources.gold <= 0) {
-      player.resources.victoryPoints -= Math.floor(
-        Math.abs(player.resources.gold / 2)
-      );
-    }
 
     player.resources.dragonScales = 0;
     player.resources.stickyIchor = 0;
@@ -89,85 +94,99 @@ const resolveRound = (G: MyGameState, events: EventsAPI) => {
     player.resources.mithril = 0;
   });
 
+  // B7: piracy — after goods sold, before factory income
+  enactPiracy(G);
+
+  // B2: factory income
+  collectFactoryIncome(G);
+
+  // D8: debt penalty — gold < 0 only (not at exactly 0)
+  Object.values(G.playerInfo).forEach((player) => {
+    if (player.resources.gold < 0) {
+      player.resources.victoryPoints -= Math.floor(
+        Math.abs(player.resources.gold) / 2
+      );
+    }
+  });
+
   const tradeAmounts = [...Object.values(tradeGainsMap)];
   const highestTradeAmount = Math.max(...tradeAmounts);
 
-  if (highestTradeAmount === 0) return;
-
-  while (tradeAmounts.includes(highestTradeAmount)) {
-    tradeAmounts.splice(tradeAmounts.indexOf(highestTradeAmount), 1);
-  }
-
-  const secondHighestTradeAmount = Math.max(...tradeAmounts);
-
-  while (tradeAmounts.includes(highestTradeAmount)) {
-    tradeAmounts.splice(tradeAmounts.indexOf(highestTradeAmount), 1);
-  }
-
-  const thirdHighestTradeAmount = Math.max(...tradeAmounts);
-
-  let winners: string[] = [];
-  let secondPlace: string[] = [];
-  let thirdPlace: string[] = [];
-
-  Object.entries(tradeGainsMap).forEach(([id, amount]) => {
-    if (amount === highestTradeAmount) {
-      winners.push(id);
-    } else if (amount === secondHighestTradeAmount) {
-      secondPlace.push(id);
-    } else if (amount === thirdHighestTradeAmount) {
-      thirdPlace.push(id);
+  if (highestTradeAmount > 0) {
+    while (tradeAmounts.includes(highestTradeAmount)) {
+      tradeAmounts.splice(tradeAmounts.indexOf(highestTradeAmount), 1);
     }
-  });
-  const vpAmounts = tradeVictoryPoints(G);
-  if (winners.length >= 3) {
-    const awardedAmount = Math.round(
-      (vpAmounts[0] + vpAmounts[1] + vpAmounts[2]) / winners.length
-    );
-    winners.forEach((id) => {
-      G.playerInfo[id].resources.victoryPoints += awardedAmount;
-    });
-    return;
-  } else if (winners.length === 2) {
-    const awardedAmount = Math.round((vpAmounts[0] + vpAmounts[1]) / 2);
-    winners.forEach((id) => {
-      G.playerInfo[id].resources.victoryPoints += awardedAmount;
-    });
-    if (secondHighestTradeAmount > 0) {
-      const awardAmountSecondPlace = Math.ceil(
-        vpAmounts[2] / secondPlace.length
-      );
+    const secondHighestTradeAmount = Math.max(...tradeAmounts);
 
-      secondPlace.forEach((id) => {
-        G.playerInfo[id].resources.victoryPoints += awardAmountSecondPlace;
-      });
+    while (tradeAmounts.includes(secondHighestTradeAmount)) {
+      tradeAmounts.splice(tradeAmounts.indexOf(secondHighestTradeAmount), 1);
     }
-  } else if (winners.length === 1) {
-    G.playerInfo[winners[0]].resources.victoryPoints += vpAmounts[0];
+    const thirdHighestTradeAmount = Math.max(...tradeAmounts);
 
-    if (secondPlace.length === 1) {
-      if (secondHighestTradeAmount > 0) {
-        G.playerInfo[secondPlace[0]].resources.victoryPoints += vpAmounts[1];
+    const winners: string[] = [];
+    const secondPlace: string[] = [];
+    const thirdPlace: string[] = [];
+
+    Object.entries(tradeGainsMap).forEach(([id, amount]) => {
+      if (amount === highestTradeAmount) {
+        winners.push(id);
+      } else if (amount === secondHighestTradeAmount) {
+        secondPlace.push(id);
+      } else if (amount === thirdHighestTradeAmount) {
+        thirdPlace.push(id);
       }
-      if (thirdHighestTradeAmount > 0) {
-        const awardAmountThirdPlace = Math.ceil(
-          vpAmounts[2] / thirdPlace.length
+    });
+
+    // D2: corrected VP amounts per round
+    const vpAmounts = tradeVictoryPoints(G);
+    if (winners.length >= 3) {
+      const awardedAmount = Math.round(
+        (vpAmounts[0] + vpAmounts[1] + vpAmounts[2]) / winners.length
+      );
+      winners.forEach((id) => {
+        G.playerInfo[id].resources.victoryPoints += awardedAmount;
+      });
+    } else if (winners.length === 2) {
+      const awardedAmount = Math.round((vpAmounts[0] + vpAmounts[1]) / 2);
+      winners.forEach((id) => {
+        G.playerInfo[id].resources.victoryPoints += awardedAmount;
+      });
+      if (secondHighestTradeAmount > 0) {
+        const awardAmountSecondPlace = Math.ceil(
+          vpAmounts[2] / secondPlace.length
         );
-        thirdPlace.forEach((id) => {
-          G.playerInfo[id].resources.victoryPoints += awardAmountThirdPlace;
+        secondPlace.forEach((id) => {
+          G.playerInfo[id].resources.victoryPoints += awardAmountSecondPlace;
         });
       }
-    } else if (secondPlace.length > 1) {
-      const awardAmountSecondPlace = Math.round(
-        (vpAmounts[1] + vpAmounts[2]) / secondPlace.length
-      );
-      secondPlace.forEach((id) => {
-        G.playerInfo[id].resources.victoryPoints += awardAmountSecondPlace;
-      });
+    } else if (winners.length === 1) {
+      G.playerInfo[winners[0]].resources.victoryPoints += vpAmounts[0];
+
+      if (secondPlace.length === 1) {
+        if (secondHighestTradeAmount > 0) {
+          G.playerInfo[secondPlace[0]].resources.victoryPoints += vpAmounts[1];
+        }
+        if (thirdHighestTradeAmount > 0) {
+          const awardAmountThirdPlace = Math.ceil(
+            vpAmounts[2] / thirdPlace.length
+          );
+          thirdPlace.forEach((id) => {
+            G.playerInfo[id].resources.victoryPoints += awardAmountThirdPlace;
+          });
+        }
+      } else if (secondPlace.length > 1) {
+        const awardAmountSecondPlace = Math.round(
+          (vpAmounts[1] + vpAmounts[2]) / secondPlace.length
+        );
+        secondPlace.forEach((id) => {
+          G.playerInfo[id].resources.victoryPoints += awardAmountSecondPlace;
+        });
+      }
     }
   }
 
   if (G.round === G.finalRound) {
+    applyFinalRoundBonus(G);
     legacyResolutions(G);
     events.endGame();
   }
@@ -175,42 +194,15 @@ const resolveRound = (G: MyGameState, events: EventsAPI) => {
 
 export default resolveRound;
 
-const magicDustAndMithrilValueCalculator = (abundance: number) => {
-  if (abundance <= 1) {
-    return 4;
-  } else if (abundance <= 3) {
-    return 3;
-  } else {
-    return 2;
-  }
-};
-
-const krakenSkinAndDragonScalesValueCalculator = (abundance: number) => {
-  if (abundance <= 2) {
-    return 3;
-  } else if (abundance <= 5) {
-    return 2;
-  } else {
-    return 1;
-  }
-};
-
-const stickyIchorAndPipeweedValueCalculator = (abundance: number) => {
-  if (abundance <= 1) {
-    return 3;
-  } else if (abundance <= 4) {
-    return 2;
-  } else {
-    return 1;
-  }
-};
-
+// D2: corrected trade VP schedule
 const tradeVictoryPoints = (G: MyGameState) => {
   if (G.round === 1) {
+    return [3, 2, 1];
+  } else if (G.round <= 3) {
     return [6, 4, 2];
-  } else if (G.round < 4) {
+  } else if (G.round <= 5) {
     return [9, 6, 3];
-  } else if (G.round < 6) {
+  } else {
     return [12, 8, 4];
-  } else return [15, 10, 5];
+  }
 };
