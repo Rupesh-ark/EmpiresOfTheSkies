@@ -213,6 +213,8 @@ describe("resolveBattleAndReturnWinner — aerial combat math", () => {
     );
     G.playerInfo["0"].hereticOrOrthodox = "orthodox";
     G.playerInfo["0"].heresyTracker = 5;
+    // Defender must have opposing alignment for heresy shift to apply (DEV-8)
+    G.playerInfo["1"].hereticOrOrthodox = "heretic";
     resolveBattleAndReturnWinner(G, stubEvents, buildCtxWithPhase("0"));
     // Orthodox winner: heresyTracker decreases by 1
     expect(G.playerInfo["0"].heresyTracker).toBe(4);
