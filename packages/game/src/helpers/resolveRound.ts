@@ -3,6 +3,7 @@ import { RandomAPI } from "boardgame.io/dist/types/src/plugins/random/random";
 import { MyGameState, GoodKey } from "../types";
 import legacyResolutions from "./legacyResolutions";
 import { enactPiracy } from "./piracy";
+import { removeVPAmount } from "./stateUtils";
 
 const ALL_GOODS: GoodKey[] = ["mithril", "dragonScales", "krakenSkin", "magicDust", "stickyIchor", "pipeweed"];
 
@@ -130,17 +131,11 @@ const resolveRound = (G: MyGameState, events: EventsAPI, random: RandomAPI) => {
   collectFactoryIncome(G);
 
   // D8: debt penalty — gold < 0 only (not at exactly 0)
+  // GAP-16: VP floor enforced inside removeVPAmount
   Object.values(G.playerInfo).forEach((player) => {
     if (player.resources.gold < 0) {
-      player.resources.victoryPoints -= Math.floor(
-        Math.abs(player.resources.gold) / 2
-      );
+      removeVPAmount(G, player.id, Math.floor(Math.abs(player.resources.gold) / 2));
     }
-  });
-
-  // GAP-16: VP floor of 0
-  Object.values(G.playerInfo).forEach((player) => {
-    player.resources.victoryPoints = Math.max(0, player.resources.victoryPoints);
   });
 
   const tradeAmounts = [...Object.values(tradeGainsMap)];

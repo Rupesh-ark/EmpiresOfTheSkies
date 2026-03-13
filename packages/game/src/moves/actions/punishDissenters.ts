@@ -7,6 +7,7 @@ import {
   increaseOrthodoxyWithinMove,
   removeGoldAmount,
   removeOneCounsellor,
+  removeVPAmount,
 } from "../../helpers/stateUtils";
 import { Ctx } from "boardgame.io/dist/types/src/types";
 
@@ -45,7 +46,7 @@ const punishDissenters: Move<MyGameState> = (
       return INVALID_MOVE;
     }
     playerInfo.prisoners -= 1;
-    playerInfo.resources.victoryPoints -= 1;
+    removeVPAmount(G, playerID, 1);
     if (playerInfo.hereticOrOrthodox === "orthodox") {
       increaseOrthodoxyWithinMove(G, playerID);
     } else {

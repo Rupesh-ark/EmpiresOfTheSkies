@@ -14,7 +14,11 @@ export const removeVPAmount = (
   playerID: string,
   vpAmount: number
 ) => {
-  G.playerInfo[playerID].resources.victoryPoints -= vpAmount;
+  // GAP-16: "A player's total of Victory Points can never fall below zero"
+  G.playerInfo[playerID].resources.victoryPoints = Math.max(
+    0,
+    G.playerInfo[playerID].resources.victoryPoints - vpAmount
+  );
 };
 
 export const addVPAmount = (
