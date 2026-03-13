@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { MyGameProps, GAME_PHASES } from "@eots/game";
 import {
   AppBar,
@@ -19,12 +19,14 @@ import { IoMdCube } from "react-icons/io";
 import { GiTrumpetFlag } from "react-icons/gi";
 import { checkPlayerIDAndReturnPlayerInfo, clearMoves } from "../../utils/gameHelpers";
 import { Factory, Person4Sharp } from "@mui/icons-material";
+import prisonSvg from "../../boards_and_assets/player_boards/prison.svg";
 import ArchprelateIcon from "../Icons/ArchprelateIcon";
 import CounsellorIcon from "../Icons/CounsellorIcon";
-import SkyshipIcon from "../Icons/SkyshipIcon";
-import RegimentIcon from "../Icons/RegimentIcon";
-import LevyIcon from "../Icons/LevyIcon";
 import VictoryPointIcon from "../Icons/VictoryPointIcon";
+import {
+  CardHoldingsInlineControls,
+  CardHoldingsPanels,
+} from "./CardHoldingsBarTabs";
 
 const chipSx = {
   backgroundColor: "rgba(255,255,255,1)",
@@ -38,18 +40,21 @@ const chipSx = {
 const ResourceTrackerBar = (props: ResourceTrackerBarProps) => {
   const [passDialogOpen, setPassDialogOpen] = useState(false);
   const [phaseDialogOpen, setPhaseDialogOpen] = useState(false);
+  const [legacyCardOpen, setLegacyCardOpen] = useState(false);
+  const [advantageCardOpen, setAdvantageCardOpen] = useState(false);
+  const cardHoldingsAnchorRef = useRef<HTMLDivElement | null>(null);
   if (!props.playerID) {
     return <></>;
   }
   const currentPlayer = checkPlayerIDAndReturnPlayerInfo(props);
   const counsellors = currentPlayer.resources.counsellors;
   const gold = currentPlayer.resources.gold;
-  const skyships = currentPlayer.resources.skyships;
-  const regiments = currentPlayer.resources.regiments;
+  const prisoners = currentPlayer.prisoners;
   const colour = currentPlayer.colour;
   const victoryPoints = currentPlayer.resources.victoryPoints;
-  const levies = currentPlayer.resources.levies;
   const factories = currentPlayer.factories;
+  const legacyCardName = currentPlayer.resources.legacyCard ?? "the builder";
+  const advantageCard = currentPlayer.resources.advantageCard;
   const turnComplete =
     props.G.playerInfo[props.playerID ?? props.ctx.currentPlayer].turnComplete;
 
@@ -63,8 +68,25 @@ const ResourceTrackerBar = (props: ResourceTrackerBarProps) => {
     }
   };
   return (
-    <AppBar position={"sticky"} sx={{ background: "linear-gradient(90deg, #1a0a14 0%, #0d0d0d 50%, #1a0a00 100%)", boxShadow: "0 2px 12px rgba(0,0,0,0.6)" }}>
-      <Toolbar sx={{ justifyContent: "space-between", flexWrap: "wrap", gap: 1, py: 0.5 }}>
+    <AppBar
+      position={"sticky"}
+      sx={{
+        background: "linear-gradient(90deg, #1a0a14 0%, #0d0d0d 50%, #1a0a00 100%)",
+        boxShadow: "0 2px 12px rgba(0,0,0,0.6)",
+        overflow: "visible",
+      }}
+    >
+      <Toolbar
+        sx={{
+          justifyContent: "space-between",
+          flexWrap: "nowrap",
+          gap: 1,
+          py: 0.5,
+          overflowX: "auto",
+          scrollbarWidth: "none",
+          "&::-webkit-scrollbar": { display: "none" },
+        }}
+      >
         <div style={{ display: "flex", alignItems: "center", gap: "24px" }}>
           <Tooltip title="Click to see all phases" disableInteractive>
             <span
@@ -100,12 +122,24 @@ const ResourceTrackerBar = (props: ResourceTrackerBarProps) => {
             </Tooltip>
           )}
         </div>
+        <Box
+          ref={cardHoldingsAnchorRef}
+          sx={{ display: "inline-flex", alignItems: "center", flexShrink: 0 }}
+        >
+          <CardHoldingsInlineControls
+            colour={colour}
+            legacyCardOpen={legacyCardOpen}
+            advantageCardOpen={advantageCardOpen}
+            onToggleLegacy={() => setLegacyCardOpen((open) => !open)}
+            onToggleAdvantage={() => setAdvantageCardOpen((open) => !open)}
+          />
+        </Box>
         <div
           style={{
             display: "flex",
             alignItems: "center",
             gap: "6px",
-            flexWrap: "wrap",
+            flexWrap: "nowrap",
           }}
         >
           <Tooltip title="Counsellors" disableInteractive>
@@ -122,24 +156,17 @@ const ResourceTrackerBar = (props: ResourceTrackerBarProps) => {
               sx={chipSx}
             />
           </Tooltip>
-          <Tooltip title="Skyships" disableInteractive>
+          <Tooltip title="Imprisoned Dissenters" disableInteractive>
             <Chip
-              icon={<SkyshipIcon colour={colour} />}
-              label={skyships}
-              sx={chipSx}
-            />
-          </Tooltip>
-          <Tooltip title="Regiments" disableInteractive>
-            <Chip
-              icon={<RegimentIcon colour={colour} />}
-              label={regiments}
-              sx={chipSx}
-            />
-          </Tooltip>
-          <Tooltip title="Levies" disableInteractive>
-            <Chip
-              icon={<LevyIcon colour={colour} />}
-              label={levies}
+              icon={
+                <Box
+                  component="img"
+                  src={prisonSvg}
+                  alt=""
+                  sx={{ width: 22, height: 22, objectFit: "contain" }}
+                />
+              }
+              label={prisoners}
               sx={chipSx}
             />
           </Tooltip>
@@ -198,6 +225,14 @@ const ResourceTrackerBar = (props: ResourceTrackerBarProps) => {
           )}
         </div>
       </Toolbar>
+      <CardHoldingsPanels
+        anchorEl={cardHoldingsAnchorRef.current}
+        colour={colour}
+        legacyCardName={legacyCardName}
+        advantageCard={advantageCard}
+        legacyCardOpen={legacyCardOpen}
+        advantageCardOpen={advantageCardOpen}
+      />
       <Box
         sx={{
           height: 3,

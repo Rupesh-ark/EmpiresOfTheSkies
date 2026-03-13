@@ -9,6 +9,7 @@ import {
   DialogContent,
   DialogTitle,
 } from "@mui/material";
+import { getLocationPresentation } from "../../utils/locationLabels";
 
 const RetrieveFleetsDialog = (props: RetrieveFleetsDialogProps) => {
   const [open, setOpen] = useState(true);
@@ -21,10 +22,16 @@ const RetrieveFleetsDialog = (props: RetrieveFleetsDialogProps) => {
     const [x, y] = fleet.location;
     if (x !== 4 || y !== 0) {
       hasNoFleets = false;
+      const locationPresentation = getLocationPresentation(
+        props.G.mapState.currentTileArray,
+        fleet.location
+      );
       return (
         <FleetDisplay
           fleetId={fleet.fleetId}
           location={fleet.location}
+          locationLabel={locationPresentation.name}
+          locationReference={locationPresentation.reference}
           skyships={fleet.skyships}
           regiments={fleet.regiments}
           levies={fleet.levies}

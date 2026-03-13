@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from "react";
+import React, { useState, useRef, useCallback, useEffect } from "react";
 import { keyframes } from "@emotion/react";
 
 import ReactCardFlip from "react-card-flip";
@@ -13,6 +13,7 @@ import FleetIcon from "../Icons/FleetIcon";
 import ColonyIcon from "../Icons/ColonyIcon";
 import OutpostIcon from "../Icons/OutpostIcon";
 import svgNameToElementMap from "./nameToElementMap";
+import { getLocationPresentation } from "../../utils/locationLabels";
 
 //Method for displaying a flippable tile which contains a world map tile image
 export const WorldMapTile = (props: worldMapTileProps) => {
@@ -123,16 +124,25 @@ Loot:
     props.G.mapState.discoveredTiles[yLocation][xLocation]
   );
   const [detailOpen, setDetailOpen] = useState(false);
+  const locationPresentation = getLocationPresentation(props.G.mapState.currentTileArray, [
+    xLocation,
+    yLocation,
+  ]);
 
-  const isOcean = currentTile.type === "ocean";
-  const isCenterTile = xLocation === 4 && yLocation === 0;
-  const canShowDetail = flip && !isOcean && !isCenterTile;
+  const canShowDetail = flip;
 
   const altOnClick = () => {
     if (props.alternateOnClick) {
       props.alternateOnClick([xLocation, yLocation]);
     }
   };
+
+  useEffect(() => {
+    if (props.detailRequestKey !== undefined && flip) {
+      setDetailOpen(true);
+      props.onDetailRequestHandled?.(props.detailRequestKey);
+    }
+  }, [flip, props.detailRequestKey, props.onDetailRequestHandled]);
 
   return (
     <ReactCardFlip isFlipped={flip} key={props.location.toString()}>
@@ -200,7 +210,7 @@ Loot:
             maxWidth: "100%",
             minHeight: "150px",
             minWidth: "150px",
-            border: props.selectable ? "5px solid yellow" : "0px ",
+            border: props.selectable ? "5px solid #ffe066" : "0px",
             borderRadius: 0,
           }}
           onClick={props.selectable ? altOnClick : canShowDetail ? () => setDetailOpen(true) : undefined}
@@ -210,7 +220,22 @@ Loot:
           {xLocation !== 4 || yLocation !== 0 ? fleets : null}
         </Button>
         <Dialog open={detailOpen} onClose={() => setDetailOpen(false)} maxWidth="sm" fullWidth>
-          <DialogTitle sx={{ display: "flex", justifyContent: "flex-end", alignItems: "center", pb: 0 }}>
+          <DialogTitle
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              pb: 0,
+            }}
+          >
+            <Box sx={{ pr: 1 }}>
+              <Typography sx={{ fontWeight: 800 }}>
+                {locationPresentation.name}
+              </Typography>
+              <Typography sx={{ fontSize: "0.82rem", color: "rgba(0,0,0,0.62)" }}>
+                {locationPresentation.reference}
+              </Typography>
+            </Box>
             <IconButton size="small" onClick={() => setDetailOpen(false)}><Close /></IconButton>
           </DialogTitle>
           <DialogContent>
@@ -242,4 +267,6 @@ interface worldMapTileProps extends MyGameProps {
   location: number[];
   alternateOnClick?: (coords: number[]) => void;
   selectable?: boolean;
+  detailRequestKey?: number;
+  onDetailRequestHandled?: (requestKey: number) => void;
 }

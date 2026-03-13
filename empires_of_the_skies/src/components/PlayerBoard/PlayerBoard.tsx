@@ -22,7 +22,7 @@ import FortuneOfWarCardDisplay from "./FortuneOfWarCardDisplay";
 import ShipYardDisplay from "./ShipYardDisplay";
 import WorldMap from "../WorldMap/WorldMap";
 import { clearMoves } from "../../utils/gameHelpers";
-import svgNameToElementMap from "../WorldMap/nameToElementMap";
+import { getLocationPresentation } from "../../utils/locationLabels";
 import SkyshipIcon from "../Icons/SkyshipIcon";
 import RegimentIcon from "../Icons/RegimentIcon";
 import LevyIcon from "../Icons/LevyIcon";
@@ -41,6 +41,12 @@ type FleetAllocation = {
   skyships: number;
   regiments: number;
   levies: number;
+};
+
+type FleetLocationSummary = {
+  name: string;
+  reference: string;
+  fullLabel: string;
 };
 
 const emptyFleetAllocation = (): FleetAllocation => ({
@@ -75,6 +81,7 @@ const resourceCounterButtonSx = (disabledState = false) =>
 
 const FleetManagementCard = ({
   fleet,
+  locationSummary,
   playerColour,
   allocation,
   availableResources,
@@ -82,6 +89,7 @@ const FleetManagementCard = ({
   isDispatchDisabled,
   onSelect,
   onDispatch,
+  onViewLocation,
   onAdjustAllocation,
 }: FleetManagementCardProps) => {
   const resourceRows: { key: FleetResourceKey; label: string }[] = [
@@ -143,12 +151,77 @@ const FleetManagementCard = ({
         <Typography
           sx={{
             fontFamily: fonts.system,
-            fontSize: "0.78rem",
-            color: "rgba(0,0,0,0.72)",
+            fontSize: "0.64rem",
+            fontWeight: 800,
+            letterSpacing: "0.08em",
+            textTransform: "uppercase",
+            color: "rgba(17,34,54,0.58)",
+            mt: 0.2,
           }}
         >
-          {`Location: [${fleet.location[0] + 1}, ${4 - fleet.location[1]}]`}
+          Current Position
         </Typography>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, flexWrap: "wrap" }}>
+          <Box
+            component="button"
+            type="button"
+            onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
+              event.stopPropagation();
+              onViewLocation(fleet.fleetId, fleet.location);
+            }}
+            sx={{
+              all: "unset",
+              cursor: "pointer",
+              textDecoration: "underline",
+              textDecorationColor: alpha(playerColour, 0.75),
+              textDecorationThickness: "1.5px",
+              textUnderlineOffset: "2px",
+              borderRadius: "4px",
+              "&:hover": {
+                color: darken(playerColour, 0.12),
+              },
+              "&:focus-visible": {
+                outline: `2px solid ${alpha(playerColour, 0.55)}`,
+                outlineOffset: "2px",
+              },
+            }}
+          >
+            <Box
+              component="span"
+              sx={{ display: "inline-flex", alignItems: "center", gap: 0.5, flexWrap: "wrap" }}
+            >
+              <Typography
+                component="span"
+                sx={{
+                  fontFamily: fonts.system,
+                  fontSize: "0.82rem",
+                  fontWeight: 700,
+                  color: "#112236",
+                  lineHeight: 1.2,
+                }}
+              >
+                {locationSummary.name}
+              </Typography>
+              <Box
+                component="span"
+                sx={{
+                  px: 0.55,
+                  py: 0.12,
+                  borderRadius: 999,
+                  backgroundColor: alpha(playerColour, 0.12),
+                  border: `1px solid ${alpha(playerColour, 0.24)}`,
+                  fontFamily: fonts.system,
+                  fontSize: "0.66rem",
+                  fontWeight: 800,
+                  letterSpacing: "0.08em",
+                  color: darken(playerColour, 0.35),
+                }}
+              >
+                {locationSummary.reference}
+              </Box>
+            </Box>
+          </Box>
+        </Box>
         <Box
           sx={{
             display: "grid",
@@ -281,6 +354,7 @@ const FleetManagementCard = ({
 
 interface FleetManagementCardProps {
   fleet: FleetInfo;
+  locationSummary: FleetLocationSummary;
   playerColour: string;
   allocation: FleetAllocation;
   availableResources: FleetAllocation;
@@ -288,104 +362,13 @@ interface FleetManagementCardProps {
   isDispatchDisabled: boolean;
   onSelect: (fleetId: number) => void;
   onDispatch: (fleetId: number) => void;
+  onViewLocation: (fleetId: number, location: number[]) => void;
   onAdjustAllocation: (
     fleetId: number,
     resource: FleetResourceKey,
     delta: -1 | 1
   ) => void;
 }
-
-const PrisonDisplay = ({
-  colour,
-  prisoners,
-}: {
-  colour: string;
-  prisoners: number;
-}) => {
-  const barLines = [
-    7.5, 14.5, 21.5, 28.5, 35.5, 42.5, 49.5, 56.5, 62.5, 69.5, 76.5, 83.5, 89.5,
-    96.5, 103.5, 110.5, 116.5,
-  ];
-
-  return (
-    <Box
-      sx={{
-        width: "100%",
-        minHeight: 130,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
-      <svg
-        width="220"
-        height="104"
-        viewBox="0 0 124 59"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-        style={{ width: "min(88%, 260px)", height: "auto" }}
-      >
-        <path
-          d="M25.6596 15.0001C30.5371 15.0001 34.4903 19.9215 34.4903 25.9921C34.4903 32.0624 30.5371 36.9844 25.6596 36.9844C20.7831 36.9844 16.8296 32.0624 16.8296 25.9921C16.8296 19.9215 20.7831 15.0001 25.6596 15.0001Z"
-          fill={colour}
-          stroke="#1A1A18"
-          strokeWidth="0.288"
-          strokeMiterlimit="22.9256"
-          visibility={prisoners >= 1 ? "visible" : "hidden"}
-        />
-        <path
-          fillRule="evenodd"
-          clipRule="evenodd"
-          d="M26.0001 55.1782H8C8 44.711 16.0589 36.2265 26.0001 36.2265C35.9411 36.2265 44 44.711 44 55.1782H26.0001Z"
-          fill={colour}
-          visibility={prisoners >= 1 ? "visible" : "hidden"}
-        />
-        <path
-          d="M61.6596 15.0001C66.5371 15.0001 70.4903 19.9215 70.4903 25.9921C70.4903 32.0624 66.5371 36.9844 61.6596 36.9844C56.7831 36.9844 52.8296 32.0624 52.8296 25.9921C52.8296 19.9215 56.7831 15.0001 61.6596 15.0001Z"
-          fill={colour}
-          stroke="#1A1A18"
-          strokeWidth="0.288"
-          strokeMiterlimit="22.9256"
-          visibility={prisoners >= 2 ? "visible" : "hidden"}
-        />
-        <path
-          fillRule="evenodd"
-          clipRule="evenodd"
-          d="M62.0001 55.1782H44C44 44.711 52.0589 36.2265 62.0001 36.2265C71.9411 36.2265 80 44.711 80 55.1782H62.0001Z"
-          fill={colour}
-          visibility={prisoners >= 2 ? "visible" : "hidden"}
-        />
-        <path
-          d="M98.6596 15.0001C103.537 15.0001 107.49 19.9215 107.49 25.9921C107.49 32.0624 103.537 36.9844 98.6596 36.9844C93.7831 36.9844 89.8296 32.0624 89.8296 25.9921C89.8296 19.9215 93.7831 15.0001 98.6596 15.0001Z"
-          fill={colour}
-          stroke="#1A1A18"
-          strokeWidth="0.288"
-          strokeMiterlimit="22.9256"
-          visibility={prisoners >= 3 ? "visible" : "hidden"}
-        />
-        <path
-          fillRule="evenodd"
-          clipRule="evenodd"
-          d="M99.0001 55.1782H81C81 44.711 89.0589 36.2265 99.0001 36.2265C108.941 36.2265 117 44.711 117 55.1782H99.0001Z"
-          fill={colour}
-          visibility={prisoners >= 3 ? "visible" : "hidden"}
-        />
-        {barLines.map((x) => (
-          <line
-            key={`prison-bar-${x}`}
-            x1={x}
-            y1="1"
-            x2={x}
-            y2="58"
-            stroke="black"
-            strokeWidth="3"
-          />
-        ))}
-        <rect x="0.5" y="0.5" width="123" height="58" stroke="black" />
-      </svg>
-    </Box>
-  );
-};
 
 // displays buttons which can build cathedrals, palaces and skyships
 // also displays the button to imprison dissenters and to dispatch skyship fleets
@@ -405,7 +388,6 @@ export const PlayerBoard = (props: PlayerBoardProps) => {
   const playerInfo =
     props.G.playerInfo[props.playerID ?? props.ctx.currentPlayer];
   const colour = playerInfo.colour;
-  const prisoners = playerInfo.prisoners;
   const playerRegiments = playerInfo.resources.regiments;
   const playerSkyships = playerInfo.resources.skyships;
   const playerLevies = playerInfo.resources.levies;
@@ -419,6 +401,10 @@ export const PlayerBoard = (props: PlayerBoardProps) => {
   const dockNoteColor = alpha(darken(colour, 0.5), 0.86);
   const currentFleet =
     playerInfo.fleetInfo[selectedFleet] ?? playerInfo.fleetInfo[0];
+  const selectedFleetLocationSummary = getLocationPresentation(
+    props.G.mapState.currentTileArray,
+    currentFleet.location
+  );
 
   const fortuneOfWarCards: JSX.Element[] = [];
 
@@ -508,23 +494,37 @@ export const PlayerBoard = (props: PlayerBoardProps) => {
     setDispatchFleetMapVisible(true);
   };
 
-  const fleetCards = playerInfo.fleetInfo.map((fleet) => (
-    <FleetManagementCard
-      key={`fleet-management-${fleet.fleetId}`}
-      fleet={fleet}
-      playerColour={colour}
-      allocation={fleetAllocations[fleet.fleetId] ?? emptyFleetAllocation()}
-      availableResources={getAvailableResourcesForFleet(
-        fleet.fleetId,
-        fleetAllocations
-      )}
-      selected={selectedFleet === fleet.fleetId}
-      isDispatchDisabled={dispatchButtonDisabled}
-      onSelect={setSelectedFleet}
-      onDispatch={openDispatchMapForFleet}
-      onAdjustAllocation={adjustFleetAllocation}
-    />
-  ));
+  const openFleetLocation = (fleetId: number, location: number[]) => {
+    setSelectedFleet(fleetId);
+    props.onOpenFleetLocation?.([...location]);
+  };
+
+  const fleetCards = playerInfo.fleetInfo.map((fleet) => {
+    const locationSummary = getLocationPresentation(
+      props.G.mapState.currentTileArray,
+      fleet.location
+    );
+
+    return (
+      <FleetManagementCard
+        key={`fleet-management-${fleet.fleetId}`}
+        fleet={fleet}
+        locationSummary={locationSummary}
+        playerColour={colour}
+        allocation={fleetAllocations[fleet.fleetId] ?? emptyFleetAllocation()}
+        availableResources={getAvailableResourcesForFleet(
+          fleet.fleetId,
+          fleetAllocations
+        )}
+        selected={selectedFleet === fleet.fleetId}
+        isDispatchDisabled={dispatchButtonDisabled}
+        onSelect={setSelectedFleet}
+        onDispatch={openDispatchMapForFleet}
+        onViewLocation={openFleetLocation}
+        onAdjustAllocation={adjustFleetAllocation}
+      />
+    );
+  });
   const totalAllocatedResources = getTotalAllocatedResources(fleetAllocations);
   const availableForLoading: FleetAllocation = {
     skyships: Math.max(0, playerSkyships - totalAllocatedResources.skyships),
@@ -534,6 +534,11 @@ export const PlayerBoard = (props: PlayerBoardProps) => {
 
   const selectedFleetAllocation =
     fleetAllocations[selectedFleet] ?? emptyFleetAllocation();
+  const destinationLocationSummary = getLocationPresentation(
+    props.G.mapState.currentTileArray,
+    fleetDestination
+  );
+
   return (
     <ThemeProvider theme={influencePrelatesTheme}>
       <Box sx={{ width: "100%", display: "flex", justifyContent: "center", px: { xs: 1, md: 2 } }}>
@@ -1184,10 +1189,33 @@ export const PlayerBoard = (props: PlayerBoardProps) => {
               </Box>
             </Box>
             <Dialog open={dispatchFleetMapVisible} maxWidth={false}>
-              <DialogTitle>{`Select a tile to deploy Fleet ${selectedFleet + 1} to. 
-Selected tile: [${fleetDestination[0] + 1}, ${
-                4 - fleetDestination[1]
-              }]`}</DialogTitle>
+              <DialogTitle>
+                <Box sx={{ display: "grid", gap: 0.25 }}>
+                  <Typography
+                    sx={{ fontFamily: fonts.system, fontWeight: 800, fontSize: "1rem" }}
+                  >
+                    {`Deploy Fleet ${selectedFleet + 1}`}
+                  </Typography>
+                  <Typography
+                    sx={{
+                      fontFamily: fonts.system,
+                      fontSize: "0.84rem",
+                      color: "rgba(0,0,0,0.74)",
+                    }}
+                  >
+                    {`Current position: ${selectedFleetLocationSummary.fullLabel}`}
+                  </Typography>
+                  <Typography
+                    sx={{
+                      fontFamily: fonts.system,
+                      fontSize: "0.84rem",
+                      color: "rgba(0,0,0,0.74)",
+                    }}
+                  >
+                    {`Selected destination: ${destinationLocationSummary.fullLabel}`}
+                  </Typography>
+                </Box>
+              </DialogTitle>
               <DialogContent>
                 <WorldMap
                   {...props}
@@ -1415,127 +1443,6 @@ Selected tile: [${fleetDestination[0] + 1}, ${
                 </Box>
               </Box>
             </Box>
-            <Box sx={rowCardSx}>
-              <Box
-                sx={{
-                  borderLeft: `4px solid ${boardSectionAccent}`,
-                  pl: 1,
-                  mb: 1.2,
-                }}
-              >
-                <Typography
-                  sx={{
-                    fontFamily: fonts.system,
-                    fontWeight: 800,
-                    lineHeight: 1.1,
-                    fontSize: "1.02rem",
-                    color: "#1a2733",
-                    mb: 0.35,
-                  }}
-                >
-                  Card Holdings
-                </Typography>
-                <Typography
-                  sx={{
-                    fontFamily: fonts.system,
-                    fontSize: "0.9rem",
-                    lineHeight: 1.25,
-                    color: "rgba(0,0,0,0.74)",
-                  }}
-                >
-                  Legacy and kingdom advantage cards, plus prison status.
-                </Typography>
-              </Box>
-              <Box
-                sx={{
-                  display: "grid",
-                  gridTemplateColumns: { xs: "1fr", md: "auto minmax(240px, 1fr)" },
-                  gap: 1.2,
-                  alignItems: "stretch",
-                }}
-              >
-                <Box
-                  sx={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                  }}
-                >
-                  <svg
-                    style={{
-                      backgroundImage: `url(${
-                        svgNameToElementMap[
-                          props.G.playerInfo[
-                            props.playerID ?? props.ctx.currentPlayer
-                          ].resources.legacyCard ?? "the builder"
-                        ]
-                      })`,
-                      backgroundRepeat: "no-repeat",
-                      backgroundSize: "contain",
-                      width: "137px",
-                      height: "250px",
-                      margin: "5px",
-                    }}
-                  ></svg>
-                  {playerInfo.resources.advantageCard && (
-                    <div
-                      style={{
-                        fontSize: "11px",
-                        background: "#C8A96E",
-                        borderRadius: "4px",
-                        padding: "2px 6px",
-                        textAlign: "center",
-                        marginTop: "4px",
-                      }}
-                    >
-                      {playerInfo.resources.advantageCard.replace(/_/g, " ")}
-                    </div>
-                  )}
-                </Box>
-                <Box
-                  sx={{
-                    minWidth: 0,
-                    borderLeft: { xs: "none", md: "1px dashed rgba(15,23,42,0.16)" },
-                    pl: { xs: 0, md: 1.2 },
-                    display: "grid",
-                    gridTemplateRows: "auto 1fr",
-                    gap: 0.7,
-                    alignContent: "stretch",
-                  }}
-                >
-                  <Box
-                    sx={{
-                      display: "flex",
-                      alignItems: "baseline",
-                      gap: 0.75,
-                    }}
-                  >
-                    <Typography
-                      sx={{
-                        fontFamily: fonts.system,
-                        fontWeight: 700,
-                        fontSize: "0.88rem",
-                        color: boardSectionAccent,
-                        whiteSpace: "nowrap",
-                      }}
-                    >
-                      Prison
-                    </Typography>
-                    <Typography
-                      sx={{
-                        fontFamily: fonts.system,
-                        fontSize: "0.8rem",
-                        lineHeight: 1.25,
-                        color: "rgba(0,0,0,0.7)",
-                      }}
-                    >
-                      Imprisoned dissenters (max 3).
-                    </Typography>
-                  </Box>
-                  <PrisonDisplay colour={colour} prisoners={prisoners} />
-                </Box>
-              </Box>
-            </Box>
           </Box>
         </Box>
       </Box>
@@ -1543,4 +1450,6 @@ Selected tile: [${fleetDestination[0] + 1}, ${
   );
 };
 
-interface PlayerBoardProps extends MyGameProps {}
+interface PlayerBoardProps extends MyGameProps {
+  onOpenFleetLocation?: (location: number[]) => void;
+}

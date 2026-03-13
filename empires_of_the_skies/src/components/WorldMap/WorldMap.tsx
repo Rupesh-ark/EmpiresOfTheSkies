@@ -20,6 +20,12 @@ const WorldMap = (props: WorldMapProps) => {
             selectable = true;
           }
         });
+        const detailRequestKey =
+          props.detailRequest &&
+          props.detailRequest.location[0] === x &&
+          props.detailRequest.location[1] === y
+            ? props.detailRequest.key
+            : undefined;
         tiles[y].push(
           <Grid
             size={{ lg: 1 }}
@@ -33,6 +39,8 @@ const WorldMap = (props: WorldMapProps) => {
                 props.alternateOnClick ? props.alternateOnClick : undefined
               }
               selectable={selectable}
+              detailRequestKey={detailRequestKey}
+              onDetailRequestHandled={props.onDetailRequestHandled}
             />
           </Grid>
         );
@@ -68,6 +76,8 @@ const WorldMap = (props: WorldMapProps) => {
 interface WorldMapProps extends MyGameProps {
   alternateOnClick?: (coords: number[]) => void;
   selectableTiles?: number[][];
+  detailRequest?: { location: number[]; key: number } | null;
+  onDetailRequestHandled?: (requestKey: number) => void;
 }
 
 export default WorldMap;

@@ -38,6 +38,48 @@ const FleetDisplay = (props: FleetDisplayProps) => {
       >
         {`Fleet ${props.fleetId + 1}`}
       </Typography>
+      <Typography
+        sx={{
+          fontFamily: fonts.system,
+          fontSize: "0.68rem",
+          fontWeight: 800,
+          letterSpacing: "0.08em",
+          textTransform: "uppercase",
+          color: "rgba(19,38,58,0.62)",
+        }}
+      >
+        Current Position
+      </Typography>
+      <Box sx={{ display: "flex", alignItems: "center", gap: 0.55, flexWrap: "wrap" }}>
+        <Typography
+          sx={{
+            fontFamily: fonts.system,
+            fontSize: "0.88rem",
+            fontWeight: 700,
+            lineHeight: 1.2,
+            color: "#13263a",
+          }}
+        >
+          {props.locationLabel}
+        </Typography>
+        <Box
+          component="span"
+          sx={{
+            px: 0.6,
+            py: 0.15,
+            borderRadius: 999,
+            backgroundColor: "rgba(19,38,58,0.08)",
+            border: "1px solid rgba(19,38,58,0.15)",
+            fontFamily: fonts.system,
+            fontSize: "0.68rem",
+            fontWeight: 800,
+            letterSpacing: "0.08em",
+            color: "rgba(19,38,58,0.72)",
+          }}
+        >
+          {props.locationReference}
+        </Box>
+      </Box>
       <Box
         sx={{
           fontFamily: fonts.system,
@@ -46,7 +88,6 @@ const FleetDisplay = (props: FleetDisplayProps) => {
           color: "rgba(0,0,0,0.76)",
         }}
       >
-        <div>{`Location: [${props.location[0] + 1}, ${4 - props.location[1]}]`}</div>
         <div>{`Skyships: ${props.skyships}`}</div>
         <div>{`Regiments: ${props.regiments}`}</div>
         <div>{`Levies: ${props.levies}`}</div>
@@ -58,6 +99,8 @@ const FleetDisplay = (props: FleetDisplayProps) => {
 export default FleetDisplay;
 
 interface FleetDisplayProps extends FleetInfo {
+  locationLabel: string;
+  locationReference: string;
   onClickFunction: (fleetId: number) => void;
   selected: number;
 }

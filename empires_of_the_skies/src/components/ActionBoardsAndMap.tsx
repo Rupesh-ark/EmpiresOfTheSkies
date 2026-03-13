@@ -54,11 +54,16 @@ const tabSx = {
   },
   "&.Mui-selected": {
     backgroundColor: "rgba(255,255,255,0.12)",
+    transform: "scale(1.08)",
   },
 };
 
 export const ActionBoardsAndMap = (props: MyGameProps) => {
   const [value, setValue] = useState("0");
+  const [mapDetailRequest, setMapDetailRequest] = useState<{
+    location: number[];
+    key: number;
+  } | null>(null);
   const handleChange = (event: React.SyntheticEvent, newValue: string) => {
     setValue(newValue);
   };
@@ -71,6 +76,14 @@ export const ActionBoardsAndMap = (props: MyGameProps) => {
 
   const isElectionTurn =
     props.ctx.phase === "election" && props.playerID === props.ctx.currentPlayer;
+
+  const openMapAtLocation = (location: number[]) => {
+    setMapDetailRequest((previousRequest) => ({
+      location: [...location],
+      key: (previousRequest?.key ?? 0) + 1,
+    }));
+    setValue("2");
+  };
 
   return (
     <div>
@@ -99,10 +112,21 @@ export const ActionBoardsAndMap = (props: MyGameProps) => {
                     <ActionBoard {...props} />
                   </TabPanel>
                   <TabPanel value={"1"} tabIndex={1}>
-                    <PlayerBoard {...props} />
+                    <PlayerBoard
+                      {...props}
+                      onOpenFleetLocation={openMapAtLocation}
+                    />
                   </TabPanel>
                   <TabPanel value={"2"} tabIndex={2}>
-                    <WorldMap {...props} />
+                    <WorldMap
+                      {...props}
+                      detailRequest={mapDetailRequest}
+                      onDetailRequestHandled={(requestKey) => {
+                        setMapDetailRequest((currentRequest) =>
+                          currentRequest?.key === requestKey ? null : currentRequest
+                        );
+                      }}
+                    />
                   </TabPanel>
                   <TabPanel value={"3"} tabIndex={3} sx={{ p: 0 }}>
                     <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%", gap: 0, px: 2, pt: 1 }}>
