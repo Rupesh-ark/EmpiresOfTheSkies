@@ -119,6 +119,8 @@ export function buildInitialG(
     round: 1,
     finalRound: 4,
     firstTurnOfRound: true,
+    mustContinueDiscovery: false,
+    nprCathedrals: {},
     electionResults: {},
     hasVoted: [],
     turnOrder: players.map((p) => p.id),

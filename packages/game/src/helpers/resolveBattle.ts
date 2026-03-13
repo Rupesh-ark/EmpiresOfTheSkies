@@ -33,6 +33,14 @@ export const resolveBattleAndReturnWinner = (
   });
   attackerSwordValue += G.battleState?.attacker.fowCard?.sword ?? 0;
   attackerShieldValue += G.battleState?.attacker.fowCard?.shield ?? 0;
+  // GAP-8: improved_training KA — +1 sword/shield per FoW card played, matching the card's stats
+  if (
+    G.battleState?.attacker.fowCard &&
+    G.playerInfo[G.battleState.attacker.id].resources.advantageCard === "improved_training"
+  ) {
+    if (G.battleState.attacker.fowCard.sword > 0) attackerSwordValue += 1;
+    if (G.battleState.attacker.fowCard.shield > 0) attackerShieldValue += 1;
+  }
 
   let defenderSwordValue = 0;
   let defenderShieldValue = 0;
@@ -61,6 +69,14 @@ export const resolveBattleAndReturnWinner = (
   }
   defenderSwordValue += G.battleState?.defender.fowCard?.sword ?? 0;
   defenderShieldValue += G.battleState?.defender.fowCard?.shield ?? 0;
+  // GAP-8: improved_training KA for defender
+  if (
+    G.battleState?.defender.fowCard &&
+    G.playerInfo[G.battleState.defender.id].resources.advantageCard === "improved_training"
+  ) {
+    if (G.battleState.defender.fowCard.sword > 0) defenderSwordValue += 1;
+    if (G.battleState.defender.fowCard.shield > 0) defenderShieldValue += 1;
+  }
 
   const attackerLosses = defenderSwordValue - attackerShieldValue;
   let attackerLossesCopy = attackerLosses.valueOf();
@@ -70,7 +86,20 @@ export const resolveBattleAndReturnWinner = (
   let defenderLossesCopy = defenderLosses.valueOf();
   console.log(`defender losses = ${defenderLossesCopy}`);
 
+  // GAP-22: odd hit rule — if total attacker hits are odd, at least 1 Skyship or Levy must absorb a hit
+  let attackerOddHitSatisfied = attackerLosses % 2 !== 1;
   attackerFleets.forEach((fleet) => {
+    if (!attackerOddHitSatisfied && attackerLossesCopy > 0) {
+      if (fleet.levies > 0) {
+        fleet.levies -= 1;
+        attackerLossesCopy -= 1;
+        attackerOddHitSatisfied = true;
+      } else if (fleet.skyships > 0) {
+        fleet.skyships -= 1;
+        attackerLossesCopy -= 1;
+        attackerOddHitSatisfied = true;
+      }
+    }
     while (
       attackerLossesCopy > 0 &&
       (fleet.regiments > 0 || fleet.skyships > 0 || fleet.levies > 0)
@@ -89,9 +118,24 @@ export const resolveBattleAndReturnWinner = (
         attackerLossesCopy -= 2;
       }
     }
+    // GAP-23 / GAP-14: troops aboard destroyed Skyships are lost — trim to Skyship capacity
+    while (fleet.regiments + fleet.levies > fleet.skyships) {
+      if (fleet.levies > 0) {
+        fleet.levies -= 1;
+      } else if (fleet.regiments > 0) {
+        fleet.regiments -= 1;
+      } else {
+        break;
+      }
+    }
   });
   if (ctx.phase === "ground_battle") {
     const currentBuilding = G.mapState.buildings[y][x];
+    // GAP-22: odd hit rule for garrison defender — at least 1 Levy must absorb if hits are odd
+    if (defenderLosses % 2 === 1 && (currentBuilding.garrisonedLevies ?? 0) > 0) {
+      currentBuilding.garrisonedLevies! -= 1;
+      defenderLossesCopy -= 1;
+    }
     while (
       defenderLossesCopy > 0 &&
       currentBuilding.garrisonedLevies &&
@@ -108,7 +152,20 @@ export const resolveBattleAndReturnWinner = (
       }
     }
   } else {
+    // GAP-22: odd hit rule — if total defender hits are odd, at least 1 Skyship or Levy must absorb a hit
+    let defenderOddHitSatisfied = defenderLosses % 2 !== 1;
     defenderFleets.forEach((fleet) => {
+      if (!defenderOddHitSatisfied && defenderLossesCopy > 0) {
+        if (fleet.levies > 0) {
+          fleet.levies -= 1;
+          defenderLossesCopy -= 1;
+          defenderOddHitSatisfied = true;
+        } else if (fleet.skyships > 0) {
+          fleet.skyships -= 1;
+          defenderLossesCopy -= 1;
+          defenderOddHitSatisfied = true;
+        }
+      }
       while (
         defenderLossesCopy > 0 &&
         (fleet.regiments > 0 || fleet.skyships > 0 || fleet.levies > 0)
@@ -125,6 +182,16 @@ export const resolveBattleAndReturnWinner = (
         } else if (fleet.regiments > 0) {
           fleet.regiments -= 1;
           defenderLossesCopy -= 2;
+        }
+      }
+      // GAP-23: troops aboard destroyed Skyships are lost — trim to Skyship capacity
+      while (fleet.regiments + fleet.levies > fleet.skyships) {
+        if (fleet.levies > 0) {
+          fleet.levies -= 1;
+        } else if (fleet.regiments > 0) {
+          fleet.regiments -= 1;
+        } else {
+          break;
         }
       }
     });

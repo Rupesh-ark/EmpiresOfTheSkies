@@ -1,6 +1,6 @@
 import type { Game, Ctx } from "boardgame.io";
 
-import { LegacyCard, MyGameState, MapState } from "./types";
+import { LegacyCardInfo, MyGameState, MapState } from "./types";
 
 import { ALL_KA_CARDS, FINAL_ROUND, LEGACY_CARDS } from "./codifiedGameInfo";
 import { initialBoardState, initialBattleMapState } from "./setup/boardSetup";
@@ -34,6 +34,7 @@ import passFleetInfoToPlayerInfo from "./moves/actions/passFleetInfoToPlayerInfo
 import deployFleet from "./moves/actions/deployFleet";
 import enableDispatchButtons from "./moves/actions/enableDispatchButtons";
 import issueHolyDecree from "./moves/actions/issueHolyDecree";
+import declareSmugglerGood from "./moves/actions/declareSmugglerGood";
 import pass from "./moves/pass";
 import attackOtherPlayersFleet from "./moves/aerialBattle/attackOtherPlayersFleet";
 import evadeAttackingFleet from "./moves/aerialBattle/evadeAttackingFleet";
@@ -86,8 +87,24 @@ const MyGame: Game<MyGameState> = {
       },
     };
 
+    const playerInfoMap = buildPlayerInfoMap(ctx);
+
+    // GAP-18: compute which player-type kingdoms are NPRs this session (1 cathedral each to start)
+    const assignedKingdoms = new Set(
+      Object.values(playerInfoMap).map((p) => p.kingdomName)
+    );
+    const ALL_PLAYER_KINGDOMS = [
+      "Angland", "Gallois", "Castillia", "Nordmark", "Ostreich", "Constantium",
+    ];
+    const nprCathedrals: Record<string, number> = {};
+    ALL_PLAYER_KINGDOMS.forEach((k) => {
+      if (!assignedKingdoms.has(k as any)) {
+        nprCathedrals[k] = 1;
+      }
+    });
+
     return {
-      playerInfo: buildPlayerInfoMap(ctx),
+      playerInfo: playerInfoMap,
       mapState: mapState,
       boardState: { ...initialBoardState },
       playerOrder: {
@@ -109,6 +126,8 @@ const MyGame: Game<MyGameState> = {
       round: 0,
       finalRound: FINAL_ROUND,
       firstTurnOfRound: true,
+      mustContinueDiscovery: false,
+      nprCathedrals,
       turnOrder: ctx.playOrder,
     };
   },
@@ -176,7 +195,7 @@ const MyGame: Game<MyGameState> = {
       next: "events",
       onBegin: (context) => {
         context.G.stage = "pick legacy card";
-        const cards: LegacyCard[] = [...LEGACY_CARDS];
+        const cards: LegacyCardInfo[] = [...LEGACY_CARDS];
         Object.values(context.G.playerInfo).forEach((player) => {
           for (let i = 0; i < 3; i++) {
             let randomIndex = Math.floor(Math.random() * cards.length);
@@ -356,6 +375,7 @@ const MyGame: Game<MyGameState> = {
         deployFleet,
         enableDispatchButtons,
         issueHolyDecree,
+        declareSmugglerGood,
         pass,
         setTurnCompleteFalse,
       },
@@ -485,7 +505,7 @@ const MyGame: Game<MyGameState> = {
         context.G.stage = "retrieve fleets";
       },
       onEnd: (context) => {
-        resolveRound(context.G, context.events);
+        resolveRound(context.G, context.events, context.random);
         console.log(`Round number:${context.G.round}`);
       },
       moves: { retrieveFleets },

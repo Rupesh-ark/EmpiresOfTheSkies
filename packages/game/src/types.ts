@@ -35,6 +35,8 @@ export interface MyGameState {
   round: number;
   finalRound: number;
   firstTurnOfRound: boolean;
+  mustContinueDiscovery: boolean;
+  nprCathedrals: Record<string, number>;
   turnOrder: string[];
 }
 
@@ -82,6 +84,8 @@ export type MapState = {
   currentBattle: number[];
   goodsPriceMarkers: GoodsPriceMarkers;
 };
+export type GoodKey = "mithril" | "dragonScales" | "krakenSkin" | "magicDust" | "stickyIchor" | "pipeweed";
+
 export type GoodsPriceMarkers = {
   mithril: number;
   dragonScales: number;
@@ -117,7 +121,7 @@ export type PlayerInfo = {
   factories: number;
   troopsToGarrison?: TroopInfo;
   turnComplete: boolean;
-  legacyCardOptions: LegacyCard[];
+  legacyCardOptions: LegacyCardInfo[];
 };
 
 type TroopInfo = { regiments: number; levies: number };
@@ -166,7 +170,8 @@ export interface Resources extends TileLoot {
   advantageCard: KingdomAdvantageCard | undefined;
   eliteRegiments: number;
   eventCards: string[];
-  legacyCard: LegacyCard;
+  legacyCard: LegacyCardInfo | undefined;
+  smugglerGoodChoice: GoodKey | undefined;
 }
 export type KingdomAdvantageCard =
   | "elite_regiments"
@@ -177,7 +182,7 @@ export type KingdomAdvantageCard =
   | "patriarch_of_the_church"
   | "sanctioned_piracy";
 
-export type LegacyCard =
+export type LegacyCardName =
   | "the builder"
   | "the conqueror"
   | "the navigator"
@@ -186,8 +191,14 @@ export type LegacyCard =
   | "the merchant"
   | "the mighty"
   | "the aviator"
-  | "the pious"
-  | undefined;
+  | "the pious";
+
+export type LegacyCardColour = "purple" | "orange";
+
+export type LegacyCardInfo = {
+  name: LegacyCardName;
+  colour: LegacyCardColour;
+};
 
 export const PlayerColour = {
   red: "#DC5454",

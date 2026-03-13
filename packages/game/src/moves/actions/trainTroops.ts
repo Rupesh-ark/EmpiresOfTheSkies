@@ -22,6 +22,11 @@ const trainTroops: Move<MyGameState> = ({ G, playerID }) => {
       flipped: false,
     });
   }
+  // GAP-13: FoW hand max 4 — discard oldest cards if over the limit
+  const hand = G.playerInfo[playerID].resources.fortuneCards;
+  if (hand.length > 4) {
+    hand.splice(0, hand.length - 4);
+  }
   removeOneCounsellor(G, playerID);
   playerBoard.trainTroops = true;
   G.playerInfo[playerID].turnComplete = true;

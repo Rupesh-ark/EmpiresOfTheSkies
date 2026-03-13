@@ -1,7 +1,10 @@
 import { EventsAPI } from "boardgame.io/dist/types/src/plugins/plugin-events";
-import { MyGameState } from "../types";
+import { RandomAPI } from "boardgame.io/dist/types/src/plugins/random/random";
+import { MyGameState, GoodKey } from "../types";
 import legacyResolutions from "./legacyResolutions";
 import { enactPiracy } from "./piracy";
+
+const ALL_GOODS: GoodKey[] = ["mithril", "dragonScales", "krakenSkin", "magicDust", "stickyIchor", "pipeweed"];
 
 // B2: factory income — pool = total outposts + colonies on map
 const collectFactoryIncome = (G: MyGameState) => {
@@ -19,12 +22,15 @@ const collectFactoryIncome = (G: MyGameState) => {
     return G.turnOrder.indexOf(a.id) - G.turnOrder.indexOf(b.id);
   });
 
-  sortedPlayers.forEach((player) => {
-    if (pool <= 0) return;
-    const income = Math.min(player.factories, pool);
-    player.resources.gold += income;
-    pool -= income;
-  });
+  // GAP-4: repeat the cycle until the pool is exhausted
+  while (pool > 0) {
+    sortedPlayers.forEach((player) => {
+      if (pool <= 0) return;
+      const income = Math.min(player.factories, pool);
+      player.resources.gold += income;
+      pool -= income;
+    });
+  }
 };
 
 // D4: player with most palaces scores (their count − 2nd highest) VP; tied = nobody scores
@@ -64,8 +70,37 @@ const applyFinalRoundBonus = (G: MyGameState) => {
   });
 };
 
-const resolveRound = (G: MyGameState, events: EventsAPI) => {
+// BUG-2: heresy track VP scored every round
+// orthodoxVP(h): h≤-3 → -h-2, h≥4 → 3-h, else 0
+// hereticVP(h) = -orthodoxVP(h)
+const scoreHeresyTrackVP = (G: MyGameState) => {
+  Object.values(G.playerInfo).forEach((player) => {
+    const h = player.heresyTracker;
+    let orthodoxVP: number;
+    if (h <= -3) {
+      orthodoxVP = -h - 2;
+    } else if (h >= 4) {
+      orthodoxVP = 3 - h;
+    } else {
+      orthodoxVP = 0;
+    }
+    const vp =
+      player.hereticOrOrthodox === "orthodox" ? orthodoxVP : -orthodoxVP;
+    player.resources.victoryPoints += vp;
+  });
+};
+
+const resolveRound = (G: MyGameState, events: EventsAPI, random: RandomAPI) => {
+  scoreHeresyTrackVP(G);
   palaceBonus(G);
+
+  // GAP-9: licenced_smugglers KA — grant +1 good before goods are sold
+  Object.values(G.playerInfo).forEach((player) => {
+    if (player.resources.advantageCard !== "licenced_smugglers") return;
+    const choice = player.resources.smugglerGoodChoice ?? ALL_GOODS[Math.floor(random.Number() * ALL_GOODS.length)];
+    player.resources[choice] += 1;
+    player.resources.smugglerGoodChoice = undefined;
+  });
 
   // D1: price marker lookup — replaces abundance functions
   const goodsKeys = Object.keys(G.mapState.goodsPriceMarkers) as Array<
@@ -110,6 +145,11 @@ const resolveRound = (G: MyGameState, events: EventsAPI) => {
     }
   });
 
+  // GAP-16: VP floor of 0
+  Object.values(G.playerInfo).forEach((player) => {
+    player.resources.victoryPoints = Math.max(0, player.resources.victoryPoints);
+  });
+
   const tradeAmounts = [...Object.values(tradeGainsMap)];
   const highestTradeAmount = Math.max(...tradeAmounts);
 
@@ -141,14 +181,15 @@ const resolveRound = (G: MyGameState, events: EventsAPI) => {
     // D2: corrected VP amounts per round
     const vpAmounts = tradeVictoryPoints(G);
     if (winners.length >= 3) {
-      const awardedAmount = Math.round(
+      // GAP-12: Math.ceil for tied trade VP splits
+      const awardedAmount = Math.ceil(
         (vpAmounts[0] + vpAmounts[1] + vpAmounts[2]) / winners.length
       );
       winners.forEach((id) => {
         G.playerInfo[id].resources.victoryPoints += awardedAmount;
       });
     } else if (winners.length === 2) {
-      const awardedAmount = Math.round((vpAmounts[0] + vpAmounts[1]) / 2);
+      const awardedAmount = Math.ceil((vpAmounts[0] + vpAmounts[1]) / 2);
       winners.forEach((id) => {
         G.playerInfo[id].resources.victoryPoints += awardedAmount;
       });
@@ -189,7 +230,17 @@ const resolveRound = (G: MyGameState, events: EventsAPI) => {
   if (G.round === G.finalRound) {
     applyFinalRoundBonus(G);
     legacyResolutions(G);
-    events.endGame();
+    // GAP-17: final score tie-break — most Gold, then earliest IPO position
+    const ranking = Object.values(G.playerInfo)
+      .sort((a, b) => {
+        if (b.resources.victoryPoints !== a.resources.victoryPoints)
+          return b.resources.victoryPoints - a.resources.victoryPoints;
+        if (b.resources.gold !== a.resources.gold)
+          return b.resources.gold - a.resources.gold;
+        return G.turnOrder.indexOf(a.id) - G.turnOrder.indexOf(b.id);
+      })
+      .map((p) => p.id);
+    events.endGame({ ranking });
   }
 };
 

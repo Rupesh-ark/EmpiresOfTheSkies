@@ -76,13 +76,26 @@ export const discoverTile: Move<MyGameState> = (
     });
   });
 
-  if (allDiscovered) events.endPhase();
+  if (allDiscovered) {
+    G.mustContinueDiscovery = false;
+    events.endPhase();
+    return;
+  }
 
-  if (currentTile.shield !== 0 || currentTile.sword !== 0) {
-    if (ctx.currentPlayer === ctx.playOrder[ctx.playOrder.length - 1]) {
-      events.endPhase();
-    } else {
-      events.endTurn();
+  // GAP-24: Discovery cascade — Ocean/Legend tiles don't count as Land; player must flip again
+  if (currentTile.type === "ocean" || currentTile.type === "legend") {
+    G.mustContinueDiscovery = true;
+    // Do NOT end turn — player must flip an adjacent tile
+  } else {
+    // Land (or home/infidel_empire) tile found — cascade satisfied
+    G.mustContinueDiscovery = false;
+    // End turn on combat tile (native creature guards the land)
+    if (currentTile.shield !== 0 || currentTile.sword !== 0) {
+      if (ctx.currentPlayer === ctx.playOrder[ctx.playOrder.length - 1]) {
+        events.endPhase();
+      } else {
+        events.endTurn();
+      }
     }
   }
 };

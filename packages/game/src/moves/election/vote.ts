@@ -56,8 +56,21 @@ const vote: Move<MyGameState> = (
     }
   });
 
+  // GAP-18: NPR player-type kingdoms under our influence contribute their cathedral count
+  kingdomsUnderOurInfluence.forEach((kName) => {
+    const nprVotes = G.nprCathedrals[kName];
+    if (nprVotes !== undefined) {
+      votes += nprVotes;
+    }
+  });
+
   if (kingdomsUnderOurInfluence.includes("Venoa")) votes += 1;
   if (kingdomsUnderOurInfluence.includes("Zeeland")) votes += 1;
+
+  // GAP-7: patriarch_of_the_church KA adds +1 permanent vote
+  if (G.playerInfo[playerID].resources.advantageCard === "patriarch_of_the_church") {
+    votes += 1;
+  }
 
   if (G.electionResults[kingdomVotedFor]) {
     G.electionResults[kingdomVotedFor] += votes;
