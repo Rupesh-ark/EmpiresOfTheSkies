@@ -32,6 +32,7 @@ import buildSkyships from "./moves/actions/buildSkyships";
 import conscriptLevies from "./moves/actions/conscriptLevies";
 import passFleetInfoToPlayerInfo from "./moves/actions/passFleetInfoToPlayerInfo";
 import deployFleet from "./moves/actions/deployFleet";
+import transferBetweenFleets from "./moves/actions/transferBetweenFleets";
 import enableDispatchButtons from "./moves/actions/enableDispatchButtons";
 import issueHolyDecree from "./moves/actions/issueHolyDecree";
 import declareSmugglerGood from "./moves/actions/declareSmugglerGood";
@@ -298,6 +299,7 @@ const MyGame: Game<MyGameState> = {
         conscriptLevies,
         passFleetInfoToPlayerInfo,
         deployFleet,
+        transferBetweenFleets,
         enableDispatchButtons,
         issueHolyDecree,
         declareSmugglerGood,
