@@ -2,7 +2,7 @@ import { Move } from "boardgame.io";
 import { MyGameState } from "../../types";
 import { INVALID_MOVE } from "boardgame.io/core";
 import { checkCounsellorsNotZero } from "../moveValidation";
-import { removeOneCounsellor } from "../../helpers/stateUtils";
+import { removeOneCounsellor, HERESY_MAX, HERESY_MIN } from "../../helpers/stateUtils";
 import { BuildingSlot } from "../../codifiedGameInfo";
 import { EventsAPI } from "boardgame.io/dist/types/src/plugins/plugin-events";
 import { RandomAPI } from "boardgame.io/dist/types/src/plugins/random/random";
@@ -56,7 +56,7 @@ const foundCathedral = (
   G.playerInfo[playerID].resources.gold -= cost;
   G.playerInfo[playerID].cathedrals += 1;
   G.playerInfo[playerID].resources.victoryPoints += 2;
-  if (G.playerInfo[playerID].heresyTracker > -11) {
+  if (G.playerInfo[playerID].heresyTracker > HERESY_MIN) {
     G.playerInfo[playerID].heresyTracker -= 1;
   }
   G.boardState.foundBuildings[BuildingSlot.Cathedral].push(playerID);
@@ -91,9 +91,9 @@ const foundPalace = (
 
   // Rule: founding a Palace moves the heresy tracker one space in the player's chosen direction
   const tracker = G.playerInfo[playerID].heresyTracker;
-  if (heresyDirection === "advance" && tracker < 12) {
+  if (heresyDirection === "advance" && tracker < HERESY_MAX) {
     G.playerInfo[playerID].heresyTracker += 1;
-  } else if (heresyDirection === "retreat" && tracker > -11) {
+  } else if (heresyDirection === "retreat" && tracker > HERESY_MIN) {
     G.playerInfo[playerID].heresyTracker -= 1;
   }
 

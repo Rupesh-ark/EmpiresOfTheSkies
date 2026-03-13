@@ -1,5 +1,8 @@
 import { MyGameState } from "../types";
 
+export const HERESY_MAX = 9;
+export const HERESY_MIN = -9;
+
 export const removeOneCounsellor = (G: MyGameState, playerID: string) => {
   G.playerInfo[playerID].resources.counsellors -= 1;
 };
@@ -78,8 +81,8 @@ export const addRegiments = (
 };
 
 export const increaseHeresyWithinMove = (G: MyGameState, playerID: string) => {
-  // Track has 19 spaces: internal range -9 (most orthodox) to +9 (most heretic)
-  if (G.playerInfo[playerID].heresyTracker < 9) {
+  // Track has 19 spaces: internal range HERESY_MIN (most orthodox) to HERESY_MAX (most heretic)
+  if (G.playerInfo[playerID].heresyTracker < HERESY_MAX) {
     G.playerInfo[playerID].heresyTracker += 1;
   }
 };
@@ -88,7 +91,7 @@ export const increaseOrthodoxyWithinMove = (
   G: MyGameState,
   playerID: string
 ) => {
-  if (G.playerInfo[playerID].heresyTracker > -9) {
+  if (G.playerInfo[playerID].heresyTracker > HERESY_MIN) {
     G.playerInfo[playerID].heresyTracker -= 1;
   }
 };

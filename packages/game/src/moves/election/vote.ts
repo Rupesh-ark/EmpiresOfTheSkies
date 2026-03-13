@@ -1,8 +1,9 @@
 import { Move } from "boardgame.io";
 import { MyGameState } from "../../types";
+import { HERESY_MIN } from "../../helpers/stateUtils";
 
 const vote: Move<MyGameState> = (
-  { G, ctx, playerID, events, random },
+  { G, ctx, playerID, events },
   ...args
 ) => {
   const kingdomVotedFor = args[0];
@@ -98,7 +99,7 @@ const vote: Move<MyGameState> = (
       if (player.kingdomName === finalWinner) {
         player.isArchprelate = true;
         // Elected Archprelate's heresy marker retreats one space
-        if (player.heresyTracker > -11) {
+        if (player.heresyTracker > HERESY_MIN) {
           player.heresyTracker -= 1;
         }
         let orthodoxRealms = 0;
