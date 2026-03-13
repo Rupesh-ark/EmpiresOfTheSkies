@@ -134,7 +134,7 @@ describe("Legacy Cards — the navigator (+1 VP per trade good in active trade r
 
 describe("Legacy Cards — the magnificent (+4 per palace)", () => {
   it("grants +4 VP per palace", () => {
-    const G = setupPlayer({ name: "the magnificent", colour: "orange" });
+    const G = setupPlayer({ name: "the magnificent", colour: "purple" });
     G.playerInfo["0"].palaces = 3;
     const vpBefore = G.playerInfo["0"].resources.victoryPoints;
     legacyResolutions(G);
@@ -146,7 +146,7 @@ describe("Legacy Cards — the magnificent (+4 per palace)", () => {
 
 describe("Legacy Cards — the pious (+4 per cathedral)", () => {
   it("grants +4 VP per cathedral", () => {
-    const G = setupPlayer({ name: "the pious", colour: "orange" });
+    const G = setupPlayer({ name: "the pious", colour: "purple" });
     G.playerInfo["0"].cathedrals = 3;
     const vpBefore = G.playerInfo["0"].resources.victoryPoints;
     legacyResolutions(G);
@@ -171,7 +171,7 @@ describe("Legacy Cards — the aviator (+1 per skyship, deployed + reserve)", ()
 
 describe("Legacy Cards — the mighty", () => {
   it("grants +1 VP per deployed skyship + floor(totalRegiments/3) + 1 per fort", () => {
-    const G = setupPlayer({ name: "the mighty", colour: "orange" });
+    const G = setupPlayer({ name: "the mighty", colour: "purple" });
     G.playerInfo["0"].resources.regiments = 6;
     G.playerInfo["0"].fleetInfo = [buildFleet(0, { skyships: 4, regiments: 3 })];
     G.mapState.buildings[0][0] = { player: G.playerInfo["0"], fort: true, garrisonedRegiments: 0, garrisonedLevies: 0 };

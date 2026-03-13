@@ -1,6 +1,6 @@
 import { Ctx } from "boardgame.io";
 import { EventsAPI } from "boardgame.io/dist/types/src/plugins/plugin-events";
-import { FleetInfo, MyGameState } from "../types";
+import { FleetInfo, GoodKey, MyGameState } from "../types";
 import {
   findNextConquest,
   findNextGroundBattle,
@@ -8,6 +8,8 @@ import {
 } from "./findNext";
 import { drawFortuneOfWarCard } from "./helpers";
 import { RandomAPI } from "boardgame.io/dist/types/src/plugins/random/random";
+
+const GOODS: GoodKey[] = ["mithril", "dragonScales", "krakenSkin", "magicDust", "stickyIchor", "pipeweed"];
 
 export const resolveBattleAndReturnWinner = (
   G: MyGameState,
@@ -453,6 +455,11 @@ export const resolveConquest = (
     currentBuilding.fort = false;
     currentBuilding.garrisonedLevies = 0;
     currentBuilding.garrisonedRegiments = 0;
+    // GAP-15 sub-rule 3: record that this player failed conquest here this round
+    G.failedConquests.push({
+      playerId: G.battleState?.attacker.id ?? ctx.currentPlayer,
+      tile: [x, y],
+    });
     G.conquestState = undefined;
     findNextConquest(G, events);
   } else if (remainingDefenders <= 0 && remainingAttackers > 0) {
@@ -469,6 +476,15 @@ export const resolveConquest = (
     });
     currentPlayer.resources.victoryPoints += 1;
     currentPlayer.heresyTracker += 1;
+
+    // GAP-15 sub-rule 2: move price markers left for each additional colony good
+    // (the broken-line rectangle goods on the tile, per "Resolve Conquest Attempt" rule)
+    GOODS.forEach((good) => {
+      const qty = currentTile.loot.colony[good];
+      if (qty > 0) {
+        G.mapState.goodsPriceMarkers[good] = Math.max(1, G.mapState.goodsPriceMarkers[good] - qty);
+      }
+    });
 
     currentBuilding.player = currentPlayer;
     currentBuilding.buildings = "colony";

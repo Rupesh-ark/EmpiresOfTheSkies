@@ -91,6 +91,8 @@ const scoreHeresyTrackVP = (G: MyGameState) => {
 };
 
 const resolveRound = (G: MyGameState, events: EventsAPI, random: RandomAPI) => {
+  // GAP-15 sub-rule 3: failed conquest records are per-round only
+  G.failedConquests = [];
   scoreHeresyTrackVP(G);
   palaceBonus(G);
 

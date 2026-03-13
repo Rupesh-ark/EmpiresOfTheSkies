@@ -9,6 +9,7 @@
  */
 
 import { describe, it, expect } from "vitest";
+import { INVALID_MOVE } from "boardgame.io/core";
 import constructOutpost from "../../moves/conquests/constructOutpost";
 import coloniseLand from "../../moves/conquests/coloniseLand";
 import { buildInitialG, buildPlayer, buildCtx } from "../testHelpers";
@@ -107,6 +108,8 @@ describe("constructOutpost — placing an outpost", () => {
 describe("coloniseLand — initiating a colonisation attempt", () => {
   it("sets conquestState with decision=fight", () => {
     const G = buildInitialG();
+    G.mapState = { ...G.mapState, ...buildMapWithLoot({}) };
+    G.mapState.currentBattle = [0, 0];
     const ctx = { ...buildCtx("0"), currentPlayer: "0" };
     (coloniseLand as Function)({ G, ctx, playerID: "0", events: stubEvents, random: {} });
     expect(G.conquestState?.decision).toBe("fight");
@@ -114,6 +117,50 @@ describe("coloniseLand — initiating a colonisation attempt", () => {
 
   it("sets stage to 'conquest draw or pick card'", () => {
     const G = buildInitialG();
+    G.mapState = { ...G.mapState, ...buildMapWithLoot({}) };
+    G.mapState.currentBattle = [0, 0];
+    const ctx = { ...buildCtx("0"), currentPlayer: "0" };
+    (coloniseLand as Function)({ G, ctx, playerID: "0", events: stubEvents, random: {} });
+    expect(G.stage).toBe("conquest draw or pick card");
+  });
+
+  it("returns INVALID_MOVE if another player owns a building at the tile", () => {
+    const G = buildInitialG([buildPlayer("0"), buildPlayer("1")]);
+    G.mapState = { ...G.mapState, ...buildMapWithLoot({}) };
+    G.mapState.currentBattle = [0, 0];
+    G.mapState.buildings[0][0].buildings = "outpost";
+    G.mapState.buildings[0][0].player = G.playerInfo["1"];
+    const ctx = { ...buildCtx("0"), currentPlayer: "0" };
+    const result = (coloniseLand as Function)({ G, ctx, playerID: "0", events: stubEvents, random: {} });
+    expect(result).toBe(INVALID_MOVE);
+  });
+
+  it("allows coloniseLand when own outpost is at the tile", () => {
+    const G = buildInitialG();
+    G.mapState = { ...G.mapState, ...buildMapWithLoot({}) };
+    G.mapState.currentBattle = [0, 0];
+    G.mapState.buildings[0][0].buildings = "outpost";
+    G.mapState.buildings[0][0].player = G.playerInfo["0"];
+    const ctx = { ...buildCtx("0"), currentPlayer: "0" };
+    (coloniseLand as Function)({ G, ctx, playerID: "0", events: stubEvents, random: {} });
+    expect(G.stage).toBe("conquest draw or pick card");
+  });
+
+  it("returns INVALID_MOVE if player already failed conquest at this tile this round", () => {
+    const G = buildInitialG();
+    G.mapState = { ...G.mapState, ...buildMapWithLoot({}) };
+    G.mapState.currentBattle = [0, 0];
+    G.failedConquests = [{ playerId: "0", tile: [0, 0] }];
+    const ctx = { ...buildCtx("0"), currentPlayer: "0" };
+    const result = (coloniseLand as Function)({ G, ctx, playerID: "0", events: stubEvents, random: {} });
+    expect(result).toBe(INVALID_MOVE);
+  });
+
+  it("allows coloniseLand if a different player failed at the same tile", () => {
+    const G = buildInitialG([buildPlayer("0"), buildPlayer("1")]);
+    G.mapState = { ...G.mapState, ...buildMapWithLoot({}) };
+    G.mapState.currentBattle = [0, 0];
+    G.failedConquests = [{ playerId: "1", tile: [0, 0] }];
     const ctx = { ...buildCtx("0"), currentPlayer: "0" };
     (coloniseLand as Function)({ G, ctx, playerID: "0", events: stubEvents, random: {} });
     expect(G.stage).toBe("conquest draw or pick card");

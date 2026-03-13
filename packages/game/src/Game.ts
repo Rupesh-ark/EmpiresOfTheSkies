@@ -129,6 +129,7 @@ const MyGame: Game<MyGameState> = {
       mustContinueDiscovery: false,
       nprCathedrals,
       turnOrder: ctx.playOrder,
+      failedConquests: [],
     };
   },
   moves: {

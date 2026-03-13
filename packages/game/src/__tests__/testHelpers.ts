@@ -19,7 +19,7 @@ export function buildPlayer(id: string, overrides: Partial<PlayerInfo> = {}): Pl
     passed: false,
     isArchprelate: false,
     hereticOrOrthodox: "orthodox",
-    heresyTracker: 9, // mid-track starting position
+    heresyTracker: 0, // actual game starting value (playerSetup.ts)
     prisoners: 0,
     shipyards: 0,
     factories: 1,      // v4.2: all players start with 1 factory
@@ -149,6 +149,7 @@ export function buildInitialG(
         pipeweed: 2,
       },
     },
+    failedConquests: [],
     ...overrides,
   };
 }

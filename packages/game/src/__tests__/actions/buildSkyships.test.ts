@@ -23,9 +23,9 @@ import {
   buildPlayerBoard,
 } from "../testHelpers";
 
-function callMove(G: ReturnType<typeof buildInitialG>, playerID: string) {
+function callMove(G: ReturnType<typeof buildInitialG>, playerID: string, perShipyard = 2) {
   const ctx = buildCtx(playerID);
-  return (buildSkyships as Function)({ G, ctx, playerID });
+  return (buildSkyships as Function)({ G, ctx, playerID }, perShipyard);
 }
 
 // ── Gold cost ─────────────────────────────────────────────────────────────────

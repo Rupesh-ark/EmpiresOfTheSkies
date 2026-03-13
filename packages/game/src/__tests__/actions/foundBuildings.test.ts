@@ -22,9 +22,9 @@ import foundBuildings from "../../moves/actions/foundBuildings";
 import { buildInitialG, buildPlayer, buildCtx, buildResources } from "../testHelpers";
 
 // slotIndex: 0 = Cathedral, 1 = Palace, 2 = Shipyard, 3 = Fort
-function callMove(G: ReturnType<typeof buildInitialG>, playerID: string, slotIndex: number) {
+function callMove(G: ReturnType<typeof buildInitialG>, playerID: string, slotIndex: number, extraArg?: any) {
   const ctx = buildCtx(playerID);
-  return (foundBuildings as Function)({ G, ctx, playerID }, slotIndex);
+  return (foundBuildings as Function)({ G, ctx, playerID }, slotIndex, extraArg);
 }
 
 // ── Cathedral (slot 0) ─────────────────────────────────────────────────────
@@ -95,27 +95,27 @@ describe("foundBuildings — Palace (v4.2: 5 Gold base)", () => {
   it("first palace costs 5 Gold", () => {
     const G = buildInitialG();
     G.playerInfo["0"].resources.gold = 10;
-    callMove(G, "0", 1);
+    callMove(G, "0", 1, "advance");
     expect(G.playerInfo["0"].resources.gold).toBe(5);
   });
 
   it("orthodox player gains +1 VP", () => {
     const G = buildInitialG([buildPlayer("0", { hereticOrOrthodox: "orthodox", resources: buildResources({ gold: 10 }) })]);
     const vpBefore = G.playerInfo["0"].resources.victoryPoints;
-    callMove(G, "0", 1);
+    callMove(G, "0", 1, "advance");
     expect(G.playerInfo["0"].resources.victoryPoints).toBe(vpBefore + 1);
   });
 
   it("heretic player gains +2 VP", () => {
     const G = buildInitialG([buildPlayer("0", { hereticOrOrthodox: "heretic", resources: buildResources({ gold: 10 }) })]);
     const vpBefore = G.playerInfo["0"].resources.victoryPoints;
-    callMove(G, "0", 1);
+    callMove(G, "0", 1, "advance");
     expect(G.playerInfo["0"].resources.victoryPoints).toBe(vpBefore + 2);
   });
 
   it("returns INVALID_MOVE when already at 6 palaces", () => {
     const G = buildInitialG([buildPlayer("0", { palaces: 6, resources: buildResources({ gold: 10 }) })]);
-    const result = callMove(G, "0", 1);
+    const result = callMove(G, "0", 1, "advance");
     expect(result).toBe(INVALID_MOVE);
   });
 });

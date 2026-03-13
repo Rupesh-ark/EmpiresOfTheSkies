@@ -38,6 +38,7 @@ export interface MyGameState {
   mustContinueDiscovery: boolean;
   nprCathedrals: Record<string, number>;
   turnOrder: string[];
+  failedConquests: { playerId: string; tile: [number, number] }[];
 }
 
 export type BattleState = {

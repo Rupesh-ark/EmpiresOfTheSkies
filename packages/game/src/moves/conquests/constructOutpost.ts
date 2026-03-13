@@ -12,6 +12,9 @@ const constructOutpost: Move<MyGameState> = (
 
   currentBuilding.player = currentPlayer;
   currentBuilding.buildings = "outpost";
+  // TODO (GAP-15 sub-rule 2): move price markers left for outpost goods per "To Claim" rule.
+  // Requires the trade-route setup step to be implemented first, because the rule only applies
+  // "If a Trade Route has been established" (which the player does after placing the outpost).
 
   Object.entries(currentTile.loot.outpost).forEach(([lootName, value]) => {
     const lootNameAsResource = lootName as keyof typeof currentTile.loot.colony;

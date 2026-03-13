@@ -93,8 +93,8 @@ describe("vote — Archprelate assignment (all players voted)", () => {
     callMove(G, "0", "Angland");
     callMove(G, "1", "Gallois");
     callMove(G, "2", "Castillia");
-    // Player "0" wins with 4 votes; 3 orthodox → +1 VP
-    expect(G.playerInfo["0"].resources.victoryPoints).toBe(vpBefore + 1);
+    // Player "0" wins with 4 votes; 3 orthodox → floor(2*3/3)=2 VP
+    expect(G.playerInfo["0"].resources.victoryPoints).toBe(vpBefore + 2);
   });
 });
 

@@ -58,10 +58,12 @@ describe("issueHolyDecree — bless monarch", () => {
   it("adds VP to the target player — amount = floor(orthodoxCount / 3), so need 3+ orthodox", () => {
     // blessingOrCurseVPAmount = floor(orthodoxPlayerCount / 3)
     // With 3 orthodox players → floor(3/3) = 1 VP
+    // GAP-19: bless targets the least-advanced orthodox (lowest heresyTracker)
+    // Give player "1" a lower tracker so they are the valid target
     const G = buildInitialG([
-      buildPlayer("0", { isArchprelate: true, hereticOrOrthodox: "orthodox" }),
-      buildPlayer("1", { hereticOrOrthodox: "orthodox" }),
-      buildPlayer("2", { hereticOrOrthodox: "orthodox" }),
+      buildPlayer("0", { isArchprelate: true, hereticOrOrthodox: "orthodox", heresyTracker: 5 }),
+      buildPlayer("1", { hereticOrOrthodox: "orthodox", heresyTracker: 0 }),
+      buildPlayer("2", { hereticOrOrthodox: "orthodox", heresyTracker: 5 }),
     ]);
     const vpBefore = G.playerInfo["1"].resources.victoryPoints;
     callMove(G, "0", "bless monarch", "1");
@@ -71,10 +73,12 @@ describe("issueHolyDecree — bless monarch", () => {
 
 describe("issueHolyDecree — curse monarch", () => {
   it("removes VP from the target player — amount = floor(orthodoxCount / 3)", () => {
+    // GAP-19: curse targets the most heresy-advanced orthodox (highest heresyTracker) when no heretics
+    // Give player "1" a higher tracker so they are the valid target
     const G = buildInitialG([
-      buildPlayer("0", { isArchprelate: true, hereticOrOrthodox: "orthodox" }),
-      buildPlayer("1", { hereticOrOrthodox: "orthodox" }),
-      buildPlayer("2", { hereticOrOrthodox: "orthodox" }),
+      buildPlayer("0", { isArchprelate: true, hereticOrOrthodox: "orthodox", heresyTracker: 0 }),
+      buildPlayer("1", { hereticOrOrthodox: "orthodox", heresyTracker: 10 }),
+      buildPlayer("2", { hereticOrOrthodox: "orthodox", heresyTracker: 0 }),
     ]);
     const vpBefore = G.playerInfo["1"].resources.victoryPoints;
     callMove(G, "0", "curse monarch", "1");

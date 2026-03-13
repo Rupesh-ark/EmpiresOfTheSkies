@@ -193,11 +193,12 @@ describe("resolveBattleAndReturnWinner — aerial combat math", () => {
   });
 
   it("regiments count double for sword value", () => {
-    // Attacker: 2 regiments = sword value 4 (2×2), shield = 0 skyships = 0
+    // Attacker: 1 skyship + 2 regiments = sword 1+4=5, shield=1
     // Defender: 1 skyship = sword=1, shield=1
-    // Attacker losses = 1 - 0 = 1. Defender losses = 4 - 1 = 3.
+    // Attacker losses = max(0, 1-1) = 0. Defender losses = max(0, 5-1) = 4 → dead.
+    // Without regiments (1 skyship only): sword=1, defender losses=0 → draw. Regiments are decisive.
     const G = setupBattle(
-      { skyships: 0, regiments: 2, levies: 0 },
+      { skyships: 1, regiments: 2, levies: 0 },
       { skyships: 1, regiments: 0, levies: 0 }
     );
     const vp0Before = G.playerInfo["0"].resources.victoryPoints;
