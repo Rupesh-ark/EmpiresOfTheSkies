@@ -24,6 +24,13 @@ export const BuildingSlot = {
   Fort:      4,
 } as const;
 
+export const BUILDING_BASE_COST = {
+  cathedral: 5,
+  palace: 5,
+  shipyard: 3,
+  fort: 2,
+} as const;
+
 export const STARTING_RESOURCES = {
   gold: 6,
   victoryPoints: 10,

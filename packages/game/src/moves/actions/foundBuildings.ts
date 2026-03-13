@@ -3,7 +3,7 @@ import { MyGameState } from "../../types";
 import { INVALID_MOVE } from "boardgame.io/core";
 import { checkCounsellorsNotZero } from "../moveValidation";
 import { removeOneCounsellor, HERESY_MAX, HERESY_MIN } from "../../helpers/stateUtils";
-import { BuildingSlot } from "../../codifiedGameInfo";
+import { BuildingSlot, BUILDING_BASE_COST } from "../../codifiedGameInfo";
 import { EventsAPI } from "boardgame.io/dist/types/src/plugins/plugin-events";
 import { RandomAPI } from "boardgame.io/dist/types/src/plugins/random/random";
 import { Ctx } from "boardgame.io/dist/types/src/types";
@@ -52,7 +52,7 @@ const foundCathedral = (
   if (G.playerInfo[playerID].hereticOrOrthodox === "heretic") {
     return INVALID_MOVE;
   }
-  const cost = 5 + G.boardState.foundBuildings[BuildingSlot.Cathedral].length;
+  const cost = BUILDING_BASE_COST.cathedral + G.boardState.foundBuildings[BuildingSlot.Cathedral].length;
   G.playerInfo[playerID].resources.gold -= cost;
   G.playerInfo[playerID].cathedrals += 1;
   G.playerInfo[playerID].resources.victoryPoints += 2;
@@ -79,7 +79,7 @@ const foundPalace = (
     return INVALID_MOVE;
   }
 
-  const cost = 5 + G.boardState.foundBuildings[BuildingSlot.Palace].length;
+  const cost = BUILDING_BASE_COST.palace + G.boardState.foundBuildings[BuildingSlot.Palace].length;
 
   G.playerInfo[playerID].resources.gold -= cost;
   G.playerInfo[playerID].palaces += 1;
@@ -112,7 +112,7 @@ const foundShipyard = (
   if (G.playerInfo[playerID].shipyards === 3) {
     return INVALID_MOVE;
   }
-  const cost = 3 + G.boardState.foundBuildings[BuildingSlot.Shipyard].length;
+  const cost = BUILDING_BASE_COST.shipyard + G.boardState.foundBuildings[BuildingSlot.Shipyard].length;
 
   G.playerInfo[playerID].resources.gold -= cost;
   G.playerInfo[playerID].shipyards += 1;
@@ -129,18 +129,11 @@ const foundFort = (
   events: EventsAPI,
   args: any[]
 ): void | typeof INVALID_MOVE => {
-  // B11: flat 2 Gold + 1 extra counsellor (plus the placed counsellor = 2 total)
-  if (G.playerInfo[playerID].resources.counsellors < 2) {
-    return INVALID_MOVE;
-  }
-  if (G.playerInfo[playerID].resources.gold < 2) {
-    return INVALID_MOVE;
-  }
+  const cost = BUILDING_BASE_COST.fort + G.boardState.foundBuildings[BuildingSlot.Fort].length;
 
-  G.playerInfo[playerID].resources.gold -= 2;
+  G.playerInfo[playerID].resources.gold -= cost;
   G.boardState.foundBuildings[BuildingSlot.Fort].push(playerID);
-  removeOneCounsellor(G, playerID); // extra counsellor payment
-  removeOneCounsellor(G, playerID); // counsellor placed on board
+  removeOneCounsellor(G, playerID);
 
   G.playerInfo[playerID].turnComplete = false;
 };

@@ -9,11 +9,10 @@
  *   Palace:    5 Gold base + 1 per previous palace built this round
  *              (+2 VP for heretics, +1 VP for orthodox)
  *   Shipyard:  3 Gold base + 1 per previous shipyard built this round
- *   Fort:      2 Gold flat + 2 counsellors total (1 extra + 1 placed)
+ *   Fort:      2 Gold base + 1 per previous fort built this round
  *
- * All buildings: cost 1 counsellor (except fort = 2), mark turnComplete
- * INVALID_MOVE if: 0 counsellors, at max (cathedrals/palaces = 6, shipyards = 3),
- *   fort requires ≥ 2 counsellors and ≥ 2 Gold
+ * All buildings: cost 1 counsellor, mark turnComplete
+ * INVALID_MOVE if: 0 counsellors, at max (cathedrals/palaces = 6, shipyards = 3)
  */
 
 import { describe, it, expect } from "vitest";
@@ -147,43 +146,33 @@ describe("foundBuildings — Shipyard (3 Gold base)", () => {
 
 // ── Fort (slot 3) ─────────────────────────────────────────────────────────────
 
-describe("foundBuildings — Fort (v4.2: 2 Gold + 2 counsellors)", () => {
-  it("costs 2 Gold", () => {
+describe("foundBuildings — Fort (v4.2: 2 Gold base + 1 per counsellor in slot)", () => {
+  it("costs 2 Gold when first in slot", () => {
     const G = buildInitialG();
     const goldBefore = G.playerInfo["0"].resources.gold;
     callMove(G, "0", 3);
     expect(G.playerInfo["0"].resources.gold).toBe(goldBefore - 2);
   });
 
-  it("costs 2 counsellors (1 extra + 1 placed)", () => {
+  it("costs 3 Gold when one counsellor already in slot", () => {
+    const G = buildInitialG();
+    G.boardState.foundBuildings[4] = ["1"];
+    const goldBefore = G.playerInfo["0"].resources.gold;
+    callMove(G, "0", 3);
+    expect(G.playerInfo["0"].resources.gold).toBe(goldBefore - 3);
+  });
+
+  it("costs 1 counsellor", () => {
     const G = buildInitialG();
     const counsellorsBefore = G.playerInfo["0"].resources.counsellors;
     callMove(G, "0", 3);
-    expect(G.playerInfo["0"].resources.counsellors).toBe(counsellorsBefore - 2);
+    expect(G.playerInfo["0"].resources.counsellors).toBe(counsellorsBefore - 1);
   });
 
   it("does NOT mark turnComplete (placement continues in a sub-stage)", () => {
     const G = buildInitialG();
     callMove(G, "0", 3);
     expect(G.playerInfo["0"].turnComplete).toBe(false);
-  });
-
-  it("returns INVALID_MOVE when player has < 2 counsellors", () => {
-    const G = buildInitialG([
-      buildPlayer("0", { resources: buildResources({ counsellors: 1 }) }),
-      buildPlayer("1"),
-    ]);
-    const result = callMove(G, "0", 3);
-    expect(result).toBe(INVALID_MOVE);
-  });
-
-  it("returns INVALID_MOVE when player has < 2 Gold", () => {
-    const G = buildInitialG([
-      buildPlayer("0", { resources: buildResources({ gold: 1 }) }),
-      buildPlayer("1"),
-    ]);
-    const result = callMove(G, "0", 3);
-    expect(result).toBe(INVALID_MOVE);
   });
 });
 
