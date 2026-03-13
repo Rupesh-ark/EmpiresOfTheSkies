@@ -40,7 +40,7 @@ const deployFleet: Move<MyGameState> = (
   const regimentCount = args[3];
   const levyCount = args[4];
 
-  const unladen = fleet.regiments === 0 && fleet.levies === 0;
+  const unladen = regimentCount === 0 && levyCount === 0;
 
   if (fleet.location[0] === 4 && fleet.location[1] === 0) {
     if (
