@@ -78,7 +78,8 @@ export const addRegiments = (
 };
 
 export const increaseHeresyWithinMove = (G: MyGameState, playerID: string) => {
-  if (G.playerInfo[playerID].heresyTracker < 12) {
+  // Track has 19 spaces: internal range -9 (most orthodox) to +9 (most heretic)
+  if (G.playerInfo[playerID].heresyTracker < 9) {
     G.playerInfo[playerID].heresyTracker += 1;
   }
 };
@@ -87,7 +88,7 @@ export const increaseOrthodoxyWithinMove = (
   G: MyGameState,
   playerID: string
 ) => {
-  if (G.playerInfo[playerID].heresyTracker > -11) {
+  if (G.playerInfo[playerID].heresyTracker > -9) {
     G.playerInfo[playerID].heresyTracker -= 1;
   }
 };

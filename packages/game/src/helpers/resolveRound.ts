@@ -70,22 +70,13 @@ const applyFinalRoundBonus = (G: MyGameState) => {
   });
 };
 
-// BUG-2: heresy track VP scored every round
-// orthodoxVP(h): h≤-3 → -h-2, h≥4 → 3-h, else 0
-// hereticVP(h) = -orthodoxVP(h)
+// BUG-2: heresy track VP scored every round.
+// Track is 19 spaces: h in [-9, +9]. orthodoxVP = -h (so orthodox gains at h<0,
+// heretic gains at h>0, both score 0 at h=0).
 const scoreHeresyTrackVP = (G: MyGameState) => {
   Object.values(G.playerInfo).forEach((player) => {
     const h = player.heresyTracker;
-    let orthodoxVP: number;
-    if (h <= -3) {
-      orthodoxVP = -h - 2;
-    } else if (h >= 4) {
-      orthodoxVP = 3 - h;
-    } else {
-      orthodoxVP = 0;
-    }
-    const vp =
-      player.hereticOrOrthodox === "orthodox" ? orthodoxVP : -orthodoxVP;
+    const vp = player.hereticOrOrthodox === "orthodox" ? -h : h;
     player.resources.victoryPoints += vp;
   });
 };
@@ -219,7 +210,8 @@ const resolveRound = (G: MyGameState, events: EventsAPI, random: RandomAPI) => {
           });
         }
       } else if (secondPlace.length > 1) {
-        const awardAmountSecondPlace = Math.round(
+        // GAP-12: rule says "rounding up" — use ceil not round
+        const awardAmountSecondPlace = Math.ceil(
           (vpAmounts[1] + vpAmounts[2]) / secondPlace.length
         );
         secondPlace.forEach((id) => {

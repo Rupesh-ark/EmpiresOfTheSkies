@@ -45,11 +45,11 @@ describe("issueHolyDecree — reform dogma", () => {
 describe("issueHolyDecree — confirm dogma", () => {
   it("advances all heresyTrackers by 1", () => {
     const G = buildInitialG([
-      buildPlayer("0", { isArchprelate: true, heresyTracker: 9 }),
+      buildPlayer("0", { isArchprelate: true, heresyTracker: 8 }),
       buildPlayer("1", { heresyTracker: 5 }),
     ]);
     callMove(G, "0", "confirm dogma");
-    expect(G.playerInfo["0"].heresyTracker).toBe(10);
+    expect(G.playerInfo["0"].heresyTracker).toBe(9);
     expect(G.playerInfo["1"].heresyTracker).toBe(6);
   });
 });

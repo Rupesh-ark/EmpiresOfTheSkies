@@ -11,11 +11,12 @@ import {
 import { MyGameProps, PlayerInfo } from "@eots/game";
 
 
-const ORTHODOX_TRACK = [9, 8, 7, 6, 5, 4, 3, 2, 1, 0, 0, 0, 0, 0, 0, -1, -2, -3, -4, -5, -6, -7, -8, -9];
-const HERESY_TRACK = [-9, -8, -7, -6, -5, -4, -3, -2, -1, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+// 19 spaces: h=-9 (most orthodox) to h=+9 (most heretic). orthodoxVP = -h, hereticVP = h.
+const ORTHODOX_TRACK = [9, 8, 7, 6, 5, 4, 3, 2, 1, 0, -1, -2, -3, -4, -5, -6, -7, -8, -9];
+const HERESY_TRACK   = [-9, -8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 
 const HeresyTracker = (props: HeresyTrackerProps) => {
-  const trackIndices = Array.from({ length: 24 }, (_, index) => index - 11);
+  const trackIndices = Array.from({ length: 19 }, (_, index) => index - 9);
 
   return (
     <Paper elevation={2} sx={{ maxWidth: 1230, mb: 3, width: "100%", borderRadius: 2, overflow: "hidden" }}>

@@ -67,9 +67,9 @@ describe("punishDissenters — heresy track effects", () => {
   });
 
   it("heretic player's heresyTracker increases by 1 (toward heresy)", () => {
-    const G = buildInitialG([buildPlayer("0", { hereticOrOrthodox: "heretic", heresyTracker: 9 })]);
+    const G = buildInitialG([buildPlayer("0", { hereticOrOrthodox: "heretic", heresyTracker: 8 })]);
     callMove(G, "0", 0, "gold");
-    expect(G.playerInfo["0"].heresyTracker).toBe(10);
+    expect(G.playerInfo["0"].heresyTracker).toBe(9);
   });
 });
 

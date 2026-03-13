@@ -4,6 +4,7 @@
  * Tests for the resolveRound helper (v4.2, Track D).
  *
  * Covers:
+ *   BUG-2: heresy track VP scored every round (orthodoxVP = -h, hereticVP = h)
  *   D1: goods sold at price marker value
  *   D2: trade VP by round (round 1 → [3,2,1]; rounds 2–3 → [6,4,2]; rounds 4–5 → [9,6,3]; round 6+ → [12,8,4])
  *   D3: only players with outpost or colony score trade VP
@@ -21,6 +22,46 @@ import { buildInitialG, buildPlayer, buildResources } from "../testHelpers";
 const stubEvents = { endGame: () => {}, endPhase: () => {}, endTurn: () => {} } as any;
 const stubRandom = { Number: () => 0 } as any;
 
+
+// ── BUG-2: Heresy track VP ────────────────────────────────────────────────────
+
+describe("resolveRound — BUG-2: heresy track VP every round", () => {
+  it("orthodox player at h=-9 gains 9 VP", () => {
+    const G = buildInitialG([
+      buildPlayer("0", { heresyTracker: -9, hereticOrOrthodox: "orthodox", palaces: 0 }),
+    ]);
+    const vpBefore = G.playerInfo["0"].resources.victoryPoints;
+    resolveRound(G, stubEvents, stubRandom);
+    expect(G.playerInfo["0"].resources.victoryPoints).toBe(vpBefore + 9);
+  });
+
+  it("heretic player at h=+9 gains 9 VP", () => {
+    const G = buildInitialG([
+      buildPlayer("0", { heresyTracker: 9, hereticOrOrthodox: "heretic", palaces: 0 }),
+    ]);
+    const vpBefore = G.playerInfo["0"].resources.victoryPoints;
+    resolveRound(G, stubEvents, stubRandom);
+    expect(G.playerInfo["0"].resources.victoryPoints).toBe(vpBefore + 9);
+  });
+
+  it("player at h=0 scores no heresy VP", () => {
+    const G = buildInitialG([
+      buildPlayer("0", { heresyTracker: 0, hereticOrOrthodox: "orthodox", palaces: 0 }),
+    ]);
+    const vpBefore = G.playerInfo["0"].resources.victoryPoints;
+    resolveRound(G, stubEvents, stubRandom);
+    expect(G.playerInfo["0"].resources.victoryPoints).toBe(vpBefore);
+  });
+
+  it("orthodox player deep in heretic territory (h=+5) loses 5 VP", () => {
+    const G = buildInitialG([
+      buildPlayer("0", { heresyTracker: 5, hereticOrOrthodox: "orthodox", palaces: 0 }),
+    ]);
+    const vpBefore = G.playerInfo["0"].resources.victoryPoints;
+    resolveRound(G, stubEvents, stubRandom);
+    expect(G.playerInfo["0"].resources.victoryPoints).toBe(vpBefore - 5);
+  });
+});
 
 // ── D1: Price marker goods conversion ────────────────────────────────────────
 
@@ -116,6 +157,41 @@ describe("resolveRound — D2: trade VP by round", () => {
     const vpBefore = G.playerInfo["0"].resources.victoryPoints;
     resolveRound(G, stubEvents, stubRandom);
     expect(G.playerInfo["0"].resources.victoryPoints).toBe(vpBefore + 9);
+  });
+});
+
+// ── GAP-12: Trade VP ties round up ────────────────────────────────────────────
+
+describe("resolveRound — GAP-12: tied trade VP splits round up", () => {
+  it("two players tied for 2nd on round 1 each get ceil((2+1)/2) = 2 VP", () => {
+    // Three players, all with settlements so they qualify for trade VP.
+    // Player "0" has the most goods → 1st place (3 VP).
+    // Players "1" and "2" are equal → tied for 2nd; share 2nd+3rd prize.
+    // ceil((2+1)/2) = ceil(1.5) = 2 VP each.
+    const G = buildInitialG([
+      buildPlayer("0", { resources: buildResources({ mithril: 5 }) }),
+      buildPlayer("1", { resources: buildResources({ mithril: 2 }) }),
+      buildPlayer("2", { resources: buildResources({ mithril: 2 }) }),
+    ]);
+    G.round = 1;
+    // Use two rows so no building sits at x=2 y=0, which is adjacent to faithdom
+    // [3,0] and would cause piracy to crash on a missing currentTileArray entry.
+    G.mapState.buildings = [
+      [
+        { player: G.playerInfo["0"], buildings: "outpost" as const, fort: false, garrisonedRegiments: 0, garrisonedLevies: 0 },
+        { player: G.playerInfo["1"], buildings: "outpost" as const, fort: false, garrisonedRegiments: 0, garrisonedLevies: 0 },
+      ],
+      [
+        { player: G.playerInfo["2"], buildings: "outpost" as const, fort: false, garrisonedRegiments: 0, garrisonedLevies: 0 },
+      ],
+    ] as any;
+
+    const vp1Before = G.playerInfo["1"].resources.victoryPoints;
+    const vp2Before = G.playerInfo["2"].resources.victoryPoints;
+    resolveRound(G, stubEvents, stubRandom);
+
+    expect(G.playerInfo["1"].resources.victoryPoints).toBe(vp1Before + 2);
+    expect(G.playerInfo["2"].resources.victoryPoints).toBe(vp2Before + 2);
   });
 });
 
