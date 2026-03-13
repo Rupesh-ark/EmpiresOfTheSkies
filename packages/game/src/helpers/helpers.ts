@@ -139,20 +139,16 @@ export const sortPlayersInPlayerOrder = (
 };
 
 export const drawFortuneOfWarCard = (G: MyGameState): FortuneOfWarCardInfo => {
-  const cardDeck = G.cardDecks.fortuneOfWarCards;
-  let randomIndex = Math.floor(Math.random() * cardDeck.length);
-
-  //checking if the card is a no effect card
-  while (
-    cardDeck[randomIndex].shield === 0 &&
-    cardDeck[randomIndex].sword === 0
-  ) {
+  if (G.cardDecks.fortuneOfWarCards.length === 0) {
     resetFortuneOfWarCardDeck(G);
-    randomIndex = Math.floor(Math.random() * cardDeck.length);
   }
-  const card = cardDeck[randomIndex];
-  G.cardDecks.discardedFortuneOfWarCards.push(cardDeck[randomIndex]);
-  G.cardDecks.fortuneOfWarCards.splice(randomIndex, 1);
+  const cardDeck = G.cardDecks.fortuneOfWarCards;
+  // Find first non-NoEffect card; fall back to index 0 if all are NoEffect
+  let chosenIndex = cardDeck.findIndex((c) => c.sword !== 0 || c.shield !== 0);
+  if (chosenIndex === -1) chosenIndex = 0;
+  const card = cardDeck[chosenIndex];
+  G.cardDecks.discardedFortuneOfWarCards.push(card);
+  G.cardDecks.fortuneOfWarCards.splice(chosenIndex, 1);
   return card;
 };
 

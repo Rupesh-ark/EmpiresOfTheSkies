@@ -76,13 +76,13 @@ const vote: Move<MyGameState> = (
     if (winners.length > 1) {
       Object.values(G.playerInfo).forEach((player) => {
         if (player.isArchprelate) {
-          finalWinner = player.id;
+          finalWinner = player.kingdomName;
         }
       });
     } else finalWinner = winners[0];
 
     Object.values(G.playerInfo).forEach((player) => {
-      if (player.id === finalWinner) {
+      if (player.kingdomName === finalWinner) {
         player.isArchprelate = true;
         let orthodoxRealms = 0;
         Object.values(G.playerInfo).forEach((player) => {

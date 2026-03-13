@@ -273,8 +273,8 @@ export const resolveConquest = (
 
   attackerSwordValue += attackerGarrisonedLevies;
 
-  attackerSwordValue += G.battleState?.attacker.fowCard?.sword ?? 0;
-  attackerShieldValue += G.battleState?.attacker.fowCard?.shield ?? 0;
+  attackerSwordValue += G.conquestState?.fowCard?.sword ?? 0;
+  attackerShieldValue += G.conquestState?.fowCard?.shield ?? 0;
 
   const defenderCard = drawFortuneOfWarCard(G);
 
@@ -346,7 +346,7 @@ export const resolveConquest = (
     `Remaining attackers in colonisation attempt: ${remainingAttackers}`
   );
   const remainingDefenders =
-    attackerSwordValue - (defenderShieldValue + defenderSwordValue);
+    (defenderShieldValue + defenderSwordValue) - attackerSwordValue;
 
   console.log(
     `Remaining defenders in colonisation attempt: ${remainingDefenders}`

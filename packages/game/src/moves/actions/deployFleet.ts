@@ -127,7 +127,7 @@ const deployFleet: Move<MyGameState> = (
 
   removeOneCounsellor(G, playerID);
   G.playerInfo[playerID].playerBoardCounsellorLocations.dispatchDisabled =
-    args[0];
+    true;
 
   G.playerInfo[playerID].turnComplete = true;
 };

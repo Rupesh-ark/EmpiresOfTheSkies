@@ -26,13 +26,12 @@ const passFleetInfoToPlayerInfo: Move<MyGameState> = (
   const regimentCount = args[2];
   const levyCount = args[3];
 
-  if (fleetId !== G.playerInfo[playerID].fleetInfo[fleetId].fleetId) {
+  const currentPlayer = G.playerInfo[playerID];
+  const currentFleet = currentPlayer.fleetInfo[fleetId];
+  if (!currentFleet || fleetId !== currentFleet.fleetId) {
     console.log("Fleet IDs do not match, something has gone wrong...");
     return INVALID_MOVE;
   }
-
-  const currentPlayer = G.playerInfo[playerID];
-  const currentFleet = currentPlayer.fleetInfo[fleetId];
   if (currentFleet.location[0] === 4 && currentFleet.location[1] === 0) {
     if (
       currentPlayer.resources.skyships < skyshipCount ||
