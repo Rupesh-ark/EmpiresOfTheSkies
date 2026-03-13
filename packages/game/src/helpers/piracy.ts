@@ -30,22 +30,30 @@ export const bfsReachable = (
   starts: [number, number][],
   network: Set<string>
 ): Set<string> => {
-  const visited = new Set<string>();
-  const queue: [number, number][] = [];
+  return new Set(bfsWithDistance(starts, network).keys());
+};
+
+// BFS returning a map of tileKey → distance from nearest start tile
+export const bfsWithDistance = (
+  starts: [number, number][],
+  network: Set<string>
+): Map<string, number> => {
+  const visited = new Map<string, number>();
+  const queue: [number, number, number][] = [];
   starts.forEach(([x, y]) => {
     const k = tileKey(x, y);
     if (network.has(k)) {
-      visited.add(k);
-      queue.push([x, y]);
+      visited.set(k, 0);
+      queue.push([x, y, 0]);
     }
   });
   while (queue.length > 0) {
-    const [cx, cy] = queue.shift()!;
+    const [cx, cy, dist] = queue.shift()!;
     for (const [nx, ny] of getNeighbors(cx, cy)) {
       const k = tileKey(nx, ny);
       if (network.has(k) && !visited.has(k)) {
-        visited.add(k);
-        queue.push([nx, ny]);
+        visited.set(k, dist + 1);
+        queue.push([nx, ny, dist + 1]);
       }
     }
   }
@@ -123,11 +131,17 @@ export const enactPiracy = (G: MyGameState): void => {
         const routeValue = getTileRouteValue(G, x, y, cell.buildings);
         let goldRemainingToLose = routeValue;
 
+        // BFS from outpost to get distance of each tile on the route
+        const distFromOutpost = bfsWithDistance([[x, y]], network);
+
+        // Collect all rival blocking fleets with their distance from the outpost
+        const blockingPirates: { rivalID: string; distance: number }[] = [];
+
         Object.keys(G.playerInfo).forEach((rivalID) => {
-          if (rivalID === playerID || goldRemainingToLose <= 0) return;
+          if (rivalID === playerID) return;
 
           G.playerInfo[rivalID].fleetInfo.forEach((rivalFleet) => {
-            if (rivalFleet.skyships <= 0 || goldRemainingToLose <= 0) return;
+            if (rivalFleet.skyships <= 0) return;
 
             const rivalKey = tileKey(
               rivalFleet.location[0],
@@ -148,19 +162,30 @@ export const enactPiracy = (G: MyGameState): void => {
               reducedNetwork
             );
             if (!reachableWithout.has(outpostKey)) {
-              const goldLost = Math.min(1, goldRemainingToLose);
-              G.playerInfo[playerID].resources.gold -= goldLost;
-              G.playerInfo[rivalID].resources.gold += goldLost;
-              goldRemainingToLose -= goldLost;
-
-              if (
-                G.playerInfo[rivalID].resources.advantageCard ===
-                "sanctioned_piracy"
-              ) {
-                G.playerInfo[rivalID].resources.victoryPoints += 1;
-              }
+              blockingPirates.push({
+                rivalID,
+                distance: distFromOutpost.get(rivalKey) ?? Infinity,
+              });
             }
           });
+        });
+
+        // v4.2: multiple pirates prioritized by nearest to Land source
+        blockingPirates.sort((a, b) => a.distance - b.distance);
+
+        blockingPirates.forEach(({ rivalID }) => {
+          if (goldRemainingToLose <= 0) return;
+          const goldLost = Math.min(1, goldRemainingToLose);
+          G.playerInfo[playerID].resources.gold -= goldLost;
+          G.playerInfo[rivalID].resources.gold += goldLost;
+          goldRemainingToLose -= goldLost;
+
+          if (
+            G.playerInfo[rivalID].resources.advantageCard ===
+            "sanctioned_piracy"
+          ) {
+            G.playerInfo[rivalID].resources.victoryPoints += 1;
+          }
         });
       });
     });
