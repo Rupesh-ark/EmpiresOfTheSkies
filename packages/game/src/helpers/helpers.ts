@@ -142,13 +142,21 @@ export const drawFortuneOfWarCard = (G: MyGameState): FortuneOfWarCardInfo => {
   if (G.cardDecks.fortuneOfWarCards.length === 0) {
     resetFortuneOfWarCardDeck(G);
   }
-  const cardDeck = G.cardDecks.fortuneOfWarCards;
-  // Find first non-NoEffect card; fall back to index 0 if all are NoEffect
-  let chosenIndex = cardDeck.findIndex((c) => c.sword !== 0 || c.shield !== 0);
-  if (chosenIndex === -1) chosenIndex = 0;
-  const card = cardDeck[chosenIndex];
+  const card = G.cardDecks.fortuneOfWarCards.splice(0, 1)[0];
   G.cardDecks.discardedFortuneOfWarCards.push(card);
-  G.cardDecks.fortuneOfWarCards.splice(chosenIndex, 1);
+
+  // v4.2: No Effect → discard, reshuffle discard into deck, draw again
+  const isNoEffect = card.sword === 0 && card.shield === 0;
+  if (isNoEffect) {
+    resetFortuneOfWarCardDeck(G);
+    // Guard against infinite loop if all remaining cards are No Effect
+    const hasRealCard = G.cardDecks.fortuneOfWarCards.some(
+      (c) => c.sword !== 0 || c.shield !== 0
+    );
+    if (hasRealCard) {
+      return drawFortuneOfWarCard(G);
+    }
+  }
   return card;
 };
 
