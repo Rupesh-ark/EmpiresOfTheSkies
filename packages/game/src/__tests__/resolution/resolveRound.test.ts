@@ -19,6 +19,7 @@ import { buildInitialG, buildPlayer, buildResources } from "../testHelpers";
 
 // events stub — resolveRound calls events.endGame() on final round
 const stubEvents = { endGame: () => {}, endPhase: () => {}, endTurn: () => {} } as any;
+const stubRandom = { Number: () => 0 } as any;
 
 
 // ── D1: Price marker goods conversion ────────────────────────────────────────
@@ -30,7 +31,7 @@ describe("resolveRound — D1: goods sold at price marker values", () => {
     ]);
     G.mapState.goodsPriceMarkers.mithril = 3;
     const goldBefore = G.playerInfo["0"].resources.gold;
-    resolveRound(G, stubEvents);
+    resolveRound(G, stubEvents, stubRandom);
     // 3 mithril × price 3 = 9 Gold gained
     expect(G.playerInfo["0"].resources.gold).toBeGreaterThanOrEqual(goldBefore + 9);
   });
@@ -44,7 +45,7 @@ describe("resolveRound — D1: goods sold at price marker values", () => {
         }),
       }),
     ]);
-    resolveRound(G, stubEvents);
+    resolveRound(G, stubEvents, stubRandom);
     const r = G.playerInfo["0"].resources;
     expect(r.mithril).toBe(0);
     expect(r.dragonScales).toBe(0);
@@ -76,7 +77,7 @@ describe("resolveRound — D2: trade VP by round", () => {
     G.round = 1;
     setupTwoTradersWithSettlements(G);
     const vpBefore = G.playerInfo["0"].resources.victoryPoints;
-    resolveRound(G, stubEvents);
+    resolveRound(G, stubEvents, stubRandom);
     expect(G.playerInfo["0"].resources.victoryPoints).toBe(vpBefore + 3);
   });
 
@@ -85,7 +86,7 @@ describe("resolveRound — D2: trade VP by round", () => {
     G.round = 1;
     setupTwoTradersWithSettlements(G);
     const vpBefore = G.playerInfo["1"].resources.victoryPoints;
-    resolveRound(G, stubEvents);
+    resolveRound(G, stubEvents, stubRandom);
     expect(G.playerInfo["1"].resources.victoryPoints).toBe(vpBefore + 2);
   });
 
@@ -94,7 +95,7 @@ describe("resolveRound — D2: trade VP by round", () => {
     G.round = 2;
     setupTwoTradersWithSettlements(G);
     const vpBefore = G.playerInfo["0"].resources.victoryPoints;
-    resolveRound(G, stubEvents);
+    resolveRound(G, stubEvents, stubRandom);
     expect(G.playerInfo["0"].resources.victoryPoints).toBe(vpBefore + 6);
   });
 
@@ -103,7 +104,7 @@ describe("resolveRound — D2: trade VP by round", () => {
     G.round = 3;
     setupTwoTradersWithSettlements(G);
     const vpBefore = G.playerInfo["0"].resources.victoryPoints;
-    resolveRound(G, stubEvents);
+    resolveRound(G, stubEvents, stubRandom);
     expect(G.playerInfo["0"].resources.victoryPoints).toBe(vpBefore + 6);
   });
 
@@ -113,7 +114,7 @@ describe("resolveRound — D2: trade VP by round", () => {
     G.finalRound = 6; // so it's not the final round
     setupTwoTradersWithSettlements(G);
     const vpBefore = G.playerInfo["0"].resources.victoryPoints;
-    resolveRound(G, stubEvents);
+    resolveRound(G, stubEvents, stubRandom);
     expect(G.playerInfo["0"].resources.victoryPoints).toBe(vpBefore + 9);
   });
 });
@@ -138,7 +139,7 @@ describe("resolveRound — D3: only players with outpost/colony score trade VP",
 
     const vp0Before = G.playerInfo["0"].resources.victoryPoints;
     const vp1Before = G.playerInfo["1"].resources.victoryPoints;
-    resolveRound(G, stubEvents);
+    resolveRound(G, stubEvents, stubRandom);
 
     // Player "0" should NOT get any trade VP despite having more goods
     expect(G.playerInfo["0"].resources.victoryPoints).toBe(vp0Before);
@@ -156,7 +157,7 @@ describe("resolveRound — D4: palace bonus", () => {
       buildPlayer("1", { palaces: 2 }),
     ]);
     const vpBefore = G.playerInfo["0"].resources.victoryPoints;
-    resolveRound(G, stubEvents);
+    resolveRound(G, stubEvents, stubRandom);
     // 4 − 2 = 2 VP
     expect(G.playerInfo["0"].resources.victoryPoints).toBeGreaterThanOrEqual(vpBefore + 2);
   });
@@ -168,7 +169,7 @@ describe("resolveRound — D4: palace bonus", () => {
     ]);
     const vp0Before = G.playerInfo["0"].resources.victoryPoints;
     const vp1Before = G.playerInfo["1"].resources.victoryPoints;
-    resolveRound(G, stubEvents);
+    resolveRound(G, stubEvents, stubRandom);
     expect(G.playerInfo["0"].resources.victoryPoints).toBe(vp0Before);
     expect(G.playerInfo["1"].resources.victoryPoints).toBe(vp1Before);
   });
@@ -179,7 +180,7 @@ describe("resolveRound — D4: palace bonus", () => {
       buildPlayer("1", { palaces: 0 }),
     ]);
     const vp0Before = G.playerInfo["0"].resources.victoryPoints;
-    resolveRound(G, stubEvents);
+    resolveRound(G, stubEvents, stubRandom);
     expect(G.playerInfo["0"].resources.victoryPoints).toBe(vp0Before);
   });
 });
@@ -203,7 +204,7 @@ describe("resolveRound — D5: factory income", () => {
       ],
     ] as any;
     // Pool = 5; player "0" has 3 factories → gets 3 gold; player "1" has 1 → gets 1 gold
-    resolveRound(G, stubEvents);
+    resolveRound(G, stubEvents, stubRandom);
     expect(G.playerInfo["0"].resources.gold).toBeGreaterThanOrEqual(3);
     expect(G.playerInfo["1"].resources.gold).toBeGreaterThanOrEqual(1);
   });
@@ -220,7 +221,7 @@ describe("resolveRound — D5: factory income", () => {
       { buildings: "outpost" as const, fort: false, garrisonedRegiments: 0, garrisonedLevies: 0 },
       { buildings: "outpost" as const, fort: false, garrisonedRegiments: 0, garrisonedLevies: 0 },
     ]] as any;
-    resolveRound(G, stubEvents);
+    resolveRound(G, stubEvents, stubRandom);
     // Total income distributed = 4 (pool size), not 6 (sum of factories)
     const totalGold = G.playerInfo["0"].resources.gold + G.playerInfo["1"].resources.gold;
     expect(totalGold).toBe(4);
@@ -238,7 +239,7 @@ describe("resolveRound — D7: final round gold bonus (1 VP per 5 Gold)", () => 
     G.round = G.finalRound; // trigger final round
     const vp0Before = G.playerInfo["0"].resources.victoryPoints;
     const vp1Before = G.playerInfo["1"].resources.victoryPoints;
-    resolveRound(G, stubEvents);
+    resolveRound(G, stubEvents, stubRandom);
     // Player "0": floor(15/5) = 3 bonus VP
     expect(G.playerInfo["0"].resources.victoryPoints).toBeGreaterThanOrEqual(vp0Before + 3);
     // Player "1": floor(7/5) = 1 bonus VP
@@ -252,7 +253,7 @@ describe("resolveRound — D7: final round gold bonus (1 VP per 5 Gold)", () => 
     G.round = 1;
     G.finalRound = 4;
     const vpBefore = G.playerInfo["0"].resources.victoryPoints;
-    resolveRound(G, stubEvents);
+    resolveRound(G, stubEvents, stubRandom);
     // No gold bonus on round 1
     expect(G.playerInfo["0"].resources.victoryPoints).toBe(vpBefore);
   });
@@ -266,7 +267,7 @@ describe("resolveRound — D8: debt penalty (1 VP per 2 Gold of actual debt)", (
       buildPlayer("0", { palaces: 0, resources: buildResources({ gold: -6 }) }),
     ]);
     const vpBefore = G.playerInfo["0"].resources.victoryPoints;
-    resolveRound(G, stubEvents);
+    resolveRound(G, stubEvents, stubRandom);
     // debt = 6, penalty = floor(6/2) = 3 VP
     expect(G.playerInfo["0"].resources.victoryPoints).toBe(vpBefore - 3);
   });
@@ -276,7 +277,7 @@ describe("resolveRound — D8: debt penalty (1 VP per 2 Gold of actual debt)", (
       buildPlayer("0", { palaces: 0, resources: buildResources({ gold: 0 }) }),
     ]);
     const vpBefore = G.playerInfo["0"].resources.victoryPoints;
-    resolveRound(G, stubEvents);
+    resolveRound(G, stubEvents, stubRandom);
     expect(G.playerInfo["0"].resources.victoryPoints).toBe(vpBefore);
   });
 
@@ -285,7 +286,7 @@ describe("resolveRound — D8: debt penalty (1 VP per 2 Gold of actual debt)", (
       buildPlayer("0", { palaces: 0, resources: buildResources({ gold: 5 }) }),
     ]);
     const vpBefore = G.playerInfo["0"].resources.victoryPoints;
-    resolveRound(G, stubEvents);
+    resolveRound(G, stubEvents, stubRandom);
     expect(G.playerInfo["0"].resources.victoryPoints).toBe(vpBefore);
   });
 });

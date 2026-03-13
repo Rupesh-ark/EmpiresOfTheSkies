@@ -54,6 +54,7 @@ export function buildResources(overrides: Partial<Resources> = {}): Resources {
     advantageCard: undefined,
     eventCards: [],
     legacyCard: undefined,
+    smugglerGoodChoice: undefined,
     ...overrides,
   };
 }

@@ -47,6 +47,7 @@ export const buildPlayerInfoMap = (ctx: Ctx): { [id: string]: PlayerInfo } => {
         advantageCard: undefined,
         eventCards: [""],
         legacyCard: undefined,
+        smugglerGoodChoice: undefined,
       },
       isArchprelate: playerID === ctx.playOrder[ctx.playOrder.length - 1],
       playerBoardCounsellorLocations: {
