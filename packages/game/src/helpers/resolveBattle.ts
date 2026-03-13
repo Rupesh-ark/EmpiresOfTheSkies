@@ -8,6 +8,7 @@ import {
 } from "./findNext";
 import { drawFortuneOfWarCard } from "./helpers";
 import { RandomAPI } from "boardgame.io/dist/types/src/plugins/random/random";
+import { increaseHeresyWithinMove, increaseOrthodoxyWithinMove } from "./stateUtils";
 
 const GOODS: GoodKey[] = ["mithril", "dragonScales", "krakenSkin", "magicDust", "stickyIchor", "pipeweed"];
 
@@ -256,11 +257,15 @@ export const resolveBattleAndReturnWinner = (
     G.battleState &&
       Object.values(G.battleState).forEach((player) => {
         if (player.id === winner) {
-          if (ctx.phase !== "ground_battle") {
+          // DEV-8: heresy shift applies to both aerial and ground battles,
+          // but only when the two sides have opposing alignments
+          const loserId = Object.values(G.battleState!).find(p => p.id !== winner)?.id;
+          const loserAlignment = loserId ? G.playerInfo[loserId].hereticOrOrthodox : undefined;
+          if (loserAlignment && loserAlignment !== player.hereticOrOrthodox) {
             if (player.hereticOrOrthodox === "heretic") {
-              G.playerInfo[player.id].heresyTracker += 1;
+              increaseHeresyWithinMove(G, player.id);
             } else {
-              G.playerInfo[player.id].heresyTracker -= 1;
+              increaseOrthodoxyWithinMove(G, player.id);
             }
           }
           player.victorious = true;
@@ -475,7 +480,7 @@ export const resolveConquest = (
       currentPlayer.resources[lootNameAsResource] += value;
     });
     currentPlayer.resources.victoryPoints += 1;
-    currentPlayer.heresyTracker += 1;
+    increaseHeresyWithinMove(G, currentPlayer.id);
 
     // GAP-15 sub-rule 2: move price markers left for each additional colony good
     // (the broken-line rectangle goods on the tile, per "Resolve Conquest Attempt" rule)
