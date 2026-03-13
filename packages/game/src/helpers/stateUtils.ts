@@ -42,7 +42,13 @@ export const removeSkyship = (G: MyGameState, playerID: string) => {
   G.playerInfo[playerID].resources.skyships -= 1;
 };
 export const addSkyship = (G: MyGameState, playerID: string) => {
-  G.playerInfo[playerID].resources.skyships += 1;
+  // GAP-13: max 24 skyships total (reserve + deployed in fleets)
+  const player = G.playerInfo[playerID];
+  const totalSkyships = player.resources.skyships +
+    player.fleetInfo.reduce((sum, f) => sum + f.skyships, 0);
+  if (totalSkyships < 24) {
+    player.resources.skyships += 1;
+  }
 };
 
 export const removeRegiments = (
@@ -58,7 +64,17 @@ export const addRegiments = (
   playerID: string,
   amount: number
 ) => {
-  G.playerInfo[playerID].resources.regiments += amount;
+  // GAP-13: max 30 regiments total (reserve + fleets + garrisoned on map)
+  const player = G.playerInfo[playerID];
+  const totalRegiments = player.resources.regiments +
+    player.fleetInfo.reduce((sum, f) => sum + f.regiments, 0) +
+    G.mapState.buildings.reduce((sum, row) =>
+      sum + row.reduce((s, cell) =>
+        s + (cell.player?.id === playerID ? cell.garrisonedRegiments : 0), 0), 0);
+  const allowed = Math.min(amount, 30 - totalRegiments);
+  if (allowed > 0) {
+    player.resources.regiments += allowed;
+  }
 };
 
 export const increaseHeresyWithinMove = (G: MyGameState, playerID: string) => {

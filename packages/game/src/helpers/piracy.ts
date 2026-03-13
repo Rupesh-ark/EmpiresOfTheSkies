@@ -1,6 +1,6 @@
 import { MyGameState } from "../types";
 
-const FAITHDOM_TILES: [number, number][] = [
+export const FAITHDOM_TILES: [number, number][] = [
   [3, 0],
   [4, 0],
   [3, 1],
@@ -9,7 +9,7 @@ const FAITHDOM_TILES: [number, number][] = [
 const MAP_WIDTH = 8;
 const MAP_HEIGHT = 4;
 
-const tileKey = (x: number, y: number): string => `${x},${y}`;
+export const tileKey = (x: number, y: number): string => `${x},${y}`;
 
 // 8-directional adjacency with east-west wrap
 const getNeighbors = (x: number, y: number): [number, number][] => {
@@ -26,7 +26,7 @@ const getNeighbors = (x: number, y: number): [number, number][] => {
 };
 
 // BFS from start tiles through a network of allowed tiles
-const bfsReachable = (
+export const bfsReachable = (
   starts: [number, number][],
   network: Set<string>
 ): Set<string> => {

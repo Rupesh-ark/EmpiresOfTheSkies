@@ -11,21 +11,19 @@ const checkAndPlaceFort: Move<MyGameState> = (
   if (tileInfo === undefined) {
     return INVALID_MOVE;
   }
-  let hasRelevantPresence = false;
-  if (tileInfo.player) {
-    if (
-      tileInfo.player.id === playerID &&
-      (tileInfo.buildings === "colony" || tileInfo.buildings === "outpost") &&
-      tileInfo.fort === false &&
-      tileInfo.garrisonedRegiments
-        ? tileInfo.garrisonedRegiments > 0
-        : false
-    ) {
-      hasRelevantPresence = true;
-    }
-  }
+  // GAP-10: validate fort placement — must have outpost/colony + regiments or levies (garrisoned or in fleet)
+  const hasBuilding =
+    tileInfo.player?.id === playerID &&
+    (tileInfo.buildings === "colony" || tileInfo.buildings === "outpost");
+  const noFortYet = tileInfo.fort === false;
 
-  if (!hasRelevantPresence) {
+  const hasGarrisonedTroops =
+    tileInfo.garrisonedRegiments > 0 || tileInfo.garrisonedLevies > 0;
+  const hasFleetTroops = G.playerInfo[playerID].fleetInfo.some(
+    (f) => f.location[0] === x && f.location[1] === y && (f.regiments > 0 || f.levies > 0)
+  );
+
+  if (!hasBuilding || !noFortYet || (!hasGarrisonedTroops && !hasFleetTroops)) {
     return INVALID_MOVE;
   }
 

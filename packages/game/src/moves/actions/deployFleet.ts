@@ -58,6 +58,11 @@ const deployFleet: Move<MyGameState> = (
     console.log("Player has attempted to deploy a fleet with no skyships");
     return INVALID_MOVE;
   }
+  // GAP-13: max 5 skyships per fleet
+  if (skyshipCount > 5) {
+    console.log("Player has attempted to deploy more than 5 skyships in one fleet");
+    return INVALID_MOVE;
+  }
 
   fleet.skyships = skyshipCount;
   fleet.regiments = regimentCount;

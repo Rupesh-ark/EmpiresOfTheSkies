@@ -10,13 +10,12 @@ import {
 } from "../../helpers/stateUtils";
 import { Ctx } from "boardgame.io/dist/types/src/types";
 
-// TODO: add functionality for executing prisoners
 const punishDissenters: Move<MyGameState> = (
   { G, ctx, playerID }: { G: MyGameState; ctx: Ctx; playerID: string },
   ...args: any[]
 ) => {
   const value: keyof typeof G.boardState.punishDissenters = args[0] + 1;
-  const paymentType: "gold" | "counsellor" = args[1];
+  const paymentType: "gold" | "counsellor" | "execute" = args[1];
 
   if (checkCounsellorsNotZero(playerID, G) !== undefined) {
     return INVALID_MOVE;
@@ -40,7 +39,27 @@ const punishDissenters: Move<MyGameState> = (
 
   const playerInfo = G.playerInfo[playerID];
 
-  if (playerInfo.prisoners >= 3) {
+  // GAP-11: execute an existing prisoner — returns cube to pool, shifts heresy, costs 1 VP
+  if (paymentType === "execute") {
+    if (playerInfo.prisoners <= 0) {
+      return INVALID_MOVE;
+    }
+    playerInfo.prisoners -= 1;
+    playerInfo.resources.victoryPoints -= 1;
+    if (playerInfo.hereticOrOrthodox === "orthodox") {
+      increaseOrthodoxyWithinMove(G, playerID);
+    } else {
+      increaseHeresyWithinMove(G, playerID);
+    }
+    removeOneCounsellor(G, playerID); // counsellor placed on board
+    G.boardState.punishDissenters[value] = playerID;
+    G.playerInfo[playerID].turnComplete = true;
+    return;
+  }
+
+  // GAP-6: more_prisons KA raises max prisoners from 3 to 4
+  const maxPrisoners = playerInfo.resources.advantageCard === "more_prisons" ? 4 : 3;
+  if (playerInfo.prisoners >= maxPrisoners) {
     return INVALID_MOVE;
   }
 

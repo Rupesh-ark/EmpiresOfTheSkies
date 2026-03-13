@@ -1,4 +1,4 @@
-import { FortuneOfWarCardInfo, KingdomAdvantageCard, KingdomName, LegacyCard, TileInfoProps } from "./types";
+import { FortuneOfWarCardInfo, KingdomAdvantageCard, KingdomName, LegacyCardInfo, TileInfoProps } from "./types";
 
 // ── Game configuration ────────────────────────────────────────────────────────
 
@@ -44,25 +44,25 @@ export const ALL_KA_CARDS: KingdomAdvantageCard[] = [
   "sanctioned_piracy",
 ];
 
-export const LEGACY_CARDS: LegacyCard[] = [
-  "the builder",
-  "the conqueror",
-  "the navigator",
-  "the great",
-  "the magnificent",
-  "the merchant",
-  "the mighty",
-  "the aviator",
-  "the pious",
-  "the builder",
-  "the conqueror",
-  "the navigator",
-  "the great",
-  "the magnificent",
-  "the merchant",
-  "the mighty",
-  "the aviator",
-  "the pious",
+export const LEGACY_CARDS: LegacyCardInfo[] = [
+  { name: "the builder",     colour: "purple" },
+  { name: "the conqueror",   colour: "purple" },
+  { name: "the navigator",   colour: "purple" },
+  { name: "the great",       colour: "purple" },
+  { name: "the magnificent", colour: "purple" },
+  { name: "the merchant",    colour: "purple" },
+  { name: "the mighty",      colour: "purple" },
+  { name: "the aviator",     colour: "purple" },
+  { name: "the pious",       colour: "purple" },
+  { name: "the builder",     colour: "orange" },
+  { name: "the conqueror",   colour: "orange" },
+  { name: "the navigator",   colour: "orange" },
+  { name: "the great",       colour: "orange" },
+  { name: "the magnificent", colour: "orange" },
+  { name: "the merchant",    colour: "orange" },
+  { name: "the mighty",      colour: "orange" },
+  { name: "the aviator",     colour: "orange" },
+  { name: "the pious",       colour: "orange" },
 ];
 
 export const GAME_PHASES: { key: string; label: string }[] = [

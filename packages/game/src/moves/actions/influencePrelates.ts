@@ -51,12 +51,19 @@ export const influencePrelates: Move<MyGameState> = (
     8: PlayerColour.green,
   };
 
-  Object.entries(G.playerInfo).forEach(([id, playerInfo]) => {
-    if (playerInfo.colour === kingdomToIDMap[value]) {
-      recipientOfPayment = id;
-      cost = playerInfo.cathedrals;
-    }
-  });
+  // GAP-5: placing in your own kingdom's slot is free
+  const slotColour = kingdomToIDMap[value];
+  const actingPlayerColour = G.playerInfo[playerID].colour;
+  if (slotColour !== null && slotColour === actingPlayerColour) {
+    cost = 0;
+  } else {
+    Object.entries(G.playerInfo).forEach(([id, playerInfo]) => {
+      if (playerInfo.colour === slotColour) {
+        recipientOfPayment = id;
+        cost = playerInfo.cathedrals;
+      }
+    });
+  }
 
   if (recipientOfPayment) {
     addGoldAmount(G, recipientOfPayment, cost);
