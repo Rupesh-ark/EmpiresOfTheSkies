@@ -34,22 +34,37 @@ function buildTile(name: string, type: TileInfoProps["type"] = "land"): TileInfo
   };
 }
 
-/**
- * Build a minimal 2×1 map where tile [0][0] is already discovered (home)
- * and tile [1][0] is the tile we want to discover.
- */
-function buildMinimalMap(tile: TileInfoProps) {
-  const home = buildTile("home1", "home");
+// discoverTile assumes exactly 4 rows (y 0–3) and 8 columns (x 0–7, wrapping).
+// Build a proper 4×8 grid.  [0, 0] = home (discovered), [1, 0] = the target.
+function buildMinimalMap(target: TileInfoProps) {
+  const home    = buildTile("home1", "home");
+  const filler  = buildTile("ocean0", "ocean");
+  const ROWS = 4, COLS = 8;
+
+  const currentTileArray: TileInfoProps[][] = [];
+  const discoveredTiles: boolean[][] = [];
+  const buildings: any[][] = [];
+
+  for (let row = 0; row < ROWS; row++) {
+    currentTileArray[row] = [];
+    discoveredTiles[row] = [];
+    buildings[row] = [];
+    for (let col = 0; col < COLS; col++) {
+      currentTileArray[row][col] = (row === 0 && col === 0) ? home
+                                 : (row === 0 && col === 1) ? target
+                                 : filler;
+      discoveredTiles[row][col] = row === 0 && col === 0; // only home is discovered
+      buildings[row][col] = { fort: false, garrisonedRegiments: 0, garrisonedLevies: 0 };
+    }
+  }
+
   return {
-    currentTileArray: [[home, tile]], // 1 row, 2 columns
-    discoveredTiles: [[true, false]],
-    buildings: [[
-      { fort: false, garrisonedRegiments: 0, garrisonedLevies: 0 },
-      { fort: false, garrisonedRegiments: 0, garrisonedLevies: 0 },
-    ]],
+    currentTileArray,
+    discoveredTiles,
+    buildings,
     mostRecentlyDiscoveredTile: [0, 0],
     discoveredRaces: [] as string[],
-    battleMap: [[], []],
+    battleMap: [] as string[][][],
     currentBattle: [],
     goodsPriceMarkers: { mithril: 2, dragonScales: 2, krakenSkin: 2, magicDust: 2, stickyIchor: 2, pipeweed: 2 },
   };
@@ -172,14 +187,15 @@ describe("discoverTile — INVALID_MOVE conditions", () => {
 
   it("returns INVALID_MOVE if tile is not adjacent to any discovered tile (first move)", () => {
     const G = buildInitialG();
-    // Build a 3-wide map: [0,0] discovered, [1,0] undiscovered, [2,0] undiscovered
-    G.mapState = {
-      ...buildMinimalMap(buildTile("elf1", "land")),
-      currentTileArray: [[buildTile("home1", "home"), buildTile("elf1", "land"), buildTile("dwarf1", "land")]],
-      discoveredTiles: [[true, false, false]],
-    } as any;
-    // Try to discover [2, 0] which is NOT adjacent to [0, 0]
-    const result = callDiscover(G, "0", [2, 0], 0);
+    // Start with the full 4×8 map where [0,0] is discovered.
+    // Try to discover [3, 0] which is NOT adjacent to [0, 0].
+    G.mapState = buildMinimalMap(buildTile("elf1", "land")) as any;
+    // Re-label [3,0] as a non-ocean tile to make sure it's what we're targeting
+    G.mapState.currentTileArray[0][3] = buildTile("dwarf1", "land");
+    // Ensure [3,0] is not discovered
+    G.mapState.discoveredTiles[0][3] = false;
+    // Try to discover [3, 0] which is NOT adjacent to [0, 0]
+    const result = callDiscover(G, "0", [3, 0], 0);
     expect(result).toBe(INVALID_MOVE);
   });
 });

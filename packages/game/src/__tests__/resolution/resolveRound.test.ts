@@ -16,21 +16,10 @@
 import { describe, it, expect } from "vitest";
 import resolveRound from "../../helpers/resolveRound";
 import { buildInitialG, buildPlayer, buildResources } from "../testHelpers";
-import type { MapBuildingInfo } from "../../types";
 
 // events stub — resolveRound calls events.endGame() on final round
 const stubEvents = { endGame: () => {}, endPhase: () => {}, endTurn: () => {} } as any;
 
-// Helper: create a simple 1×1 buildings map with a settlement
-function buildingsWithSettlement(buildings: "outpost" | "colony", playerID: string): MapBuildingInfo[][] {
-  return [[{
-    player: buildPlayer(playerID) as any,
-    buildings,
-    fort: false,
-    garrisonedRegiments: 0,
-    garrisonedLevies: 0,
-  }]];
-}
 
 // ── D1: Price marker goods conversion ────────────────────────────────────────
 
@@ -258,7 +247,7 @@ describe("resolveRound — D7: final round gold bonus (1 VP per 5 Gold)", () => 
 
   it("does NOT award gold bonus on non-final rounds", () => {
     const G = buildInitialG([
-      buildPlayer("0", { resources: buildResources({ gold: 15 }) }),
+      buildPlayer("0", { palaces: 0, resources: buildResources({ gold: 15 }) }),
     ]);
     G.round = 1;
     G.finalRound = 4;
@@ -274,7 +263,7 @@ describe("resolveRound — D7: final round gold bonus (1 VP per 5 Gold)", () => 
 describe("resolveRound — D8: debt penalty (1 VP per 2 Gold of actual debt)", () => {
   it("deducts 1 VP per 2 Gold when player has negative gold", () => {
     const G = buildInitialG([
-      buildPlayer("0", { resources: buildResources({ gold: -6 }) }),
+      buildPlayer("0", { palaces: 0, resources: buildResources({ gold: -6 }) }),
     ]);
     const vpBefore = G.playerInfo["0"].resources.victoryPoints;
     resolveRound(G, stubEvents);
@@ -284,7 +273,7 @@ describe("resolveRound — D8: debt penalty (1 VP per 2 Gold of actual debt)", (
 
   it("does NOT deduct VP when gold is exactly 0 (v4.2 fix: zero is not debt)", () => {
     const G = buildInitialG([
-      buildPlayer("0", { resources: buildResources({ gold: 0 }) }),
+      buildPlayer("0", { palaces: 0, resources: buildResources({ gold: 0 }) }),
     ]);
     const vpBefore = G.playerInfo["0"].resources.victoryPoints;
     resolveRound(G, stubEvents);
@@ -293,7 +282,7 @@ describe("resolveRound — D8: debt penalty (1 VP per 2 Gold of actual debt)", (
 
   it("does NOT deduct VP when gold is positive", () => {
     const G = buildInitialG([
-      buildPlayer("0", { resources: buildResources({ gold: 5 }) }),
+      buildPlayer("0", { palaces: 0, resources: buildResources({ gold: 5 }) }),
     ]);
     const vpBefore = G.playerInfo["0"].resources.victoryPoints;
     resolveRound(G, stubEvents);
