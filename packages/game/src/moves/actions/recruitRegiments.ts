@@ -35,25 +35,13 @@ const recruitRegiments: Move<MyGameState> = (
     console.log("Player has chosen an action which has already been taken");
     return INVALID_MOVE;
   }
-  const cost: { [key: number]: number } = {
-    1: 0,
-    2: 1,
-    3: 2,
-    4: 3,
-    5: 3,
-    6: 4,
-  };
-  const reward: { [key: number]: number } = {
-    1: 1,
-    2: 2,
-    3: 4,
-    4: 6,
-    5: 7,
-    6: 9,
-  };
+  // v4.2: cost = 1 Gold + 1 Gold per counsellor in slot (including this one)
+  // Slot position equals the count of counsellors, so cost = 1 + slot position
+  const cost = 1 + value;
   removeOneCounsellor(G, playerID);
-  removeGoldAmount(G, playerID, cost[value]);
-  addRegiments(G, playerID, reward[value]);
+  removeGoldAmount(G, playerID, cost);
+  // v4.2: always 4 regiments per action
+  addRegiments(G, playerID, 4);
   G.boardState.recruitRegiments[value] = playerID;
   G.playerInfo[playerID].turnComplete = true;
 };

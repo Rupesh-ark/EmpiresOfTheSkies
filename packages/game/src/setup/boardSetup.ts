@@ -2,7 +2,7 @@ import { ActionBoardInfo } from "../types";
 import { BuildingSlot, CounsellorSlot } from "../codifiedGameInfo";
 
 export const initialBoardState: ActionBoardInfo = {
-  alterPlayerOrder: {
+  pendingPlayerOrder: {
     1: undefined,
     2: undefined,
     3: undefined,

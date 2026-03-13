@@ -31,19 +31,18 @@ export const alterPlayerOrder: Move<MyGameState> = (
     console.log("Player has chosen a position that is out of bounds");
     return INVALID_MOVE;
   }
-  if (G.playerOrder[newPosition] !== undefined) {
+  if (G.boardState.pendingPlayerOrder[newPosition] !== undefined) {
     console.log("Player has chosen a position that is already taken");
     return INVALID_MOVE;
   }
-  for (const value of Object.values(G.playerOrder)) {
+  for (const value of Object.values(G.boardState.pendingPlayerOrder)) {
     if (value === playerID) {
       console.log("Player has already altered their position");
       return INVALID_MOVE;
     }
   }
   removeOneCounsellor(G, playerID);
-  G.boardState.alterPlayerOrder[newPosition] = playerID;
-  G.playerOrder[newPosition] = playerID;
+  G.boardState.pendingPlayerOrder[newPosition] = playerID;
   G.playerInfo[playerID].turnComplete = true;
 };
 

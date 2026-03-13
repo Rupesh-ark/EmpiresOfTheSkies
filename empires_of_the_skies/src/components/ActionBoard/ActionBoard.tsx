@@ -199,7 +199,7 @@ export const ActionBoard = (props: ActionBoardProps) => {
               Array(6).fill(playerOrderTile),
               "98px",
               props,
-              props.G.boardState.alterPlayerOrder,
+              props.G.boardState.pendingPlayerOrder,
               undefined,
               [
                 "#9EE8FF",

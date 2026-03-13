@@ -107,14 +107,6 @@ const MyGame: Game<MyGameState> = {
       playerInfo: playerInfoMap,
       mapState: mapState,
       boardState: { ...initialBoardState },
-      playerOrder: {
-        1: undefined,
-        2: undefined,
-        3: undefined,
-        4: undefined,
-        5: undefined,
-        6: undefined,
-      },
       cardDecks: {
         fortuneOfWarCards: fullResetFortuneOfWarCardDeck(),
         discardedFortuneOfWarCards: [],
@@ -228,74 +220,6 @@ const MyGame: Game<MyGameState> = {
 
         Object.values(context.G.playerInfo).forEach((playerInfo: any) => {
           playerInfo.passed = false;
-        });
-        const currentTurnOrder = [...context.ctx.playOrder];
-        let newTurnOrder: string[] = [];
-        Object.values(context.G.boardState.alterPlayerOrder).forEach(
-          (id, index) => {
-            if (index < context.ctx.playOrder.length) {
-              if (id) {
-                newTurnOrder.splice(currentTurnOrder.indexOf(id), 1);
-                newTurnOrder.push(id);
-              } else {
-                newTurnOrder.push(currentTurnOrder.splice(0, 1)[0]);
-              }
-            }
-          }
-        );
-        newTurnOrder.push(...currentTurnOrder);
-        if (newTurnOrder.length !== context.ctx.playOrder.length) {
-          throw Error(`Something has gone wrong when updating the player order.
-          old order: ${context.ctx.playOrder}
-          new order: ${newTurnOrder}`);
-        } else {
-          context.G.turnOrder = newTurnOrder;
-        }
-
-        Object.entries(context.G.boardState).forEach(
-          ([key, gameStateObject]: [string, any]) => {
-            if (key === "foundBuildings") {
-              Object.values(gameStateObject).forEach((idArray: any) => {
-                idArray.forEach((id: string) => {
-                  console.log(
-                    `adding counsellor to player ${id} info for a founded ${key}`
-                  );
-                  context.G.playerInfo[id].resources.counsellors += 1;
-                });
-              });
-            } else if (key === "issueHolyDecree") {
-              context.G.boardState[key] = false;
-            } else {
-              Object.values(gameStateObject).forEach((id: any) => {
-                if (id) {
-                  console.log(
-                    `adding counsellor to player ${id} info for a ${key} button`
-                  );
-                  context.G.playerInfo[id].resources.counsellors += 1;
-                }
-              });
-            }
-          }
-        );
-
-        context.G.boardState = { ...initialBoardState };
-
-        Object.values(context.G.playerInfo).forEach((player: any) => {
-          Object.values(player.playerBoardCounsellorLocations).forEach(
-            (counsellor, index) => {
-              if (counsellor && index !== 3) {
-                console.log(
-                  "adding counsellor to player info for a player board button"
-                );
-                player.resources.counsellors += 1;
-                counsellor = false;
-              }
-            }
-          );
-          player.playerBoardCounsellorLocations.buildSkyships = false;
-          player.playerBoardCounsellorLocations.conscriptLevies = false;
-          player.playerBoardCounsellorLocations.dispatchSkyshipFleet = false;
-          player.playerBoardCounsellorLocations.dispatchDisabled = false;
         });
         context.events.endTurn({ next: context.ctx.playOrder[0] });
         context.events.pass();
@@ -516,6 +440,80 @@ const MyGame: Game<MyGameState> = {
       turn: { order: TurnOrder.ONCE },
       onBegin: (context) => {
         console.log("Reset phase has begun");
+
+        // Recompute turn order from alterPlayerOrder choices
+        const currentTurnOrder = [...context.ctx.playOrder];
+        let newTurnOrder: string[] = [];
+        Object.values(context.G.boardState.pendingPlayerOrder).forEach(
+          (id, index) => {
+            if (index < context.ctx.playOrder.length) {
+              if (id) {
+                newTurnOrder.splice(currentTurnOrder.indexOf(id), 1);
+                newTurnOrder.push(id);
+              } else {
+                newTurnOrder.push(currentTurnOrder.splice(0, 1)[0]);
+              }
+            }
+          }
+        );
+        newTurnOrder.push(...currentTurnOrder);
+        if (newTurnOrder.length !== context.ctx.playOrder.length) {
+          throw Error(`Something has gone wrong when updating the player order.
+          old order: ${context.ctx.playOrder}
+          new order: ${newTurnOrder}`);
+        } else {
+          context.G.turnOrder = newTurnOrder;
+        }
+
+        // Return counsellors from action board slots
+        Object.entries(context.G.boardState).forEach(
+          ([key, gameStateObject]: [string, any]) => {
+            if (key === "foundBuildings") {
+              Object.values(gameStateObject).forEach((idArray: any) => {
+                idArray.forEach((id: string) => {
+                  console.log(
+                    `adding counsellor to player ${id} info for a founded ${key}`
+                  );
+                  context.G.playerInfo[id].resources.counsellors += 1;
+                });
+              });
+            } else if (key === "issueHolyDecree") {
+              context.G.boardState[key] = false;
+            } else {
+              Object.values(gameStateObject).forEach((id: any) => {
+                if (id) {
+                  console.log(
+                    `adding counsellor to player ${id} info for a ${key} button`
+                  );
+                  context.G.playerInfo[id].resources.counsellors += 1;
+                }
+              });
+            }
+          }
+        );
+
+        // Reset action board
+        context.G.boardState = { ...initialBoardState };
+
+        // Return counsellors from player board slots
+        Object.values(context.G.playerInfo).forEach((player: any) => {
+          Object.values(player.playerBoardCounsellorLocations).forEach(
+            (counsellor, index) => {
+              if (counsellor && index !== 3) {
+                console.log(
+                  "adding counsellor to player info for a player board button"
+                );
+                player.resources.counsellors += 1;
+                counsellor = false;
+              }
+            }
+          );
+          player.playerBoardCounsellorLocations.buildSkyships = false;
+          player.playerBoardCounsellorLocations.conscriptLevies = false;
+          player.playerBoardCounsellorLocations.dispatchSkyshipFleet = false;
+          player.playerBoardCounsellorLocations.dispatchDisabled = false;
+        });
+
         context.events.endPhase();
       },
       moves: {},

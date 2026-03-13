@@ -3,13 +3,10 @@
  *
  * Tests for recruitRegiments (v4.2).
  *
- * Rules — 6 slots with increasing cost/reward:
- *   slot 1: 0 Gold → 1 regiment
- *   slot 2: 1 Gold → 2 regiments
- *   slot 3: 2 Gold → 4 regiments
- *   slot 4: 3 Gold → 6 regiments
- *   slot 5: 3 Gold → 7 regiments
- *   slot 6: 4 Gold → 9 regiments
+ * Rules:
+ *   Cost = 1 Gold + 1 Gold per counsellor in the slot (including the one just placed)
+ *   Reward = always 4 regiments
+ *   Slot position = counsellor count, so slot N costs 1 + N Gold
  *
  *   All slots: cost 1 counsellor, mark turnComplete
  *   INVALID_MOVE if: 0 counsellors, slot already taken
@@ -25,22 +22,20 @@ function callMove(G: ReturnType<typeof buildInitialG>, playerID: string, slotInd
   return (recruitRegiments as Function)({ G, ctx, playerID }, slotIndex);
 }
 
-const COST_TABLE: Record<number, number> = { 0: 0, 1: 1, 2: 2, 3: 3, 4: 3, 5: 4 };
-const REWARD_TABLE: Record<number, number> = { 0: 1, 1: 2, 2: 4, 3: 6, 4: 7, 5: 9 };
-
 describe("recruitRegiments — cost and reward per slot", () => {
   for (let slotIndex = 0; slotIndex <= 5; slotIndex++) {
-    it(`slot ${slotIndex + 1}: costs ${COST_TABLE[slotIndex]} Gold, grants ${REWARD_TABLE[slotIndex]} regiments`, () => {
+    const slotPosition = slotIndex + 1;
+    const expectedCost = 1 + slotPosition;
+    it(`slot ${slotPosition}: costs ${expectedCost} Gold, grants 4 regiments`, () => {
       const G = buildInitialG();
-      // Mark all lower slots as taken so this slotIndex is the first available
-      for (let i = 1; i < slotIndex + 1; i++) {
+      for (let i = 1; i < slotPosition; i++) {
         G.boardState.recruitRegiments[i as 1 | 2 | 3 | 4 | 5 | 6] = "1";
       }
       const goldBefore = G.playerInfo["0"].resources.gold;
       const regBefore = G.playerInfo["0"].resources.regiments;
       callMove(G, "0", slotIndex);
-      expect(G.playerInfo["0"].resources.gold).toBe(goldBefore - COST_TABLE[slotIndex]);
-      expect(G.playerInfo["0"].resources.regiments).toBe(regBefore + REWARD_TABLE[slotIndex]);
+      expect(G.playerInfo["0"].resources.gold).toBe(goldBefore - expectedCost);
+      expect(G.playerInfo["0"].resources.regiments).toBe(regBefore + 4);
     });
   }
 });

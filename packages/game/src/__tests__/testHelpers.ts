@@ -85,7 +85,7 @@ export function buildFleet(fleetId: number, overrides: Partial<FleetInfo> = {}):
 
 export function buildActionBoard(overrides: Partial<ActionBoardInfo> = {}): ActionBoardInfo {
   return {
-    alterPlayerOrder: { 1: undefined, 2: undefined, 3: undefined, 4: undefined, 5: undefined, 6: undefined },
+    pendingPlayerOrder: { 1: undefined, 2: undefined, 3: undefined, 4: undefined, 5: undefined, 6: undefined },
     recruitCounsellors: { 1: undefined, 2: undefined, 3: undefined },
     recruitRegiments: { 1: undefined, 2: undefined, 3: undefined, 4: undefined, 5: undefined, 6: undefined },
     purchaseSkyshipsZeeland: { 1: undefined, 2: undefined },
@@ -125,7 +125,6 @@ export function buildInitialG(
     electionResults: {},
     hasVoted: [],
     turnOrder: players.map((p) => p.id),
-    playerOrder: { 1: players[0]?.id, 2: players[1]?.id, 3: undefined, 4: undefined, 5: undefined, 6: undefined },
     playerInfo,
     boardState: buildActionBoard(),
     cardDecks: {

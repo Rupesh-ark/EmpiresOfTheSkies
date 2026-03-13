@@ -6,7 +6,6 @@ export interface MyGameState {
   playerInfo: { [details: string]: PlayerInfo };
   mapState: MapState;
   boardState: ActionBoardInfo;
-  playerOrder: PlayerOrder;
   cardDecks: CardDeckInfo;
   battleState?: BattleState;
   conquestState?: BattlePlayerInfo;
@@ -225,7 +224,7 @@ interface LootInfo {
 }
 
 export type ActionBoardInfo = {
-  alterPlayerOrder: {
+  pendingPlayerOrder: {
     1: string | undefined;
     2: string | undefined;
     3: string | undefined;
