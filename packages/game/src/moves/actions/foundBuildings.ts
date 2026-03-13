@@ -63,7 +63,6 @@ const foundCathedral = (
   removeOneCounsellor(G, playerID);
   G.playerInfo[playerID].turnComplete = true;
 };
-//TODO: add a input for the user to select the heresy tracker movement direction
 const foundPalace = (
   G: MyGameState,
   playerID: string,
@@ -71,6 +70,12 @@ const foundPalace = (
   args: any[]
 ): void | typeof INVALID_MOVE => {
   if (G.playerInfo[playerID].palaces === 6) {
+    return INVALID_MOVE;
+  }
+
+  // args[1] is the heresy direction chosen by the player ("advance" or "retreat")
+  const heresyDirection: "advance" | "retreat" = args[1];
+  if (heresyDirection !== "advance" && heresyDirection !== "retreat") {
     return INVALID_MOVE;
   }
 
@@ -83,6 +88,15 @@ const foundPalace = (
   } else {
     G.playerInfo[playerID].resources.victoryPoints += 1;
   }
+
+  // Rule: founding a Palace moves the heresy tracker one space in the player's chosen direction
+  const tracker = G.playerInfo[playerID].heresyTracker;
+  if (heresyDirection === "advance" && tracker < 12) {
+    G.playerInfo[playerID].heresyTracker += 1;
+  } else if (heresyDirection === "retreat" && tracker > -11) {
+    G.playerInfo[playerID].heresyTracker -= 1;
+  }
+
   G.boardState.foundBuildings[BuildingSlot.Palace].push(playerID);
   removeOneCounsellor(G, playerID);
 

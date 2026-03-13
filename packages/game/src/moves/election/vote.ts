@@ -84,13 +84,21 @@ const vote: Move<MyGameState> = (
     Object.values(G.playerInfo).forEach((player) => {
       if (player.kingdomName === finalWinner) {
         player.isArchprelate = true;
+        // Elected Archprelate's heresy marker retreats one space
+        if (player.heresyTracker > -11) {
+          player.heresyTracker -= 1;
+        }
         let orthodoxRealms = 0;
         Object.values(G.playerInfo).forEach((player) => {
           if (player.hereticOrOrthodox === "orthodox") {
             orthodoxRealms += 1;
           }
         });
-        player.resources.victoryPoints += Math.floor(orthodoxRealms / 3);
+        // Rule: floor(2 × orthodoxRealms / 3), maximum 6 VP
+        player.resources.victoryPoints += Math.min(
+          6,
+          Math.floor((2 * orthodoxRealms) / 3)
+        );
       } else player.isArchprelate = false;
     });
 

@@ -120,7 +120,10 @@ export const ActionBoardButtonLarge = (props: ActionBoardButtonProps) => {
         }}
         onClick={() => {
           clearMoves(props);
-          props.onClickFunction(props.value);
+          // Palace (value=1): open dialog first, move fires after direction is chosen
+          if (props.value !== 1) {
+            props.onClickFunction(props.value);
+          }
           console.log(props.value);
           if (props.value === 1) {
             setHeresyOrOrthodoxyDialogOpen(true);
@@ -186,7 +189,7 @@ export const ActionBoardButtonLarge = (props: ActionBoardButtonProps) => {
                     backgroundColor: "#E77B00",
                   }}
                   onClick={() => {
-                    props.moves.increaseHeresy();
+                    props.moves.foundBuildings(1, "advance");
                     setHeresyOrOrthodoxyDialogOpen(false);
                   }}
                 >
@@ -196,7 +199,7 @@ export const ActionBoardButtonLarge = (props: ActionBoardButtonProps) => {
                   variant="contained"
                   sx={{ backgroundColor: "#A74383" }}
                   onClick={() => {
-                    props.moves.increaseOrthodoxy();
+                    props.moves.foundBuildings(1, "retreat");
                     setHeresyOrOrthodoxyDialogOpen(false);
                   }}
                 >

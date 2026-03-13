@@ -173,21 +173,20 @@ const theMagnificent = (player: PlayerInfo) => {
 };
 
 const theMerchant = (player: PlayerInfo, G: MyGameState) => {
+  // Rule: 1 VP per Trade Gain (gold + goods cubes) on owned outpost/colony tiles.
+  // "victoryPoints" entries on loot tiles are not Trade Gains and are excluded.
   for (let y = 0; y < 4; y++) {
     for (let x = 0; x < 8; x++) {
       const tile = G.mapState.buildings[y][x];
       const lootTile = G.mapState.currentTileArray[y][x];
-      if (tile.player?.id === player.id) {
-        if (tile.buildings) {
-          Object.entries(lootTile.loot[tile.buildings]).forEach(
-            ([lootName, lootAmount]) => {
-              if (lootName !== "gold" && lootName !== "victoryPoints") {
-                if (tile.player)
-                  player.resources.victoryPoints += lootAmount * 2;
-              }
+      if (tile.player?.id === player.id && tile.buildings) {
+        Object.entries(lootTile.loot[tile.buildings]).forEach(
+          ([lootName, lootAmount]) => {
+            if (lootName !== "victoryPoints") {
+              player.resources.victoryPoints += lootAmount;
             }
-          );
-        }
+          }
+        );
       }
     }
   }
