@@ -1,6 +1,7 @@
 import { Move } from "boardgame.io";
 import { INVALID_MOVE } from "boardgame.io/core";
 import { MyGameState, KingdomAdvantageCard } from "../../types";
+import { ELITE_REGIMENTS_COUNT } from "../../codifiedGameInfo";
 import { EventsAPI } from "boardgame.io/dist/types/src/plugins/plugin-events";
 
 const pickKingdomAdvantageCard: Move<MyGameState> = (
@@ -29,8 +30,8 @@ const pickKingdomAdvantageCard: Move<MyGameState> = (
   );
 
   if (cardName === "elite_regiments") {
-    G.playerInfo[playerID].resources.regiments -= 3;
-    G.playerInfo[playerID].resources.eliteRegiments += 3;
+    G.playerInfo[playerID].resources.regiments -= ELITE_REGIMENTS_COUNT;
+    G.playerInfo[playerID].resources.eliteRegiments += ELITE_REGIMENTS_COUNT;
   }
 
   const allPicked = Object.values(G.playerInfo).every(

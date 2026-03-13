@@ -150,6 +150,7 @@ export function buildInitialG(
       },
     },
     failedConquests: [],
+    pendingDeal: undefined,
     ...overrides,
   };
 }

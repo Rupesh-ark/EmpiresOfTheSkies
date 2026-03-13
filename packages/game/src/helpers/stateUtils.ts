@@ -1,4 +1,5 @@
 import { MyGameState } from "../types";
+import { MAX_SKYSHIPS, MAX_REGIMENTS } from "../codifiedGameInfo";
 
 export const HERESY_MAX = 9;
 export const HERESY_MIN = -9;
@@ -49,11 +50,11 @@ export const removeSkyship = (G: MyGameState, playerID: string) => {
   G.playerInfo[playerID].resources.skyships -= 1;
 };
 export const addSkyship = (G: MyGameState, playerID: string) => {
-  // GAP-13: max 24 skyships total (reserve + deployed in fleets)
+  // GAP-13: max MAX_SKYSHIPS skyships total (reserve + deployed in fleets)
   const player = G.playerInfo[playerID];
   const totalSkyships = player.resources.skyships +
     player.fleetInfo.reduce((sum, f) => sum + f.skyships, 0);
-  if (totalSkyships < 24) {
+  if (totalSkyships < MAX_SKYSHIPS) {
     player.resources.skyships += 1;
   }
 };
@@ -71,14 +72,14 @@ export const addRegiments = (
   playerID: string,
   amount: number
 ) => {
-  // GAP-13: max 30 regiments total (reserve + fleets + garrisoned on map)
+  // GAP-13: max MAX_REGIMENTS regiments total (reserve + fleets + garrisoned on map)
   const player = G.playerInfo[playerID];
   const totalRegiments = player.resources.regiments +
     player.fleetInfo.reduce((sum, f) => sum + f.regiments, 0) +
     G.mapState.buildings.reduce((sum, row) =>
       sum + row.reduce((s, cell) =>
         s + (cell.player?.id === playerID ? cell.garrisonedRegiments : 0), 0), 0);
-  const allowed = Math.min(amount, 30 - totalRegiments);
+  const allowed = Math.min(amount, MAX_REGIMENTS - totalRegiments);
   if (allowed > 0) {
     player.resources.regiments += allowed;
   }
@@ -125,4 +126,41 @@ export const retreatAllHeresyTrackers = (G: MyGameState) => {
   Object.values(G.playerInfo).forEach((player) => {
     increaseOrthodoxyWithinMove(G, player.id);
   });
+};
+
+/**
+ * Validates that an outpost/colony transfer from ownerID to targetID at
+ * tileCoords is legal. Returns undefined if valid, or an error string if not.
+ */
+export const validateOutpostTransfer = (
+  G: MyGameState,
+  ownerID: string,
+  targetID: string,
+  tileCoords: [number, number]
+): string | undefined => {
+  const [x, y] = tileCoords;
+
+  if (!G.mapState.buildings[y] || !G.mapState.buildings[y][x]) {
+    return "Invalid tile coordinates";
+  }
+
+  const cell = G.mapState.buildings[y][x];
+
+  if (
+    !cell.player ||
+    cell.player.id !== ownerID ||
+    (cell.buildings !== "outpost" && cell.buildings !== "colony")
+  ) {
+    return "Player does not own an outpost or colony at this tile";
+  }
+
+  const targetHasFleet = G.playerInfo[targetID].fleetInfo.some(
+    (fleet) => fleet.location[0] === x && fleet.location[1] === y && fleet.skyships > 0
+  );
+
+  if (!targetHasFleet) {
+    return "Target player does not have a fleet at this tile";
+  }
+
+  return undefined;
 };

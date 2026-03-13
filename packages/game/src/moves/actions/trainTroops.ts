@@ -4,6 +4,7 @@ import { checkCounsellorsNotZero } from "../moveValidation";
 import { INVALID_MOVE } from "boardgame.io/core";
 import { drawFortuneOfWarCard } from "../../helpers/helpers";
 import { removeOneCounsellor } from "../../helpers/stateUtils";
+import { FOW_CARDS_DRAWN, FOW_HAND_MAX } from "../../codifiedGameInfo";
 
 const trainTroops: Move<MyGameState> = ({ G, playerID }) => {
   if (checkCounsellorsNotZero(playerID, G) !== undefined) {
@@ -15,7 +16,7 @@ const trainTroops: Move<MyGameState> = ({ G, playerID }) => {
     console.log("Player has selected a move which has already been taken.");
     return INVALID_MOVE;
   }
-  for (let i = 0; i < 2; i++) {
+  for (let i = 0; i < FOW_CARDS_DRAWN; i++) {
     const card = drawFortuneOfWarCard(G);
     G.playerInfo[playerID].resources.fortuneCards.push({
       ...card,
@@ -24,8 +25,8 @@ const trainTroops: Move<MyGameState> = ({ G, playerID }) => {
   }
   // GAP-13: FoW hand max 4 — discard oldest cards if over the limit
   const hand = G.playerInfo[playerID].resources.fortuneCards;
-  if (hand.length > 4) {
-    hand.splice(0, hand.length - 4);
+  if (hand.length > FOW_HAND_MAX) {
+    hand.splice(0, hand.length - FOW_HAND_MAX);
   }
   removeOneCounsellor(G, playerID);
   playerBoard.trainTroops = true;

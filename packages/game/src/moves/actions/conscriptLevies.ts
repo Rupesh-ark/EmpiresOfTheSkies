@@ -7,7 +7,7 @@ import {
   removeOneCounsellor,
   removeVPAmount,
 } from "../../helpers/stateUtils";
-import { MAX_LEVIES } from "../../codifiedGameInfo";
+import { MAX_LEVIES, LEVY_GROUP_SIZE } from "../../codifiedGameInfo";
 
 const conscriptLevies: Move<MyGameState> = ({ G, playerID }, ...args: any[]) => {
   if (G.playerInfo[playerID].playerBoardCounsellorLocations.conscriptLevies) {
@@ -31,7 +31,7 @@ const conscriptLevies: Move<MyGameState> = ({ G, playerID }, ...args: any[]) => 
   }
 
   // B4: ceil so a partial final group still costs 1 VP
-  const cost = Math.ceil(levyAmount / 3);
+  const cost = Math.ceil(levyAmount / LEVY_GROUP_SIZE);
   removeOneCounsellor(G, playerID);
   removeVPAmount(G, playerID, cost);
   addLevyAmount(G, playerID, levyAmount);

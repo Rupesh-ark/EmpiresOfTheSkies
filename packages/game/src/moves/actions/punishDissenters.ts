@@ -10,6 +10,12 @@ import {
   removeVPAmount,
 } from "../../helpers/stateUtils";
 import { Ctx } from "boardgame.io/dist/types/src/types";
+import {
+  BASE_PRISONERS,
+  MORE_PRISONS_BONUS,
+  PUNISH_GOLD_COST,
+  PUNISH_EXECUTE_VP_COST,
+} from "../../codifiedGameInfo";
 
 const punishDissenters: Move<MyGameState> = (
   { G, ctx, playerID }: { G: MyGameState; ctx: Ctx; playerID: string },
@@ -46,7 +52,7 @@ const punishDissenters: Move<MyGameState> = (
       return INVALID_MOVE;
     }
     playerInfo.prisoners -= 1;
-    removeVPAmount(G, playerID, 1);
+    removeVPAmount(G, playerID, PUNISH_EXECUTE_VP_COST);
     if (playerInfo.hereticOrOrthodox === "orthodox") {
       increaseOrthodoxyWithinMove(G, playerID);
     } else {
@@ -59,17 +65,19 @@ const punishDissenters: Move<MyGameState> = (
   }
 
   // GAP-6: more_prisons KA raises max prisoners from 3 to 4
-  const maxPrisoners = playerInfo.resources.advantageCard === "more_prisons" ? 4 : 3;
+  const maxPrisoners = playerInfo.resources.advantageCard === "more_prisons"
+    ? BASE_PRISONERS + MORE_PRISONS_BONUS
+    : BASE_PRISONERS;
   if (playerInfo.prisoners >= maxPrisoners) {
     return INVALID_MOVE;
   }
 
   // B6: cost = 2 Gold OR 1 extra counsellor (player's choice via paymentType arg)
   if (paymentType === "gold") {
-    if (playerInfo.resources.gold < 2) {
+    if (playerInfo.resources.gold < PUNISH_GOLD_COST) {
       return INVALID_MOVE;
     }
-    removeGoldAmount(G, playerID, 2);
+    removeGoldAmount(G, playerID, PUNISH_GOLD_COST);
   } else if (paymentType === "counsellor") {
     if (playerInfo.resources.counsellors < 2) {
       return INVALID_MOVE;

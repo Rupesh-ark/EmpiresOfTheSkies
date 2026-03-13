@@ -11,6 +11,57 @@ export const MAX_FACTORIES = 6;
 export const MAX_HERESY = 19;
 export const MAX_LEVIES = 12;
 
+// ── Building limits ──────────────────────────────────────────────────────────
+export const MAX_CATHEDRALS = 6;
+export const MAX_PALACES = 6;
+export const MAX_SHIPYARDS = 3;
+
+// ── Building sell prices ─────────────────────────────────────────────────────
+export const BUILDING_SELL_PRICE = 3;
+export const SKYSHIP_SELL_PRICE = 1;
+
+// ── Building VP rewards ──────────────────────────────────────────────────────
+export const CATHEDRAL_VP = 2;
+export const PALACE_VP_HERETIC = 2;
+export const PALACE_VP_ORTHODOX = 1;
+
+// ── Fleet & troop caps ──────────────────────────────────────────────────────
+export const MAX_SKYSHIPS_PER_FLEET = 5;
+export const MAX_SKYSHIPS = 24;
+export const MAX_REGIMENTS = 30;
+
+// ── Kingdom location (home base) ─────────────────────────────────────────────
+export const KINGDOM_LOCATION: [number, number] = [4, 0];
+
+// ── Punish Dissenters ────────────────────────────────────────────────────────
+export const BASE_PRISONERS = 3;
+export const MORE_PRISONS_BONUS = 1;
+export const PUNISH_GOLD_COST = 2;
+export const PUNISH_EXECUTE_VP_COST = 1;
+
+// ── Fortune of War ───────────────────────────────────────────────────────────
+export const FOW_CARDS_DRAWN = 2;
+export const FOW_HAND_MAX = 4;
+
+// ── Conscript Levies ─────────────────────────────────────────────────────────
+export const LEVY_GROUP_SIZE = 3;
+
+// ── Kingdom Advantage ────────────────────────────────────────────────────────
+export const ELITE_REGIMENTS_COUNT = 3;
+
+// ── Recruit Regiments ────────────────────────────────────────────────────────
+export const RECRUIT_REGIMENTS_REWARD = 4;
+
+// ── Resolution / scoring ─────────────────────────────────────────────────────
+export const FINAL_ROUND_GOLD_PER_VP = 5;
+export const DEBT_PENALTY_DIVISOR = 2;
+export const TRADE_VP_SCHEDULE: Record<number, [number, number, number]> = {
+  1: [3, 2, 1],
+  2: [6, 4, 2],
+  4: [9, 6, 3],
+  6: [12, 8, 4],
+};
+
 export const CounsellorSlot = {
   First:  1,
   Second: 2,

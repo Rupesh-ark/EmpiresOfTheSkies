@@ -33,6 +33,12 @@ import conscriptLevies from "./moves/actions/conscriptLevies";
 import passFleetInfoToPlayerInfo from "./moves/actions/passFleetInfoToPlayerInfo";
 import deployFleet from "./moves/actions/deployFleet";
 import transferBetweenFleets from "./moves/actions/transferBetweenFleets";
+import sellSkyships from "./moves/actions/sellSkyships";
+import sellBuilding from "./moves/actions/sellBuilding";
+import transferOutpost from "./moves/actions/transferOutpost";
+import proposeDeal from "./moves/actions/proposeDeal";
+import acceptDeal from "./moves/actions/acceptDeal";
+import rejectDeal from "./moves/actions/rejectDeal";
 import enableDispatchButtons from "./moves/actions/enableDispatchButtons";
 import issueHolyDecree from "./moves/actions/issueHolyDecree";
 import declareSmugglerGood from "./moves/actions/declareSmugglerGood";
@@ -123,6 +129,7 @@ const MyGame: Game<MyGameState> = {
       nprCathedrals,
       turnOrder: ctx.playOrder,
       failedConquests: [],
+      pendingDeal: undefined,
     };
   },
   moves: {
@@ -300,6 +307,12 @@ const MyGame: Game<MyGameState> = {
         passFleetInfoToPlayerInfo,
         deployFleet,
         transferBetweenFleets,
+        sellSkyships,
+        sellBuilding,
+        transferOutpost,
+        proposeDeal,
+        acceptDeal,
+        rejectDeal,
         enableDispatchButtons,
         issueHolyDecree,
         declareSmugglerGood,

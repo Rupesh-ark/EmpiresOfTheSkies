@@ -2,6 +2,20 @@ import { BoardProps } from "boardgame.io/dist/types/packages/react";
 
 export interface MyGameProps extends BoardProps<MyGameState> {}
 
+export type DealOffer = {
+  gold?: number;
+  skyships?: number;
+  outposts?: [number, number][];
+  archprelateToken?: boolean;
+};
+
+export type DealProposal = {
+  proposerID: string;
+  targetID: string;
+  offering: DealOffer;
+  requesting: DealOffer;
+};
+
 export interface MyGameState {
   playerInfo: { [details: string]: PlayerInfo };
   mapState: MapState;
@@ -9,6 +23,7 @@ export interface MyGameState {
   cardDecks: CardDeckInfo;
   battleState?: BattleState;
   conquestState?: BattlePlayerInfo;
+  pendingDeal?: DealProposal;
   stage:
     | "discovery"
     | "actions"

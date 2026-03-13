@@ -8,8 +8,8 @@
  *   - Returns INVALID_MOVE if fleetId !== fleet.fleetId (ID mismatch)
  *   - Returns INVALID_MOVE if fleet is not at reserve [4,0]
  *   - Returns INVALID_MOVE if player lacks the requested resources
- *   - Otherwise: sets fleet.skyships/regiments/levies, deducts from player resources,
- *     sets turnComplete = true
+ *   - Otherwise: sets fleet.skyships/regiments/levies, deducts from player resources
+ *   - v4.2: free Anytime action — does NOT set turnComplete
  */
 
 import { describe, it, expect } from "vitest";
@@ -37,7 +37,7 @@ describe("passFleetInfoToPlayerInfo — successful load", () => {
     expect(G.playerInfo["0"].resources.levies).toBe(2);
   });
 
-  it("sets turnComplete=true on success", () => {
+  it("does NOT set turnComplete (v4.2: free Anytime action)", () => {
     const G = buildInitialG([
       buildPlayer("0", {
         resources: buildResources({ skyships: 3, regiments: 3, levies: 0 }),
@@ -48,7 +48,7 @@ describe("passFleetInfoToPlayerInfo — successful load", () => {
 
     (passFleetInfoToPlayerInfo as Function)({ G, ctx, playerID: "0" }, 0, 1, 0, 0);
 
-    expect(G.playerInfo["0"].turnComplete).toBe(true);
+    expect(G.playerInfo["0"].turnComplete).toBe(false);
   });
 });
 

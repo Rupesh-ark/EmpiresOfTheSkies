@@ -1,6 +1,7 @@
 import { Move } from "boardgame.io";
 import { MyGameState } from "../../types";
 import { INVALID_MOVE } from "boardgame.io/core";
+import { KINGDOM_LOCATION } from "../../codifiedGameInfo";
 import { EventsAPI } from "boardgame.io/dist/types/src/plugins/plugin-events";
 import { RandomAPI } from "boardgame.io/dist/types/src/plugins/random/random";
 import { Ctx } from "boardgame.io/dist/types/src/types";
@@ -32,7 +33,7 @@ const passFleetInfoToPlayerInfo: Move<MyGameState> = (
     console.log("Fleet IDs do not match, something has gone wrong...");
     return INVALID_MOVE;
   }
-  if (currentFleet.location[0] === 4 && currentFleet.location[1] === 0) {
+  if (currentFleet.location[0] === KINGDOM_LOCATION[0] && currentFleet.location[1] === KINGDOM_LOCATION[1]) {
     if (
       currentPlayer.resources.skyships < skyshipCount ||
       currentPlayer.resources.regiments < regimentCount ||
@@ -50,7 +51,7 @@ const passFleetInfoToPlayerInfo: Move<MyGameState> = (
     currentPlayer.resources.skyships -= skyshipCount;
     currentPlayer.resources.regiments -= regimentCount;
     currentPlayer.resources.levies -= levyCount;
-    G.playerInfo[playerID].turnComplete = true;
+    // v4.2: Kingdom↔Fleet transfers are a free Anytime action — do NOT set turnComplete
   }
 };
 

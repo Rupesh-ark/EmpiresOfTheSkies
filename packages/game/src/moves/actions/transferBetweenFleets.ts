@@ -1,9 +1,7 @@
 import { Move } from "boardgame.io";
 import { MyGameState } from "../../types";
 import { INVALID_MOVE } from "boardgame.io/core";
-
-const KINGDOM_LOCATION: [number, number] = [4, 0];
-const MAX_SKYSHIPS_PER_FLEET = 5;
+import { MAX_SKYSHIPS_PER_FLEET, KINGDOM_LOCATION } from "../../codifiedGameInfo";
 
 const transferBetweenFleets: Move<MyGameState> = (
   { G, playerID },

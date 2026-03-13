@@ -4,6 +4,7 @@ import { MyGameState, GoodKey } from "../types";
 import legacyResolutions from "./legacyResolutions";
 import { enactPiracy } from "./piracy";
 import { removeVPAmount } from "./stateUtils";
+import { FINAL_ROUND_GOLD_PER_VP, DEBT_PENALTY_DIVISOR, TRADE_VP_SCHEDULE } from "../codifiedGameInfo";
 
 const ALL_GOODS: GoodKey[] = ["mithril", "dragonScales", "krakenSkin", "magicDust", "stickyIchor", "pipeweed"];
 
@@ -67,7 +68,7 @@ const hasTradeAccess = (G: MyGameState, playerID: string): boolean => {
 // D7: final round bonus — 1 VP per 5 Gold
 const applyFinalRoundBonus = (G: MyGameState) => {
   Object.values(G.playerInfo).forEach((player) => {
-    player.resources.victoryPoints += Math.floor(player.resources.gold / 5);
+    player.resources.victoryPoints += Math.floor(player.resources.gold / FINAL_ROUND_GOLD_PER_VP);
   });
 };
 
@@ -134,7 +135,7 @@ const resolveRound = (G: MyGameState, events: EventsAPI, random: RandomAPI) => {
   // GAP-16: VP floor enforced inside removeVPAmount
   Object.values(G.playerInfo).forEach((player) => {
     if (player.resources.gold < 0) {
-      removeVPAmount(G, player.id, Math.floor(Math.abs(player.resources.gold) / 2));
+      removeVPAmount(G, player.id, Math.floor(Math.abs(player.resources.gold) / DEBT_PENALTY_DIVISOR));
     }
   });
 
@@ -235,15 +236,13 @@ const resolveRound = (G: MyGameState, events: EventsAPI, random: RandomAPI) => {
 
 export default resolveRound;
 
-// D2: corrected trade VP schedule
-const tradeVictoryPoints = (G: MyGameState) => {
-  if (G.round === 1) {
-    return [3, 2, 1];
-  } else if (G.round <= 3) {
-    return [6, 4, 2];
-  } else if (G.round <= 5) {
-    return [9, 6, 3];
-  } else {
-    return [12, 8, 4];
+// D2: corrected trade VP schedule — lookup from TRADE_VP_SCHEDULE
+const tradeVictoryPoints = (G: MyGameState): [number, number, number] => {
+  const thresholds = Object.keys(TRADE_VP_SCHEDULE)
+    .map(Number)
+    .sort((a, b) => b - a);
+  for (const t of thresholds) {
+    if (G.round >= t) return TRADE_VP_SCHEDULE[t];
   }
+  return TRADE_VP_SCHEDULE[thresholds[thresholds.length - 1]];
 };

@@ -4,6 +4,7 @@ import { findPossibleDestinations } from "../../helpers/helpers";
 import { INVALID_MOVE } from "boardgame.io/core";
 import { removeGoldAmount, removeOneCounsellor } from "../../helpers/stateUtils";
 import { checkCounsellorsNotZero } from "../moveValidation";
+import { MAX_SKYSHIPS_PER_FLEET, KINGDOM_LOCATION } from "../../codifiedGameInfo";
 import { EventsAPI } from "boardgame.io/dist/types/src/plugins/events/events";
 import { RandomAPI } from "boardgame.io/dist/types/src/plugins/random/random";
 import { Ctx } from "boardgame.io/dist/types/src/types";
@@ -42,7 +43,7 @@ const deployFleet: Move<MyGameState> = (
 
   const unladen = regimentCount === 0 && levyCount === 0;
 
-  if (fleet.location[0] === 4 && fleet.location[1] === 0) {
+  if (fleet.location[0] === KINGDOM_LOCATION[0] && fleet.location[1] === KINGDOM_LOCATION[1]) {
     if (
       currentPlayer.resources.skyships < skyshipCount ||
       currentPlayer.resources.regiments < regimentCount ||
@@ -59,7 +60,7 @@ const deployFleet: Move<MyGameState> = (
     return INVALID_MOVE;
   }
   // GAP-13: max 5 skyships per fleet
-  if (skyshipCount > 5) {
+  if (skyshipCount > MAX_SKYSHIPS_PER_FLEET) {
     console.log("Player has attempted to deploy more than 5 skyships in one fleet");
     return INVALID_MOVE;
   }

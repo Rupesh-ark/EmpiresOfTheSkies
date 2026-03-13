@@ -7,6 +7,7 @@ import {
   removeGoldAmount,
   removeOneCounsellor,
 } from "../../helpers/stateUtils";
+import { RECRUIT_REGIMENTS_REWARD } from "../../codifiedGameInfo";
 import { EventsAPI } from "boardgame.io/dist/types/src/plugins/plugin-events";
 import { RandomAPI } from "boardgame.io/dist/types/src/plugins/random/random";
 import { Ctx } from "boardgame.io/dist/types/src/types";
@@ -41,7 +42,7 @@ const recruitRegiments: Move<MyGameState> = (
   removeOneCounsellor(G, playerID);
   removeGoldAmount(G, playerID, cost);
   // v4.2: always 4 regiments per action
-  addRegiments(G, playerID, 4);
+  addRegiments(G, playerID, RECRUIT_REGIMENTS_REWARD);
   G.boardState.recruitRegiments[value] = playerID;
   G.playerInfo[playerID].turnComplete = true;
 };

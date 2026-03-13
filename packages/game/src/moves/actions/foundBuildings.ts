@@ -3,7 +3,16 @@ import { MyGameState } from "../../types";
 import { INVALID_MOVE } from "boardgame.io/core";
 import { checkCounsellorsNotZero } from "../moveValidation";
 import { removeOneCounsellor, HERESY_MAX, HERESY_MIN } from "../../helpers/stateUtils";
-import { BuildingSlot, BUILDING_BASE_COST } from "../../codifiedGameInfo";
+import {
+  BuildingSlot,
+  BUILDING_BASE_COST,
+  MAX_CATHEDRALS,
+  MAX_PALACES,
+  MAX_SHIPYARDS,
+  CATHEDRAL_VP,
+  PALACE_VP_HERETIC,
+  PALACE_VP_ORTHODOX,
+} from "../../codifiedGameInfo";
 import { EventsAPI } from "boardgame.io/dist/types/src/plugins/plugin-events";
 import { RandomAPI } from "boardgame.io/dist/types/src/plugins/random/random";
 import { Ctx } from "boardgame.io/dist/types/src/types";
@@ -46,7 +55,7 @@ const foundCathedral = (
   events: EventsAPI,
   args: any[]
 ): void | typeof INVALID_MOVE => {
-  if (G.playerInfo[playerID].cathedrals === 6) {
+  if (G.playerInfo[playerID].cathedrals === MAX_CATHEDRALS) {
     return INVALID_MOVE;
   }
   if (G.playerInfo[playerID].hereticOrOrthodox === "heretic") {
@@ -55,7 +64,7 @@ const foundCathedral = (
   const cost = BUILDING_BASE_COST.cathedral + G.boardState.foundBuildings[BuildingSlot.Cathedral].length;
   G.playerInfo[playerID].resources.gold -= cost;
   G.playerInfo[playerID].cathedrals += 1;
-  G.playerInfo[playerID].resources.victoryPoints += 2;
+  G.playerInfo[playerID].resources.victoryPoints += CATHEDRAL_VP;
   if (G.playerInfo[playerID].heresyTracker > HERESY_MIN) {
     G.playerInfo[playerID].heresyTracker -= 1;
   }
@@ -69,7 +78,7 @@ const foundPalace = (
   events: EventsAPI,
   args: any[]
 ): void | typeof INVALID_MOVE => {
-  if (G.playerInfo[playerID].palaces === 6) {
+  if (G.playerInfo[playerID].palaces === MAX_PALACES) {
     return INVALID_MOVE;
   }
 
@@ -84,9 +93,9 @@ const foundPalace = (
   G.playerInfo[playerID].resources.gold -= cost;
   G.playerInfo[playerID].palaces += 1;
   if (G.playerInfo[playerID].hereticOrOrthodox === "heretic") {
-    G.playerInfo[playerID].resources.victoryPoints += 2;
+    G.playerInfo[playerID].resources.victoryPoints += PALACE_VP_HERETIC;
   } else {
-    G.playerInfo[playerID].resources.victoryPoints += 1;
+    G.playerInfo[playerID].resources.victoryPoints += PALACE_VP_ORTHODOX;
   }
 
   // Rule: founding a Palace moves the heresy tracker one space in the player's chosen direction
@@ -109,7 +118,7 @@ const foundShipyard = (
   events: EventsAPI,
   args: any[]
 ): void | typeof INVALID_MOVE => {
-  if (G.playerInfo[playerID].shipyards === 3) {
+  if (G.playerInfo[playerID].shipyards === MAX_SHIPYARDS) {
     return INVALID_MOVE;
   }
   const cost = BUILDING_BASE_COST.shipyard + G.boardState.foundBuildings[BuildingSlot.Shipyard].length;
