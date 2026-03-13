@@ -34,7 +34,7 @@ function buildDeployMap() {
       blocked: [] as string[],
       sword: 0,
       shield: 0,
-      type: "land",
+      type: "land" as const,
       loot: { outpost: emptyLoot, colony: emptyLoot },
     }))
   );
