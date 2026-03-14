@@ -54,6 +54,13 @@ export interface MyGameState {
   turnOrder: string[];
   failedConquests: { playerId: string; tile: [number, number] }[];
   contingentPool: number[];
+  infidelHostPool: InfidelHostCounter[];
+  accumulatedHosts: InfidelHostCounter[];
+  infidelFleet: {
+    counter: InfidelHostCounter;
+    location: [number, number];
+    active: boolean;
+  } | null;
   eventState: EventState;
 }
 
@@ -235,6 +242,13 @@ export type EventCardName =
   | "allies_in_faerie"
   | "a_kingdom_turns_heretic";
 
+export type InfidelHostCounter = {
+  swords: number;
+  shields: number;
+  isFleet: boolean;
+  isInvasionTrigger: boolean;
+};
+
 export type DeferredEvent = {
   card: EventCardName;
   targetPlayerID: string;
@@ -256,6 +270,7 @@ export type EventState = {
   nprHeretic: string[];
   skipTaxesNextRound: boolean;
   cannotConvertThisRound: string[];
+  grandInfidelDies: boolean;
 };
 
 export type LegacyCardName =

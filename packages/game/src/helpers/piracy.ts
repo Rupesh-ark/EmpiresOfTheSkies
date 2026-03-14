@@ -170,6 +170,32 @@ export const enactPiracy = (G: MyGameState): void => {
           });
         });
 
+        // GAP-INF2: Infidel Fleet piracy — active fleet on a bottleneck tile
+        // sends gold to bank (deducted, no player receives it)
+        if (G.infidelFleet?.active) {
+          const fleetKey = tileKey(
+            G.infidelFleet.location[0],
+            G.infidelFleet.location[1]
+          );
+          if (
+            network.has(fleetKey) &&
+            !playerFleetTiles.has(fleetKey) // protected if player has fleet there
+          ) {
+            const reducedNetwork = new Set(network);
+            reducedNetwork.delete(fleetKey);
+            const reachableWithout = bfsReachable(
+              FAITHDOM_TILES,
+              reducedNetwork
+            );
+            if (!reachableWithout.has(outpostKey)) {
+              const goldLost = Math.min(1, goldRemainingToLose);
+              G.playerInfo[playerID].resources.gold -= goldLost;
+              // Gold goes to bank — no player receives it
+              goldRemainingToLose -= goldLost;
+            }
+          }
+        }
+
         // v4.2: multiple pirates prioritized by nearest to Land source
         blockingPirates.sort((a, b) => a.distance - b.distance);
 

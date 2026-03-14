@@ -1,4 +1,4 @@
-import { EventCardName, FortuneOfWarCardInfo, KingdomAdvantageCard, KingdomName, LegacyCardInfo, TileInfoProps } from "./types";
+import { EventCardName, FortuneOfWarCardInfo, InfidelHostCounter, KingdomAdvantageCard, KingdomName, LegacyCardInfo, TileInfoProps } from "./types";
 
 // ── Game configuration ────────────────────────────────────────────────────────
 
@@ -38,6 +38,33 @@ export const BASE_PRISONERS = 3;
 export const MORE_PRISONS_BONUS = 1;
 export const PUNISH_GOLD_COST = 2;
 export const PUNISH_EXECUTE_VP_COST = 1;
+
+// ── Infidel Host counters ────────────────────────────────────────────────────
+export const INFIDEL_EMPIRE_LOCATION: [number, number] = [4, 1];
+
+export const INFIDEL_HOST_COUNTERS: InfidelHostCounter[] = [
+  { swords: 30, shields: 0, isFleet: false, isInvasionTrigger: true },
+  { swords: 30, shields: 0, isFleet: false, isInvasionTrigger: true },
+  { swords: 20, shields: 0, isFleet: false, isInvasionTrigger: false },
+  { swords: 20, shields: 0, isFleet: false, isInvasionTrigger: false },
+  { swords: 20, shields: 0, isFleet: false, isInvasionTrigger: false },
+  { swords: 15, shields: 0, isFleet: false, isInvasionTrigger: false },
+  { swords: 15, shields: 0, isFleet: false, isInvasionTrigger: false },
+  { swords: 15, shields: 0, isFleet: false, isInvasionTrigger: false },
+  { swords: 10, shields: 0, isFleet: false, isInvasionTrigger: false },
+  { swords: 10, shields: 0, isFleet: false, isInvasionTrigger: false },
+  { swords: 10, shields: 0, isFleet: false, isInvasionTrigger: false },
+  { swords: 15, shields: 5, isFleet: true, isInvasionTrigger: false },
+];
+
+// Grand Army VP rewards/penalties
+export const CAPTAIN_GENERAL_VP = 3;
+export const LARGEST_FORCE_VP = 5;
+export const SECOND_LARGEST_VP = 2;
+export const TIED_LARGEST_VP = 4;
+
+// Number of kingdoms (for Grand Army contingent draws)
+export const TOTAL_KINGDOMS = 6;
 
 // ── Event cards ──────────────────────────────────────────────────────────────
 export const EVENT_HAND_SIZE = 3;

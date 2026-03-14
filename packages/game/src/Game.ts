@@ -2,7 +2,7 @@ import type { Game, Ctx } from "boardgame.io";
 
 import { LegacyCardInfo, MyGameState, MapState } from "./types";
 
-import { ALL_KA_CARDS, CONTINGENT_COUNTERS, EVENT_HAND_SIZE, FINAL_ROUND, LEGACY_CARDS } from "./codifiedGameInfo";
+import { ALL_KA_CARDS, CONTINGENT_COUNTERS, EVENT_HAND_SIZE, FINAL_ROUND, INFIDEL_HOST_COUNTERS, LEGACY_CARDS } from "./codifiedGameInfo";
 import { initialBoardState, initialBattleMapState } from "./setup/boardSetup";
 import {
   getRandomisedMapTileArray,
@@ -74,6 +74,7 @@ import pickKingdomAdvantageCard from "./moves/kingdomAdvantage/pickKingdomAdvant
 import chooseEventCard from "./moves/events/chooseEventCard";
 import { ALL_EVENT_CARD_NAMES } from "./helpers/eventCardDefinitions";
 import { resolveRebellionEvent } from "./helpers/resolveRebellion";
+import { checkForInvasion } from "./helpers/resolveInvasion";
 
 const MyGame: Game<MyGameState> = {
   turn: { minMoves: 1 },
@@ -120,6 +121,13 @@ const MyGame: Game<MyGameState> = {
       [contingentPool[i], contingentPool[j]] = [contingentPool[j], contingentPool[i]];
     }
 
+    // Shuffle Infidel Host counter pool
+    const infidelHostPool = INFIDEL_HOST_COUNTERS.map((c) => ({ ...c }));
+    for (let i = infidelHostPool.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [infidelHostPool[i], infidelHostPool[j]] = [infidelHostPool[j], infidelHostPool[i]];
+    }
+
     // Shuffle event deck and deal EVENT_HAND_SIZE cards to each player
     const eventDeck = [...ALL_EVENT_CARD_NAMES];
     for (let i = eventDeck.length - 1; i > 0; i--) {
@@ -154,6 +162,9 @@ const MyGame: Game<MyGameState> = {
       turnOrder: ctx.playOrder,
       failedConquests: [],
       contingentPool,
+      infidelHostPool,
+      accumulatedHosts: [],
+      infidelFleet: null,
       pendingDeal: undefined,
       eventState: {
         deck: eventDeck,
@@ -169,6 +180,7 @@ const MyGame: Game<MyGameState> = {
         nprHeretic: [],
         skipTaxesNextRound: false,
         cannotConvertThisRound: [],
+        grandInfidelDies: false,
       },
     };
   },
@@ -513,6 +525,9 @@ const MyGame: Game<MyGameState> = {
           // TODO: Resolve faerie_uprising, headstrong_commander,
           // infidels_invade_faerie here when implemented
         }
+
+        // Check for Infidel Invasion (draw Host counter, trigger if up-arrow)
+        checkForInvasion(context.G);
 
         context.G.stage = "retrieve fleets";
       },

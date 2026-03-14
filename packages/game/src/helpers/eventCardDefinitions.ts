@@ -673,9 +673,7 @@ export const resolveEventCard = (
 
     // ── No-op (infidel invasion not implemented) ───────────────────────────
     case "grand_infidel_dies":
-      console.log(
-        "Grand Infidel Dies: invasion step skipped (not yet implemented)"
-      );
+      G.eventState.grandInfidelDies = true;
       break;
 
     // ── Royal Succession ─────────────────────────────────────────────────

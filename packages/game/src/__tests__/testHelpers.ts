@@ -152,6 +152,9 @@ export function buildInitialG(
     },
     failedConquests: [],
     contingentPool: [10, 10, 7, 7],
+    infidelHostPool: [],
+    accumulatedHosts: [],
+    infidelFleet: null,
     pendingDeal: undefined,
     eventState: {
       deck: [],
@@ -167,6 +170,7 @@ export function buildInitialG(
       nprHeretic: [],
       skipTaxesNextRound: false,
       cannotConvertThisRound: [],
+      grandInfidelDies: false,
     },
     ...overrides,
   };
