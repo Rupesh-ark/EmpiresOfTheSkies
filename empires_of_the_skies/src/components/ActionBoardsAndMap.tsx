@@ -38,6 +38,7 @@ import { generalTheme } from "./themes";
 import { Campaign, ChatBubble, Close, Dashboard, Map, MenuBook, Person, TableChart } from "@mui/icons-material";
 import PickLegacyCardDialog from "./PickLegacyCardDialog";
 import PickKingdomAdvantageCardDialog from "./PickKingdomAdvantageCardDialog";
+import PickEventCardDialog from "./PickEventCardDialog";
 import GameOverView from "./GameOverView";
 import LootValueTable from "./PlayerTable/LootValueTable";
 
@@ -206,6 +207,9 @@ export const ActionBoardsAndMap = (props: MyGameProps) => {
 
           {props.ctx.phase === "kingdom_advantage" && (
             <PickKingdomAdvantageCardDialog {...props} />
+          )}
+          {props.G.stage === "events" && (
+            <PickEventCardDialog {...props} />
           )}
           {props.G.stage === "pick legacy card" && (
             <PickLegacyCardDialog {...props} />

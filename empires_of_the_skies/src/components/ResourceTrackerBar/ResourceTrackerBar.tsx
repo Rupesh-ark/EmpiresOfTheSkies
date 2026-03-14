@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { MyGameProps, GAME_PHASES } from "@eots/game";
+import { MyGameProps, GAME_PHASES, EVENT_CARD_DEFS } from "@eots/game";
 import {
   AppBar,
   Box,
@@ -88,13 +88,25 @@ const ResourceTrackerBar = (props: ResourceTrackerBarProps) => {
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: "24px" }}>
-          <Tooltip title="Click to see all phases" disableInteractive>
+          <Tooltip title="Click for game status" disableInteractive>
             <span
               onClick={() => setPhaseDialogOpen(true)}
               style={{ display: "flex", alignItems: "center", gap: "6px", cursor: "pointer" }}
             >
               <GiTrumpetFlag style={{ fontSize: "28px" }} />
-              <span style={{ textTransform: "capitalize" }}>{props.G.stage}</span>
+              <span style={{ textTransform: "capitalize", maxWidth: 200, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                {(() => {
+                  const resolvedEvent = props.G.eventState.resolvedEvent;
+                  const phase = GAME_PHASES.find((p) => p.key === props.ctx.phase);
+                  const phaseName = phase?.label ?? props.G.stage;
+
+                  if (props.G.stage === "events") return `${phaseName} \u2014 Choose a Card`;
+                  if (resolvedEvent && props.ctx.phase === "events") {
+                    return `${phaseName} \u2014 ${EVENT_CARD_DEFS[resolvedEvent].displayName}`;
+                  }
+                  return `Round ${props.G.round} \u2014 ${phaseName}`;
+                })()}
+              </span>
             </span>
           </Tooltip>
           <Tooltip title="Kingdom to Play" disableInteractive>
@@ -247,16 +259,24 @@ const ResourceTrackerBar = (props: ResourceTrackerBarProps) => {
           },
         }}
       />
-      <Dialog open={phaseDialogOpen} onClose={() => setPhaseDialogOpen(false)}>
-        <DialogTitle>Game Phases</DialogTitle>
+      <Dialog open={phaseDialogOpen} onClose={() => setPhaseDialogOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>Game Status</DialogTitle>
         <DialogContent sx={{ p: 0 }}>
+          <List dense>
+            <ListItem sx={{ backgroundColor: "rgba(0,0,0,0.06)" }}>
+              <ListItemText primary={`Round ${props.G.round} of ${props.G.finalRound}`} slotProps={{ primary: { fontWeight: "bold" } }} />
+            </ListItem>
+          </List>
+          <Box sx={{ px: 2, pt: 1, pb: 0.5 }}>
+            <span style={{ fontWeight: 600, fontSize: "0.8rem", textTransform: "uppercase", color: "#888" }}>Phases</span>
+          </Box>
           <List dense>
             {GAME_PHASES.map((phase) => (
               <ListItem
                 key={phase.key}
                 sx={
                   props.ctx.phase === phase.key
-                    ? { backgroundColor: "action.selected", fontWeight: "bold" }
+                    ? { backgroundColor: "action.selected" }
                     : {}
                 }
               >
@@ -271,6 +291,77 @@ const ResourceTrackerBar = (props: ResourceTrackerBarProps) => {
               </ListItem>
             ))}
           </List>
+          {props.G.eventState.resolvedEvent && (
+            <>
+              <Box sx={{ px: 2, pt: 1, pb: 0.5 }}>
+                <span style={{ fontWeight: 600, fontSize: "0.8rem", textTransform: "uppercase", color: "#888" }}>This Round's Event</span>
+              </Box>
+              <List dense>
+                <ListItem>
+                  <ListItemText
+                    primary={EVENT_CARD_DEFS[props.G.eventState.resolvedEvent].displayName}
+                    secondary={EVENT_CARD_DEFS[props.G.eventState.resolvedEvent].description}
+                  />
+                </ListItem>
+              </List>
+            </>
+          )}
+          {(props.G.eventState.peaceAccordActive ||
+            props.G.eventState.dynasticMarriage ||
+            props.G.eventState.schismAffected.length > 0 ||
+            props.G.eventState.colonialPrelatesActive ||
+            props.G.eventState.lendersRefuseCredit.length > 0 ||
+            props.G.accumulatedHosts.length > 0) && (
+            <>
+              <Box sx={{ px: 2, pt: 1, pb: 0.5 }}>
+                <span style={{ fontWeight: 600, fontSize: "0.8rem", textTransform: "uppercase", color: "#888" }}>Active Effects</span>
+              </Box>
+              <List dense>
+                {props.G.eventState.peaceAccordActive && (
+                  <ListItem>
+                    <ListItemText primary="Peace Accord" secondary="First player to attack loses -3 VP" />
+                  </ListItem>
+                )}
+                {props.G.eventState.dynasticMarriage && (
+                  <ListItem>
+                    <ListItemText
+                      primary="Dynastic Marriage"
+                      secondary={`${props.G.playerInfo[props.G.eventState.dynasticMarriage[0]].kingdomName} & ${props.G.playerInfo[props.G.eventState.dynasticMarriage[1]].kingdomName} are allied`}
+                    />
+                  </ListItem>
+                )}
+                {props.G.eventState.colonialPrelatesActive && (
+                  <ListItem>
+                    <ListItemText primary="Colonial Prelates" secondary="Colonies add +1 vote each" />
+                  </ListItem>
+                )}
+                {props.G.eventState.schismAffected.length > 0 && (
+                  <ListItem>
+                    <ListItemText
+                      primary="Schism"
+                      secondary={`Affected: ${props.G.eventState.schismAffected.map((id) => props.G.playerInfo[id].kingdomName).join(", ")}`}
+                    />
+                  </ListItem>
+                )}
+                {props.G.eventState.lendersRefuseCredit.length > 0 && (
+                  <ListItem>
+                    <ListItemText
+                      primary="Lenders Refuse Credit"
+                      secondary={`Blocked: ${props.G.eventState.lendersRefuseCredit.map((id) => props.G.playerInfo[id].kingdomName).join(", ")}`}
+                    />
+                  </ListItem>
+                )}
+                {props.G.accumulatedHosts.length > 0 && (
+                  <ListItem>
+                    <ListItemText
+                      primary="Infidel Hosts Gathering"
+                      secondary={`${props.G.accumulatedHosts.length} host counter(s) in the Infidel Empire`}
+                    />
+                  </ListItem>
+                )}
+              </List>
+            </>
+          )}
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setPhaseDialogOpen(false)}>Close</Button>

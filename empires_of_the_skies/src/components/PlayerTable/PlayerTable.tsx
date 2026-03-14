@@ -90,6 +90,45 @@ const PlayerTable = (props: PlayerTableProps) => {
                         }}
                       />
                     )}
+                    {props.G.eventState.peaceAccordActive && (
+                      <Chip
+                        label="Peace Accord"
+                        size="small"
+                        variant="outlined"
+                        sx={{ borderColor: "#D4A017", color: "#D4A017", height: 20, fontSize: "0.65rem", fontWeight: "bold" }}
+                      />
+                    )}
+                    {props.G.eventState.dynasticMarriage?.includes(key) && (
+                      <Chip
+                        label={`Allied: ${
+                          props.G.playerInfo[
+                            props.G.eventState.dynasticMarriage[0] === key
+                              ? props.G.eventState.dynasticMarriage[1]
+                              : props.G.eventState.dynasticMarriage[0]
+                          ].kingdomName
+                        }`}
+                        size="small"
+                        variant="outlined"
+                        sx={{ borderColor: "#C06090", color: "#C06090", height: 20, fontSize: "0.65rem", fontWeight: "bold" }}
+                      />
+                    )}
+                    {props.G.eventState.schismAffected.includes(key) && (
+                      <Chip
+                        label="Schism"
+                        size="small"
+                        variant="outlined"
+                        sx={{ borderColor: "#E77B00", color: "#E77B00", height: 20, fontSize: "0.65rem", fontWeight: "bold" }}
+                      />
+                    )}
+                    {props.G.eventState.lendersRefuseCredit.includes(key) &&
+                      value.resources.gold < 0 && (
+                      <Chip
+                        label="Credit Blocked"
+                        size="small"
+                        variant="outlined"
+                        sx={{ borderColor: "#D32F2F", color: "#D32F2F", height: 20, fontSize: "0.65rem", fontWeight: "bold" }}
+                      />
+                    )}
                   </Box>
                 </TableCell>
                 <TableCell align="right">{value.resources.counsellors}</TableCell>
