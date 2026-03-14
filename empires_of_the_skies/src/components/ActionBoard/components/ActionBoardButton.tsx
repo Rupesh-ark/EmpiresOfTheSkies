@@ -1,5 +1,5 @@
 import { ReactElement, useState } from "react";
-import { fonts } from "../../designTokens";
+import { fonts } from "@/designTokens";
 import { MyGameProps, PlayerColour } from "@eots/game";
 import {
   Box,
@@ -10,9 +10,31 @@ import {
   DialogContentText,
   DialogTitle,
 } from "@mui/material";
-import WorldMap from "../WorldMap/WorldMap";
-import { clearMoves } from "../../utils/gameHelpers";
-import CounsellorIcon from "../Icons/CounsellorIcon";
+import WorldMap from "@/components/WorldMap/WorldMap";
+import { clearMoves } from "@/utils/gameHelpers";
+import CounsellorIcon from "@/components/Icons/CounsellorIcon";
+
+/**
+ * Check if a button's resource requirements are blocked by active restrictions.
+ * Add new restriction checks here — they apply to all buttons that declare
+ * the matching requirement.
+ */
+const isButtonRestricted = (props: ActionBoardButtonProps): boolean => {
+  if (!props.requires || !props.playerID) return false;
+  const player = props.G.playerInfo[props.playerID];
+  if (!player) return false;
+
+  // Lenders Refuse Credit: blocks gold-spending actions
+  if (
+    props.requires.gold &&
+    props.G.eventState.lendersRefuseCredit.includes(props.playerID) &&
+    player.resources.gold < 0
+  ) return true;
+
+  // Future resource restrictions go here
+
+  return false;
+};
 
 export const ActionBoardButton = (props: ActionBoardButtonProps) => {
   let counsellorColour: string | undefined;
@@ -20,6 +42,7 @@ export const ActionBoardButton = (props: ActionBoardButtonProps) => {
   if (props.counsellor) {
     counsellorColour = props.G.playerInfo[props.counsellor].colour;
   }
+  const restricted = isButtonRestricted(props);
   return (
     <Button
       sx={{
@@ -39,7 +62,7 @@ export const ActionBoardButton = (props: ActionBoardButtonProps) => {
           : "#e0e0e0",
         overflow: "hidden",
       }}
-      disabled={props.disabled}
+      disabled={props.disabled || restricted}
       onClick={() => {
         clearMoves(props);
         props.onClickFunction(props.value);
@@ -70,6 +93,7 @@ export const ActionBoardButtonLarge = (props: ActionBoardButtonProps) => {
     useState(false);
 
   const [selectedTile, setSelectedTile] = useState([4, 0]);
+  const restricted = isButtonRestricted(props);
 
   let listOfCounsellors: ReactElement[] = [];
   if (props.counsellors) {
@@ -115,9 +139,11 @@ export const ActionBoardButtonLarge = (props: ActionBoardButtonProps) => {
           backgroundRepeat: "no-repeat",
           fontFamily: fonts.primary,
           fontSize: "18px",
-          cursor: "pointer",
+          cursor: restricted ? "not-allowed" : "pointer",
           justifyContent: "center",
+          opacity: restricted ? 0.5 : 1,
         }}
+        disabled={props.disabled || restricted}
         onClick={() => {
           clearMoves(props);
           // Palace (value=1): open dialog first, move fires after direction is chosen
@@ -237,4 +263,6 @@ export interface ActionBoardButtonProps extends MyGameProps {
   width?: string;
   backgroundColour?: string;
   disabled?: boolean;
+  /** Declare what resources this action requires — auto-disables if restricted */
+  requires?: { gold?: boolean; counsellor?: boolean };
 }

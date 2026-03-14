@@ -90,6 +90,20 @@ const PlayerTable = (props: PlayerTableProps) => {
                         }}
                       />
                     )}
+                    {value.isCaptainGeneral && (
+                      <Chip
+                        label="Captain-General"
+                        size="small"
+                        variant="outlined"
+                        sx={{
+                          borderColor: "#2E7D32",
+                          color: "#2E7D32",
+                          height: 20,
+                          fontSize: "0.65rem",
+                          fontWeight: "bold",
+                        }}
+                      />
+                    )}
                     {props.G.eventState.peaceAccordActive && (
                       <Chip
                         label="Peace Accord"
