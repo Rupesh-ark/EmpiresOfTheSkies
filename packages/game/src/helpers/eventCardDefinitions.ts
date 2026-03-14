@@ -1,4 +1,4 @@
-import { EventCardName, MyGameState, LegacyCardInfo, DeferredEvent } from "../types";
+import { EventCardName, MyGameState, LegacyCardInfo, DeferredEvent, EventChoice } from "../types";
 import {
   advanceAllHeresyTrackers,
   retreatAllHeresyTrackers,
@@ -930,6 +930,119 @@ export const getBattleEventTarget = (
         }
       }
       return null;
+    }
+
+    default:
+      return null;
+  }
+};
+
+// ── Interactive event choice preparation ─────────────────────────────────────
+
+/**
+ * Check if a revealed event card requires a player choice before resolving.
+ * Returns an EventChoice if interaction is needed, or null if the card
+ * can be auto-resolved.
+ */
+export const prepareEventChoice = (
+  card: EventCardName,
+  G: MyGameState,
+  turnOrder: string[]
+): EventChoice | null => {
+  switch (card) {
+    case "the_great_fire": {
+      // Only needs a choice when 2+ building types are tied for highest count
+      const target = turnOrder[0]; // will be recalculated properly
+      let maxBuildings = 0;
+      let targetID = turnOrder[0];
+      for (const id of turnOrder) {
+        const p = G.playerInfo[id];
+        const total = p.cathedrals + p.palaces + p.shipyards;
+        if (total > maxBuildings) {
+          maxBuildings = total;
+          targetID = id;
+        }
+      }
+      const p = G.playerInfo[targetID];
+      const allCounts = [
+        { type: "cathedral" as const, count: p.cathedrals },
+        { type: "palace" as const, count: p.palaces },
+        { type: "shipyard" as const, count: p.shipyards },
+      ];
+      const counts = allCounts.filter((c) => c.count > 0);
+
+      const maxCount = Math.max(...counts.map((c) => c.count));
+      const tied = counts.filter((c) => c.count === maxCount);
+
+      if (tied.length <= 1) return null; // No tie, auto-resolve
+      return {
+        card,
+        targetPlayerID: targetID,
+        buildingOptions: tied.map((c) => c.type),
+      };
+    }
+
+    case "royal_succession": {
+      const targetID = playerWithFewestVP(G, turnOrder);
+      const player = G.playerInfo[targetID];
+
+      // Score current legacy card first
+      if (player.resources.legacyCard) {
+        resolveCardWithAlignmentPenalty(player, G, player.resources.legacyCard);
+        G.cardDecks.legacyDeck.push(player.resources.legacyCard);
+        player.resources.legacyCard = undefined;
+      }
+
+      // Draw 2 new cards
+      if (G.cardDecks.legacyDeck.length === 0) return null;
+      const drawn: LegacyCardInfo[] = [];
+      for (let i = 0; i < 2 && G.cardDecks.legacyDeck.length > 0; i++) {
+        const idx = Math.floor(Math.random() * G.cardDecks.legacyDeck.length);
+        drawn.push(G.cardDecks.legacyDeck.splice(idx, 1)[0]);
+      }
+
+      if (drawn.length <= 1) {
+        // Only 1 card available, auto-assign
+        if (drawn.length === 1) player.resources.legacyCard = drawn[0];
+        return null;
+      }
+
+      return {
+        card,
+        targetPlayerID: targetID,
+        legacyOptions: drawn,
+      };
+    }
+
+    case "dynastic_marriage": {
+      const targetID = playerWithFewestVP(G, turnOrder);
+      const allyOptions = turnOrder.filter((id) => id !== targetID);
+      if (allyOptions.length === 0) return null;
+      return {
+        card,
+        targetPlayerID: targetID,
+        allyOptions,
+      };
+    }
+
+    case "colonial_rebellion": {
+      // Player needs to choose which of their colonies to risk
+      const targetID = playerWithFewestVP(G, turnOrder);
+      const colonies: [number, number][] = [];
+      for (let y = 0; y < G.mapState.buildings.length; y++) {
+        for (let x = 0; x < G.mapState.buildings[y].length; x++) {
+          const tile = G.mapState.buildings[y][x];
+          if (tile.player?.id === targetID && tile.buildings === "colony") {
+            colonies.push([x, y]);
+          }
+        }
+      }
+      if (colonies.length <= 1) return null; // 0 or 1 colony, no choice needed
+      return {
+        card,
+        targetPlayerID: targetID,
+        colonyOptions: colonies,
+      };
     }
 
     default:

@@ -72,6 +72,7 @@ import resolveRound from "./helpers/resolveRound";
 import pickLegacyCard from "./moves/pickLegacyCard";
 import pickKingdomAdvantageCard from "./moves/kingdomAdvantage/pickKingdomAdvantageCard";
 import chooseEventCard from "./moves/events/chooseEventCard";
+import resolveEventChoice from "./moves/events/resolveEventChoice";
 import { ALL_EVENT_CARD_NAMES } from "./helpers/eventCardDefinitions";
 import { resolveRebellionEvent } from "./helpers/resolveRebellion";
 import { checkForInvasion } from "./helpers/resolveInvasion";
@@ -175,6 +176,7 @@ const MyGame: Game<MyGameState> = {
         chosenCards: [],
         resolvedEvent: null,
         deferredEvents: [],
+        pendingChoice: null,
         taxModifier: 0,
         peaceAccordActive: false,
         schismAffected: [],
@@ -226,6 +228,7 @@ const MyGame: Game<MyGameState> = {
     yieldToAttacker,
     setTurnCompleteFalse,
     chooseEventCard,
+    resolveEventChoice,
   },
   phases: {
     kingdom_advantage: {
@@ -277,7 +280,7 @@ const MyGame: Game<MyGameState> = {
         context.G.eventState.cannotConvertThisRound = [];
         console.log("Events phase has begun");
       },
-      moves: { chooseEventCard },
+      moves: { chooseEventCard, resolveEventChoice },
       next: "discovery",
     },
     discovery: {

@@ -162,6 +162,7 @@ export function buildInitialG(
       chosenCards: [],
       resolvedEvent: null,
       deferredEvents: [],
+      pendingChoice: null,
       taxModifier: 0,
       peaceAccordActive: false,
       schismAffected: [],

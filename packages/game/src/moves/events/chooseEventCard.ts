@@ -5,6 +5,7 @@ import {
   isEventVoid,
   resolveEventCard,
   getBattleEventTarget,
+  prepareEventChoice,
   EVENT_CARD_DEFS,
 } from "../../helpers/eventCardDefinitions";
 import { logEvent } from "../../helpers/stateUtils";
@@ -58,17 +59,33 @@ const chooseEventCard: Move<MyGameState> = (
       const card = shuffled[resolvedIndex];
       const def = EVENT_CARD_DEFS[card];
 
-      if (def.isBattle) {
-        // Battle events deferred to Resolution phase
-        const target = getBattleEventTarget(card, G, ctx.playOrder);
-        if (target) {
-          G.eventState.deferredEvents.push(target);
-        }
-      } else {
-        resolveEventCard(card, G, ctx.playOrder);
-      }
       G.eventState.resolvedEvent = card;
       logEvent(G, `Event: ${def.displayName} \u2014 ${def.description}`);
+
+      // Check if this card needs a player choice before resolving
+      const choice = !def.isBattle
+        ? prepareEventChoice(card, G, ctx.playOrder)
+        : null;
+
+      if (def.isBattle) {
+        // Battle events deferred to Resolution phase
+        // Colonial Rebellion with multiple colonies needs a choice first
+        const colChoice = prepareEventChoice(card, G, ctx.playOrder);
+        if (colChoice) {
+          G.eventState.pendingChoice = colChoice;
+        } else {
+          const target = getBattleEventTarget(card, G, ctx.playOrder);
+          if (target) {
+            G.eventState.deferredEvents.push(target);
+          }
+        }
+      } else if (choice) {
+        // Card needs interactive choice — pause resolution
+        G.eventState.pendingChoice = choice;
+      } else {
+        // Auto-resolve immediately
+        resolveEventCard(card, G, ctx.playOrder);
+      }
 
       // All other chosen cards go back to deck
       for (let i = 0; i < shuffled.length; i++) {
@@ -92,7 +109,12 @@ const chooseEventCard: Move<MyGameState> = (
       }
     }
 
-    events.endPhase();
+    if (G.eventState.pendingChoice) {
+      // Transfer turn to the player who needs to make a choice
+      events.endTurn({ next: G.eventState.pendingChoice.targetPlayerID });
+    } else {
+      events.endPhase();
+    }
   } else {
     events.endTurn();
   }

@@ -259,11 +259,25 @@ export type DeferredEvent = {
   targetTile?: [number, number];
 };
 
+export type EventChoice = {
+  card: EventCardName;
+  targetPlayerID: string;
+  /** Royal Succession: 2 drawn legacy cards to pick from */
+  legacyOptions?: LegacyCardInfo[];
+  /** The Great Fire: tied building types to choose from */
+  buildingOptions?: ("cathedral" | "palace" | "shipyard")[];
+  /** Dynastic Marriage: eligible ally player IDs */
+  allyOptions?: string[];
+  /** Colonial Rebellion: eligible colony tile coordinates */
+  colonyOptions?: [number, number][];
+};
+
 export type EventState = {
   deck: EventCardName[];
   chosenCards: EventCardName[];
   resolvedEvent: EventCardName | null;
   deferredEvents: DeferredEvent[];
+  pendingChoice: EventChoice | null;
   taxModifier: number;
   peaceAccordActive: boolean;
   schismAffected: string[];

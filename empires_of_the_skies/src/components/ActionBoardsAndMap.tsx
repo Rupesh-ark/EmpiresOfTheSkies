@@ -39,6 +39,7 @@ import { Campaign, ChatBubble, Close, Dashboard, Map, MenuBook, Person, TableCha
 import PickLegacyCardDialog from "./PickLegacyCardDialog";
 import PickKingdomAdvantageCardDialog from "./PickKingdomAdvantageCardDialog";
 import PickEventCardDialog from "./PickEventCardDialog";
+import EventChoiceDialog from "./EventChoiceDialog";
 import RoundSummaryDialog from "./RoundSummaryDialog";
 import NprKingdomTable from "./PlayerTable/NprKingdomTable";
 import GameLog from "./GameLog";
@@ -260,7 +261,10 @@ export const ActionBoardsAndMap = (props: MyGameProps) => {
             <PickKingdomAdvantageCardDialog {...props} />
           )}
           {props.G.stage === "events" && (
-            <PickEventCardDialog {...props} />
+            <>
+              <PickEventCardDialog {...props} />
+              <EventChoiceDialog {...props} />
+            </>
           )}
           {props.G.stage === "pick legacy card" && (
             <PickLegacyCardDialog {...props} />
