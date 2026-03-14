@@ -42,20 +42,18 @@ export const PUNISH_EXECUTE_VP_COST = 1;
 // ── Infidel Host counters ────────────────────────────────────────────────────
 export const INFIDEL_EMPIRE_LOCATION: [number, number] = [4, 1];
 
-export const INFIDEL_HOST_COUNTERS: InfidelHostCounter[] = [
-  { swords: 30, shields: 0, isFleet: false, isInvasionTrigger: true },
-  { swords: 30, shields: 0, isFleet: false, isInvasionTrigger: true },
-  { swords: 20, shields: 0, isFleet: false, isInvasionTrigger: false },
-  { swords: 20, shields: 0, isFleet: false, isInvasionTrigger: false },
-  { swords: 20, shields: 0, isFleet: false, isInvasionTrigger: false },
-  { swords: 15, shields: 0, isFleet: false, isInvasionTrigger: false },
-  { swords: 15, shields: 0, isFleet: false, isInvasionTrigger: false },
-  { swords: 15, shields: 0, isFleet: false, isInvasionTrigger: false },
-  { swords: 10, shields: 0, isFleet: false, isInvasionTrigger: false },
-  { swords: 10, shields: 0, isFleet: false, isInvasionTrigger: false },
-  { swords: 10, shields: 0, isFleet: false, isInvasionTrigger: false },
-  { swords: 15, shields: 5, isFleet: true, isInvasionTrigger: false },
+// Config-driven: change count to adjust pool size
+export const INFIDEL_HOST_CONFIG: (InfidelHostCounter & { count: number })[] = [
+  { swords: 30, shields: 0, isFleet: false, isInvasionTrigger: true, count: 2 },
+  { swords: 20, shields: 0, isFleet: false, isInvasionTrigger: false, count: 3 },
+  { swords: 15, shields: 0, isFleet: false, isInvasionTrigger: false, count: 3 },
+  { swords: 10, shields: 0, isFleet: false, isInvasionTrigger: false, count: 3 },
+  { swords: 15, shields: 5, isFleet: true, isInvasionTrigger: false, count: 1 },
 ];
+export const INFIDEL_HOST_COUNTERS: InfidelHostCounter[] =
+  INFIDEL_HOST_CONFIG.flatMap(({ count, ...counter }) =>
+    Array.from({ length: count }, () => ({ ...counter }))
+  );
 
 // Grand Army VP rewards/penalties
 export const CAPTAIN_GENERAL_VP = 3;
@@ -70,13 +68,17 @@ export const TOTAL_KINGDOMS = 6;
 export const EVENT_HAND_SIZE = 3;
 
 // ── Contingent counters (Rebels / Grand Army) ────────────────────────────────
-// 20 counters: sword values only, no shields. Used for rebellions and invasions.
-export const CONTINGENT_COUNTERS: number[] = [
-  15,
-  12, 12, 12, 12, 12,
-  10, 10, 10, 10, 10, 10, 10,
-  7, 7, 7, 7, 7, 7, 7,
+// Config-driven: change count to adjust pool size
+export const CONTINGENT_CONFIG: { swords: number; count: number }[] = [
+  { swords: 15, count: 1 },
+  { swords: 12, count: 5 },
+  { swords: 10, count: 7 },
+  { swords: 7, count: 7 },
 ];
+export const CONTINGENT_COUNTERS: number[] =
+  CONTINGENT_CONFIG.flatMap(({ swords, count }) =>
+    Array(count).fill(swords)
+  );
 
 // ── Fortune of War ───────────────────────────────────────────────────────────
 export const FOW_CARDS_DRAWN = 2;
@@ -1125,37 +1127,28 @@ export const knownWorldTiles: TileInfoProps[] = [
   },
 ];
 
-export const fortuneOfWarCards: FortuneOfWarCardInfo[] = [
-  { name: "SwordOne_1", sword: 1, shield: 0 },
-  { name: "SwordOne_2", sword: 1, shield: 0 },
-  { name: "SwordOne_3", sword: 1, shield: 0 },
-  { name: "SwordTwo_1", sword: 2, shield: 0 },
-  { name: "SwordTwo_2", sword: 2, shield: 0 },
-  { name: "SwordTwo_3", sword: 2, shield: 0 },
-  { name: "SwordThree_1", sword: 3, shield: 0 },
-  { name: "SwordThree_2", sword: 3, shield: 0 },
-  { name: "SwordThree_3", sword: 3, shield: 0 },
-  { name: "SwordFour_1", sword: 4, shield: 0 },
-  { name: "SwordFour_2", sword: 4, shield: 0 },
-  { name: "SwordFour_3", sword: 4, shield: 0 },
-  { name: "SwordFive_1", sword: 5, shield: 0 },
-  { name: "SwordFive_2", sword: 5, shield: 0 },
-  { name: "SwordFive_3", sword: 5, shield: 0 },
-  { name: "ShieldOne_1", sword: 0, shield: 1 },
-  { name: "ShieldOne_2", sword: 0, shield: 1 },
-  { name: "ShieldOne_3", sword: 0, shield: 1 },
-  { name: "ShieldTwo_1", sword: 0, shield: 2 },
-  { name: "ShieldTwo_2", sword: 0, shield: 2 },
-  { name: "ShieldTwo_3", sword: 0, shield: 2 },
-  { name: "ShieldThree_1", sword: 0, shield: 3 },
-  { name: "ShieldThree_2", sword: 0, shield: 3 },
-  { name: "ShieldThree_3", sword: 0, shield: 3 },
-  { name: "ShieldFour_1", sword: 0, shield: 4 },
-  { name: "ShieldFour_2", sword: 0, shield: 4 },
-  { name: "ShieldFour_3", sword: 0, shield: 4 },
-  { name: "ShieldFive_1", sword: 0, shield: 5 },
-  { name: "ShieldFive_2", sword: 0, shield: 5 },
-  { name: "ShieldFive_3", sword: 0, shield: 5 },
-  { name: "NoEffect_1", sword: 0, shield: 0 },
-  { name: "NoEffect_2", sword: 0, shield: 0 },
+// ── Fortune of War cards ─────────────────────────────────────────────────────
+// Config-driven: change count to adjust deck size, adjust sword/shield values
+export const FOW_CARD_CONFIG: { sword: number; shield: number; count: number }[] = [
+  { sword: 1, shield: 0, count: 3 },
+  { sword: 2, shield: 0, count: 3 },
+  { sword: 3, shield: 0, count: 3 },
+  { sword: 4, shield: 0, count: 3 },
+  { sword: 5, shield: 0, count: 3 },
+  { sword: 0, shield: 1, count: 3 },
+  { sword: 0, shield: 2, count: 3 },
+  { sword: 0, shield: 3, count: 3 },
+  { sword: 0, shield: 4, count: 3 },
+  { sword: 0, shield: 5, count: 3 },
+  { sword: 0, shield: 0, count: 2 }, // No Effect
 ];
+
+export const fortuneOfWarCards: FortuneOfWarCardInfo[] =
+  FOW_CARD_CONFIG.flatMap(({ sword, shield, count }) => {
+    const label = sword > 0 ? `Sword${sword}` : shield > 0 ? `Shield${shield}` : "NoEffect";
+    return Array.from({ length: count }, (_, i) => ({
+      name: `${label}_${i + 1}`,
+      sword,
+      shield,
+    }));
+  });

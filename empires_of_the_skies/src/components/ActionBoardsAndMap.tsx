@@ -41,6 +41,8 @@ import PickKingdomAdvantageCardDialog from "./PickKingdomAdvantageCardDialog";
 import PickEventCardDialog from "./PickEventCardDialog";
 import EventChoiceDialog from "./EventChoiceDialog";
 import RebellionDialog from "./RebellionDialog";
+import InvasionNominateDialog from "./InvasionNominateDialog";
+import InvasionContributeDialog from "./InvasionContributeDialog";
 import RoundSummaryDialog from "./RoundSummaryDialog";
 import NprKingdomTable from "./PlayerTable/NprKingdomTable";
 import GameLog from "./GameLog";
@@ -295,6 +297,12 @@ export const ActionBoardsAndMap = (props: MyGameProps) => {
           {props.G.stage === "conquest" && <OutpostOrColonyDialog {...props} />}
           {props.G.stage === "rebellion" && (
             <RebellionDialog {...props} />
+          )}
+          {props.G.stage === "invasion_nominate" && (
+            <InvasionNominateDialog {...props} />
+          )}
+          {props.G.stage === "invasion_contribute" && (
+            <InvasionContributeDialog {...props} />
           )}
           {props.G.stage === "retrieve fleets" && (
             <RetrieveFleetsDialog {...props} />

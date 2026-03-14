@@ -41,6 +41,8 @@ export interface MyGameState {
     | "garrison troops"
     | "retrieve fleets"
     | "rebellion"
+    | "invasion_nominate"
+    | "invasion_contribute"
     | "pick legacy card"
     | "taxes"
     | "events"
@@ -68,6 +70,11 @@ export interface MyGameState {
   currentRebellion: {
     event: DeferredEvent;
     counterSwords: number;
+  } | null;
+  currentInvasion: {
+    totalHostSwords: number;
+    contributions: Record<string, { regiments: number; levies: number }>;
+    phase: "nominate" | "contribute";
   } | null;
 }
 
@@ -144,6 +151,7 @@ export type PlayerInfo = {
   passed: boolean;
   resources: Resources;
   isArchprelate: boolean;
+  isCaptainGeneral: boolean;
   playerBoardCounsellorLocations: PlayerBoardInfo;
   hereticOrOrthodox: "heretic" | "orthodox";
   fleetInfo: FleetInfo[];

@@ -6,7 +6,7 @@ import {
   resolveRebellionWithTroops,
   setupNextRebellion,
 } from "../../helpers/resolveRebellion";
-import { checkForInvasion } from "../../helpers/resolveInvasion";
+import { checkForInvasion, getArchprelateForNomination } from "../../helpers/resolveInvasion";
 import { EventsAPI } from "boardgame.io/dist/types/src/plugins/events/events";
 import { Ctx } from "boardgame.io/dist/types/src/types";
 
@@ -61,10 +61,21 @@ const commitRebellionTroops: Move<MyGameState> = (
     G.stage = "rebellion";
     events.endTurn({ next: G.currentRebellion!.event.targetPlayerID });
   } else {
-    // No more rebellions — run invasion check, then retrieve fleets
-    checkForInvasion(G);
-    G.stage = "retrieve fleets";
-    events.endTurn();
+    // No more rebellions — check for invasion
+    const invasionTriggered = checkForInvasion(G);
+    if (invasionTriggered) {
+      const archprelate = getArchprelateForNomination(G);
+      if (archprelate) {
+        G.stage = "invasion_nominate";
+        events.endTurn({ next: archprelate });
+      } else {
+        G.stage = "retrieve fleets";
+        events.endTurn();
+      }
+    } else {
+      G.stage = "retrieve fleets";
+      events.endTurn();
+    }
   }
 };
 

@@ -34,20 +34,20 @@ import {
 // ── Host counter draw ────────────────────────────────────────────────────────
 
 /**
- * Called each round during Resolution. Draws 1 Host counter, checks for
- * invasion trigger, and resolves if needed.
+ * Called each round during Resolution. Draws 1 Host counter and checks
+ * for invasion trigger. Returns true if invasion was triggered (caller
+ * should set up the interactive invasion flow).
  */
-export const checkForInvasion = (G: MyGameState): void => {
+export const checkForInvasion = (G: MyGameState): boolean => {
   // Grand Infidel Dies event: skip this round's draw
   if (G.eventState.grandInfidelDies) {
     G.eventState.grandInfidelDies = false;
-    console.log("Infidel Invasion step skipped (Grand Infidel Dies)");
-    return;
+    logEvent(G, "Infidel Invasion step skipped (Grand Infidel Dies)");
+    return false;
   }
 
   if (G.infidelHostPool.length === 0) {
-    console.log("No Infidel Host counters left to draw");
-    return;
+    return false;
   }
 
   // Draw 1 counter
@@ -69,8 +69,29 @@ export const checkForInvasion = (G: MyGameState): void => {
 
   if (drawn.isInvasionTrigger) {
     logEvent(G, "INVASION TRIGGERED! Grand Army of the Faith is raised!");
-    resolveGrandArmyBattle(G);
+    const totalHostSwords = G.accumulatedHosts.reduce(
+      (sum, h) => sum + h.swords, 0
+    );
+    G.currentInvasion = {
+      totalHostSwords,
+      contributions: {},
+      phase: "nominate",
+    };
+    return true;
   }
+
+  return false;
+};
+
+/**
+ * Setup the interactive invasion: find the Archprelate to nominate.
+ * Returns the Archprelate's player ID.
+ */
+export const getArchprelateForNomination = (G: MyGameState): string | null => {
+  const archprelate = Object.values(G.playerInfo).find(
+    (p) => p.isArchprelate
+  );
+  return archprelate?.id ?? null;
 };
 
 // ── Grand Army battle ────────────────────────────────────────────────────────
@@ -83,40 +104,34 @@ type PlayerContribution = {
 };
 
 /**
- * Auto-resolve the Grand Army vs accumulated Infidel Hosts.
+ * Resolve the Grand Army battle using contributions from currentInvasion
+ * and the Captain-General from PlayerInfo.isCaptainGeneral.
  *
- * TODO: Interactive sub-phase for Captain-General nomination, troop choices,
- * Infidel Fleet aerial combat, and buy-off offers.
+ * TODO: Replace FoW draws with player card selection.
+ * TODO: Replace buy-off auto-distribution with interactive gold offers.
  */
-const resolveGrandArmyBattle = (G: MyGameState): void => {
+export const resolveGrandArmyBattle = (G: MyGameState): void => {
   const turnOrder = G.turnOrder;
+  const invasion = G.currentInvasion;
+  if (!invasion) return;
 
-  // ── 1. Auto-pick Captain-General (must be Orthodox if possible) ──
-  let captainGeneral = turnOrder[0];
-  for (const id of turnOrder) {
-    if (G.playerInfo[id].hereticOrOrthodox === "orthodox") {
-      captainGeneral = id;
-      break;
-    }
-  }
+  // Find Captain-General from PlayerInfo
+  const captainGeneral = turnOrder.find(
+    (id) => G.playerInfo[id].isCaptainGeneral
+  ) ?? turnOrder[0];
 
-  // ── 2. Auto-commit all Kingdom troops per player ──
-  const contributions: PlayerContribution[] = [];
-  for (const id of turnOrder) {
-    const p = G.playerInfo[id];
-    const regiments = p.resources.regiments;
-    const levies = p.resources.levies;
-    contributions.push({
+  // Build contributions from currentInvasion
+  const contributions: PlayerContribution[] = turnOrder.map((id) => {
+    const c = invasion.contributions[id] ?? { regiments: 0, levies: 0 };
+    return {
       playerID: id,
-      regiments,
-      levies,
-      totalSwords: regiments * 2 + levies,
-    });
-    // Troops are committed (removed from kingdom for the battle)
-    // They'll be returned after the battle
-  }
+      regiments: c.regiments,
+      levies: c.levies,
+      totalSwords: c.regiments * 2 + c.levies,
+    };
+  });
 
-  // ── 3. Draw Contingent counters as NPR Grand Army (1 per kingdom) ──
+  // ── Draw Contingent counters as NPR Grand Army (1 per kingdom) ──
   let contingentSwords = 0;
   const contingentsDrawn: number[] = [];
   for (let i = 0; i < TOTAL_KINGDOMS && G.contingentPool.length > 0; i++) {
@@ -208,6 +223,9 @@ const resolveGrandArmyBattle = (G: MyGameState): void => {
   for (const c of contingentsDrawn) {
     G.contingentPool.push(c);
   }
+
+  // Clear invasion state (Captain-General persists until next nomination)
+  G.currentInvasion = null;
 };
 
 // ── VP reward/penalty helpers ────────────────────────────────────────────────

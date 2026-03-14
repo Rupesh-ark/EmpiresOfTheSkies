@@ -76,7 +76,9 @@ import resolveEventChoice from "./moves/events/resolveEventChoice";
 import { ALL_EVENT_CARD_NAMES } from "./helpers/eventCardDefinitions";
 import { resolveRebellionEvent, setupNextRebellion } from "./helpers/resolveRebellion";
 import commitRebellionTroops from "./moves/events/commitRebellionTroops";
-import { checkForInvasion } from "./helpers/resolveInvasion";
+import nominateCaptainGeneral from "./moves/events/nominateCaptainGeneral";
+import contributeToGrandArmy from "./moves/events/contributeToGrandArmy";
+import { checkForInvasion, getArchprelateForNomination } from "./helpers/resolveInvasion";
 import { logEvent } from "./helpers/stateUtils";
 import { resolveDeferredBattle } from "./helpers/resolveDeferredBattles";
 import { resolveInfidelFleet } from "./helpers/resolveInfidelFleet";
@@ -172,6 +174,7 @@ const MyGame: Game<MyGameState> = {
       infidelFleet: null,
       gameLog: [],
       currentRebellion: null,
+      currentInvasion: null,
       pendingDeal: undefined,
       eventState: {
         deck: eventDeck,
@@ -232,6 +235,8 @@ const MyGame: Game<MyGameState> = {
     chooseEventCard,
     resolveEventChoice,
     commitRebellionTroops,
+    nominateCaptainGeneral,
+    contributeToGrandArmy,
   },
   phases: {
     kingdom_advantage: {
@@ -550,16 +555,26 @@ const MyGame: Game<MyGameState> = {
             next: context.G.currentRebellion!.event.targetPlayerID,
           });
         } else {
-          // No rebellions — proceed normally
-          checkForInvasion(context.G);
-          context.G.stage = "retrieve fleets";
+          // No rebellions — check for invasion
+          const invasionTriggered = checkForInvasion(context.G);
+          if (invasionTriggered) {
+            const archprelate = getArchprelateForNomination(context.G);
+            if (archprelate) {
+              context.G.stage = "invasion_nominate";
+              context.events.endTurn({ next: archprelate });
+            } else {
+              context.G.stage = "retrieve fleets";
+            }
+          } else {
+            context.G.stage = "retrieve fleets";
+          }
         }
       },
       onEnd: (context) => {
         resolveRound(context.G, context.events, context.random);
         console.log(`Round number:${context.G.round}`);
       },
-      moves: { retrieveFleets, commitRebellionTroops },
+      moves: { retrieveFleets, commitRebellionTroops, nominateCaptainGeneral, contributeToGrandArmy },
       next: "reset",
     },
     reset: {

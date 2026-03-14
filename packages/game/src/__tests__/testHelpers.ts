@@ -18,6 +18,7 @@ export function buildPlayer(id: string, overrides: Partial<PlayerInfo> = {}): Pl
     ready: true,
     passed: false,
     isArchprelate: false,
+    isCaptainGeneral: false,
     hereticOrOrthodox: "orthodox",
     heresyTracker: 0, // actual game starting value (playerSetup.ts)
     prisoners: 0,
@@ -157,6 +158,7 @@ export function buildInitialG(
     infidelFleet: null,
     gameLog: [],
     currentRebellion: null,
+    currentInvasion: null,
     pendingDeal: undefined,
     eventState: {
       deck: [],

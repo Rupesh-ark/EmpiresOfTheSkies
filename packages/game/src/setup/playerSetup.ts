@@ -50,6 +50,7 @@ export const buildPlayerInfoMap = (ctx: Ctx): { [id: string]: PlayerInfo } => {
         smugglerGoodChoice: undefined,
       },
       isArchprelate: playerID === ctx.playOrder[ctx.playOrder.length - 1],
+      isCaptainGeneral: false,
       playerBoardCounsellorLocations: {
         buildSkyships: false,
         conscriptLevies: false,
