@@ -7,6 +7,7 @@ import {
   getBattleEventTarget,
   EVENT_CARD_DEFS,
 } from "../../helpers/eventCardDefinitions";
+import { logEvent } from "../../helpers/stateUtils";
 import { EventsAPI } from "boardgame.io/dist/types/src/plugins/events/events";
 import { RandomAPI } from "boardgame.io/dist/types/src/plugins/random/random";
 import { Ctx } from "boardgame.io/dist/types/src/types";
@@ -67,6 +68,7 @@ const chooseEventCard: Move<MyGameState> = (
         resolveEventCard(card, G, ctx.playOrder);
       }
       G.eventState.resolvedEvent = card;
+      logEvent(G, `Event: ${def.displayName} \u2014 ${def.description}`);
 
       // All other chosen cards go back to deck
       for (let i = 0; i < shuffled.length; i++) {
@@ -76,6 +78,7 @@ const chooseEventCard: Move<MyGameState> = (
       // All void — no event this round, all cards return to deck
       returnToDeck.push(...shuffled);
       G.eventState.resolvedEvent = null;
+      logEvent(G, "No event was resolved this round (all void)");
     }
 
     // Return unused cards to deck and shuffle

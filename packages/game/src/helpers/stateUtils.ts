@@ -117,6 +117,10 @@ export const addLevyAmount = (
   G.playerInfo[playerID].resources.levies += levyAmount;
 };
 
+export const logEvent = (G: MyGameState, message: string) => {
+  G.gameLog.push({ round: G.round, message });
+};
+
 export const advanceAllHeresyTrackers = (G: MyGameState) => {
   Object.values(G.playerInfo).forEach((player) => {
     increaseHeresyWithinMove(G, player.id);

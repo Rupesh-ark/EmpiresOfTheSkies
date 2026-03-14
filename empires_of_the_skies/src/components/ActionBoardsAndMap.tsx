@@ -35,10 +35,13 @@ import RetrieveFleetsDialog from "./Resolution/RetrieveFleetsDialog";
 import PlayerTable from "./PlayerTable/PlayerTable";
 import HeresyTracker from "./PlayerTable/HeresyTracker";
 import { generalTheme } from "./themes";
-import { Campaign, ChatBubble, Close, Dashboard, Map, MenuBook, Person, TableChart } from "@mui/icons-material";
+import { Campaign, ChatBubble, Close, Dashboard, Map, MenuBook, Person, TableChart, Timeline } from "@mui/icons-material";
 import PickLegacyCardDialog from "./PickLegacyCardDialog";
 import PickKingdomAdvantageCardDialog from "./PickKingdomAdvantageCardDialog";
 import PickEventCardDialog from "./PickEventCardDialog";
+import RoundSummaryDialog from "./RoundSummaryDialog";
+import NprKingdomTable from "./PlayerTable/NprKingdomTable";
+import GameLog from "./GameLog";
 import GameOverView from "./GameOverView";
 import LootValueTable from "./PlayerTable/LootValueTable";
 
@@ -105,6 +108,7 @@ export const ActionBoardsAndMap = (props: MyGameProps) => {
                 <Tab icon={<Tooltip title="World Map" placement="left"><Map sx={{ color: kingdomColour }} /></Tooltip>} value={"2"} sx={tabSx} />
                 <Tab icon={<Tooltip title="Player Table" placement="left"><TableChart sx={{ color: kingdomColour }} /></Tooltip>} value={"3"} sx={tabSx} />
                 <Tab icon={<Tooltip title="Rules" placement="left"><MenuBook sx={{ color: kingdomColour }} /></Tooltip>} value={"4"} sx={tabSx} />
+                <Tab icon={<Tooltip title="Game Log" placement="left"><Timeline sx={{ color: kingdomColour }} /></Tooltip>} value={"5"} sx={tabSx} />
               </Tabs>
               </Box>
               <Box sx={{ flexGrow: 1 }}>
@@ -151,11 +155,15 @@ export const ActionBoardsAndMap = (props: MyGameProps) => {
                       </Box>
                       <HeresyTracker {...props} />
                       <PlayerTable {...props} />
+                      <NprKingdomTable {...props} />
                       <LootValueTable {...props} />
                     </Box>
                   </TabPanel>
                   <TabPanel value={"4"} tabIndex={4} sx={{ p: 0 }}>
                     <RulesReference />
+                  </TabPanel>
+                  <TabPanel value={"5"} tabIndex={5} sx={{ p: 0 }}>
+                    <GameLog {...props} />
                   </TabPanel>
                 </Suspense>
               </Box>
@@ -205,6 +213,7 @@ export const ActionBoardsAndMap = (props: MyGameProps) => {
             </Box>
           </Box>
 
+          <RoundSummaryDialog {...props} />
           {props.ctx.phase === "kingdom_advantage" && (
             <PickKingdomAdvantageCardDialog {...props} />
           )}

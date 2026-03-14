@@ -19,6 +19,7 @@ import {
   removeVPAmount,
   increaseHeresyWithinMove,
   increaseOrthodoxyWithinMove,
+  logEvent,
 } from "./stateUtils";
 import { drawFortuneOfWarCard } from "./helpers";
 import {
@@ -53,21 +54,20 @@ export const checkForInvasion = (G: MyGameState): void => {
   const drawn = G.infidelHostPool.pop()!;
 
   if (drawn.isFleet) {
-    // Infidel Fleet placed at Infidel Empire, active
     G.infidelFleet = {
       counter: drawn,
       location: [...INFIDEL_EMPIRE_LOCATION] as [number, number],
       active: true,
     };
-    console.log("Infidel Fleet drawn — placed at Infidel Empire");
-    // Fleet also accumulates for invasion purposes
+    logEvent(G, "Infidel Fleet drawn \u2014 placed at Infidel Empire");
     G.accumulatedHosts.push(drawn);
   } else {
+    logEvent(G, `Infidel Host drawn: ${drawn.swords} Swords`);
     G.accumulatedHosts.push(drawn);
   }
 
   if (drawn.isInvasionTrigger) {
-    console.log("Invasion trigger drawn! Grand Army of the Faith is raised.");
+    logEvent(G, "INVASION TRIGGERED! Grand Army of the Faith is raised!");
     resolveGrandArmyBattle(G);
   }
 };
@@ -162,10 +162,15 @@ const resolveGrandArmyBattle = (G: MyGameState): void => {
   const grandArmyWins = hitsOnInfidel >= infidelSwords;
 
   // ── 6. Apply outcomes ──
+  const captainKingdom = G.playerInfo[captainGeneral].kingdomName;
+  logEvent(G, `Captain-General: ${captainKingdom} | Grand Army: ${grandArmySwords}S vs Infidel: ${infidelSwords}S`);
+
   if (grandArmyWins) {
+    logEvent(G, "Grand Army of the Faith is victorious!");
     applyVictoryRewards(G, captainGeneral, sorted, turnOrder);
   } else {
     const remainingHostStrength = infidelSwords - hitsOnInfidel;
+    logEvent(G, `Grand Army defeated! Buy-off cost: ${remainingHostStrength} Gold`);
     applyDefeatPenalties(
       G,
       captainGeneral,

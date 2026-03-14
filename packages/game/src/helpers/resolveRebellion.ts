@@ -14,6 +14,7 @@ import {
   addVPAmount,
   increaseHeresyWithinMove,
   increaseOrthodoxyWithinMove,
+  logEvent,
 } from "./stateUtils";
 import { drawFortuneOfWarCard } from "./helpers";
 import { CARD_RESOLVERS, resolveCardWithAlignmentPenalty } from "./legacyCardDefinitions";
@@ -203,6 +204,8 @@ export const resolveRebellionEvent = (
     return;
   }
   const counterSwords = G.contingentPool.pop()!;
+  const kingdom = G.playerInfo[targetPlayerID].kingdomName;
+  logEvent(G, `Rebellion in ${kingdom}! Rebel force: ${counterSwords} swords`);
 
   const player = G.playerInfo[targetPlayerID];
 
@@ -212,6 +215,7 @@ export const resolveRebellionEvent = (
 
   // If no troops committed, rebels auto-win
   if (defenderRegiments === 0 && defenderLevies === 0) {
+    logEvent(G, `${kingdom} has no troops \u2014 rebels win automatically`);
     applyOutcome(G, card, targetPlayerID, false, counterSwords, targetTile);
     returnCounter(G, card, false, counterSwords);
     return;
@@ -242,6 +246,11 @@ export const resolveRebellionEvent = (
   if (hitsOnDefender > 0) {
     applyTroopLosses(G, targetPlayerID, hitsOnDefender);
   }
+
+  logEvent(G, defenderWins
+    ? `${kingdom} defeats the rebels!`
+    : `Rebels overwhelm ${kingdom}'s defenders!`
+  );
 
   // Apply per-card outcome
   applyOutcome(G, card, targetPlayerID, defenderWins, counterSwords, targetTile);

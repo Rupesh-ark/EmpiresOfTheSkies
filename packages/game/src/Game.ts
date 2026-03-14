@@ -165,6 +165,7 @@ const MyGame: Game<MyGameState> = {
       infidelHostPool,
       accumulatedHosts: [],
       infidelFleet: null,
+      gameLog: [],
       pendingDeal: undefined,
       eventState: {
         deck: eventDeck,

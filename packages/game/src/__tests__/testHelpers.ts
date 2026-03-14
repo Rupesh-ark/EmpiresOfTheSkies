@@ -155,6 +155,7 @@ export function buildInitialG(
     infidelHostPool: [],
     accumulatedHosts: [],
     infidelFleet: null,
+    gameLog: [],
     pendingDeal: undefined,
     eventState: {
       deck: [],
