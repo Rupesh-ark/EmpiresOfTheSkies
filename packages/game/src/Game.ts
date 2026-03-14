@@ -74,7 +74,8 @@ import pickKingdomAdvantageCard from "./moves/kingdomAdvantage/pickKingdomAdvant
 import chooseEventCard from "./moves/events/chooseEventCard";
 import resolveEventChoice from "./moves/events/resolveEventChoice";
 import { ALL_EVENT_CARD_NAMES } from "./helpers/eventCardDefinitions";
-import { resolveRebellionEvent } from "./helpers/resolveRebellion";
+import { resolveRebellionEvent, setupNextRebellion } from "./helpers/resolveRebellion";
+import commitRebellionTroops from "./moves/events/commitRebellionTroops";
 import { checkForInvasion } from "./helpers/resolveInvasion";
 import { logEvent } from "./helpers/stateUtils";
 import { resolveDeferredBattle } from "./helpers/resolveDeferredBattles";
@@ -170,6 +171,7 @@ const MyGame: Game<MyGameState> = {
       accumulatedHosts: [],
       infidelFleet: null,
       gameLog: [],
+      currentRebellion: null,
       pendingDeal: undefined,
       eventState: {
         deck: eventDeck,
@@ -229,6 +231,7 @@ const MyGame: Game<MyGameState> = {
     setTurnCompleteFalse,
     chooseEventCard,
     resolveEventChoice,
+    commitRebellionTroops,
   },
   phases: {
     kingdom_advantage: {
@@ -518,35 +521,45 @@ const MyGame: Game<MyGameState> = {
       next: "resolution",
     },
     resolution: {
-      turn: { order: TurnOrder.ONCE },
+      turn: { order: TurnOrder.CUSTOM_FROM("turnOrder") },
       onBegin: (context) => {
         console.log("resolution phase has begun");
 
         // Infidel Fleet: reactivate, target, move, aerial combat
         resolveInfidelFleet(context.G);
 
-        // Resolve pending deferred events (rebellions, conquests)
+        // Auto-resolve non-rebellion deferred events
         const pending = context.G.eventState.deferredEvents;
-        while (pending.length > 0) {
-          const event = pending.shift()!;
-          const isRebellion = event.card.endsWith("_rebellion");
-          if (isRebellion) {
-            resolveRebellionEvent(context.G, event);
-          } else {
-            resolveDeferredBattle(context.G, event);
-          }
+        const nonRebellions = pending.filter(
+          (e) => !e.card.endsWith("_rebellion")
+        );
+        for (const event of nonRebellions) {
+          resolveDeferredBattle(context.G, event);
         }
+        context.G.eventState.deferredEvents = pending.filter((e) =>
+          e.card.endsWith("_rebellion")
+        );
 
-        // Check for Infidel Invasion (draw Host counter, trigger if up-arrow)
-        checkForInvasion(context.G);
+        // Check if any rebellions need interactive resolution
+        const hasRebellions = context.G.eventState.deferredEvents.length > 0;
 
-        context.G.stage = "retrieve fleets";
+        if (hasRebellions && setupNextRebellion(context.G)) {
+          // Interactive rebellion — target player gets a turn
+          context.G.stage = "rebellion";
+          context.events.endTurn({
+            next: context.G.currentRebellion!.event.targetPlayerID,
+          });
+        } else {
+          // No rebellions — proceed normally
+          checkForInvasion(context.G);
+          context.G.stage = "retrieve fleets";
+        }
       },
       onEnd: (context) => {
         resolveRound(context.G, context.events, context.random);
         console.log(`Round number:${context.G.round}`);
       },
-      moves: { retrieveFleets },
+      moves: { retrieveFleets, commitRebellionTroops },
       next: "reset",
     },
     reset: {

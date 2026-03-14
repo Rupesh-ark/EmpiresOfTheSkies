@@ -10,6 +10,7 @@ import {
   HERESY_MIN,
 } from "./stateUtils";
 import { CARD_RESOLVERS, resolveCardWithAlignmentPenalty } from "./legacyCardDefinitions";
+import { hasAnyOutpost, hasAnyColony } from "./helpers";
 
 // ── Card metadata ────────────────────────────────────────────────────────────
 
@@ -239,26 +240,6 @@ const hasPlayerFleetsOnTiles = (
         )
     )
   );
-
-/** Check if any colony exists on the map */
-const hasAnyColony = (G: MyGameState): boolean => {
-  for (const row of G.mapState.buildings) {
-    for (const tile of row) {
-      if (tile.buildings === "colony") return true;
-    }
-  }
-  return false;
-};
-
-/** Check if any outpost exists on the map */
-const hasAnyOutpost = (G: MyGameState): boolean => {
-  for (const row of G.mapState.buildings) {
-    for (const tile of row) {
-      if (tile.buildings === "outpost" && tile.player) return true;
-    }
-  }
-  return false;
-};
 
 /** Check if any land tile has been discovered */
 const hasDiscoveredLand = (G: MyGameState): boolean => {

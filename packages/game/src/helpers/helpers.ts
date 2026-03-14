@@ -160,6 +160,71 @@ export const drawFortuneOfWarCard = (G: MyGameState): FortuneOfWarCardInfo => {
   return card;
 };
 
+// ── Tile query helpers ────────────────────────────────────────────────────────
+// Reusable functions for checking tile state. All accept optional playerID
+// to scope the check to a specific player.
+// TODO: Add hasSettlementAt / hasAnySettlement if a new building type is
+// introduced that should count alongside outposts and colonies.
+
+/** Check if a tile has a fort (optionally owned by a specific player) */
+export const hasFortAt = (
+  G: MyGameState,
+  x: number,
+  y: number,
+  playerID?: string
+): boolean => {
+  const tile = G.mapState.buildings[y]?.[x];
+  if (!tile?.fort) return false;
+  if (playerID && tile.player?.id !== playerID) return false;
+  return true;
+};
+
+/** Check if a tile has an outpost (optionally owned by a specific player) */
+export const hasOutpostAt = (
+  G: MyGameState,
+  x: number,
+  y: number,
+  playerID?: string
+): boolean => {
+  const tile = G.mapState.buildings[y]?.[x];
+  if (tile?.buildings !== "outpost") return false;
+  if (playerID && tile.player?.id !== playerID) return false;
+  return true;
+};
+
+/** Check if a tile has a colony (optionally owned by a specific player) */
+export const hasColonyAt = (
+  G: MyGameState,
+  x: number,
+  y: number,
+  playerID?: string
+): boolean => {
+  const tile = G.mapState.buildings[y]?.[x];
+  if (tile?.buildings !== "colony") return false;
+  if (playerID && tile.player?.id !== playerID) return false;
+  return true;
+};
+
+/** Check if any outpost exists on the map (optionally owned by a specific player) */
+export const hasAnyOutpost = (G: MyGameState, playerID?: string): boolean => {
+  for (let y = 0; y < G.mapState.buildings.length; y++) {
+    for (let x = 0; x < G.mapState.buildings[y].length; x++) {
+      if (hasOutpostAt(G, x, y, playerID)) return true;
+    }
+  }
+  return false;
+};
+
+/** Check if any colony exists on the map (optionally owned by a specific player) */
+export const hasAnyColony = (G: MyGameState, playerID?: string): boolean => {
+  for (let y = 0; y < G.mapState.buildings.length; y++) {
+    for (let x = 0; x < G.mapState.buildings[y].length; x++) {
+      if (hasColonyAt(G, x, y, playerID)) return true;
+    }
+  }
+  return false;
+};
+
 export const checkIfCurrentPlayerIsInCurrentBattle = (
   G: MyGameState,
   ctx: Ctx,

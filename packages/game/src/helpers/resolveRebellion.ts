@@ -16,7 +16,7 @@ import {
   increaseOrthodoxyWithinMove,
   logEvent,
 } from "./stateUtils";
-import { drawFortuneOfWarCard } from "./helpers";
+import { drawFortuneOfWarCard, hasFortAt } from "./helpers";
 import { CARD_RESOLVERS, resolveCardWithAlignmentPenalty } from "./legacyCardDefinitions";
 
 // ── Battle math ──────────────────────────────────────────────────────────────
@@ -221,15 +221,14 @@ export const resolveRebellionEvent = (
     return;
   }
 
-  // Check for fort (at colony for Colonial, at Kingdom for others)
-  let hasFort = false;
+  // Check for fort
+  let fortPresent = false;
   if (card === "colonial_rebellion" && targetTile) {
-    const [x, y] = targetTile;
-    hasFort = G.mapState.buildings[y][x].fort;
+    fortPresent = hasFortAt(G, targetTile[0], targetTile[1]);
   }
   // TODO: Check for fort at Kingdom location for other rebellions
 
-  // Simulate FoW card draws for both sides
+  // TODO: Replace simulated FoW draws with player FoW card selection
   const fowRebel = drawFortuneOfWarCard(G);
   const fowDefender = drawFortuneOfWarCard(G);
 
@@ -237,7 +236,7 @@ export const resolveRebellionEvent = (
     counterSwords,
     defenderRegiments,
     defenderLevies,
-    hasFort,
+    fortPresent,
     fowRebel,
     fowDefender
   );
@@ -299,4 +298,89 @@ const returnCounter = (
     return;
   }
   G.contingentPool.push(counterSwords);
+};
+
+// ── Interactive rebellion helpers ─────────────────────────────────────────────
+
+/**
+ * Find the next rebellion in deferredEvents, draw a contingent counter,
+ * and set G.currentRebellion. Returns true if a rebellion was set up,
+ * false if no rebellions remain.
+ */
+export const setupNextRebellion = (G: MyGameState): boolean => {
+  const idx = G.eventState.deferredEvents.findIndex((e) =>
+    e.card.endsWith("_rebellion")
+  );
+  if (idx === -1) return false;
+
+  const event = G.eventState.deferredEvents.splice(idx, 1)[0];
+
+  if (G.contingentPool.length === 0) {
+    logEvent(G, "No contingent counters left \u2014 rebellion cannot occur");
+    return false;
+  }
+
+  const counterSwords = G.contingentPool.pop()!;
+  const kingdom = G.playerInfo[event.targetPlayerID].kingdomName;
+  logEvent(G, `Rebellion in ${kingdom}! Rebel force: ${counterSwords} swords`);
+
+  G.currentRebellion = { event, counterSwords };
+  return true;
+};
+
+/**
+ * Resolve a rebellion with the player's chosen troop commitment.
+ * Called from the commitRebellionTroops move.
+ */
+export const resolveRebellionWithTroops = (
+  G: MyGameState,
+  rebellion: { event: DeferredEvent; counterSwords: number },
+  regiments: number,
+  levies: number
+): void => {
+  const { event, counterSwords } = rebellion;
+  const { card, targetPlayerID, targetTile } = event;
+  const kingdom = G.playerInfo[targetPlayerID].kingdomName;
+
+  // If no troops committed, rebels auto-win
+  if (regiments === 0 && levies === 0) {
+    logEvent(G, `${kingdom} surrenders \u2014 rebels win automatically`);
+    applyOutcome(G, card, targetPlayerID, false, counterSwords, targetTile);
+    returnCounter(G, card, false, counterSwords);
+    return;
+  }
+
+  // Check for fort
+  let fortPresent = false;
+  if (card === "colonial_rebellion" && targetTile) {
+    fortPresent = hasFortAt(G, targetTile[0], targetTile[1]);
+  }
+
+  // TODO: Replace simulated FoW draws with player FoW card selection
+  const fowRebel = drawFortuneOfWarCard(G);
+  const fowDefender = drawFortuneOfWarCard(G);
+
+  const { defenderWins, hitsOnDefender } = calculateBattle(
+    counterSwords,
+    regiments,
+    levies,
+    fortPresent,
+    fowRebel,
+    fowDefender
+  );
+
+  // Apply troop losses — remove from player's kingdom resources
+  if (hitsOnDefender > 0) {
+    applyTroopLosses(G, targetPlayerID, hitsOnDefender);
+  }
+
+  logEvent(
+    G,
+    defenderWins
+      ? `${kingdom} defeats the rebels!`
+      : `Rebels overwhelm ${kingdom}'s defenders!`
+  );
+
+  applyOutcome(G, card, targetPlayerID, defenderWins, counterSwords, targetTile);
+  returnCounter(G, card, defenderWins, counterSwords);
 };

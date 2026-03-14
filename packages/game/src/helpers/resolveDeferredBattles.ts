@@ -13,7 +13,7 @@
 
 import { MyGameState, DeferredEvent } from "../types";
 import { addVPAmount, logEvent } from "./stateUtils";
-import { drawFortuneOfWarCard } from "./helpers";
+import { drawFortuneOfWarCard, hasFortAt } from "./helpers";
 
 /**
  * Auto-resolve Faerie Uprising.
@@ -38,7 +38,7 @@ const resolveFaerieUprising = (G: MyGameState, event: DeferredEvent): void => {
   const defRegiments = tile.garrisonedRegiments;
   const defLevies = tile.garrisonedLevies;
   const defSwords = defRegiments * 2 + defLevies;
-  const defShields = tile.fort ? defRegiments + defLevies : 0;
+  const defShields = hasFortAt(G, x, y) ? defRegiments + defLevies : 0;
 
   // Simulated FoW draws
   const fowLand = drawFortuneOfWarCard(G);
@@ -148,7 +148,7 @@ const resolveInfidelsInvadeFaerie = (G: MyGameState, event: DeferredEvent): void
   const defRegiments = tile.garrisonedRegiments;
   const defLevies = tile.garrisonedLevies;
   const defSwords = defRegiments * 2 + defLevies;
-  const defShields = tile.fort ? defRegiments + defLevies : 0;
+  const defShields = hasFortAt(G, x, y) ? defRegiments + defLevies : 0;
 
   // Simulated FoW draws
   const fowHost = drawFortuneOfWarCard(G);

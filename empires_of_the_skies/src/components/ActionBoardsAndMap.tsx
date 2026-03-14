@@ -40,6 +40,7 @@ import PickLegacyCardDialog from "./PickLegacyCardDialog";
 import PickKingdomAdvantageCardDialog from "./PickKingdomAdvantageCardDialog";
 import PickEventCardDialog from "./PickEventCardDialog";
 import EventChoiceDialog from "./EventChoiceDialog";
+import RebellionDialog from "./RebellionDialog";
 import RoundSummaryDialog from "./RoundSummaryDialog";
 import NprKingdomTable from "./PlayerTable/NprKingdomTable";
 import GameLog from "./GameLog";
@@ -292,6 +293,9 @@ export const ActionBoardsAndMap = (props: MyGameProps) => {
             <GarrisonTroopsDialog {...props} />
           )}
           {props.G.stage === "conquest" && <OutpostOrColonyDialog {...props} />}
+          {props.G.stage === "rebellion" && (
+            <RebellionDialog {...props} />
+          )}
           {props.G.stage === "retrieve fleets" && (
             <RetrieveFleetsDialog {...props} />
           )}

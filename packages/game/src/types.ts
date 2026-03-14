@@ -40,6 +40,7 @@ export interface MyGameState {
     | "resolve ground battle"
     | "garrison troops"
     | "retrieve fleets"
+    | "rebellion"
     | "pick legacy card"
     | "taxes"
     | "events"
@@ -64,6 +65,10 @@ export interface MyGameState {
     destroyed: boolean;
   } | null;
   eventState: EventState;
+  currentRebellion: {
+    event: DeferredEvent;
+    counterSwords: number;
+  } | null;
 }
 
 export type BattleState = {

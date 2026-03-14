@@ -156,6 +156,7 @@ export function buildInitialG(
     accumulatedHosts: [],
     infidelFleet: null,
     gameLog: [],
+    currentRebellion: null,
     pendingDeal: undefined,
     eventState: {
       deck: [],
