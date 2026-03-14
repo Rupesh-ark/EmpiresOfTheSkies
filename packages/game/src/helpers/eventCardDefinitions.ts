@@ -836,12 +836,69 @@ export const getBattleEventTarget = (
         : null;
     }
 
-    // TODO: Implement targeting for these non-rebellion battle events
-    case "faerie_uprising":
-    case "headstrong_commander":
-    case "infidels_invade_faerie":
-      console.log(`${card}: targeting not yet implemented`);
+    case "faerie_uprising": {
+      // Target: player with colony in the strongest Land yet conquered
+      let maxStrength = 0;
+      let target: { playerID: string; tile: [number, number] } | null = null;
+      for (let y = 0; y < G.mapState.buildings.length; y++) {
+        for (let x = 0; x < G.mapState.buildings[y].length; x++) {
+          const tile = G.mapState.buildings[y][x];
+          if (tile.buildings === "colony" && tile.player) {
+            const land = G.mapState.currentTileArray[y][x];
+            if (land.sword > maxStrength) {
+              maxStrength = land.sword;
+              target = { playerID: tile.player.id, tile: [x, y] };
+            }
+          }
+        }
+      }
+      return target
+        ? { card, targetPlayerID: target.playerID, targetTile: target.tile }
+        : null;
+    }
+
+    case "headstrong_commander": {
+      // Target: player with outpost in weakest claimed Land that has fleet/regiments
+      let minStrength = Infinity;
+      let target: { playerID: string; tile: [number, number] } | null = null;
+      for (let y = 0; y < G.mapState.buildings.length; y++) {
+        for (let x = 0; x < G.mapState.buildings[y].length; x++) {
+          const tile = G.mapState.buildings[y][x];
+          if (
+            tile.buildings === "outpost" &&
+            tile.player &&
+            (tile.garrisonedRegiments > 0 || tile.garrisonedLevies > 0)
+          ) {
+            const land = G.mapState.currentTileArray[y][x];
+            if (land.sword < minStrength) {
+              minStrength = land.sword;
+              target = { playerID: tile.player.id, tile: [x, y] };
+            }
+          }
+        }
+      }
+      return target
+        ? { card, targetPlayerID: target.playerID, targetTile: target.tile }
+        : null;
+    }
+
+    case "infidels_invade_faerie": {
+      // Target: fewest VP player chooses a colony/outpost
+      // Auto-pick: first colony/outpost found
+      const targetID = playerWithFewestVP(G, turnOrder);
+      for (let y = 0; y < G.mapState.buildings.length; y++) {
+        for (let x = 0; x < G.mapState.buildings[y].length; x++) {
+          const tile = G.mapState.buildings[y][x];
+          if (
+            tile.player?.id === targetID &&
+            (tile.buildings === "outpost" || tile.buildings === "colony")
+          ) {
+            return { card, targetPlayerID: targetID, targetTile: [x, y] };
+          }
+        }
+      }
       return null;
+    }
 
     default:
       return null;

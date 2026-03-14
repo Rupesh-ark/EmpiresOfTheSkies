@@ -75,6 +75,8 @@ import chooseEventCard from "./moves/events/chooseEventCard";
 import { ALL_EVENT_CARD_NAMES } from "./helpers/eventCardDefinitions";
 import { resolveRebellionEvent } from "./helpers/resolveRebellion";
 import { checkForInvasion } from "./helpers/resolveInvasion";
+import { logEvent } from "./helpers/stateUtils";
+import { resolveDeferredBattle } from "./helpers/resolveDeferredBattles";
 
 const MyGame: Game<MyGameState> = {
   turn: { minMoves: 1 },
@@ -320,7 +322,7 @@ const MyGame: Game<MyGameState> = {
 
         // Peasant REBELLION loss: skip taxes this round
         if (context.G.eventState.skipTaxesNextRound) {
-          console.log("Taxes skipped due to Peasant Rebellion");
+          logEvent(context.G, "Taxes skipped due to Peasant Rebellion");
           context.G.eventState.skipTaxesNextRound = false;
           context.events.endPhase();
           return;
@@ -334,6 +336,7 @@ const MyGame: Game<MyGameState> = {
           }
           context.G.playerInfo[id].resources.gold += Math.max(0, income);
         });
+        logEvent(context.G, `Taxes collected${taxMod !== 0 ? ` (modifier: ${taxMod > 0 ? "+" : ""}${taxMod})` : ""}`);
         context.events.endPhase();
       },
       moves: {},
@@ -522,9 +525,9 @@ const MyGame: Game<MyGameState> = {
           const isRebellion = event.card.endsWith("_rebellion");
           if (isRebellion) {
             resolveRebellionEvent(context.G, event);
+          } else {
+            resolveDeferredBattle(context.G, event);
           }
-          // TODO: Resolve faerie_uprising, headstrong_commander,
-          // infidels_invade_faerie here when implemented
         }
 
         // Check for Infidel Invasion (draw Host counter, trigger if up-arrow)

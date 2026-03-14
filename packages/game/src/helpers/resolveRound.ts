@@ -3,7 +3,7 @@ import { RandomAPI } from "boardgame.io/dist/types/src/plugins/random/random";
 import { MyGameState, GoodKey } from "../types";
 import legacyResolutions from "./legacyResolutions";
 import { enactPiracy } from "./piracy";
-import { removeVPAmount } from "./stateUtils";
+import { removeVPAmount, logEvent } from "./stateUtils";
 import { FINAL_ROUND_GOLD_PER_VP, DEBT_PENALTY_DIVISOR, TRADE_VP_SCHEDULE } from "../codifiedGameInfo";
 
 const ALL_GOODS: GoodKey[] = ["mithril", "dragonScales", "krakenSkin", "magicDust", "stickyIchor", "pipeweed"];
@@ -47,7 +47,9 @@ const palaceBonus = (G: MyGameState) => {
   if (playersWithMost.length > 1) return;
 
   const secondHighest = Math.max(...counts.filter((c) => c !== highest), 0);
-  playersWithMost[0].resources.victoryPoints += highest - secondHighest;
+  const bonus = highest - secondHighest;
+  playersWithMost[0].resources.victoryPoints += bonus;
+  logEvent(G, `Palace bonus: ${playersWithMost[0].kingdomName} +${bonus} VP`);
 };
 
 // D3: only players with ≥1 outpost or colony are eligible for trade VP ranking
@@ -80,6 +82,9 @@ const scoreHeresyTrackVP = (G: MyGameState) => {
     const h = player.heresyTracker;
     const vp = player.hereticOrOrthodox === "orthodox" ? -h : h;
     player.resources.victoryPoints += vp;
+    if (vp !== 0) {
+      logEvent(G, `Heresy VP: ${player.kingdomName} ${vp > 0 ? "+" : ""}${vp} VP`);
+    }
   });
 };
 
@@ -135,7 +140,11 @@ const resolveRound = (G: MyGameState, events: EventsAPI, random: RandomAPI) => {
   // GAP-16: VP floor enforced inside removeVPAmount
   Object.values(G.playerInfo).forEach((player) => {
     if (player.resources.gold < 0) {
-      removeVPAmount(G, player.id, Math.floor(Math.abs(player.resources.gold) / DEBT_PENALTY_DIVISOR));
+      const penalty = Math.floor(Math.abs(player.resources.gold) / DEBT_PENALTY_DIVISOR);
+      removeVPAmount(G, player.id, penalty);
+      if (penalty > 0) {
+        logEvent(G, `Debt penalty: ${player.kingdomName} -${penalty} VP`);
+      }
     }
   });
 
@@ -215,6 +224,15 @@ const resolveRound = (G: MyGameState, events: EventsAPI, random: RandomAPI) => {
         });
       }
     }
+  }
+
+  // Log trade VP results
+  if (highestTradeAmount > 0) {
+    Object.entries(tradeGainsMap).forEach(([id, amount]) => {
+      if (amount > 0) {
+        logEvent(G, `Trade: ${G.playerInfo[id].kingdomName} \u2014 ${amount} goods traded`);
+      }
+    });
   }
 
   if (G.round === G.finalRound) {

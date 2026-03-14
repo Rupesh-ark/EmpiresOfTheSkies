@@ -1,6 +1,6 @@
 import { Move } from "boardgame.io";
 import { MyGameState } from "../../types";
-import { HERESY_MIN } from "../../helpers/stateUtils";
+import { HERESY_MIN, logEvent } from "../../helpers/stateUtils";
 
 const vote: Move<MyGameState> = (
   { G, ctx, playerID, events },
@@ -126,10 +126,9 @@ const vote: Move<MyGameState> = (
           }
         });
         // Rule: floor(2 × orthodoxRealms / 3), maximum 6 VP
-        player.resources.victoryPoints += Math.min(
-          6,
-          Math.floor((2 * orthodoxRealms) / 3)
-        );
+        const electionVP = Math.min(6, Math.floor((2 * orthodoxRealms) / 3));
+        player.resources.victoryPoints += electionVP;
+        logEvent(G, `Archprelate elected: ${player.kingdomName} (+${electionVP} VP)`);
       } else player.isArchprelate = false;
     });
 
