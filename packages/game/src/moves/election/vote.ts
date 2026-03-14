@@ -47,13 +47,19 @@ const vote: Move<MyGameState> = (
 
   let votes = 0;
 
-  if (!isInfluenced) {
+  // Schism: affected players' prelates cannot participate in election
+  const schismBlocked = G.eventState.schismAffected.includes(playerID);
+
+  if (!isInfluenced && !schismBlocked) {
     votes += G.playerInfo[playerID].cathedrals;
   }
 
   Object.values(G.playerInfo).forEach((kingdom) => {
     if (kingdomsUnderOurInfluence.includes(kingdom.kingdomName)) {
-      votes += kingdom.cathedrals;
+      // Schism also blocks influenced kingdoms if the influencer is schism-affected
+      if (!G.eventState.schismAffected.includes(kingdom.id)) {
+        votes += kingdom.cathedrals;
+      }
     }
   });
 
@@ -71,6 +77,17 @@ const vote: Move<MyGameState> = (
   // GAP-7: patriarch_of_the_church KA adds +1 permanent vote
   if (G.playerInfo[playerID].resources.advantageCard === "patriarch_of_the_church") {
     votes += 1;
+  }
+
+  // Colonial Prelates: each colony adds +1 vote to its owner
+  if (G.eventState.colonialPrelatesActive) {
+    for (const row of G.mapState.buildings) {
+      for (const tile of row) {
+        if (tile.player?.id === playerID && tile.buildings === "colony") {
+          votes += 1;
+        }
+      }
+    }
   }
 
   if (G.electionResults[kingdomVotedFor]) {

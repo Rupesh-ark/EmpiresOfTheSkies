@@ -131,6 +131,7 @@ export function buildInitialG(
       fortuneOfWarCards: [...fortuneOfWarCards],
       discardedFortuneOfWarCards: [],
       kingdomAdvantagePool: [],
+      legacyDeck: [],
     },
     mapState: {
       currentTileArray: [],
@@ -150,7 +151,23 @@ export function buildInitialG(
       },
     },
     failedConquests: [],
+    contingentPool: [10, 10, 7, 7],
     pendingDeal: undefined,
+    eventState: {
+      deck: [],
+      chosenCards: [],
+      resolvedEvent: null,
+      deferredEvents: [],
+      taxModifier: 0,
+      peaceAccordActive: false,
+      schismAffected: [],
+      colonialPrelatesActive: false,
+      dynasticMarriage: null,
+      lendersRefuseCredit: [],
+      nprHeretic: [],
+      skipTaxesNextRound: false,
+      cannotConvertThisRound: [],
+    },
     ...overrides,
   };
 }

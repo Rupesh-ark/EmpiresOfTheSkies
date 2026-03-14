@@ -1,6 +1,6 @@
 import { Move } from "boardgame.io";
 import { PlayerOrder, MyGameState } from "../../types";
-import { checkCounsellorsNotZero } from "../moveValidation";
+import { validateMove } from "../moveValidation";
 import { INVALID_MOVE } from "boardgame.io/core";
 import { removeOneCounsellor } from "../../helpers/stateUtils";
 import { EventsAPI } from "boardgame.io/dist/types/src/plugins/plugin-events";
@@ -24,9 +24,7 @@ export const alterPlayerOrder: Move<MyGameState> = (
 ) => {
   const newPosition: keyof PlayerOrder = args[0] + 1;
   const playerID = ctx.currentPlayer;
-  if (checkCounsellorsNotZero(playerID, G) !== undefined) {
-    return INVALID_MOVE;
-  }
+  if (validateMove(playerID, G, { costsCounsellor: true })) return INVALID_MOVE;
   if (ctx.numPlayers < newPosition) {
     console.log("Player has chosen a position that is out of bounds");
     return INVALID_MOVE;

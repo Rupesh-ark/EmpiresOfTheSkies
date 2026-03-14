@@ -1,7 +1,7 @@
 import { Move } from "boardgame.io";
 import { MyGameState } from "../../types";
 import { INVALID_MOVE } from "boardgame.io/core";
-import { checkCounsellorsNotZero } from "../moveValidation";
+import { validateMove } from "../moveValidation";
 import { removeOneCounsellor, HERESY_MAX, HERESY_MIN } from "../../helpers/stateUtils";
 import {
   BuildingSlot,
@@ -34,9 +34,7 @@ const foundBuildings: Move<MyGameState> = (
   },
   ...args: any[]
 ) => {
-  if (checkCounsellorsNotZero(playerID, G)) {
-    return INVALID_MOVE;
-  }
+  if (validateMove(playerID, G, { costsCounsellor: true, costsGold: true })) return INVALID_MOVE;
   const value: keyof typeof G.boardState.foundBuildings = args[0] + 1;
 
   const specialisedBuildingFunctions = {

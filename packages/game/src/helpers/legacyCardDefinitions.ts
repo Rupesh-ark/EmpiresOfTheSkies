@@ -59,8 +59,20 @@ export const CARD_RESOLVERS: Record<LegacyCardName, CardResolver> = {
     return vp;
   },
 
-  // GAP-3 / BUG-3: 1 VP per trade good on tiles in active trade route
-  "the navigator": (player, G) => tradeRouteGoods(player, G),
+  // L8: 4 VP per Outpost and Colony
+  "the navigator": (player, G) => {
+    let count = 0;
+    G.mapState.buildings.forEach((row) =>
+      row.forEach((tile) => {
+        if (
+          tile.player?.id === player.id &&
+          (tile.buildings === "outpost" || tile.buildings === "colony")
+        )
+          count++;
+      })
+    );
+    return count * 4;
+  },
 
   "the great": (player, G) => {
     const count = (fn: (p: PlayerInfo) => number) => {

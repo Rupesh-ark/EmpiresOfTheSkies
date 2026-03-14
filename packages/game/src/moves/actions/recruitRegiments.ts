@@ -1,6 +1,6 @@
 import { Move } from "boardgame.io";
 import { MyGameState } from "../../types";
-import { checkCounsellorsNotZero } from "../moveValidation";
+import { validateMove } from "../moveValidation";
 import { INVALID_MOVE } from "boardgame.io/core";
 import {
   addRegiments,
@@ -28,9 +28,7 @@ const recruitRegiments: Move<MyGameState> = (
   },
   ...args: any[]
 ) => {
-  if (checkCounsellorsNotZero(playerID, G)) {
-    return INVALID_MOVE;
-  }
+  if (validateMove(playerID, G, { costsCounsellor: true, costsGold: true })) return INVALID_MOVE;
   const value: keyof typeof G.boardState.recruitRegiments = args[0] + 1;
   if (G.boardState.recruitRegiments[value] !== undefined) {
     console.log("Player has chosen an action which has already been taken");

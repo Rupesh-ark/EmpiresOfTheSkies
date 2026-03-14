@@ -5,6 +5,7 @@ import {
   removeOneCounsellor,
 } from "../../helpers/stateUtils";
 import { INVALID_MOVE } from "boardgame.io/core";
+import { validateMove } from "../moveValidation";
 import { Ctx } from "boardgame.io/dist/types/src/types";
 
 const convertMonarch: Move<MyGameState> = (
@@ -13,6 +14,11 @@ const convertMonarch: Move<MyGameState> = (
 ) => {
   const value: keyof typeof G.boardState.convertMonarch = args[0] + 1;
   const playerInfo = G.playerInfo[playerID];
+
+  if (validateMove(playerID, G, { costsGold: true })) return INVALID_MOVE;
+
+  // Orthodox/Heretic REBELLION: cannot convert back this round
+  if (G.eventState.cannotConvertThisRound.includes(playerID)) return INVALID_MOVE;
 
   if (G.boardState.convertMonarch[value] !== undefined) {
     console.log("Player has chosen a slot which is already taken");

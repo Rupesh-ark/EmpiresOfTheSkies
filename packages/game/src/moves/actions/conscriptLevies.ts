@@ -1,7 +1,7 @@
 import { Move } from "boardgame.io";
 import { MyGameState } from "../../types";
 import { INVALID_MOVE } from "boardgame.io/core";
-import { checkCounsellorsNotZero } from "../moveValidation";
+import { validateMove } from "../moveValidation";
 import {
   addLevyAmount,
   removeOneCounsellor,
@@ -15,9 +15,7 @@ const conscriptLevies: Move<MyGameState> = ({ G, playerID }, ...args: any[]) => 
     return INVALID_MOVE;
   }
 
-  if (checkCounsellorsNotZero(playerID, G) !== undefined) {
-    return INVALID_MOVE;
-  }
+  if (validateMove(playerID, G, { costsCounsellor: true })) return INVALID_MOVE;
 
   const levyAmount: number = args[0];
 

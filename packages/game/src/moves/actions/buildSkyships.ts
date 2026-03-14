@@ -1,6 +1,6 @@
 import { Move } from "boardgame.io";
 import { MyGameState } from "../../types";
-import { checkCounsellorsNotZero } from "../moveValidation";
+import { validateMove } from "../moveValidation";
 import { INVALID_MOVE } from "boardgame.io/core";
 import {
   addSkyship,
@@ -27,9 +27,7 @@ const buildSkyships: Move<MyGameState> = (
   },
   ...args: any[]
 ) => {
-  if (checkCounsellorsNotZero(playerID, G) !== undefined) {
-    return INVALID_MOVE;
-  }
+  if (validateMove(playerID, G, { costsCounsellor: true, costsGold: true })) return INVALID_MOVE;
 
   if (G.playerInfo[playerID].shipyards === 0) {
     console.log("Player tried to build skyships without having any shipyards");

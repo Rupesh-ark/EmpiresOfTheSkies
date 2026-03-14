@@ -2,7 +2,7 @@ import type { Game, Ctx } from "boardgame.io";
 
 import { LegacyCardInfo, MyGameState, MapState } from "./types";
 
-import { ALL_KA_CARDS, FINAL_ROUND, LEGACY_CARDS } from "./codifiedGameInfo";
+import { ALL_KA_CARDS, CONTINGENT_COUNTERS, EVENT_HAND_SIZE, FINAL_ROUND, LEGACY_CARDS } from "./codifiedGameInfo";
 import { initialBoardState, initialBattleMapState } from "./setup/boardSetup";
 import {
   getRandomisedMapTileArray,
@@ -71,6 +71,9 @@ import { TurnOrder } from "boardgame.io/core";
 import resolveRound from "./helpers/resolveRound";
 import pickLegacyCard from "./moves/pickLegacyCard";
 import pickKingdomAdvantageCard from "./moves/kingdomAdvantage/pickKingdomAdvantageCard";
+import chooseEventCard from "./moves/events/chooseEventCard";
+import { ALL_EVENT_CARD_NAMES } from "./helpers/eventCardDefinitions";
+import { resolveRebellionEvent } from "./helpers/resolveRebellion";
 
 const MyGame: Game<MyGameState> = {
   turn: { minMoves: 1 },
@@ -110,6 +113,26 @@ const MyGame: Game<MyGameState> = {
       }
     });
 
+    // Shuffle contingent counter pool (used for rebellions and Grand Army)
+    const contingentPool = [...CONTINGENT_COUNTERS];
+    for (let i = contingentPool.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [contingentPool[i], contingentPool[j]] = [contingentPool[j], contingentPool[i]];
+    }
+
+    // Shuffle event deck and deal EVENT_HAND_SIZE cards to each player
+    const eventDeck = [...ALL_EVENT_CARD_NAMES];
+    for (let i = eventDeck.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [eventDeck[i], eventDeck[j]] = [eventDeck[j], eventDeck[i]];
+    }
+    for (const id of ctx.playOrder) {
+      playerInfoMap[id].resources.eventCards = eventDeck.splice(
+        0,
+        EVENT_HAND_SIZE
+      );
+    }
+
     return {
       playerInfo: playerInfoMap,
       mapState: mapState,
@@ -118,6 +141,7 @@ const MyGame: Game<MyGameState> = {
         fortuneOfWarCards: fullResetFortuneOfWarCardDeck(),
         discardedFortuneOfWarCards: [],
         kingdomAdvantagePool: [...ALL_KA_CARDS],
+        legacyDeck: [],
       },
       stage: "discovery",
       electionResults: {},
@@ -129,7 +153,23 @@ const MyGame: Game<MyGameState> = {
       nprCathedrals,
       turnOrder: ctx.playOrder,
       failedConquests: [],
+      contingentPool,
       pendingDeal: undefined,
+      eventState: {
+        deck: eventDeck,
+        chosenCards: [],
+        resolvedEvent: null,
+        deferredEvents: [],
+        taxModifier: 0,
+        peaceAccordActive: false,
+        schismAffected: [],
+        colonialPrelatesActive: false,
+        dynasticMarriage: null,
+        lendersRefuseCredit: [],
+        nprHeretic: [],
+        skipTaxesNextRound: false,
+        cannotConvertThisRound: [],
+      },
     };
   },
   moves: {
@@ -169,6 +209,7 @@ const MyGame: Game<MyGameState> = {
     garrisonTroops,
     yieldToAttacker,
     setTurnCompleteFalse,
+    chooseEventCard,
   },
   phases: {
     kingdom_advantage: {
@@ -204,16 +245,23 @@ const MyGame: Game<MyGameState> = {
             player.legacyCardOptions.push(card[0]);
           }
         });
+        // Store remaining cards for Royal Succession event
+        context.G.cardDecks.legacyDeck = cards;
       },
     },
     events: {
-      turn: { order: TurnOrder.ONCE },
+      turn: {
+        order: TurnOrder.CUSTOM_FROM("turnOrder"),
+      },
       onBegin: (context) => {
         context.G.stage = "events";
+        context.G.eventState.taxModifier = 0;
+        context.G.eventState.chosenCards = [];
+        context.G.eventState.resolvedEvent = null;
+        context.G.eventState.cannotConvertThisRound = [];
         console.log("Events phase has begun");
-        context.events.endPhase();
       },
-      moves: {},
+      moves: { chooseEventCard },
       next: "discovery",
     },
     discovery: {
@@ -256,11 +304,22 @@ const MyGame: Game<MyGameState> = {
       onBegin: (context) => {
         context.G.stage = "taxes";
         console.log("Taxes phase has begun");
+
+        // Peasant REBELLION loss: skip taxes this round
+        if (context.G.eventState.skipTaxesNextRound) {
+          console.log("Taxes skipped due to Peasant Rebellion");
+          context.G.eventState.skipTaxesNextRound = false;
+          context.events.endPhase();
+          return;
+        }
+
+        const taxMod = context.G.eventState.taxModifier;
         context.ctx.playOrder.forEach((id, index) => {
-          context.G.playerInfo[id].resources.gold += getGoldIncomeForPlayer(index);
+          let income = getGoldIncomeForPlayer(index) + taxMod;
           if (context.G.playerInfo[id].resources.advantageCard === "more_efficient_taxation") {
-            context.G.playerInfo[id].resources.gold += 2;
+            income += 2;
           }
+          context.G.playerInfo[id].resources.gold += Math.max(0, income);
         });
         context.events.endPhase();
       },
@@ -442,6 +501,19 @@ const MyGame: Game<MyGameState> = {
       turn: { order: TurnOrder.ONCE },
       onBegin: (context) => {
         console.log("resolution phase has begun");
+
+        // Resolve pending rebellion events before fleet retrieval
+        const pending = context.G.eventState.deferredEvents;
+        while (pending.length > 0) {
+          const event = pending.shift()!;
+          const isRebellion = event.card.endsWith("_rebellion");
+          if (isRebellion) {
+            resolveRebellionEvent(context.G, event);
+          }
+          // TODO: Resolve faerie_uprising, headstrong_commander,
+          // infidels_invade_faerie here when implemented
+        }
+
         context.G.stage = "retrieve fleets";
       },
       onEnd: (context) => {

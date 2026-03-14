@@ -45,7 +45,7 @@ export const buildPlayerInfoMap = (ctx: Ctx): { [id: string]: PlayerInfo } => {
         eliteRegiments: 0,
         fortuneCards: [],
         advantageCard: undefined,
-        eventCards: [""],
+        eventCards: [],
         legacyCard: undefined,
         smugglerGoodChoice: undefined,
       },

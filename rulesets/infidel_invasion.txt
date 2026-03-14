@@ -1,0 +1,41 @@
+1. Infidel Host Counters (Brown)
+
+These counters represent the forces of the Infidel Empire.
+
+    Identification: The backs are solid brown with "Infidel Host" printed in white . The fronts feature a brown background with a sword icon and a number .
+
+    Stats & Shields: Ground Hosts do not have printed Shield values; they absorb hits equal to their Sword Strength alone. The only counter in this pool with a Shield is the Infidel Fleet, denoted by a black circle.
+
+    Effects: Drawn randomly to accumulate in the Infidel Empire . If an attack symbol is drawn, they invade Faithdom and players must combine forces to defeat their total Sword strength.
+
+Exact Breakdown (12 Counters):
+
+    2 -> 30 Swords (Features a up arrow icon behind the sword) 
+
+    3 -> 20 Swords 
+
+    3 -> 15 Swords 
+
+    3 -> 10 Swords 
+
+    1 -> Infidel Fleet: 15 Swords and 5 Shields (Features a balloon icon and a black circle for shields). Effect: Patrols airspace, engages in piracy against Trade Routes, and forces aerial combat.
+
+2. Contingent Counters (Rebels / Grand Army)
+
+These multi-purpose counters represent either internal uprisings or allied non-player armies.
+
+    Identification: The backs feature a purple and orange checkered/striped pattern with the word "Contingent" . The fronts have a plain white background with a sword icon and a number .
+
+    Stats & Shields: These counters do not have printed Shield values . They rely entirely on their Sword values for attack power and absorb hits equal to their printed Sword Strength.
+
+    Effects: They serve two different roles depending on the phase. During a Rebellion Event, they act as the "Rebels" internal enemy force . During an Infidel Invasion, they act as the "Grand Army" forces representing non-player realms defending Faithdom.
+
+Exact Breakdown (20 Counters):
+
+    1 -> 15 Swords 
+
+    5 -> 12 Swords 
+
+    7 -> 10 Swords 
+
+    7 -> 7 Swords

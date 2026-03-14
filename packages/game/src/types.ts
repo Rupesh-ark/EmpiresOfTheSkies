@@ -53,6 +53,8 @@ export interface MyGameState {
   nprCathedrals: Record<string, number>;
   turnOrder: string[];
   failedConquests: { playerId: string; tile: [number, number] }[];
+  contingentPool: number[];
+  eventState: EventState;
 }
 
 export type BattleState = {
@@ -70,6 +72,7 @@ export type CardDeckInfo = {
   fortuneOfWarCards: FortuneOfWarCardInfo[];
   discardedFortuneOfWarCards: FortuneOfWarCardInfo[];
   kingdomAdvantagePool: KingdomAdvantageCard[];
+  legacyDeck: LegacyCardInfo[];
 };
 
 export type FortuneOfWarCardInfo = {
@@ -115,6 +118,8 @@ export type MapBuildingInfo = {
   fort: boolean;
   garrisonedRegiments: number;
   garrisonedLevies: number;
+  /** Contingent counter occupying this colony (Colonial REBELLION loss) */
+  rebelCounter?: number;
 };
 
 export type PlayerInfo = {
@@ -184,7 +189,7 @@ export interface Resources extends TileLoot {
   fortuneCards: PlayerFortuneOfWarCardInfo[];
   advantageCard: KingdomAdvantageCard | undefined;
   eliteRegiments: number;
-  eventCards: string[];
+  eventCards: EventCardName[];
   legacyCard: LegacyCardInfo | undefined;
   smugglerGoodChoice: GoodKey | undefined;
 }
@@ -196,6 +201,62 @@ export type KingdomAdvantageCard =
   | "more_prisons"
   | "patriarch_of_the_church"
   | "sanctioned_piracy";
+
+export type EventCardName =
+  | "zeeland_turns_heretic"
+  | "venoa_turns_heretic"
+  | "treacherous_creatures"
+  | "the_great_fire"
+  | "the_faerie_plague"
+  | "schism"
+  | "royal_succession"
+  | "pretender_rebellion"
+  | "prelacy_condemned"
+  | "peace_accord_reached"
+  | "peasant_rebellion"
+  | "patrons_of_the_arts"
+  | "orthodox_rebellion"
+  | "mysterious_disappearances"
+  | "monsters_awake"
+  | "lenders_refuse_credit"
+  | "infidels_invade_faerie"
+  | "infidel_corsairs_raid"
+  | "heretic_rebellion"
+  | "headstrong_commander"
+  | "grand_infidel_dies"
+  | "faerie_uprising"
+  | "dynastic_marriage"
+  | "defence_of_the_faith"
+  | "crops_fail"
+  | "colonial_rebellion"
+  | "colonial_prelates"
+  | "bumper_crops"
+  | "archprelate_dies"
+  | "allies_in_faerie"
+  | "a_kingdom_turns_heretic";
+
+export type DeferredEvent = {
+  card: EventCardName;
+  targetPlayerID: string;
+  /** Colony tile coordinates (Colonial REBELLION only) */
+  targetTile?: [number, number];
+};
+
+export type EventState = {
+  deck: EventCardName[];
+  chosenCards: EventCardName[];
+  resolvedEvent: EventCardName | null;
+  deferredEvents: DeferredEvent[];
+  taxModifier: number;
+  peaceAccordActive: boolean;
+  schismAffected: string[];
+  colonialPrelatesActive: boolean;
+  dynasticMarriage: [string, string] | null;
+  lendersRefuseCredit: string[];
+  nprHeretic: string[];
+  skipTaxesNextRound: boolean;
+  cannotConvertThisRound: string[];
+};
 
 export type LegacyCardName =
   | "the builder"

@@ -1,6 +1,6 @@
 import { MyGameState } from "../../types";
 import { Move } from "boardgame.io";
-import { checkCounsellorsNotZero } from "../moveValidation";
+import { validateMove } from "../moveValidation";
 import { addOneCounsellor, removeGoldAmount } from "../../helpers/stateUtils";
 import { INVALID_MOVE } from "boardgame.io/core";
 import { CounsellorSlot, MAX_COUNSELLORS } from "../../codifiedGameInfo";
@@ -9,9 +9,7 @@ export const recruitCounsellors: Move<MyGameState> = (
   { G, playerID },
   ...args: any[]
 ) => {
-  if (checkCounsellorsNotZero(playerID, G)) {
-    return INVALID_MOVE;
-  }
+  if (validateMove(playerID, G, { costsCounsellor: true, costsGold: true })) return INVALID_MOVE;
 
   const value: keyof typeof G.boardState.recruitCounsellors = args[0] + 1;
   if (G.boardState.recruitCounsellors[value] !== undefined) {

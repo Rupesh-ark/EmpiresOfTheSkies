@@ -1,4 +1,4 @@
-import { FortuneOfWarCardInfo, KingdomAdvantageCard, KingdomName, LegacyCardInfo, TileInfoProps } from "./types";
+import { EventCardName, FortuneOfWarCardInfo, KingdomAdvantageCard, KingdomName, LegacyCardInfo, TileInfoProps } from "./types";
 
 // ── Game configuration ────────────────────────────────────────────────────────
 
@@ -38,6 +38,18 @@ export const BASE_PRISONERS = 3;
 export const MORE_PRISONS_BONUS = 1;
 export const PUNISH_GOLD_COST = 2;
 export const PUNISH_EXECUTE_VP_COST = 1;
+
+// ── Event cards ──────────────────────────────────────────────────────────────
+export const EVENT_HAND_SIZE = 3;
+
+// ── Contingent counters (Rebels / Grand Army) ────────────────────────────────
+// 20 counters: sword values only, no shields. Used for rebellions and invasions.
+export const CONTINGENT_COUNTERS: number[] = [
+  15,
+  12, 12, 12, 12, 12,
+  10, 10, 10, 10, 10, 10, 10,
+  7, 7, 7, 7, 7, 7, 7,
+];
 
 // ── Fortune of War ───────────────────────────────────────────────────────────
 export const FOW_CARDS_DRAWN = 2;
@@ -125,7 +137,9 @@ export const LEGACY_CARDS: LegacyCardInfo[] = [
 
 export const GAME_PHASES: { key: string; label: string }[] = [
   { key: "legacy_card",     label: "Legacy Card" },
+  { key: "events",          label: "Events" },
   { key: "discovery",       label: "Discovery" },
+  { key: "taxes",           label: "Taxes" },
   { key: "actions",         label: "Actions" },
   { key: "battle",          label: "Battle" },
   { key: "plunder_legends", label: "Plunder Legends" },

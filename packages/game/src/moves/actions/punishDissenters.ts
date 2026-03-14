@@ -1,7 +1,7 @@
 import { Move } from "boardgame.io";
 import { MyGameState } from "../../types";
 import { INVALID_MOVE } from "boardgame.io/core";
-import { checkCounsellorsNotZero } from "../moveValidation";
+import { validateMove } from "../moveValidation";
 import {
   increaseHeresyWithinMove,
   increaseOrthodoxyWithinMove,
@@ -24,9 +24,10 @@ const punishDissenters: Move<MyGameState> = (
   const value: keyof typeof G.boardState.punishDissenters = args[0] + 1;
   const paymentType: "gold" | "counsellor" | "execute" = args[1];
 
-  if (checkCounsellorsNotZero(playerID, G) !== undefined) {
-    return INVALID_MOVE;
-  }
+  if (validateMove(playerID, G, {
+    costsCounsellor: true,
+    costsGold: paymentType === "gold",
+  })) return INVALID_MOVE;
   if (value > ctx.numPlayers) {
     console.log("Player has selected a slot only available in larger games");
     return INVALID_MOVE;

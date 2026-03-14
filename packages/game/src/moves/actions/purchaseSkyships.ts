@@ -1,7 +1,7 @@
 import { Move } from "boardgame.io";
 import { MyGameState } from "../../types";
 import { INVALID_MOVE } from "boardgame.io/core";
-import { checkCounsellorsNotZero } from "../moveValidation";
+import { validateMove } from "../moveValidation";
 import {
   addSkyship,
   removeGoldAmount,
@@ -13,9 +13,7 @@ const purchaseSkyships: Move<MyGameState> = (
   slotIndex: number,
   republic: "zeeland" | "venoa"
 ) => {
-  if (checkCounsellorsNotZero(playerID, G)) {
-    return INVALID_MOVE;
-  }
+  if (validateMove(playerID, G, { costsCounsellor: true, costsGold: true })) return INVALID_MOVE;
 
   const boardSlots =
     republic === "venoa"

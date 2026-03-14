@@ -1,6 +1,6 @@
 import { Move } from "boardgame.io";
 import { MyGameState, PlayerColour } from "../../types";
-import { checkCounsellorsNotZero } from "../moveValidation";
+import { validateMove } from "../moveValidation";
 import { INVALID_MOVE } from "boardgame.io/core";
 import {
   addGoldAmount,
@@ -29,9 +29,7 @@ export const influencePrelates: Move<MyGameState> = (
 ) => {
   const value: keyof typeof G.boardState.influencePrelates = args[0] + 1;
 
-  if (checkCounsellorsNotZero(playerID, G) !== undefined) {
-    return INVALID_MOVE;
-  }
+  if (validateMove(playerID, G, { costsCounsellor: true, costsGold: true })) return INVALID_MOVE;
 
   if (G.boardState.influencePrelates[value] !== undefined) {
     console.log("Player has selected a move which has already been taken");

@@ -8,7 +8,7 @@
  *
  *   "the builder"    → +2 VP per cathedral + palace + shipyard + fort owned
  *   "the conqueror"  → +6 VP per colony
- *   "the navigator"  → +1 VP per trade good on tiles in active trade route
+ *   "the navigator"  → +4 VP per outpost and colony on the map (L8)
  *   "the great"      → +4 VP for each category where player is tied-first or first
  *   "the magnificent"→ +4 VP per palace
  *   "the merchant"   → +1 VP per trade good on tiles in active trade route
@@ -88,42 +88,22 @@ describe("Legacy Cards — the conqueror (+6 per colony)", () => {
 });
 
 // ── Navigator ─────────────────────────────────────────────────────────────────
-// Faithdom tiles: x=3,y=0 / x=4,y=0 / x=3,y=1 / x=4,y=1
-// A fleet at x=2,y=0 is adjacent to Faithdom → tile buildings[0][2] is reachable.
+// L8: 4 VP per Outpost and Colony
 
-describe("Legacy Cards — the navigator (+1 VP per trade good in active trade route)", () => {
-  it("grants 1 VP per trade good on BFS-connected tile", () => {
+describe("Legacy Cards — the navigator (+4 VP per outpost and colony)", () => {
+  it("grants 4 VP per outpost and colony on the map", () => {
     const G = setupPlayer({ name: "the navigator", colour: "purple" });
-    // Fleet at x=2,y=0 — adjacent to Faithdom (x=3,y=0)
-    G.playerInfo["0"].fleetInfo = [buildFleet(0, { location: [2, 0], skyships: 2 })];
-    // Outpost at buildings[0][2] (y=0, x=2) — same tile as fleet
     G.mapState.buildings[0][2] = { player: G.playerInfo["0"], buildings: "outpost", fort: false, garrisonedRegiments: 0, garrisonedLevies: 0 };
-    // 2 mithril + 1 dragonScales on that tile
-    G.mapState.currentTileArray[0][2] = {
-      name: "test", blocked: [], sword: 0, shield: 0, type: "land",
-      loot: {
-        outpost: { gold: 1, mithril: 2, dragonScales: 1, krakenSkin: 0, magicDust: 0, stickyIchor: 0, pipeweed: 0, victoryPoints: 0 },
-        colony: { gold: 0, mithril: 0, dragonScales: 0, krakenSkin: 0, magicDust: 0, stickyIchor: 0, pipeweed: 0, victoryPoints: 0 },
-      },
-    };
+    G.mapState.buildings[1][3] = { player: G.playerInfo["0"], buildings: "colony", fort: false, garrisonedRegiments: 0, garrisonedLevies: 0 };
+    G.mapState.buildings[2][1] = { player: G.playerInfo["0"], buildings: "outpost", fort: false, garrisonedRegiments: 0, garrisonedLevies: 0 };
     const vpBefore = G.playerInfo["0"].resources.victoryPoints;
     legacyResolutions(G);
-    // 2 mithril + 1 dragonScales = 3 trade goods → 3 VP (gold excluded)
-    expect(G.playerInfo["0"].resources.victoryPoints).toBe(vpBefore + 3);
+    // 2 outposts + 1 colony = 3 × 4 = 12 VP
+    expect(G.playerInfo["0"].resources.victoryPoints).toBe(vpBefore + 12);
   });
 
-  it("grants 0 VP when outpost is not connected to Faithdom", () => {
+  it("grants 0 VP when player has no outposts or colonies", () => {
     const G = setupPlayer({ name: "the navigator", colour: "purple" });
-    // No fleet — tile at [0][0] cannot reach Faithdom
-    G.playerInfo["0"].fleetInfo = [];
-    G.mapState.buildings[0][0] = { player: G.playerInfo["0"], buildings: "outpost", fort: false, garrisonedRegiments: 0, garrisonedLevies: 0 };
-    G.mapState.currentTileArray[0][0] = {
-      name: "test", blocked: [], sword: 0, shield: 0, type: "land",
-      loot: {
-        outpost: { gold: 0, mithril: 3, dragonScales: 0, krakenSkin: 0, magicDust: 0, stickyIchor: 0, pipeweed: 0, victoryPoints: 0 },
-        colony: { gold: 0, mithril: 0, dragonScales: 0, krakenSkin: 0, magicDust: 0, stickyIchor: 0, pipeweed: 0, victoryPoints: 0 },
-      },
-    };
     const vpBefore = G.playerInfo["0"].resources.victoryPoints;
     legacyResolutions(G);
     expect(G.playerInfo["0"].resources.victoryPoints).toBe(vpBefore);
