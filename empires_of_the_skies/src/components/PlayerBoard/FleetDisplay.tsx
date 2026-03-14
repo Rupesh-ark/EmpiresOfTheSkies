@@ -1,4 +1,3 @@
-import React from "react";
 import { FleetInfo } from "@eots/game";
 import { Box, Button, Typography } from "@mui/material";
 import { fonts } from "../../designTokens";

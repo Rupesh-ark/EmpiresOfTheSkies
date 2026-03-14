@@ -53,7 +53,7 @@ const ResourceTrackerBar = (props: ResourceTrackerBarProps) => {
   const colour = currentPlayer.colour;
   const victoryPoints = currentPlayer.resources.victoryPoints;
   const factories = currentPlayer.factories;
-  const legacyCardName = currentPlayer.resources.legacyCard ?? "the builder";
+  const legacyCardName = currentPlayer.resources.legacyCard?.name ?? "the builder";
   const advantageCard = currentPlayer.resources.advantageCard;
   const turnComplete =
     props.G.playerInfo[props.playerID ?? props.ctx.currentPlayer].turnComplete;
