@@ -175,11 +175,31 @@ export const EVENT_CARD_DEFS: Record<EventCardName, EventCardDef> = {
     description: "Monarch Opts For Religious Reform",
     isBattle: false,
   },
+  return_to_orthodoxy: {
+    displayName: "Return to Orthodoxy",
+    description: "Monarch Reverses Religious Reform",
+    isBattle: false,
+  },
 };
 
-export const ALL_EVENT_CARD_NAMES: EventCardName[] = Object.keys(
+// ── Deck composition (36 cards) ──────────────────────────────────────────────
+// Most cards have 1 copy; some have multiples per the physical game.
+const UNIQUE_CARD_NAMES: EventCardName[] = Object.keys(
   EVENT_CARD_DEFS
 ) as EventCardName[];
+
+const EXTRA_COPIES: Partial<Record<EventCardName, number>> = {
+  a_kingdom_turns_heretic: 2,   // 3 total (1 base + 2 extra)
+  infidel_corsairs_raid: 1,     // 2 total
+  infidels_invade_faerie: 1,    // 2 total
+};
+
+export const ALL_EVENT_CARD_NAMES: EventCardName[] = [
+  ...UNIQUE_CARD_NAMES,
+  ...Object.entries(EXTRA_COPIES).flatMap(([card, extra]) =>
+    Array(extra).fill(card as EventCardName)
+  ),
+];
 
 // ── Legend tile groupings (for void checks & resolvers) ──────────────────────
 
@@ -437,6 +457,10 @@ export const isEventVoid = (
       );
     }
 
+    case "return_to_orthodoxy":
+      // Void if no heretic NPR kingdom exists
+      return G.eventState.nprHeretic.length === 0;
+
     default:
       return false;
   }
@@ -616,6 +640,14 @@ export const resolveEventCard = (
       );
       if (orthodoxNPR.length > 0) {
         G.eventState.nprHeretic.push(orthodoxNPR[0]);
+      }
+      break;
+    }
+
+    case "return_to_orthodoxy": {
+      // Remove one heretic NPR kingdom (restore to orthodox)
+      if (G.eventState.nprHeretic.length > 0) {
+        G.eventState.nprHeretic.pop();
       }
       break;
     }

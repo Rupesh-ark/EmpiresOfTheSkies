@@ -241,7 +241,8 @@ export type EventCardName =
   | "bumper_crops"
   | "archprelate_dies"
   | "allies_in_faerie"
-  | "a_kingdom_turns_heretic";
+  | "a_kingdom_turns_heretic"
+  | "return_to_orthodoxy";
 
 export type InfidelHostCounter = {
   swords: number;
