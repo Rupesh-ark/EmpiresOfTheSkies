@@ -24,8 +24,10 @@ const RebellionDialog = (props: MyGameProps) => {
 
   const [regiments, setRegiments] = useState(maxRegiments);
   const [levies, setLevies] = useState(maxLevies);
+  const [selectedFoW, setSelectedFoW] = useState<number | undefined>(undefined);
 
   const totalSwords = regiments * 2 + levies;
+  const fowHand = player.resources.fortuneCards;
 
   return (
     <Dialog open maxWidth="sm" fullWidth>
@@ -91,6 +93,31 @@ const RebellionDialog = (props: MyGameProps) => {
           sx={{ mb: 2 }}
         />
 
+        {fowHand.length > 0 && (
+          <>
+            <Typography variant="subtitle2" sx={{ mb: 1 }}>
+              Play a Fortune of War card (optional)
+            </Typography>
+            <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginBottom: "16px" }}>
+              {fowHand.map((card, idx) => {
+                const label = card.sword > 0
+                  ? `${card.sword} Sword${card.sword > 1 ? "s" : ""}`
+                  : `${card.shield} Shield${card.shield > 1 ? "s" : ""}`;
+                return (
+                  <Chip
+                    key={idx}
+                    label={label}
+                    onClick={() => setSelectedFoW(selectedFoW === idx ? undefined : idx)}
+                    variant={selectedFoW === idx ? "filled" : "outlined"}
+                    color={selectedFoW === idx ? "success" : "default"}
+                    sx={{ cursor: "pointer" }}
+                  />
+                );
+              })}
+            </div>
+          </>
+        )}
+
         {totalSwords === 0 && (
           <Typography variant="body2" color="error" sx={{ mt: 1 }}>
             Committing no troops means the rebels win automatically!
@@ -108,7 +135,7 @@ const RebellionDialog = (props: MyGameProps) => {
         <Button
           variant="contained"
           color="primary"
-          onClick={() => props.moves.commitRebellionTroops(regiments, levies)}
+          onClick={() => props.moves.commitRebellionTroops(regiments, levies, selectedFoW)}
         >
           {totalSwords > 0 ? "Defend!" : "Confirm Surrender"}
         </Button>

@@ -127,13 +127,15 @@ const resolveCombat = (
   G: MyGameState,
   infidelSwords: number,
   infidelShields: number,
-  playerSkyships: number
+  playerSkyships: number,
+  playerFoWCard?: { sword: number; shield: number }
 ): FleetCombatResult => {
   const playerSwords = playerSkyships; // 1 sword per skyship
   const playerShields = playerSkyships; // 1 shield per skyship
 
   const fowInfidel = drawFortuneOfWarCard(G);
-  const fowPlayer = drawFortuneOfWarCard(G);
+  // Use player's hand card if provided, otherwise draw from deck
+  const fowPlayer = playerFoWCard ?? drawFortuneOfWarCard(G);
 
   const totalInfidelSwords = infidelSwords + fowInfidel.sword;
   const totalInfidelShields = infidelShields + fowInfidel.shield;
@@ -180,11 +182,12 @@ const applyPlayerFleetLosses = (
 // ── Main entry point ─────────────────────────────────────────────────────────
 
 /**
- * Resolve the Infidel Fleet's actions for this round.
- * Called at the start of Resolution, before rebellions and invasion.
+ * Prepare the Infidel Fleet for combat: reactivate, target, move.
+ * Returns true if there's a player fleet to fight (sets infidelFleetCombat).
+ * Returns false if no combat needed (no fleet, stays at empire for piracy).
  */
-export const resolveInfidelFleet = (G: MyGameState): void => {
-  if (!G.infidelFleet || G.infidelFleet.destroyed) return;
+export const prepareInfidelFleetCombat = (G: MyGameState): boolean => {
+  if (!G.infidelFleet || G.infidelFleet.destroyed) return false;
 
   // ── 1. Reactivate if flipped ──
   if (!G.infidelFleet.active) {
@@ -194,7 +197,7 @@ export const resolveInfidelFleet = (G: MyGameState): void => {
 
   // ── 2. Target ──
   const targetID = findTarget(G);
-  if (!targetID) return;
+  if (!targetID) return false;
 
   const targetKingdom = G.playerInfo[targetID].kingdomName;
   logEvent(G, `Infidel Fleet targets ${targetKingdom} (highest military power)`);
@@ -209,62 +212,77 @@ export const resolveInfidelFleet = (G: MyGameState): void => {
 
   if (atEmpire) {
     logEvent(G, `${targetKingdom} has no fleets on the map \u2014 Infidel Fleet remains at Infidel Empire`);
-    return; // No combat, just piracy
+    return false;
   }
 
-  // ── 4. Combat — attack each player fleet at this square (IPO order) ──
+  // Find the target's largest fleet at this square
   const [fx, fy] = destination;
-  const infidel = G.infidelFleet.counter;
-
-  for (const id of G.turnOrder) {
-    if (!G.infidelFleet.active) break; // Fleet was flipped/destroyed
-
-    for (let i = 0; i < G.playerInfo[id].fleetInfo.length; i++) {
-      if (!G.infidelFleet.active) break;
-
-      const fleet = G.playerInfo[id].fleetInfo[i];
-      if (
-        fleet.skyships <= 0 ||
-        fleet.location[0] !== fx ||
-        fleet.location[1] !== fy
-      ) {
-        continue;
-      }
-
-      const kingdom = G.playerInfo[id].kingdomName;
-      logEvent(G, `Infidel Fleet attacks ${kingdom}'s fleet (${fleet.skyships} skyships)`);
-
-      const { infidelWins, hitsOnInfidel, hitsOnPlayer } = resolveCombat(
-        G,
-        infidel.swords,
-        infidel.shields,
-        fleet.skyships
-      );
-
-      // Apply player losses
-      if (hitsOnPlayer > 0) {
-        const skyshipsLost = Math.min(hitsOnPlayer, fleet.skyships);
-        applyPlayerFleetLosses(G, id, i, skyshipsLost);
-        logEvent(G, `${kingdom} loses ${skyshipsLost} skyship(s)`);
-      }
-
-      if (infidelWins) {
-        // Infidel Fleet wins — its losses are IGNORED
-        logEvent(G, "Infidel Fleet wins \u2014 its losses are ignored");
-      } else {
-        // Infidel Fleet loses
-        if (hitsOnInfidel >= infidel.swords) {
-          // Destroyed — removed from play (kept in state for tracking)
-          logEvent(G, "Infidel Fleet destroyed!");
-          G.infidelFleet.destroyed = true;
-          G.infidelFleet.active = false;
-          return;
-        } else {
-          // Flipped inactive — no more combat, stays for piracy
-          G.infidelFleet.active = false;
-          logEvent(G, "Infidel Fleet defeated but survives \u2014 flipped inactive");
-        }
-      }
+  let bestFleetIdx = -1;
+  let bestSkyships = 0;
+  for (let i = 0; i < G.playerInfo[targetID].fleetInfo.length; i++) {
+    const fleet = G.playerInfo[targetID].fleetInfo[i];
+    if (
+      fleet.skyships > bestSkyships &&
+      fleet.location[0] === fx &&
+      fleet.location[1] === fy
+    ) {
+      bestSkyships = fleet.skyships;
+      bestFleetIdx = i;
     }
   }
+
+  if (bestFleetIdx === -1) return false;
+
+  G.infidelFleetCombat = { targetPlayerID: targetID, fleetIndex: bestFleetIdx };
+  return true;
+};
+
+/**
+ * Execute aerial combat between the Infidel Fleet and a player fleet.
+ * Called from the respondToInfidelFleet move when the player chooses "fight".
+ *
+ * @param fowCard Optional FoW card from the player's hand
+ */
+export const executeInfidelFleetCombat = (
+  G: MyGameState,
+  fowCard?: { sword: number; shield: number }
+): void => {
+  const combat = G.infidelFleetCombat;
+  if (!combat || !G.infidelFleet) return;
+
+  const { targetPlayerID, fleetIndex } = combat;
+  const fleet = G.playerInfo[targetPlayerID].fleetInfo[fleetIndex];
+  const infidel = G.infidelFleet.counter;
+  const kingdom = G.playerInfo[targetPlayerID].kingdomName;
+
+  logEvent(G, `${kingdom}'s fleet fights the Infidel Fleet (${fleet.skyships} skyships vs ${infidel.swords}S/${infidel.shields}Sh)`);
+
+  const { infidelWins, hitsOnInfidel, hitsOnPlayer } = resolveCombat(
+    G,
+    infidel.swords,
+    infidel.shields,
+    fleet.skyships,
+    fowCard
+  );
+
+  if (hitsOnPlayer > 0) {
+    const skyshipsLost = Math.min(hitsOnPlayer, fleet.skyships);
+    applyPlayerFleetLosses(G, targetPlayerID, fleetIndex, skyshipsLost);
+    logEvent(G, `${kingdom} loses ${skyshipsLost} skyship(s)`);
+  }
+
+  if (infidelWins) {
+    logEvent(G, "Infidel Fleet wins \u2014 its losses are ignored");
+  } else {
+    if (hitsOnInfidel >= infidel.swords) {
+      logEvent(G, "Infidel Fleet destroyed!");
+      G.infidelFleet.destroyed = true;
+      G.infidelFleet.active = false;
+    } else {
+      G.infidelFleet.active = false;
+      logEvent(G, "Infidel Fleet defeated but survives \u2014 flipped inactive");
+    }
+  }
+
+  G.infidelFleetCombat = null;
 };

@@ -159,6 +159,7 @@ export function buildInitialG(
     gameLog: [],
     currentRebellion: null,
     currentInvasion: null,
+    infidelFleetCombat: null,
     pendingDeal: undefined,
     eventState: {
       deck: [],

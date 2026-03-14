@@ -49,12 +49,21 @@ const contributeToGrandArmy: Move<MyGameState> = (
   );
 
   if (allContributed) {
-    // Resolve the battle
-    resolveGrandArmyBattle(G);
+    // Resolve the battle — returns buyoff cost (0 if won)
+    const buyoffCost = resolveGrandArmyBattle(G);
 
-    // Proceed to retrieve fleets
-    G.stage = "retrieve fleets";
-    events.endTurn();
+    if (buyoffCost > 0 && G.currentInvasion) {
+      // Army lost — transition to interactive buyoff
+      G.currentInvasion.phase = "buyoff";
+      G.currentInvasion.buyoffCost = buyoffCost;
+      G.currentInvasion.buyoffOffered = {};
+      G.stage = "invasion_buyoff";
+      events.endTurn({ next: ctx.playOrder[0] });
+    } else {
+      // Army won — proceed to retrieve fleets
+      G.stage = "retrieve fleets";
+      events.endTurn();
+    }
   } else {
     // Next player in IPO who hasn't contributed yet
     const nextPlayer = ctx.playOrder.find(

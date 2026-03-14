@@ -1,3 +1,80 @@
+Cards with Multiple Copies (7 Cards Total)
+
+    A Kingdom Turns Heretic: 3 copies 
+
+    Infidel Corsairs Raid: 2 copies 
+
+    Infidels Invade Faerie: 2 copies 
+
+Cards with a Single Copy (29 Cards Total)
+
+    A - C
+
+        Allies in Faerie 
+
+        Archprelate Dies 
+
+        Bumper Crops 
+
+        Colonial Prelates 
+
+        Colonial REBELLION 
+
+        Crops Fail 
+
+    D - H
+
+        Defence of the Faith 
+
+        Dynastic Marriage 
+
+        Faerie Uprising 
+
+        Grand Infidel Dies 
+
+        Headstrong Commander 
+
+        Heretic REBELLION 
+
+    L - P
+
+        Lenders Refuse Credit 
+
+        Monsters Awake 
+
+        Mysterious Disappearances 
+
+        Orthodox REBELLION 
+
+        Patrons Of The Arts 
+
+        Peace Accord Reached 
+
+        Peasant REBELLION 
+
+        Prelacy Codemned 
+
+        Pretender REBELLION 
+
+    R - Z
+
+        Return to Orthodoxy 
+
+        Royal Succession 
+
+        Schism 
+
+        The Faerie Plague 
+
+        The Great Fire 
+
+        Treacherous Creatures 
+
+        Venoa Turns Heretic 
+
+        Zeeland Turns Heretic
+
+
 Zeeland Turns Heretic
 
     Name: Zeeland Turns Heretic
@@ -14,7 +91,7 @@ Venoa Turns Heretic
 
     Name: Venoa Turns Heretic
 
-    Description: Ruling Council Opts For Religious Reform
+    Description: RuI ling Council Opts For Religious Reform
 
     VOID Condition: None
 
@@ -371,3 +448,16 @@ A Kingdom Turns Heretic
     Target: an Orthodox NPR Kingdom.
 
     Effect: Place a Heretic NPR marker (orange disc) on the chosen Kingdom, reducing the number of Orthodox Realms by one.
+
+
+Return to Orthodoxy
+
+    Name: Monarch Reverses Religious Reform
+
+    Description: Monarch Opts For Religious Reform
+
+    VOID Condition: VOID IF NO HERETIC NPR KINGDOM
+
+    Target: an Heretic NPR Kingdom.
+
+    Effect: remove a Heretic NPR marker (orange disc) from the chosen Kingdom, increasing the number of Orthodox Realms by one.

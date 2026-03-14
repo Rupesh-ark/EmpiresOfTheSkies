@@ -6,7 +6,7 @@ import {
   resolveRebellionWithTroops,
   setupNextRebellion,
 } from "../../helpers/resolveRebellion";
-import { checkForInvasion, getArchprelateForNomination } from "../../helpers/resolveInvasion";
+import { continueResolution } from "../../helpers/resolutionFlow";
 import { EventsAPI } from "boardgame.io/dist/types/src/plugins/events/events";
 import { Ctx } from "boardgame.io/dist/types/src/types";
 
@@ -30,7 +30,8 @@ const commitRebellionTroops: Move<MyGameState> = (
     events: EventsAPI;
   },
   regiments: number,
-  levies: number
+  levies: number,
+  fowCardIndex?: number
 ) => {
   const rebellion = G.currentRebellion;
   if (!rebellion) return INVALID_MOVE;
@@ -49,34 +50,42 @@ const commitRebellionTroops: Move<MyGameState> = (
     `${kingdom} commits ${regiments} regiments and ${levies} levies against the rebellion`
   );
 
-  // Resolve the battle with chosen troops
-  resolveRebellionWithTroops(G, rebellion, regiments, levies);
-
-  // Clear current rebellion
-  G.currentRebellion = null;
-
-  // Check for more rebellions
-  if (setupNextRebellion(G)) {
-    // More rebellions — transfer turn to next target
-    G.stage = "rebellion";
-    events.endTurn({ next: G.currentRebellion!.event.targetPlayerID });
-  } else {
-    // No more rebellions — check for invasion
-    const invasionTriggered = checkForInvasion(G);
-    if (invasionTriggered) {
-      const archprelate = getArchprelateForNomination(G);
-      if (archprelate) {
-        G.stage = "invasion_nominate";
-        events.endTurn({ next: archprelate });
-      } else {
-        G.stage = "retrieve fleets";
-        events.endTurn();
-      }
-    } else {
-      G.stage = "retrieve fleets";
-      events.endTurn();
-    }
+  // Pull FoW card from hand if provided
+  if (
+    fowCardIndex !== undefined &&
+    fowCardIndex >= 0 &&
+    fowCardIndex < player.resources.fortuneCards.length
+  ) {
+    const card = player.resources.fortuneCards.splice(fowCardIndex, 1)[0];
+    rebellion.fowCard = { name: card.name, sword: card.sword, shield: card.shield };
+    logEvent(G, `${kingdom} plays Fortune of War card: ${card.sword}S/${card.shield}Sh`);
   }
+
+  // Store defender's commitment for the rival support stage
+  rebellion.defenderRegiments = regiments;
+  rebellion.defenderLevies = levies;
+  rebellion.rivalContributions = {};
+
+  // If only 1 player (no rivals), resolve immediately
+  const rivals = ctx.playOrder.filter(
+    (id) => id !== rebellion.event.targetPlayerID
+  );
+  if (rivals.length === 0) {
+    resolveRebellionWithTroops(G, rebellion, regiments, levies);
+    G.currentRebellion = null;
+
+    if (setupNextRebellion(G)) {
+      G.stage = "rebellion";
+      events.endTurn({ next: G.currentRebellion!.event.targetPlayerID });
+    } else {
+      continueResolution(G, events);
+    }
+    return;
+  }
+
+  // Transition to rival support stage
+  G.stage = "rebellion_rival_support";
+  events.endTurn({ next: rivals[0] });
 };
 
 export default commitRebellionTroops;

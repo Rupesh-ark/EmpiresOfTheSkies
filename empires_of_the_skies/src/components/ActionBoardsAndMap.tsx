@@ -41,8 +41,11 @@ import PickKingdomAdvantageCardDialog from "./PickKingdomAdvantageCardDialog";
 import PickEventCardDialog from "./PickEventCardDialog";
 import EventChoiceDialog from "./EventChoiceDialog";
 import RebellionDialog from "./RebellionDialog";
+import RebellionRivalSupportDialog from "./RebellionRivalSupportDialog";
 import InvasionNominateDialog from "./InvasionNominateDialog";
 import InvasionContributeDialog from "./InvasionContributeDialog";
+import InvasionBuyoffDialog from "./InvasionBuyoffDialog";
+import InfidelFleetCombatDialog from "./InfidelFleetCombatDialog";
 import RoundSummaryDialog from "./RoundSummaryDialog";
 import NprKingdomTable from "./PlayerTable/NprKingdomTable";
 import GameLog from "./GameLog";
@@ -295,14 +298,23 @@ export const ActionBoardsAndMap = (props: MyGameProps) => {
             <GarrisonTroopsDialog {...props} />
           )}
           {props.G.stage === "conquest" && <OutpostOrColonyDialog {...props} />}
+          {props.G.stage === "infidel_fleet_combat" && (
+            <InfidelFleetCombatDialog {...props} />
+          )}
           {props.G.stage === "rebellion" && (
             <RebellionDialog {...props} />
+          )}
+          {props.G.stage === "rebellion_rival_support" && (
+            <RebellionRivalSupportDialog {...props} />
           )}
           {props.G.stage === "invasion_nominate" && (
             <InvasionNominateDialog {...props} />
           )}
           {props.G.stage === "invasion_contribute" && (
             <InvasionContributeDialog {...props} />
+          )}
+          {props.G.stage === "invasion_buyoff" && (
+            <InvasionBuyoffDialog {...props} />
           )}
           {props.G.stage === "retrieve fleets" && (
             <RetrieveFleetsDialog {...props} />

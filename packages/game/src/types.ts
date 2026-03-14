@@ -43,6 +43,9 @@ export interface MyGameState {
     | "rebellion"
     | "invasion_nominate"
     | "invasion_contribute"
+    | "invasion_buyoff"
+    | "infidel_fleet_combat"
+    | "rebellion_rival_support"
     | "pick legacy card"
     | "taxes"
     | "events"
@@ -70,11 +73,28 @@ export interface MyGameState {
   currentRebellion: {
     event: DeferredEvent;
     counterSwords: number;
+    /** Set after defender commits — used for rival support stage */
+    defenderRegiments?: number;
+    defenderLevies?: number;
+    /** FoW card chosen by defender from hand (undefined = draw from deck) */
+    fowCard?: FortuneOfWarCardInfo;
+    rivalContributions?: Record<string, {
+      side: "defender" | "rebel";
+      regiments: number;
+      levies: number;
+    }>;
   } | null;
   currentInvasion: {
     totalHostSwords: number;
     contributions: Record<string, { regiments: number; levies: number }>;
-    phase: "nominate" | "contribute";
+    phase: "nominate" | "contribute" | "buyoff";
+    buyoffCost?: number;
+    buyoffOffered?: Record<string, number>;
+  } | null;
+  /** Infidel Fleet combat: targeted player must choose fight or evade */
+  infidelFleetCombat: {
+    targetPlayerID: string;
+    fleetIndex: number;
   } | null;
 }
 

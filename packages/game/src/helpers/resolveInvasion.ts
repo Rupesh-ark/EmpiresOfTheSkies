@@ -108,9 +108,10 @@ type PlayerContribution = {
  * and the Captain-General from PlayerInfo.isCaptainGeneral.
  *
  * TODO: Replace FoW draws with player card selection.
- * TODO: Replace buy-off auto-distribution with interactive gold offers.
+ *
+ * Returns the buy-off cost if the army lost (> 0), or 0 if won.
  */
-export const resolveGrandArmyBattle = (G: MyGameState): void => {
+export const resolveGrandArmyBattle = (G: MyGameState): number => {
   const turnOrder = G.turnOrder;
   const invasion = G.currentInvasion;
   if (!invasion) return;
@@ -181,19 +182,16 @@ export const resolveGrandArmyBattle = (G: MyGameState): void => {
   const captainKingdom = G.playerInfo[captainGeneral].kingdomName;
   logEvent(G, `Captain-General: ${captainKingdom} | Grand Army: ${grandArmySwords}S vs Infidel: ${infidelSwords}S`);
 
+  let buyoffCost = 0;
+
   if (grandArmyWins) {
     logEvent(G, "Grand Army of the Faith is victorious!");
     applyVictoryRewards(G, captainGeneral, sorted, turnOrder);
   } else {
-    const remainingHostStrength = infidelSwords - hitsOnInfidel;
-    logEvent(G, `Grand Army defeated! Buy-off cost: ${remainingHostStrength} Gold`);
-    applyDefeatPenalties(
-      G,
-      captainGeneral,
-      sorted,
-      turnOrder,
-      remainingHostStrength
-    );
+    buyoffCost = infidelSwords - hitsOnInfidel;
+    logEvent(G, `Grand Army defeated! Buy-off cost: ${buyoffCost} Gold`);
+    // VP penalties applied now; buy-off gold handled interactively by caller
+    applyDefeatVPPenalties(G, captainGeneral, sorted);
   }
 
   // ── 7. Heresy shame — non-contributors ──
@@ -225,7 +223,12 @@ export const resolveGrandArmyBattle = (G: MyGameState): void => {
   }
 
   // Clear invasion state (Captain-General persists until next nomination)
-  G.currentInvasion = null;
+  // Don't clear if buy-off is needed — caller will set phase to "buyoff"
+  if (buyoffCost === 0) {
+    G.currentInvasion = null;
+  }
+
+  return buyoffCost;
 };
 
 // ── VP reward/penalty helpers ────────────────────────────────────────────────
@@ -270,106 +273,64 @@ const applyVictoryRewards = (
   }
 };
 
-/**
- * Grand Army loses: attempt buy-off, then apply VP penalties.
- * Buy-off cost = remaining Host strength.
- * Captain-General -3, smallest -5, 2nd smallest -2 (tied: -4 each).
- * If buy-off fails: -1 VP per player from least contributed until covered.
- */
-const applyDefeatPenalties = (
+/** Apply VP penalties for defeat (Captain-General -3, smallest -5, 2nd smallest -2) */
+const applyDefeatVPPenalties = (
   G: MyGameState,
   captainGeneral: string,
-  sorted: PlayerContribution[],
-  turnOrder: string[],
-  buyoffCost: number
+  sorted: PlayerContribution[]
 ): void => {
-  // ── Buy-off: auto-distribute gold proportionally IPO ──
-  let totalGoldOffered = 0;
-  const goldOffered: Record<string, number> = {};
-
-  for (const id of turnOrder) {
-    const available = Math.max(0, G.playerInfo[id].resources.gold);
-    // Auto-offer: proportional share, capped at what they have
-    const share = Math.min(
-      available,
-      Math.ceil(buyoffCost / turnOrder.length)
-    );
-    goldOffered[id] = share;
-    totalGoldOffered += share;
-  }
-
-  // If we overshot, reduce from last contributors
-  let excess = totalGoldOffered - buyoffCost;
-  if (excess > 0 && buyoffCost > 0) {
-    for (let i = turnOrder.length - 1; i >= 0 && excess > 0; i--) {
-      const reduce = Math.min(excess, goldOffered[turnOrder[i]]);
-      goldOffered[turnOrder[i]] -= reduce;
-      excess -= reduce;
-    }
-  }
-
-  // Deduct gold
-  const actualTotal = Object.values(goldOffered).reduce((a, b) => a + b, 0);
-  for (const id of turnOrder) {
-    G.playerInfo[id].resources.gold -= goldOffered[id];
-  }
-
-  // ── VP penalties ──
   removeVPAmount(G, captainGeneral, CAPTAIN_GENERAL_VP);
 
-  // Smallest contributor(s) — sorted ascending
-  const ascending = [...sorted].sort(
-    (a, b) => a.totalSwords - b.totalSwords
-  );
+  const ascending = [...sorted].sort((a, b) => a.totalSwords - b.totalSwords);
+  if (ascending.length === 0) return;
 
-  if (ascending.length > 0) {
-    const smallestSwords = ascending[0].totalSwords;
-    const smallestGroup = ascending.filter(
-      (c) => c.totalSwords === smallestSwords
-    );
+  const smallestSwords = ascending[0].totalSwords;
+  const smallestGroup = ascending.filter((c) => c.totalSwords === smallestSwords);
 
-    if (smallestGroup.length > 1) {
-      for (const c of smallestGroup) {
-        removeVPAmount(G, c.playerID, TIED_LARGEST_VP);
-      }
-    } else {
-      removeVPAmount(G, smallestGroup[0].playerID, LARGEST_FORCE_VP);
-      // 2nd smallest
-      const remaining = ascending.filter(
-        (c) => c.totalSwords > smallestSwords
-      );
-      if (remaining.length > 0) {
-        const secondSwords = remaining[0].totalSwords;
-        const secondGroup = remaining.filter(
-          (c) => c.totalSwords === secondSwords
-        );
-        if (secondGroup.length > 1) {
-          for (const c of secondGroup) {
-            removeVPAmount(G, c.playerID, TIED_LARGEST_VP);
-          }
-        } else {
-          removeVPAmount(G, secondGroup[0].playerID, SECOND_LARGEST_VP);
-        }
+  if (smallestGroup.length > 1) {
+    for (const c of smallestGroup) removeVPAmount(G, c.playerID, TIED_LARGEST_VP);
+  } else {
+    removeVPAmount(G, smallestGroup[0].playerID, LARGEST_FORCE_VP);
+    const remaining = ascending.filter((c) => c.totalSwords > smallestSwords);
+    if (remaining.length > 0) {
+      const secondSwords = remaining[0].totalSwords;
+      const secondGroup = remaining.filter((c) => c.totalSwords === secondSwords);
+      if (secondGroup.length > 1) {
+        for (const c of secondGroup) removeVPAmount(G, c.playerID, TIED_LARGEST_VP);
+      } else {
+        removeVPAmount(G, secondGroup[0].playerID, SECOND_LARGEST_VP);
       }
     }
   }
+};
 
-  // ── If buy-off failed: additional VP losses ──
-  const shortfall = buyoffCost - actualTotal;
+/**
+ * Apply the buy-off gold and shortfall VP penalties.
+ * Called from the offerBuyoffGold move after all players have offered.
+ */
+export const applyBuyoff = (G: MyGameState): void => {
+  const invasion = G.currentInvasion;
+  if (!invasion?.buyoffCost || !invasion.buyoffOffered) return;
+
+  const turnOrder = G.turnOrder;
+  const offered = invasion.buyoffOffered;
+
+  // Deduct gold
+  for (const id of turnOrder) {
+    G.playerInfo[id].resources.gold -= offered[id] ?? 0;
+  }
+
+  const totalOffered = Object.values(offered).reduce((a, b) => a + b, 0);
+  const shortfall = invasion.buyoffCost - totalOffered;
+
+  logEvent(G, `Buy-off: ${totalOffered} Gold offered of ${invasion.buyoffCost} required`);
+
   if (shortfall > 0) {
-    // -1 VP per player from least to most contributed until covered
+    logEvent(G, `Shortfall: ${shortfall} Gold \u2014 VP penalties applied`);
     let remaining = shortfall;
     const byGold = [...turnOrder].sort(
-      (a, b) => (goldOffered[a] ?? 0) - (goldOffered[b] ?? 0)
+      (a, b) => (offered[a] ?? 0) - (offered[b] ?? 0)
     );
-    for (const id of byGold) {
-      if (remaining <= 0) break;
-      if (G.playerInfo[id].resources.victoryPoints > 0) {
-        removeVPAmount(G, id, 1);
-        remaining--;
-      }
-    }
-    // If still short, loop again until all at 0 or covered
     while (remaining > 0) {
       let anyDeducted = false;
       for (const id of byGold) {
@@ -380,7 +341,10 @@ const applyDefeatPenalties = (
           anyDeducted = true;
         }
       }
-      if (!anyDeducted) break; // all at 0
+      if (!anyDeducted) break;
     }
   }
+
+  // Clear invasion state
+  G.currentInvasion = null;
 };

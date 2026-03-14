@@ -334,7 +334,7 @@ export const setupNextRebellion = (G: MyGameState): boolean => {
  */
 export const resolveRebellionWithTroops = (
   G: MyGameState,
-  rebellion: { event: DeferredEvent; counterSwords: number },
+  rebellion: MyGameState["currentRebellion"] & {},
   regiments: number,
   levies: number
 ): void => {
@@ -356,9 +356,9 @@ export const resolveRebellionWithTroops = (
     fortPresent = hasFortAt(G, targetTile[0], targetTile[1]);
   }
 
-  // TODO: Replace simulated FoW draws with player FoW card selection
+  // Rebel always draws from deck; defender uses hand card if provided
   const fowRebel = drawFortuneOfWarCard(G);
-  const fowDefender = drawFortuneOfWarCard(G);
+  const fowDefender = rebellion.fowCard ?? drawFortuneOfWarCard(G);
 
   const { defenderWins, hitsOnDefender } = calculateBattle(
     counterSwords,
@@ -383,4 +383,92 @@ export const resolveRebellionWithTroops = (
 
   applyOutcome(G, card, targetPlayerID, defenderWins, counterSwords, targetTile);
   returnCounter(G, card, defenderWins, counterSwords);
+};
+
+/**
+ * Resolve a rebellion including rival contributions from both sides.
+ * Rival troops add to the defender or rebel swords totals.
+ */
+export const resolveRebellionWithTroopsAndRivals = (
+  G: MyGameState,
+  rebellion: MyGameState["currentRebellion"] & {}
+): void => {
+  const { event, counterSwords, defenderRegiments, defenderLevies, rivalContributions } = rebellion;
+  const { card, targetPlayerID, targetTile } = event;
+  const kingdom = G.playerInfo[targetPlayerID].kingdomName;
+
+  const defReg = defenderRegiments ?? 0;
+  const defLev = defenderLevies ?? 0;
+
+  // Sum rival contributions per side
+  let rivalDefenderSwords = 0;
+  let rivalRebelSwords = 0;
+  for (const [, contrib] of Object.entries(rivalContributions ?? {})) {
+    const swords = contrib.regiments * 2 + contrib.levies;
+    if (contrib.side === "defender") rivalDefenderSwords += swords;
+    else rivalRebelSwords += swords;
+  }
+
+  const totalDefenderSwords = defReg * 2 + defLev + rivalDefenderSwords;
+  const totalRebelSwords = counterSwords + rivalRebelSwords;
+
+  if (totalDefenderSwords === 0 && defReg === 0 && defLev === 0) {
+    logEvent(G, `${kingdom} surrenders \u2014 rebels win automatically`);
+    applyOutcome(G, card, targetPlayerID, false, counterSwords, targetTile);
+    returnCounter(G, card, false, counterSwords);
+    returnRivalTroops(G, rivalContributions ?? {});
+    return;
+  }
+
+  let fortPresent = false;
+  if (card === "colonial_rebellion" && targetTile) {
+    fortPresent = hasFortAt(G, targetTile[0], targetTile[1]);
+  }
+
+  // Rebel always draws from deck; defender uses hand card if provided
+  const fowRebel = drawFortuneOfWarCard(G);
+  const fowDefender = rebellion.fowCard ?? drawFortuneOfWarCard(G);
+
+  // Use combined swords for battle calculation
+  const totalDefShields = fortPresent ? defReg + defLev : 0;
+  const hitsOnDefender = Math.max(0,
+    totalRebelSwords + fowRebel.sword - totalDefShields - fowDefender.shield
+  );
+  const hitsOnRebel = Math.max(0,
+    totalDefenderSwords + fowDefender.sword - fowRebel.shield
+  );
+
+  const defenderHP = defReg * 2 + defLev + rivalDefenderSwords;
+  const rebelHP = counterSwords + rivalRebelSwords;
+
+  const rebelsEliminated = hitsOnRebel >= rebelHP;
+  const defendersEliminated = hitsOnDefender >= defenderHP;
+  const defenderWins = !defendersEliminated || rebelsEliminated;
+
+  if (hitsOnDefender > 0) {
+    applyTroopLosses(G, targetPlayerID, Math.min(hitsOnDefender, defReg * 2 + defLev));
+  }
+
+  logEvent(G, defenderWins
+    ? `${kingdom} defeats the rebels! (${totalDefenderSwords}S vs ${totalRebelSwords}S)`
+    : `Rebels overwhelm the defenders! (${totalRebelSwords}S vs ${totalDefenderSwords}S)`
+  );
+
+  applyOutcome(G, card, targetPlayerID, defenderWins, counterSwords, targetTile);
+  returnCounter(G, card, defenderWins, counterSwords);
+  returnRivalTroops(G, rivalContributions ?? {});
+};
+
+/** Return surviving rival troops to their kingdoms */
+const returnRivalTroops = (
+  G: MyGameState,
+  rivalContributions: Record<string, { side: string; regiments: number; levies: number }>
+): void => {
+  // For now, all rival troops survive and return
+  // TODO: Apply losses to rival troops based on battle damage
+  for (const [, contrib] of Object.entries(rivalContributions)) {
+    // Troops were never actually removed from the rival's kingdom
+    // (they contribute from their pool conceptually)
+    // In full implementation, remove on commit and return survivors here
+  }
 };
