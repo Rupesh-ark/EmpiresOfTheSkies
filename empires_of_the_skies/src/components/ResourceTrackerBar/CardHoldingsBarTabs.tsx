@@ -4,21 +4,9 @@ import { KingdomAdvantageCard } from "@eots/game";
 import { alpha, darken } from "@mui/material/styles";
 import { fonts } from "../../designTokens";
 import svgNameToElementMap from "../WorldMap/nameToElementMap";
-import eliteRegimentsCard from "../../boards_and_assets/kingdom_advantage_cards/elite_regiments.svg";
-import improvedTrainingCard from "../../boards_and_assets/kingdom_advantage_cards/improved_training.svg";
-import licencedSmugglersCard from "../../boards_and_assets/kingdom_advantage_cards/licenced_smugglers.svg";
-import moreEfficientTaxationCard from "../../boards_and_assets/kingdom_advantage_cards/more_efficient_taxation.svg";
-import morePrisonsCard from "../../boards_and_assets/kingdom_advantage_cards/more_prisons.svg";
-import patriarchOfTheChurchCard from "../../boards_and_assets/kingdom_advantage_cards/patriarch_of_the_church.svg";
+import { KA_CARD_IMAGES } from "../../assets/kingdomAdvantage";
 
-const kingdomAdvantageCardArt: Partial<Record<KingdomAdvantageCard, string>> = {
-  elite_regiments: eliteRegimentsCard,
-  improved_training: improvedTrainingCard,
-  licenced_smugglers: licencedSmugglersCard,
-  more_efficient_taxation: moreEfficientTaxationCard,
-  more_prisons: morePrisonsCard,
-  patriarch_of_the_church: patriarchOfTheChurchCard,
-};
+const kingdomAdvantageCardArt: Partial<Record<KingdomAdvantageCard, string>> = KA_CARD_IMAGES;
 
 const formatCardLabel = (value: string) =>
   value

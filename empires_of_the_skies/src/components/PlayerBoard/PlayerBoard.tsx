@@ -1,8 +1,6 @@
 import React, { useState } from "react";
 
-import buildSkyships from "../../boards_and_assets/player_boards/buttons/build_skyships.svg";
-import conscriptLevies from "../../boards_and_assets/player_boards/buttons/conscript_levies.svg";
-import trainTroopsSvg from "../../boards_and_assets/train_troops1.svg";
+import { BUILD_SKYSHIPS as buildSkyships, CONSCRIPT_LEVIES as conscriptLevies, TRAIN_TROOPS as trainTroopsSvg } from "../../assets/playerBoard";
 import { FleetInfo, findPossibleDestinations, MyGameProps } from "@eots/game";
 import { PlayerBoardButton } from "./PlayerBoardButton";
 import {

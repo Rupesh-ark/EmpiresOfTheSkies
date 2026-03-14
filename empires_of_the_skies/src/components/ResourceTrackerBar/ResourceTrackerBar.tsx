@@ -19,7 +19,7 @@ import { IoMdCube } from "react-icons/io";
 import { GiTrumpetFlag } from "react-icons/gi";
 import { checkPlayerIDAndReturnPlayerInfo, clearMoves } from "../../utils/gameHelpers";
 import { Factory, Person4Sharp } from "@mui/icons-material";
-import prisonSvg from "../../boards_and_assets/player_boards/prison.svg";
+import { PRISON_ICON as prisonSvg } from "../../assets/icons";
 import ArchprelateIcon from "../Icons/ArchprelateIcon";
 import CounsellorIcon from "../Icons/CounsellorIcon";
 import VictoryPointIcon from "../Icons/VictoryPointIcon";

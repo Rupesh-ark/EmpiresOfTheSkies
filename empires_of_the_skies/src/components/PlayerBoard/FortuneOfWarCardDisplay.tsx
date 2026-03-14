@@ -1,6 +1,6 @@
 import React from "react";
 import { MyGameProps } from "@eots/game";
-import fortuneOfWarCardBack from "../../boards_and_assets/fortunes_of_war_card_back.svg";
+import { FOW_CARD_BACK as fortuneOfWarCardBack } from "../../assets/fortuneOfWarCards";
 import svgNameToElementMap from "../WorldMap/nameToElementMap";
 
 const FortuneOfWarCardDisplay = (props: FortuneOfWarCardDisplayProps) => {
