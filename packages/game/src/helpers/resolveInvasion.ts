@@ -58,6 +58,7 @@ export const checkForInvasion = (G: MyGameState): void => {
       counter: drawn,
       location: [...INFIDEL_EMPIRE_LOCATION] as [number, number],
       active: true,
+      destroyed: false,
     };
     logEvent(G, "Infidel Fleet drawn \u2014 placed at Infidel Empire");
     G.accumulatedHosts.push(drawn);
@@ -199,7 +200,7 @@ const resolveGrandArmyBattle = (G: MyGameState): void => {
 
   // Infidel Fleet retreats to Infidel Empire (if not destroyed)
   // TODO: Track Fleet destruction properly via aerial combat
-  if (G.infidelFleet) {
+  if (G.infidelFleet && !G.infidelFleet.destroyed) {
     G.infidelFleet.location = [...INFIDEL_EMPIRE_LOCATION] as [number, number];
   }
 

@@ -77,6 +77,7 @@ import { resolveRebellionEvent } from "./helpers/resolveRebellion";
 import { checkForInvasion } from "./helpers/resolveInvasion";
 import { logEvent } from "./helpers/stateUtils";
 import { resolveDeferredBattle } from "./helpers/resolveDeferredBattles";
+import { resolveInfidelFleet } from "./helpers/resolveInfidelFleet";
 
 const MyGame: Game<MyGameState> = {
   turn: { minMoves: 1 },
@@ -518,7 +519,10 @@ const MyGame: Game<MyGameState> = {
       onBegin: (context) => {
         console.log("resolution phase has begun");
 
-        // Resolve pending rebellion events before fleet retrieval
+        // Infidel Fleet: reactivate, target, move, aerial combat
+        resolveInfidelFleet(context.G);
+
+        // Resolve pending deferred events (rebellions, conquests)
         const pending = context.G.eventState.deferredEvents;
         while (pending.length > 0) {
           const event = pending.shift()!;

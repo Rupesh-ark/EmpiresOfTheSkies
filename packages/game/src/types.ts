@@ -61,6 +61,7 @@ export interface MyGameState {
     counter: InfidelHostCounter;
     location: [number, number];
     active: boolean;
+    destroyed: boolean;
   } | null;
   eventState: EventState;
 }
