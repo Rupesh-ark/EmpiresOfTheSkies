@@ -1,12 +1,10 @@
 /**
  * resolveRebellion.ts
  *
- * Auto-resolves rebellion battles during the Resolution phase.
- *
- * TODO: Replace auto-resolution with an interactive ground battle sub-phase
- * where the defender chooses which troops to commit, rival players can
- * contribute up to 3 regiments/levies to either side, and FoW cards are
- * drawn interactively (not simulated).
+ * Resolves rebellion battles during the Resolution phase.
+ * Interactive stages (defender troop commitment, rival support) are handled
+ * by moves in moves/events/commitRebellionTroops and contributeToRebellion.
+ * This file provides the resolution logic called after interactive input.
  */
 
 import { MyGameState, DeferredEvent, LegacyCardInfo } from "../types";
@@ -187,10 +185,8 @@ const resolveColonialRebellion = (
  * simulates FoW card draws for both sides, calculates the battle, and
  * applies the per-card outcome.
  *
- * TODO: Replace with interactive ground battle sub-phase where:
- * - Defender chooses which troops to commit (currently auto-commits all)
- * - Rival players can contribute up to 3 regiments/levies to either side
- * - FoW cards are drawn interactively, not simulated
+ * NOTE: This is the legacy auto-resolve path. The interactive path uses
+ * resolveRebellionWithTroops() and resolveRebellionWithTroopsAndRivals().
  */
 export const resolveRebellionEvent = (
   G: MyGameState,

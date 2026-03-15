@@ -5,11 +5,8 @@
  * 1. Reactivate if flipped inactive
  * 2. Target the player with highest military power
  * 3. Move to that player's largest fleet's square
- * 4. Auto-resolve aerial combat against each player fleet in that square
- *
- * TODO: Replace auto-resolve with interactive aerial combat where
- * targeted players can choose to evade or fight, and FoW cards are
- * drawn interactively.
+ * 4. Player chooses fight or evade (interactive via respondToInfidelFleet move)
+ * 5. If fight: resolve aerial combat with optional player FoW card
  */
 
 import { MyGameState } from "../types";

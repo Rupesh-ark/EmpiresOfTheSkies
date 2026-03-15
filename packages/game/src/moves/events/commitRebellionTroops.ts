@@ -13,9 +13,7 @@ import { Ctx } from "boardgame.io/dist/types/src/types";
 /**
  * Move called by the rebellion target player to choose how many
  * troops to commit to defend against the rebellion.
- *
- * TODO: Add a follow-up stage for rival players to contribute
- * up to 3 regiments/levies to either side.
+ * After commitment, transitions to rival support stage (contributeToRebellion).
  */
 const commitRebellionTroops: Move<MyGameState> = (
   {

@@ -3,14 +3,8 @@
  *
  * Handles the "Check for Infidel Invasion" step each round during Resolution.
  * Draws Host counters, triggers invasion when an up-arrow counter appears,
- * and auto-resolves the Grand Army battle.
- *
- * TODO: Replace auto-resolution with interactive sub-phases where:
- * - Archprelate nominates Captain-General
- * - Each player chooses troop/fleet contributions
- * - Infidel Fleet aerial combat is resolved interactively
- * - Buy-off gold offers are made per player
- * - Infidel Fleet targeting/movement each round (strongest player's fleet)
+ * and resolves the Grand Army battle. Interactive sub-phases (nomination,
+ * contribution, buyoff) are handled by moves in moves/events/.
  */
 
 import { MyGameState, InfidelHostCounter } from "../types";
@@ -106,8 +100,6 @@ type PlayerContribution = {
 /**
  * Resolve the Grand Army battle using contributions from currentInvasion
  * and the Captain-General from PlayerInfo.isCaptainGeneral.
- *
- * TODO: Replace FoW draws with player card selection.
  *
  * Returns the buy-off cost if the army lost (> 0), or 0 if won.
  */
