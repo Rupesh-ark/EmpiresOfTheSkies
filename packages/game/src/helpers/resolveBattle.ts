@@ -8,7 +8,7 @@ import {
 } from "./findNext";
 import { drawFortuneOfWarCard } from "./helpers";
 import { RandomAPI } from "boardgame.io/dist/types/src/plugins/random/random";
-import { increaseHeresyWithinMove, increaseOrthodoxyWithinMove } from "./stateUtils";
+import { increaseHeresyWithinMove, increaseOrthodoxyWithinMove, logEvent } from "./stateUtils";
 
 const GOODS: GoodKey[] = ["mithril", "dragonScales", "krakenSkin", "magicDust", "stickyIchor", "pipeweed"];
 
@@ -81,13 +81,16 @@ export const resolveBattleAndReturnWinner = (
     if (G.battleState.defender.fowCard.shield > 0) defenderShieldValue += 1;
   }
 
+  const attackerName = G.playerInfo[G.battleState?.attacker.id ?? ctx.currentPlayer].kingdomName;
+  const defenderName = G.playerInfo[G.battleState?.defender.id ?? ctx.currentPlayer].kingdomName;
+  const battleType = ctx.phase === "ground_battle" ? "Ground battle" : "Aerial battle";
+  logEvent(G, `${battleType}: ${attackerName} (${attackerSwordValue}S/${attackerShieldValue}Sh) vs ${defenderName} (${defenderSwordValue}S/${defenderShieldValue}Sh)`);
+
   const attackerLosses = defenderSwordValue - attackerShieldValue;
   let attackerLossesCopy = attackerLosses.valueOf();
-  console.log(`attacker losses = ${attackerLossesCopy}`);
 
   const defenderLosses = attackerSwordValue - defenderShieldValue;
   let defenderLossesCopy = defenderLosses.valueOf();
-  console.log(`defender losses = ${defenderLossesCopy}`);
 
   // GAP-22: odd hit rule — if total attacker hits are odd, at least 1 Skyship or Levy must absorb a hit
   let attackerOddHitSatisfied = attackerLosses % 2 !== 1;
@@ -254,6 +257,8 @@ export const resolveBattleAndReturnWinner = (
     winner = G.battleState?.defender.id;
   }
   if (winner !== "total annihilation" && winner) {
+    const winnerName = G.playerInfo[winner]?.kingdomName ?? "Unknown";
+    logEvent(G, `${battleType} won by ${winnerName} (+1 VP)`);
     G.battleState &&
       Object.values(G.battleState).forEach((player) => {
         if (player.id === winner) {
@@ -357,9 +362,12 @@ export const resolveConquest = (
   const defenderShieldValue =
     G.mapState.currentTileArray[y][x].shield + defenderCard.shield;
 
+  const conquestPlayerName = G.playerInfo[G.battleState?.attacker.id ?? ctx.currentPlayer].kingdomName;
+  const landName = G.mapState.currentTileArray[y][x]?.name ?? "unknown land";
+  logEvent(G, `Conquest: ${conquestPlayerName} attacks ${landName} (${attackerSwordValue}S vs ${defenderSwordValue}S/${defenderShieldValue}Sh)`);
+
   const attackerLosses = defenderSwordValue - attackerShieldValue;
   let attackerLossesCopy = attackerLosses.valueOf();
-  console.log(`attacker losses = ${attackerLossesCopy}`);
 
   if (attackerLossesCopy > attackerGarrisonedLevies) {
     attackerLossesCopy -= attackerGarrisonedLevies;
@@ -416,18 +424,11 @@ export const resolveConquest = (
     }
   });
 
-  console.log(
-    `Remaining attackers in colonisation attempt: ${remainingAttackers}`
-  );
   const remainingDefenders =
     (defenderShieldValue + defenderSwordValue) - attackerSwordValue;
 
-  console.log(
-    `Remaining defenders in colonisation attempt: ${remainingDefenders}`
-  );
-
   if (remainingDefenders > 0 || remainingAttackers < 1) {
-    console.log("Attacker has failed their conquest attempt");
+    logEvent(G, `Conquest failed: ${conquestPlayerName} loses outpost at ${landName}`);
     const currentBuilding = G.mapState.buildings[y][x];
     if (currentBuilding.garrisonedRegiments > 0) {
       attackerFleets.forEach((fleet) => {
@@ -468,7 +469,7 @@ export const resolveConquest = (
     G.conquestState = undefined;
     findNextConquest(G, events);
   } else if (remainingDefenders <= 0 && remainingAttackers > 0) {
-    console.log("Attacker has successfully colonised a region");
+    logEvent(G, `Conquest succeeded: ${conquestPlayerName} colonises ${landName} (+1 VP)`);
     const currentPlayer =
       G.playerInfo[G.battleState?.attacker.id ?? ctx.currentPlayer];
     const currentBuilding = G.mapState.buildings[y][x];
@@ -493,7 +494,6 @@ export const resolveConquest = (
 
     currentBuilding.player = currentPlayer;
     currentBuilding.buildings = "colony";
-    console.log("Setting stage for the garrison of troops");
     G.conquestState = undefined;
     G.stage = "garrison troops";
   }

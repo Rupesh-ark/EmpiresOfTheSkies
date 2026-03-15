@@ -1,7 +1,7 @@
 import { Move } from "boardgame.io";
 import { MyGameState } from "../../types";
 import { findNextPlunder } from "../../helpers/findNext";
-import { increaseHeresyWithinMove } from "../../helpers/stateUtils";
+import { increaseHeresyWithinMove, logEvent } from "../../helpers/stateUtils";
 
 const plunder: Move<MyGameState> = (
   { G, ctx, playerID, events, random },
@@ -18,7 +18,9 @@ const plunder: Move<MyGameState> = (
   });
   // v4.2: plundering a Legend advances the plunderer's heresy by 1
   increaseHeresyWithinMove(G, playerID);
-  console.log("about to find the next plunder or move to the next phase");
+
+  const landName = currentTile?.name ?? "unknown land";
+  logEvent(G, `${currentPlayer.kingdomName} plunders ${landName} (+1 heresy)`);
   findNextPlunder(G, events);
 };
 

@@ -13,8 +13,11 @@ import nominateCaptainGeneral from "../../moves/events/nominateCaptainGeneral";
 import contributeToGrandArmy from "../../moves/events/contributeToGrandArmy";
 import offerBuyoffGold from "../../moves/events/offerBuyoffGold";
 import respondToInfidelFleet from "../../moves/events/respondToInfidelFleet";
+import commitDeferredBattleCard from "../../moves/events/commitDeferredBattleCard";
+import { setupNextDeferredBattle } from "../../helpers/resolutionFlow";
 import { buildInitialG, buildPlayer, buildCtx, buildResources, buildFleet } from "../testHelpers";
 import { INVALID_MOVE } from "boardgame.io/core";
+import { MyGameState, DeferredEvent, MapBuildingInfo, TileInfoProps } from "../../types";
 
 const stubEvents = () => ({ endTurn: vi.fn(), endPhase: vi.fn() });
 
@@ -505,5 +508,217 @@ describe("respondToInfidelFleet — fight", () => {
 
     callRespondFleet(G, "0", "fight", 0);
     expect(G.playerInfo["0"].resources.fortuneCards).toHaveLength(0);
+  });
+});
+
+// ── Helper: build map with a valid tile and building at (x, y) ──────────────
+
+function setupMapTile(
+  G: MyGameState,
+  x: number,
+  y: number,
+  tileOverrides: Partial<TileInfoProps> = {},
+  buildingOverrides: Partial<MapBuildingInfo> = {}
+) {
+  // Ensure the 2D arrays are large enough
+  while (G.mapState.currentTileArray.length <= y) G.mapState.currentTileArray.push([]);
+  while (G.mapState.currentTileArray[y].length <= x)
+    G.mapState.currentTileArray[y].push({
+      name: "Empty",
+      blocked: [],
+      sword: 0,
+      shield: 0,
+      loot: { outpost: { gold: 0 }, colony: { gold: 0 } } as any,
+      type: "land",
+    });
+  while (G.mapState.buildings.length <= y) G.mapState.buildings.push([]);
+  while (G.mapState.buildings[y].length <= x)
+    G.mapState.buildings[y].push({
+      fort: false,
+      garrisonedRegiments: 0,
+      garrisonedLevies: 0,
+    });
+
+  G.mapState.currentTileArray[y][x] = {
+    name: "Test Land",
+    blocked: [],
+    sword: 3,
+    shield: 1,
+    loot: { outpost: { gold: 1 }, colony: { gold: 2 } } as any,
+    type: "land",
+    ...tileOverrides,
+  };
+  G.mapState.buildings[y][x] = {
+    player: G.playerInfo["0"],
+    buildings: "colony",
+    fort: false,
+    garrisonedRegiments: 2,
+    garrisonedLevies: 1,
+    ...buildingOverrides,
+  };
+}
+
+function callCommitDeferredBattle(
+  G: MyGameState,
+  playerID: string,
+  fowCardIndex?: number,
+  playOrder?: string[]
+) {
+  const events = stubEvents();
+  const ctx = {
+    ...buildCtx(playerID, Object.keys(G.playerInfo).length),
+    playOrder: playOrder ?? Object.keys(G.playerInfo),
+  };
+  const result = (commitDeferredBattleCard as Function)(
+    { G, ctx, playerID, events },
+    fowCardIndex
+  );
+  return { result, events };
+}
+
+// ── commitDeferredBattleCard ────────────────────────────────────────────────
+
+describe("commitDeferredBattleCard — validation", () => {
+  it("returns INVALID_MOVE if no currentDeferredBattle", () => {
+    const G = buildInitialG();
+    G.currentDeferredBattle = null;
+    const { result } = callCommitDeferredBattle(G, "0");
+    expect(result).toBe(INVALID_MOVE);
+  });
+
+  it("returns INVALID_MOVE if wrong player (not the target)", () => {
+    const G = buildInitialG();
+    setupMapTile(G, 0, 0);
+    const event: DeferredEvent = { card: "faerie_uprising", targetPlayerID: "0", targetTile: [0, 0] };
+    G.currentDeferredBattle = { event, description: "test" };
+    // Player "1" is NOT the target
+    const { result } = callCommitDeferredBattle(G, "1");
+    expect(result).toBe(INVALID_MOVE);
+  });
+});
+
+describe("commitDeferredBattleCard — FoW card handling", () => {
+  it("removes FoW card from hand when index provided", () => {
+    const fowCard = { name: "Battle card", sword: 4, shield: 3, flipped: false };
+    const G = buildInitialG([
+      buildPlayer("0", { resources: buildResources({ fortuneCards: [fowCard] }) }),
+      buildPlayer("1"),
+    ]);
+    setupMapTile(G, 0, 0);
+    // Ensure deck has cards for the attacker's auto-draw
+    G.cardDecks.fortuneOfWarCards = [
+      { name: "deck1", sword: 1, shield: 1 },
+      { name: "deck2", sword: 1, shield: 1 },
+    ];
+    const event: DeferredEvent = { card: "faerie_uprising", targetPlayerID: "0", targetTile: [0, 0] };
+    G.currentDeferredBattle = { event, description: "test" };
+
+    callCommitDeferredBattle(G, "0", 0);
+    expect(G.playerInfo["0"].resources.fortuneCards).toHaveLength(0);
+  });
+
+  it("works without FoW card (draws from deck instead)", () => {
+    const G = buildInitialG([
+      buildPlayer("0", { resources: buildResources({ fortuneCards: [] }) }),
+      buildPlayer("1"),
+    ]);
+    setupMapTile(G, 0, 0);
+    G.cardDecks.fortuneOfWarCards = [
+      { name: "deck1", sword: 1, shield: 1 },
+      { name: "deck2", sword: 2, shield: 2 },
+      { name: "deck3", sword: 3, shield: 3 },
+    ];
+    const event: DeferredEvent = { card: "faerie_uprising", targetPlayerID: "0", targetTile: [0, 0] };
+    G.currentDeferredBattle = { event, description: "test" };
+
+    // No fowCardIndex — should draw from deck for both attacker and defender
+    const deckSizeBefore = G.cardDecks.fortuneOfWarCards.length;
+    const { result } = callCommitDeferredBattle(G, "0");
+    expect(result).not.toBe(INVALID_MOVE);
+    // Two cards drawn from deck (one for land attacker, one for defender auto-draw)
+    expect(G.cardDecks.fortuneOfWarCards.length).toBeLessThan(deckSizeBefore);
+  });
+});
+
+describe("commitDeferredBattleCard — resolution", () => {
+  it("clears currentDeferredBattle after resolution", () => {
+    const G = buildInitialG();
+    setupMapTile(G, 0, 0);
+    G.cardDecks.fortuneOfWarCards = [
+      { name: "deck1", sword: 1, shield: 1 },
+      { name: "deck2", sword: 2, shield: 2 },
+      { name: "deck3", sword: 3, shield: 3 },
+    ];
+    const event: DeferredEvent = { card: "faerie_uprising", targetPlayerID: "0", targetTile: [0, 0] };
+    G.currentDeferredBattle = { event, description: "test" };
+
+    callCommitDeferredBattle(G, "0");
+    expect(G.currentDeferredBattle).toBeNull();
+  });
+});
+
+// ── setupNextDeferredBattle ─────────────────────────────────────────────────
+
+describe("setupNextDeferredBattle", () => {
+  it("sets up first non-rebellion deferred event as currentDeferredBattle", () => {
+    const G = buildInitialG();
+    setupMapTile(G, 2, 3);
+    const event: DeferredEvent = { card: "faerie_uprising", targetPlayerID: "0", targetTile: [2, 3] };
+    G.eventState.deferredEvents = [event];
+    const events = stubEvents();
+
+    setupNextDeferredBattle(G, events as any);
+
+    expect(G.currentDeferredBattle).not.toBeNull();
+    expect(G.currentDeferredBattle!.event.card).toBe("faerie_uprising");
+    expect(G.currentDeferredBattle!.event.targetPlayerID).toBe("0");
+    expect(G.stage).toBe("deferred_battle");
+    // The event should be removed from the deferred list
+    expect(G.eventState.deferredEvents).toHaveLength(0);
+    // Should end turn to the target player
+    expect(events.endTurn).toHaveBeenCalledWith({ next: "0" });
+  });
+
+  it("skips rebellion events (cards ending with _rebellion)", () => {
+    const G = buildInitialG();
+    setupMapTile(G, 1, 1);
+    const rebellionEvent: DeferredEvent = { card: "colonial_rebellion" as any, targetPlayerID: "0", targetTile: [1, 1] };
+    const battleEvent: DeferredEvent = { card: "faerie_uprising", targetPlayerID: "1", targetTile: [1, 1] };
+    G.eventState.deferredEvents = [rebellionEvent, battleEvent];
+    const events = stubEvents();
+
+    setupNextDeferredBattle(G, events as any);
+
+    // Should pick the faerie_uprising, not the rebellion
+    expect(G.currentDeferredBattle).not.toBeNull();
+    expect(G.currentDeferredBattle!.event.card).toBe("faerie_uprising");
+    // Rebellion event should remain in the deferred list
+    expect(G.eventState.deferredEvents).toHaveLength(1);
+    expect(G.eventState.deferredEvents[0].card).toBe("colonial_rebellion");
+  });
+
+  it("when no deferred battles remain, continues to next flow stage", () => {
+    const G = buildInitialG();
+    G.eventState.deferredEvents = [];
+    const events = stubEvents();
+
+    setupNextDeferredBattle(G, events as any);
+
+    // No deferred battle set up
+    expect(G.currentDeferredBattle).toBeNull();
+    // Should have called endTurn (for retrieve fleets or rebellion/invasion flow)
+    expect(events.endTurn).toHaveBeenCalled();
+  });
+
+  it("when only rebellion events remain, does not set currentDeferredBattle", () => {
+    const G = buildInitialG();
+    const rebellionEvent: DeferredEvent = { card: "colonial_rebellion" as any, targetPlayerID: "0", targetTile: [0, 0] };
+    G.eventState.deferredEvents = [rebellionEvent];
+    const events = stubEvents();
+
+    setupNextDeferredBattle(G, events as any);
+
+    // Should not set up a deferred battle (rebellion is handled differently)
+    expect(G.currentDeferredBattle).toBeNull();
   });
 });
