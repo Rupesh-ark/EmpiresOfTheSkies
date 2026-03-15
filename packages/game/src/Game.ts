@@ -81,6 +81,7 @@ import commitRebellionTroops from "./moves/events/commitRebellionTroops";
 import contributeToRebellion from "./moves/events/contributeToRebellion";
 import offerBuyoffGold from "./moves/events/offerBuyoffGold";
 import nominateCaptainGeneral from "./moves/events/nominateCaptainGeneral";
+import commitDeferredBattleCard from "./moves/events/commitDeferredBattleCard";
 import contributeToGrandArmy from "./moves/events/contributeToGrandArmy";
 import { logEvent } from "./helpers/stateUtils";
 
@@ -177,6 +178,7 @@ const MyGame: Game<MyGameState> = {
       currentRebellion: null,
       currentInvasion: null,
       infidelFleetCombat: null,
+      currentDeferredBattle: null,
       pendingDeal: undefined,
       eventState: {
         deck: eventDeck,
@@ -553,7 +555,7 @@ const MyGame: Game<MyGameState> = {
         resolveRound(context.G, context.events, context.random);
         console.log(`Round number:${context.G.round}`);
       },
-      moves: { retrieveFleets, commitRebellionTroops, contributeToRebellion, nominateCaptainGeneral, contributeToGrandArmy, respondToInfidelFleet, offerBuyoffGold },
+      moves: { retrieveFleets, commitRebellionTroops, contributeToRebellion, nominateCaptainGeneral, contributeToGrandArmy, respondToInfidelFleet, offerBuyoffGold, commitDeferredBattleCard },
       next: "reset",
     },
     reset: {

@@ -2,48 +2,63 @@
  * resolutionFlow.ts
  *
  * Shared helper that advances through the Resolution phase stages:
- * Fleet combat → deferred events → rebellions → invasion → retrieve fleets
+ * Fleet combat → deferred battles → rebellions → invasion → retrieve fleets
  *
  * Called from Resolution onBegin and from interactive moves
- * (respondToInfidelFleet, commitRebellionTroops, contributeToGrandArmy, etc.)
- * to determine what comes next.
+ * (respondToInfidelFleet, commitDeferredBattleCard, commitRebellionTroops,
+ * contributeToGrandArmy, etc.) to determine what comes next.
  */
 
 import { MyGameState } from "../types";
 import { setupNextRebellion } from "./resolveRebellion";
-import { resolveDeferredBattle } from "./resolveDeferredBattles";
+import { getDeferredBattleDescription } from "./resolveDeferredBattles";
 import { checkForInvasion, getArchprelateForNomination } from "./resolveInvasion";
 import { EventsAPI } from "boardgame.io/dist/types/src/plugins/events/events";
 
 /**
- * Continue the Resolution flow from the current point.
- * Checks each stage in order and activates the next interactive one,
- * or proceeds to "retrieve fleets" if nothing interactive remains.
+ * Set up the next non-rebellion deferred battle for interactive resolution.
+ * If one exists, transitions to deferred_battle stage and pauses.
+ * If none remain, continues to rebellions → invasion → retrieve fleets.
  */
-export const continueResolution = (
+export const setupNextDeferredBattle = (
   G: MyGameState,
   events: EventsAPI
 ): void => {
-  // 1. Auto-resolve non-rebellion deferred events
-  const pending = G.eventState.deferredEvents;
-  const nonRebellions = pending.filter(
+  // Find next non-rebellion deferred event
+  const idx = G.eventState.deferredEvents.findIndex(
     (e) => !e.card.endsWith("_rebellion")
   );
-  for (const event of nonRebellions) {
-    resolveDeferredBattle(G, event);
-  }
-  G.eventState.deferredEvents = pending.filter((e) =>
-    e.card.endsWith("_rebellion")
-  );
 
-  // 2. Interactive rebellions
+  if (idx >= 0) {
+    const event = G.eventState.deferredEvents.splice(idx, 1)[0];
+    G.currentDeferredBattle = {
+      event,
+      description: getDeferredBattleDescription(G, event),
+    };
+    G.stage = "deferred_battle";
+    events.endTurn({ next: event.targetPlayerID });
+    return;
+  }
+
+  // No more deferred battles — continue to rebellions → invasion
+  continueAfterDeferredBattles(G, events);
+};
+
+/**
+ * Continue the Resolution flow after all deferred battles are resolved.
+ */
+const continueAfterDeferredBattles = (
+  G: MyGameState,
+  events: EventsAPI
+): void => {
+  // Interactive rebellions
   if (G.eventState.deferredEvents.length > 0 && setupNextRebellion(G)) {
     G.stage = "rebellion";
     events.endTurn({ next: G.currentRebellion!.event.targetPlayerID });
     return;
   }
 
-  // 3. Invasion check
+  // Invasion check
   const invasionTriggered = checkForInvasion(G);
   if (invasionTriggered) {
     const archprelate = getArchprelateForNomination(G);
@@ -54,7 +69,19 @@ export const continueResolution = (
     }
   }
 
-  // 4. Nothing interactive left — retrieve fleets
+  // Nothing interactive left — retrieve fleets
   G.stage = "retrieve fleets";
   events.endTurn();
+};
+
+/**
+ * Continue the Resolution flow from the current point.
+ * Entry point called from Resolution onBegin and after Fleet combat.
+ */
+export const continueResolution = (
+  G: MyGameState,
+  events: EventsAPI
+): void => {
+  // Try to set up first deferred battle (interactive)
+  setupNextDeferredBattle(G, events);
 };

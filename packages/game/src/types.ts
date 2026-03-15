@@ -46,6 +46,7 @@ export interface MyGameState {
     | "invasion_buyoff"
     | "infidel_fleet_combat"
     | "rebellion_rival_support"
+    | "deferred_battle"
     | "pick legacy card"
     | "taxes"
     | "events"
@@ -95,6 +96,11 @@ export interface MyGameState {
   infidelFleetCombat: {
     targetPlayerID: string;
     fleetIndex: number;
+  } | null;
+  /** Deferred battle: player chooses FoW card before resolution */
+  currentDeferredBattle: {
+    event: DeferredEvent;
+    description: string;
   } | null;
 }
 

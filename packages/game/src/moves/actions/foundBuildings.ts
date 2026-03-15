@@ -128,14 +128,28 @@ const foundShipyard = (
 
   G.playerInfo[playerID].turnComplete = true;
 };
-//TODO: add capability for the user to select the map tile to build the fort on
-// and validate that they have either an outpost or colony on that tile as well as regiments
+// Fort placement: pays cost here, then player picks a tile via checkAndPlaceFort move.
+// Frontend shows valid tiles in a dialog (ActionBoardButton handles this).
 const foundFort = (
   G: MyGameState,
   playerID: string,
   events: EventsAPI,
   args: any[]
 ): void | typeof INVALID_MOVE => {
+  // Validate that at least one valid tile exists before charging
+  const hasValidTile = G.mapState.buildings.some((row, y) =>
+    row.some((tile, x) => {
+      const hasBuilding = tile.player?.id === playerID &&
+        (tile.buildings === "colony" || tile.buildings === "outpost");
+      const hasTroops = tile.garrisonedRegiments > 0 || tile.garrisonedLevies > 0 ||
+        G.playerInfo[playerID].fleetInfo.some(
+          (f) => f.location[0] === x && f.location[1] === y && (f.regiments > 0 || f.levies > 0)
+        );
+      return hasBuilding && !tile.fort && hasTroops;
+    })
+  );
+  if (!hasValidTile) return INVALID_MOVE;
+
   const cost = BUILDING_BASE_COST.fort + G.boardState.foundBuildings[BuildingSlot.Fort].length;
 
   G.playerInfo[playerID].resources.gold -= cost;

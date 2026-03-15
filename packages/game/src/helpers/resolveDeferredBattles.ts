@@ -1,27 +1,26 @@
 /**
  * resolveDeferredBattles.ts
  *
- * Auto-resolves deferred battle events that are NOT rebellions:
+ * Resolves deferred battle events that are NOT rebellions:
  * - Faerie Uprising: Land attacks colony with 2× printed swords
  * - Headstrong Commander: forced conquest attempt on weakest outpost
  * - Infidels Invade Faerie: Host counter attacks a colony/outpost
  *
- * TODO: Replace auto-resolution with interactive conquest/battle sub-phases
- * where the defender chooses troops, FoW cards are drawn interactively,
- * and the full battle UI is shown.
+ * Interactive version: player chooses FoW card from hand via
+ * commitDeferredBattleCard move. Attacker always draws from deck.
  */
 
 import { MyGameState, DeferredEvent } from "../types";
 import { addVPAmount, logEvent } from "./stateUtils";
 import { drawFortuneOfWarCard, hasFortAt } from "./helpers";
 
-/**
- * Auto-resolve Faerie Uprising.
- * The Land attacks with 2× its printed Sword value.
- * Player wins: keep colony, +1 VP.
- * Player loses: colony removed (as failed conquest).
- */
-const resolveFaerieUprising = (G: MyGameState, event: DeferredEvent): void => {
+// ── Faerie Uprising ─────────────────────────────────────────────────────────
+
+const resolveFaerieUprising = (
+  G: MyGameState,
+  event: DeferredEvent,
+  fowCard?: { sword: number; shield: number }
+): void => {
   const { targetPlayerID, targetTile } = event;
   if (!targetTile) return;
 
@@ -33,22 +32,20 @@ const resolveFaerieUprising = (G: MyGameState, event: DeferredEvent): void => {
 
   logEvent(G, `Faerie Uprising at ${land.name}! Land attacks ${kingdom}'s colony with ${landSwords} swords`);
 
-  // Defender: garrisoned troops + kingdom troops if available
   const tile = G.mapState.buildings[y][x];
   const defRegiments = tile.garrisonedRegiments;
   const defLevies = tile.garrisonedLevies;
   const defSwords = defRegiments * 2 + defLevies;
   const defShields = hasFortAt(G, x, y) ? defRegiments + defLevies : 0;
 
-  // Simulated FoW draws
   const fowLand = drawFortuneOfWarCard(G);
-  const fowDefender = drawFortuneOfWarCard(G);
+  const fowDefender = fowCard ?? drawFortuneOfWarCard(G);
 
   const hitsOnDefender = Math.max(0, landSwords + fowLand.sword - defShields - fowDefender.shield);
   const hitsOnLand = Math.max(0, defSwords + fowDefender.sword - landShields - fowLand.shield);
 
   const defenderHP = defRegiments * 2 + defLevies;
-  const landHP = landSwords; // land absorbs hits equal to its attack strength
+  const landHP = landSwords;
 
   const defenderWins = hitsOnLand >= landHP || hitsOnDefender < defenderHP;
 
@@ -56,7 +53,6 @@ const resolveFaerieUprising = (G: MyGameState, event: DeferredEvent): void => {
     addVPAmount(G, targetPlayerID, 1);
     logEvent(G, `${kingdom} defends the colony! +1 VP`);
   } else {
-    // Colony lost — as failed conquest (remove colony, outpost, fort)
     tile.buildings = undefined;
     tile.player = undefined;
     tile.fort = false;
@@ -66,12 +62,13 @@ const resolveFaerieUprising = (G: MyGameState, event: DeferredEvent): void => {
   }
 };
 
-/**
- * Auto-resolve Headstrong Commander.
- * Forces a conquest attempt on the weakest outpost with troops.
- * Uses standard conquest battle rules.
- */
-const resolveHeadstrongCommander = (G: MyGameState, event: DeferredEvent): void => {
+// ── Headstrong Commander ────────────────────────────────────────────────────
+
+const resolveHeadstrongCommander = (
+  G: MyGameState,
+  event: DeferredEvent,
+  fowCard?: { sword: number; shield: number }
+): void => {
   const { targetPlayerID, targetTile } = event;
   if (!targetTile) return;
 
@@ -81,18 +78,16 @@ const resolveHeadstrongCommander = (G: MyGameState, event: DeferredEvent): void 
 
   logEvent(G, `Headstrong Commander! ${kingdom}'s outpost at ${land.name} attempts conquest`);
 
-  // Attacker: garrisoned troops at the outpost
   const tile = G.mapState.buildings[y][x];
   const atkRegiments = tile.garrisonedRegiments;
   const atkLevies = tile.garrisonedLevies;
   const atkSwords = atkRegiments * 2 + atkLevies;
 
-  // Defender: the Land's printed values
   const landSwords = land.sword;
   const landShields = land.shield;
 
-  // Simulated FoW draws
-  const fowAttacker = drawFortuneOfWarCard(G);
+  // Headstrong Commander: player's FoW card helps the attacker (their own troops)
+  const fowAttacker = fowCard ?? drawFortuneOfWarCard(G);
   const fowLand = drawFortuneOfWarCard(G);
 
   const hitsOnLand = Math.max(0, atkSwords + fowAttacker.sword - landShields - fowLand.shield);
@@ -105,12 +100,10 @@ const resolveHeadstrongCommander = (G: MyGameState, event: DeferredEvent): void 
   const attackerSurvives = hitsOnAttacker < attackerHP;
 
   if (conquestSuccess && attackerSurvives) {
-    // Conquest succeeds — upgrade outpost to colony
     tile.buildings = "colony";
     addVPAmount(G, targetPlayerID, 1);
     logEvent(G, `Conquest succeeds! ${kingdom} gains a colony at ${land.name} (+1 VP)`);
   } else {
-    // Conquest fails — outpost and fort lost, excess troops lost
     tile.buildings = undefined;
     tile.player = undefined;
     tile.fort = false;
@@ -120,13 +113,13 @@ const resolveHeadstrongCommander = (G: MyGameState, event: DeferredEvent): void 
   }
 };
 
-/**
- * Auto-resolve Infidels Invade Faerie.
- * A random Host counter attacks a colony/outpost.
- * Owner wins: +1 VP, Host back to pool.
- * Infidels win: Host stays, trade gains lost.
- */
-const resolveInfidelsInvadeFaerie = (G: MyGameState, event: DeferredEvent): void => {
+// ── Infidels Invade Faerie ──────────────────────────────────────────────────
+
+const resolveInfidelsInvadeFaerie = (
+  G: MyGameState,
+  event: DeferredEvent,
+  fowCard?: { sword: number; shield: number }
+): void => {
   const { targetPlayerID, targetTile } = event;
   if (!targetTile) return;
 
@@ -139,20 +132,17 @@ const resolveInfidelsInvadeFaerie = (G: MyGameState, event: DeferredEvent): void
   const land = G.mapState.currentTileArray[y][x];
   const kingdom = G.playerInfo[targetPlayerID].kingdomName;
 
-  // Draw a random Host counter
   const host = G.infidelHostPool.pop()!;
   logEvent(G, `Infidels attack ${kingdom}'s ${G.mapState.buildings[y][x].buildings} at ${land.name}! Host: ${host.swords} swords`);
 
-  // Defender: garrisoned troops
   const tile = G.mapState.buildings[y][x];
   const defRegiments = tile.garrisonedRegiments;
   const defLevies = tile.garrisonedLevies;
   const defSwords = defRegiments * 2 + defLevies;
   const defShields = hasFortAt(G, x, y) ? defRegiments + defLevies : 0;
 
-  // Simulated FoW draws
   const fowHost = drawFortuneOfWarCard(G);
-  const fowDefender = drawFortuneOfWarCard(G);
+  const fowDefender = fowCard ?? drawFortuneOfWarCard(G);
 
   const hitsOnDefender = Math.max(0, host.swords + fowHost.sword - defShields - fowDefender.shield);
   const hitsOnHost = Math.max(0, defSwords + fowDefender.sword - host.shields - fowHost.shield);
@@ -162,36 +152,70 @@ const resolveInfidelsInvadeFaerie = (G: MyGameState, event: DeferredEvent): void
 
   if (defenderWins) {
     addVPAmount(G, targetPlayerID, 1);
-    G.infidelHostPool.push(host); // Host back to pool
+    G.infidelHostPool.push(host);
     logEvent(G, `${kingdom} repels the Infidels! +1 VP`);
   } else {
-    // Host stays on the tile — trade gains lost
-    // Mark tile as occupied by infidels (similar to rebel counter)
-    tile.rebelCounter = host.swords; // reuse field for infidel occupation
+    tile.rebelCounter = host.swords;
     logEvent(G, `Infidels seize ${kingdom}'s ${tile.buildings} at ${land.name}! Trade gains lost`);
   }
 };
 
-// ── Main dispatcher ──────────────────────────────────────────────────────────
+// ── Dispatchers ─────────────────────────────────────────────────────────────
 
 /**
- * Resolve a non-rebellion deferred battle event.
- *
- * TODO: Replace with interactive conquest/battle sub-phases.
+ * Resolve a deferred battle with an optional player FoW card.
+ * Called from commitDeferredBattleCard move after player makes their choice.
+ */
+export const resolveDeferredBattleInteractive = (
+  G: MyGameState,
+  event: DeferredEvent,
+  fowCard?: { sword: number; shield: number }
+): void => {
+  switch (event.card) {
+    case "faerie_uprising":
+      resolveFaerieUprising(G, event, fowCard);
+      break;
+    case "headstrong_commander":
+      resolveHeadstrongCommander(G, event, fowCard);
+      break;
+    case "infidels_invade_faerie":
+      resolveInfidelsInvadeFaerie(G, event, fowCard);
+      break;
+  }
+};
+
+/**
+ * Legacy auto-resolve (no player input). Still used as fallback.
  */
 export const resolveDeferredBattle = (
   G: MyGameState,
   event: DeferredEvent
 ): void => {
+  resolveDeferredBattleInteractive(G, event);
+};
+
+/**
+ * Get a human-readable description of a deferred battle for the UI.
+ */
+export const getDeferredBattleDescription = (
+  G: MyGameState,
+  event: DeferredEvent
+): string => {
+  const { targetTile } = event;
+  if (!targetTile) return "Unknown battle";
+  const [x, y] = targetTile;
+  const land = G.mapState.currentTileArray[y]?.[x];
+  const landName = land?.name ?? "unknown land";
+  const kingdom = G.playerInfo[event.targetPlayerID]?.kingdomName ?? "Unknown";
+
   switch (event.card) {
     case "faerie_uprising":
-      resolveFaerieUprising(G, event);
-      break;
+      return `Faerie Uprising at ${landName}! The land attacks ${kingdom}'s colony with ${(land?.sword ?? 0) * 2} swords.`;
     case "headstrong_commander":
-      resolveHeadstrongCommander(G, event);
-      break;
+      return `Headstrong Commander! ${kingdom}'s garrison at ${landName} attempts conquest against the land.`;
     case "infidels_invade_faerie":
-      resolveInfidelsInvadeFaerie(G, event);
-      break;
+      return `Infidels Invade! A Host counter attacks ${kingdom}'s settlement at ${landName}.`;
+    default:
+      return `Battle at ${landName}`;
   }
 };

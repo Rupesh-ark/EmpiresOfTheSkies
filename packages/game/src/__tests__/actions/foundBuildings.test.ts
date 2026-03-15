@@ -146,9 +146,23 @@ describe("foundBuildings — Shipyard (3 Gold base)", () => {
 
 // ── Fort (slot 3) ─────────────────────────────────────────────────────────────
 
+/** Add a valid fort target to the buildings grid: outpost owned by player with garrisoned troops */
+function addValidFortTile(G: ReturnType<typeof buildInitialG>, playerID: string) {
+  // Ensure buildings grid has at least 1 row with a tile at index 0
+  if (!G.mapState.buildings.length) G.mapState.buildings = [[]];
+  G.mapState.buildings[0][0] = {
+    player: G.playerInfo[playerID],
+    buildings: "outpost",
+    fort: false,
+    garrisonedRegiments: 1,
+    garrisonedLevies: 0,
+  } as any;
+}
+
 describe("foundBuildings — Fort (v4.2: 2 Gold base + 1 per counsellor in slot)", () => {
   it("costs 2 Gold when first in slot", () => {
     const G = buildInitialG();
+    addValidFortTile(G, "0");
     const goldBefore = G.playerInfo["0"].resources.gold;
     callMove(G, "0", 3);
     expect(G.playerInfo["0"].resources.gold).toBe(goldBefore - 2);
@@ -156,6 +170,7 @@ describe("foundBuildings — Fort (v4.2: 2 Gold base + 1 per counsellor in slot)
 
   it("costs 3 Gold when one counsellor already in slot", () => {
     const G = buildInitialG();
+    addValidFortTile(G, "0");
     G.boardState.foundBuildings[4] = ["1"];
     const goldBefore = G.playerInfo["0"].resources.gold;
     callMove(G, "0", 3);
@@ -164,6 +179,7 @@ describe("foundBuildings — Fort (v4.2: 2 Gold base + 1 per counsellor in slot)
 
   it("costs 1 counsellor", () => {
     const G = buildInitialG();
+    addValidFortTile(G, "0");
     const counsellorsBefore = G.playerInfo["0"].resources.counsellors;
     callMove(G, "0", 3);
     expect(G.playerInfo["0"].resources.counsellors).toBe(counsellorsBefore - 1);
@@ -171,8 +187,16 @@ describe("foundBuildings — Fort (v4.2: 2 Gold base + 1 per counsellor in slot)
 
   it("does NOT mark turnComplete (placement continues in a sub-stage)", () => {
     const G = buildInitialG();
+    addValidFortTile(G, "0");
     callMove(G, "0", 3);
     expect(G.playerInfo["0"].turnComplete).toBe(false);
+  });
+
+  it("returns INVALID_MOVE when no valid fort tile exists", () => {
+    const G = buildInitialG();
+    // No buildings grid tiles → no valid location
+    const result = callMove(G, "0", 3);
+    expect(result).toBe(INVALID_MOVE);
   });
 });
 

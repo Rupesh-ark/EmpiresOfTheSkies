@@ -161,6 +161,7 @@ export function buildInitialG(
     currentInvasion: null,
     infidelFleetCombat: null,
     pendingDeal: undefined,
+    currentDeferredBattle: null,
     eventState: {
       deck: [],
       chosenCards: [],
