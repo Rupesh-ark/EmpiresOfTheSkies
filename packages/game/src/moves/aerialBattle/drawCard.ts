@@ -3,7 +3,7 @@ import { MyGameState } from "../../types";
 import { drawFortuneOfWarCard } from "../../helpers/helpers";
 import { resolveBattleAndReturnWinner } from "../../helpers/resolveBattle";
 
-//TODO: add possibility to draw a no effect card from the deck
+// No-effect cards are handled by drawFortuneOfWarCard (reshuffle + redraw).
 const drawCard: Move<MyGameState> = (
   { G, ctx, playerID, events, random },
   ...args
@@ -11,7 +11,6 @@ const drawCard: Move<MyGameState> = (
   if (G.battleState) {
     Object.values(G.battleState).forEach((battler) => {
       if (battler.id === playerID) {
-        //draw card function currently never returns a no effect card
         battler.fowCard = drawFortuneOfWarCard(G);
       }
     });

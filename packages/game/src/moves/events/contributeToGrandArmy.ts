@@ -3,16 +3,13 @@ import { INVALID_MOVE } from "boardgame.io/core";
 import { MyGameState } from "../../types";
 import { logEvent } from "../../helpers/stateUtils";
 import { resolveGrandArmyBattle } from "../../helpers/resolveInvasion";
-import { checkForInvasion } from "../../helpers/resolveInvasion";
 import { EventsAPI } from "boardgame.io/dist/types/src/plugins/events/events";
 import { Ctx } from "boardgame.io/dist/types/src/types";
 
 /**
- * Move called by each player in IPO order to contribute troops
- * to the Grand Army of the Faith. Zero is a valid choice (but
- * triggers heresy shame penalty after battle).
- *
- * TODO: Also allow fleet contribution.
+ * Move called by each player in IPO order to contribute troops and
+ * skyships to the Grand Army of the Faith. Zero is a valid choice
+ * (but triggers heresy shame penalty after battle).
  */
 const contributeToGrandArmy: Move<MyGameState> = (
   { G, ctx, playerID, events }: {
@@ -22,7 +19,8 @@ const contributeToGrandArmy: Move<MyGameState> = (
     events: EventsAPI;
   },
   regiments: number,
-  levies: number
+  levies: number,
+  skyships: number = 0
 ) => {
   if (!G.currentInvasion) return INVALID_MOVE;
   if (G.currentInvasion.phase !== "contribute") return INVALID_MOVE;
@@ -30,17 +28,22 @@ const contributeToGrandArmy: Move<MyGameState> = (
   const player = G.playerInfo[playerID];
 
   // Validate
-  if (regiments < 0 || levies < 0) return INVALID_MOVE;
+  if (regiments < 0 || levies < 0 || skyships < 0) return INVALID_MOVE;
   if (regiments > player.resources.regiments) return INVALID_MOVE;
   if (levies > player.resources.levies) return INVALID_MOVE;
+  if (skyships > player.resources.skyships) return INVALID_MOVE;
 
   // Record contribution
-  G.currentInvasion.contributions[playerID] = { regiments, levies };
+  G.currentInvasion.contributions[playerID] = { regiments, levies, skyships };
 
-  const totalSwords = regiments * 2 + levies;
+  const totalSwords = regiments * 2 + levies + skyships;
+  const parts = [];
+  if (regiments > 0) parts.push(`${regiments} regiments`);
+  if (levies > 0) parts.push(`${levies} levies`);
+  if (skyships > 0) parts.push(`${skyships} skyships`);
   logEvent(
     G,
-    `${player.kingdomName} contributes ${regiments} regiments, ${levies} levies (${totalSwords} swords) to the Grand Army`
+    `${player.kingdomName} contributes ${parts.join(", ") || "nothing"} (${totalSwords} swords) to the Grand Army`
   );
 
   // Check if all players have contributed

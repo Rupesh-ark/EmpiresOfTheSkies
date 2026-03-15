@@ -87,7 +87,7 @@ export interface MyGameState {
   } | null;
   currentInvasion: {
     totalHostSwords: number;
-    contributions: Record<string, { regiments: number; levies: number }>;
+    contributions: Record<string, { regiments: number; levies: number; skyships: number }>;
     phase: "nominate" | "contribute" | "buyoff";
     buyoffCost?: number;
     buyoffOffered?: Record<string, number>;

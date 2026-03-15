@@ -94,7 +94,9 @@ type PlayerContribution = {
   playerID: string;
   regiments: number;
   levies: number;
+  skyships: number;
   totalSwords: number;
+  totalShields: number;
 };
 
 /**
@@ -115,12 +117,14 @@ export const resolveGrandArmyBattle = (G: MyGameState): number => {
 
   // Build contributions from currentInvasion
   const contributions: PlayerContribution[] = turnOrder.map((id) => {
-    const c = invasion.contributions[id] ?? { regiments: 0, levies: 0 };
+    const c = invasion.contributions[id] ?? { regiments: 0, levies: 0, skyships: 0 };
     return {
       playerID: id,
       regiments: c.regiments,
       levies: c.levies,
-      totalSwords: c.regiments * 2 + c.levies,
+      skyships: c.skyships,
+      totalSwords: c.regiments * 2 + c.levies + c.skyships,
+      totalShields: c.skyships, // each skyship contributes 1 shield
     };
   });
 
@@ -139,13 +143,14 @@ export const resolveGrandArmyBattle = (G: MyGameState): number => {
   );
 
   // ── 5. Calculate battle ──
-  // Grand Army: player troops + contingent counters
+  // Grand Army: player troops + skyship shields + contingent counters
   const grandArmySwords =
     contributions.reduce((sum, c) => sum + c.totalSwords, 0) +
     contingentSwords;
+  const grandArmyShields =
+    contributions.reduce((sum, c) => sum + c.totalShields, 0);
 
   // Infidel: all accumulated non-Fleet Host swords
-  // (Fleet fights aerially first — stubbed, so we include it in ground total for now)
   const infidelSwords = G.accumulatedHosts.reduce(
     (sum, h) => sum + h.swords,
     0
@@ -165,7 +170,7 @@ export const resolveGrandArmyBattle = (G: MyGameState): number => {
   );
   const hitsOnArmy = Math.max(
     0,
-    infidelSwords + fowInfidel.sword - fowArmy.shield
+    infidelSwords + fowInfidel.sword - grandArmyShields - fowArmy.shield
   );
 
   const grandArmyWins = hitsOnInfidel >= infidelSwords;

@@ -281,6 +281,7 @@ describe("contributeToGrandArmy — state mutations", () => {
     expect(G.currentInvasion!.contributions["0"]).toEqual({
       regiments: 4,
       levies: 2,
+      skyships: 0,
     });
   });
 
@@ -299,6 +300,7 @@ describe("contributeToGrandArmy — state mutations", () => {
     expect(G.currentInvasion!.contributions["0"]).toEqual({
       regiments: 0,
       levies: 0,
+      skyships: 0,
     });
   });
 
@@ -436,7 +438,7 @@ describe("offerBuyoffGold — state mutations", () => {
     ]);
     G.currentInvasion = {
       totalHostSwords: 10,
-      contributions: { "0": { regiments: 0, levies: 0 }, "1": { regiments: 0, levies: 0 } },
+      contributions: { "0": { regiments: 0, levies: 0, skyships: 0 }, "1": { regiments: 0, levies: 0, skyships: 0 } },
       phase: "buyoff",
       buyoffCost: 8,
       buyoffOffered: {},

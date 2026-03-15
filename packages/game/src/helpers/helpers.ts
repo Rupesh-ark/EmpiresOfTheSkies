@@ -163,8 +163,6 @@ export const drawFortuneOfWarCard = (G: MyGameState): FortuneOfWarCardInfo => {
 // ── Tile query helpers ────────────────────────────────────────────────────────
 // Reusable functions for checking tile state. All accept optional playerID
 // to scope the check to a specific player.
-// TODO: Add hasSettlementAt / hasAnySettlement if a new building type is
-// introduced that should count alongside outposts and colonies.
 
 /** Check if a tile has a fort (optionally owned by a specific player) */
 export const hasFortAt = (
