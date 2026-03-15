@@ -1,5 +1,7 @@
 import { Move } from "boardgame.io";
-import { MyGameState } from "../../types";
+import { MyGameState, GoodKey } from "../../types";
+
+const GOODS: GoodKey[] = ["mithril", "dragonScales", "krakenSkin", "magicDust", "stickyIchor", "pipeweed"];
 
 const constructOutpost: Move<MyGameState> = (
   { G, ctx, playerID, events, random },
@@ -12,9 +14,14 @@ const constructOutpost: Move<MyGameState> = (
 
   currentBuilding.player = currentPlayer;
   currentBuilding.buildings = "outpost";
-  // TODO (GAP-15 sub-rule 2): move price markers left for outpost goods per "To Claim" rule.
-  // Requires the trade-route setup step to be implemented first, because the rule only applies
-  // "If a Trade Route has been established" (which the player does after placing the outpost).
+
+  // Move price markers left for outpost goods ("To Claim" rule)
+  GOODS.forEach((good) => {
+    const qty = currentTile.loot.outpost[good];
+    if (qty > 0) {
+      G.mapState.goodsPriceMarkers[good] = Math.max(1, G.mapState.goodsPriceMarkers[good] - qty);
+    }
+  });
 
   Object.entries(currentTile.loot.outpost).forEach(([lootName, value]) => {
     const lootNameAsResource = lootName as keyof typeof currentTile.loot.colony;

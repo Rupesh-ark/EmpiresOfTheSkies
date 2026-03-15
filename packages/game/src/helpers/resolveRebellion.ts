@@ -16,6 +16,7 @@ import {
 } from "./stateUtils";
 import { drawFortuneOfWarCard, hasFortAt } from "./helpers";
 import { CARD_RESOLVERS, resolveCardWithAlignmentPenalty } from "./legacyCardDefinitions";
+import { KINGDOM_LOCATION } from "../codifiedGameInfo";
 
 // ── Battle math ──────────────────────────────────────────────────────────────
 
@@ -217,14 +218,14 @@ export const resolveRebellionEvent = (
     return;
   }
 
-  // Check for fort
+  // Check for fort — colonial rebellions use the colony tile, others use Kingdom
   let fortPresent = false;
   if (card === "colonial_rebellion" && targetTile) {
     fortPresent = hasFortAt(G, targetTile[0], targetTile[1]);
+  } else {
+    fortPresent = hasFortAt(G, KINGDOM_LOCATION[0], KINGDOM_LOCATION[1]);
   }
-  // TODO: Check for fort at Kingdom location for other rebellions
 
-  // TODO: Replace simulated FoW draws with player FoW card selection
   const fowRebel = drawFortuneOfWarCard(G);
   const fowDefender = drawFortuneOfWarCard(G);
 
@@ -346,10 +347,12 @@ export const resolveRebellionWithTroops = (
     return;
   }
 
-  // Check for fort
+  // Check for fort — colonial rebellions use the colony tile, others use Kingdom
   let fortPresent = false;
   if (card === "colonial_rebellion" && targetTile) {
     fortPresent = hasFortAt(G, targetTile[0], targetTile[1]);
+  } else {
+    fortPresent = hasFortAt(G, KINGDOM_LOCATION[0], KINGDOM_LOCATION[1]);
   }
 
   // Rebel always draws from deck; defender uses hand card if provided
@@ -412,13 +415,16 @@ export const resolveRebellionWithTroopsAndRivals = (
     logEvent(G, `${kingdom} surrenders \u2014 rebels win automatically`);
     applyOutcome(G, card, targetPlayerID, false, counterSwords, targetTile);
     returnCounter(G, card, false, counterSwords);
-    returnRivalTroops(G, rivalContributions ?? {});
+    returnRivalTroops(G, false, rivalContributions ?? {});
     return;
   }
 
+  // Check for fort — colonial rebellions use the colony tile, others use Kingdom
   let fortPresent = false;
   if (card === "colonial_rebellion" && targetTile) {
     fortPresent = hasFortAt(G, targetTile[0], targetTile[1]);
+  } else {
+    fortPresent = hasFortAt(G, KINGDOM_LOCATION[0], KINGDOM_LOCATION[1]);
   }
 
   // Rebel always draws from deck; defender uses hand card if provided
@@ -452,19 +458,26 @@ export const resolveRebellionWithTroopsAndRivals = (
 
   applyOutcome(G, card, targetPlayerID, defenderWins, counterSwords, targetTile);
   returnCounter(G, card, defenderWins, counterSwords);
-  returnRivalTroops(G, rivalContributions ?? {});
+  returnRivalTroops(G, defenderWins, rivalContributions ?? {});
 };
 
-/** Return surviving rival troops to their kingdoms */
+/**
+ * Return surviving rival troops to their kingdoms.
+ * Troops on the winning side survive and return in full.
+ * Troops on the losing side are lost (they were overrun).
+ */
 const returnRivalTroops = (
   G: MyGameState,
+  defenderWins: boolean,
   rivalContributions: Record<string, { side: string; regiments: number; levies: number }>
 ): void => {
-  // For now, all rival troops survive and return
-  // TODO: Apply losses to rival troops based on battle damage
-  for (const [, contrib] of Object.entries(rivalContributions)) {
-    // Troops were never actually removed from the rival's kingdom
-    // (they contribute from their pool conceptually)
-    // In full implementation, remove on commit and return survivors here
+  const winningSide = defenderWins ? "defender" : "rebel";
+  for (const [playerID, contrib] of Object.entries(rivalContributions)) {
+    if (contrib.side === winningSide) {
+      // Winning side — return all troops
+      G.playerInfo[playerID].resources.regiments += contrib.regiments;
+      G.playerInfo[playerID].resources.levies += contrib.levies;
+    }
+    // Losing side — troops are lost (already deducted on commit)
   }
 };

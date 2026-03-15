@@ -38,8 +38,10 @@ const contributeToRebellion: Move<MyGameState> = (
   if (regiments > player.resources.regiments) return INVALID_MOVE;
   if (levies > player.resources.levies) return INVALID_MOVE;
 
-  // Record contribution
+  // Record contribution and deduct troops from rival's kingdom
   rebellion.rivalContributions[playerID] = { side, regiments, levies };
+  player.resources.regiments -= regiments;
+  player.resources.levies -= levies;
 
   if (regiments + levies > 0) {
     logEvent(G, `${player.kingdomName} sends ${regiments}R/${levies}L to support the ${side}`);

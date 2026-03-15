@@ -101,6 +101,38 @@ describe("constructOutpost — placing an outpost", () => {
     (constructOutpost as Function)({ G, ctx, playerID: "0", events: stubEvents, random: {} });
     expect(G.stage).toBe("garrison troops");
   });
+
+  it("decreases mithril price marker by loot quantity (min 1)", () => {
+    const G = buildInitialG();
+    G.mapState = { ...G.mapState, ...buildMapWithLoot({ mithril: 2 }) };
+    G.mapState.currentBattle = [0, 0];
+    const markerBefore = G.mapState.goodsPriceMarkers.mithril; // default 2
+    const ctx = { ...buildCtx("0"), currentPlayer: "0" };
+    (constructOutpost as Function)({ G, ctx, playerID: "0", events: stubEvents, random: {} });
+    // marker = max(1, 2 - 2) = max(1, 0) = 1
+    expect(G.mapState.goodsPriceMarkers.mithril).toBe(Math.max(1, markerBefore - 2));
+  });
+
+  it("does not decrease price marker below 1", () => {
+    const G = buildInitialG();
+    G.mapState = { ...G.mapState, ...buildMapWithLoot({ dragonScales: 5 }) };
+    G.mapState.currentBattle = [0, 0];
+    G.mapState.goodsPriceMarkers.dragonScales = 3;
+    const ctx = { ...buildCtx("0"), currentPlayer: "0" };
+    (constructOutpost as Function)({ G, ctx, playerID: "0", events: stubEvents, random: {} });
+    // marker = max(1, 3 - 5) = max(1, -2) = 1
+    expect(G.mapState.goodsPriceMarkers.dragonScales).toBe(1);
+  });
+
+  it("does not change price marker when loot quantity is 0", () => {
+    const G = buildInitialG();
+    G.mapState = { ...G.mapState, ...buildMapWithLoot({ mithril: 0 }) };
+    G.mapState.currentBattle = [0, 0];
+    G.mapState.goodsPriceMarkers.mithril = 5;
+    const ctx = { ...buildCtx("0"), currentPlayer: "0" };
+    (constructOutpost as Function)({ G, ctx, playerID: "0", events: stubEvents, random: {} });
+    expect(G.mapState.goodsPriceMarkers.mithril).toBe(5);
+  });
 });
 
 // ── coloniseLand ─────────────────────────────────────────────────────────────

@@ -204,7 +204,6 @@ export const resolveGrandArmyBattle = (G: MyGameState): number => {
   G.accumulatedHosts = [];
 
   // Infidel Fleet retreats to Infidel Empire (if not destroyed)
-  // TODO: Track Fleet destruction properly via aerial combat
   if (G.infidelFleet && !G.infidelFleet.destroyed) {
     G.infidelFleet.location = [...INFIDEL_EMPIRE_LOCATION] as [number, number];
   }
