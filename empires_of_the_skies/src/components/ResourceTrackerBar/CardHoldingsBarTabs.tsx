@@ -2,9 +2,9 @@ import { Box, Popper, Typography } from "@mui/material";
 import { Close, MenuBook, Style } from "@mui/icons-material";
 import { KingdomAdvantageCard } from "@eots/game";
 import { alpha, darken } from "@mui/material/styles";
-import { fonts } from "../../designTokens";
+import { fonts } from "@/designTokens";
 import svgNameToElementMap from "../WorldMap/nameToElementMap";
-import { KA_CARD_IMAGES } from "../../assets/kingdomAdvantage";
+import { KA_CARD_IMAGES } from "@/assets/kingdomAdvantage";
 
 const kingdomAdvantageCardArt: Partial<Record<KingdomAdvantageCard, string>> = KA_CARD_IMAGES;
 

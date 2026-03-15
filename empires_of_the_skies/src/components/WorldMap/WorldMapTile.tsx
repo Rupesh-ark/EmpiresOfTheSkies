@@ -13,7 +13,7 @@ import FleetIcon from "../Icons/FleetIcon";
 import ColonyIcon from "../Icons/ColonyIcon";
 import OutpostIcon from "../Icons/OutpostIcon";
 import svgNameToElementMap from "./nameToElementMap";
-import { getLocationPresentation } from "../../utils/locationLabels";
+import { getLocationPresentation } from "@/utils/locationLabels";
 
 //Method for displaying a flippable tile which contains a world map tile image
 export const WorldMapTile = (props: worldMapTileProps) => {

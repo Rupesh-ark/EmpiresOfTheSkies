@@ -12,7 +12,7 @@ import {
 } from "@eots/game";
 import React, { useState } from "react";
 import { ButtonRow } from "./ActionBoardButtonRow";
-import { KingdomButton } from "../../shared/KingdomButton";
+import { KingdomButton } from "@/components/shared/KingdomButton";
 //Consider using a dropdown menu for selecting the kingdom to curse or bless, could make the experience clearer
 const HolyDecreeDialog = (props: HolyDecreeDialogProps) => {
   const mostHereticalKingdoms = findMostHereticalKingdoms(props.G);

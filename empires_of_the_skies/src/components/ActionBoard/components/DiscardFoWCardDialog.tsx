@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { MyGameProps } from "@eots/game";
-import FleetDisplay from "../../PlayerBoard/FleetDisplay";
-import WorldMap from "../../WorldMap/WorldMap";
+import FleetDisplay from "@/components/PlayerBoard/FleetDisplay";
+import WorldMap from "@/components/WorldMap/WorldMap";
 import {
   Button,
   Dialog,
@@ -9,7 +9,7 @@ import {
   DialogContent,
   DialogTitle,
 } from "@mui/material";
-import { getLocationPresentation } from "../../../utils/locationLabels";
+import { getLocationPresentation } from "@/utils/locationLabels";
 
 const DiscardFowCardDialog = (props: RetrieveFleetsDialogProps) => {
   const [open, setOpen] = useState(true);

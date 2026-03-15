@@ -9,7 +9,7 @@ import {
   DialogContent,
   DialogTitle,
 } from "@mui/material";
-import { getLocationPresentation } from "../../utils/locationLabels";
+import { getLocationPresentation } from "@/utils/locationLabels";
 
 const RetrieveFleetsDialog = (props: RetrieveFleetsDialogProps) => {
   const [open, setOpen] = useState(true);

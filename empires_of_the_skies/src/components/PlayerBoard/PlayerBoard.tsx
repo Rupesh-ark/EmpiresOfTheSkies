@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-import { BUILD_SKYSHIPS as buildSkyships, CONSCRIPT_LEVIES as conscriptLevies, TRAIN_TROOPS as trainTroopsSvg } from "../../assets/playerBoard";
+import { BUILD_SKYSHIPS as buildSkyships, CONSCRIPT_LEVIES as conscriptLevies, TRAIN_TROOPS as trainTroopsSvg } from "@/assets/playerBoard";
 import { FleetInfo, findPossibleDestinations, MyGameProps } from "@eots/game";
 import { PlayerBoardButton } from "./PlayerBoardButton";
 import {
@@ -15,12 +15,12 @@ import {
 } from "@mui/material";
 import { alpha, darken, getContrastRatio } from "@mui/material/styles";
 import { influencePrelatesTheme } from "../themes";
-import { fonts } from "../../designTokens";
+import { fonts } from "@/designTokens";
 import FortuneOfWarCardDisplay from "./FortuneOfWarCardDisplay";
 import ShipYardDisplay from "./ShipYardDisplay";
 import WorldMap from "../WorldMap/WorldMap";
-import { clearMoves } from "../../utils/gameHelpers";
-import { getLocationPresentation } from "../../utils/locationLabels";
+import { clearMoves } from "@/utils/gameHelpers";
+import { getLocationPresentation } from "@/utils/locationLabels";
 import SkyshipIcon from "../Icons/SkyshipIcon";
 import RegimentIcon from "../Icons/RegimentIcon";
 import LevyIcon from "../Icons/LevyIcon";

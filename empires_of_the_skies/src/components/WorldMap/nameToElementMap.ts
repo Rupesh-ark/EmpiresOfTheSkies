@@ -1,6 +1,6 @@
-import { KNOWN_WORLD, UNKNOWN_WORLD, LEGEND_TILES } from "../../assets/mapTiles";
-import { SWORD_CARDS, SHIELD_CARDS, NO_EFFECT_CARD } from "../../assets/fortuneOfWarCards";
-import { LEGACY_CARD_IMAGES } from "../../assets/legacyCards";
+import { KNOWN_WORLD, UNKNOWN_WORLD, LEGEND_TILES } from "@/assets/mapTiles";
+import { SWORD_CARDS, SHIELD_CARDS, NO_EFFECT_CARD } from "@/assets/fortuneOfWarCards";
+import { LEGACY_CARD_IMAGES } from "@/assets/legacyCards";
 
 const svgNameToElementMap: Record<string, string> = {
   // Known world tiles

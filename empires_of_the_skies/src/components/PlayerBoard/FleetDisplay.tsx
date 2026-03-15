@@ -1,6 +1,6 @@
 import { FleetInfo } from "@eots/game";
 import { Box, Button, Typography } from "@mui/material";
-import { fonts } from "../../designTokens";
+import { fonts } from "@/designTokens";
 
 const FleetDisplay = (props: FleetDisplayProps) => {
   const isSelected = props.selected === props.fleetId;
