@@ -24,10 +24,8 @@ const constructOutpost: Move<MyGameState> = (
     }
   });
 
-  Object.entries(currentTile.loot.outpost).forEach(([lootName, value]) => {
-    const lootNameAsResource = lootName as keyof typeof currentTile.loot.colony;
-    currentPlayer.resources[lootNameAsResource] += value;
-  });
+  // GAP-RES1: goods are no longer granted immediately on claim —
+  // they are recalculated each round via grantTradeRouteGoods in resolveRound.
 
   currentPlayer.resources.victoryPoints += 1;
   increaseHeresyWithinMove(G, playerID);

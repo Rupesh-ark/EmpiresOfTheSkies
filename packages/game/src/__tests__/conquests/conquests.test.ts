@@ -4,7 +4,8 @@
  * Tests for conquest mechanics (v4.2).
  *
  * Covers:
- *   - constructOutpost: places outpost, grants tile loot + 1 VP, heresy +1, sets garrison stage
+ *   - constructOutpost: places outpost, grants +1 VP, heresy +1, sets garrison stage
+ *     NOTE: goods are no longer granted on claim (GAP-RES1) — they recur via trade routes each round
  *   - coloniseLand: sets up conquestState, advances to "conquest draw or pick card"
  */
 
@@ -81,7 +82,7 @@ describe("constructOutpost — placing an outpost", () => {
     expect(G.playerInfo["0"].heresyTracker).toBe(6);
   });
 
-  it("grants tile loot resources", () => {
+  it("does NOT grant tile loot resources immediately (GAP-RES1: goods come from trade routes each round)", () => {
     const G = buildInitialG();
     G.mapState = { ...G.mapState, ...buildMapWithLoot({ mithril: 2, gold: 3 }) };
     G.mapState.currentBattle = [0, 0];
@@ -89,8 +90,9 @@ describe("constructOutpost — placing an outpost", () => {
     const mithrilBefore = G.playerInfo["0"].resources.mithril;
     const ctx = { ...buildCtx("0"), currentPlayer: "0" };
     (constructOutpost as Function)({ G, ctx, playerID: "0", events: stubEvents, random: {} });
-    expect(G.playerInfo["0"].resources.gold).toBe(goldBefore + 3);
-    expect(G.playerInfo["0"].resources.mithril).toBe(mithrilBefore + 2);
+    // Goods are no longer granted at claim time — they recur via grantTradeRouteGoods in resolveRound
+    expect(G.playerInfo["0"].resources.gold).toBe(goldBefore);
+    expect(G.playerInfo["0"].resources.mithril).toBe(mithrilBefore);
   });
 
   it("sets stage to 'garrison troops'", () => {
