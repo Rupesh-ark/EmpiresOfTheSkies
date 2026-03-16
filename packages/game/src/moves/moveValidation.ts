@@ -18,7 +18,6 @@ export const validateMove = (
 ) => {
   // Counsellor placement check
   if (opts.costsCounsellor && G.playerInfo[playerID].resources.counsellors === 0) {
-    console.log("Player has no counsellors to place");
     return INVALID_MOVE;
   }
 

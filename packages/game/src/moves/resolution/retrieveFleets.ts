@@ -14,9 +14,6 @@ const retrieveFleets: Move<MyGameState> = (
       const oldLocation = currentFleet.location;
 
       currentFleet.location = [4, 0];
-      console.log(
-        `New fleet location: ${G.playerInfo[playerID].fleetInfo[fleetId].location}`
-      );
 
       currentPlayer.resources.skyships += currentFleet.skyships;
       currentPlayer.resources.regiments += currentFleet.regiments;

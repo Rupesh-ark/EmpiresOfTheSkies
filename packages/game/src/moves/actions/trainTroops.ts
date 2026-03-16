@@ -11,7 +11,6 @@ const trainTroops: Move<MyGameState> = ({ G, playerID }) => {
   const playerBoard = G.playerInfo[playerID].playerBoardCounsellorLocations;
 
   if (playerBoard.trainTroops) {
-    console.log("Player has selected a move which has already been taken.");
     return INVALID_MOVE;
   }
   for (let i = 0; i < FOW_CARDS_DRAWN; i++) {

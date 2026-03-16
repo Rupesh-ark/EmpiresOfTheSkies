@@ -47,24 +47,18 @@ const deployFleet: Move<MyGameState> = (
       currentPlayer.resources.regiments < regimentCount ||
       currentPlayer.resources.levies < levyCount
     ) {
-      console.log(
-        "Player has attempted to deploy more of a resource than they have ready, something has gone wrong..."
-      );
       return INVALID_MOVE;
     }
   }
   if (skyshipCount === 0) {
-    console.log("Player has attempted to deploy a fleet with no skyships");
     return INVALID_MOVE;
   }
   // GAP-13: max 5 skyships per fleet
   if (skyshipCount > MAX_SKYSHIPS_PER_FLEET) {
-    console.log("Player has attempted to deploy more than 5 skyships in one fleet");
     return INVALID_MOVE;
   }
   // K10: 1 troop (regiment or levy) per skyship
   if (regimentCount + levyCount > skyshipCount) {
-    console.log("Fleet cannot carry more troops than skyships (1 troop per skyship)");
     return INVALID_MOVE;
   }
 
@@ -93,9 +87,6 @@ const deployFleet: Move<MyGameState> = (
   });
 
   if (!destinationValid) {
-    console.log(
-      "Player is attempting to deploy a fleet to a tile outwith its range"
-    );
     return INVALID_MOVE;
   }
 
@@ -128,7 +119,6 @@ const deployFleet: Move<MyGameState> = (
   if (!G.mapState.battleMap[y][x].includes(playerID)) {
     G.mapState.battleMap[y][x].push(playerID);
   }
-  console.log(G.mapState.battleMap[y][x]);
 
   removeGoldAmount(G, playerID, cost);
   G.playerInfo[playerID].playerBoardCounsellorLocations.dispatchSkyshipFleet =

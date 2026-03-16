@@ -764,9 +764,6 @@ export const resolveEventCard = (
     case "faerie_uprising":
     case "headstrong_commander":
     case "infidels_invade_faerie":
-      console.log(
-        `${card}: battle event deferred to Resolution (not yet implemented)`
-      );
       break;
   }
 };

@@ -37,12 +37,10 @@ const executeSide = (
 
 const acceptDeal: Move<MyGameState> = ({ G, playerID }) => {
   if (!G.pendingDeal) {
-    console.log("No deal pending");
     return INVALID_MOVE;
   }
 
   if (G.pendingDeal.targetID !== playerID) {
-    console.log("Only the target player can accept a deal");
     return INVALID_MOVE;
   }
 
@@ -51,14 +49,12 @@ const acceptDeal: Move<MyGameState> = ({ G, playerID }) => {
   // Re-validate both sides (state may have changed since proposal)
   const offerError = validateOffer(G, proposerID, targetID, offering);
   if (offerError) {
-    console.log(`Proposer can no longer fulfil offer: ${offerError}`);
     G.pendingDeal = undefined;
     return INVALID_MOVE;
   }
 
   const requestError = validateOffer(G, targetID, proposerID, requesting);
   if (requestError) {
-    console.log(`Target can no longer fulfil request: ${requestError}`);
     G.pendingDeal = undefined;
     return INVALID_MOVE;
   }

@@ -11,7 +11,6 @@ const sellSkyships: Move<MyGameState> = ({ G, playerID }, ...args: any[]) => {
   }
 
   if (G.playerInfo[playerID].resources.skyships < amount) {
-    console.log("Player does not have enough skyships to sell");
     return INVALID_MOVE;
   }
 

@@ -280,7 +280,6 @@ const MyGame: Game<MyGameState> = {
         context.G.eventState.chosenCards = [];
         context.G.eventState.resolvedEvent = null;
         context.G.eventState.cannotConvertThisRound = [];
-        console.log("Events phase has begun");
       },
       moves: { chooseEventCard, resolveEventChoice },
       next: "discovery",
@@ -288,10 +287,8 @@ const MyGame: Game<MyGameState> = {
     discovery: {
       onBegin: (context) => {
         context.G.round += 1;
-        console.log(`Round: ${context.G.round}`);
         context.ctx.playOrderPos = 0;
         context.G.stage = "discovery";
-        console.log("Discovery phase has begun");
 
         context.G.firstTurnOfRound = true;
 
@@ -324,7 +321,6 @@ const MyGame: Game<MyGameState> = {
       turn: { order: TurnOrder.ONCE },
       onBegin: (context) => {
         context.G.stage = "taxes";
-        console.log("Taxes phase has begun");
 
         // Peasant REBELLION loss: skip taxes this round
         if (context.G.eventState.skipTaxesNextRound) {
@@ -352,11 +348,9 @@ const MyGame: Game<MyGameState> = {
       onBegin: (context) => {
         context.G.firstTurnOfRound = true;
         context.G.stage = "actions";
-        console.log("Actions phase has begun");
       },
       turn: {
         onBegin: (context) => {
-          console.log("new turn in action phase");
           if (context.G.firstTurnOfRound && context.ctx.playOrderPos !== 0) {
             context.events.endTurn({ next: context.ctx.playOrder[0] });
           }
@@ -409,14 +403,10 @@ const MyGame: Game<MyGameState> = {
     },
     aerial_battle: {
       onBegin: (context) => {
-        console.log("Aerial battle phase has begun");
         findNextBattle(context.G, context.events);
       },
       turn: {
         onBegin: (context) => {
-          console.log(
-            `It is now player ${context.ctx.currentPlayer}'s turn in the aerial battle phase`
-          );
           checkIfCurrentPlayerIsInCurrentBattle(
             context.G,
             context.ctx,
@@ -437,14 +427,10 @@ const MyGame: Game<MyGameState> = {
     },
     ground_battle: {
       onBegin: (context) => {
-        console.log("Ground battle phase has begun");
         findNextGroundBattle(context.G, context.events);
       },
       turn: {
         onBegin: (context) => {
-          console.log(
-            `It is now player ${context.ctx.currentPlayer}'s turn in the ground battle phase`
-          );
           checkIfCurrentPlayerIsInCurrentBattle(
             context.G,
             context.ctx,
@@ -466,17 +452,12 @@ const MyGame: Game<MyGameState> = {
     plunder_legends: {
       onBegin: (context) => {
         context.G.stage = "plunder legends";
-        console.log("Plunder legends phase has begun");
-
         findNextPlunder(context.G, context.events);
       },
       moves: { plunder, doNotPlunder },
       next: "ground_battle",
       turn: {
         onBegin: (context) => {
-          console.log(
-            `it is now player ${context.ctx.currentPlayer}'s time to plunder`
-          );
           checkIfCurrentPlayerIsInCurrentBattle(
             context.G,
             context.ctx,
@@ -488,14 +469,9 @@ const MyGame: Game<MyGameState> = {
     conquest: {
       onBegin: (context) => {
         context.G.stage = "attack or pass";
-
-        console.log("Conquests have begun");
       },
       turn: {
         onBegin: (context) => {
-          console.log(
-            `it is now player ${context.ctx.currentPlayer}'s time to conquer`
-          );
           checkIfCurrentPlayerIsInCurrentBattle(
             context.G,
             context.ctx,
@@ -532,8 +508,6 @@ const MyGame: Game<MyGameState> = {
     resolution: {
       turn: { order: TurnOrder.CUSTOM_FROM("turnOrder") },
       onBegin: (context) => {
-        console.log("resolution phase has begun");
-
         // Step 1: Infidel Fleet targeting + movement
         const hasCombat = prepareInfidelFleetCombat(context.G);
 
@@ -550,7 +524,6 @@ const MyGame: Game<MyGameState> = {
       },
       onEnd: (context) => {
         resolveRound(context.G, context.events, context.random);
-        console.log(`Round number:${context.G.round}`);
       },
       moves: { retrieveFleets, commitRebellionTroops, contributeToRebellion, nominateCaptainGeneral, contributeToGrandArmy, respondToInfidelFleet, offerBuyoffGold, commitDeferredBattleCard },
       next: "reset",
@@ -558,8 +531,6 @@ const MyGame: Game<MyGameState> = {
     reset: {
       turn: { order: TurnOrder.ONCE },
       onBegin: (context) => {
-        console.log("Reset phase has begun");
-
         // Recompute turn order from alterPlayerOrder choices
         const currentTurnOrder = [...context.ctx.playOrder];
         let newTurnOrder: string[] = [];
@@ -590,9 +561,6 @@ const MyGame: Game<MyGameState> = {
             if (key === "foundBuildings") {
               Object.values(gameStateObject).forEach((idArray: any) => {
                 idArray.forEach((id: string) => {
-                  console.log(
-                    `adding counsellor to player ${id} info for a founded ${key}`
-                  );
                   context.G.playerInfo[id].resources.counsellors += 1;
                 });
               });
@@ -601,9 +569,6 @@ const MyGame: Game<MyGameState> = {
             } else {
               Object.values(gameStateObject).forEach((id: any) => {
                 if (id) {
-                  console.log(
-                    `adding counsellor to player ${id} info for a ${key} button`
-                  );
                   context.G.playerInfo[id].resources.counsellors += 1;
                 }
               });
@@ -619,9 +584,6 @@ const MyGame: Game<MyGameState> = {
           Object.values(player.playerBoardCounsellorLocations).forEach(
             (counsellor, index) => {
               if (counsellor && index !== 3) {
-                console.log(
-                  "adding counsellor to player info for a player board button"
-                );
                 player.resources.counsellors += 1;
                 counsellor = false;
               }

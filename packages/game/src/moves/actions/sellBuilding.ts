@@ -10,11 +10,9 @@ const sellBuilding: Move<MyGameState> = ({ G, playerID }, ...args: any[]) => {
   if (buildingType === "cathedral") {
     // Only heretics can sell cathedrals
     if (player.hereticOrOrthodox !== "heretic") {
-      console.log("Only heretics can sell cathedrals");
       return INVALID_MOVE;
     }
     if (player.cathedrals <= 0) {
-      console.log("Player has no cathedrals to sell");
       return INVALID_MOVE;
     }
     player.cathedrals -= 1;
@@ -22,7 +20,6 @@ const sellBuilding: Move<MyGameState> = ({ G, playerID }, ...args: any[]) => {
   } else if (buildingType === "palace") {
     // Cannot sell last palace
     if (player.palaces <= 1) {
-      console.log("Cannot sell last palace");
       return INVALID_MOVE;
     }
     player.palaces -= 1;

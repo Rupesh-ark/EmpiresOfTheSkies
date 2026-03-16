@@ -23,7 +23,6 @@ const purchaseSkyships: Move<MyGameState> = (
   const slot: keyof typeof boardSlots = (slotIndex + 1) as 1 | 2;
 
   if (boardSlots[slot] !== undefined) {
-    console.log("Player has chosen an action which has already been taken");
     return INVALID_MOVE;
   }
 

@@ -26,16 +26,13 @@ export const alterPlayerOrder: Move<MyGameState> = (
   const playerID = ctx.currentPlayer;
   if (validateMove(playerID, G, { costsCounsellor: true })) return INVALID_MOVE;
   if (ctx.numPlayers < newPosition) {
-    console.log("Player has chosen a position that is out of bounds");
     return INVALID_MOVE;
   }
   if (G.boardState.pendingPlayerOrder[newPosition] !== undefined) {
-    console.log("Player has chosen a position that is already taken");
     return INVALID_MOVE;
   }
   for (const value of Object.values(G.boardState.pendingPlayerOrder)) {
     if (value === playerID) {
-      console.log("Player has already altered their position");
       return INVALID_MOVE;
     }
   }

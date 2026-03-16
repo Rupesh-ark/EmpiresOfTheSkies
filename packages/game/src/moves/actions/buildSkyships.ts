@@ -30,16 +30,12 @@ const buildSkyships: Move<MyGameState> = (
   if (validateMove(playerID, G, { costsCounsellor: true, costsGold: true })) return INVALID_MOVE;
 
   if (G.playerInfo[playerID].shipyards === 0) {
-    console.log("Player tried to build skyships without having any shipyards");
     return INVALID_MOVE;
   }
 
   if (
     G.playerInfo[playerID].playerBoardCounsellorLocations.buildSkyships === true
   ) {
-    console.log(
-      "Player has attempted to build skyships twice in the same phase of play"
-    );
     return INVALID_MOVE;
   }
 

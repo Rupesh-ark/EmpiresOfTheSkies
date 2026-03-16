@@ -11,7 +11,6 @@ import { MAX_LEVIES, LEVY_GROUP_SIZE } from "../../codifiedGameInfo";
 
 const conscriptLevies: Move<MyGameState> = ({ G, playerID }, ...args: any[]) => {
   if (G.playerInfo[playerID].playerBoardCounsellorLocations.conscriptLevies) {
-    console.log("Player has attempted to conscript levies twice in the same phase of play");
     return INVALID_MOVE;
   }
 

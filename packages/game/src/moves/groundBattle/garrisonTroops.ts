@@ -13,13 +13,8 @@ const garrisonTroops: Move<MyGameState> = (
     levies: levies,
     eliteRegiments: eliteRegiments,
   };
-  console.log(`Garrisoning ${troopInfo.regiments} regiments`);
   G.mapState.buildings[y][x].garrisonedRegiments += troopInfo.regiments;
-
-  console.log(`Garrisoning ${troopInfo.levies} levies`);
   G.mapState.buildings[y][x].garrisonedLevies += troopInfo.levies;
-
-  console.log(`Garrisoning ${troopInfo.eliteRegiments} elite regiments`);
   G.mapState.buildings[y][x].garrisonedEliteRegiments += troopInfo.eliteRegiments;
 
   G.mapState.buildings[y][x].player = G.playerInfo[playerID];

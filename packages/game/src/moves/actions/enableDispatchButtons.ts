@@ -25,9 +25,6 @@ const enableDispatchButtons: Move<MyGameState> = (
   if (
     G.playerInfo[playerID].playerBoardCounsellorLocations.dispatchSkyshipFleet
   ) {
-    console.log(
-      "Player has attempted to dispatch skyship fleet twice in once phase of play"
-    );
     return INVALID_MOVE;
   }
 };

@@ -31,7 +31,6 @@ const recruitRegiments: Move<MyGameState> = (
   if (validateMove(playerID, G, { costsCounsellor: true, costsGold: true })) return INVALID_MOVE;
   const value: keyof typeof G.boardState.recruitRegiments = args[0] + 1;
   if (G.boardState.recruitRegiments[value] !== undefined) {
-    console.log("Player has chosen an action which has already been taken");
     return INVALID_MOVE;
   }
   // v4.2: cost = 1 Gold + 1 Gold per counsellor in slot (including this one)

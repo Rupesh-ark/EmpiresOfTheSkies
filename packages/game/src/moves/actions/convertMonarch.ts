@@ -23,11 +23,9 @@ const convertMonarch: Move<MyGameState> = (
   if (G.eventState.cannotConvertThisRound.includes(playerID)) return INVALID_MOVE;
 
   if (G.boardState.convertMonarch[value] !== undefined) {
-    console.log("Player has chosen a slot which is already taken");
     return INVALID_MOVE;
   }
   if (value > ctx.numPlayers) {
-    console.log("Player has selected a slot only available in larger games");
     return INVALID_MOVE;
   }
 
@@ -35,7 +33,6 @@ const convertMonarch: Move<MyGameState> = (
     (id) => id === playerID
   );
   if (alreadyConverting) {
-    console.log("Player has already placed a counsellor to convert monarch");
     return INVALID_MOVE;
   }
 

@@ -19,12 +19,10 @@ const transferBetweenFleets: Move<MyGameState> = (
   const targetFleet = currentPlayer.fleetInfo[targetFleetIndex];
 
   if (!sourceFleet || !targetFleet) {
-    console.log("Invalid fleet index");
     return INVALID_MOVE;
   }
 
   if (sourceFleetIndex === targetFleetIndex) {
-    console.log("Cannot transfer to the same fleet");
     return INVALID_MOVE;
   }
 
@@ -33,7 +31,6 @@ const transferBetweenFleets: Move<MyGameState> = (
     sourceFleet.location[0] !== targetFleet.location[0] ||
     sourceFleet.location[1] !== targetFleet.location[1]
   ) {
-    console.log("Fleets must be at the same location to transfer");
     return INVALID_MOVE;
   }
 
@@ -42,7 +39,6 @@ const transferBetweenFleets: Move<MyGameState> = (
     sourceFleet.location[0] === KINGDOM_LOCATION[0] &&
     sourceFleet.location[1] === KINGDOM_LOCATION[1]
   ) {
-    console.log("Use Kingdom board for transfers at home");
     return INVALID_MOVE;
   }
 
@@ -53,13 +49,11 @@ const transferBetweenFleets: Move<MyGameState> = (
     sourceFleet.levies < levies ||
     sourceFleet.eliteRegiments < eliteRegiments
   ) {
-    console.log("Source fleet does not have enough resources to transfer");
     return INVALID_MOVE;
   }
 
   // Target fleet cannot exceed max skyships
   if (targetFleet.skyships + skyships > MAX_SKYSHIPS_PER_FLEET) {
-    console.log("Target fleet would exceed max skyships");
     return INVALID_MOVE;
   }
 
@@ -68,7 +62,6 @@ const transferBetweenFleets: Move<MyGameState> = (
     targetFleet.regiments + regiments + targetFleet.levies + levies + targetFleet.eliteRegiments + eliteRegiments;
   const targetSkyshipsAfter = targetFleet.skyships + skyships;
   if (targetTroopsAfter > targetSkyshipsAfter) {
-    console.log("Target fleet cannot carry more troops than skyships");
     return INVALID_MOVE;
   }
 
@@ -77,7 +70,6 @@ const transferBetweenFleets: Move<MyGameState> = (
     sourceFleet.regiments - regiments + sourceFleet.levies - levies + sourceFleet.eliteRegiments - eliteRegiments;
   const sourceSkyshipsAfter = sourceFleet.skyships - skyships;
   if (sourceTroopsAfter > sourceSkyshipsAfter && sourceSkyshipsAfter > 0) {
-    console.log("Source fleet would have more troops than skyships after transfer");
     return INVALID_MOVE;
   }
 

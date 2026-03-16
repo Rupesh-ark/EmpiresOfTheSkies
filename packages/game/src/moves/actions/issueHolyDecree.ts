@@ -31,15 +31,9 @@ const issueHolyDecree: Move<MyGameState> = (
   const value = args[0];
   const id = args[1];
   if (!G.playerInfo[playerID].isArchprelate) {
-    console.log(
-      "One who has not been anointed by God has attempted to issue a holy decree."
-    );
     return INVALID_MOVE;
   }
   if (G.boardState.issueHolyDecree) {
-    console.log(
-      "You must prove your worthiness by re-election before issuing another holy decree."
-    );
     return INVALID_MOVE;
   }
 
