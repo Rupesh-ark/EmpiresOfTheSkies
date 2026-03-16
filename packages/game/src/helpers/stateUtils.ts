@@ -1,8 +1,7 @@
 import { MyGameState } from "../types";
-import { MAX_SKYSHIPS, MAX_REGIMENTS } from "../codifiedGameInfo";
+import { MAX_SKYSHIPS, MAX_REGIMENTS, HERESY_MAX, HERESY_MIN } from "../codifiedGameInfo";
 
-export const HERESY_MAX = 9;
-export const HERESY_MIN = -9;
+export { HERESY_MAX, HERESY_MIN };
 
 export const removeOneCounsellor = (G: MyGameState, playerID: string) => {
   G.playerInfo[playerID].resources.counsellors -= 1;

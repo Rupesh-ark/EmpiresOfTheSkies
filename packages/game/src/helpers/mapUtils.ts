@@ -1,4 +1,5 @@
 import { MyGameState } from "../types";
+import { MAP_WIDTH, MAP_HEIGHT } from "../codifiedGameInfo";
 
 export const FAITHDOM_TILES: [number, number][] = [
   [3, 0],
@@ -7,8 +8,6 @@ export const FAITHDOM_TILES: [number, number][] = [
   [4, 1],
 ];
 
-const MAP_WIDTH = 8;
-const MAP_HEIGHT = 4;
 
 export const tileKey = (x: number, y: number): string => `${x},${y}`;
 

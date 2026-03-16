@@ -2,6 +2,7 @@ import { Move } from "boardgame.io";
 import { MyGameState, GoodKey } from "../../types";
 import { findNextPlunder } from "../../helpers/findNext";
 import { increaseHeresyWithinMove, logEvent } from "../../helpers/stateUtils";
+import { PRICE_MARKER_MIN } from "../../codifiedGameInfo";
 
 const GOODS: GoodKey[] = ["mithril", "dragonScales", "krakenSkin", "magicDust", "stickyIchor", "pipeweed"];
 
@@ -22,7 +23,7 @@ const plunder: Move<MyGameState> = (
   GOODS.forEach((good) => {
     const qty = currentTile.loot.colony[good];
     if (qty > 0) {
-      G.mapState.goodsPriceMarkers[good] = Math.max(1, G.mapState.goodsPriceMarkers[good] - qty);
+      G.mapState.goodsPriceMarkers[good] = Math.max(PRICE_MARKER_MIN, G.mapState.goodsPriceMarkers[good] - qty);
     }
   });
   // v4.2: plundering a Legend advances the plunderer's heresy by 1

@@ -1,6 +1,7 @@
 import { Move } from "boardgame.io";
 import { MyGameState, GoodKey } from "../../types";
 import { increaseHeresyWithinMove } from "../../helpers/stateUtils";
+import { PRICE_MARKER_MIN } from "../../codifiedGameInfo";
 
 const GOODS: GoodKey[] = ["mithril", "dragonScales", "krakenSkin", "magicDust", "stickyIchor", "pipeweed"];
 
@@ -20,7 +21,7 @@ const constructOutpost: Move<MyGameState> = (
   GOODS.forEach((good) => {
     const qty = currentTile.loot.outpost[good];
     if (qty > 0) {
-      G.mapState.goodsPriceMarkers[good] = Math.max(1, G.mapState.goodsPriceMarkers[good] - qty);
+      G.mapState.goodsPriceMarkers[good] = Math.max(PRICE_MARKER_MIN, G.mapState.goodsPriceMarkers[good] - qty);
     }
   });
 

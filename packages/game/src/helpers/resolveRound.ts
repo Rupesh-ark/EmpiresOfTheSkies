@@ -5,7 +5,7 @@ import legacyResolutions from "./legacyResolutions";
 import { enactPiracy } from "./piracy";
 import { grantTradeRouteGoods } from "./tradeRouteResolver";
 import { removeVPAmount, logEvent } from "./stateUtils";
-import { FINAL_ROUND_GOLD_PER_VP, DEBT_PENALTY_DIVISOR, TRADE_VP_SCHEDULE } from "../codifiedGameInfo";
+import { FINAL_ROUND_GOLD_PER_VP, DEBT_PENALTY_DIVISOR, TRADE_VP_SCHEDULE, PRICE_MARKER_MAX } from "../codifiedGameInfo";
 
 const ALL_GOODS: GoodKey[] = ["mithril", "dragonScales", "krakenSkin", "magicDust", "stickyIchor", "pipeweed"];
 
@@ -148,7 +148,7 @@ const resolveRound = (G: MyGameState, events: EventsAPI, random: RandomAPI) => {
   // right by 1 (toward expensive) to undo the supply-side depression it caused.
   // Cap at 4 (the maximum price on the Sell Goods track).
   Object.values(smugglerGoods).forEach((good) => {
-    G.mapState.goodsPriceMarkers[good] = Math.min(4, G.mapState.goodsPriceMarkers[good] + 1);
+    G.mapState.goodsPriceMarkers[good] = Math.min(PRICE_MARKER_MAX, G.mapState.goodsPriceMarkers[good] + 1);
   });
 
   // B7: piracy — after goods sold, before factory income
