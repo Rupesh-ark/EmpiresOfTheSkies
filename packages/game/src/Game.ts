@@ -473,6 +473,8 @@ const MyGame: Game<MyGameState> = {
         defendGroundAttack,
         garrisonTroops,
         yieldToAttacker,
+        drawCard,
+        pickCard,
       },
     },
     plunder_legends: {

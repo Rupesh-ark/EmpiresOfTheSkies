@@ -144,8 +144,6 @@ export const resolveBattleAndReturnWinner = (
     }
     while (
       defenderLossesCopy > 0 &&
-      currentBuilding.garrisonedLevies &&
-      currentBuilding.garrisonedRegiments &&
       (currentBuilding.garrisonedRegiments > 0 ||
         currentBuilding.garrisonedLevies > 0)
     ) {
