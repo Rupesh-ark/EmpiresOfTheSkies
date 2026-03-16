@@ -88,9 +88,9 @@ import { logEvent } from "./helpers/stateUtils";
 const MyGame: Game<MyGameState> = {
   turn: { minMoves: 1 },
   name: "empires-of-the-skies",
-  setup: ({ ctx }: { ctx: Ctx }): MyGameState => {
+  setup: ({ ctx, random }: { ctx: Ctx; random: { Shuffle: <T>(arr: T[]) => T[] } }): MyGameState => {
     const mapState: MapState = {
-      currentTileArray: getRandomisedMapTileArray(),
+      currentTileArray: getRandomisedMapTileArray(random.Shuffle),
       discoveredTiles: getInitialDiscoveredTiles(),
       buildings: getInitialOutpostsAndColoniesInfo(),
       mostRecentlyDiscoveredTile: [4, 0],
@@ -124,25 +124,13 @@ const MyGame: Game<MyGameState> = {
     });
 
     // Shuffle contingent counter pool (used for rebellions and Grand Army)
-    const contingentPool = [...CONTINGENT_COUNTERS];
-    for (let i = contingentPool.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [contingentPool[i], contingentPool[j]] = [contingentPool[j], contingentPool[i]];
-    }
+    const contingentPool = random.Shuffle([...CONTINGENT_COUNTERS]);
 
     // Shuffle Infidel Host counter pool
-    const infidelHostPool = INFIDEL_HOST_COUNTERS.map((c) => ({ ...c }));
-    for (let i = infidelHostPool.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [infidelHostPool[i], infidelHostPool[j]] = [infidelHostPool[j], infidelHostPool[i]];
-    }
+    const infidelHostPool = random.Shuffle(INFIDEL_HOST_COUNTERS.map((c) => ({ ...c })));
 
     // Shuffle event deck and deal EVENT_HAND_SIZE cards to each player
-    const eventDeck = [...ALL_EVENT_CARD_NAMES];
-    for (let i = eventDeck.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [eventDeck[i], eventDeck[j]] = [eventDeck[j], eventDeck[i]];
-    }
+    const eventDeck = random.Shuffle([...ALL_EVENT_CARD_NAMES]);
     for (const id of ctx.playOrder) {
       playerInfoMap[id].resources.eventCards = eventDeck.splice(
         0,
@@ -155,7 +143,7 @@ const MyGame: Game<MyGameState> = {
       mapState: mapState,
       boardState: { ...initialBoardState },
       cardDecks: {
-        fortuneOfWarCards: fullResetFortuneOfWarCardDeck(),
+        fortuneOfWarCards: random.Shuffle(fullResetFortuneOfWarCardDeck()),
         discardedFortuneOfWarCards: [],
         kingdomAdvantagePool: [...ALL_KA_CARDS],
         legacyDeck: [],
@@ -272,16 +260,14 @@ const MyGame: Game<MyGameState> = {
       next: "events",
       onBegin: (context) => {
         context.G.stage = "pick legacy card";
-        const cards: LegacyCardInfo[] = [...LEGACY_CARDS];
+        const cards: LegacyCardInfo[] = context.random.Shuffle([...LEGACY_CARDS]);
+        let cardIndex = 0;
         Object.values(context.G.playerInfo).forEach((player) => {
-          for (let i = 0; i < 3; i++) {
-            let randomIndex = Math.floor(Math.random() * cards.length);
-            const card = cards.splice(randomIndex, 1);
-            player.legacyCardOptions.push(card[0]);
-          }
+          player.legacyCardOptions = cards.slice(cardIndex, cardIndex + 3);
+          cardIndex += 3;
         });
         // Store remaining cards for Royal Succession event
-        context.G.cardDecks.legacyDeck = cards;
+        context.G.cardDecks.legacyDeck = cards.slice(cardIndex);
       },
     },
     events: {

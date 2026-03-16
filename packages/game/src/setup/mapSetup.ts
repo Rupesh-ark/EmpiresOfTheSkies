@@ -6,19 +6,11 @@ import {
   knownWorldTiles,
 } from "../codifiedGameInfo";
 
-export const getRandomisedMapTileArray = (): TileInfoProps[][] => {
-  let randomTiles = oceanTiles.concat(unknownWorldTiles, legendTiles);
+export const getRandomisedMapTileArray = (
+  shuffle: <T>(arr: T[]) => T[]
+): TileInfoProps[][] => {
+  let randomTiles = shuffle(oceanTiles.concat(unknownWorldTiles, legendTiles));
 
-  let currentIndex = 28;
-  let randomIndex = 0;
-  while (currentIndex > 0) {
-    randomIndex = Math.floor(Math.random() * currentIndex);
-    currentIndex--;
-    [randomTiles[currentIndex], randomTiles[randomIndex]] = [
-      randomTiles[randomIndex],
-      randomTiles[currentIndex],
-    ];
-  }
   randomTiles.splice(3, 0, knownWorldTiles[0]);
   randomTiles.splice(4, 0, knownWorldTiles[1]);
   randomTiles.splice(11, 0, knownWorldTiles[2]);
