@@ -13,25 +13,10 @@ import {
   PALACE_VP_HERETIC,
   PALACE_VP_ORTHODOX,
 } from "../../codifiedGameInfo";
-import { EventsAPI } from "boardgame.io/dist/types/src/plugins/plugin-events";
-import { RandomAPI } from "boardgame.io/dist/types/src/plugins/random/random";
-import { Ctx } from "boardgame.io/dist/types/src/types";
 
 // needs a stage where the player selects a map tile to place the fort onto and that tile is verified to ensure they can build on it
 const foundBuildings: Move<MyGameState> = (
-  {
-    G,
-    ctx,
-    playerID,
-    events,
-    random,
-  }: {
-    G: MyGameState;
-    ctx: Ctx;
-    playerID: string;
-    events: EventsAPI;
-    random: RandomAPI;
-  },
+  { G, playerID },
   ...args: any[]
 ) => {
   if (validateMove(playerID, G, { costsCounsellor: true, costsGold: true })) return INVALID_MOVE;
@@ -44,13 +29,12 @@ const foundBuildings: Move<MyGameState> = (
     [BuildingSlot.Fort]:      foundFort,
   };
 
-  return specialisedBuildingFunctions[value](G, playerID, events, args);
+  return specialisedBuildingFunctions[value](G, playerID, args);
 };
 
 const foundCathedral = (
   G: MyGameState,
   playerID: string,
-  events: EventsAPI,
   args: any[]
 ): void | typeof INVALID_MOVE => {
   if (G.playerInfo[playerID].cathedrals === MAX_CATHEDRALS) {
@@ -73,7 +57,6 @@ const foundCathedral = (
 const foundPalace = (
   G: MyGameState,
   playerID: string,
-  events: EventsAPI,
   args: any[]
 ): void | typeof INVALID_MOVE => {
   if (G.playerInfo[playerID].palaces === MAX_PALACES) {
@@ -113,7 +96,6 @@ const foundPalace = (
 const foundShipyard = (
   G: MyGameState,
   playerID: string,
-  events: EventsAPI,
   args: any[]
 ): void | typeof INVALID_MOVE => {
   if (G.playerInfo[playerID].shipyards === MAX_SHIPYARDS) {
@@ -133,7 +115,6 @@ const foundShipyard = (
 const foundFort = (
   G: MyGameState,
   playerID: string,
-  events: EventsAPI,
   args: any[]
 ): void | typeof INVALID_MOVE => {
   // Validate that at least one valid tile exists before charging

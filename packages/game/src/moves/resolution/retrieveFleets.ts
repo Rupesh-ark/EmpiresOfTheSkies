@@ -1,5 +1,5 @@
 import { Move } from "boardgame.io";
-import { FleetInfo, MyGameState, PlayerInfo } from "../../types";
+import { MyGameState, PlayerInfo } from "../../types";
 
 const retrieveFleets: Move<MyGameState> = (
   { G, ctx, playerID, events, random },

@@ -7,24 +7,8 @@ import {
   removeGoldAmount,
   removeOneCounsellor,
 } from "../../helpers/stateUtils";
-import { Ctx } from "boardgame.io/dist/types/src/types.js";
-import { EventsAPI } from "boardgame.io/dist/types/src/plugins/plugin-events.js";
-import { RandomAPI } from "boardgame.io/dist/types/src/plugins/random/random.js";
-
 const buildSkyships: Move<MyGameState> = (
-  {
-    G,
-    ctx,
-    playerID,
-    events,
-    random,
-  }: {
-    G: MyGameState;
-    ctx: Ctx;
-    playerID: string;
-    events: EventsAPI;
-    random: RandomAPI;
-  },
+  { G, playerID },
   ...args: any[]
 ) => {
   if (validateMove(playerID, G, { costsCounsellor: true, costsGold: true })) return INVALID_MOVE;
