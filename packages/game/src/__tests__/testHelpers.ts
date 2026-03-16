@@ -78,6 +78,7 @@ export function buildFleet(fleetId: number, overrides: Partial<FleetInfo> = {}):
     skyships: 3,
     regiments: 0,
     levies: 0,
+    eliteRegiments: 0,
     ...overrides,
   };
 }

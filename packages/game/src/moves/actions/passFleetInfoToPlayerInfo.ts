@@ -26,6 +26,7 @@ const passFleetInfoToPlayerInfo: Move<MyGameState> = (
   const skyshipCount = args[1];
   const regimentCount = args[2];
   const levyCount = args[3];
+  const eliteRegimentCount = args[4] ?? 0;  // backwards compatible — older callers omit this
 
   const currentPlayer = G.playerInfo[playerID];
   const currentFleet = currentPlayer.fleetInfo[fleetId];
@@ -37,20 +38,28 @@ const passFleetInfoToPlayerInfo: Move<MyGameState> = (
     if (
       currentPlayer.resources.skyships < skyshipCount ||
       currentPlayer.resources.regiments < regimentCount ||
-      currentPlayer.resources.levies < levyCount
+      currentPlayer.resources.levies < levyCount ||
+      currentPlayer.resources.eliteRegiments < eliteRegimentCount
     ) {
       console.log(
         "Player has attempted to deploy more of a resource than they have ready, something has gone wrong..."
       );
       return INVALID_MOVE;
     }
+    // Each skyship carries exactly 1 troop (any type)
+    if (skyshipCount < regimentCount + levyCount + eliteRegimentCount) {
+      console.log("Not enough skyships to carry all requested troops");
+      return INVALID_MOVE;
+    }
     currentFleet.skyships = skyshipCount;
     currentFleet.regiments = regimentCount;
     currentFleet.levies = levyCount;
+    currentFleet.eliteRegiments = eliteRegimentCount;
 
     currentPlayer.resources.skyships -= skyshipCount;
     currentPlayer.resources.regiments -= regimentCount;
     currentPlayer.resources.levies -= levyCount;
+    currentPlayer.resources.eliteRegiments -= eliteRegimentCount;
     // v4.2: Kingdom↔Fleet transfers are a free Anytime action — do NOT set turnComplete
   }
 };

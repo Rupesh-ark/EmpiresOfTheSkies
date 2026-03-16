@@ -107,8 +107,8 @@ describe("resolveRound — D2: trade VP by round", () => {
     // Give both players outposts so they qualify for trade VP
     G.mapState.buildings = [
       [
-        { player: G.playerInfo["0"], buildings: "outpost", fort: false, garrisonedRegiments: 0, garrisonedLevies: 0 },
-        { player: G.playerInfo["1"], buildings: "outpost", fort: false, garrisonedRegiments: 0, garrisonedLevies: 0 },
+        { player: G.playerInfo["0"], buildings: "outpost", fort: false, garrisonedRegiments: 0, garrisonedLevies: 0, garrisonedEliteRegiments: 0 },
+        { player: G.playerInfo["1"], buildings: "outpost", fort: false, garrisonedRegiments: 0, garrisonedLevies: 0, garrisonedEliteRegiments: 0 },
       ],
     ];
   }
@@ -211,6 +211,7 @@ describe("resolveRound — D3: only players with outpost/colony score trade VP",
       fort: false,
       garrisonedRegiments: 0,
       garrisonedLevies: 0,
+      garrisonedEliteRegiments: 0,
     }]];
 
     const vp0Before = G.playerInfo["0"].resources.victoryPoints;

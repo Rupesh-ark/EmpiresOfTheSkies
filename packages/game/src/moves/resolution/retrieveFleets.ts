@@ -21,10 +21,12 @@ const retrieveFleets: Move<MyGameState> = (
       currentPlayer.resources.skyships += currentFleet.skyships;
       currentPlayer.resources.regiments += currentFleet.regiments;
       currentPlayer.resources.levies += currentFleet.levies;
+      currentPlayer.resources.eliteRegiments += currentFleet.eliteRegiments;
 
       currentFleet.skyships = 0;
       currentFleet.regiments = 0;
       currentFleet.levies = 0;
+      currentFleet.eliteRegiments = 0;
       let shouldScrubFromBattleMap = true;
       Object.values(currentPlayer.fleetInfo).forEach((fleet) => {
         const [fleetX, fleetY] = fleet.location;

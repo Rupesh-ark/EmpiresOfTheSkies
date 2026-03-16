@@ -29,7 +29,8 @@ export const resolveBattleAndReturnWinner = (
       attackerSwordValue +=
         currentFleet.skyships +
         currentFleet.levies +
-        currentFleet.regiments * 2;
+        currentFleet.regiments * 2 +
+        currentFleet.eliteRegiments * 3;
       attackerShieldValue += currentFleet.skyships;
       attackerFleets.push(currentFleet);
     }
@@ -55,7 +56,8 @@ export const resolveBattleAndReturnWinner = (
       defenderSwordValue +=
         currentFleet.skyships +
         currentFleet.levies +
-        currentFleet.regiments * 2;
+        currentFleet.regiments * 2 +
+        currentFleet.eliteRegiments * 3;
       defenderShieldValue += currentFleet.skyships;
       defenderFleets.push(currentFleet);
     }
@@ -64,10 +66,12 @@ export const resolveBattleAndReturnWinner = (
     const currentBuilding = G.mapState.buildings[y][x];
     defenderSwordValue += (currentBuilding.garrisonedRegiments ?? 0) * 2;
     defenderSwordValue += currentBuilding.garrisonedLevies ?? 0;
+    defenderSwordValue += (currentBuilding.garrisonedEliteRegiments ?? 0) * 3;
     if (currentBuilding.fort) {
       defenderShieldValue +=
         (currentBuilding.garrisonedRegiments ?? 0) +
-        (currentBuilding.garrisonedLevies ?? 0);
+        (currentBuilding.garrisonedLevies ?? 0) +
+        (currentBuilding.garrisonedEliteRegiments ?? 0);
     }
   }
   defenderSwordValue += G.battleState?.defender.fowCard?.sword ?? 0;
@@ -108,10 +112,10 @@ export const resolveBattleAndReturnWinner = (
     }
     while (
       attackerLossesCopy > 0 &&
-      (fleet.regiments > 0 || fleet.skyships > 0 || fleet.levies > 0)
+      (fleet.regiments > 0 || fleet.skyships > 0 || fleet.levies > 0 || fleet.eliteRegiments > 0)
     ) {
       if (
-        fleet.skyships > fleet.regiments + fleet.levies &&
+        fleet.skyships > fleet.regiments + fleet.levies + fleet.eliteRegiments &&
         fleet.skyships > 0
       ) {
         fleet.skyships -= 1;
@@ -122,14 +126,19 @@ export const resolveBattleAndReturnWinner = (
       } else if (fleet.regiments > 0) {
         fleet.regiments -= 1;
         attackerLossesCopy -= 2;
+      } else if (fleet.eliteRegiments > 0) {
+        fleet.eliteRegiments -= 1;
+        attackerLossesCopy -= 3;
       }
     }
     // GAP-23 / GAP-14: troops aboard destroyed Skyships are lost — trim to Skyship capacity
-    while (fleet.regiments + fleet.levies > fleet.skyships) {
+    while (fleet.regiments + fleet.levies + fleet.eliteRegiments > fleet.skyships) {
       if (fleet.levies > 0) {
         fleet.levies -= 1;
       } else if (fleet.regiments > 0) {
         fleet.regiments -= 1;
+      } else if (fleet.eliteRegiments > 0) {
+        fleet.eliteRegiments -= 1;
       } else {
         break;
       }
@@ -145,7 +154,8 @@ export const resolveBattleAndReturnWinner = (
     while (
       defenderLossesCopy > 0 &&
       (currentBuilding.garrisonedRegiments > 0 ||
-        currentBuilding.garrisonedLevies > 0)
+        currentBuilding.garrisonedLevies > 0 ||
+        (currentBuilding.garrisonedEliteRegiments ?? 0) > 0)
     ) {
       if (currentBuilding.garrisonedLevies > 0) {
         currentBuilding.garrisonedLevies -= 1;
@@ -153,6 +163,9 @@ export const resolveBattleAndReturnWinner = (
       } else if (currentBuilding.garrisonedRegiments > 0) {
         currentBuilding.garrisonedRegiments -= 1;
         defenderLossesCopy -= 2;
+      } else if ((currentBuilding.garrisonedEliteRegiments ?? 0) > 0) {
+        currentBuilding.garrisonedEliteRegiments -= 1;
+        defenderLossesCopy -= 3;
       }
     }
   } else {
@@ -172,10 +185,10 @@ export const resolveBattleAndReturnWinner = (
       }
       while (
         defenderLossesCopy > 0 &&
-        (fleet.regiments > 0 || fleet.skyships > 0 || fleet.levies > 0)
+        (fleet.regiments > 0 || fleet.skyships > 0 || fleet.levies > 0 || fleet.eliteRegiments > 0)
       ) {
         if (
-          fleet.skyships > fleet.regiments + fleet.levies &&
+          fleet.skyships > fleet.regiments + fleet.levies + fleet.eliteRegiments &&
           fleet.skyships > 0
         ) {
           fleet.skyships -= 1;
@@ -186,14 +199,19 @@ export const resolveBattleAndReturnWinner = (
         } else if (fleet.regiments > 0) {
           fleet.regiments -= 1;
           defenderLossesCopy -= 2;
+        } else if (fleet.eliteRegiments > 0) {
+          fleet.eliteRegiments -= 1;
+          defenderLossesCopy -= 3;
         }
       }
       // GAP-23: troops aboard destroyed Skyships are lost — trim to Skyship capacity
-      while (fleet.regiments + fleet.levies > fleet.skyships) {
+      while (fleet.regiments + fleet.levies + fleet.eliteRegiments > fleet.skyships) {
         if (fleet.levies > 0) {
           fleet.levies -= 1;
         } else if (fleet.regiments > 0) {
           fleet.regiments -= 1;
+        } else if (fleet.eliteRegiments > 0) {
+          fleet.eliteRegiments -= 1;
         } else {
           break;
         }
@@ -211,8 +229,8 @@ export const resolveBattleAndReturnWinner = (
 
   attackerFleets.forEach((fleet) => {
     if (fleet.location[0] === x && fleet.location[1] === y) {
-      remainingAttackers += fleet.regiments + fleet.levies + fleet.skyships;
-      if (fleet.regiments + fleet.levies + fleet.skyships === 0) {
+      remainingAttackers += fleet.regiments + fleet.levies + fleet.skyships + fleet.eliteRegiments;
+      if (fleet.regiments + fleet.levies + fleet.skyships + fleet.eliteRegiments === 0) {
         fleet.location = [4, 0];
         G.mapState.battleMap[y][x].splice(
           G.mapState.battleMap[y][x].indexOf(
@@ -227,12 +245,13 @@ export const resolveBattleAndReturnWinner = (
     const currentBuilding = G.mapState.buildings[y][x];
     remainingDefenders +=
       (currentBuilding.garrisonedLevies ?? 0) +
-      (currentBuilding.garrisonedRegiments ?? 0);
+      (currentBuilding.garrisonedRegiments ?? 0) +
+      (currentBuilding.garrisonedEliteRegiments ?? 0);
   } else {
     defenderFleets.forEach((fleet) => {
       if (fleet.location[0] === x && fleet.location[1] === y) {
-        remainingDefenders += fleet.regiments + fleet.levies + fleet.skyships;
-        if (fleet.regiments + fleet.levies + fleet.skyships === 0) {
+        remainingDefenders += fleet.regiments + fleet.levies + fleet.skyships + fleet.eliteRegiments;
+        if (fleet.regiments + fleet.levies + fleet.skyships + fleet.eliteRegiments === 0) {
           fleet.location = [4, 0];
           G.mapState.battleMap[y][x].splice(
             G.mapState.battleMap[y][x].indexOf(
@@ -336,7 +355,8 @@ export const resolveConquest = (
       attackerSwordValue +=
         currentFleet.skyships +
         currentFleet.levies +
-        currentFleet.regiments * 2;
+        currentFleet.regiments * 2 +
+        currentFleet.eliteRegiments * 3;
       attackerShieldValue += currentFleet.skyships;
       attackerFleets.push(currentFleet);
     }
@@ -346,9 +366,14 @@ export const resolveConquest = (
 
   let attackerGarrisonedLevies = G.mapState.buildings[y][x].garrisonedLevies;
 
+  let attackerGarrisonedEliteRegiments =
+    G.mapState.buildings[y][x].garrisonedEliteRegiments ?? 0;
+
   attackerSwordValue += attackerGarrisonedRegiments * 2;
 
   attackerSwordValue += attackerGarrisonedLevies;
+
+  attackerSwordValue += attackerGarrisonedEliteRegiments * 3;
 
   attackerSwordValue += G.conquestState?.fowCard?.sword ?? 0;
   attackerShieldValue += G.conquestState?.fowCard?.shield ?? 0;
@@ -375,21 +400,29 @@ export const resolveConquest = (
 
     attackerLossesCopy = 0;
   }
-  if (attackerLossesCopy > attackerGarrisonedRegiments) {
-    attackerLossesCopy -= attackerGarrisonedRegiments;
+  if (attackerLossesCopy > attackerGarrisonedRegiments * 2) {
+    attackerLossesCopy -= attackerGarrisonedRegiments * 2;
     attackerGarrisonedRegiments = 0;
   } else {
-    attackerGarrisonedRegiments -= attackerLossesCopy;
+    attackerGarrisonedRegiments -= Math.ceil(attackerLossesCopy / 2);
+
+    attackerLossesCopy = 0;
+  }
+  if (attackerLossesCopy > attackerGarrisonedEliteRegiments * 3) {
+    attackerLossesCopy -= attackerGarrisonedEliteRegiments * 3;
+    attackerGarrisonedEliteRegiments = 0;
+  } else {
+    attackerGarrisonedEliteRegiments -= Math.ceil(attackerLossesCopy / 3);
 
     attackerLossesCopy = 0;
   }
   attackerFleets.forEach((fleet) => {
     while (
       attackerLossesCopy > 0 &&
-      (fleet.regiments > 0 || fleet.skyships > 0 || fleet.levies > 0)
+      (fleet.regiments > 0 || fleet.skyships > 0 || fleet.levies > 0 || fleet.eliteRegiments > 0)
     ) {
       if (
-        fleet.skyships > fleet.regiments + fleet.levies &&
+        fleet.skyships > fleet.regiments + fleet.levies + fleet.eliteRegiments &&
         fleet.skyships > 0
       ) {
         fleet.skyships -= 1;
@@ -400,17 +433,20 @@ export const resolveConquest = (
       } else if (fleet.regiments > 0) {
         fleet.regiments -= 1;
         attackerLossesCopy -= 2;
+      } else if (fleet.eliteRegiments > 0) {
+        fleet.eliteRegiments -= 1;
+        attackerLossesCopy -= 3;
       }
     }
   });
 
   let remainingAttackers =
-    attackerGarrisonedLevies + attackerGarrisonedRegiments;
+    attackerGarrisonedLevies + attackerGarrisonedRegiments + attackerGarrisonedEliteRegiments;
 
   attackerFleets.forEach((fleet) => {
     if (fleet.location[0] === x && fleet.location[1] === y) {
-      remainingAttackers += fleet.regiments + fleet.levies + fleet.skyships;
-      if (fleet.regiments + fleet.levies + fleet.skyships === 0) {
+      remainingAttackers += fleet.regiments + fleet.levies + fleet.skyships + fleet.eliteRegiments;
+      if (fleet.regiments + fleet.levies + fleet.skyships + fleet.eliteRegiments === 0) {
         fleet.location = [4, 0];
         G.mapState.battleMap[y][x].splice(
           G.mapState.battleMap[y][x].indexOf(
@@ -459,6 +495,7 @@ export const resolveConquest = (
     currentBuilding.fort = false;
     currentBuilding.garrisonedLevies = 0;
     currentBuilding.garrisonedRegiments = 0;
+    currentBuilding.garrisonedEliteRegiments = 0;
     // GAP-15 sub-rule 3: record that this player failed conquest here this round
     G.failedConquests.push({
       playerId: G.battleState?.attacker.id ?? ctx.currentPlayer,

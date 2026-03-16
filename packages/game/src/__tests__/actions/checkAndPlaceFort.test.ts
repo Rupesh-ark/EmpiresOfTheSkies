@@ -22,6 +22,7 @@ function buildMap(): MapBuildingInfo[][] {
     fort: false,
     garrisonedRegiments: 0,
     garrisonedLevies: 0,
+    garrisonedEliteRegiments: 0,
   };
   return Array.from({ length: 4 }, () =>
     Array.from({ length: 8 }, () => ({ ...emptyTile }))
@@ -38,6 +39,7 @@ describe("checkAndPlaceFort — success", () => {
       fort: false,
       garrisonedRegiments: 2,
       garrisonedLevies: 0,
+      garrisonedEliteRegiments: 0,
     };
     G.mapState.buildings = buildings;
     const ctx = buildCtx("0");
@@ -57,6 +59,7 @@ describe("checkAndPlaceFort — success", () => {
       fort: false,
       garrisonedRegiments: 1,
       garrisonedLevies: 0,
+      garrisonedEliteRegiments: 0,
     };
     G.mapState.buildings = buildings;
     const ctx = buildCtx("0");
@@ -100,6 +103,7 @@ describe("checkAndPlaceFort — INVALID_MOVE conditions", () => {
       fort: false,
       garrisonedRegiments: 2,
       garrisonedLevies: 0,
+      garrisonedEliteRegiments: 0,
     };
     G.mapState.buildings = buildings;
     const ctx = buildCtx("0");
@@ -118,6 +122,7 @@ describe("checkAndPlaceFort — INVALID_MOVE conditions", () => {
       fort: true, // already fortified
       garrisonedRegiments: 2,
       garrisonedLevies: 0,
+      garrisonedEliteRegiments: 0,
     };
     G.mapState.buildings = buildings;
     const ctx = buildCtx("0");
@@ -136,6 +141,7 @@ describe("checkAndPlaceFort — INVALID_MOVE conditions", () => {
       fort: false,
       garrisonedRegiments: 0, // no troops
       garrisonedLevies: 0,
+      garrisonedEliteRegiments: 0,
     };
     G.mapState.buildings = buildings;
     const ctx = buildCtx("0");

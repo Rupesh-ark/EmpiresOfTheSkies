@@ -537,6 +537,7 @@ function setupMapTile(
       fort: false,
       garrisonedRegiments: 0,
       garrisonedLevies: 0,
+      garrisonedEliteRegiments: 0,
     });
 
   G.mapState.currentTileArray[y][x] = {
@@ -554,6 +555,7 @@ function setupMapTile(
     fort: false,
     garrisonedRegiments: 2,
     garrisonedLevies: 1,
+    garrisonedEliteRegiments: 0,
     ...buildingOverrides,
   };
 }

@@ -58,7 +58,7 @@ describe("Legacy Cards — the builder (+2 per building)", () => {
     G.playerInfo["0"].cathedrals = 2;
     G.playerInfo["0"].palaces = 1;
     G.playerInfo["0"].shipyards = 1;
-    G.mapState.buildings[0][0] = { player: G.playerInfo["0"], fort: true, garrisonedRegiments: 0, garrisonedLevies: 0 };
+    G.mapState.buildings[0][0] = { player: G.playerInfo["0"], fort: true, garrisonedRegiments: 0, garrisonedLevies: 0, garrisonedEliteRegiments: 0 };
     const vpBefore = G.playerInfo["0"].resources.victoryPoints;
     legacyResolutions(G);
     // 2 cathedrals×2 + 1 palace×2 + 1 shipyard×2 + 1 fort×2 = 10
@@ -71,8 +71,8 @@ describe("Legacy Cards — the builder (+2 per building)", () => {
 describe("Legacy Cards — the conqueror (+6 per colony)", () => {
   it("grants +6 VP per colony", () => {
     const G = setupPlayer({ name: "the conqueror", colour: "purple" });
-    G.mapState.buildings[0][0] = { player: G.playerInfo["0"], buildings: "colony", fort: false, garrisonedRegiments: 0, garrisonedLevies: 0 };
-    G.mapState.buildings[0][1] = { player: G.playerInfo["0"], buildings: "colony", fort: false, garrisonedRegiments: 0, garrisonedLevies: 0 };
+    G.mapState.buildings[0][0] = { player: G.playerInfo["0"], buildings: "colony", fort: false, garrisonedRegiments: 0, garrisonedLevies: 0, garrisonedEliteRegiments: 0 };
+    G.mapState.buildings[0][1] = { player: G.playerInfo["0"], buildings: "colony", fort: false, garrisonedRegiments: 0, garrisonedLevies: 0, garrisonedEliteRegiments: 0 };
     const vpBefore = G.playerInfo["0"].resources.victoryPoints;
     legacyResolutions(G);
     expect(G.playerInfo["0"].resources.victoryPoints).toBe(vpBefore + 12);
@@ -80,7 +80,7 @@ describe("Legacy Cards — the conqueror (+6 per colony)", () => {
 
   it("does NOT grant VP for outposts", () => {
     const G = setupPlayer({ name: "the conqueror", colour: "purple" });
-    G.mapState.buildings[0][0] = { player: G.playerInfo["0"], buildings: "outpost", fort: false, garrisonedRegiments: 0, garrisonedLevies: 0 };
+    G.mapState.buildings[0][0] = { player: G.playerInfo["0"], buildings: "outpost", fort: false, garrisonedRegiments: 0, garrisonedLevies: 0, garrisonedEliteRegiments: 0 };
     const vpBefore = G.playerInfo["0"].resources.victoryPoints;
     legacyResolutions(G);
     expect(G.playerInfo["0"].resources.victoryPoints).toBe(vpBefore);
@@ -93,9 +93,9 @@ describe("Legacy Cards — the conqueror (+6 per colony)", () => {
 describe("Legacy Cards — the navigator (+4 VP per outpost and colony)", () => {
   it("grants 4 VP per outpost and colony on the map", () => {
     const G = setupPlayer({ name: "the navigator", colour: "purple" });
-    G.mapState.buildings[0][2] = { player: G.playerInfo["0"], buildings: "outpost", fort: false, garrisonedRegiments: 0, garrisonedLevies: 0 };
-    G.mapState.buildings[1][3] = { player: G.playerInfo["0"], buildings: "colony", fort: false, garrisonedRegiments: 0, garrisonedLevies: 0 };
-    G.mapState.buildings[2][1] = { player: G.playerInfo["0"], buildings: "outpost", fort: false, garrisonedRegiments: 0, garrisonedLevies: 0 };
+    G.mapState.buildings[0][2] = { player: G.playerInfo["0"], buildings: "outpost", fort: false, garrisonedRegiments: 0, garrisonedLevies: 0, garrisonedEliteRegiments: 0 };
+    G.mapState.buildings[1][3] = { player: G.playerInfo["0"], buildings: "colony", fort: false, garrisonedRegiments: 0, garrisonedLevies: 0, garrisonedEliteRegiments: 0 };
+    G.mapState.buildings[2][1] = { player: G.playerInfo["0"], buildings: "outpost", fort: false, garrisonedRegiments: 0, garrisonedLevies: 0, garrisonedEliteRegiments: 0 };
     const vpBefore = G.playerInfo["0"].resources.victoryPoints;
     legacyResolutions(G);
     // 2 outposts + 1 colony = 3 × 4 = 12 VP
@@ -154,7 +154,7 @@ describe("Legacy Cards — the mighty", () => {
     const G = setupPlayer({ name: "the mighty", colour: "purple" });
     G.playerInfo["0"].resources.regiments = 6;
     G.playerInfo["0"].fleetInfo = [buildFleet(0, { skyships: 4, regiments: 3 })];
-    G.mapState.buildings[0][0] = { player: G.playerInfo["0"], fort: true, garrisonedRegiments: 0, garrisonedLevies: 0 };
+    G.mapState.buildings[0][0] = { player: G.playerInfo["0"], fort: true, garrisonedRegiments: 0, garrisonedLevies: 0, garrisonedEliteRegiments: 0 };
     const vpBefore = G.playerInfo["0"].resources.victoryPoints;
     legacyResolutions(G);
     // deployed skyships=4 → +4; total regiments=9 → floor(9/3)=3 → +3; forts=1 → +1; total=8
@@ -184,7 +184,7 @@ describe("Legacy Cards — the merchant (+1 per trade good in active trade route
   it("grants 1 VP per trade good on BFS-connected tile", () => {
     const G = setupPlayer({ name: "the merchant", colour: "purple" });
     G.playerInfo["0"].fleetInfo = [buildFleet(0, { location: [2, 0], skyships: 2 })];
-    G.mapState.buildings[0][2] = { player: G.playerInfo["0"], buildings: "outpost", fort: false, garrisonedRegiments: 0, garrisonedLevies: 0 };
+    G.mapState.buildings[0][2] = { player: G.playerInfo["0"], buildings: "outpost", fort: false, garrisonedRegiments: 0, garrisonedLevies: 0, garrisonedEliteRegiments: 0 };
     G.mapState.currentTileArray[0][2] = {
       name: "test", blocked: [], sword: 0, shield: 0, type: "land",
       loot: {

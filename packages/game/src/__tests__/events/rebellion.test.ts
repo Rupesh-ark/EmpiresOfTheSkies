@@ -386,7 +386,7 @@ function buildBuildingsGrid(): MapBuildingInfo[][] {
   const COLS = 8;
   const row: MapBuildingInfo[] = [];
   for (let c = 0; c < COLS; c++) {
-    row.push({ fort: false, garrisonedRegiments: 0, garrisonedLevies: 0 });
+    row.push({ fort: false, garrisonedRegiments: 0, garrisonedLevies: 0, garrisonedEliteRegiments: 0 });
   }
   return [row];
 }

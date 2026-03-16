@@ -12,6 +12,7 @@ const transferBetweenFleets: Move<MyGameState> = (
   const skyships: number = args[2];
   const regiments: number = args[3];
   const levies: number = args[4];
+  const eliteRegiments: number = args[5] ?? 0;  // backwards compatible
 
   const currentPlayer = G.playerInfo[playerID];
   const sourceFleet = currentPlayer.fleetInfo[sourceFleetIndex];
@@ -49,7 +50,8 @@ const transferBetweenFleets: Move<MyGameState> = (
   if (
     sourceFleet.skyships < skyships ||
     sourceFleet.regiments < regiments ||
-    sourceFleet.levies < levies
+    sourceFleet.levies < levies ||
+    sourceFleet.eliteRegiments < eliteRegiments
   ) {
     console.log("Source fleet does not have enough resources to transfer");
     return INVALID_MOVE;
@@ -63,7 +65,7 @@ const transferBetweenFleets: Move<MyGameState> = (
 
   // Target fleet: troops cannot exceed skyships (1 troop per skyship)
   const targetTroopsAfter =
-    targetFleet.regiments + regiments + targetFleet.levies + levies;
+    targetFleet.regiments + regiments + targetFleet.levies + levies + targetFleet.eliteRegiments + eliteRegiments;
   const targetSkyshipsAfter = targetFleet.skyships + skyships;
   if (targetTroopsAfter > targetSkyshipsAfter) {
     console.log("Target fleet cannot carry more troops than skyships");
@@ -72,7 +74,7 @@ const transferBetweenFleets: Move<MyGameState> = (
 
   // Source fleet: remaining troops cannot exceed remaining skyships
   const sourceTroopsAfter =
-    sourceFleet.regiments - regiments + sourceFleet.levies - levies;
+    sourceFleet.regiments - regiments + sourceFleet.levies - levies + sourceFleet.eliteRegiments - eliteRegiments;
   const sourceSkyshipsAfter = sourceFleet.skyships - skyships;
   if (sourceTroopsAfter > sourceSkyshipsAfter && sourceSkyshipsAfter > 0) {
     console.log("Source fleet would have more troops than skyships after transfer");
@@ -83,10 +85,12 @@ const transferBetweenFleets: Move<MyGameState> = (
   sourceFleet.skyships -= skyships;
   sourceFleet.regiments -= regiments;
   sourceFleet.levies -= levies;
+  sourceFleet.eliteRegiments -= eliteRegiments;
 
   targetFleet.skyships += skyships;
   targetFleet.regiments += regiments;
   targetFleet.levies += levies;
+  targetFleet.eliteRegiments += eliteRegiments;
 };
 
 export default transferBetweenFleets;
