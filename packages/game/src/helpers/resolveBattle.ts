@@ -13,6 +13,147 @@ import { PRICE_MARKER_MIN } from "../codifiedGameInfo";
 
 const GOODS: GoodKey[] = ["mithril", "dragonScales", "krakenSkin", "magicDust", "stickyIchor", "pipeweed"];
 
+// ---------------------------------------------------------------------------
+// Private battle math helpers
+// ---------------------------------------------------------------------------
+
+/**
+ * Calculates sword value, shield value, and fleet list for all of a player's
+ * fleets located at (x, y).  Does NOT include FoW card bonuses — those are
+ * battle-type-specific and must be added by the caller.
+ */
+const calcFleetCombatValues = (
+  playerFleets: FleetInfo[],
+  x: number,
+  y: number
+): { swordValue: number; shieldValue: number; fleets: FleetInfo[] } => {
+  let swordValue = 0;
+  let shieldValue = 0;
+  const fleets: FleetInfo[] = [];
+  playerFleets.forEach((fleet) => {
+    if (fleet.location[0] === x && fleet.location[1] === y) {
+      swordValue += fleet.skyships + fleet.levies + fleet.regiments * 2 + fleet.eliteRegiments * 3;
+      shieldValue += fleet.skyships;
+      fleets.push(fleet);
+    }
+  });
+  return { swordValue, shieldValue, fleets };
+};
+
+/** Total unit count across all unit types for a single fleet. */
+const fleetUnitCount = (fleet: FleetInfo): number =>
+  fleet.regiments + fleet.levies + fleet.skyships + fleet.eliteRegiments;
+
+/**
+ * Trims troops that exceed skyship carrying capacity after losses have been
+ * applied.  Priority: levies first, then regiments, then elites.
+ */
+const trimFleetCapacity = (fleet: FleetInfo): void => {
+  while (fleet.regiments + fleet.levies + fleet.eliteRegiments > fleet.skyships) {
+    if (fleet.levies > 0) {
+      fleet.levies -= 1;
+    } else if (fleet.regiments > 0) {
+      fleet.regiments -= 1;
+    } else if (fleet.eliteRegiments > 0) {
+      fleet.eliteRegiments -= 1;
+    } else {
+      break;
+    }
+  }
+};
+
+/**
+ * Applies `totalLosses` hit-points to a list of fleets using standard loss
+ * priority (odd-hit rule → levies → outnumbering skyships → regiments →
+ * elites) and then trims each fleet to skyship capacity.
+ *
+ * @param applyOddHitRule  Pass `true` for aerial/ground fleet combats.
+ *                         Pass `false` for conquest (garrison absorbs first,
+ *                         no odd-hit parity requirement on the fleet portion).
+ * @returns remaining unabsorbed loss points (should be ≤ 0 when fleets are
+ *          fully destroyed before absorbing all hits).
+ */
+const applyFleetLosses = (
+  fleets: FleetInfo[],
+  totalLosses: number,
+  applyOddHitRule: boolean
+): number => {
+  let remaining = totalLosses;
+
+  // Odd-hit rule: first hit must go to a levy or skyship
+  if (applyOddHitRule && totalLosses % 2 === 1) {
+    for (const fleet of fleets) {
+      if (remaining <= 0) break;
+      if (fleet.levies > 0) {
+        fleet.levies -= 1;
+        remaining -= 1;
+        break;
+      } else if (fleet.skyships > 0) {
+        fleet.skyships -= 1;
+        remaining -= 1;
+        break;
+      }
+    }
+  }
+
+  // Main loss loop: levies → outnumbering skyships → regiments → elites
+  fleets.forEach((fleet) => {
+    while (remaining > 0 && fleetUnitCount(fleet) > 0) {
+      if (fleet.skyships > fleet.regiments + fleet.levies + fleet.eliteRegiments && fleet.skyships > 0) {
+        fleet.skyships -= 1;
+        remaining -= 1;
+      } else if (fleet.levies > 0) {
+        fleet.levies -= 1;
+        remaining -= 1;
+      } else if (fleet.regiments > 0) {
+        fleet.regiments -= 1;
+        remaining -= 2;
+      } else if (fleet.eliteRegiments > 0) {
+        fleet.eliteRegiments -= 1;
+        remaining -= 3;
+      }
+    }
+    // GAP-23 / GAP-14: troops aboard destroyed Skyships are lost — trim to capacity
+    trimFleetCapacity(fleet);
+  });
+
+  return remaining;
+};
+
+/**
+ * For each fleet at (x, y): counts surviving units and, if the fleet is
+ * completely wiped out, resets its location to home [4,0] and removes the
+ * owning player's entry from the battleMap tile.
+ *
+ * @returns total surviving unit count across all fleets at the tile.
+ */
+const cleanupWipedFleets = (
+  fleets: FleetInfo[],
+  x: number,
+  y: number,
+  playerID: string,
+  battleMap: string[][][]
+): number => {
+  let remaining = 0;
+  fleets.forEach((fleet) => {
+    if (fleet.location[0] === x && fleet.location[1] === y) {
+      const units = fleetUnitCount(fleet);
+      remaining += units;
+      if (units === 0) {
+        fleet.location = [4, 0];
+        const tile = battleMap[y][x];
+        const idx = tile.indexOf(playerID);
+        if (idx !== -1) tile.splice(idx, 1);
+      }
+    }
+  });
+  return remaining;
+};
+
+// ---------------------------------------------------------------------------
+// Exported battle resolution functions
+// ---------------------------------------------------------------------------
+
 export const resolveBattleAndReturnWinner = (
   G: MyGameState,
   events: EventsAPI,
@@ -20,22 +161,16 @@ export const resolveBattleAndReturnWinner = (
 ) => {
   const [x, y] = G.mapState.currentBattle;
 
-  let attackerSwordValue = 0;
-  let attackerShieldValue = 0;
-  let attackerFleets: FleetInfo[] = [];
-  G.playerInfo[
-    G.battleState?.attacker.id ?? ctx.currentPlayer
-  ].fleetInfo.forEach((currentFleet) => {
-    if (currentFleet.location[0] === x && currentFleet.location[1] === y) {
-      attackerSwordValue +=
-        currentFleet.skyships +
-        currentFleet.levies +
-        currentFleet.regiments * 2 +
-        currentFleet.eliteRegiments * 3;
-      attackerShieldValue += currentFleet.skyships;
-      attackerFleets.push(currentFleet);
-    }
-  });
+  // --- Attacker fleet combat values ---
+  const attackerID = G.battleState?.attacker.id ?? ctx.currentPlayer;
+  const {
+    swordValue: baseAttackerSword,
+    shieldValue: baseAttackerShield,
+    fleets: attackerFleets,
+  } = calcFleetCombatValues(G.playerInfo[attackerID].fleetInfo, x, y);
+
+  let attackerSwordValue = baseAttackerSword;
+  let attackerShieldValue = baseAttackerShield;
   attackerSwordValue += G.battleState?.attacker.fowCard?.sword ?? 0;
   attackerShieldValue += G.battleState?.attacker.fowCard?.shield ?? 0;
   // GAP-8: improved_training KA — +1 sword/shield per FoW card played, matching the card's stats
@@ -47,22 +182,16 @@ export const resolveBattleAndReturnWinner = (
     if (G.battleState.attacker.fowCard.shield > 0) attackerShieldValue += 1;
   }
 
-  let defenderSwordValue = 0;
-  let defenderShieldValue = 0;
-  let defenderFleets: FleetInfo[] = [];
-  G.playerInfo[
-    G.battleState?.defender.id ?? ctx.currentPlayer
-  ].fleetInfo.forEach((currentFleet) => {
-    if (currentFleet.location[0] === x && currentFleet.location[1] === y) {
-      defenderSwordValue +=
-        currentFleet.skyships +
-        currentFleet.levies +
-        currentFleet.regiments * 2 +
-        currentFleet.eliteRegiments * 3;
-      defenderShieldValue += currentFleet.skyships;
-      defenderFleets.push(currentFleet);
-    }
-  });
+  // --- Defender fleet combat values ---
+  const defenderID = G.battleState?.defender.id ?? ctx.currentPlayer;
+  const {
+    swordValue: baseDefenderSword,
+    shieldValue: baseDefenderShield,
+    fleets: defenderFleets,
+  } = calcFleetCombatValues(G.playerInfo[defenderID].fleetInfo, x, y);
+
+  let defenderSwordValue = baseDefenderSword;
+  let defenderShieldValue = baseDefenderShield;
   if (ctx.phase === "ground_battle") {
     const currentBuilding = G.mapState.buildings[y][x];
     defenderSwordValue += (currentBuilding.garrisonedRegiments ?? 0) * 2;
@@ -86,67 +215,21 @@ export const resolveBattleAndReturnWinner = (
     if (G.battleState.defender.fowCard.shield > 0) defenderShieldValue += 1;
   }
 
-  const attackerName = G.playerInfo[G.battleState?.attacker.id ?? ctx.currentPlayer].kingdomName;
-  const defenderName = G.playerInfo[G.battleState?.defender.id ?? ctx.currentPlayer].kingdomName;
+  const attackerName = G.playerInfo[attackerID].kingdomName;
+  const defenderName = G.playerInfo[defenderID].kingdomName;
   const battleType = ctx.phase === "ground_battle" ? "Ground battle" : "Aerial battle";
   logEvent(G, `${battleType}: ${attackerName} (${attackerSwordValue}S/${attackerShieldValue}Sh) vs ${defenderName} (${defenderSwordValue}S/${defenderShieldValue}Sh)`);
 
   const attackerLosses = defenderSwordValue - attackerShieldValue;
-  let attackerLossesCopy = attackerLosses.valueOf();
-
   const defenderLosses = attackerSwordValue - defenderShieldValue;
-  let defenderLossesCopy = defenderLosses.valueOf();
 
-  // GAP-22: odd hit rule — if total attacker hits are odd, at least 1 Skyship or Levy must absorb a hit
-  let attackerOddHitSatisfied = attackerLosses % 2 !== 1;
-  attackerFleets.forEach((fleet) => {
-    if (!attackerOddHitSatisfied && attackerLossesCopy > 0) {
-      if (fleet.levies > 0) {
-        fleet.levies -= 1;
-        attackerLossesCopy -= 1;
-        attackerOddHitSatisfied = true;
-      } else if (fleet.skyships > 0) {
-        fleet.skyships -= 1;
-        attackerLossesCopy -= 1;
-        attackerOddHitSatisfied = true;
-      }
-    }
-    while (
-      attackerLossesCopy > 0 &&
-      (fleet.regiments > 0 || fleet.skyships > 0 || fleet.levies > 0 || fleet.eliteRegiments > 0)
-    ) {
-      if (
-        fleet.skyships > fleet.regiments + fleet.levies + fleet.eliteRegiments &&
-        fleet.skyships > 0
-      ) {
-        fleet.skyships -= 1;
-        attackerLossesCopy -= 1;
-      } else if (fleet.levies > 0) {
-        fleet.levies -= 1;
-        attackerLossesCopy -= 1;
-      } else if (fleet.regiments > 0) {
-        fleet.regiments -= 1;
-        attackerLossesCopy -= 2;
-      } else if (fleet.eliteRegiments > 0) {
-        fleet.eliteRegiments -= 1;
-        attackerLossesCopy -= 3;
-      }
-    }
-    // GAP-23 / GAP-14: troops aboard destroyed Skyships are lost — trim to Skyship capacity
-    while (fleet.regiments + fleet.levies + fleet.eliteRegiments > fleet.skyships) {
-      if (fleet.levies > 0) {
-        fleet.levies -= 1;
-      } else if (fleet.regiments > 0) {
-        fleet.regiments -= 1;
-      } else if (fleet.eliteRegiments > 0) {
-        fleet.eliteRegiments -= 1;
-      } else {
-        break;
-      }
-    }
-  });
+  // --- Apply losses ---
+  // GAP-22: odd-hit rule applies to aerial/ground fleet combats
+  applyFleetLosses(attackerFleets, attackerLosses, true);
+
   if (ctx.phase === "ground_battle") {
     const currentBuilding = G.mapState.buildings[y][x];
+    let defenderLossesCopy = defenderLosses;
     // GAP-22: odd hit rule for garrison defender — at least 1 Levy must absorb if hits are odd
     if (defenderLosses % 2 === 1 && (currentBuilding.garrisonedLevies ?? 0) > 0) {
       currentBuilding.garrisonedLevies! -= 1;
@@ -170,78 +253,24 @@ export const resolveBattleAndReturnWinner = (
       }
     }
   } else {
-    // GAP-22: odd hit rule — if total defender hits are odd, at least 1 Skyship or Levy must absorb a hit
-    let defenderOddHitSatisfied = defenderLosses % 2 !== 1;
-    defenderFleets.forEach((fleet) => {
-      if (!defenderOddHitSatisfied && defenderLossesCopy > 0) {
-        if (fleet.levies > 0) {
-          fleet.levies -= 1;
-          defenderLossesCopy -= 1;
-          defenderOddHitSatisfied = true;
-        } else if (fleet.skyships > 0) {
-          fleet.skyships -= 1;
-          defenderLossesCopy -= 1;
-          defenderOddHitSatisfied = true;
-        }
-      }
-      while (
-        defenderLossesCopy > 0 &&
-        (fleet.regiments > 0 || fleet.skyships > 0 || fleet.levies > 0 || fleet.eliteRegiments > 0)
-      ) {
-        if (
-          fleet.skyships > fleet.regiments + fleet.levies + fleet.eliteRegiments &&
-          fleet.skyships > 0
-        ) {
-          fleet.skyships -= 1;
-          defenderLossesCopy -= 1;
-        } else if (fleet.levies > 0) {
-          fleet.levies -= 1;
-          defenderLossesCopy -= 1;
-        } else if (fleet.regiments > 0) {
-          fleet.regiments -= 1;
-          defenderLossesCopy -= 2;
-        } else if (fleet.eliteRegiments > 0) {
-          fleet.eliteRegiments -= 1;
-          defenderLossesCopy -= 3;
-        }
-      }
-      // GAP-23: troops aboard destroyed Skyships are lost — trim to Skyship capacity
-      while (fleet.regiments + fleet.levies + fleet.eliteRegiments > fleet.skyships) {
-        if (fleet.levies > 0) {
-          fleet.levies -= 1;
-        } else if (fleet.regiments > 0) {
-          fleet.regiments -= 1;
-        } else if (fleet.eliteRegiments > 0) {
-          fleet.eliteRegiments -= 1;
-        } else {
-          break;
-        }
-      }
-    });
+    applyFleetLosses(defenderFleets, defenderLosses, true);
   }
 
+  // --- Determine winner ---
   let winner =
     attackerLosses >= defenderLosses
       ? G.battleState?.defender.id
       : G.battleState?.attacker.id;
 
-  let remainingAttackers = 0;
-  let remainingDefenders = 0;
+  const remainingAttackers = cleanupWipedFleets(
+    attackerFleets,
+    x,
+    y,
+    attackerID,
+    G.mapState.battleMap
+  );
 
-  attackerFleets.forEach((fleet) => {
-    if (fleet.location[0] === x && fleet.location[1] === y) {
-      remainingAttackers += fleet.regiments + fleet.levies + fleet.skyships + fleet.eliteRegiments;
-      if (fleet.regiments + fleet.levies + fleet.skyships + fleet.eliteRegiments === 0) {
-        fleet.location = [4, 0];
-        G.mapState.battleMap[y][x].splice(
-          G.mapState.battleMap[y][x].indexOf(
-            G.battleState?.attacker.id ?? ctx.currentPlayer
-          ),
-          1
-        );
-      }
-    }
-  });
+  let remainingDefenders = 0;
   if (ctx.phase === "ground_battle") {
     const currentBuilding = G.mapState.buildings[y][x];
     remainingDefenders +=
@@ -249,21 +278,15 @@ export const resolveBattleAndReturnWinner = (
       (currentBuilding.garrisonedRegiments ?? 0) +
       (currentBuilding.garrisonedEliteRegiments ?? 0);
   } else {
-    defenderFleets.forEach((fleet) => {
-      if (fleet.location[0] === x && fleet.location[1] === y) {
-        remainingDefenders += fleet.regiments + fleet.levies + fleet.skyships + fleet.eliteRegiments;
-        if (fleet.regiments + fleet.levies + fleet.skyships + fleet.eliteRegiments === 0) {
-          fleet.location = [4, 0];
-          G.mapState.battleMap[y][x].splice(
-            G.mapState.battleMap[y][x].indexOf(
-              G.battleState?.defender.id ?? ctx.currentPlayer
-            ),
-            1
-          );
-        }
-      }
-    });
+    remainingDefenders = cleanupWipedFleets(
+      defenderFleets,
+      x,
+      y,
+      defenderID,
+      G.mapState.battleMap
+    );
   }
+
   if (remainingAttackers === 0 && remainingDefenders > 0) {
     winner = G.battleState?.defender.id;
   } else if (remainingDefenders === 0 && remainingAttackers > 0) {
@@ -345,35 +368,24 @@ export const resolveConquest = (
 ) => {
   const [x, y] = G.mapState.currentBattle;
 
-  let attackerSwordValue = 0;
-  let attackerShieldValue = 0;
-  let attackerFleets: FleetInfo[] = [];
+  // --- Attacker fleet combat values ---
+  const attackerID = G.battleState?.attacker.id ?? ctx.currentPlayer;
+  const {
+    swordValue: baseAttackerSword,
+    shieldValue: baseAttackerShield,
+    fleets: attackerFleets,
+  } = calcFleetCombatValues(G.playerInfo[attackerID].fleetInfo, x, y);
 
-  G.playerInfo[
-    G.battleState?.attacker.id ?? ctx.currentPlayer
-  ].fleetInfo.forEach((currentFleet) => {
-    if (currentFleet.location[0] === x && currentFleet.location[1] === y) {
-      attackerSwordValue +=
-        currentFleet.skyships +
-        currentFleet.levies +
-        currentFleet.regiments * 2 +
-        currentFleet.eliteRegiments * 3;
-      attackerShieldValue += currentFleet.skyships;
-      attackerFleets.push(currentFleet);
-    }
-  });
-  let attackerGarrisonedRegiments =
-    G.mapState.buildings[y][x].garrisonedRegiments;
+  let attackerSwordValue = baseAttackerSword;
+  let attackerShieldValue = baseAttackerShield;
 
+  // Garrison troops contribute swords (but not shields — no fort during conquest attempt)
+  let attackerGarrisonedRegiments = G.mapState.buildings[y][x].garrisonedRegiments;
   let attackerGarrisonedLevies = G.mapState.buildings[y][x].garrisonedLevies;
-
-  let attackerGarrisonedEliteRegiments =
-    G.mapState.buildings[y][x].garrisonedEliteRegiments ?? 0;
+  let attackerGarrisonedEliteRegiments = G.mapState.buildings[y][x].garrisonedEliteRegiments ?? 0;
 
   attackerSwordValue += attackerGarrisonedRegiments * 2;
-
   attackerSwordValue += attackerGarrisonedLevies;
-
   attackerSwordValue += attackerGarrisonedEliteRegiments * 3;
 
   attackerSwordValue += G.conquestState?.fowCard?.sword ?? 0;
@@ -386,19 +398,19 @@ export const resolveConquest = (
   const defenderShieldValue =
     G.mapState.currentTileArray[y][x].shield + defenderCard.shield;
 
-  const conquestPlayerName = G.playerInfo[G.battleState?.attacker.id ?? ctx.currentPlayer].kingdomName;
+  const conquestPlayerName = G.playerInfo[attackerID].kingdomName;
   const landName = G.mapState.currentTileArray[y][x]?.name ?? "unknown land";
   logEvent(G, `Conquest: ${conquestPlayerName} attacks ${landName} (${attackerSwordValue}S vs ${defenderSwordValue}S/${defenderShieldValue}Sh)`);
 
   const attackerLosses = defenderSwordValue - attackerShieldValue;
   let attackerLossesCopy = attackerLosses.valueOf();
 
+  // Garrison troops absorb losses first (conquest-specific priority — no odd-hit rule here)
   if (attackerLossesCopy > attackerGarrisonedLevies) {
     attackerLossesCopy -= attackerGarrisonedLevies;
     attackerGarrisonedLevies = 0;
   } else {
     attackerGarrisonedLevies -= attackerLossesCopy;
-
     attackerLossesCopy = 0;
   }
   if (attackerLossesCopy > attackerGarrisonedRegiments * 2) {
@@ -406,7 +418,6 @@ export const resolveConquest = (
     attackerGarrisonedRegiments = 0;
   } else {
     attackerGarrisonedRegiments -= Math.ceil(attackerLossesCopy / 2);
-
     attackerLossesCopy = 0;
   }
   if (attackerLossesCopy > attackerGarrisonedEliteRegiments * 3) {
@@ -414,50 +425,22 @@ export const resolveConquest = (
     attackerGarrisonedEliteRegiments = 0;
   } else {
     attackerGarrisonedEliteRegiments -= Math.ceil(attackerLossesCopy / 3);
-
     attackerLossesCopy = 0;
   }
-  attackerFleets.forEach((fleet) => {
-    while (
-      attackerLossesCopy > 0 &&
-      (fleet.regiments > 0 || fleet.skyships > 0 || fleet.levies > 0 || fleet.eliteRegiments > 0)
-    ) {
-      if (
-        fleet.skyships > fleet.regiments + fleet.levies + fleet.eliteRegiments &&
-        fleet.skyships > 0
-      ) {
-        fleet.skyships -= 1;
-        attackerLossesCopy -= 1;
-      } else if (fleet.levies > 0) {
-        fleet.levies -= 1;
-        attackerLossesCopy -= 1;
-      } else if (fleet.regiments > 0) {
-        fleet.regiments -= 1;
-        attackerLossesCopy -= 2;
-      } else if (fleet.eliteRegiments > 0) {
-        fleet.eliteRegiments -= 1;
-        attackerLossesCopy -= 3;
-      }
-    }
-  });
 
+  // Fleet troops absorb any remaining losses (no odd-hit rule — garrison absorbed first)
+  applyFleetLosses(attackerFleets, attackerLossesCopy, false);
+
+  // Count survivors (garrison + fleets) and clean up wiped fleets
   let remainingAttackers =
     attackerGarrisonedLevies + attackerGarrisonedRegiments + attackerGarrisonedEliteRegiments;
-
-  attackerFleets.forEach((fleet) => {
-    if (fleet.location[0] === x && fleet.location[1] === y) {
-      remainingAttackers += fleet.regiments + fleet.levies + fleet.skyships + fleet.eliteRegiments;
-      if (fleet.regiments + fleet.levies + fleet.skyships + fleet.eliteRegiments === 0) {
-        fleet.location = [4, 0];
-        G.mapState.battleMap[y][x].splice(
-          G.mapState.battleMap[y][x].indexOf(
-            G.battleState?.attacker.id ?? ctx.currentPlayer
-          ),
-          1
-        );
-      }
-    }
-  });
+  remainingAttackers += cleanupWipedFleets(
+    attackerFleets,
+    x,
+    y,
+    attackerID,
+    G.mapState.battleMap
+  );
 
   const attackerHits = Math.max(0, attackerSwordValue - defenderShieldValue);
   const tileStrength = G.mapState.currentTileArray[y][x].sword;
@@ -499,15 +482,14 @@ export const resolveConquest = (
     currentBuilding.garrisonedEliteRegiments = 0;
     // GAP-15 sub-rule 3: record that this player failed conquest here this round
     G.failedConquests.push({
-      playerId: G.battleState?.attacker.id ?? ctx.currentPlayer,
+      playerId: attackerID,
       tile: [x, y],
     });
     G.conquestState = undefined;
     findNextConquest(G, events);
   } else if (attackerHits >= tileStrength && remainingAttackers > 0) {
     logEvent(G, `Conquest succeeded: ${conquestPlayerName} colonises ${landName} (+1 VP)`);
-    const currentPlayer =
-      G.playerInfo[G.battleState?.attacker.id ?? ctx.currentPlayer];
+    const currentPlayer = G.playerInfo[attackerID];
     const currentBuilding = G.mapState.buildings[y][x];
     const currentTile = G.mapState.currentTileArray[y][x];
 
