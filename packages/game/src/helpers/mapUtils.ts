@@ -61,6 +61,44 @@ export const bfsWithDistance = (
   return visited;
 };
 
+/**
+ * Validates a retreat/evasion destination.
+ * v4.2 rules: destination must be discovered, adjacent (or same tile or Faithdom),
+ * and free of unfriendly fleets (Faithdom is always safe).
+ */
+export const isValidRetreatDestination = (
+  G: MyGameState,
+  battleLocation: [number, number],
+  destination: [number, number],
+  retreatingPlayerID: string
+): boolean => {
+  const [dx, dy] = destination;
+  const [bx, by] = battleLocation;
+
+  // Same tile is always valid (staying put)
+  if (dx === bx && dy === by) return true;
+
+  // Faithdom tiles are always valid (safe haven)
+  if (FAITHDOM_TILES.some(([fx, fy]) => fx === dx && fy === dy)) return true;
+
+  // Must be discovered
+  if (!G.mapState.discoveredTiles[dy]?.[dx]) return false;
+
+  // Must be adjacent to battle location
+  const neighbors = getNeighbors(bx, by);
+  const isAdjacent = neighbors.some(([nx, ny]) => nx === dx && ny === dy);
+  if (!isAdjacent) return false;
+
+  // Must not contain unfriendly fleets
+  const playersAtDestination = G.mapState.battleMap[dy]?.[dx] ?? [];
+  const hasUnfriendlyFleet = playersAtDestination.some(
+    (pid) => pid !== retreatingPlayerID
+  );
+  if (hasUnfriendlyFleet) return false;
+
+  return true;
+};
+
 // All tiles where a player has skyships, plus Faithdom as free waypoints
 export const buildPlayerNetwork = (G: MyGameState, playerID: string): Set<string> => {
   const network = new Set<string>();

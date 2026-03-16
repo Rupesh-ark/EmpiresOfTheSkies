@@ -1,6 +1,8 @@
 import { Move } from "boardgame.io";
+import { INVALID_MOVE } from "boardgame.io/core";
 import { MyGameState } from "../../types";
 import { findNextPlayerInBattleSequence } from "../../helpers/findNext";
+import { isValidRetreatDestination } from "../../helpers/mapUtils";
 
 const relocateDefeatedFleet: Move<MyGameState> = (
   { G, ctx, playerID, events, random },
@@ -12,6 +14,19 @@ const relocateDefeatedFleet: Move<MyGameState> = (
   const defeatedPlayer = args[1];
   console.log(defeatedPlayer);
   const [x, y] = G.mapState.currentBattle;
+
+  // Validate retreat destination per v4.2 rules
+  if (
+    !isValidRetreatDestination(
+      G,
+      [x, y] as [number, number],
+      destination as [number, number],
+      defeatedPlayer
+    )
+  ) {
+    return INVALID_MOVE;
+  }
+
   G.playerInfo[defeatedPlayer].fleetInfo.forEach((fleet) => {
     if (fleet.location[0] === x && fleet.location[1] === y) {
       fleet.location = destination;
