@@ -9,6 +9,7 @@ import {
 import { drawFortuneOfWarCard } from "./helpers";
 import { RandomAPI } from "boardgame.io/dist/types/src/plugins/random/random";
 import { increaseHeresyWithinMove, increaseOrthodoxyWithinMove, logEvent } from "./stateUtils";
+import { PRICE_MARKER_MIN } from "../codifiedGameInfo";
 
 const GOODS: GoodKey[] = ["mithril", "dragonScales", "krakenSkin", "magicDust", "stickyIchor", "pipeweed"];
 
@@ -520,7 +521,7 @@ export const resolveConquest = (
     GOODS.forEach((good) => {
       const qty = currentTile.loot.colony[good];
       if (qty > 0) {
-        G.mapState.goodsPriceMarkers[good] = Math.max(1, G.mapState.goodsPriceMarkers[good] - qty);
+        G.mapState.goodsPriceMarkers[good] = Math.max(PRICE_MARKER_MIN, G.mapState.goodsPriceMarkers[good] - qty);
       }
     });
 
