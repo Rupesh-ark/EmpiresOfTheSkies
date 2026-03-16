@@ -58,14 +58,6 @@ export const addSkyship = (G: MyGameState, playerID: string) => {
   }
 };
 
-export const removeRegiments = (
-  G: MyGameState,
-  playerID: string,
-  amount: number
-) => {
-  G.playerInfo[playerID].resources.regiments -= amount;
-};
-
 export const addRegiments = (
   G: MyGameState,
   playerID: string,
@@ -98,14 +90,6 @@ export const increaseOrthodoxyWithinMove = (
   if (G.playerInfo[playerID].heresyTracker > HERESY_MIN) {
     G.playerInfo[playerID].heresyTracker -= 1;
   }
-};
-
-export const removeLevyAmount = (
-  G: MyGameState,
-  playerID: string,
-  levyAmount: number
-) => {
-  G.playerInfo[playerID].resources.levies -= levyAmount;
 };
 
 export const addLevyAmount = (

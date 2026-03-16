@@ -3,22 +3,15 @@ import { PlayerOrder, MyGameState } from "../../types";
 import { validateMove } from "../moveValidation";
 import { INVALID_MOVE } from "boardgame.io/core";
 import { removeOneCounsellor } from "../../helpers/stateUtils";
-import { EventsAPI } from "boardgame.io/dist/types/src/plugins/plugin-events";
-import { RandomAPI } from "boardgame.io/dist/types/src/plugins/random/random";
 import { Ctx } from "boardgame.io/dist/types/src/types";
 
 export const alterPlayerOrder: Move<MyGameState> = (
   {
     G,
     ctx,
-    events,
-    random,
   }: {
     G: MyGameState;
     ctx: Ctx;
-    playerID: string;
-    events: EventsAPI;
-    random: RandomAPI;
   },
   ...args: any[]
 ) => {
