@@ -1,6 +1,0 @@
-If a player contributes neither Regiments, Levies nor Fleets to the Grand Army of the Faith, they are deemed to have shamed their Realm before all of Faithdom. Regardless of the outcome of the battle, the following applies immediately after the Grand Army has been resolved:
-
-An Orthodox Monarch who contributed nothing must advance their Heresy track marker one space — the Church publicly condemns their failure to defend the Faith.
-A Heretic Monarch who contributed nothing must retreat their Heresy track marker one space — their own people condemn them for their cowardice in the face of the common enemy.
-
-This shift occurs after all other Heresy track adjustments arising from the invasion have been applied. It cannot push a marker beyond either end of the track.
