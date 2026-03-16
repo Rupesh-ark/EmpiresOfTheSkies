@@ -7,7 +7,7 @@ const defendGroundAttack: Move<MyGameState> = (
 ) => {
   if (G.battleState) {
     G.battleState.defender.decision = "fight";
-    G.stage = "draw or pick card";
+    G.stage = "resolve battle";
     events.endTurn({ next: G.battleState.attacker.id });
   }
 };
