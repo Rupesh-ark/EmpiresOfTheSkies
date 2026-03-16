@@ -53,6 +53,7 @@ export interface MyGameState {
     | "reset";
   electionResults: Record<string, number>;
   hasVoted: string[];
+  voteSubmitted: Record<string, string>;
   round: number;
   finalRound: number;
   firstTurnOfRound: boolean;

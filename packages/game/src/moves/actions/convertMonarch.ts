@@ -3,6 +3,8 @@ import { MyGameState } from "../../types";
 import {
   removeGoldAmount,
   removeOneCounsellor,
+  increaseHeresyWithinMove,
+  increaseOrthodoxyWithinMove,
 } from "../../helpers/stateUtils";
 import { INVALID_MOVE } from "boardgame.io/core";
 import { validateMove } from "../moveValidation";
@@ -51,11 +53,15 @@ const convertMonarch: Move<MyGameState> = (
 
   if (playerInfo.hereticOrOrthodox === "heretic") {
     playerInfo.hereticOrOrthodox = "orthodox";
-    playerInfo.heresyTracker -= playerInfo.prisoners;
+    for (let i = 0; i < playerInfo.prisoners; i++) {
+      increaseOrthodoxyWithinMove(G, playerID);
+    }
     playerInfo.prisoners = 0;
   } else {
     playerInfo.hereticOrOrthodox = "heretic";
-    playerInfo.heresyTracker += playerInfo.prisoners;
+    for (let i = 0; i < playerInfo.prisoners; i++) {
+      increaseHeresyWithinMove(G, playerID);
+    }
     playerInfo.prisoners = 0;
   }
 

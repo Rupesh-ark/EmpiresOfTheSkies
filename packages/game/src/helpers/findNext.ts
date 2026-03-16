@@ -55,7 +55,7 @@ export const findNextPlunder = (G: MyGameState, events: EventsAPI): void => {
     }
   }
   G.mapState.currentBattle = [0, 0];
-  G.stage = "conquest";
+  G.stage = "attack or pass";
   events.endPhase();
 };
 export const findNextGroundBattle = (
@@ -87,7 +87,7 @@ export const findNextGroundBattle = (
     }
   }
   G.mapState.currentBattle = [0, 0];
-  G.stage = "plunder legends";
+  G.stage = "conquest";
   events.endPhase();
 };
 
@@ -102,7 +102,11 @@ export const findNextConquest = (G: MyGameState, events: EventsAPI) => {
       } else if (
         G.mapState.currentTileArray[y][x].type === "land" &&
         G.mapState.battleMap[y][x].length === 1 &&
-        !G.mapState.buildings[y][x].player
+        (
+          !G.mapState.buildings[y][x].player ||
+          (G.mapState.buildings[y][x].player?.id === G.mapState.battleMap[y][x][0] &&
+           G.mapState.buildings[y][x].buildings === "outpost")
+        )
       ) {
         const nextPlayer = G.mapState.battleMap[y][x][0];
         G.mapState.currentBattle = [x, y];

@@ -163,6 +163,7 @@ const MyGame: Game<MyGameState> = {
       stage: "discovery",
       electionResults: {},
       hasVoted: [],
+      voteSubmitted: {},
       round: 0,
       finalRound: FINAL_ROUND,
       firstTurnOfRound: true,
@@ -437,7 +438,7 @@ const MyGame: Game<MyGameState> = {
           );
         },
       },
-      next: "ground_battle",
+      next: "plunder_legends",
       moves: {
         doNotAttack,
         attackOtherPlayersFleet,
@@ -465,7 +466,7 @@ const MyGame: Game<MyGameState> = {
           );
         },
       },
-      next: "plunder_legends",
+      next: "conquest",
       moves: {
         attackPlayersBuilding,
         doNotGroundAttack,
@@ -482,7 +483,7 @@ const MyGame: Game<MyGameState> = {
         findNextPlunder(context.G, context.events);
       },
       moves: { plunder, doNotPlunder },
-      next: "conquest",
+      next: "ground_battle",
       turn: {
         onBegin: (context) => {
           console.log(
@@ -525,11 +526,19 @@ const MyGame: Game<MyGameState> = {
       next: "election",
     },
     election: {
+      turn: {
+        activePlayers: { all: "voting", moveLimit: 1 },
+        stages: {
+          voting: {
+            moves: { vote },
+          },
+        },
+      },
       onBegin: (context) => {
         context.G.electionResults = {};
         context.G.hasVoted = [];
+        context.G.voteSubmitted = {};
       },
-      moves: { vote },
       next: "resolution",
     },
     resolution: {

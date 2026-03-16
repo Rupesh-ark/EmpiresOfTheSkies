@@ -25,13 +25,17 @@ const collectFactoryIncome = (G: MyGameState) => {
   });
 
   // GAP-4: repeat the cycle until the pool is exhausted
+  // GAP-F1: guard against infinite loop when all players have 0 factories
   while (pool > 0) {
+    let distributed = 0;
     sortedPlayers.forEach((player) => {
       if (pool <= 0) return;
       const income = Math.min(player.factories, pool);
       player.resources.gold += income;
       pool -= income;
+      distributed += income;
     });
+    if (distributed === 0) break;
   }
 };
 
@@ -95,10 +99,15 @@ const resolveRound = (G: MyGameState, events: EventsAPI, random: RandomAPI) => {
   palaceBonus(G);
 
   // GAP-9: licenced_smugglers KA — grant +1 good before goods are sold
+  // GAP-RES5: record which good each smuggler received so we can recover the
+  // price marker after selling (smugglerGoodChoice is cleared here, so we
+  // cannot read it again after the loop)
+  const smugglerGoods: Record<string, GoodKey> = {};
   Object.values(G.playerInfo).forEach((player) => {
     if (player.resources.advantageCard !== "licenced_smugglers") return;
     const choice = player.resources.smugglerGoodChoice ?? ALL_GOODS[Math.floor(random.Number() * ALL_GOODS.length)];
     player.resources[choice] += 1;
+    smugglerGoods[player.id] = choice;
     player.resources.smugglerGoodChoice = undefined;
   });
 
@@ -128,6 +137,14 @@ const resolveRound = (G: MyGameState, events: EventsAPI, random: RandomAPI) => {
     player.resources.pipeweed = 0;
     player.resources.magicDust = 0;
     player.resources.mithril = 0;
+  });
+
+  // GAP-RES5: price markers recover after smuggler goods sold (v4.2 line 257)
+  // The smuggled cube was temporary supply — once it is sold the marker moves
+  // right by 1 (toward expensive) to undo the supply-side depression it caused.
+  // Cap at 4 (the maximum price on the Sell Goods track).
+  Object.values(smugglerGoods).forEach((good) => {
+    G.mapState.goodsPriceMarkers[good] = Math.min(4, G.mapState.goodsPriceMarkers[good] + 1);
   });
 
   // B7: piracy — after goods sold, before factory income

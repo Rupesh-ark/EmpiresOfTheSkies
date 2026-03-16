@@ -204,7 +204,7 @@ export const resolveBattleAndReturnWinner = (
   }
 
   let winner =
-    attackerLosses > defenderLosses
+    attackerLosses >= defenderLosses
       ? G.battleState?.defender.id
       : G.battleState?.attacker.id;
 
@@ -424,10 +424,10 @@ export const resolveConquest = (
     }
   });
 
-  const remainingDefenders =
-    (defenderShieldValue + defenderSwordValue) - attackerSwordValue;
+  const attackerHits = Math.max(0, attackerSwordValue - defenderShieldValue);
+  const tileStrength = G.mapState.currentTileArray[y][x].sword;
 
-  if (remainingDefenders > 0 || remainingAttackers < 1) {
+  if (attackerHits < tileStrength || remainingAttackers < 1) {
     logEvent(G, `Conquest failed: ${conquestPlayerName} loses outpost at ${landName}`);
     const currentBuilding = G.mapState.buildings[y][x];
     if (currentBuilding.garrisonedRegiments > 0) {
@@ -468,7 +468,7 @@ export const resolveConquest = (
     });
     G.conquestState = undefined;
     findNextConquest(G, events);
-  } else if (remainingDefenders <= 0 && remainingAttackers > 0) {
+  } else if (attackerHits >= tileStrength && remainingAttackers > 0) {
     logEvent(G, `Conquest succeeded: ${conquestPlayerName} colonises ${landName} (+1 VP)`);
     const currentPlayer =
       G.playerInfo[G.battleState?.attacker.id ?? ctx.currentPlayer];

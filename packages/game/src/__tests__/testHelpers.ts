@@ -125,6 +125,7 @@ export function buildInitialG(
     nprCathedrals: {},
     electionResults: {},
     hasVoted: [],
+    voteSubmitted: {},
     turnOrder: players.map((p) => p.id),
     playerInfo,
     boardState: buildActionBoard(),

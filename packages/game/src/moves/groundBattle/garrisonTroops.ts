@@ -46,7 +46,7 @@ const garrisonTroops: Move<MyGameState> = (
 
   G.playerInfo[playerID].troopsToGarrison = undefined;
 
-  if (ctx.phase === "ground-attack") {
+  if (ctx.phase === "ground_battle") {
     findNextGroundBattle(G, events);
   } else if (ctx.phase === "conquest") {
     findNextConquest(G, events);

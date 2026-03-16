@@ -1,5 +1,6 @@
 import { Move } from "boardgame.io";
 import { MyGameState, GoodKey } from "../../types";
+import { increaseHeresyWithinMove } from "../../helpers/stateUtils";
 
 const GOODS: GoodKey[] = ["mithril", "dragonScales", "krakenSkin", "magicDust", "stickyIchor", "pipeweed"];
 
@@ -29,7 +30,7 @@ const constructOutpost: Move<MyGameState> = (
   });
 
   currentPlayer.resources.victoryPoints += 1;
-  currentPlayer.heresyTracker += 1;
+  increaseHeresyWithinMove(G, playerID);
 
   G.stage = "garrison troops";
 };
