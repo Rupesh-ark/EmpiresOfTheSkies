@@ -167,6 +167,7 @@ export type MapBuildingInfo = {
   fort: boolean;
   garrisonedRegiments: number;
   garrisonedLevies: number;
+  garrisonedEliteRegiments: number;
   /** Contingent counter occupying this colony (Colonial REBELLION loss) */
   rebelCounter?: number;
 };
@@ -210,6 +211,7 @@ export type FleetInfo = {
   skyships: number;
   regiments: number;
   levies: number;
+  eliteRegiments: number;
 };
 
 export type PlayerBoardInfo = {

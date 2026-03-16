@@ -35,13 +35,13 @@ function buildMapWithBuilding(
   buildingType: "outpost" | "colony",
   coords: [number, number]
 ): MapBuildingInfo[][] {
-  const emptyCell: MapBuildingInfo = { fort: false, garrisonedRegiments: 0, garrisonedLevies: 0 };
+  const emptyCell: MapBuildingInfo = { fort: false, garrisonedRegiments: 0, garrisonedLevies: 0, garrisonedEliteRegiments: 0 };
   // Create a 5x3 grid
   const grid: MapBuildingInfo[][] = Array.from({ length: 3 }, () =>
     Array.from({ length: 5 }, () => ({ ...emptyCell }))
   );
   const [x, y] = coords;
-  grid[y][x] = { player, buildings: buildingType, fort: false, garrisonedRegiments: 0, garrisonedLevies: 0 };
+  grid[y][x] = { player, buildings: buildingType, fort: false, garrisonedRegiments: 0, garrisonedLevies: 0, garrisonedEliteRegiments: 0 };
   return grid;
 }
 

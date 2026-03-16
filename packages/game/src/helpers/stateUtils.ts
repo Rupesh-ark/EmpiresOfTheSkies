@@ -117,6 +117,16 @@ export const addLevyAmount = (
   G.playerInfo[playerID].resources.levies += levyAmount;
 };
 
+/** Return elite regiments to a kingdom's reserve. No max cap — they are non-recruitable,
+ *  so the pool can only shrink over a game; we never need to clamp here. */
+export const addEliteRegiments = (
+  G: MyGameState,
+  playerID: string,
+  amount: number
+) => {
+  G.playerInfo[playerID].resources.eliteRegiments += amount;
+};
+
 export const logEvent = (G: MyGameState, message: string) => {
   G.gameLog.push({ round: G.round, message });
 };
