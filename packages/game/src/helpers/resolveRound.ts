@@ -3,6 +3,7 @@ import { RandomAPI } from "boardgame.io/dist/types/src/plugins/random/random";
 import { MyGameState, GoodKey } from "../types";
 import legacyResolutions from "./legacyResolutions";
 import { enactPiracy } from "./piracy";
+import { grantTradeRouteGoods } from "./tradeRouteResolver";
 import { removeVPAmount, logEvent } from "./stateUtils";
 import { FINAL_ROUND_GOLD_PER_VP, DEBT_PENALTY_DIVISOR, TRADE_VP_SCHEDULE } from "../codifiedGameInfo";
 
@@ -97,6 +98,9 @@ const resolveRound = (G: MyGameState, events: EventsAPI, random: RandomAPI) => {
   G.failedConquests = [];
   scoreHeresyTrackVP(G);
   palaceBonus(G);
+
+  // GAP-RES1: grant goods from connected trade routes (recalculated each round)
+  grantTradeRouteGoods(G);
 
   // GAP-9: licenced_smugglers KA — grant +1 good before goods are sold
   // GAP-RES5: record which good each smuggler received so we can recover the

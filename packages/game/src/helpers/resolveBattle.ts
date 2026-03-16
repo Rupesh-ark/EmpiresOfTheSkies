@@ -473,11 +473,8 @@ export const resolveConquest = (
     const currentBuilding = G.mapState.buildings[y][x];
     const currentTile = G.mapState.currentTileArray[y][x];
 
-    Object.entries(currentTile.loot.colony).forEach(([lootName, value]) => {
-      const lootNameAsResource =
-        lootName as keyof typeof currentTile.loot.colony;
-      currentPlayer.resources[lootNameAsResource] += value;
-    });
+    // GAP-RES1: goods are no longer granted immediately on conquest —
+    // they are recalculated each round via grantTradeRouteGoods in resolveRound.
     currentPlayer.resources.victoryPoints += 1;
     increaseHeresyWithinMove(G, currentPlayer.id);
 
