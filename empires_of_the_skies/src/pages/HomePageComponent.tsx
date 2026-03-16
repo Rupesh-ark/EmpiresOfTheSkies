@@ -12,6 +12,7 @@ import {
 import { LobbyClient } from "boardgame.io/dist/types/packages/client";
 import { useState } from "react";
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import { BG_DESKTOP as bgDesktop, BG_TABLET as bgTablet, BG_MOBILE as bgMobile, LOGO as logo } from "../assets/homePage";
 import { colors, fonts } from "../designTokens";
 
@@ -65,6 +66,7 @@ const HomePageComponent = (props: HomePageComponentProps) => {
   const [joinOrCreate, setJoinOrCreate] = useState<"join" | "create">("join");
   const [playerName, setName] = useState("");
   const [matchIDInput, setMatchIDInput] = useState("");
+  const navigate = useNavigate();
 
   return (
     <Box
@@ -227,49 +229,6 @@ const HomePageComponent = (props: HomePageComponentProps) => {
             COMMAND CENTER
           </Typography>
 
-          <Typography sx={labelSx}>Player Name</Typography>
-          <TextField
-            size="small"
-            fullWidth
-            placeholder="Enter username..."
-            onChange={(e) => setName(e.target.value)}
-            sx={textFieldSx}
-          />
-
-          <Typography sx={labelSx}>Match ID</Typography>
-          <TextField
-            size="small"
-            fullWidth
-            disabled={joinOrCreate === "create"}
-            placeholder={joinOrCreate === "create" ? "N/A (Creating New)" : "Enter ID..."}
-            onChange={(e) => setMatchIDInput(e.target.value)}
-            sx={textFieldSx}
-          />
-
-          <Typography sx={labelSx}>Number of Players</Typography>
-          <Select
-            size="small"
-            fullWidth
-            value={props.numPlayers}
-            onChange={(event) => props.setNumPlayers(Number(event.target.value))}
-            sx={{
-              fontFamily: fonts.accent,
-              color: colors.home.text,
-              backgroundColor: colors.home.textFieldBg,
-              borderRadius: "2px",
-              border: `1px solid ${colors.home.border}`,
-              "&:hover": { borderColor: colors.home.hoverBronze },
-              "& .MuiSelect-select": { color: colors.home.text },
-              "& .MuiOutlinedInput-notchedOutline": { border: "none" },
-            }}
-          >
-            {[1, 2, 3, 4, 5, 6].map((n) => (
-              <MenuItem key={n} value={n}>
-                {n}
-              </MenuItem>
-            ))}
-          </Select>
-
           <ToggleButtonGroup
             color="secondary"
             value={joinOrCreate}
@@ -277,7 +236,6 @@ const HomePageComponent = (props: HomePageComponentProps) => {
             fullWidth
             onChange={(_, value) => value && setJoinOrCreate(value)}
             sx={{
-              mt: 1,
               "& .MuiToggleButton-root": {
                 fontFamily: fonts.accent,
                 color: colors.home.text,
@@ -297,11 +255,68 @@ const HomePageComponent = (props: HomePageComponentProps) => {
             <ToggleButton value="create">Create</ToggleButton>
           </ToggleButtonGroup>
 
+          <Typography sx={{ ...labelSx, mt: 1 }}>Player Name</Typography>
+          <TextField
+            size="small"
+            fullWidth
+            placeholder="Enter username..."
+            value={playerName}
+            onChange={(e) => setName(e.target.value)}
+            sx={textFieldSx}
+          />
+
+          {joinOrCreate === "join" && (
+            <>
+              <Typography sx={labelSx}>Match ID</Typography>
+              <TextField
+                size="small"
+                fullWidth
+                placeholder="Enter ID..."
+                value={matchIDInput}
+                onChange={(e) => setMatchIDInput(e.target.value)}
+                sx={textFieldSx}
+              />
+            </>
+          )}
+
+          {joinOrCreate === "create" && (
+            <>
+              <Typography sx={labelSx}>Number of Players</Typography>
+              <Select
+                size="small"
+                fullWidth
+                value={props.numPlayers}
+                onChange={(event) => props.setNumPlayers(Number(event.target.value))}
+                sx={{
+                  fontFamily: fonts.accent,
+                  color: colors.home.text,
+                  backgroundColor: colors.home.textFieldBg,
+                  borderRadius: "2px",
+                  border: `1px solid ${colors.home.border}`,
+                  "&:hover": { borderColor: colors.home.hoverBronze },
+                  "& .MuiSelect-select": { color: colors.home.text },
+                  "& .MuiOutlinedInput-notchedOutline": { border: "none" },
+                }}
+              >
+                {[1, 2, 3, 4, 5, 6].map((n) => (
+                  <MenuItem key={n} value={n}>
+                    {n}
+                  </MenuItem>
+                ))}
+              </Select>
+            </>
+          )}
+
           <Button
             fullWidth
             size="large"
             color="success"
             variant="contained"
+            disabled={
+              joinOrCreate === "join"
+                ? playerName.trim() === "" || matchIDInput.trim() === ""
+                : playerName.trim() === ""
+            }
             sx={{
               mt: 1,
               fontFamily: fonts.accent,
@@ -316,11 +331,19 @@ const HomePageComponent = (props: HomePageComponentProps) => {
                 background: `linear-gradient(to bottom, ${colors.home.gradientTopHover}, ${colors.home.gradientBottomHover})`,
                 borderColor: colors.home.darkerBrown,
               },
+              "&.Mui-disabled": {
+                background: `linear-gradient(to bottom, ${colors.home.gradientTop}, ${colors.home.gradientBottom})`,
+                opacity: 0.45,
+                color: "rgba(255, 255, 255, 0.6)",
+                border: `2px solid ${colors.home.darkBrown}`,
+              },
             }}
             onClick={() => {
-              joinOrCreate === "create"
-                ? createMatch(props.lobbyClient, props.numPlayers, props.setMatchReady)
-                : window.open(`/match/${matchIDInput}/${playerName}`);
+              if (joinOrCreate === "create") {
+                createMatch(props.lobbyClient, props.numPlayers, props.setMatchReady);
+              } else {
+                navigate(`/match/${matchIDInput}/${playerName}`);
+              }
             }}
           >
             {joinOrCreate === "join" ? "JOIN" : "CREATE"} GAME
@@ -349,8 +372,7 @@ const HomePageComponent = (props: HomePageComponentProps) => {
             </Typography>
             <Button
               variant="outlined"
-              href={`/match/${props.matchReady}/${playerName}`}
-              target="_blank"
+              onClick={() => navigate(`/match/${props.matchReady}/${playerName}`)}
               sx={{
                 fontFamily: fonts.accent,
                 color: colors.home.text,
