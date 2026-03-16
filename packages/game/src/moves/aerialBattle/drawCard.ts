@@ -12,6 +12,7 @@ const drawCard: Move<MyGameState> = (
     Object.values(G.battleState).forEach((battler) => {
       if (battler.id === playerID) {
         battler.fowCard = drawFortuneOfWarCard(G);
+        battler.fowSource = "deck";
       }
     });
 

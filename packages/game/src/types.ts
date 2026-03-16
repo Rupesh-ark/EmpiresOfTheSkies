@@ -113,6 +113,7 @@ export type BattleState = {
 interface BattlePlayerInfo extends PlayerInfo {
   decision: "fight" | "evade" | "undecided";
   fowCard?: FortuneOfWarCardInfo;
+  fowSource?: "hand" | "deck";
   victorious?: boolean;
 }
 

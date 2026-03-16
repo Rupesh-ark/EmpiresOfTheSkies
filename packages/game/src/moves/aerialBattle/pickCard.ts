@@ -14,6 +14,7 @@ const pickCard: Move<MyGameState> = (
     Object.values(G.battleState).forEach((battler) => {
       if (battler.id === playerID) {
         battler.fowCard = card;
+        battler.fowSource = "hand";
       }
     });
     G.playerInfo[playerID].resources.fortuneCards.splice(value, 1);
