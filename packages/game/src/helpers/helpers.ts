@@ -229,12 +229,8 @@ export const checkIfCurrentPlayerIsInCurrentBattle = (
   events: EventsAPI
 ) => {
   const [x, y] = G.mapState.currentBattle;
-  console.log("current battlemap:");
-  console.log(G.mapState.battleMap.toString());
-  console.log(`The bit just before the failure... ${[x, y]}`);
   if (G.mapState.battleMap[y][x].length > 0) {
     if (!G.mapState.battleMap[y][x].includes(ctx.currentPlayer)) {
-      console.log("ending turn");
       events.endTurn({
         next: G.mapState.battleMap[y][x][0],
       });
@@ -242,19 +238,15 @@ export const checkIfCurrentPlayerIsInCurrentBattle = (
   } else {
     switch (ctx.phase) {
       case "aerial_battle":
-        console.log("finding next aerial battle");
         findNextBattle(G, events);
         break;
       case "ground_battle":
-        console.log("finding next ground battle");
         findNextGroundBattle(G, events);
         break;
       case "plunder_legends":
-        console.log("finding next plunder");
         findNextPlunder(G, events);
         break;
       case "conquest":
-        console.log("finding next conquest");
         findNextConquest(G, events);
         break;
     }

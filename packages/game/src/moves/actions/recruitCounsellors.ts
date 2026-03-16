@@ -13,7 +13,6 @@ export const recruitCounsellors: Move<MyGameState> = (
 
   const value: keyof typeof G.boardState.recruitCounsellors = args[0] + 1;
   if (G.boardState.recruitCounsellors[value] !== undefined) {
-    console.log("Player selected a move which has already been taken");
     return INVALID_MOVE;
   }
   const costs = {

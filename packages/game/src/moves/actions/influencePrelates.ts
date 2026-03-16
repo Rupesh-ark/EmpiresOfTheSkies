@@ -32,7 +32,6 @@ export const influencePrelates: Move<MyGameState> = (
   if (validateMove(playerID, G, { costsCounsellor: true, costsGold: true })) return INVALID_MOVE;
 
   if (G.boardState.influencePrelates[value] !== undefined) {
-    console.log("Player has selected a move which has already been taken");
     return INVALID_MOVE;
   }
   let recipientOfPayment;

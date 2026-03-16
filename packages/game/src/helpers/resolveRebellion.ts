@@ -197,7 +197,6 @@ export const resolveRebellionEvent = (
 
   // Draw contingent counter
   if (G.contingentPool.length === 0) {
-    console.log("No contingent counters left — rebellion cannot occur");
     return;
   }
   const counterSwords = G.contingentPool.pop()!;

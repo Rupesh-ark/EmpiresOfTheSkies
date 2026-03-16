@@ -8,18 +8,15 @@ const transferOutpost: Move<MyGameState> = ({ G, playerID }, ...args: any[]) => 
   const targetPlayerID: string = args[1];
 
   if (targetPlayerID === playerID) {
-    console.log("Cannot transfer to yourself");
     return INVALID_MOVE;
   }
 
   if (!G.playerInfo[targetPlayerID]) {
-    console.log("Target player does not exist");
     return INVALID_MOVE;
   }
 
   const error = validateOutpostTransfer(G, playerID, targetPlayerID, tileCoords);
   if (error) {
-    console.log(error);
     return INVALID_MOVE;
   }
 
