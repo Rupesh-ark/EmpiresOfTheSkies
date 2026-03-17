@@ -34,7 +34,7 @@ import RetrieveFleetsDialog from "./Resolution/RetrieveFleetsDialog";
 
 import PlayerTable from "./PlayerTable/PlayerTable";
 import HeresyTracker from "./PlayerTable/HeresyTracker";
-import { generalTheme } from "./themes";
+import { useGameTheme } from "@/theme";
 import { Campaign, ChatBubble, Close, Dashboard, Map, MenuBook, Person, TableChart, Timeline } from "@mui/icons-material";
 import PickLegacyCardDialog from "./PickLegacyCardDialog";
 import PickKingdomAdvantageCardDialog from "./PickKingdomAdvantageCardDialog";
@@ -71,6 +71,7 @@ const tabSx = {
 };
 
 export const ActionBoardsAndMap = (props: MyGameProps) => {
+  const theme = useGameTheme(props.G.stage);
   const [value, setValue] = useState("0");
   const [mapDetailRequest, setMapDetailRequest] = useState<{
     location: number[];
@@ -186,7 +187,7 @@ export const ActionBoardsAndMap = (props: MyGameProps) => {
 
   return (
     <div>
-      <ThemeProvider theme={generalTheme}>
+      <ThemeProvider theme={theme}>
         {<ResourceTrackerBar {...props} />}
         <Box sx={{ flexGrow: 1 }}>
           <TabContext value={value}>
