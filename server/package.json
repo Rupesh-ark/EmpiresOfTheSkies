@@ -4,6 +4,7 @@
   "type": "commonjs",
   "scripts": {
     "dev": "tsx watch src/server.ts",
+    "dev:log": "mkdir -p logs && tsx watch src/server.ts 2>&1 | tee logs/game.log",
     "build": "tsc -p src/tsconfig.json",
     "start": "node dist/server.js"
   },

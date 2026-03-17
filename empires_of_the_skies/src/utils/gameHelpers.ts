@@ -1,8 +1,10 @@
-import { MyGameProps, PlayerInfo } from "@eots/game";
+import { MyGameProps, PlayerInfo, createLogger } from "@eots/game";
+
+const log = createLogger("ui");
 
 export const clearMoves = (props: MyGameProps) => {
   if (props.ctx.numMoves) {
-    console.log(`undoing ${props.ctx.numMoves} move(s)`);
+    log.info("undo", { numMoves: props.ctx.numMoves });
 
     for (let i = 0; i < props.ctx.numMoves; i++) {
       props.undo();

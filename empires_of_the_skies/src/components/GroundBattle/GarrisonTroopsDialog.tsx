@@ -1,5 +1,7 @@
 import React, { useState } from "react";
-import { MyGameProps } from "@eots/game";
+import { MyGameProps, createLogger } from "@eots/game";
+
+const log = createLogger("battle");
 import {
   Dialog,
   DialogTitle,
@@ -40,8 +42,7 @@ const GarrisonTroopsDialog = (props: GarrisonTroopsDialogProps) => {
     ) &&
     !(props.ctx.phase === "conquest" && inCurrentBattle && hasTroopsToGarrison)
   ) {
-    console.log("Hold onto your hats!! We are entering the loop!!!");
-    console.log(props.ctx.phase);
+    log.info("garrison dialog", { phase: props.ctx.phase });
     props.ctx.phase === "ground_battle"
       ? props.moves.doNotGroundAttack()
       : props.moves.doNothing();

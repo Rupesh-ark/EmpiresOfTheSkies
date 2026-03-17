@@ -84,6 +84,10 @@ import nominateCaptainGeneral from "./moves/events/nominateCaptainGeneral";
 import commitDeferredBattleCard from "./moves/events/commitDeferredBattleCard";
 import contributeToGrandArmy from "./moves/events/contributeToGrandArmy";
 import { logEvent } from "./helpers/stateUtils";
+import { withLogging } from "./helpers/moveWrapper";
+import { createLogger } from "./helpers/logger";
+
+const phaseLog = createLogger("phase");
 
 const MyGame: Game<MyGameState> = {
   turn: { minMoves: 1 },
@@ -189,57 +193,58 @@ const MyGame: Game<MyGameState> = {
     };
   },
   moves: {
-    discoverTile,
-    alterPlayerOrder,
-    recruitCounsellors,
-    recruitRegiments,
-    purchaseSkyships,
-    foundBuildings,
-    increaseHeresy,
-    increaseOrthodoxy,
-    checkAndPlaceFort,
-    punishDissenters,
-    convertMonarch,
-    influencePrelates,
-    trainTroops,
-    flipCards,
-    buildSkyships,
-    conscriptLevies,
-    passFleetInfoToPlayerInfo,
-    deployFleet,
-    enableDispatchButtons,
-    issueHolyDecree,
-    pass,
-    attackOtherPlayersFleet,
-    evadeAttackingFleet,
-    doNotAttack,
-    retaliate,
-    drawCard,
-    pickCard,
-    relocateDefeatedFleet,
-    plunder,
-    doNotPlunder,
-    attackPlayersBuilding,
-    doNotGroundAttack,
-    defendGroundAttack,
-    garrisonTroops,
-    yieldToAttacker,
-    setTurnCompleteFalse,
-    chooseEventCard,
-    resolveEventChoice,
-    commitRebellionTroops,
-    nominateCaptainGeneral,
-    contributeToGrandArmy,
-    respondToInfidelFleet,
-    contributeToRebellion,
-    offerBuyoffGold,
+    discoverTile: withLogging("discoverTile", discoverTile),
+    alterPlayerOrder: withLogging("alterPlayerOrder", alterPlayerOrder),
+    recruitCounsellors: withLogging("recruitCounsellors", recruitCounsellors),
+    recruitRegiments: withLogging("recruitRegiments", recruitRegiments),
+    purchaseSkyships: withLogging("purchaseSkyships", purchaseSkyships),
+    foundBuildings: withLogging("foundBuildings", foundBuildings),
+    increaseHeresy: withLogging("increaseHeresy", increaseHeresy),
+    increaseOrthodoxy: withLogging("increaseOrthodoxy", increaseOrthodoxy),
+    checkAndPlaceFort: withLogging("checkAndPlaceFort", checkAndPlaceFort),
+    punishDissenters: withLogging("punishDissenters", punishDissenters),
+    convertMonarch: withLogging("convertMonarch", convertMonarch),
+    influencePrelates: withLogging("influencePrelates", influencePrelates),
+    trainTroops: withLogging("trainTroops", trainTroops),
+    flipCards: withLogging("flipCards", flipCards),
+    buildSkyships: withLogging("buildSkyships", buildSkyships),
+    conscriptLevies: withLogging("conscriptLevies", conscriptLevies),
+    passFleetInfoToPlayerInfo: withLogging("passFleetInfoToPlayerInfo", passFleetInfoToPlayerInfo),
+    deployFleet: withLogging("deployFleet", deployFleet),
+    enableDispatchButtons: withLogging("enableDispatchButtons", enableDispatchButtons),
+    issueHolyDecree: withLogging("issueHolyDecree", issueHolyDecree),
+    pass: withLogging("pass", pass),
+    attackOtherPlayersFleet: withLogging("attackOtherPlayersFleet", attackOtherPlayersFleet),
+    evadeAttackingFleet: withLogging("evadeAttackingFleet", evadeAttackingFleet),
+    doNotAttack: withLogging("doNotAttack", doNotAttack),
+    retaliate: withLogging("retaliate", retaliate),
+    drawCard: withLogging("drawCard", drawCard),
+    pickCard: withLogging("pickCard", pickCard),
+    relocateDefeatedFleet: withLogging("relocateDefeatedFleet", relocateDefeatedFleet),
+    plunder: withLogging("plunder", plunder),
+    doNotPlunder: withLogging("doNotPlunder", doNotPlunder),
+    attackPlayersBuilding: withLogging("attackPlayersBuilding", attackPlayersBuilding),
+    doNotGroundAttack: withLogging("doNotGroundAttack", doNotGroundAttack),
+    defendGroundAttack: withLogging("defendGroundAttack", defendGroundAttack),
+    garrisonTroops: withLogging("garrisonTroops", garrisonTroops),
+    yieldToAttacker: withLogging("yieldToAttacker", yieldToAttacker),
+    setTurnCompleteFalse: withLogging("setTurnCompleteFalse", setTurnCompleteFalse),
+    chooseEventCard: withLogging("chooseEventCard", chooseEventCard),
+    resolveEventChoice: withLogging("resolveEventChoice", resolveEventChoice),
+    commitRebellionTroops: withLogging("commitRebellionTroops", commitRebellionTroops),
+    nominateCaptainGeneral: withLogging("nominateCaptainGeneral", nominateCaptainGeneral),
+    contributeToGrandArmy: withLogging("contributeToGrandArmy", contributeToGrandArmy),
+    respondToInfidelFleet: withLogging("respondToInfidelFleet", respondToInfidelFleet),
+    contributeToRebellion: withLogging("contributeToRebellion", contributeToRebellion),
+    offerBuyoffGold: withLogging("offerBuyoffGold", offerBuyoffGold),
   },
   phases: {
     kingdom_advantage: {
       start: true,
-      moves: { pickKingdomAdvantageCard },
+      moves: { pickKingdomAdvantageCard: withLogging("pickKingdomAdvantageCard", pickKingdomAdvantageCard) },
       next: "legacy_card",
       onBegin: (context) => {
+        phaseLog.info("kingdom_advantage", { round: context.G.round });
         context.G.cardDecks.kingdomAdvantagePool = context.random.Shuffle(
           context.G.cardDecks.kingdomAdvantagePool
         );
@@ -256,9 +261,10 @@ const MyGame: Game<MyGameState> = {
       },
     },
     legacy_card: {
-      moves: { pickLegacyCard },
+      moves: { pickLegacyCard: withLogging("pickLegacyCard", pickLegacyCard) },
       next: "events",
       onBegin: (context) => {
+        phaseLog.info("legacy_card", { round: context.G.round });
         context.G.stage = "pick legacy card";
         const cards: LegacyCardInfo[] = context.random.Shuffle([...LEGACY_CARDS]);
         let cardIndex = 0;
@@ -275,17 +281,22 @@ const MyGame: Game<MyGameState> = {
         order: TurnOrder.CUSTOM_FROM("turnOrder"),
       },
       onBegin: (context) => {
+        phaseLog.info("events", { round: context.G.round });
         context.G.stage = "events";
         context.G.eventState.taxModifier = 0;
         context.G.eventState.chosenCards = [];
         context.G.eventState.resolvedEvent = null;
         context.G.eventState.cannotConvertThisRound = [];
       },
-      moves: { chooseEventCard, resolveEventChoice },
+      moves: {
+        chooseEventCard: withLogging("chooseEventCard", chooseEventCard),
+        resolveEventChoice: withLogging("resolveEventChoice", resolveEventChoice),
+      },
       next: "discovery",
     },
     discovery: {
       onBegin: (context) => {
+        phaseLog.info("discovery", { round: context.G.round + 1 });
         context.G.round += 1;
         context.ctx.playOrderPos = 0;
         context.G.stage = "discovery";
@@ -307,8 +318,8 @@ const MyGame: Game<MyGameState> = {
         order: TurnOrder.CUSTOM_FROM("turnOrder"),
       },
       moves: {
-        discoverTile,
-        pass,
+        discoverTile: withLogging("discoverTile", discoverTile),
+        pass: withLogging("pass", pass),
       },
       next: "taxes",
       onEnd: (context) => {
@@ -320,6 +331,7 @@ const MyGame: Game<MyGameState> = {
     taxes: {
       turn: { order: TurnOrder.ONCE },
       onBegin: (context) => {
+        phaseLog.info("taxes", { round: context.G.round });
         context.G.stage = "taxes";
 
         // Peasant REBELLION loss: skip taxes this round
@@ -346,6 +358,7 @@ const MyGame: Game<MyGameState> = {
     },
     actions: {
       onBegin: (context) => {
+        phaseLog.info("actions", { round: context.G.round });
         context.G.firstTurnOfRound = true;
         context.G.stage = "actions";
       },
@@ -363,36 +376,36 @@ const MyGame: Game<MyGameState> = {
         order: TurnOrder.CUSTOM_FROM("turnOrder"),
       },
       moves: {
-        alterPlayerOrder,
-        recruitCounsellors,
-        recruitRegiments,
-        purchaseSkyships,
-        foundBuildings,
-        foundFactory,
-        increaseHeresy,
-        increaseOrthodoxy,
-        checkAndPlaceFort,
-        punishDissenters,
-        convertMonarch,
-        influencePrelates,
-        trainTroops,
-        flipCards,
-        buildSkyships,
-        conscriptLevies,
-        passFleetInfoToPlayerInfo,
-        deployFleet,
-        transferBetweenFleets,
-        sellSkyships,
-        sellBuilding,
-        transferOutpost,
-        proposeDeal,
-        acceptDeal,
-        rejectDeal,
-        enableDispatchButtons,
-        issueHolyDecree,
-        declareSmugglerGood,
-        pass,
-        setTurnCompleteFalse,
+        alterPlayerOrder: withLogging("alterPlayerOrder", alterPlayerOrder),
+        recruitCounsellors: withLogging("recruitCounsellors", recruitCounsellors),
+        recruitRegiments: withLogging("recruitRegiments", recruitRegiments),
+        purchaseSkyships: withLogging("purchaseSkyships", purchaseSkyships),
+        foundBuildings: withLogging("foundBuildings", foundBuildings),
+        foundFactory: withLogging("foundFactory", foundFactory),
+        increaseHeresy: withLogging("increaseHeresy", increaseHeresy),
+        increaseOrthodoxy: withLogging("increaseOrthodoxy", increaseOrthodoxy),
+        checkAndPlaceFort: withLogging("checkAndPlaceFort", checkAndPlaceFort),
+        punishDissenters: withLogging("punishDissenters", punishDissenters),
+        convertMonarch: withLogging("convertMonarch", convertMonarch),
+        influencePrelates: withLogging("influencePrelates", influencePrelates),
+        trainTroops: withLogging("trainTroops", trainTroops),
+        flipCards: withLogging("flipCards", flipCards),
+        buildSkyships: withLogging("buildSkyships", buildSkyships),
+        conscriptLevies: withLogging("conscriptLevies", conscriptLevies),
+        passFleetInfoToPlayerInfo: withLogging("passFleetInfoToPlayerInfo", passFleetInfoToPlayerInfo),
+        deployFleet: withLogging("deployFleet", deployFleet),
+        transferBetweenFleets: withLogging("transferBetweenFleets", transferBetweenFleets),
+        sellSkyships: withLogging("sellSkyships", sellSkyships),
+        sellBuilding: withLogging("sellBuilding", sellBuilding),
+        transferOutpost: withLogging("transferOutpost", transferOutpost),
+        proposeDeal: withLogging("proposeDeal", proposeDeal),
+        acceptDeal: withLogging("acceptDeal", acceptDeal),
+        rejectDeal: withLogging("rejectDeal", rejectDeal),
+        enableDispatchButtons: withLogging("enableDispatchButtons", enableDispatchButtons),
+        issueHolyDecree: withLogging("issueHolyDecree", issueHolyDecree),
+        declareSmugglerGood: withLogging("declareSmugglerGood", declareSmugglerGood),
+        pass: withLogging("pass", pass),
+        setTurnCompleteFalse: withLogging("setTurnCompleteFalse", setTurnCompleteFalse),
       },
       onEnd: (context) => {
         Object.values(context.G.playerInfo).forEach((playerInfo: any) => {
@@ -403,6 +416,7 @@ const MyGame: Game<MyGameState> = {
     },
     aerial_battle: {
       onBegin: (context) => {
+        phaseLog.info("aerial_battle", { round: context.G.round });
         findNextBattle(context.G, context.events);
       },
       turn: {
@@ -416,17 +430,18 @@ const MyGame: Game<MyGameState> = {
       },
       next: "plunder_legends",
       moves: {
-        doNotAttack,
-        attackOtherPlayersFleet,
-        retaliate,
-        evadeAttackingFleet,
-        drawCard,
-        pickCard,
-        relocateDefeatedFleet,
+        doNotAttack: withLogging("doNotAttack", doNotAttack),
+        attackOtherPlayersFleet: withLogging("attackOtherPlayersFleet", attackOtherPlayersFleet),
+        retaliate: withLogging("retaliate", retaliate),
+        evadeAttackingFleet: withLogging("evadeAttackingFleet", evadeAttackingFleet),
+        drawCard: withLogging("drawCard", drawCard),
+        pickCard: withLogging("pickCard", pickCard),
+        relocateDefeatedFleet: withLogging("relocateDefeatedFleet", relocateDefeatedFleet),
       },
     },
     ground_battle: {
       onBegin: (context) => {
+        phaseLog.info("ground_battle", { round: context.G.round });
         findNextGroundBattle(context.G, context.events);
       },
       turn: {
@@ -440,21 +455,25 @@ const MyGame: Game<MyGameState> = {
       },
       next: "conquest",
       moves: {
-        attackPlayersBuilding,
-        doNotGroundAttack,
-        defendGroundAttack,
-        garrisonTroops,
-        yieldToAttacker,
-        drawCard,
-        pickCard,
+        attackPlayersBuilding: withLogging("attackPlayersBuilding", attackPlayersBuilding),
+        doNotGroundAttack: withLogging("doNotGroundAttack", doNotGroundAttack),
+        defendGroundAttack: withLogging("defendGroundAttack", defendGroundAttack),
+        garrisonTroops: withLogging("garrisonTroops", garrisonTroops),
+        yieldToAttacker: withLogging("yieldToAttacker", yieldToAttacker),
+        drawCard: withLogging("drawCard", drawCard),
+        pickCard: withLogging("pickCard", pickCard),
       },
     },
     plunder_legends: {
       onBegin: (context) => {
+        phaseLog.info("plunder_legends", { round: context.G.round });
         context.G.stage = "plunder legends";
         findNextPlunder(context.G, context.events);
       },
-      moves: { plunder, doNotPlunder },
+      moves: {
+        plunder: withLogging("plunder", plunder),
+        doNotPlunder: withLogging("doNotPlunder", doNotPlunder),
+      },
       next: "ground_battle",
       turn: {
         onBegin: (context) => {
@@ -468,6 +487,7 @@ const MyGame: Game<MyGameState> = {
     },
     conquest: {
       onBegin: (context) => {
+        phaseLog.info("conquest", { round: context.G.round });
         context.G.stage = "attack or pass";
       },
       turn: {
@@ -480,12 +500,12 @@ const MyGame: Game<MyGameState> = {
         },
       },
       moves: {
-        coloniseLand,
-        constructOutpost,
-        doNothing,
-        drawCardConquest,
-        pickCardConquest,
-        garrisonTroops,
+        coloniseLand: withLogging("coloniseLand", coloniseLand),
+        constructOutpost: withLogging("constructOutpost", constructOutpost),
+        doNothing: withLogging("doNothing", doNothing),
+        drawCardConquest: withLogging("drawCardConquest", drawCardConquest),
+        pickCardConquest: withLogging("pickCardConquest", pickCardConquest),
+        garrisonTroops: withLogging("garrisonTroops", garrisonTroops),
       },
       next: "election",
     },
@@ -494,11 +514,12 @@ const MyGame: Game<MyGameState> = {
         activePlayers: { all: "voting", moveLimit: 1 },
         stages: {
           voting: {
-            moves: { vote },
+            moves: { vote: withLogging("vote", vote) },
           },
         },
       },
       onBegin: (context) => {
+        phaseLog.info("election", { round: context.G.round });
         context.G.electionResults = {};
         context.G.hasVoted = [];
         context.G.voteSubmitted = {};
@@ -508,6 +529,7 @@ const MyGame: Game<MyGameState> = {
     resolution: {
       turn: { order: TurnOrder.CUSTOM_FROM("turnOrder") },
       onBegin: (context) => {
+        phaseLog.info("resolution", { round: context.G.round });
         // Step 1: Infidel Fleet targeting + movement
         const hasCombat = prepareInfidelFleetCombat(context.G);
 
@@ -525,12 +547,22 @@ const MyGame: Game<MyGameState> = {
       onEnd: (context) => {
         resolveRound(context.G, context.events, context.random);
       },
-      moves: { retrieveFleets, commitRebellionTroops, contributeToRebellion, nominateCaptainGeneral, contributeToGrandArmy, respondToInfidelFleet, offerBuyoffGold, commitDeferredBattleCard },
+      moves: {
+        retrieveFleets: withLogging("retrieveFleets", retrieveFleets),
+        commitRebellionTroops: withLogging("commitRebellionTroops", commitRebellionTroops),
+        contributeToRebellion: withLogging("contributeToRebellion", contributeToRebellion),
+        nominateCaptainGeneral: withLogging("nominateCaptainGeneral", nominateCaptainGeneral),
+        contributeToGrandArmy: withLogging("contributeToGrandArmy", contributeToGrandArmy),
+        respondToInfidelFleet: withLogging("respondToInfidelFleet", respondToInfidelFleet),
+        offerBuyoffGold: withLogging("offerBuyoffGold", offerBuyoffGold),
+        commitDeferredBattleCard: withLogging("commitDeferredBattleCard", commitDeferredBattleCard),
+      },
       next: "reset",
     },
     reset: {
       turn: { order: TurnOrder.ONCE },
       onBegin: (context) => {
+        phaseLog.info("reset", { round: context.G.round });
         // Recompute turn order from alterPlayerOrder choices
         const currentTurnOrder = [...context.ctx.playOrder];
         let newTurnOrder: string[] = [];

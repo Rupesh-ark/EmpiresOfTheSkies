@@ -1,4 +1,5 @@
 export { MyGame } from "./Game";
+export { createLogger } from "./helpers/logger";
 
 
 export * from "./helpers/helpers";

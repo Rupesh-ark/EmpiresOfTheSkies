@@ -2,24 +2,26 @@ import { Client } from "boardgame.io/react";
 import { SocketIO } from "boardgame.io/multiplayer";
 import { useState, useEffect, useRef, useMemo } from "react";
 import { useParams } from "react-router-dom";
-import { MyGame } from "@eots/game";
+import { MyGame, createLogger } from "@eots/game";
 import { ActionBoardsAndMap } from "../components/ActionBoardsAndMap";
 import React from "react";
 import { LobbyClient } from "boardgame.io/client";
+
+const log = createLogger("client");
 
 const storageKey = (matchID: string, playerName: string) =>
   `eots_${matchID}_${playerName}`;
 
 const saveSession = (matchID: string, playerName: string, playerID: string, credentials: string) => {
   localStorage.setItem(storageKey(matchID, playerName), JSON.stringify({ playerID, credentials }));
-  console.log("[Client] Session saved to localStorage", { matchID, playerName, playerID });
+  log.info("session saved", { matchID, playerName, playerID });
 };
 
 const loadSession = (matchID: string, playerName: string): { playerID: string; credentials: string } | null => {
   const raw = localStorage.getItem(storageKey(matchID, playerName));
   if (!raw) return null;
   const parsed = JSON.parse(raw);
-  console.log("[Client] Session loaded from localStorage", parsed);
+  log.info("session loaded", parsed);
   return parsed;
 };
 
@@ -31,10 +33,10 @@ const ClientComponent = (props: ClientComponentProps) => {
   const server = props.server;
 
   useEffect(() => {
-    console.log("[Client] useEffect triggered", { matchID, playerName, hasJoined: hasJoined.current });
+    log.debug("join effect", { matchID, playerName, hasJoined: hasJoined.current });
 
     if (hasJoined.current || !matchID || !playerName) {
-      console.log("[Client] Skipping join — already joined or missing params");
+      log.debug("join skipped");
       return;
     }
     hasJoined.current = true;
@@ -44,22 +46,22 @@ const ClientComponent = (props: ClientComponentProps) => {
         // Check localStorage first — covers page refresh case
         const existingSession = loadSession(matchID, playerName);
         if (existingSession) {
-          console.log("[Client] Reconnecting with existing session", existingSession);
+          log.info("reconnecting", existingSession);
           setPlayerID(existingSession.playerID);
           setPlayerCredentials(existingSession.credentials);
           props.setStartGame(true);
           return;
         }
 
-        console.log("[Client] No existing session — fetching match info for matchID:", matchID);
+        log.info("fetching match", { matchID });
         const enquiry = await props.lobbyClient.getMatch("empires-of-the-skies", matchID);
-        console.log("[Client] Match info received:", enquiry);
+        log.info("match info", { matchID, players: enquiry.players.length });
 
         // Check if this playerName already has a slot (localStorage was cleared but server still has them)
         for (const player of Object.values(enquiry.players)) {
-          console.log(`[Client] Player slot ${player.id} — isConnected: ${player.isConnected}, name: ${player.name}`);
+          log.debug("player slot", { id: player.id, isConnected: player.isConnected, name: player.name });
           if (player.name === playerName) {
-            console.warn("[Client] Player name already registered but no local credentials — cannot reconnect securely");
+            log.warn("name collision", { playerName });
             alert("You are already registered in this match but your session was lost. Please rejoin with a different name or ask the host to restart the match.");
             return;
           }
@@ -73,28 +75,28 @@ const ClientComponent = (props: ClientComponentProps) => {
           }
         }
 
-        console.log("[Client] Free slot found:", freeSlotID);
+        log.info("free slot", { freeSlotID });
 
         if (freeSlotID === undefined) {
-          console.warn("[Client] No free slots available — game is full");
+          log.warn("game full");
           alert("Game is already full");
           return;
         }
 
-        console.log("[Client] Joining match as:", { playerName, freeSlotID });
+        log.info("joining", { playerName, freeSlotID });
         const response = await props.lobbyClient.joinMatch(
           "empires-of-the-skies",
           matchID,
           { playerName, playerID: freeSlotID.toString() }
         );
-        console.log("[Client] Joined successfully:", response);
+        log.info("joined", { playerID: response.playerID });
 
         saveSession(matchID, playerName, response.playerID, response.playerCredentials);
         setPlayerID(response.playerID);
         setPlayerCredentials(response.playerCredentials);
         props.setStartGame(true);
       } catch (e) {
-        console.error("[Client] Failed to join match:", e);
+        log.error("join failed", { error: String(e) });
         alert("Failed to join match, please try again");
       }
     };

@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 
-import { MyGameProps } from "@eots/game";
+import { MyGameProps, createLogger } from "@eots/game";
+
+const log = createLogger("battle");
 import WorldMap from "../WorldMap/WorldMap";
 import {
   Button,
@@ -14,7 +16,7 @@ import { findPossibleDestinations } from "@eots/game";
 const RelocateLoserDialog = (props: RelocateLoserDialogProps) => {
   const [open, setOpen] = useState(true);
 
-  console.log("attempting to display relocation dialog");
+  log.info("relocation dialog");
   const [currentTile, setCurrentTile] = React.useState(
     props.G.mapState.currentBattle
   );
