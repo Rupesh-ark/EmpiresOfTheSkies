@@ -1,125 +1,66 @@
-// ---------------------------------------------------------------------------
-// Colors
-// ---------------------------------------------------------------------------
+// ─────────────────────────────────────────────────────────────────────────────
+// LEGACY RE-EXPORTS — all values now live in theme/tokens.ts
+// This file exists so existing imports don't break. New code should import
+// from "@/theme" directly.
+// ─────────────────────────────────────────────────────────────────────────────
+
+import { tokens } from "./theme/tokens";
+
+export { tokens };
 
 export const colors = {
-  // Game mechanics
-  orthodox: "#A74383",      // purple — Orthodox allegiance
-  heresy: "#E77B00",        // orange — Heresy allegiance
-
-  // SVG / icon outlines
-  svgStroke: "#1A1A18",
-  svgStrokeWidth: "0.288",
-
-  // Unit fills
-  levyFill: "#B1B2B2",      // neutral grey — levy troops
-
-  // Player-order tile accent
-  playerOrderTile: "#9EE8FF",
-
-  // Fixed kingdom colours
-  zeeland: "#FE9F10",
-  venoa: "#FE9ACC",
-
-  // World map tiles
-  unrevealedTile: "#298932",       // forest green back-face
-  selectableTileBorder: "yellow",
-
-  // Action board buttons
-  actionButtonDefault: "#e0e0e0",  // small button default bg
-  actionButtonLarge: "#5ebf85",    // large button bg
-
-  // Loot goods
-  loot: {
-    mithril: "#ECEDED",
-    magicDust: "#F6B1B5",
-    dragonScales: "#52A6B2",
-    krakenSkin: "#B1AC7E",
-    stickyIchor: "#008BD2",
-    pipeweed: "#AE9675",
-  },
-
-  // Shipyard / resource icons
-  shipyardGold: "#D7B469",
-  shipyardGrey: "#D9DADA",
-
-  // UI neutrals
-  tableBorderLight: "#EAEAEA",
-  black: "#000000",
-  white: "#ffffff",
-
-  // Home page / lobby
-  home: {
-    text: "#3e2723",              // aged ink brown
-    border: "#a67c52",            // bronze
-    gradientTop: "#2c6e49",       // forest green
-    gradientBottom: "#1b4d3e",
-    gradientTopHover: "#1b5e20",
-    gradientBottomHover: "#134e35",
-    parchmentBg: "rgba(240, 230, 210, 0.75)",
-    textFieldBg: "rgba(255, 255, 255, 0.6)",
-    hoverBronze: "#d2b48c",
-    darkBrown: "#5c4033",
-    darkerBrown: "#4d3122",
-    creamButton: "rgba(250, 245, 235, 0.9)",
-    creamButtonSolid: "rgba(250, 245, 235, 1)",
-    disabledBg: "rgba(0, 0, 0, 0.05)",
-    disabledBorder: "rgba(0, 0, 0, 0.2)",
-    disabledText: "rgba(0, 0, 0, 0.5)",
-    shadowOverlay: "rgba(0, 0, 0, 0.5)",
-  },
+  orthodox:            tokens.allegiance.orthodox,
+  heresy:              tokens.allegiance.heresy,
+  svgStroke:           tokens.svg.stroke,
+  svgStrokeWidth:      tokens.svg.strokeWidth,
+  levyFill:            tokens.svg.levyFill,
+  playerOrderTile:     tokens.ui.playerOrderTile,
+  zeeland:             tokens.nprKingdom.zeeland,
+  venoa:               tokens.nprKingdom.venoa,
+  unrevealedTile:      tokens.map.unrevealedTile,
+  selectableTileBorder: tokens.map.selectableBorder,
+  actionButtonDefault: tokens.ui.actionButtonDefault,
+  actionButtonLarge:   tokens.ui.actionButtonLarge,
+  loot:                tokens.goods,
+  shipyardGold:        tokens.ui.shipyardGold,
+  shipyardGrey:        tokens.ui.shipyardGrey,
+  tableBorderLight:    tokens.ui.tableBorderLight,
+  black:               tokens.ui.black,
+  white:               tokens.ui.white,
+  home:                tokens.home,
 } as const;
-
-// ---------------------------------------------------------------------------
-// Typography
-// ---------------------------------------------------------------------------
 
 export const fonts = {
-  primary: "dauphinn",
-  accent: '"Cinzel", serif',
-  system: "Inter, system-ui, Avenir, Helvetica, Arial, sans-serif",
+  primary: tokens.font.display,
+  accent:  tokens.font.accent,
+  system:  tokens.font.body,
 } as const;
 
-// ---------------------------------------------------------------------------
-// Sizes & dimensions
-// ---------------------------------------------------------------------------
-
 export const sizes = {
-  // Fortune-of-War / Legacy cards
-  cardWidth: "137px",
-  cardHeight: "250px",
+  cardWidth:  `${tokens.size.card.width}px`,
+  cardHeight: `${tokens.size.card.height}px`,
   cardMargin: "5px",
-
-  // World-map tiles
-  tileSize: "150px",
-
-  // Action board buttons
+  tileSize:   `${tokens.size.tile.width}px`,
   actionButton: {
-    width: "98px",
-    height: "50px",
-    largeWidth: "180px",
-    largeHeight: "150px",
+    width:       `${tokens.size.slotButton.width}px`,
+    height:      `${tokens.size.slotButton.height}px`,
+    largeWidth:  `${tokens.size.largeButton.width}px`,
+    largeHeight: `${tokens.size.largeButton.height}px`,
   },
-
-  // Player board buttons
   playerBoardButton: {
-    width: "98px",
-    height: "50px",
+    width:  `${tokens.size.slotButton.width}px`,
+    height: `${tokens.size.slotButton.height}px`,
   },
-
-  // Fonts (numeric, for MUI theme)
   fontSize: {
-    base: 20,
-    small: 18,
-    tableCell: 18.5,
-    tooltip: 18,
-    tab: 26,
-    chat: 16,
-    tile: "20px",
+    base:             tokens.fontSize.base,
+    small:            tokens.fontSize.small,
+    tableCell:        tokens.fontSize.tableCell,
+    tooltip:          tokens.fontSize.tooltip,
+    tab:              tokens.fontSize.tab,
+    chat:             tokens.fontSize.chat,
+    tile:             "20px",
     holyDecreeButton: "18px",
   },
-
-  // Common spacing
   spacing: {
     xs: "5px",
     sm: "10px",
