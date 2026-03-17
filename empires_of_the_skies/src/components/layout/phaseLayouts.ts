@@ -17,11 +17,6 @@ export interface PhaseLayoutConfig {
   right: PanelSlot[];
   bottom: PanelSlot;
   tabExtras: PanelSlot[];
-  gridColumns: {
-    laptop: string;
-    desktop: string;
-    wide: string;
-  };
   bottomHeight: string;
 }
 
@@ -32,11 +27,6 @@ export const PHASE_LAYOUTS: Record<GameMood, PhaseLayoutConfig> = {
     right: [],
     bottom: "action-board",
     tabExtras: ["game-log", "stats", "rules"],
-    gridColumns: {
-      laptop:  "280px 1fr 0px",
-      desktop: "300px 1fr 0px",
-      wide:    "340px 1fr 0px",
-    },
     bottomHeight: "45vh",
   },
 
@@ -46,11 +36,6 @@ export const PHASE_LAYOUTS: Record<GameMood, PhaseLayoutConfig> = {
     right: [],
     bottom: "empty",
     tabExtras: ["action-board", "game-log", "stats", "rules"],
-    gridColumns: {
-      laptop:  "240px 1fr 0px",
-      desktop: "280px 1fr 0px",
-      wide:    "320px 1fr 0px",
-    },
     bottomHeight: "0px",
   },
 
@@ -60,11 +45,6 @@ export const PHASE_LAYOUTS: Record<GameMood, PhaseLayoutConfig> = {
     right: ["stats"],
     bottom: "empty",
     tabExtras: ["action-board", "game-log", "rules"],
-    gridColumns: {
-      laptop:  "240px 1fr 280px",
-      desktop: "280px 1fr 320px",
-      wide:    "320px 1fr 380px",
-    },
     bottomHeight: "0px",
   },
 
@@ -74,11 +54,6 @@ export const PHASE_LAYOUTS: Record<GameMood, PhaseLayoutConfig> = {
     right: [],
     bottom: "empty",
     tabExtras: ["action-board", "game-log", "stats", "rules"],
-    gridColumns: {
-      laptop:  "240px 1fr 0px",
-      desktop: "260px 1fr 0px",
-      wide:    "300px 1fr 0px",
-    },
     bottomHeight: "0px",
   },
 
@@ -88,11 +63,6 @@ export const PHASE_LAYOUTS: Record<GameMood, PhaseLayoutConfig> = {
     right: [],
     bottom: "empty",
     tabExtras: ["action-board", "game-log", "stats", "rules"],
-    gridColumns: {
-      laptop:  "240px 1fr 0px",
-      desktop: "280px 1fr 0px",
-      wide:    "320px 1fr 0px",
-    },
     bottomHeight: "0px",
   },
 };

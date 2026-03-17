@@ -22,9 +22,6 @@ const SLOT_LABELS: Record<PanelSlot, string> = {
   "empty":        "",
 };
 
-const BOTTOM_HEIGHT_TRANSITION = `height ${tokens.transition.slow}, min-height ${tokens.transition.slow}`;
-const COLUMNS_TRANSITION        = `grid-template-columns ${tokens.transition.slow}`;
-
 export const GameLayout = ({
   mood,
   renderSlot,
@@ -33,87 +30,73 @@ export const GameLayout = ({
 }: GameLayoutProps) => {
   const config = getPhaseLayout(mood);
   const [mapExpanded, setMapExpanded] = useState(false);
-  const [extraTab, setExtraTab]       = useState<PanelSlot | null>(null);
+  const [extraTab, setExtraTab] = useState<PanelSlot | null>(null);
 
-  // When map is expanded, collapse side panels to give map all space
-  const gridColumns = mapExpanded
-    ? { xs: "0px 1fr 0px", lg: "0px 1fr 0px", xl: "0px 1fr 0px" }
-    : {
-        xs: config.gridColumns.laptop,
-        lg: config.gridColumns.desktop,
-        xl: config.gridColumns.wide,
-      };
-
-  const resolvedMapSize: MapSize = mapExpanded ? "large" : config.mapSize;
-
-  const mapMaxHeight =
-    resolvedMapSize === "compact" ? "40vh"
-    : resolvedMapSize === "medium"  ? "55vh"
-    : "100%";
-
-  const hasRight  = config.right.length > 0;
+  const hasLeft = config.left.length > 0;
+  const hasRight = config.right.length > 0;
   const hasBottom = config.bottom !== "empty";
   const hasExtras = config.tabExtras.length > 0;
+  const resolvedMapSize: MapSize = mapExpanded ? "large" : config.mapSize;
 
   const handleExtraTab = (_: React.SyntheticEvent, slot: PanelSlot) => {
     setExtraTab(prev => (prev === slot ? null : slot));
   };
 
+  // Left panel width based on screen (using CSS clamp for fluid sizing)
+  const leftWidth = mapExpanded ? "0px" : "280px";
+  const rightWidth = (hasRight && !mapExpanded) ? "300px" : "0px";
+
   return (
     <Box
       sx={{
-        display:        "flex",
-        flexDirection:  "column",
-        flex:           1,
-        overflow:       "hidden",
-        minHeight:      0,
+        display: "flex",
+        flexDirection: "column",
+        flex: 1,
+        overflow: "hidden",
+        minHeight: 0,
       }}
     >
-      {/* ── Main 3-column content row ─────────────────────────────────── */}
+      {/* ── Top row: left sidebar + map + right sidebar ──────────── */}
       <Box
         sx={{
-          display:               "grid",
-          gridTemplateColumns:   gridColumns,
-          flex:                  1,
-          overflow:              "hidden",
-          minHeight:             0,
-          transition:            COLUMNS_TRANSITION,
+          display: "flex",
+          flex: hasBottom ? "1 1 55%" : "1 1 100%",
+          overflow: "hidden",
+          minHeight: 0,
         }}
       >
         {/* Left sidebar */}
-        <Box
-          sx={{
-            overflow:    "hidden auto",
-            borderRight: `1px solid ${tokens.ui.border}`,
-            backgroundColor: tokens.ui.surface,
-            display: mapExpanded ? "none" : "block",
-          }}
-        >
-          {config.left.map((slot, i) => (
-            <Box key={`left-${i}`}>{renderSlot(slot)}</Box>
-          ))}
-        </Box>
+        {hasLeft && (
+          <Box
+            sx={{
+              width: leftWidth,
+              minWidth: mapExpanded ? 0 : 240,
+              maxWidth: mapExpanded ? 0 : 360,
+              flexShrink: 0,
+              overflowY: "auto",
+              overflowX: "hidden",
+              borderRight: `1px solid ${tokens.ui.border}`,
+              backgroundColor: tokens.ui.surface,
+              transition: `width ${tokens.transition.slow}, min-width ${tokens.transition.slow}, max-width ${tokens.transition.slow}`,
+            }}
+          >
+            {config.left.map((slot, i) => (
+              <Box key={`left-${i}`}>{renderSlot(slot)}</Box>
+            ))}
+          </Box>
+        )}
 
         {/* Center — map */}
         <Box
           sx={{
-            position:        "relative",
-            overflow:        "hidden",
+            flex: 1,
+            position: "relative",
+            overflow: "auto",
             backgroundColor: tokens.ui.background,
-            display:         "flex",
-            flexDirection:   "column",
+            minWidth: 0,
           }}
         >
-          <Box
-            sx={{
-              flex:      1,
-              overflow:  "hidden",
-              maxHeight: resolvedMapSize === "large" ? "100%" : mapMaxHeight,
-              transition: `max-height ${tokens.transition.slow}`,
-            }}
-          >
-            {renderMap(resolvedMapSize)}
-          </Box>
+          {renderMap(resolvedMapSize)}
 
           {/* Enlarge / restore toggle */}
           <Tooltip title={mapExpanded ? "Restore layout" : "Enlarge map"}>
@@ -121,15 +104,15 @@ export const GameLayout = ({
               size="small"
               onClick={() => setMapExpanded(v => !v)}
               sx={{
-                position:        "absolute",
-                top:             8,
-                right:           8,
-                zIndex:          10,
-                backgroundColor: "rgba(0,0,0,0.45)",
-                color:           tokens.ui.textMuted,
+                position: "absolute",
+                top: 8,
+                right: 8,
+                zIndex: 10,
+                backgroundColor: "rgba(0,0,0,0.55)",
+                color: tokens.ui.textBright,
+                border: `1px solid ${tokens.ui.borderMedium}`,
                 "&:hover": {
-                  backgroundColor: "rgba(0,0,0,0.65)",
-                  color:           tokens.ui.text,
+                  backgroundColor: "rgba(0,0,0,0.75)",
                 },
               }}
             >
@@ -138,14 +121,19 @@ export const GameLayout = ({
           </Tooltip>
         </Box>
 
-        {/* Right sidebar — only rendered when config.right has entries */}
+        {/* Right sidebar */}
         {hasRight && (
           <Box
             sx={{
-              overflow:     "hidden auto",
-              borderLeft:   `1px solid ${tokens.ui.border}`,
+              width: rightWidth,
+              minWidth: mapExpanded ? 0 : 240,
+              maxWidth: mapExpanded ? 0 : 380,
+              flexShrink: 0,
+              overflowY: "auto",
+              overflowX: "hidden",
+              borderLeft: `1px solid ${tokens.ui.border}`,
               backgroundColor: tokens.ui.surface,
-              display: mapExpanded ? "none" : "block",
+              transition: `width ${tokens.transition.slow}, min-width ${tokens.transition.slow}, max-width ${tokens.transition.slow}`,
             }}
           >
             {config.right.map((slot, i) => (
@@ -153,40 +141,34 @@ export const GameLayout = ({
             ))}
           </Box>
         )}
-        {/* Placeholder column when right is "0px" but we still need the grid column */}
-        {!hasRight && (
-          <Box sx={{ overflow: "hidden", width: 0 }} />
-        )}
       </Box>
 
-      {/* ── Bottom panel ─────────────────────────────────────────────── */}
+      {/* ── Bottom panel (e.g., action board) ────────────────────── */}
       {hasBottom && (
-        <Collapse in={!mapExpanded}>
-          <Box
-            sx={{
-              height:          config.bottomHeight,
-              overflowY:       "auto",
-              borderTop:       `1px solid ${tokens.ui.border}`,
-              backgroundColor: tokens.ui.surface,
-              flexShrink:      0,
-              transition:      BOTTOM_HEIGHT_TRANSITION,
-            }}
-          >
-            {renderSlot(config.bottom)}
-          </Box>
-        </Collapse>
+        <Box
+          sx={{
+            height: config.bottomHeight,
+            minHeight: "200px",
+            flexShrink: 0,
+            overflowY: "auto",
+            borderTop: `1px solid ${tokens.ui.border}`,
+            backgroundColor: tokens.ui.surface,
+          }}
+        >
+          {renderSlot(config.bottom)}
+        </Box>
       )}
 
-      {/* ── Tab extras bar ───────────────────────────────────────────── */}
+      {/* ── Tab extras strip ─────────────────────────────────────── */}
       {hasExtras && (
         <Box sx={{ flexShrink: 0 }}>
           {/* Expanded drawer */}
           <Collapse in={extraTab !== null} unmountOnExit>
             <Box
               sx={{
-                height:          "280px",
-                overflowY:       "auto",
-                borderTop:       `1px solid ${tokens.ui.border}`,
+                height: "35vh",
+                overflowY: "auto",
+                borderTop: `1px solid ${tokens.ui.border}`,
                 backgroundColor: tokens.ui.surface,
               }}
             >
@@ -197,7 +179,7 @@ export const GameLayout = ({
           {/* Tab strip */}
           <Box
             sx={{
-              borderTop:       `1px solid ${tokens.ui.border}`,
+              borderTop: `1px solid ${tokens.ui.border}`,
               backgroundColor: tokens.ui.surfaceRaised,
             }}
           >
@@ -207,18 +189,18 @@ export const GameLayout = ({
               variant="scrollable"
               scrollButtons="auto"
               sx={{
-                minHeight: 28,
+                minHeight: 32,
                 "& .MuiTabs-indicator": {
                   backgroundColor: tokens.ui.gold,
-                  height:          2,
+                  height: 2,
                 },
                 "& .MuiTab-root": {
-                  minHeight:     28,
-                  fontFamily:    tokens.font.body,
-                  fontSize:      tokens.fontSize.xs,
+                  minHeight: 32,
+                  fontFamily: tokens.font.body,
+                  fontSize: tokens.fontSize.sm,
                   textTransform: "none",
-                  color:         tokens.ui.textMuted,
-                  padding:       "0 12px",
+                  color: tokens.ui.textMuted,
+                  padding: "4px 16px",
                   "&.Mui-selected": {
                     color: tokens.ui.gold,
                   },
