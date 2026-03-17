@@ -2,6 +2,11 @@ import { BoardProps } from "boardgame.io/dist/types/packages/react";
 
 export interface MyGameProps extends BoardProps<MyGameState> {}
 
+export type MoveError = {
+  code: string;
+  message: string;
+};
+
 export type DealOffer = {
   gold?: number;
   skyships?: number;

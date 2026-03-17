@@ -1,6 +1,6 @@
 import { Move } from "boardgame.io";
 import { MyGameState, PlayerColour } from "../../types";
-import { validateMove } from "../moveValidation";
+import { validateInfluencePrelates } from "../moveValidation";
 import { INVALID_MOVE } from "boardgame.io/core";
 import {
   addGoldAmount,
@@ -13,11 +13,7 @@ export const influencePrelates: Move<MyGameState> = (
 ) => {
   const value: keyof typeof G.boardState.influencePrelates = args[0] + 1;
 
-  if (validateMove(playerID, G, { costsCounsellor: true, costsGold: true })) return INVALID_MOVE;
-
-  if (G.boardState.influencePrelates[value] !== undefined) {
-    return INVALID_MOVE;
-  }
+  if (validateInfluencePrelates(G, playerID, args[0])) return INVALID_MOVE;
   let recipientOfPayment;
   let cost = 1;
 

@@ -1,21 +1,13 @@
 import { Move } from "boardgame.io";
 import { MyGameState } from "../../types";
 import { INVALID_MOVE } from "boardgame.io/core";
-import { validateMove } from "../moveValidation";
+import { validateFoundFactory } from "../moveValidation";
 import { removeOneCounsellor } from "../../helpers/stateUtils";
-import { MAX_FACTORIES } from "../../codifiedGameInfo";
 
 const foundFactory: Move<MyGameState> = ({ G, playerID }, ...args) => {
-  if (validateMove(playerID, G, { costsCounsellor: true, costsGold: true })) return INVALID_MOVE;
-
-  if (G.playerInfo[playerID].factories >= MAX_FACTORIES) {
-    return INVALID_MOVE;
-  }
+  if (validateFoundFactory(G, playerID, args[0])) return INVALID_MOVE;
 
   const slot: keyof typeof G.boardState.foundFactories = args[0] + 1;
-  if (G.boardState.foundFactories[slot] !== undefined) {
-    return INVALID_MOVE;
-  }
 
   const takenSlots = Object.values(G.boardState.foundFactories).filter(
     (v) => v !== undefined

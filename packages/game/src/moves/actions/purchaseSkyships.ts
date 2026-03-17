@@ -1,7 +1,7 @@
 import { Move } from "boardgame.io";
 import { MyGameState } from "../../types";
 import { INVALID_MOVE } from "boardgame.io/core";
-import { validateMove } from "../moveValidation";
+import { validatePurchaseSkyships } from "../moveValidation";
 import {
   addSkyship,
   removeGoldAmount,
@@ -13,7 +13,7 @@ const purchaseSkyships: Move<MyGameState> = (
   slotIndex: number,
   republic: "zeeland" | "venoa"
 ) => {
-  if (validateMove(playerID, G, { costsCounsellor: true, costsGold: true })) return INVALID_MOVE;
+  if (validatePurchaseSkyships(G, playerID, slotIndex, republic)) return INVALID_MOVE;
 
   const boardSlots =
     republic === "venoa"
@@ -21,10 +21,6 @@ const purchaseSkyships: Move<MyGameState> = (
       : G.boardState.purchaseSkyshipsZeeland;
 
   const slot: keyof typeof boardSlots = (slotIndex + 1) as 1 | 2;
-
-  if (boardSlots[slot] !== undefined) {
-    return INVALID_MOVE;
-  }
 
   // v4.2: cost = 2 Gold + 1 per counsellor in this slot including the one just placed
   // slot 1 (takenSlots=0): 2+1 = 3 Gold; slot 2 (takenSlots=1): 2+2 = 4 Gold

@@ -1,6 +1,7 @@
 import { Move } from "boardgame.io";
 import { MyGameState } from "../../types";
 import { INVALID_MOVE } from "boardgame.io/core";
+import { validatePassFleetInfo } from "../moveValidation";
 import { KINGDOM_LOCATION } from "../../codifiedGameInfo";
 const passFleetInfoToPlayerInfo: Move<MyGameState> = (
   { G, playerID },
@@ -12,24 +13,11 @@ const passFleetInfoToPlayerInfo: Move<MyGameState> = (
   const levyCount = args[3];
   const eliteRegimentCount = args[4] ?? 0;  // backwards compatible — older callers omit this
 
+  if (validatePassFleetInfo(G, playerID, fleetId, skyshipCount, regimentCount, levyCount, eliteRegimentCount)) return INVALID_MOVE;
+
   const currentPlayer = G.playerInfo[playerID];
   const currentFleet = currentPlayer.fleetInfo[fleetId];
-  if (!currentFleet || fleetId !== currentFleet.fleetId) {
-    return INVALID_MOVE;
-  }
   if (currentFleet.location[0] === KINGDOM_LOCATION[0] && currentFleet.location[1] === KINGDOM_LOCATION[1]) {
-    if (
-      currentPlayer.resources.skyships < skyshipCount ||
-      currentPlayer.resources.regiments < regimentCount ||
-      currentPlayer.resources.levies < levyCount ||
-      currentPlayer.resources.eliteRegiments < eliteRegimentCount
-    ) {
-      return INVALID_MOVE;
-    }
-    // Each skyship carries exactly 1 troop (any type)
-    if (skyshipCount < regimentCount + levyCount + eliteRegimentCount) {
-      return INVALID_MOVE;
-    }
     currentFleet.skyships = skyshipCount;
     currentFleet.regiments = regimentCount;
     currentFleet.levies = levyCount;

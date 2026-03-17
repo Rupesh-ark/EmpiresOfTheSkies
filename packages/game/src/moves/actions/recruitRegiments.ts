@@ -1,6 +1,6 @@
 import { Move } from "boardgame.io";
 import { MyGameState } from "../../types";
-import { validateMove } from "../moveValidation";
+import { validateRecruitRegiments } from "../moveValidation";
 import { INVALID_MOVE } from "boardgame.io/core";
 import {
   addRegiments,
@@ -12,11 +12,8 @@ const recruitRegiments: Move<MyGameState> = (
   { G, playerID },
   ...args: any[]
 ) => {
-  if (validateMove(playerID, G, { costsCounsellor: true, costsGold: true })) return INVALID_MOVE;
   const value: keyof typeof G.boardState.recruitRegiments = args[0] + 1;
-  if (G.boardState.recruitRegiments[value] !== undefined) {
-    return INVALID_MOVE;
-  }
+  if (validateRecruitRegiments(G, playerID, args[0])) return INVALID_MOVE;
   // v4.2: cost = 1 Gold + 1 Gold per counsellor in slot (including this one)
   // Slot position equals the count of counsellors, so cost = 1 + slot position
   const cost = 1 + value;
