@@ -21,11 +21,13 @@ const commitRebellionTroops: Move<MyGameState> = (
     ctx,
     playerID,
     events,
+    random,
   }: {
     G: MyGameState;
     ctx: Ctx;
     playerID: string;
     events: EventsAPI;
+    random: any;
   },
   regiments: number,
   levies: number,
@@ -69,7 +71,7 @@ const commitRebellionTroops: Move<MyGameState> = (
     (id) => id !== rebellion.event.targetPlayerID
   );
   if (rivals.length === 0) {
-    resolveRebellionWithTroops(G, rebellion, regiments, levies);
+    resolveRebellionWithTroops(G, rebellion, regiments, levies, random.Shuffle);
     G.currentRebellion = null;
 
     if (setupNextRebellion(G)) {

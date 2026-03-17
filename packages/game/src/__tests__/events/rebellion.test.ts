@@ -13,7 +13,7 @@ import {
   resolveRebellionWithTroops,
   resolveRebellionWithTroopsAndRivals,
 } from "../../helpers/resolveRebellion";
-import { buildInitialG, buildPlayer, buildCtx, buildResources } from "../testHelpers";
+import { buildInitialG, buildPlayer, buildCtx, buildResources, buildRandom } from "../testHelpers";
 import { INVALID_MOVE } from "boardgame.io/core";
 import { MyGameState, MapBuildingInfo } from "../../types";
 
@@ -438,7 +438,7 @@ describe("resolveRebellionWithTroops — fort bonus at Kingdom location", () => 
 
     // With fort: rebel swords = 6+2 = 8, defender shields = 3 (fort) + 1 (FoW) = 4
     // hitsOnDefender = 8 - 4 = 4; defHP = 6 → defender survives
-    resolveRebellionWithTroops(G, rebellion as any, 3, 0);
+    resolveRebellionWithTroops(G, rebellion as any, 3, 0, buildRandom().Shuffle);
 
     // Defender should survive (fort shielded enough)
     // Troop losses: 4 hits on 3 reg (6HP) → 0 levies lost, 2 reg lost (4/2=2)
@@ -466,7 +466,7 @@ describe("resolveRebellionWithTroops — fort bonus at Kingdom location", () => 
 
     // Without fort: rebel swords = 6+2 = 8, defender shields = 0 + 1 (FoW) = 1
     // hitsOnDefender = 8 - 1 = 7; defHP = 6 → defender eliminated (rebels win)
-    resolveRebellionWithTroops(G, rebellion as any, 3, 0);
+    resolveRebellionWithTroops(G, rebellion as any, 3, 0, buildRandom().Shuffle);
 
     // All troops lost (7 hits >= 6 HP)
     expect(G.playerInfo["0"].resources.regiments).toBe(0);
@@ -529,7 +529,7 @@ describe("resolveRebellionWithTroopsAndRivals — rival troop return", () => {
     // Defender swords = 4*2 + 0 + rival(2*2+1=5) = 13, + FoW 3 = 16
     // Rebel swords = 3 + FoW 0 = 3
     // Defender definitely wins — rival on winning side gets troops back
-    resolveRebellionWithTroopsAndRivals(G, rebellion!);
+    resolveRebellionWithTroopsAndRivals(G, rebellion!, buildRandom().Shuffle);
 
     // Rival "1" should get 2R/1L returned
     expect(G.playerInfo["1"].resources.regiments).toBe(3 + 2); // 3 remaining + 2 returned
@@ -573,7 +573,7 @@ describe("resolveRebellionWithTroopsAndRivals — rival troop return", () => {
     // hitsOnDefender = 14 - 1 = 13; defHP = 1*2+0+4 = 6 → eliminated
     // hitsOnRebel = 6 - 2 = 4; rebelHP = 10+0 = 10 → not eliminated
     // Rebels win → defender-side rival troops are lost
-    resolveRebellionWithTroopsAndRivals(G, rebellion!);
+    resolveRebellionWithTroopsAndRivals(G, rebellion!, buildRandom().Shuffle);
 
     // Rival "1" was on the losing (defender) side: troops NOT returned
     expect(G.playerInfo["1"].resources.regiments).toBe(3); // unchanged — 2R already deducted, not returned

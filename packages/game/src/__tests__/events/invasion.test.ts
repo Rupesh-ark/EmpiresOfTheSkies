@@ -15,7 +15,7 @@ import offerBuyoffGold from "../../moves/events/offerBuyoffGold";
 import respondToInfidelFleet from "../../moves/events/respondToInfidelFleet";
 import commitDeferredBattleCard from "../../moves/events/commitDeferredBattleCard";
 import { setupNextDeferredBattle } from "../../helpers/resolutionFlow";
-import { buildInitialG, buildPlayer, buildCtx, buildResources, buildFleet } from "../testHelpers";
+import { buildInitialG, buildPlayer, buildCtx, buildResources, buildFleet, buildRandom } from "../testHelpers";
 import { INVALID_MOVE } from "boardgame.io/core";
 import { MyGameState, DeferredEvent, MapBuildingInfo, TileInfoProps } from "../../types";
 
@@ -89,8 +89,9 @@ function callRespondFleet(
     ...buildCtx(playerID, Object.keys(G.playerInfo).length),
     playOrder: playOrder ?? Object.keys(G.playerInfo),
   };
+  const random = buildRandom();
   const result = (respondToInfidelFleet as Function)(
-    { G, ctx, playerID, events },
+    { G, ctx, playerID, events, random },
     response,
     fowCardIndex
   );
@@ -571,8 +572,9 @@ function callCommitDeferredBattle(
     ...buildCtx(playerID, Object.keys(G.playerInfo).length),
     playOrder: playOrder ?? Object.keys(G.playerInfo),
   };
+  const random = buildRandom();
   const result = (commitDeferredBattleCard as Function)(
-    { G, ctx, playerID, events },
+    { G, ctx, playerID, events, random },
     fowCardIndex
   );
   return { result, events };

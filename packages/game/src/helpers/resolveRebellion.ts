@@ -191,7 +191,8 @@ const resolveColonialRebellion = (
  */
 export const resolveRebellionEvent = (
   G: MyGameState,
-  event: DeferredEvent
+  event: DeferredEvent,
+  shuffle: <T>(arr: T[]) => T[]
 ): void => {
   const { card, targetPlayerID, targetTile } = event;
 
@@ -225,8 +226,8 @@ export const resolveRebellionEvent = (
     fortPresent = hasFortAt(G, KINGDOM_LOCATION[0], KINGDOM_LOCATION[1]);
   }
 
-  const fowRebel = drawFortuneOfWarCard(G);
-  const fowDefender = drawFortuneOfWarCard(G);
+  const fowRebel = drawFortuneOfWarCard(G, shuffle);
+  const fowDefender = drawFortuneOfWarCard(G, shuffle);
 
   const { defenderWins, hitsOnDefender } = calculateBattle(
     counterSwords,
@@ -332,7 +333,8 @@ export const resolveRebellionWithTroops = (
   G: MyGameState,
   rebellion: MyGameState["currentRebellion"] & {},
   regiments: number,
-  levies: number
+  levies: number,
+  shuffle: <T>(arr: T[]) => T[]
 ): void => {
   const { event, counterSwords } = rebellion;
   const { card, targetPlayerID, targetTile } = event;
@@ -355,8 +357,8 @@ export const resolveRebellionWithTroops = (
   }
 
   // Rebel always draws from deck; defender uses hand card if provided
-  const fowRebel = drawFortuneOfWarCard(G);
-  const fowDefender = rebellion.fowCard ?? drawFortuneOfWarCard(G);
+  const fowRebel = drawFortuneOfWarCard(G, shuffle);
+  const fowDefender = rebellion.fowCard ?? drawFortuneOfWarCard(G, shuffle);
 
   const { defenderWins, hitsOnDefender } = calculateBattle(
     counterSwords,
@@ -389,7 +391,8 @@ export const resolveRebellionWithTroops = (
  */
 export const resolveRebellionWithTroopsAndRivals = (
   G: MyGameState,
-  rebellion: MyGameState["currentRebellion"] & {}
+  rebellion: MyGameState["currentRebellion"] & {},
+  shuffle: <T>(arr: T[]) => T[]
 ): void => {
   const { event, counterSwords, defenderRegiments, defenderLevies, rivalContributions } = rebellion;
   const { card, targetPlayerID, targetTile } = event;
@@ -427,8 +430,8 @@ export const resolveRebellionWithTroopsAndRivals = (
   }
 
   // Rebel always draws from deck; defender uses hand card if provided
-  const fowRebel = drawFortuneOfWarCard(G);
-  const fowDefender = rebellion.fowCard ?? drawFortuneOfWarCard(G);
+  const fowRebel = drawFortuneOfWarCard(G, shuffle);
+  const fowDefender = rebellion.fowCard ?? drawFortuneOfWarCard(G, shuffle);
 
   // Use combined swords for battle calculation
   const totalDefShields = fortPresent ? defReg + defLev : 0;

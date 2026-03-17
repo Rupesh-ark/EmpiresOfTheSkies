@@ -12,11 +12,12 @@ import { Ctx } from "boardgame.io/dist/types/src/types";
  * (but triggers heresy shame penalty after battle).
  */
 const contributeToGrandArmy: Move<MyGameState> = (
-  { G, ctx, playerID, events }: {
+  { G, ctx, playerID, events, random }: {
     G: MyGameState;
     ctx: Ctx;
     playerID: string;
     events: EventsAPI;
+    random: any;
   },
   regiments: number,
   levies: number,
@@ -53,7 +54,7 @@ const contributeToGrandArmy: Move<MyGameState> = (
 
   if (allContributed) {
     // Resolve the battle — returns buyoff cost (0 if won)
-    const buyoffCost = resolveGrandArmyBattle(G);
+    const buyoffCost = resolveGrandArmyBattle(G, random.Shuffle);
 
     if (buyoffCost > 0 && G.currentInvasion) {
       // Army lost — transition to interactive buyoff

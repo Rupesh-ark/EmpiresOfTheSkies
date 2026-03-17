@@ -16,9 +16,12 @@ export const fullResetFortuneOfWarCardDeck = (): FortuneOfWarCardInfo[] => {
   return [...fortuneOfWarCards];
 };
 
-export const resetFortuneOfWarCardDeck = (props: MyGameState) => {
-  props.cardDecks.fortuneOfWarCards = props.cardDecks.fortuneOfWarCards.concat(
-    props.cardDecks.discardedFortuneOfWarCards
+export const resetFortuneOfWarCardDeck = (
+  props: MyGameState,
+  shuffle: <T>(arr: T[]) => T[]
+) => {
+  props.cardDecks.fortuneOfWarCards = shuffle(
+    props.cardDecks.fortuneOfWarCards.concat(props.cardDecks.discardedFortuneOfWarCards)
   );
   props.cardDecks.discardedFortuneOfWarCards = [];
 };
@@ -138,9 +141,12 @@ export const sortPlayersInPlayerOrder = (
   return sortedPlayerIDs;
 };
 
-export const drawFortuneOfWarCard = (G: MyGameState): FortuneOfWarCardInfo => {
+export const drawFortuneOfWarCard = (
+  G: MyGameState,
+  shuffle: <T>(arr: T[]) => T[]
+): FortuneOfWarCardInfo => {
   if (G.cardDecks.fortuneOfWarCards.length === 0) {
-    resetFortuneOfWarCardDeck(G);
+    resetFortuneOfWarCardDeck(G, shuffle);
   }
   const card = G.cardDecks.fortuneOfWarCards.splice(0, 1)[0];
   G.cardDecks.discardedFortuneOfWarCards.push(card);
@@ -148,13 +154,13 @@ export const drawFortuneOfWarCard = (G: MyGameState): FortuneOfWarCardInfo => {
   // v4.2: No Effect → discard, reshuffle discard into deck, draw again
   const isNoEffect = card.sword === 0 && card.shield === 0;
   if (isNoEffect) {
-    resetFortuneOfWarCardDeck(G);
+    resetFortuneOfWarCardDeck(G, shuffle);
     // Guard against infinite loop if all remaining cards are No Effect
     const hasRealCard = G.cardDecks.fortuneOfWarCards.some(
       (c) => c.sword !== 0 || c.shield !== 0
     );
     if (hasRealCard) {
-      return drawFortuneOfWarCard(G);
+      return drawFortuneOfWarCard(G, shuffle);
     }
   }
   return card;
