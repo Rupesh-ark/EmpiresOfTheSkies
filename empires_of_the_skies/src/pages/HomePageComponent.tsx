@@ -12,6 +12,9 @@ import {
 import { LobbyClient } from "boardgame.io/dist/types/packages/client";
 import { useState } from "react";
 import React from "react";
+import { createLogger } from "@eots/game";
+
+const log = createLogger("lobby");
 import { useNavigate } from "react-router-dom";
 import { BG_DESKTOP as bgDesktop, BG_TABLET as bgTablet, BG_MOBILE as bgMobile, LOGO as logo } from "../assets/homePage";
 import { colors, fonts } from "../designTokens";
@@ -31,7 +34,7 @@ const createMatch = async (
   }
 
   const enquiry = await lobbyClient.getMatch("empires-of-the-skies", response.matchID);
-  console.log(enquiry);
+  log.info("match created", { matchID: enquiry.matchID });
   setMatchReady(response.matchID);
 };
 
