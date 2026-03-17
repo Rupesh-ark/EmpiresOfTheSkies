@@ -3,48 +3,26 @@ import { MyGameState } from "../../types";
 import { findPossibleDestinations } from "../../helpers/helpers";
 import { INVALID_MOVE } from "boardgame.io/core";
 import { removeGoldAmount, removeOneCounsellor } from "../../helpers/stateUtils";
-import { validateMove } from "../moveValidation";
-import { MAX_SKYSHIPS_PER_FLEET, KINGDOM_LOCATION } from "../../codifiedGameInfo";
+import { validateDeployFleet } from "../moveValidation";
+import { KINGDOM_LOCATION } from "../../codifiedGameInfo";
 const deployFleet: Move<MyGameState> = (
   { G, playerID },
   ...args: any[]
 ) => {
-  if (validateMove(playerID, G, { costsCounsellor: true, costsGold: true })) return INVALID_MOVE;
   const selectedFleetIndex = args[0];
+  const [x, y] = args[1];
+  const skyshipCount = args[2];
+  const regimentCount = args[3];
+  const levyCount = args[4];
+
+  if (validateDeployFleet(G, playerID, selectedFleetIndex, [x, y], skyshipCount, regimentCount, levyCount)) return INVALID_MOVE;
 
   const currentPlayer = G.playerInfo[playerID];
   const fleet = currentPlayer.fleetInfo[selectedFleetIndex];
 
   const startingCoords = fleet.location;
 
-  const [x, y] = args[1];
-
-  const skyshipCount = args[2];
-  const regimentCount = args[3];
-  const levyCount = args[4];
-
   const unladen = regimentCount === 0 && levyCount === 0;
-
-  if (fleet.location[0] === KINGDOM_LOCATION[0] && fleet.location[1] === KINGDOM_LOCATION[1]) {
-    if (
-      currentPlayer.resources.skyships < skyshipCount ||
-      currentPlayer.resources.regiments < regimentCount ||
-      currentPlayer.resources.levies < levyCount
-    ) {
-      return INVALID_MOVE;
-    }
-  }
-  if (skyshipCount === 0) {
-    return INVALID_MOVE;
-  }
-  // GAP-13: max 5 skyships per fleet
-  if (skyshipCount > MAX_SKYSHIPS_PER_FLEET) {
-    return INVALID_MOVE;
-  }
-  // K10: 1 troop (regiment or levy) per skyship
-  if (regimentCount + levyCount > skyshipCount) {
-    return INVALID_MOVE;
-  }
 
   fleet.skyships = skyshipCount;
   fleet.regiments = regimentCount;
