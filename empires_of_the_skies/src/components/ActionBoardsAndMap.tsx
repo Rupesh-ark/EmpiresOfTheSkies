@@ -21,36 +21,14 @@ import {
 } from "@mui/material";
 import { TabPanel, TabContext } from "@mui/lab";
 import ResourceTrackerBar from "./ResourceTrackerBar/ResourceTrackerBar";
-import AttackOrPassDiaLog from "./AerialBattle/AttackOrPassDialog";
-import AttackOrEvadeDialog from "./AerialBattle/AttackOrEvadeDialog";
-import DrawOrPickCardDialog from "./AerialBattle/DrawOrPickCardDialog";
-import RelocateLoserDialog from "./AerialBattle/RelocateLoserDialog";
-import PlunderLegendsDialog from "./PlunderLegends/PlunderLegendsDialog";
-import DefendOrYieldDialog from "./GroundBattle/DefendOrYieldDialog";
-import GroundAttackOrPassDialog from "./GroundBattle/GroundAttackOrPassDialog";
-import GarrisonTroopsDialog from "./GroundBattle/GarrisonTroopsDialog";
-import OutpostOrColonyDialog from "./Conquests/OutpostOrColonyDialog";
-import RetrieveFleetsDialog from "./Resolution/RetrieveFleetsDialog";
+import { DialogRouter } from "./DialogRouter";
 
 import PlayerTable from "./PlayerTable/PlayerTable";
 import HeresyTracker from "./PlayerTable/HeresyTracker";
 import { useGameTheme } from "@/theme";
 import { Campaign, ChatBubble, Close, Dashboard, Map, MenuBook, Person, TableChart, Timeline } from "@mui/icons-material";
-import PickLegacyCardDialog from "./PickLegacyCardDialog";
-import PickKingdomAdvantageCardDialog from "./PickKingdomAdvantageCardDialog";
-import PickEventCardDialog from "./PickEventCardDialog";
-import EventChoiceDialog from "./EventChoiceDialog";
-import RebellionDialog from "./RebellionDialog";
-import RebellionRivalSupportDialog from "./RebellionRivalSupportDialog";
-import InvasionNominateDialog from "./InvasionNominateDialog";
-import InvasionContributeDialog from "./InvasionContributeDialog";
-import InvasionBuyoffDialog from "./InvasionBuyoffDialog";
-import InfidelFleetCombatDialog from "./InfidelFleetCombatDialog";
-import DeferredBattleDialog from "./DeferredBattleDialog";
-import RoundSummaryDialog from "./RoundSummaryDialog";
 import NprKingdomTable from "./PlayerTable/NprKingdomTable";
 import GameLog from "./GameLog";
-import GameOverView from "./GameOverView";
 import LootValueTable from "./PlayerTable/LootValueTable";
 
 const tabSx = {
@@ -264,67 +242,7 @@ export const ActionBoardsAndMap = (props: MyGameProps) => {
             </Box>
           </Box>
 
-          <RoundSummaryDialog {...props} />
-          {props.ctx.phase === "kingdom_advantage" && (
-            <PickKingdomAdvantageCardDialog {...props} />
-          )}
-          {props.G.stage === "events" && (
-            <>
-              <PickEventCardDialog {...props} />
-              <EventChoiceDialog {...props} />
-            </>
-          )}
-          {props.G.stage === "pick legacy card" && (
-            <PickLegacyCardDialog {...props} />
-          )}
-          {props.G.stage === "attack or pass" && (
-            <AttackOrPassDiaLog {...props} />
-          )}
-          {props.G.stage === "attack or evade" && (
-            <AttackOrEvadeDialog {...props} />
-          )}
-          <DrawOrPickCardDialog {...props} />
-          {props.G.stage === "relocate loser" && (
-            <RelocateLoserDialog {...props} />
-          )}
-          {props.G.stage === "plunder legends" && (
-            <PlunderLegendsDialog {...props} />
-          )}
-          {props.G.stage === "attack or pass" && (
-            <GroundAttackOrPassDialog {...props} />
-          )}
-          {props.G.stage === "defend or yield" && (
-            <DefendOrYieldDialog {...props} />
-          )}
-          {props.G.stage === "garrison troops" && (
-            <GarrisonTroopsDialog {...props} />
-          )}
-          {props.G.stage === "conquest" && <OutpostOrColonyDialog {...props} />}
-          {props.G.stage === "infidel_fleet_combat" && (
-            <InfidelFleetCombatDialog {...props} />
-          )}
-          {props.G.stage === "deferred_battle" && (
-            <DeferredBattleDialog {...props} />
-          )}
-          {props.G.stage === "rebellion" && (
-            <RebellionDialog {...props} />
-          )}
-          {props.G.stage === "rebellion_rival_support" && (
-            <RebellionRivalSupportDialog {...props} />
-          )}
-          {props.G.stage === "invasion_nominate" && (
-            <InvasionNominateDialog {...props} />
-          )}
-          {props.G.stage === "invasion_contribute" && (
-            <InvasionContributeDialog {...props} />
-          )}
-          {props.G.stage === "invasion_buyoff" && (
-            <InvasionBuyoffDialog {...props} />
-          )}
-          {props.G.stage === "retrieve fleets" && (
-            <RetrieveFleetsDialog {...props} />
-          )}
-          <GameOverView {...props} />
+          <DialogRouter {...props} />
           <Dialog
             open={isElectionTurn && dialogOpen}
           >
