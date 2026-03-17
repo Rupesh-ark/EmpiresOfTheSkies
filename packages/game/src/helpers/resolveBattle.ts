@@ -391,7 +391,7 @@ export const resolveConquest = (
   attackerSwordValue += G.conquestState?.fowCard?.sword ?? 0;
   attackerShieldValue += G.conquestState?.fowCard?.shield ?? 0;
 
-  const defenderCard = drawFortuneOfWarCard(G);
+  const defenderCard = drawFortuneOfWarCard(G, random.Shuffle);
 
   const defenderSwordValue =
     G.mapState.currentTileArray[y][x].sword + defenderCard.sword;

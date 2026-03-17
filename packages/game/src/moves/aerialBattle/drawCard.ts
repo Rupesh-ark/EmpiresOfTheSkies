@@ -11,7 +11,7 @@ const drawCard: Move<MyGameState> = (
   if (G.battleState) {
     Object.values(G.battleState).forEach((battler) => {
       if (battler.id === playerID) {
-        battler.fowCard = drawFortuneOfWarCard(G);
+        battler.fowCard = drawFortuneOfWarCard(G, random.Shuffle);
         battler.fowSource = "deck";
       }
     });

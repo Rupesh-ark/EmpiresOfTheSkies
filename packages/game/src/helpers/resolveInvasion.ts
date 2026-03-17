@@ -105,7 +105,7 @@ type PlayerContribution = {
  *
  * Returns the buy-off cost if the army lost (> 0), or 0 if won.
  */
-export const resolveGrandArmyBattle = (G: MyGameState): number => {
+export const resolveGrandArmyBattle = (G: MyGameState, shuffle: <T>(arr: T[]) => T[]): number => {
   const turnOrder = G.turnOrder;
   const invasion = G.currentInvasion;
   if (!invasion) return;
@@ -161,8 +161,8 @@ export const resolveGrandArmyBattle = (G: MyGameState): number => {
   );
 
   // Simulate FoW draws
-  const fowArmy = drawFortuneOfWarCard(G);
-  const fowInfidel = drawFortuneOfWarCard(G);
+  const fowArmy = drawFortuneOfWarCard(G, shuffle);
+  const fowInfidel = drawFortuneOfWarCard(G, shuffle);
 
   const hitsOnInfidel = Math.max(
     0,

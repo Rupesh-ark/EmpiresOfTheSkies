@@ -125,14 +125,15 @@ const resolveCombat = (
   infidelSwords: number,
   infidelShields: number,
   playerSkyships: number,
+  shuffle: <T>(arr: T[]) => T[],
   playerFoWCard?: { sword: number; shield: number }
 ): FleetCombatResult => {
   const playerSwords = playerSkyships; // 1 sword per skyship
   const playerShields = playerSkyships; // 1 shield per skyship
 
-  const fowInfidel = drawFortuneOfWarCard(G);
+  const fowInfidel = drawFortuneOfWarCard(G, shuffle);
   // Use player's hand card if provided, otherwise draw from deck
-  const fowPlayer = playerFoWCard ?? drawFortuneOfWarCard(G);
+  const fowPlayer = playerFoWCard ?? drawFortuneOfWarCard(G, shuffle);
 
   const totalInfidelSwords = infidelSwords + fowInfidel.sword;
   const totalInfidelShields = infidelShields + fowInfidel.shield;
@@ -242,6 +243,7 @@ export const prepareInfidelFleetCombat = (G: MyGameState): boolean => {
  */
 export const executeInfidelFleetCombat = (
   G: MyGameState,
+  shuffle: <T>(arr: T[]) => T[],
   fowCard?: { sword: number; shield: number }
 ): void => {
   const combat = G.infidelFleetCombat;
@@ -259,6 +261,7 @@ export const executeInfidelFleetCombat = (
     infidel.swords,
     infidel.shields,
     fleet.skyships,
+    shuffle,
     fowCard
   );
 

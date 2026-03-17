@@ -13,11 +13,12 @@ import { Ctx } from "boardgame.io/dist/types/src/types";
  * Pass fowCardIndex = undefined to use a deck draw instead.
  */
 const commitDeferredBattleCard: Move<MyGameState> = (
-  { G, ctx, playerID, events }: {
+  { G, ctx, playerID, events, random }: {
     G: MyGameState;
     ctx: Ctx;
     playerID: string;
     events: EventsAPI;
+    random: any;
   },
   fowCardIndex?: number
 ) => {
@@ -40,7 +41,7 @@ const commitDeferredBattleCard: Move<MyGameState> = (
   }
 
   // Resolve the battle with the player's chosen card
-  resolveDeferredBattleInteractive(G, battle.event, fowCard);
+  resolveDeferredBattleInteractive(G, battle.event, random.Shuffle, fowCard);
   G.currentDeferredBattle = null;
 
   // Check for next deferred battle or continue resolution

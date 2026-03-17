@@ -224,3 +224,10 @@ export function buildCtx(currentPlayer: string, numPlayers = 2): MockCtx {
     },
   };
 }
+
+/** Mock boardgame.io random plugin — Shuffle returns array as-is (deterministic for tests). */
+export function buildRandom() {
+  return {
+    Shuffle: <T>(arr: T[]): T[] => [...arr],
+  };
+}
