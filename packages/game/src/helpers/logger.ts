@@ -18,8 +18,7 @@ function getLogFilePath(): string | null {
   try {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const path = require('path') as typeof import('path');
-    // __dirname is packages/game/src/helpers — walk up to repo root
-    _logFilePath = path.resolve(__dirname, '../../../../server/logs/game.log');
+    _logFilePath = path.resolve(process.cwd(), 'server/logs/game.log');
     // Ensure the directory exists
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const fs = require('fs') as typeof import('fs');

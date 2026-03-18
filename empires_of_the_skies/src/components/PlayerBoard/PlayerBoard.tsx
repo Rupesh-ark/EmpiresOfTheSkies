@@ -373,6 +373,7 @@ interface FleetManagementCardProps {
 export const PlayerBoard = (props: PlayerBoardProps) => {
   const [levyCount, setLevyCount] = useState(0);
   const [selectedFleet, setSelectedFleet] = useState(0);
+  const [buildSkyshipsOpen, setBuildSkyshipsOpen] = useState(false);
   const [dispatchFleetMapVisible, setDispatchFleetMapVisible] = useState(false);
   const [fleetDestination, setFleetDestination] = useState([4, 0]);
   const [fleetAllocations, setFleetAllocations] = useState<
@@ -705,7 +706,7 @@ export const PlayerBoard = (props: PlayerBoardProps) => {
                             <PlayerBoardButton
                               onClick={() => {
                                 props.moves.enableDispatchButtons(true);
-                                props.moves.buildSkyships();
+                                setBuildSkyshipsOpen(true);
                               }}
                               counsellor={
                                 playerInfo?.playerBoardCounsellorLocations.buildSkyships
@@ -718,6 +719,39 @@ export const PlayerBoard = (props: PlayerBoardProps) => {
                             />
                           </Box>
                         </Box>
+                        <Dialog open={buildSkyshipsOpen} onClose={() => setBuildSkyshipsOpen(false)}>
+                          <DialogTitle>Build Skyships</DialogTitle>
+                          <DialogContent>
+                            <Typography sx={{ mb: 1 }}>
+                              You have {playerInfo?.shipyards ?? 0} shipyard(s). How many skyships per shipyard?
+                            </Typography>
+                          </DialogContent>
+                          <DialogActions>
+                            <Button color="error" variant="contained" onClick={() => setBuildSkyshipsOpen(false)}>
+                              Cancel
+                            </Button>
+                            <Button
+                              variant="contained"
+                              color="primary"
+                              onClick={() => {
+                                props.moves.buildSkyships(1);
+                                setBuildSkyshipsOpen(false);
+                              }}
+                            >
+                              1 per yard ({playerInfo?.shipyards ?? 0}G)
+                            </Button>
+                            <Button
+                              variant="contained"
+                              color="success"
+                              onClick={() => {
+                                props.moves.buildSkyships(2);
+                                setBuildSkyshipsOpen(false);
+                              }}
+                            >
+                              2 per yard ({(playerInfo?.shipyards ?? 0) * 2}G)
+                            </Button>
+                          </DialogActions>
+                        </Dialog>
                         <Box sx={{ display: "grid", gap: 0.55, pt: 0.2 }}>
                           <Typography
                             sx={{

@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { MyGameProps, GAME_PHASES } from "@eots/game";
 import {
   AppBar,
@@ -57,6 +57,17 @@ const ResourceTrackerBar = (props: ResourceTrackerBarProps) => {
   const advantageCard = currentPlayer.resources.advantageCard;
   const turnComplete =
     props.G.playerInfo[props.playerID ?? props.ctx.currentPlayer].turnComplete;
+
+  // Auto-end turn when the current player's action completes
+  useEffect(() => {
+    if (
+      turnComplete &&
+      props.ctx.phase === "actions" &&
+      props.ctx.currentPlayer === props.playerID
+    ) {
+      props.events.endTurn?.();
+    }
+  }, [turnComplete, props.ctx.phase, props.ctx.currentPlayer, props.playerID]);
 
   return (
     <AppBar
@@ -201,32 +212,17 @@ const ResourceTrackerBar = (props: ResourceTrackerBarProps) => {
           >
             Clear Move
           </Button>
-          {turnComplete ? (
-            <Button
-              size="small"
-              disabled={!turnComplete}
-              variant="contained"
-              color="success"
-              onClick={() => {
-                props.moves.flipCards();
-                props.events.endTurn?.();
-              }}
-            >
-              Confirm & End Turn
-            </Button>
-          ) : (
-            <Button
-              size="small"
-              variant="contained"
-              color="warning"
-              onClick={() => {
-                setPassDialogOpen(true);
-              }}
-              disabled={!(props.ctx.currentPlayer === props.playerID)}
-            >
-              Pass
-            </Button>
-          )}
+          <Button
+            size="small"
+            variant="contained"
+            color="warning"
+            onClick={() => {
+              setPassDialogOpen(true);
+            }}
+            disabled={!(props.ctx.currentPlayer === props.playerID)}
+          >
+            Pass
+          </Button>
         </div>
       </Toolbar>
       <CardHoldingsPanels

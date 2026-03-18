@@ -27,6 +27,7 @@ import { Campaign, ChatBubble, Close, Dashboard, Map, MenuBook, Person, TableCha
 import NprKingdomTable from "./PlayerTable/NprKingdomTable";
 import GameLog from "./GameLog";
 import LootValueTable from "./PlayerTable/LootValueTable";
+import { ToastProvider } from "@/hooks/useToast";
 
 const tabSx = {
   minWidth: 48,
@@ -157,6 +158,7 @@ export const ActionBoardsAndMap = (props: MyGameProps) => {
   ];
 
   return (
+    <ToastProvider>
     <div>
       <ThemeProvider theme={theme}>
         {<ResourceTrackerBar {...props} />}
@@ -236,5 +238,6 @@ export const ActionBoardsAndMap = (props: MyGameProps) => {
         </Box>
       </ThemeProvider>
     </div>
+    </ToastProvider>
   );
 };

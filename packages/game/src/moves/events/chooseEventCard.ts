@@ -53,6 +53,8 @@ const chooseEventCard: Move<MyGameState> = (
         resolvedIndex = i;
         break;
       }
+      const voidDef = EVENT_CARD_DEFS[shuffled[i]];
+      logEvent(G, `Event card void: ${voidDef.displayName} \u2014 skipped`);
     }
 
     if (resolvedIndex >= 0) {

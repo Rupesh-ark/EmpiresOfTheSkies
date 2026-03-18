@@ -32,12 +32,12 @@ describe("trainTroops — draws 2 FoW cards", () => {
     expect(G.playerInfo["0"].resources.fortuneCards.length).toBe(before + 2);
   });
 
-  it("new cards are not flipped (face-down)", () => {
+  it("new cards are flipped (face-up)", () => {
     const G = buildInitialG();
     G.cardDecks.fortuneOfWarCards = [...fortuneOfWarCards];
     callMove(G, "0");
     G.playerInfo["0"].resources.fortuneCards.forEach((card) => {
-      expect(card.flipped).toBe(false);
+      expect(card.flipped).toBe(true);
     });
   });
 

@@ -11,12 +11,13 @@ export const FAITHDOM_TILES: [number, number][] = [
 
 export const tileKey = (x: number, y: number): string => `${x},${y}`;
 
-// 8-directional adjacency with east-west wrap
-export const getNeighbors = (x: number, y: number): [number, number][] => {
+// Adjacency with east-west wrap. edgesOnly=true gives 4 cardinal directions only.
+export const getNeighbors = (x: number, y: number, edgesOnly = false): [number, number][] => {
   const result: [number, number][] = [];
   for (let dy = -1; dy <= 1; dy++) {
     for (let dx = -1; dx <= 1; dx++) {
       if (dx === 0 && dy === 0) continue;
+      if (edgesOnly && dx !== 0 && dy !== 0) continue;
       const ny = y + dy;
       const nx = ((x + dx + MAP_WIDTH) % MAP_WIDTH);
       if (ny >= 0 && ny < MAP_HEIGHT) result.push([nx, ny]);
