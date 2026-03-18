@@ -1,7 +1,7 @@
 import { Move } from "boardgame.io";
-import { MyGameState } from "../../types";
+import { MyGameState, MoveError } from "../../types";
 import { INVALID_MOVE } from "boardgame.io/core";
-import { validateFoundBuildings } from "../moveValidation";
+import { validateMove } from "../moveValidation";
 import { removeOneCounsellor, HERESY_MAX, HERESY_MIN } from "../../helpers/stateUtils";
 import {
   BuildingSlot,
@@ -9,7 +9,78 @@ import {
   CATHEDRAL_VP,
   PALACE_VP_HERETIC,
   PALACE_VP_ORTHODOX,
+  MAX_CATHEDRALS,
+  MAX_PALACES,
+  MAX_SHIPYARDS,
 } from "../../codifiedGameInfo";
+
+export const validateFoundBuildings = (
+  G: MyGameState,
+  playerID: string,
+  buildingSlotIndex: number,
+  heresyDirection?: "advance" | "retreat"
+): MoveError | null => {
+  const base = validateMove(playerID, G, { costsCounsellor: true, costsGold: true });
+  if (base) return base;
+
+  const value: keyof typeof G.boardState.foundBuildings = (buildingSlotIndex + 1) as
+    | typeof BuildingSlot.Cathedral
+    | typeof BuildingSlot.Palace
+    | typeof BuildingSlot.Shipyard
+    | typeof BuildingSlot.Fort;
+
+  if (value === BuildingSlot.Cathedral) {
+    if (G.playerInfo[playerID].cathedrals >= MAX_CATHEDRALS) {
+      return { code: "CATHEDRAL_CAP_REACHED", message: `Already at maximum Cathedrals (${MAX_CATHEDRALS})` };
+    }
+    if (G.playerInfo[playerID].hereticOrOrthodox === "heretic") {
+      return { code: "HERETIC_CANNOT_BUILD_CATHEDRAL", message: "Heretic Kingdoms cannot build Cathedrals" };
+    }
+  }
+
+  if (value === BuildingSlot.Palace) {
+    if (G.playerInfo[playerID].palaces >= MAX_PALACES) {
+      return { code: "PALACE_CAP_REACHED", message: `Already at maximum Palaces (${MAX_PALACES})` };
+    }
+    if (heresyDirection !== "advance" && heresyDirection !== "retreat") {
+      return { code: "MISSING_HERESY_DIRECTION", message: "Choose a heresy direction for the Palace" };
+    }
+  }
+
+  if (value === BuildingSlot.Shipyard) {
+    if (G.playerInfo[playerID].shipyards >= MAX_SHIPYARDS) {
+      return { code: "SHIPYARD_CAP_REACHED", message: `Already at maximum Shipyards (${MAX_SHIPYARDS})` };
+    }
+  }
+
+  if (value === BuildingSlot.Fort) {
+    const hasValidTile = G.mapState.buildings.some((row, y) =>
+      row.some((tile, x) => {
+        const hasBuilding =
+          tile.player?.id === playerID &&
+          (tile.buildings === "colony" || tile.buildings === "outpost");
+        const hasTroops =
+          tile.garrisonedRegiments > 0 ||
+          tile.garrisonedLevies > 0 ||
+          G.playerInfo[playerID].fleetInfo.some(
+            (f) =>
+              f.location[0] === x &&
+              f.location[1] === y &&
+              (f.regiments > 0 || f.levies > 0)
+          );
+        return hasBuilding && !tile.fort && hasTroops;
+      })
+    );
+    if (!hasValidTile) {
+      return {
+        code: "NO_VALID_FORT_TILE",
+        message: "No eligible tile — need a colony or outpost with troops and no existing Fort",
+      };
+    }
+  }
+
+  return null;
+};
 
 // needs a stage where the player selects a map tile to place the fort onto and that tile is verified to ensure they can build on it
 const foundBuildings: Move<MyGameState> = (

@@ -1,7 +1,7 @@
 import { Move } from "boardgame.io";
-import { MyGameState } from "../../types";
+import { MyGameState, MoveError } from "../../types";
 import { INVALID_MOVE } from "boardgame.io/core";
-import { validatePunishDissenters } from "../moveValidation";
+import { validateMove } from "../moveValidation";
 import {
   increaseHeresyWithinMove,
   increaseOrthodoxyWithinMove,
@@ -11,6 +11,73 @@ import {
 } from "../../helpers/stateUtils";
 import { Ctx } from "boardgame.io/dist/types/src/types";
 import { PUNISH_EXECUTE_VP_COST, BASE_PRISONERS, MORE_PRISONS_BONUS, PUNISH_GOLD_COST } from "../../codifiedGameInfo";
+
+export const validatePunishDissenters = (
+  G: MyGameState,
+  playerID: string,
+  slotIndex: number,
+  paymentType: "gold" | "counsellor" | "execute",
+  numPlayers: number
+): MoveError | null => {
+  const value: keyof typeof G.boardState.punishDissenters = (slotIndex + 1) as
+    | 1 | 2 | 3 | 4 | 5 | 6;
+
+  const base = validateMove(playerID, G, {
+    costsCounsellor: true,
+    costsGold: paymentType === "gold",
+  });
+  if (base) return base;
+
+  if (value > numPlayers) {
+    return { code: "SLOT_OUT_OF_RANGE", message: "That Dissenters slot does not exist in this game" };
+  }
+
+  if (G.boardState.punishDissenters[value] !== undefined) {
+    return { code: "SLOT_TAKEN", message: "That Dissenters slot is already taken" };
+  }
+
+  const alreadyPunishing = Object.values(G.boardState.punishDissenters).some(
+    (id) => id === playerID
+  );
+  if (alreadyPunishing) {
+    return { code: "ALREADY_PUNISHING", message: "Your Kingdom is already punishing Dissenters this round" };
+  }
+
+  const playerInfo = G.playerInfo[playerID];
+
+  if (paymentType === "execute") {
+    if (playerInfo.prisoners <= 0) {
+      return { code: "NO_PRISONERS", message: "No prisoners to execute" };
+    }
+    return null;
+  }
+
+  const maxPrisoners =
+    playerInfo.resources.advantageCard === "more_prisons"
+      ? BASE_PRISONERS + MORE_PRISONS_BONUS
+      : BASE_PRISONERS;
+
+  if (playerInfo.prisoners >= maxPrisoners) {
+    return { code: "PRISON_FULL", message: `Prison is full — cannot take more prisoners (max ${maxPrisoners})` };
+  }
+
+  if (paymentType === "gold") {
+    if (playerInfo.resources.gold < PUNISH_GOLD_COST) {
+      return {
+        code: "INSUFFICIENT_GOLD",
+        message: `Not enough Gold — need ${PUNISH_GOLD_COST}, have ${playerInfo.resources.gold}`,
+      };
+    }
+  } else if (paymentType === "counsellor") {
+    if (playerInfo.resources.counsellors < 2) {
+      return { code: "INSUFFICIENT_COUNSELLORS", message: "Need 2 Counsellors to pay by Counsellor" };
+    }
+  } else {
+    return { code: "INVALID_PAYMENT_TYPE", message: "Invalid payment type" };
+  }
+
+  return null;
+};
 
 const punishDissenters: Move<MyGameState> = (
   { G, ctx, playerID }: { G: MyGameState; ctx: Ctx; playerID: string },

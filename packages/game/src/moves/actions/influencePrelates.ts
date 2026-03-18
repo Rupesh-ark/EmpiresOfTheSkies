@@ -1,12 +1,31 @@
 import { Move } from "boardgame.io";
-import { MyGameState, PlayerColour } from "../../types";
-import { validateInfluencePrelates } from "../moveValidation";
+import { MyGameState, PlayerColour, MoveError } from "../../types";
+import { validateMove } from "../moveValidation";
 import { INVALID_MOVE } from "boardgame.io/core";
 import {
   addGoldAmount,
   removeGoldAmount,
   removeOneCounsellor,
 } from "../../helpers/stateUtils";
+
+export const validateInfluencePrelates = (
+  G: MyGameState,
+  playerID: string,
+  slotIndex: number
+): MoveError | null => {
+  const base = validateMove(playerID, G, { costsCounsellor: true, costsGold: true });
+  if (base) return base;
+
+  const value: keyof typeof G.boardState.influencePrelates = (slotIndex + 1) as
+    | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
+
+  if (G.boardState.influencePrelates[value] !== undefined) {
+    return { code: "SLOT_TAKEN", message: "That Prelate slot is already taken" };
+  }
+
+  return null;
+};
+
 export const influencePrelates: Move<MyGameState> = (
   { G, playerID },
   ...args: any[]

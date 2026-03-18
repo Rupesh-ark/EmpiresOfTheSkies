@@ -1,12 +1,44 @@
 import { Move } from "boardgame.io";
-import { MyGameState } from "../../types";
-import { validateBuildSkyships } from "../moveValidation";
+import { MyGameState, MoveError } from "../../types";
+import { validateMove } from "../moveValidation";
 import { INVALID_MOVE } from "boardgame.io/core";
 import {
   addSkyship,
   removeGoldAmount,
   removeOneCounsellor,
 } from "../../helpers/stateUtils";
+
+export const validateBuildSkyships = (
+  G: MyGameState,
+  playerID: string,
+  perShipyard: number
+): MoveError | null => {
+  const base = validateMove(playerID, G, { costsCounsellor: true, costsGold: true });
+  if (base) return base;
+
+  if (G.playerInfo[playerID].shipyards === 0) {
+    return { code: "NO_SHIPYARDS", message: "Your Kingdom has no Shipyards" };
+  }
+
+  if (G.playerInfo[playerID].playerBoardCounsellorLocations.buildSkyships) {
+    return { code: "ALREADY_BUILT", message: "Skyships have already been built this round" };
+  }
+
+  if (perShipyard !== 1 && perShipyard !== 2) {
+    return { code: "INVALID_PRODUCTION_RATE", message: "Choose 1 or 2 Skyships per Shipyard" };
+  }
+
+  const total = perShipyard * G.playerInfo[playerID].shipyards;
+  if (G.playerInfo[playerID].resources.gold < total) {
+    return {
+      code: "INSUFFICIENT_GOLD",
+      message: `Not enough Gold — need ${total}, have ${G.playerInfo[playerID].resources.gold}`,
+    };
+  }
+
+  return null;
+};
+
 const buildSkyships: Move<MyGameState> = (
   { G, playerID },
   ...args: any[]

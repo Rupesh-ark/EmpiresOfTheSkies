@@ -1,6 +1,6 @@
 import { Move } from "boardgame.io";
-import { MyGameState } from "../../types";
-import { validateRecruitRegiments } from "../moveValidation";
+import { MyGameState, MoveError } from "../../types";
+import { validateMove } from "../moveValidation";
 import { INVALID_MOVE } from "boardgame.io/core";
 import {
   addRegiments,
@@ -8,6 +8,25 @@ import {
   removeOneCounsellor,
 } from "../../helpers/stateUtils";
 import { RECRUIT_REGIMENTS_REWARD } from "../../codifiedGameInfo";
+
+export const validateRecruitRegiments = (
+  G: MyGameState,
+  playerID: string,
+  slotIndex: number
+): MoveError | null => {
+  const base = validateMove(playerID, G, { costsCounsellor: true, costsGold: true });
+  if (base) return base;
+
+  const value: keyof typeof G.boardState.recruitRegiments = (slotIndex + 1) as
+    | 1 | 2 | 3 | 4 | 5 | 6;
+
+  if (G.boardState.recruitRegiments[value] !== undefined) {
+    return { code: "SLOT_TAKEN", message: "That Regiment recruitment slot is already taken" };
+  }
+
+  return null;
+};
+
 const recruitRegiments: Move<MyGameState> = (
   { G, playerID },
   ...args: any[]
