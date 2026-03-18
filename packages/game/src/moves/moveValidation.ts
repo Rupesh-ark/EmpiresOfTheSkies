@@ -31,19 +31,3 @@ export const validateMove = (
 
   return null;
 };
-
-// ── Per-move validators (re-exported from their respective move files) ─────────
-export { validateTrainTroops } from "./actions/trainTroops";
-export { validateBuildSkyships } from "./actions/buildSkyships";
-export { validateConscriptLevies } from "./actions/conscriptLevies";
-export { validateDeployFleet } from "./actions/deployFleet";
-export { validatePassFleetInfo } from "./actions/passFleetInfoToPlayerInfo";
-export { validatePurchaseSkyships } from "./actions/purchaseSkyships";
-export { validateRecruitCounsellors } from "./actions/recruitCounsellors";
-export { validateRecruitRegiments } from "./actions/recruitRegiments";
-export { validateFoundBuildings } from "./actions/foundBuildings";
-export { validateFoundFactory } from "./actions/foundFactory";
-export { validateInfluencePrelates } from "./actions/influencePrelates";
-export { validatePunishDissenters } from "./actions/punishDissenters";
-export { validateAlterPlayerOrder } from "./actions/alterPlayerOrder";
-export { validateConvertMonarch } from "./actions/convertMonarch";
