@@ -15,7 +15,7 @@ const checkAndPlaceFort: Move<MyGameState> = (
   const hasBuilding =
     tileInfo.player?.id === playerID &&
     (tileInfo.buildings === "colony" || tileInfo.buildings === "outpost");
-  const noFortYet = tileInfo.fort === false;
+  const noFortYet = !tileInfo.fort;
 
   const hasGarrisonedTroops =
     tileInfo.garrisonedRegiments > 0 || tileInfo.garrisonedLevies > 0;

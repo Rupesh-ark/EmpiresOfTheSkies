@@ -84,7 +84,7 @@ import nominateCaptainGeneral from "./moves/events/nominateCaptainGeneral";
 import commitDeferredBattleCard from "./moves/events/commitDeferredBattleCard";
 import contributeToGrandArmy from "./moves/events/contributeToGrandArmy";
 import { logEvent } from "./helpers/stateUtils";
-import { withLogging } from "./helpers/moveWrapper";
+import { withLogging, withPhaseGuard, withPhaseReset, checkLoopGuard } from "./helpers/moveWrapper";
 import { createLogger } from "./helpers/logger";
 
 const phaseLog = createLogger("phase");
@@ -173,6 +173,8 @@ const MyGame: Game<MyGameState> = {
       infidelFleetCombat: null,
       currentDeferredBattle: null,
       pendingDeal: undefined,
+      _loopGuard: 0,
+      _halted: false,
       eventState: {
         deck: eventDeck,
         chosenCards: [],
@@ -243,12 +245,12 @@ const MyGame: Game<MyGameState> = {
       start: true,
       moves: { pickKingdomAdvantageCard: withLogging("pickKingdomAdvantageCard", pickKingdomAdvantageCard) },
       next: "legacy_card",
-      onBegin: (context) => {
+      onBegin: withPhaseGuard("kingdom_advantage", (context) => {
         phaseLog.info("kingdom_advantage", { round: context.G.round });
         context.G.cardDecks.kingdomAdvantagePool = context.random.Shuffle(
           context.G.cardDecks.kingdomAdvantagePool
         );
-      },
+      }),
       turn: {
         order: {
           first: () => 0,
@@ -263,7 +265,7 @@ const MyGame: Game<MyGameState> = {
     legacy_card: {
       moves: { pickLegacyCard: withLogging("pickLegacyCard", pickLegacyCard) },
       next: "events",
-      onBegin: (context) => {
+      onBegin: withPhaseGuard("legacy_card", (context) => {
         phaseLog.info("legacy_card", { round: context.G.round });
         context.G.stage = "pick legacy card";
         const cards: LegacyCardInfo[] = context.random.Shuffle([...LEGACY_CARDS]);
@@ -274,20 +276,20 @@ const MyGame: Game<MyGameState> = {
         });
         // Store remaining cards for Royal Succession event
         context.G.cardDecks.legacyDeck = cards.slice(cardIndex);
-      },
+      }),
     },
     events: {
       turn: {
         order: TurnOrder.CUSTOM_FROM("turnOrder"),
       },
-      onBegin: (context) => {
+      onBegin: withPhaseGuard("events", (context) => {
         phaseLog.info("events", { round: context.G.round });
         context.G.stage = "events";
         context.G.eventState.taxModifier = 0;
         context.G.eventState.chosenCards = [];
         context.G.eventState.resolvedEvent = null;
         context.G.eventState.cannotConvertThisRound = [];
-      },
+      }),
       moves: {
         chooseEventCard: withLogging("chooseEventCard", chooseEventCard),
         resolveEventChoice: withLogging("resolveEventChoice", resolveEventChoice),
@@ -296,6 +298,10 @@ const MyGame: Game<MyGameState> = {
     },
     discovery: {
       onBegin: (context) => {
+        // Reset the loop guard at the start of each new round, then check.
+        context.G._loopGuard = 0;
+        context.G._halted = false;
+        if (checkLoopGuard(context, "discovery")) return;
         phaseLog.info("discovery", { round: context.G.round + 1 });
         context.G.round += 1;
         context.ctx.playOrderPos = 0;
@@ -331,6 +337,8 @@ const MyGame: Game<MyGameState> = {
     taxes: {
       turn: { order: TurnOrder.ONCE },
       onBegin: (context) => {
+        if (context.G._halted) return;
+        if (checkLoopGuard(context, "taxes")) return;
         phaseLog.info("taxes", { round: context.G.round });
         context.G.stage = "taxes";
 
@@ -358,19 +366,36 @@ const MyGame: Game<MyGameState> = {
     },
     actions: {
       onBegin: (context) => {
+        if (context.G._halted) return;
+        if (checkLoopGuard(context, "actions")) return;
         phaseLog.info("actions", { round: context.G.round });
         context.G.firstTurnOfRound = true;
         context.G.stage = "actions";
       },
       turn: {
         onBegin: (context) => {
+          if (context.G._halted) return;
+          if (checkLoopGuard(context, "actions:turn")) return;
           if (context.G.firstTurnOfRound && context.ctx.playOrderPos !== 0) {
             context.events.endTurn({ next: context.ctx.playOrder[0] });
           }
 
           context.G.firstTurnOfRound = false;
-          if (context.G.playerInfo[context.ctx.currentPlayer].passed === true) {
-            context.events.endTurn();
+          const currentPlayer = context.G.playerInfo[context.ctx.currentPlayer];
+
+          if (currentPlayer.resources.counsellors === 0 && !currentPlayer.passed) {
+            currentPlayer.passed = true;
+            logEvent(context.G, `${currentPlayer.kingdomName} has no counsellors remaining — auto-passed`);
+          }
+
+          if (currentPlayer.passed) {
+            const allPassed = Object.values(context.G.playerInfo).every((p) => p.passed);
+            if (allPassed) {
+              context.G.stage = "attack or pass";
+              context.events.endPhase();
+            } else {
+              context.events.endTurn();
+            }
           }
         },
         order: TurnOrder.CUSTOM_FROM("turnOrder"),
@@ -416,6 +441,8 @@ const MyGame: Game<MyGameState> = {
     },
     aerial_battle: {
       onBegin: (context) => {
+        if (context.G._halted) return;
+        if (checkLoopGuard(context, "aerial_battle")) return;
         phaseLog.info("aerial_battle", { round: context.G.round });
         findNextBattle(context.G, context.events);
       },
@@ -441,6 +468,8 @@ const MyGame: Game<MyGameState> = {
     },
     ground_battle: {
       onBegin: (context) => {
+        if (context.G._halted) return;
+        if (checkLoopGuard(context, "ground_battle")) return;
         phaseLog.info("ground_battle", { round: context.G.round });
         findNextGroundBattle(context.G, context.events);
       },
@@ -466,6 +495,7 @@ const MyGame: Game<MyGameState> = {
     },
     plunder_legends: {
       onBegin: (context) => {
+        if (checkLoopGuard(context, "plunder_legends")) return;
         phaseLog.info("plunder_legends", { round: context.G.round });
         context.G.stage = "plunder legends";
         findNextPlunder(context.G, context.events);
@@ -487,6 +517,7 @@ const MyGame: Game<MyGameState> = {
     },
     conquest: {
       onBegin: (context) => {
+        if (checkLoopGuard(context, "conquest")) return;
         phaseLog.info("conquest", { round: context.G.round });
         context.G.stage = "attack or pass";
       },
@@ -519,6 +550,7 @@ const MyGame: Game<MyGameState> = {
         },
       },
       onBegin: (context) => {
+        if (checkLoopGuard(context, "election")) return;
         phaseLog.info("election", { round: context.G.round });
         context.G.electionResults = {};
         context.G.hasVoted = [];
@@ -529,6 +561,7 @@ const MyGame: Game<MyGameState> = {
     resolution: {
       turn: { order: TurnOrder.CUSTOM_FROM("turnOrder") },
       onBegin: (context) => {
+        if (checkLoopGuard(context, "resolution")) return;
         phaseLog.info("resolution", { round: context.G.round });
         // Step 1: Infidel Fleet targeting + movement
         const hasCombat = prepareInfidelFleetCombat(context.G);
@@ -562,6 +595,7 @@ const MyGame: Game<MyGameState> = {
     reset: {
       turn: { order: TurnOrder.ONCE },
       onBegin: (context) => {
+        if (checkLoopGuard(context, "reset")) return;
         phaseLog.info("reset", { round: context.G.round });
         // Recompute turn order from alterPlayerOrder choices
         const currentTurnOrder = [...context.ctx.playOrder];
