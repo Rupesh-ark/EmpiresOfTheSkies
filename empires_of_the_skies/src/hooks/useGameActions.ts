@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useMemo, useCallback, useState } from "react";
 import {
   MyGameState,
   MoveError,
@@ -21,18 +21,39 @@ import {
 
 const log = createLogger("actions");
 
-type MoveResult = { success: true } | { success: false; error: MoveError };
+// ── Validators for moves that have specific preconditions ────────────────────
+// Moves not listed here still get the "is it my turn?" guard.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const VALIDATORS: Record<string, (G: MyGameState, playerID: string, numPlayers: number, ...args: any[]) => MoveError | null> = {
+  trainTroops: (G, pid) => validateTrainTroops(G, pid),
+  buildSkyships: (G, pid, _n, perShipyard) => validateBuildSkyships(G, pid, perShipyard),
+  conscriptLevies: (G, pid, _n, levyAmount) => validateConscriptLevies(G, pid, levyAmount),
+  deployFleet: (G, pid, _n, fleetIndex, dest, sky, reg, lev) =>
+    validateDeployFleet(G, pid, fleetIndex, dest, sky, reg, lev),
+  passFleetInfoToPlayerInfo: (G, pid, _n, fid, sky, reg, lev, elite) =>
+    validatePassFleetInfo(G, pid, fid, sky, reg, lev, elite),
+  purchaseSkyships: (G, pid, _n, slotIndex, republic) =>
+    validatePurchaseSkyships(G, pid, slotIndex, republic),
+  recruitCounsellors: (G, pid, _n, slotIndex) => validateRecruitCounsellors(G, pid, slotIndex),
+  recruitRegiments: (G, pid, _n, slotIndex) => validateRecruitRegiments(G, pid, slotIndex),
+  foundBuildings: (G, pid, _n, slotIndex, dir) => validateFoundBuildings(G, pid, slotIndex, dir),
+  foundFactory: (G, pid, _n, slotIndex) => validateFoundFactory(G, pid, slotIndex),
+  influencePrelates: (G, pid, _n, slotIndex) => validateInfluencePrelates(G, pid, slotIndex),
+  punishDissenters: (G, pid, n, slotIndex, paymentType) =>
+    validatePunishDissenters(G, pid, slotIndex, paymentType, n),
+  alterPlayerOrder: (G, pid, n, newPosition) => validateAlterPlayerOrder(G, pid, newPosition, n),
+  convertMonarch: (G, pid, n, slotIndex) => validateConvertMonarch(G, pid, slotIndex, n),
+};
 
 /**
- * Wraps boardgame.io moves with client-side validation.
- *
- * Each action runs its validator first. If it fails, the move is NOT dispatched
- * and the error is stored in `lastError` (drives the error Snackbar).
- * If validation passes, the move is dispatched to the server.
+ * Wraps ALL boardgame.io moves with:
+ * 1. "Is it my turn?" guard — blocks moves when it's not this player's turn
+ * 2. Client-side validation — for moves with a registered validator
+ * 3. Error feedback — stores the last error in `lastError` (drives toast snackbar)
  *
  * Usage:
- *   const { actions, lastError, clearError } = useGameActions(props);
- *   actions.trainTroops();  // validates, dispatches, or sets lastError
+ *   const { moves, lastError, clearError } = useGameActions(G, playerID, props.moves, ...);
+ *   // pass `moves` as props.moves — every move is now guarded
  */
 export function useGameActions(
   G: MyGameState,
@@ -46,154 +67,35 @@ export function useGameActions(
 
   const clearError = useCallback(() => setLastError(null), []);
 
-  /** Is this player allowed to act right now? */
   const isMyTurn =
     currentPlayer === playerID ||
     (activePlayers != null && playerID in activePlayers);
 
-  /**
-   * Helper: validate then dispatch. Returns MoveResult so callers can
-   * also react inline if they want (e.g., shake a button).
-   */
-  const attempt = useCallback(
-    (
-      name: string,
-      validator: () => MoveError | null,
-      moveFn: () => void
-    ): MoveResult => {
-      if (!isMyTurn) {
-        const error: MoveError = { code: "NOT_YOUR_TURN", message: "Wait for your turn" };
-        log.warn(`${name} blocked`, { code: error.code });
-        setLastError(error);
-        return { success: false, error };
-      }
-      const error = validator();
-      if (error) {
-        log.warn(`${name} blocked`, { code: error.code, message: error.message });
-        setLastError(error);
-        return { success: false, error };
-      }
-      log.info(name);
-      setLastError(null);
-      moveFn();
-      return { success: true };
-    },
-    [isMyTurn]
-  );
+  const wrappedMoves = useMemo(() => {
+    const result: Record<string, (...args: any[]) => void> = {};
+    for (const name of Object.keys(moves)) {
+      result[name] = (...args: any[]) => {
+        if (!isMyTurn) {
+          const error: MoveError = { code: "NOT_YOUR_TURN", message: "Wait for your turn" };
+          log.warn(`${name} blocked`, { code: error.code });
+          setLastError(error);
+          return;
+        }
+        const validator = VALIDATORS[name];
+        if (validator) {
+          const error = validator(G, playerID, numPlayers, ...args);
+          if (error) {
+            log.warn(`${name} blocked`, { code: error.code, message: error.message });
+            setLastError(error);
+            return;
+          }
+        }
+        setLastError(null);
+        moves[name](...args);
+      };
+    }
+    return result;
+  }, [G, playerID, moves, numPlayers, isMyTurn]);
 
-  // ── Action phase moves ──────────────────────────────────────────────────
-
-  const actions = {
-    trainTroops: (): MoveResult =>
-      attempt(
-        "trainTroops",
-        () => validateTrainTroops(G, playerID),
-        () => moves.trainTroops()
-      ),
-
-    buildSkyships: (perShipyard: number): MoveResult =>
-      attempt(
-        "buildSkyships",
-        () => validateBuildSkyships(G, playerID, perShipyard),
-        () => moves.buildSkyships(perShipyard)
-      ),
-
-    conscriptLevies: (levyAmount: number): MoveResult =>
-      attempt(
-        "conscriptLevies",
-        () => validateConscriptLevies(G, playerID, levyAmount),
-        () => moves.conscriptLevies(levyAmount)
-      ),
-
-    deployFleet: (
-      fleetIndex: number,
-      destination: [number, number],
-      skyships: number,
-      regiments: number,
-      levies: number
-    ): MoveResult =>
-      attempt(
-        "deployFleet",
-        () => validateDeployFleet(G, playerID, fleetIndex, destination, skyships, regiments, levies),
-        () => moves.deployFleet(fleetIndex, destination, skyships, regiments, levies)
-      ),
-
-    passFleetInfoToPlayerInfo: (
-      fleetId: number,
-      skyships: number,
-      regiments: number,
-      levies: number,
-      eliteRegiments: number
-    ): MoveResult =>
-      attempt(
-        "passFleetInfoToPlayerInfo",
-        () => validatePassFleetInfo(G, playerID, fleetId, skyships, regiments, levies, eliteRegiments),
-        () => moves.passFleetInfoToPlayerInfo(fleetId, skyships, regiments, levies, eliteRegiments)
-      ),
-
-    purchaseSkyships: (slotIndex: number, republic: "zeeland" | "venoa"): MoveResult =>
-      attempt(
-        "purchaseSkyships",
-        () => validatePurchaseSkyships(G, playerID, slotIndex, republic),
-        () => moves.purchaseSkyships(slotIndex, republic)
-      ),
-
-    recruitCounsellors: (slotIndex: number): MoveResult =>
-      attempt(
-        "recruitCounsellors",
-        () => validateRecruitCounsellors(G, playerID, slotIndex),
-        () => moves.recruitCounsellors(slotIndex)
-      ),
-
-    recruitRegiments: (slotIndex: number): MoveResult =>
-      attempt(
-        "recruitRegiments",
-        () => validateRecruitRegiments(G, playerID, slotIndex),
-        () => moves.recruitRegiments(slotIndex)
-      ),
-
-    foundBuildings: (slotIndex: number, heresyDirection?: "advance" | "retreat"): MoveResult =>
-      attempt(
-        "foundBuildings",
-        () => validateFoundBuildings(G, playerID, slotIndex, heresyDirection),
-        () => moves.foundBuildings(slotIndex, heresyDirection)
-      ),
-
-    foundFactory: (slotIndex: number): MoveResult =>
-      attempt(
-        "foundFactory",
-        () => validateFoundFactory(G, playerID, slotIndex),
-        () => moves.foundFactory(slotIndex)
-      ),
-
-    influencePrelates: (slotIndex: number): MoveResult =>
-      attempt(
-        "influencePrelates",
-        () => validateInfluencePrelates(G, playerID, slotIndex),
-        () => moves.influencePrelates(slotIndex)
-      ),
-
-    punishDissenters: (slotIndex: number, paymentType: "gold" | "counsellor" | "execute"): MoveResult =>
-      attempt(
-        "punishDissenters",
-        () => validatePunishDissenters(G, playerID, slotIndex, paymentType, numPlayers),
-        () => moves.punishDissenters(slotIndex, paymentType)
-      ),
-
-    alterPlayerOrder: (newPosition: number): MoveResult =>
-      attempt(
-        "alterPlayerOrder",
-        () => validateAlterPlayerOrder(G, playerID, newPosition, numPlayers),
-        () => moves.alterPlayerOrder(newPosition)
-      ),
-
-    convertMonarch: (slotIndex: number): MoveResult =>
-      attempt(
-        "convertMonarch",
-        () => validateConvertMonarch(G, playerID, slotIndex, numPlayers),
-        () => moves.convertMonarch(slotIndex)
-      ),
-  };
-
-  return { actions, lastError, clearError };
+  return { moves: wrappedMoves, lastError, clearError };
 }
