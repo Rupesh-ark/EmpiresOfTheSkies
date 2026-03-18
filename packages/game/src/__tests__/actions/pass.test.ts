@@ -63,9 +63,10 @@ describe("pass — discovery phase", () => {
     expect(G.stage).toBe("actions"); // stage unchanged from default? No — only set on endPhase branch
   });
 
-  it("sets stage='actions' and calls endPhase when last player passes", () => {
-    const G = buildInitialG();
-    const ctx = buildPassCtx("0", "discovery", 1, 2); // pos 1 of 2 — last
+  it("sets stage='actions' and calls endPhase when all players have passed", () => {
+    const G = buildInitialG([buildPlayer("0"), buildPlayer("1")]);
+    G.playerInfo["1"].passed = true; // player "1" already passed
+    const ctx = buildPassCtx("0", "discovery", 1, 2);
     const events = buildEvents();
 
     (pass as Function)({ G, ctx, playerID: "0", events });

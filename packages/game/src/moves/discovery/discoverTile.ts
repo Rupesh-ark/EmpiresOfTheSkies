@@ -1,7 +1,7 @@
 import { INVALID_MOVE } from "boardgame.io/core/";
 import { MyGameState } from "../../types";
 import { Move } from "boardgame.io";
-import { advanceAllHeresyTrackers, logEvent } from "../../helpers/stateUtils";
+import { advanceAllHeresyTrackers, logEvent, allPlayersPassed } from "../../helpers/stateUtils";
 import { EventsAPI } from "boardgame.io/dist/types/src/plugins/plugin-events";
 import { RandomAPI } from "boardgame.io/dist/types/src/plugins/random/random";
 import { Ctx } from "boardgame.io/dist/types/src/types";
@@ -91,13 +91,12 @@ export const discoverTile: Move<MyGameState> = (
   } else {
     // Land (or home/infidel_empire) tile found — cascade satisfied
     G.mustContinueDiscovery = false;
-    // End turn on combat tile (native creature guards the land)
-    if (currentTile.shield !== 0 || currentTile.sword !== 0) {
-      if (ctx.currentPlayer === ctx.playOrder[ctx.playOrder.length - 1]) {
-        events.endPhase();
-      } else {
-        events.endTurn();
-      }
+    // Land tile found — mark player as done with discovery
+    G.playerInfo[playerID].passed = true;
+    if (allPlayersPassed(G)) {
+      events.endPhase();
+    } else {
+      events.endTurn();
     }
   }
 };

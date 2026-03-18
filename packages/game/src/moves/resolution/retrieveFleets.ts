@@ -1,5 +1,6 @@
 import { Move } from "boardgame.io";
 import { MyGameState, PlayerInfo } from "../../types";
+import { allPlayersPassed } from "../../helpers/stateUtils";
 
 const retrieveFleets: Move<MyGameState> = (
   { G, ctx, playerID, events, random },
@@ -41,7 +42,12 @@ const retrieveFleets: Move<MyGameState> = (
     });
   }
 
-  events.endTurn();
+  G.playerInfo[playerID].passed = true;
+  if (allPlayersPassed(G)) {
+    events.endPhase();
+  } else {
+    events.endTurn();
+  }
 };
 
 export default retrieveFleets;

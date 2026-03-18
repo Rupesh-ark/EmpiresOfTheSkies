@@ -114,6 +114,9 @@ export const logEvent = (G: MyGameState, message: string) => {
   G.gameLog.push({ round: G.round, message });
 };
 
+export const allPlayersPassed = (G: MyGameState): boolean =>
+  Object.values(G.playerInfo).every((p) => p.passed);
+
 export const advanceAllHeresyTrackers = (G: MyGameState) => {
   Object.values(G.playerInfo).forEach((player) => {
     increaseHeresyWithinMove(G, player.id);

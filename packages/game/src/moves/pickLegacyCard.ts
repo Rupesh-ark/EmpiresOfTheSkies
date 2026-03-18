@@ -2,6 +2,7 @@ import { Ctx, Move } from "boardgame.io";
 import { MyGameState } from "../types";
 import { EventsAPI } from "boardgame.io/dist/types/src/plugins/plugin-events";
 import { RandomAPI } from "boardgame.io/dist/types/src/plugins/random/random";
+import { allPlayersPassed } from "../helpers/stateUtils";
 
 const pickLegacyCard: Move<MyGameState> = (
   {
@@ -22,8 +23,9 @@ const pickLegacyCard: Move<MyGameState> = (
   const card = args[0];
 
   G.playerInfo[playerID].resources.legacyCard = card;
+  G.playerInfo[playerID].passed = true;
 
-  if (ctx.playOrderPos === ctx.numPlayers - 1) {
+  if (allPlayersPassed(G)) {
     events.endPhase();
   } else {
     events.endTurn();

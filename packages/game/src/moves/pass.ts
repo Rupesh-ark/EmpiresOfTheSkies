@@ -4,6 +4,7 @@ import { Ctx } from "boardgame.io/dist/types/src/types";
 import { EventsAPI } from "boardgame.io/dist/types/src/plugins/plugin-events";
 import { RandomAPI } from "boardgame.io/dist/types/src/plugins/random/random";
 import { INVALID_MOVE } from "boardgame.io/core";
+import { allPlayersPassed } from "../helpers/stateUtils";
 
 const pass: Move<MyGameState> = (
   {
@@ -28,25 +29,13 @@ const pass: Move<MyGameState> = (
   G.playerInfo[playerID].passed = true;
   if (ctx.phase === "discovery") {
     G.firstTurnOfRound = false;
-    if (ctx.playOrderPos === ctx.numPlayers - 1) {
-      G.stage = "actions";
-      events.endPhase();
-    } else {
-      events.endTurn();
-    }
-  } else if (ctx.phase === "actions") {
-    let readyToEndPhase = true;
-    Object.values(G.playerInfo).forEach((info) => {
-      if (!info.passed) {
-        readyToEndPhase = false;
-      }
-    });
-    if (readyToEndPhase) {
-      G.stage = "attack or pass";
-      events.endPhase();
-    } else {
-      events.endTurn();
-    }
+  }
+
+  if (allPlayersPassed(G)) {
+    G.stage = ctx.phase === "actions" ? "attack or pass" : "actions";
+    events.endPhase();
+  } else {
+    events.endTurn();
   }
 };
 
