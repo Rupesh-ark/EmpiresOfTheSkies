@@ -83,7 +83,7 @@ import offerBuyoffGold from "./moves/events/offerBuyoffGold";
 import nominateCaptainGeneral from "./moves/events/nominateCaptainGeneral";
 import commitDeferredBattleCard from "./moves/events/commitDeferredBattleCard";
 import contributeToGrandArmy from "./moves/events/contributeToGrandArmy";
-import { logEvent } from "./helpers/stateUtils";
+import { logEvent, allPlayersPassed } from "./helpers/stateUtils";
 import { withLogging, withPhaseGuard, withPhaseReset, checkLoopGuard } from "./helpers/moveWrapper";
 import { createLogger } from "./helpers/logger";
 
@@ -389,8 +389,7 @@ const MyGame: Game<MyGameState> = {
           }
 
           if (currentPlayer.passed) {
-            const allPassed = Object.values(context.G.playerInfo).every((p) => p.passed);
-            if (allPassed) {
+            if (allPlayersPassed(context.G)) {
               context.G.stage = "attack or pass";
               context.events.endPhase();
             } else {
