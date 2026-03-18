@@ -12,7 +12,6 @@ import SendIcon from "@mui/icons-material/Send";
 import { MyGameProps } from "@eots/game";
 import { ChatMessage } from "boardgame.io";
 import { ChangeEventHandler } from "react";
-import ElectionDialog from "../Election/ElectionDialog";
 
 const Chat = (props: MyGameProps) => {
   const [input, setInput] = React.useState("");
@@ -40,10 +39,6 @@ const Chat = (props: MyGameProps) => {
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", height: "100%", overflow: "hidden" }}>
-      {props.ctx.phase === "election" && props.ctx.currentPlayer === props.playerID && (
-        <ElectionDialog {...props} />
-      )}
-
       {/* Slim top border accent */}
       <Box
         sx={{

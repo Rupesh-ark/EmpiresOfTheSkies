@@ -38,11 +38,18 @@ export function useGameActions(
   G: MyGameState,
   playerID: string,
   moves: Record<string, (...args: any[]) => void>,
-  numPlayers: number
+  numPlayers: number,
+  currentPlayer?: string,
+  activePlayers?: Record<string, string> | null
 ) {
   const [lastError, setLastError] = useState<MoveError | null>(null);
 
   const clearError = useCallback(() => setLastError(null), []);
+
+  /** Is this player allowed to act right now? */
+  const isMyTurn =
+    currentPlayer === playerID ||
+    (activePlayers != null && playerID in activePlayers);
 
   /**
    * Helper: validate then dispatch. Returns MoveResult so callers can
@@ -54,6 +61,12 @@ export function useGameActions(
       validator: () => MoveError | null,
       moveFn: () => void
     ): MoveResult => {
+      if (!isMyTurn) {
+        const error: MoveError = { code: "NOT_YOUR_TURN", message: "Wait for your turn" };
+        log.warn(`${name} blocked`, { code: error.code });
+        setLastError(error);
+        return { success: false, error };
+      }
       const error = validator();
       if (error) {
         log.warn(`${name} blocked`, { code: error.code, message: error.message });
@@ -65,7 +78,7 @@ export function useGameActions(
       moveFn();
       return { success: true };
     },
-    []
+    [isMyTurn]
   );
 
   // ── Action phase moves ──────────────────────────────────────────────────

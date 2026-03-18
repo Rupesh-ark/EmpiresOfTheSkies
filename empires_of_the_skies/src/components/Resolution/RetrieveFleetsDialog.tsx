@@ -51,14 +51,7 @@ const RetrieveFleetsDialog = (props: RetrieveFleetsDialogProps) => {
     }
   });
 
-  if (
-    props.ctx.phase === "resolution" &&
-    props.G.stage === "retrieve fleets" &&
-    props.ctx.currentPlayer === props.playerID &&
-    hasNoFleets
-  ) {
-    props.events.endTurn && props.events.endTurn();
-  }
+  // Auto-skip for no fleets is now handled server-side in turn.onBegin
   return (
     <Dialog
       maxWidth="xl"

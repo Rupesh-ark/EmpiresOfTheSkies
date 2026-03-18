@@ -108,6 +108,8 @@ export interface MyGameState {
     event: DeferredEvent;
     description: string;
   } | null;
+  _loopGuard: number;
+  _halted: boolean;
 }
 
 export type BattleState = {

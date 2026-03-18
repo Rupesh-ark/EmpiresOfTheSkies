@@ -1,6 +1,8 @@
-import React, { lazy, Suspense, useState } from "react";
+import React, { lazy, Suspense, useMemo, useState } from "react";
 
 import { MyGameProps } from "@eots/game";
+import { useGameActions } from "@/hooks/useGameActions";
+import MoveErrorSnackbar from "./MoveErrorSnackbar";
 const ActionBoard = lazy(() => import("./ActionBoard/ActionBoard").then(m => ({ default: m.ActionBoard })));
 const WorldMap = lazy(() => import("./WorldMap/WorldMap"));
 const PlayerBoard = lazy(() => import("./PlayerBoard/PlayerBoard").then(m => ({ default: m.PlayerBoard })));
@@ -11,9 +13,6 @@ import {
   Box,
   Button,
   Collapse,
-  Dialog,
-  DialogActions,
-  DialogTitle,
   Tab,
   Tabs,
   ThemeProvider,
@@ -58,15 +57,31 @@ export const ActionBoardsAndMap = (props: MyGameProps) => {
   const handleChange = (event: React.SyntheticEvent, newValue: string) => {
     setValue(newValue);
   };
-  const [dialogOpen, setDialogOpen] = useState(true);
   const [chatOpen, setChatOpen] = useState(false);
+
+  // ── Move validation (temporary — will be rebuilt in Phase E/F) ──
+  const { actions, lastError, clearError } = useGameActions(
+    props.G,
+    props.playerID ?? "",
+    props.moves,
+    props.ctx.numPlayers,
+    props.ctx.currentPlayer,
+    props.ctx.activePlayers
+  );
+
+  // Override props.moves with validated actions for ActionBoard/PlayerBoard.
+  // Moves not covered by useGameActions fall through to the raw props.moves.
+  const validatedProps = useMemo(
+    (): MyGameProps => ({
+      ...props,
+      moves: { ...props.moves, ...actions },
+    }),
+    [props, actions]
+  );
 
   const kingdomColour = props.playerID
     ? props.G.playerInfo[props.playerID].colour
     : undefined;
-
-  const isElectionTurn =
-    props.ctx.phase === "election" && props.playerID === props.ctx.currentPlayer;
 
   const openMapAtLocation = (location: number[]) => {
     setMapDetailRequest((previousRequest) => ({
@@ -112,14 +127,14 @@ export const ActionBoardsAndMap = (props: MyGameProps) => {
       key: "action",
       label: "Action Board",
       icon: <Dashboard sx={{ color: kingdomColour }} />,
-      panel: <ActionBoard {...props} />,
+      panel: <ActionBoard {...validatedProps} />,
     },
     {
       key: "player",
       label: "Player Board",
       icon: <Person sx={{ color: kingdomColour }} />,
       panel: (
-        <PlayerBoard {...props} onOpenFleetLocation={openMapAtLocation} />
+        <PlayerBoard {...validatedProps} onOpenFleetLocation={openMapAtLocation} />
       ),
     },
     {
@@ -221,12 +236,9 @@ export const ActionBoardsAndMap = (props: MyGameProps) => {
                 py: 1.25,
                 cursor: "pointer",
                 borderRadius: 0,
-                background: isElectionTurn
-                  ? "linear-gradient(90deg, #A74383, #E77B00)"
-                  : "linear-gradient(90deg, #1a0a14 0%, #0d0d0d 50%, #1a0a00 100%)",
+                background: "linear-gradient(90deg, #1a0a14 0%, #0d0d0d 50%, #1a0a00 100%)",
                 color: "white",
                 userSelect: "none",
-                animation: isElectionTurn && !chatOpen ? "pulse 1.6s ease-in-out infinite" : "none",
                 "@keyframes pulse": {
                   "0%, 100%": { boxShadow: "0 0 0 0 rgba(167,67,131,0.5)" },
                   "50%": { boxShadow: "0 0 0 10px rgba(167,67,131,0)" },
@@ -234,31 +246,16 @@ export const ActionBoardsAndMap = (props: MyGameProps) => {
                 "&:hover": { filter: "brightness(1.3)" },
               }}
             >
-              {isElectionTurn ? <Campaign fontSize="small" /> : <ChatBubble fontSize="small" />}
+              <ChatBubble fontSize="small" />
               <Box sx={{ flexGrow: 1, fontWeight: 700, fontSize: "0.875rem", letterSpacing: 0.5 }}>
-                {isElectionTurn ? "Election — cast your vote!" : "Group Chat"}
+                Group Chat
               </Box>
               <Close sx={{ fontSize: 16, opacity: 0.7, transform: chatOpen ? "rotate(0deg)" : "rotate(45deg)", transition: "transform 0.2s" }} />
             </Box>
           </Box>
 
           <DialogRouter {...props} />
-          <Dialog
-            open={isElectionTurn && dialogOpen}
-          >
-            <DialogTitle>
-              It is your turn to vote, head to the election tab.
-            </DialogTitle>
-            <DialogActions>
-              <Button
-                variant="contained"
-                color="error"
-                onClick={() => setDialogOpen(false)}
-              >
-                Dismiss
-              </Button>
-            </DialogActions>
-          </Dialog>
+          <MoveErrorSnackbar error={lastError} onClose={clearError} />
         </Box>
       </ThemeProvider>
     </div>

@@ -99,10 +99,10 @@ export const ActionBoardButtonLarge = (props: ActionBoardButtonProps) => {
 
   let listOfCounsellors: ReactElement[] = [];
   if (props.counsellors) {
-    props.counsellors.forEach((counsellor) => {
+    props.counsellors.forEach((counsellor, i) => {
       let counsellorColour = props.G.playerInfo[counsellor].colour;
       listOfCounsellors.push(
-        <CounsellorIcon colour={counsellorColour}></CounsellorIcon>
+        <CounsellorIcon key={`c-${i}`} colour={counsellorColour} />
       );
     });
   }
