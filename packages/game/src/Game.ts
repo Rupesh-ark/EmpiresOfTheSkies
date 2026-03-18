@@ -64,7 +64,7 @@ import drawCardConquest from "./moves/conquests/drawCardConquest";
 import pickCardConquest from "./moves/conquests/pickCardConquest";
 import vote from "./moves/election/vote";
 import retrieveFleets from "./moves/resolution/retrieveFleets";
-import setTurnCompleteFalse from "./moves/setTurnCompleteFalse";
+
 
 import { findNextBattle, findNextGroundBattle, findNextPlunder } from "./helpers/findNext";
 import { TurnOrder } from "boardgame.io/core";
@@ -230,7 +230,6 @@ const MyGame: Game<MyGameState> = {
     defendGroundAttack: withLogging("defendGroundAttack", defendGroundAttack),
     garrisonTroops: withLogging("garrisonTroops", garrisonTroops),
     yieldToAttacker: withLogging("yieldToAttacker", yieldToAttacker),
-    setTurnCompleteFalse: withLogging("setTurnCompleteFalse", setTurnCompleteFalse),
     chooseEventCard: withLogging("chooseEventCard", chooseEventCard),
     resolveEventChoice: withLogging("resolveEventChoice", resolveEventChoice),
     commitRebellionTroops: withLogging("commitRebellionTroops", commitRebellionTroops),
@@ -429,7 +428,6 @@ const MyGame: Game<MyGameState> = {
         issueHolyDecree: withLogging("issueHolyDecree", issueHolyDecree),
         declareSmugglerGood: withLogging("declareSmugglerGood", declareSmugglerGood),
         pass: withLogging("pass", pass),
-        setTurnCompleteFalse: withLogging("setTurnCompleteFalse", setTurnCompleteFalse),
       },
       onEnd: (context) => {
         Object.values(context.G.playerInfo).forEach((playerInfo: any) => {

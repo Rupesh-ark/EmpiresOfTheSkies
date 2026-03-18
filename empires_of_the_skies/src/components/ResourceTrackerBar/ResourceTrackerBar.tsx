@@ -208,12 +208,8 @@ const ResourceTrackerBar = (props: ResourceTrackerBarProps) => {
               variant="contained"
               color="success"
               onClick={() => {
-                if (props.ctx.numMoves !== undefined) {
-                  if (props.ctx.numMoves > 0) {
-                    props.moves.flipCards();
-                    props.moves.setTurnCompleteFalse();
-                  }
-                }
+                props.moves.flipCards();
+                props.events.endTurn?.();
               }}
             >
               Confirm & End Turn
