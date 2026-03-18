@@ -59,8 +59,8 @@ export const ActionBoardsAndMap = (props: MyGameProps) => {
   };
   const [chatOpen, setChatOpen] = useState(false);
 
-  // ── Move validation (temporary — will be rebuilt in Phase E/F) ──
-  const { actions, lastError, clearError } = useGameActions(
+  // ── Move validation — wraps all moves with turn guard + validators ──
+  const { moves: validatedMoves, lastError, clearError } = useGameActions(
     props.G,
     props.playerID ?? "",
     props.moves,
@@ -69,14 +69,12 @@ export const ActionBoardsAndMap = (props: MyGameProps) => {
     props.ctx.activePlayers
   );
 
-  // Override props.moves with validated actions for ActionBoard/PlayerBoard.
-  // Moves not covered by useGameActions fall through to the raw props.moves.
   const validatedProps = useMemo(
     (): MyGameProps => ({
       ...props,
-      moves: { ...props.moves, ...actions },
+      moves: validatedMoves,
     }),
-    [props, actions]
+    [props, validatedMoves]
   );
 
   const kingdomColour = props.playerID
