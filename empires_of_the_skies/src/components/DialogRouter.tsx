@@ -22,6 +22,7 @@ import InvasionNominateDialog from "./InvasionNominateDialog";
 import InvasionContributeDialog from "./InvasionContributeDialog";
 import InvasionBuyoffDialog from "./InvasionBuyoffDialog";
 import RetrieveFleetsDialog from "./Resolution/RetrieveFleetsDialog";
+import ElectionDialog from "./Election/ElectionDialog";
 import GameOverView from "./GameOverView";
 
 /**
@@ -34,9 +35,6 @@ import GameOverView from "./GameOverView";
  *
  * Rule: do NOT add layout, tabs, or non-dialog UI here.
  * Rule: do NOT modify the individual dialog components — only their mount conditions.
- *
- * The election "It is your turn to vote" notification dialog is intentionally left
- * in ActionBoardsAndMap because it relies on local `dialogOpen` state there.
  */
 export const DialogRouter = (props: MyGameProps) => {
   return (
@@ -124,6 +122,8 @@ export const DialogRouter = (props: MyGameProps) => {
       {props.G.stage === "retrieve fleets" && (
         <RetrieveFleetsDialog {...props} />
       )}
+
+      {props.ctx.phase === "election" && <ElectionDialog {...props} />}
 
       <GameOverView {...props} />
     </>

@@ -9,8 +9,7 @@ export const clearMoves = (props: MyGameProps) => {
     for (let i = 0; i < props.ctx.numMoves; i++) {
       props.undo();
     }
-    props.G.playerInfo[props.playerID ?? props.ctx.currentPlayer].turnComplete =
-      false;
+    props.moves.setTurnCompleteFalse();
   }
 };
 
