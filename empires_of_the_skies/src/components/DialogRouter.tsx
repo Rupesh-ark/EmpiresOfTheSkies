@@ -23,6 +23,7 @@ import InvasionContributeDialog from "./InvasionContributeDialog";
 import InvasionBuyoffDialog from "./InvasionBuyoffDialog";
 import RetrieveFleetsDialog from "./Resolution/RetrieveFleetsDialog";
 import ElectionDialog from "./Election/ElectionDialog";
+import DiscardFoWCardDialog from "./DiscardFoWCardDialog";
 import GameOverView from "./GameOverView";
 
 /**
@@ -124,6 +125,8 @@ export const DialogRouter = (props: MyGameProps) => {
       )}
 
       {props.ctx.phase === "election" && <ElectionDialog {...props} />}
+
+      {props.G.stage === "discard_fow" && <DiscardFoWCardDialog {...props} />}
 
       <GameOverView {...props} />
     </>

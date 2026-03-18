@@ -55,6 +55,7 @@ export interface MyGameState {
     | "pick legacy card"
     | "taxes"
     | "events"
+    | "discard_fow"
     | "reset";
   electionResults: Record<string, number>;
   hasVoted: string[];
