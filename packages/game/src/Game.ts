@@ -28,6 +28,7 @@ import {
   fullResetFortuneOfWarCardDeck,
 } from "./helpers/helpers";
 import trainTroops from "./moves/actions/trainTroops";
+import discardFoWCard from "./moves/actions/discardFoWCard";
 import buildSkyships from "./moves/actions/buildSkyships";
 import conscriptLevies from "./moves/actions/conscriptLevies";
 import passFleetInfoToPlayerInfo from "./moves/actions/passFleetInfoToPlayerInfo";
@@ -412,6 +413,7 @@ const MyGame: Game<MyGameState> = {
         convertMonarch: withLogging("convertMonarch", convertMonarch),
         influencePrelates: withLogging("influencePrelates", influencePrelates),
         trainTroops: withLogging("trainTroops", trainTroops),
+        discardFoWCard: withLogging("discardFoWCard", discardFoWCard),
         flipCards: withLogging("flipCards", flipCards),
         buildSkyships: withLogging("buildSkyships", buildSkyships),
         conscriptLevies: withLogging("conscriptLevies", conscriptLevies),
