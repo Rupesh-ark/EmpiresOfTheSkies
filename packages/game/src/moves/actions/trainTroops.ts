@@ -27,7 +27,7 @@ const trainTroops: Move<MyGameState> = ({ G, playerID, random }) => {
     const card = drawFortuneOfWarCard(G, random.Shuffle);
     G.playerInfo[playerID].resources.fortuneCards.push({
       ...card,
-      flipped: false,
+      flipped: true,
     });
   }
   removeOneCounsellor(G, playerID);

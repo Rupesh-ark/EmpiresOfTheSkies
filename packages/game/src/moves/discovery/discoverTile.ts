@@ -2,6 +2,7 @@ import { INVALID_MOVE } from "boardgame.io/core/";
 import { MyGameState } from "../../types";
 import { Move } from "boardgame.io";
 import { advanceAllHeresyTrackers, logEvent, allPlayersPassed } from "../../helpers/stateUtils";
+import { getNeighbors } from "../../helpers/mapUtils";
 import { EventsAPI } from "boardgame.io/dist/types/src/plugins/plugin-events";
 import { RandomAPI } from "boardgame.io/dist/types/src/plugins/random/random";
 import { Ctx } from "boardgame.io/dist/types/src/types";
@@ -26,28 +27,34 @@ export const discoverTile: Move<MyGameState> = (
   if (G.mapState.discoveredTiles[y][x]) {
     return INVALID_MOVE;
   }
-  const borderingTiles: number[][] = [
-    [x, y - 1 < 0 ? 0 : y - 1],
-    [x, y + 1 > 3 ? 3 : y + 1],
-    [(((x - 1) % 8) + 8) % 8, y],
-    [(((x + 1) % 8) + 8) % 8, y],
-  ];
+  const edgeNeighbors = getNeighbors(x, y, true);
   let bordered = false;
 
-  borderingTiles.forEach((coords) => {
-    if (ctx.numMoves === 0) {
-      if (G.mapState.discoveredTiles[coords[1]][coords[0]]) {
-        bordered = true;
-      }
-    } else {
-      if (
-        coords[0] === G.mapState.mostRecentlyDiscoveredTile[0] &&
-        coords[1] === G.mapState.mostRecentlyDiscoveredTile[1]
-      ) {
-        bordered = true;
+  if (ctx.numMoves === 0) {
+    // First flip: must be adjacent to any discovered tile
+    bordered = edgeNeighbors.some(
+      ([nx, ny]) => G.mapState.discoveredTiles[ny][nx]
+    );
+  } else {
+    // Cascade flip: must be adjacent to the most recently discovered tile
+    const [lx, ly] = G.mapState.mostRecentlyDiscoveredTile;
+    bordered = edgeNeighbors.some(([nx, ny]) => nx === lx && ny === ly);
+
+    // Cascade fallback: if the last tile has no hidden edge-neighbors,
+    // allow any tile adjacent to any revealed tile (v4.2 discovery rule)
+    if (!bordered) {
+      const lastTileNeighbors = getNeighbors(lx, ly, true);
+      const hasHiddenNeighbor = lastTileNeighbors.some(
+        ([nx, ny]) => !G.mapState.discoveredTiles[ny][nx]
+      );
+      if (!hasHiddenNeighbor) {
+        bordered = edgeNeighbors.some(
+          ([nx, ny]) => G.mapState.discoveredTiles[ny][nx]
+        );
       }
     }
-  });
+  }
+
   if (!bordered) {
     return INVALID_MOVE;
   }
