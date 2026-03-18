@@ -1,51 +1,11 @@
 import { INVALID_MOVE } from "boardgame.io/core";
 import type { Ctx } from "boardgame.io";
 import { createLogger } from "./logger";
-import {
-  validateTrainTroops,
-  validateBuildSkyships,
-  validateConscriptLevies,
-  validateDeployFleet,
-  validatePassFleetInfo,
-  validatePurchaseSkyships,
-  validateRecruitCounsellors,
-  validateRecruitRegiments,
-  validateFoundBuildings,
-  validateFoundFactory,
-  validateInfluencePrelates,
-  validatePunishDissenters,
-  validateAlterPlayerOrder,
-  validateConvertMonarch,
-} from "../moves/moveValidation";
-import { MoveError, MyGameState } from "../types";
+import { MyGameState } from "../types";
 import { logEvent } from "./stateUtils";
 import { BuildingSlot } from "../codifiedGameInfo";
 
 const log = createLogger("move");
-
-// ── Validator registry (for rejection diagnostics) ──────────────────────────
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const VALIDATORS: Record<string, (G: MyGameState, playerID: string, numPlayers: number, ...args: any[]) => MoveError | null> = {
-  trainTroops: (G, pid) => validateTrainTroops(G, pid),
-  buildSkyships: (G, pid, _n, perShipyard) => validateBuildSkyships(G, pid, perShipyard),
-  conscriptLevies: (G, pid, _n, levyAmount) => validateConscriptLevies(G, pid, levyAmount),
-  deployFleet: (G, pid, _n, fleetIndex, dest, sky, reg, lev) =>
-    validateDeployFleet(G, pid, fleetIndex, dest, sky, reg, lev),
-  passFleetInfoToPlayerInfo: (G, pid, _n, fid, sky, reg, lev, elite) =>
-    validatePassFleetInfo(G, pid, fid, sky, reg, lev, elite),
-  purchaseSkyships: (G, pid, _n, slotIndex, republic) =>
-    validatePurchaseSkyships(G, pid, slotIndex, republic),
-  recruitCounsellors: (G, pid, _n, slotIndex) => validateRecruitCounsellors(G, pid, slotIndex),
-  recruitRegiments: (G, pid, _n, slotIndex) => validateRecruitRegiments(G, pid, slotIndex),
-  foundBuildings: (G, pid, _n, slotIndex, dir) => validateFoundBuildings(G, pid, slotIndex, dir),
-  foundFactory: (G, pid, _n, slotIndex) => validateFoundFactory(G, pid, slotIndex),
-  influencePrelates: (G, pid, _n, slotIndex) => validateInfluencePrelates(G, pid, slotIndex),
-  punishDissenters: (G, pid, n, slotIndex, paymentType) =>
-    validatePunishDissenters(G, pid, slotIndex, paymentType, n),
-  alterPlayerOrder: (G, pid, n, newPosition) => validateAlterPlayerOrder(G, pid, newPosition, n),
-  convertMonarch: (G, pid, n, slotIndex) => validateConvertMonarch(G, pid, slotIndex, n),
-};
 
 // ── Game log formatters (for player-visible game log) ───────────────────────
 
@@ -139,8 +99,7 @@ const LOG_FORMATTERS: Record<string, (G: MyGameState, playerID: string, ...args:
 /**
  * Wraps a boardgame.io move function with:
  * 1. Structured developer logging (console JSON)
- * 2. Rejection diagnostics (re-runs validator to find the reason)
- * 3. Player-visible game log entries for successful action-phase moves
+ * 2. Player-visible game log entries for successful action-phase moves
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const withLogging = (name: string, moveFn: any): any => {
@@ -157,15 +116,9 @@ export const withLogging = (name: string, moveFn: any): any => {
     const result = moveFn(context, ...args);
 
     if (result === INVALID_MOVE) {
-      // Re-run the validator to find out WHY the move was rejected
-      const validator = VALIDATORS[name];
-      const reason = validator?.(G, playerID, ctx.numPlayers, ...args);
-
       log.warn(`${name} REJECTED`, {
         playerID,
         phase: ctx.phase,
-        reason: reason?.code ?? "UNKNOWN",
-        message: reason?.message ?? "no validator for this move",
         ...(args.length > 0 && { args }),
       });
     } else {
