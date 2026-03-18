@@ -206,7 +206,7 @@ const GameLog = (props: MyGameProps) => {
                 </Typography>
               </Box>
               <List dense disablePadding>
-                {messages.map((msg, idx) => {
+                {[...messages].reverse().map((msg, idx) => {
                   const iconKey = getLogIcon(msg);
                   const { icon, color } = ICON_MAP[iconKey];
                   return (
