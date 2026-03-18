@@ -37,11 +37,11 @@ const pass: Move<MyGameState> = (
   } else if (ctx.phase === "actions") {
     let readyToEndPhase = true;
     Object.values(G.playerInfo).forEach((info) => {
-      if (info.passed === false) {
+      if (!info.passed) {
         readyToEndPhase = false;
       }
     });
-    if (readyToEndPhase && ctx.phase === "actions") {
+    if (readyToEndPhase) {
       G.stage = "attack or pass";
       events.endPhase();
     } else {

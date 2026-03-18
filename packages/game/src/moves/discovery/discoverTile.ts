@@ -23,7 +23,7 @@ export const discoverTile: Move<MyGameState> = (
   ...args: any[]
 ) => {
   const [x, y] = args[0];
-  if (G.mapState.discoveredTiles[y][x] === true) {
+  if (G.mapState.discoveredTiles[y][x]) {
     return INVALID_MOVE;
   }
   const borderingTiles: number[][] = [
@@ -36,7 +36,7 @@ export const discoverTile: Move<MyGameState> = (
 
   borderingTiles.forEach((coords) => {
     if (ctx.numMoves === 0) {
-      if (G.mapState.discoveredTiles[coords[1]][coords[0]] === true) {
+      if (G.mapState.discoveredTiles[coords[1]][coords[0]]) {
         bordered = true;
       }
     } else {
@@ -48,7 +48,7 @@ export const discoverTile: Move<MyGameState> = (
       }
     }
   });
-  if (bordered === false) {
+  if (!bordered) {
     return INVALID_MOVE;
   }
   const currentTile = G.mapState.currentTileArray[y][x];
@@ -72,7 +72,7 @@ export const discoverTile: Move<MyGameState> = (
   let allDiscovered = true;
   Object.values(G.mapState.discoveredTiles).forEach((tileRow) => {
     tileRow.forEach((tile) => {
-      if (tile === false) {
+      if (!tile) {
         allDiscovered = false;
       }
     });

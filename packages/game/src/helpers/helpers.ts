@@ -54,7 +54,7 @@ export const findPossibleDestinations = (
           (!currentTile.blocked.includes(key) || unlaiden) &&
           value[1] >= 0 &&
           value[1] <= 3 &&
-          G.mapState.discoveredTiles[value[1]][value[0]] === true &&
+          G.mapState.discoveredTiles[value[1]][value[0]] &&
           (value[1] !== 0 || value[0] !== 4)
         ) {
           availableGridLocations.push(value);
