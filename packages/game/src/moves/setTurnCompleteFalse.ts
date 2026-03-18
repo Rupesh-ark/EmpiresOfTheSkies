@@ -21,6 +21,9 @@ const setTurnCompleteFalse: Move<MyGameState> = (
   ...args: any[]
 ) => {
   G.playerInfo[playerID].turnComplete = false;
+  if (ctx.phase === "actions") {
+    events.endTurn();
+  }
 };
 
 export default setTurnCompleteFalse;

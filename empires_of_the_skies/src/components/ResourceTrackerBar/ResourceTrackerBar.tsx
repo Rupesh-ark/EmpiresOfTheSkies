@@ -58,15 +58,6 @@ const ResourceTrackerBar = (props: ResourceTrackerBarProps) => {
   const turnComplete =
     props.G.playerInfo[props.playerID ?? props.ctx.currentPlayer].turnComplete;
 
-  const endTurn = () => {
-    if (props.events.endTurn) {
-      if (props.ctx.numMoves) {
-        if (props.ctx.numMoves > 0) {
-          props.events.endTurn();
-        }
-      }
-    }
-  };
   return (
     <AppBar
       position={"sticky"}
@@ -221,7 +212,6 @@ const ResourceTrackerBar = (props: ResourceTrackerBarProps) => {
                   if (props.ctx.numMoves > 0) {
                     props.moves.flipCards();
                     props.moves.setTurnCompleteFalse();
-                    endTurn();
                   }
                 }
               }}
