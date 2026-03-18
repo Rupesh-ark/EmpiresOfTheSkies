@@ -1,8 +1,6 @@
-import React, { lazy, Suspense, useMemo, useState } from "react";
+import React, { lazy, Suspense, useState } from "react";
 
 import { MyGameProps } from "@eots/game";
-import { useGameActions } from "@/hooks/useGameActions";
-import MoveErrorSnackbar from "./MoveErrorSnackbar";
 const ActionBoard = lazy(() => import("./ActionBoard/ActionBoard").then(m => ({ default: m.ActionBoard })));
 const WorldMap = lazy(() => import("./WorldMap/WorldMap"));
 const PlayerBoard = lazy(() => import("./PlayerBoard/PlayerBoard").then(m => ({ default: m.PlayerBoard })));
@@ -59,24 +57,6 @@ export const ActionBoardsAndMap = (props: MyGameProps) => {
   };
   const [chatOpen, setChatOpen] = useState(false);
 
-  // ── Move validation — wraps all moves with turn guard + validators ──
-  const { moves: validatedMoves, lastError, clearError } = useGameActions(
-    props.G,
-    props.playerID ?? "",
-    props.moves,
-    props.ctx.numPlayers,
-    props.ctx.currentPlayer,
-    props.ctx.activePlayers
-  );
-
-  const validatedProps = useMemo(
-    (): MyGameProps => ({
-      ...props,
-      moves: validatedMoves,
-    }),
-    [props, validatedMoves]
-  );
-
   const kingdomColour = props.playerID
     ? props.G.playerInfo[props.playerID].colour
     : undefined;
@@ -125,14 +105,14 @@ export const ActionBoardsAndMap = (props: MyGameProps) => {
       key: "action",
       label: "Action Board",
       icon: <Dashboard sx={{ color: kingdomColour }} />,
-      panel: <ActionBoard {...validatedProps} />,
+      panel: <ActionBoard {...props} />,
     },
     {
       key: "player",
       label: "Player Board",
       icon: <Person sx={{ color: kingdomColour }} />,
       panel: (
-        <PlayerBoard {...validatedProps} onOpenFleetLocation={openMapAtLocation} />
+        <PlayerBoard {...props} onOpenFleetLocation={openMapAtLocation} />
       ),
     },
     {
@@ -253,7 +233,6 @@ export const ActionBoardsAndMap = (props: MyGameProps) => {
           </Box>
 
           <DialogRouter {...props} />
-          <MoveErrorSnackbar error={lastError} onClose={clearError} />
         </Box>
       </ThemeProvider>
     </div>
