@@ -67,7 +67,9 @@ export const ActionBoardButton = (props: ActionBoardButtonProps) => {
       disabled={props.disabled || restricted}
       onClick={() => {
         clearMoves(props);
-        props.onClickFunction(props.value);
+        if (props.counsellor !== props.playerID) {
+          props.onClickFunction(props.value);
+        }
       }}
       value={props.value}
     >
