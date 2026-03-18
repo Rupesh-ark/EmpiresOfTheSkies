@@ -1,10 +1,80 @@
 import { Move } from "boardgame.io";
-import { MyGameState } from "../../types";
+import { MyGameState, MoveError } from "../../types";
 import { findPossibleDestinations } from "../../helpers/helpers";
 import { INVALID_MOVE } from "boardgame.io/core";
 import { removeGoldAmount, removeOneCounsellor } from "../../helpers/stateUtils";
-import { validateDeployFleet } from "../moveValidation";
-import { KINGDOM_LOCATION } from "../../codifiedGameInfo";
+import { validateMove } from "../moveValidation";
+import { KINGDOM_LOCATION, MAX_SKYSHIPS_PER_FLEET } from "../../codifiedGameInfo";
+
+export const validateDeployFleet = (
+  G: MyGameState,
+  playerID: string,
+  selectedFleetIndex: number,
+  destination: [number, number],
+  skyshipCount: number,
+  regimentCount: number,
+  levyCount: number
+): MoveError | null => {
+  const base = validateMove(playerID, G, { costsCounsellor: true, costsGold: true });
+  if (base) return base;
+
+  const currentPlayer = G.playerInfo[playerID];
+  const fleet = currentPlayer.fleetInfo[selectedFleetIndex];
+
+  if (!fleet) {
+    return { code: "INVALID_FLEET", message: "No fleet found at that index" };
+  }
+
+  const atHome =
+    fleet.location[0] === KINGDOM_LOCATION[0] &&
+    fleet.location[1] === KINGDOM_LOCATION[1];
+
+  if (atHome) {
+    if (currentPlayer.resources.skyships < skyshipCount) {
+      return {
+        code: "INSUFFICIENT_SKYSHIPS",
+        message: `Not enough Skyships — need ${skyshipCount}, have ${currentPlayer.resources.skyships}`,
+      };
+    }
+    if (currentPlayer.resources.regiments < regimentCount) {
+      return {
+        code: "INSUFFICIENT_REGIMENTS",
+        message: `Not enough Regiments — need ${regimentCount}, have ${currentPlayer.resources.regiments}`,
+      };
+    }
+    if (currentPlayer.resources.levies < levyCount) {
+      return {
+        code: "INSUFFICIENT_LEVIES",
+        message: `Not enough Levies — need ${levyCount}, have ${currentPlayer.resources.levies}`,
+      };
+    }
+  }
+
+  if (skyshipCount === 0) {
+    return { code: "NO_SKYSHIPS_ASSIGNED", message: "A fleet must have at least 1 Skyship" };
+  }
+
+  if (skyshipCount > MAX_SKYSHIPS_PER_FLEET) {
+    return {
+      code: "FLEET_SIZE_EXCEEDED",
+      message: `A fleet may carry at most ${MAX_SKYSHIPS_PER_FLEET} Skyships`,
+    };
+  }
+
+  if (regimentCount + levyCount > skyshipCount) {
+    return {
+      code: "TROOP_CAPACITY_EXCEEDED",
+      message: "Cannot carry more troops than Skyships (1 troop per Skyship)",
+    };
+  }
+
+  // Note: destination validity (pathfinding) is checked inside deployFleet itself
+  // because findPossibleDestinations is a server-side helper. The frontend can
+  // call findPossibleDestinations independently to validate before calling this.
+
+  return null;
+};
+
 const deployFleet: Move<MyGameState> = (
   { G, playerID },
   ...args: any[]

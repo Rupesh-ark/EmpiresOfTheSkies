@@ -1,8 +1,64 @@
 import { Move } from "boardgame.io";
-import { MyGameState } from "../../types";
+import { MyGameState, MoveError } from "../../types";
 import { INVALID_MOVE } from "boardgame.io/core";
-import { validatePassFleetInfo } from "../moveValidation";
 import { KINGDOM_LOCATION } from "../../codifiedGameInfo";
+
+export const validatePassFleetInfo = (
+  G: MyGameState,
+  playerID: string,
+  fleetId: number,
+  skyshipCount: number,
+  regimentCount: number,
+  levyCount: number,
+  eliteRegimentCount: number
+): MoveError | null => {
+  const currentPlayer = G.playerInfo[playerID];
+  const currentFleet = currentPlayer.fleetInfo[fleetId];
+
+  if (!currentFleet || fleetId !== currentFleet.fleetId) {
+    return { code: "INVALID_FLEET", message: "No fleet found with that ID" };
+  }
+
+  const atHome =
+    currentFleet.location[0] === KINGDOM_LOCATION[0] &&
+    currentFleet.location[1] === KINGDOM_LOCATION[1];
+
+  if (atHome) {
+    if (currentPlayer.resources.skyships < skyshipCount) {
+      return {
+        code: "INSUFFICIENT_SKYSHIPS",
+        message: `Not enough Skyships — need ${skyshipCount}, have ${currentPlayer.resources.skyships}`,
+      };
+    }
+    if (currentPlayer.resources.regiments < regimentCount) {
+      return {
+        code: "INSUFFICIENT_REGIMENTS",
+        message: `Not enough Regiments — need ${regimentCount}, have ${currentPlayer.resources.regiments}`,
+      };
+    }
+    if (currentPlayer.resources.levies < levyCount) {
+      return {
+        code: "INSUFFICIENT_LEVIES",
+        message: `Not enough Levies — need ${levyCount}, have ${currentPlayer.resources.levies}`,
+      };
+    }
+    if (currentPlayer.resources.eliteRegiments < eliteRegimentCount) {
+      return {
+        code: "INSUFFICIENT_ELITE_REGIMENTS",
+        message: `Not enough Elite Regiments — need ${eliteRegimentCount}, have ${currentPlayer.resources.eliteRegiments}`,
+      };
+    }
+    if (skyshipCount < regimentCount + levyCount + eliteRegimentCount) {
+      return {
+        code: "TROOP_CAPACITY_EXCEEDED",
+        message: "Cannot carry more troops than Skyships (1 troop per Skyship)",
+      };
+    }
+  }
+
+  return null;
+};
+
 const passFleetInfoToPlayerInfo: Move<MyGameState> = (
   { G, playerID },
   ...args: any[]

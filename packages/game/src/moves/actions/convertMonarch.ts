@@ -1,5 +1,5 @@
 import { Move } from "boardgame.io";
-import { MyGameState } from "../../types";
+import { MyGameState, MoveError } from "../../types";
 import {
   removeGoldAmount,
   removeOneCounsellor,
@@ -9,6 +9,48 @@ import {
 import { INVALID_MOVE } from "boardgame.io/core";
 import { validateMove } from "../moveValidation";
 import { Ctx } from "boardgame.io/dist/types/src/types";
+
+export const validateConvertMonarch = (
+  G: MyGameState,
+  playerID: string,
+  slotIndex: number,
+  numPlayers: number
+): MoveError | null => {
+  const base = validateMove(playerID, G, { costsGold: true });
+  if (base) return base;
+
+  const value: keyof typeof G.boardState.convertMonarch = (slotIndex + 1) as
+    | 1 | 2 | 3 | 4 | 5 | 6;
+
+  if (G.eventState.cannotConvertThisRound.includes(playerID)) {
+    return { code: "CONVERSION_BLOCKED", message: "Your Monarch cannot convert again this round" };
+  }
+
+  if (G.boardState.convertMonarch[value] !== undefined) {
+    return { code: "SLOT_TAKEN", message: "That conversion slot is already taken" };
+  }
+
+  if (value > numPlayers) {
+    return { code: "SLOT_OUT_OF_RANGE", message: "That conversion slot does not exist in this game" };
+  }
+
+  const alreadyConverting = Object.values(G.boardState.convertMonarch).some(
+    (id) => id === playerID
+  );
+  if (alreadyConverting) {
+    return { code: "ALREADY_CONVERTING", message: "Your Monarch is already converting this round" };
+  }
+
+  if (G.playerInfo[playerID].resources.counsellors < 2) {
+    return { code: "INSUFFICIENT_COUNSELLORS", message: "Converting requires 2 Counsellors" };
+  }
+
+  if (G.playerInfo[playerID].resources.gold < 2) {
+    return { code: "INSUFFICIENT_GOLD", message: "Converting requires 2 Gold" };
+  }
+
+  return null;
+};
 
 const convertMonarch: Move<MyGameState> = (
   { G, ctx, playerID }: { G: MyGameState; ctx: Ctx; playerID: string },

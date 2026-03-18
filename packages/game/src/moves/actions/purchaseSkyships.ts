@@ -1,12 +1,35 @@
 import { Move } from "boardgame.io";
-import { MyGameState } from "../../types";
+import { MyGameState, MoveError } from "../../types";
 import { INVALID_MOVE } from "boardgame.io/core";
-import { validatePurchaseSkyships } from "../moveValidation";
+import { validateMove } from "../moveValidation";
 import {
   addSkyship,
   removeGoldAmount,
   removeOneCounsellor,
 } from "../../helpers/stateUtils";
+
+export const validatePurchaseSkyships = (
+  G: MyGameState,
+  playerID: string,
+  slotIndex: number,
+  republic: "zeeland" | "venoa"
+): MoveError | null => {
+  const base = validateMove(playerID, G, { costsCounsellor: true, costsGold: true });
+  if (base) return base;
+
+  const boardSlots =
+    republic === "venoa"
+      ? G.boardState.purchaseSkyshipsVenoa
+      : G.boardState.purchaseSkyshipsZeeland;
+
+  const slot: keyof typeof boardSlots = (slotIndex + 1) as 1 | 2;
+
+  if (boardSlots[slot] !== undefined) {
+    return { code: "SLOT_TAKEN", message: "That purchase slot is already taken" };
+  }
+
+  return null;
+};
 
 const purchaseSkyships: Move<MyGameState> = (
   { G, playerID }: { G: MyGameState; playerID: string },
