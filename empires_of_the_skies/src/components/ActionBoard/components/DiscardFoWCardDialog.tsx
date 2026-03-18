@@ -51,14 +51,6 @@ const DiscardFowCardDialog = (props: RetrieveFleetsDialogProps) => {
     }
   });
 
-  if (
-    props.ctx.phase === "resolution" &&
-    props.G.stage === "retrieve fleets" &&
-    props.ctx.currentPlayer === props.playerID &&
-    hasNoFleets
-  ) {
-    props.events.endTurn && props.events.endTurn();
-  }
   return (
     <Dialog
       maxWidth="xl"
