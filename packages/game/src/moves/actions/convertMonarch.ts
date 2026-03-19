@@ -43,10 +43,6 @@ const validateConvertMonarch = (
     return { code: "INSUFFICIENT_COUNSELLORS", message: "Converting requires 2 Counsellors" };
   }
 
-  if (G.playerInfo[playerID].resources.gold < 2) {
-    return { code: "INSUFFICIENT_GOLD", message: "Converting requires 2 Gold" };
-  }
-
   return null;
 };
 

@@ -60,12 +60,7 @@ const validatePunishDissenters = (
   }
 
   if (paymentType === "gold") {
-    if (playerInfo.resources.gold < PUNISH_GOLD_COST) {
-      return {
-        code: "INSUFFICIENT_GOLD",
-        message: `Not enough Gold — need ${PUNISH_GOLD_COST}, have ${playerInfo.resources.gold}`,
-      };
-    }
+    // Gold check removed — rules allow debt (VP penalty at end of round)
   } else if (paymentType === "counsellor") {
     if (playerInfo.resources.counsellors < 2) {
       return { code: "INSUFFICIENT_COUNSELLORS", message: "Need 2 Counsellors to pay by Counsellor" };
@@ -111,9 +106,6 @@ const punishDissenters: MoveDefinition = {
 
     // B6: cost = 2 Gold OR 1 extra counsellor (player's choice via paymentType arg)
     if (paymentType === "gold") {
-      if (playerInfo.resources.gold < PUNISH_GOLD_COST) {
-        return INVALID_MOVE;
-      }
       removeGoldAmount(G, playerID, PUNISH_GOLD_COST);
     } else if (paymentType === "counsellor") {
       if (playerInfo.resources.counsellors < 2) {

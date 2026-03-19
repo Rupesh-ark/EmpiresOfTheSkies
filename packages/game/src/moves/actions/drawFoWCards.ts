@@ -14,7 +14,7 @@ const validateDrawFoWCards = (
 };
 
 const drawFoWCards: MoveDefinition = {
-  fn: ({ G, playerID, random }) => {
+  fn: ({ G, playerID, random, events }) => {
     if (validateDrawFoWCards(G, playerID)) return INVALID_MOVE;
 
     for (let i = 0; i < FOW_CARDS_DRAWN; i++) {
@@ -30,7 +30,7 @@ const drawFoWCards: MoveDefinition = {
       G.stage = "discard_fow";
     } else {
       G.stage = "actions";
-      G.playerInfo[playerID].turnComplete = true;
+      events.endTurn();
     }
   },
   errorMessage: "Cannot draw cards right now",

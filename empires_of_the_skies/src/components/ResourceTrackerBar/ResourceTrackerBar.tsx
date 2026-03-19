@@ -209,14 +209,16 @@ const ResourceTrackerBar = (props: ResourceTrackerBarProps) => {
               sx={chipSx}
             />
           </Tooltip>
-          <Button
-            size="small"
-            variant="contained"
-            color="error"
-            onClick={() => clearMoves(props)}
-          >
-            Clear Move
-          </Button>
+          {isMyTurn && props.ctx.numMoves > 0 && props.ctx.phase === "actions" && (
+            <Button
+              size="small"
+              variant="contained"
+              color="error"
+              onClick={() => clearMoves(props)}
+            >
+              Clear Move
+            </Button>
+          )}
           {showConfirmEndTurn ? (
             <Button
               size="small"
