@@ -25,7 +25,7 @@ function callMove(
   numPlayers: number
 ) {
   const ctx = { ...buildCtx(playerID, numPlayers), playOrderPos };
-  return (pickLegacyCard as Function)({ G, ctx, playerID, events: stubEvents }, card);
+  return pickLegacyCard.fn({ G, ctx, playerID, events: stubEvents }, card);
 }
 
 // ── Card assignment ───────────────────────────────────────────────────────────

@@ -1,13 +1,11 @@
-import { Move } from "boardgame.io";
-import { MyGameState } from "../../types";
-
+import { MoveDefinition } from "../../types";
 import { findNextConquest } from "../../helpers/findNext";
 
-const doNothing: Move<MyGameState> = (
-  { G, ctx, playerID, events, random },
-  ...args
-) => {
-  findNextConquest(G, events);
+const doNothing: MoveDefinition = {
+  fn: ({ G, events }, ...args) => {
+    findNextConquest(G, events);
+  },
+  errorMessage: "Cannot pass on conquest right now",
 };
 
 export default doNothing;

@@ -1,5 +1,4 @@
-import { MyGameState, MoveError } from "../../types";
-import { Move } from "boardgame.io";
+import { MyGameState, MoveError, MoveDefinition } from "../../types";
 import { validateMove } from "../moveValidation";
 import { addOneCounsellor, removeGoldAmount } from "../../helpers/stateUtils";
 import { INVALID_MOVE } from "boardgame.io/core";
@@ -32,23 +31,29 @@ export const validateRecruitCounsellors = (
   return null;
 };
 
-export const recruitCounsellors: Move<MyGameState> = (
-  { G, playerID },
-  ...args: any[]
-) => {
-  const value: keyof typeof G.boardState.recruitCounsellors = args[0] + 1;
-  if (validateRecruitCounsellors(G, playerID, args[0])) return INVALID_MOVE;
+const recruitCounsellors: MoveDefinition = {
+  fn: ({ G, playerID }, ...args: any[]) => {
+    const value: keyof typeof G.boardState.recruitCounsellors = args[0] + 1;
+    if (validateRecruitCounsellors(G, playerID, args[0])) return INVALID_MOVE;
 
-  const costs = {
-    [CounsellorSlot.First]:  1,
-    [CounsellorSlot.Second]: 1,
-    [CounsellorSlot.Third]:  2,
-  };
+    const costs = {
+      [CounsellorSlot.First]:  1,
+      [CounsellorSlot.Second]: 1,
+      [CounsellorSlot.Third]:  2,
+    };
 
-  addOneCounsellor(G, playerID);
-  G.boardState.recruitCounsellors[value] = playerID;
-  removeGoldAmount(G, playerID, costs[value]);
-  G.playerInfo[playerID].turnComplete = true;
+    addOneCounsellor(G, playerID);
+    G.boardState.recruitCounsellors[value] = playerID;
+    removeGoldAmount(G, playerID, costs[value]);
+    G.playerInfo[playerID].turnComplete = true;
+  },
+  errorMessage: "Cannot recruit a Counsellor right now",
+  validate: (G, playerID, slotIndex) => validateRecruitCounsellors(G, playerID, slotIndex),
+  successLog: (G, pid) => {
+    const k = G.playerInfo[pid].kingdomName;
+    const count = G.playerInfo[pid].resources.counsellors;
+    return `${k} recruits a Counsellor (now ${count})`;
+  },
 };
 
 export default recruitCounsellors;

@@ -1,5 +1,4 @@
-import { Move } from "boardgame.io";
-import { MyGameState, MoveError } from "../../types";
+import { MyGameState, MoveError, MoveDefinition } from "../../types";
 import { validateMove } from "../moveValidation";
 import { INVALID_MOVE } from "boardgame.io/core";
 import {
@@ -39,23 +38,29 @@ export const validateBuildSkyships = (
   return null;
 };
 
-const buildSkyships: Move<MyGameState> = (
-  { G, playerID },
-  ...args: any[]
-) => {
-  // GAP-20: player chooses 1 or 2 skyships per shipyard, pays 1 Gold each
-  const perShipyard: number = args[0];
-  if (validateBuildSkyships(G, playerID, perShipyard)) return INVALID_MOVE;
-  const total = perShipyard * G.playerInfo[playerID].shipyards;
+const buildSkyships: MoveDefinition = {
+  fn: ({ G, playerID }, ...args: any[]) => {
+    // GAP-20: player chooses 1 or 2 skyships per shipyard, pays 1 Gold each
+    const perShipyard: number = args[0];
+    if (validateBuildSkyships(G, playerID, perShipyard)) return INVALID_MOVE;
+    const total = perShipyard * G.playerInfo[playerID].shipyards;
 
-  removeOneCounsellor(G, playerID);
-  removeGoldAmount(G, playerID, total);
-  for (let i = 0; i < total; i++) {
-    addSkyship(G, playerID);
-  }
-  G.playerInfo[playerID].playerBoardCounsellorLocations.buildSkyships = true;
+    removeOneCounsellor(G, playerID);
+    removeGoldAmount(G, playerID, total);
+    for (let i = 0; i < total; i++) {
+      addSkyship(G, playerID);
+    }
+    G.playerInfo[playerID].playerBoardCounsellorLocations.buildSkyships = true;
 
-  G.playerInfo[playerID].turnComplete = true;
+    G.playerInfo[playerID].turnComplete = true;
+  },
+  errorMessage: "Cannot build Skyships right now",
+  validate: (G, playerID, perShipyard) => validateBuildSkyships(G, playerID, perShipyard),
+  successLog: (G, pid, perShipyard) => {
+    const k = G.playerInfo[pid].kingdomName;
+    const built = perShipyard * G.playerInfo[pid].shipyards;
+    return `${k} builds ${built} Skyship(s)`;
+  },
 };
 
 export default buildSkyships;

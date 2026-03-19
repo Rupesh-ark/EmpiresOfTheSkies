@@ -1,11 +1,16 @@
-import { Move } from "boardgame.io";
-import { MyGameState } from "../../types";
+import { MoveDefinition } from "../../types";
 import { increaseHeresyWithinMove, increaseOrthodoxyWithinMove } from "../../helpers/stateUtils";
 
-export const increaseHeresy: Move<MyGameState> = ({ G, playerID }) => {
-  increaseHeresyWithinMove(G, playerID);
+export const increaseHeresy: MoveDefinition = {
+  fn: ({ G, playerID }) => {
+    increaseHeresyWithinMove(G, playerID);
+  },
+  errorMessage: "Cannot increase heresy right now",
 };
 
-export const increaseOrthodoxy: Move<MyGameState> = ({ G, playerID }) => {
-  increaseOrthodoxyWithinMove(G, playerID);
+export const increaseOrthodoxy: MoveDefinition = {
+  fn: ({ G, playerID }) => {
+    increaseOrthodoxyWithinMove(G, playerID);
+  },
+  errorMessage: "Cannot increase orthodoxy right now",
 };

@@ -21,7 +21,7 @@ describe("increaseHeresy", () => {
   it("increments heresyTracker by 1 when below the cap", () => {
     const G = buildInitialG();
     const before = G.playerInfo["0"].heresyTracker; // 0
-    (increaseHeresy as Function)({ G, ctx: buildCtx("0"), playerID: "0" });
+    increaseHeresy.fn({ G, ctx: buildCtx("0"), playerID: "0" });
     expect(G.playerInfo["0"].heresyTracker).toBe(before + 1);
   });
 
@@ -30,7 +30,7 @@ describe("increaseHeresy", () => {
       buildPlayer("0", { heresyTracker: 9 }),
       buildPlayer("1"),
     ]);
-    (increaseHeresy as Function)({ G, ctx: buildCtx("0"), playerID: "0" });
+    increaseHeresy.fn({ G, ctx: buildCtx("0"), playerID: "0" });
     // Should remain at 9 — the cap prevents any further increase
     expect(G.playerInfo["0"].heresyTracker).toBe(9);
   });
@@ -42,7 +42,7 @@ describe("increaseOrthodoxy", () => {
   it("decrements heresyTracker by 1 when above the floor", () => {
     const G = buildInitialG();
     const before = G.playerInfo["0"].heresyTracker; // 0
-    (increaseOrthodoxy as Function)({ G, ctx: buildCtx("0"), playerID: "0" });
+    increaseOrthodoxy.fn({ G, ctx: buildCtx("0"), playerID: "0" });
     expect(G.playerInfo["0"].heresyTracker).toBe(before - 1);
   });
 
@@ -51,7 +51,7 @@ describe("increaseOrthodoxy", () => {
       buildPlayer("0", { heresyTracker: -9 }),
       buildPlayer("1"),
     ]);
-    (increaseOrthodoxy as Function)({ G, ctx: buildCtx("0"), playerID: "0" });
+    increaseOrthodoxy.fn({ G, ctx: buildCtx("0"), playerID: "0" });
     // Should remain at -9 — the floor prevents any further decrease
     expect(G.playerInfo["0"].heresyTracker).toBe(-9);
   });

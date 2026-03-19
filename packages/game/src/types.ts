@@ -452,3 +452,18 @@ export type ActionBoardInfo = {
   };
   issueHolyDecree: boolean;
 };
+
+export type MoveContext = {
+  G: MyGameState;
+  playerID: string;
+  ctx?: any;
+  events?: any;
+  random?: any;
+};
+
+export type MoveDefinition = {
+  fn: (context: MoveContext, ...args: any[]) => any;
+  errorMessage: string;
+  successLog?: (G: MyGameState, playerID: string, ...args: any[]) => string | null;
+  validate?: (G: MyGameState, playerID: string, ...args: any[]) => MoveError | null;
+};

@@ -76,7 +76,7 @@ function callDeploy(
   levies: number
 ) {
   const ctx = buildCtx("0");
-  return (deployFleet as Function)(
+  return deployFleet.fn(
     { G, ctx, playerID: "0", events: stubEvents, random: {} },
     fleetIndex,
     dest,

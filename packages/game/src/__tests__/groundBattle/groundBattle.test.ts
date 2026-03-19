@@ -74,7 +74,7 @@ describe("attackPlayersBuilding — initiating ground attack", () => {
     G.mapState.currentBattle = [0, 0];
 
     const ctx = buildCtxWithPhase("0");
-    (attackPlayersBuilding as Function)({ G, ctx, playerID: "0", events: stubEvents, random: {} });
+    attackPlayersBuilding.fn({ G, ctx, playerID: "0", events: stubEvents, random: {} });
 
     expect(G.battleState?.attacker.id).toBe("0");
     expect(G.battleState?.defender.id).toBe("1");
@@ -87,7 +87,7 @@ describe("attackPlayersBuilding — initiating ground attack", () => {
     G.mapState.currentBattle = [0, 0];
 
     const ctx = buildCtxWithPhase("0");
-    (attackPlayersBuilding as Function)({ G, ctx, playerID: "0", events: stubEvents, random: {} });
+    attackPlayersBuilding.fn({ G, ctx, playerID: "0", events: stubEvents, random: {} });
     expect(G.stage).toBe("defend or yield");
   });
 });
@@ -102,7 +102,7 @@ describe("defendGroundAttack — defender chooses to fight", () => {
       defender: { decision: "undecided", ...G.playerInfo["1"] },
     };
     const ctx = buildCtxWithPhase("1");
-    (defendGroundAttack as Function)({ G, ctx, playerID: "1", events: stubEvents, random: {} });
+    defendGroundAttack.fn({ G, ctx, playerID: "1", events: stubEvents, random: {} });
     expect(G.battleState.defender.decision).toBe("fight");
   });
 });
@@ -121,7 +121,7 @@ describe("yieldToAttacker — defender surrenders", () => {
     };
     const regimentsBefore = G.playerInfo["1"].resources.regiments;
     const ctx = buildCtxWithPhase("1");
-    (yieldToAttacker as Function)({ G, ctx, playerID: "1", events: stubEvents, random: {} });
+    yieldToAttacker.fn({ G, ctx, playerID: "1", events: stubEvents, random: {} });
     // Garrisoned 2 regiments returned to player "1"
     expect(G.playerInfo["1"].resources.regiments).toBe(regimentsBefore + 2);
   });
@@ -137,7 +137,7 @@ describe("yieldToAttacker — defender surrenders", () => {
     };
     const leviesBefore = G.playerInfo["1"].resources.levies;
     const ctx = buildCtxWithPhase("1");
-    (yieldToAttacker as Function)({ G, ctx, playerID: "1", events: stubEvents, random: {} });
+    yieldToAttacker.fn({ G, ctx, playerID: "1", events: stubEvents, random: {} });
     expect(G.playerInfo["1"].resources.levies).toBe(leviesBefore + 1);
   });
 
@@ -151,7 +151,7 @@ describe("yieldToAttacker — defender surrenders", () => {
       defender: { decision: "undecided", ...G.playerInfo["1"] },
     };
     const ctx = buildCtxWithPhase("1");
-    (yieldToAttacker as Function)({ G, ctx, playerID: "1", events: stubEvents, random: {} });
+    yieldToAttacker.fn({ G, ctx, playerID: "1", events: stubEvents, random: {} });
     expect(G.mapState.buildings[0][0].player?.id).toBe("0");
   });
 
@@ -165,7 +165,7 @@ describe("yieldToAttacker — defender surrenders", () => {
       defender: { decision: "undecided", ...G.playerInfo["1"] },
     };
     const ctx = buildCtxWithPhase("1");
-    (yieldToAttacker as Function)({ G, ctx, playerID: "1", events: stubEvents, random: {} });
+    yieldToAttacker.fn({ G, ctx, playerID: "1", events: stubEvents, random: {} });
     expect(G.battleState).toBeUndefined();
   });
 });
@@ -184,7 +184,7 @@ describe("garrisonTroops — moving troops from fleet to building", () => {
     G.mapState.buildings[0][0].garrisonedLevies = 0;
 
     const ctx = buildCtxWithPhase("0", "conquest");
-    (garrisonTroops as Function)({ G, ctx, playerID: "0", events: stubEvents, random: {} }, [2, 0]);
+    garrisonTroops.fn({ G, ctx, playerID: "0", events: stubEvents, random: {} }, [2, 0]);
 
     expect(G.mapState.buildings[0][0].garrisonedRegiments).toBe(2);
   });
@@ -199,7 +199,7 @@ describe("garrisonTroops — moving troops from fleet to building", () => {
     G.mapState.buildings[0][0].garrisonedRegiments = 0;
 
     const ctx = buildCtxWithPhase("0", "conquest");
-    (garrisonTroops as Function)({ G, ctx, playerID: "0", events: stubEvents, random: {} }, [2, 0]);
+    garrisonTroops.fn({ G, ctx, playerID: "0", events: stubEvents, random: {} }, [2, 0]);
 
     const fleet = G.playerInfo["0"].fleetInfo.find((f) => f.location[0] === 0 && f.location[1] === 0);
     expect(fleet?.regiments).toBe(2); // 4 - 2
@@ -214,7 +214,7 @@ describe("garrisonTroops — moving troops from fleet to building", () => {
     G.mapState.currentBattle = [0, 0];
 
     const ctx = buildCtxWithPhase("0", "conquest");
-    (garrisonTroops as Function)({ G, ctx, playerID: "0", events: stubEvents, random: {} }, [1, 0]);
+    garrisonTroops.fn({ G, ctx, playerID: "0", events: stubEvents, random: {} }, [1, 0]);
 
     expect(G.mapState.buildings[0][0].player?.id).toBe("0");
   });

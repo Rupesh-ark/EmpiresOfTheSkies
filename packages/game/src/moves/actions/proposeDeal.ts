@@ -1,5 +1,4 @@
-import { Move } from "boardgame.io";
-import { MyGameState, DealOffer, DealProposal } from "../../types";
+import { MyGameState, DealOffer, DealProposal, MoveDefinition } from "../../types";
 import { INVALID_MOVE } from "boardgame.io/core";
 import { validateOutpostTransfer } from "../../helpers/stateUtils";
 
@@ -41,43 +40,46 @@ const validateOffer = (
   return undefined;
 };
 
-const proposeDeal: Move<MyGameState> = ({ G, playerID }, ...args: any[]) => {
-  const targetID: string = args[0];
-  const offering: DealOffer = args[1];
-  const requesting: DealOffer = args[2];
+const proposeDeal: MoveDefinition = {
+  fn: ({ G, playerID }, ...args: any[]) => {
+    const targetID: string = args[0];
+    const offering: DealOffer = args[1];
+    const requesting: DealOffer = args[2];
 
-  if (G.pendingDeal) {
-    return INVALID_MOVE;
-  }
+    if (G.pendingDeal) {
+      return INVALID_MOVE;
+    }
 
-  if (targetID === playerID) {
-    return INVALID_MOVE;
-  }
+    if (targetID === playerID) {
+      return INVALID_MOVE;
+    }
 
-  if (!G.playerInfo[targetID]) {
-    return INVALID_MOVE;
-  }
+    if (!G.playerInfo[targetID]) {
+      return INVALID_MOVE;
+    }
 
-  // Validate proposer can fulfil their offer
-  const offerError = validateOffer(G, playerID, targetID, offering);
-  if (offerError) {
-    return INVALID_MOVE;
-  }
+    // Validate proposer can fulfil their offer
+    const offerError = validateOffer(G, playerID, targetID, offering);
+    if (offerError) {
+      return INVALID_MOVE;
+    }
 
-  // Validate target can fulfil what's being requested
-  const requestError = validateOffer(G, targetID, playerID, requesting);
-  if (requestError) {
-    return INVALID_MOVE;
-  }
+    // Validate target can fulfil what's being requested
+    const requestError = validateOffer(G, targetID, playerID, requesting);
+    if (requestError) {
+      return INVALID_MOVE;
+    }
 
-  const deal: DealProposal = {
-    proposerID: playerID,
-    targetID,
-    offering,
-    requesting,
-  };
+    const deal: DealProposal = {
+      proposerID: playerID,
+      targetID,
+      offering,
+      requesting,
+    };
 
-  G.pendingDeal = deal;
+    G.pendingDeal = deal;
+  },
+  errorMessage: "Cannot propose this deal",
 };
 
 export default proposeDeal;

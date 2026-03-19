@@ -19,7 +19,7 @@ import { MAX_COUNSELLORS } from "../../codifiedGameInfo";
 
 function callMove(G: ReturnType<typeof buildInitialG>, playerID: string, slotIndex: number) {
   const ctx = buildCtx(playerID);
-  return (recruitCounsellors as Function)({ G, ctx, playerID }, slotIndex);
+  return recruitCounsellors.fn({ G, ctx, playerID }, slotIndex);
 }
 
 describe("recruitCounsellors — costs", () => {

@@ -39,7 +39,7 @@ function callCommit(
     ...buildCtx(playerID, Object.keys(G.playerInfo).length),
     playOrder: playOrder ?? Object.keys(G.playerInfo),
   };
-  const result = (commitRebellionTroops as Function)(
+  const result = commitRebellionTroops.fn(
     { G, ctx, playerID, events, random: { Shuffle: <T>(a: T[]) => a } },
     regiments,
     levies,
@@ -61,7 +61,7 @@ function callContribute(
     ...buildCtx(playerID, Object.keys(G.playerInfo).length),
     playOrder: playOrder ?? Object.keys(G.playerInfo),
   };
-  const result = (contributeToRebellion as Function)(
+  const result = contributeToRebellion.fn(
     { G, ctx, playerID, events, random: { Shuffle: <T>(a: T[]) => a } },
     side,
     regiments,

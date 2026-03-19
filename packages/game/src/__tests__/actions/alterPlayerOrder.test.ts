@@ -18,7 +18,7 @@ import { buildInitialG, buildPlayer, buildCtx, buildResources } from "../testHel
 
 function callMove(G: ReturnType<typeof buildInitialG>, playerID: string, positionIndex: number, numPlayers = 2) {
   const ctx = { ...buildCtx(playerID, numPlayers), currentPlayer: playerID };
-  return (alterPlayerOrder as Function)({ G, ctx, playerID }, positionIndex);
+  return alterPlayerOrder.fn({ G, ctx, playerID }, positionIndex);
 }
 
 describe("alterPlayerOrder — counsellor cost", () => {

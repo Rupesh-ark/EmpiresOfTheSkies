@@ -45,7 +45,7 @@ describe("pass — discovery phase", () => {
     const ctx = buildPassCtx("0", "discovery", 0);
     const events = buildEvents();
 
-    (pass as Function)({ G, ctx, playerID: "0", events });
+    pass.fn({ G, ctx, playerID: "0", events });
 
     expect(G.playerInfo["0"].passed).toBe(true);
     expect(G.firstTurnOfRound).toBe(false);
@@ -56,7 +56,7 @@ describe("pass — discovery phase", () => {
     const ctx = buildPassCtx("0", "discovery", 0, 2); // pos 0 of 2 — not last
     const events = buildEvents();
 
-    (pass as Function)({ G, ctx, playerID: "0", events });
+    pass.fn({ G, ctx, playerID: "0", events });
 
     expect(events.endTurn).toHaveBeenCalled();
     expect(events.endPhase).not.toHaveBeenCalled();
@@ -69,7 +69,7 @@ describe("pass — discovery phase", () => {
     const ctx = buildPassCtx("0", "discovery", 1, 2);
     const events = buildEvents();
 
-    (pass as Function)({ G, ctx, playerID: "0", events });
+    pass.fn({ G, ctx, playerID: "0", events });
 
     expect(G.stage).toBe("actions");
     expect(events.endPhase).toHaveBeenCalled();
@@ -86,7 +86,7 @@ describe("pass — actions phase", () => {
     const ctx = buildPassCtx("0", "actions", 0);
     const events = buildEvents();
 
-    (pass as Function)({ G, ctx, playerID: "0", events });
+    pass.fn({ G, ctx, playerID: "0", events });
 
     expect(G.playerInfo["0"].passed).toBe(true);
     expect(events.endTurn).toHaveBeenCalled();
@@ -99,7 +99,7 @@ describe("pass — actions phase", () => {
     const ctx = buildPassCtx("0", "actions", 0);
     const events = buildEvents();
 
-    (pass as Function)({ G, ctx, playerID: "0", events });
+    pass.fn({ G, ctx, playerID: "0", events });
 
     expect(G.playerInfo["0"].passed).toBe(true);
     expect(G.stage).toBe("attack or pass");

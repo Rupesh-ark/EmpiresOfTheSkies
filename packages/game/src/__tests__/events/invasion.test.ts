@@ -32,7 +32,7 @@ function callNominate(
     ...buildCtx(playerID, Object.keys(G.playerInfo).length),
     playOrder: playOrder ?? Object.keys(G.playerInfo),
   };
-  const result = (nominateCaptainGeneral as Function)(
+  const result = nominateCaptainGeneral.fn(
     { G, ctx, playerID, events },
     nomineeID
   );
@@ -51,7 +51,7 @@ function callContribute(
     ...buildCtx(playerID, Object.keys(G.playerInfo).length),
     playOrder: playOrder ?? Object.keys(G.playerInfo),
   };
-  const result = (contributeToGrandArmy as Function)(
+  const result = contributeToGrandArmy.fn(
     { G, ctx, playerID, events },
     regiments,
     levies
@@ -70,7 +70,7 @@ function callBuyoff(
     ...buildCtx(playerID, Object.keys(G.playerInfo).length),
     playOrder: playOrder ?? Object.keys(G.playerInfo),
   };
-  const result = (offerBuyoffGold as Function)(
+  const result = offerBuyoffGold.fn(
     { G, ctx, playerID, events },
     amount
   );
@@ -90,7 +90,7 @@ function callRespondFleet(
     playOrder: playOrder ?? Object.keys(G.playerInfo),
   };
   const random = buildRandom();
-  const result = (respondToInfidelFleet as Function)(
+  const result = respondToInfidelFleet.fn(
     { G, ctx, playerID, events, random },
     response,
     fowCardIndex
@@ -573,7 +573,7 @@ function callCommitDeferredBattle(
     playOrder: playOrder ?? Object.keys(G.playerInfo),
   };
   const random = buildRandom();
-  const result = (commitDeferredBattleCard as Function)(
+  const result = commitDeferredBattleCard.fn(
     { G, ctx, playerID, events, random },
     fowCardIndex
   );

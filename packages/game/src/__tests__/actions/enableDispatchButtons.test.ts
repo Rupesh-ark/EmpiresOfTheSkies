@@ -23,7 +23,7 @@ describe("enableDispatchButtons — INVALID_MOVE guard", () => {
     ]);
     const ctx = buildCtx("0");
 
-    const result = (enableDispatchButtons as Function)({ G, ctx, playerID: "0" });
+    const result = enableDispatchButtons.fn({ G, ctx, playerID: "0" });
 
     expect(result).toBe(INVALID_MOVE);
   });
@@ -36,7 +36,7 @@ describe("enableDispatchButtons — INVALID_MOVE guard", () => {
     ]);
     const ctx = buildCtx("0");
 
-    const result = (enableDispatchButtons as Function)({ G, ctx, playerID: "0" });
+    const result = enableDispatchButtons.fn({ G, ctx, playerID: "0" });
 
     expect(result).toBeUndefined();
   });

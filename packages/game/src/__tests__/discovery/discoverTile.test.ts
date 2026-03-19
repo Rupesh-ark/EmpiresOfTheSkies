@@ -78,7 +78,7 @@ function callDiscover(
 ) {
   const ctx = { ...buildCtx(playerID), numMoves, playOrder: [playerID], playOrderPos: 0 };
   const events = { endTurn: () => {}, endPhase: () => {} };
-  return (discoverTile as Function)({ G, ctx, playerID, events, random: {} }, coords);
+  return discoverTile.fn({ G, ctx, playerID, events, random: {} }, coords);
 }
 
 // ── New race heresy advance ───────────────────────────────────────────────────

@@ -27,7 +27,7 @@ function callMove(
   numPlayers = 2
 ) {
   const ctx = buildCtx(playerID, numPlayers);
-  return (punishDissenters as Function)({ G, ctx, playerID }, slotIndex, paymentType);
+  return punishDissenters.fn({ G, ctx, playerID }, slotIndex, paymentType);
 }
 
 describe("punishDissenters — costs", () => {

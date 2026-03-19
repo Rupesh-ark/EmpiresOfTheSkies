@@ -45,7 +45,7 @@ describe("attackOtherPlayersFleet — initiating battle", () => {
   it("creates battleState with attacker decision=fight and defender decision=undecided", () => {
     const G = buildInitialG();
     const ctx = buildCtxWithPhase("0");
-    (attackOtherPlayersFleet as Function)({ G, ctx, playerID: "0", events: stubEvents, random: {} }, "1");
+    attackOtherPlayersFleet.fn({ G, ctx, playerID: "0", events: stubEvents, random: {} }, "1");
     expect(G.battleState?.attacker.id).toBe("0");
     expect(G.battleState?.attacker.decision).toBe("fight");
     expect(G.battleState?.defender.id).toBe("1");
@@ -55,7 +55,7 @@ describe("attackOtherPlayersFleet — initiating battle", () => {
   it("advances game stage to 'attack or evade'", () => {
     const G = buildInitialG();
     const ctx = buildCtxWithPhase("0");
-    (attackOtherPlayersFleet as Function)({ G, ctx, playerID: "0", events: stubEvents, random: {} }, "1");
+    attackOtherPlayersFleet.fn({ G, ctx, playerID: "0", events: stubEvents, random: {} }, "1");
     expect(G.stage).toBe("attack or evade");
   });
 });
@@ -70,7 +70,7 @@ describe("evadeAttackingFleet — defender chooses to evade", () => {
       defender: { decision: "undecided", ...G.playerInfo["1"] },
     };
     const ctx = buildCtxWithPhase("1");
-    (evadeAttackingFleet as Function)({ G, ctx, playerID: "1", events: stubEvents, random: {} });
+    evadeAttackingFleet.fn({ G, ctx, playerID: "1", events: stubEvents, random: {} });
     expect(G.battleState?.defender.decision).toBe("evade");
   });
 
@@ -81,7 +81,7 @@ describe("evadeAttackingFleet — defender chooses to evade", () => {
       defender: { decision: "undecided", ...G.playerInfo["1"] },
     };
     const ctx = buildCtxWithPhase("1");
-    (evadeAttackingFleet as Function)({ G, ctx, playerID: "1", events: stubEvents, random: {} });
+    evadeAttackingFleet.fn({ G, ctx, playerID: "1", events: stubEvents, random: {} });
     expect(G.stage).toBe("relocate loser");
   });
 });
@@ -96,7 +96,7 @@ describe("retaliate — defender chooses to fight", () => {
       defender: { decision: "undecided", ...G.playerInfo["1"] },
     };
     const ctx = buildCtxWithPhase("1");
-    (retaliate as Function)({ G, ctx, playerID: "1", events: stubEvents, random: {} });
+    retaliate.fn({ G, ctx, playerID: "1", events: stubEvents, random: {} });
     expect(G.battleState?.defender.decision).toBe("fight");
   });
 });

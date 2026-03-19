@@ -23,7 +23,7 @@ import { buildInitialG, buildPlayer, buildCtx, buildResources } from "../testHel
 // slotIndex: 0 = Cathedral, 1 = Palace, 2 = Shipyard, 3 = Fort
 function callMove(G: ReturnType<typeof buildInitialG>, playerID: string, slotIndex: number, extraArg?: any) {
   const ctx = buildCtx(playerID);
-  return (foundBuildings as Function)({ G, ctx, playerID }, slotIndex, extraArg);
+  return foundBuildings.fn({ G, ctx, playerID }, slotIndex, extraArg);
 }
 
 // ── Cathedral (slot 0) ─────────────────────────────────────────────────────

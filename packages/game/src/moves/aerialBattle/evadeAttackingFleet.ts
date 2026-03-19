@@ -1,16 +1,15 @@
-import { Move } from "boardgame.io";
-import { MyGameState } from "../../types";
+import { MoveDefinition } from "../../types";
 
-const evadeAttackingFleet: Move<MyGameState> = (
-  { G, ctx, playerID, events, random },
-  ...args
-) => {
-  if (G.battleState !== undefined) {
-    G.battleState.defender = { decision: "evade", ...G.playerInfo[playerID] };
-    const attackerID = G.battleState.attacker.id;
-    G.stage = "relocate loser";
-    events.endTurn({ next: attackerID });
-  }
+const evadeAttackingFleet: MoveDefinition = {
+  fn: ({ G, playerID, events }, ...args) => {
+    if (G.battleState !== undefined) {
+      G.battleState.defender = { decision: "evade", ...G.playerInfo[playerID] };
+      const attackerID = G.battleState.attacker.id;
+      G.stage = "relocate loser";
+      events.endTurn({ next: attackerID });
+    }
+  },
+  errorMessage: "Cannot evade right now",
 };
 
 export default evadeAttackingFleet;

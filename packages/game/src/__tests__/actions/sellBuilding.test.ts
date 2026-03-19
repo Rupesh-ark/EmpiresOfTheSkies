@@ -16,7 +16,7 @@ import sellBuilding from "../../moves/actions/sellBuilding";
 import { buildInitialG, buildPlayer, buildResources } from "../testHelpers";
 
 function callMove(G: ReturnType<typeof buildInitialG>, playerID: string, buildingType: string) {
-  return (sellBuilding as Function)({ G, playerID }, buildingType);
+  return sellBuilding.fn({ G, playerID }, buildingType);
 }
 
 // ── Cathedral sales ──────────────────────────────────────────────────────────

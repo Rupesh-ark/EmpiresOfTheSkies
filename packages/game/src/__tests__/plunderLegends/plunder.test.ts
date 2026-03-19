@@ -94,7 +94,7 @@ describe("plunder — colony loot transfer", () => {
       }
     );
 
-    (plunder as Function)(
+    plunder.fn(
       { G, ctx: buildCtx(playerID), playerID, events: stubEvents, random: {} }
     );
 
@@ -126,7 +126,7 @@ describe("plunder — colony loot transfer", () => {
       }
     );
 
-    (plunder as Function)(
+    plunder.fn(
       { G, ctx: buildCtx(playerID), playerID, events: stubEvents, random: {} }
     );
 

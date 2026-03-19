@@ -20,7 +20,7 @@ import { MAX_FACTORIES } from "../../codifiedGameInfo";
 
 function callMove(G: ReturnType<typeof buildInitialG>, playerID: string, slotIndex: number) {
   const ctx = buildCtx(playerID);
-  return (foundFactory as Function)({ G, ctx, playerID }, slotIndex);
+  return foundFactory.fn({ G, ctx, playerID }, slotIndex);
 }
 
 describe("foundFactory — cost formula (v4.2)", () => {

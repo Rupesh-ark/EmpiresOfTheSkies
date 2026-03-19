@@ -20,7 +20,7 @@ import { MAX_LEVIES } from "../../codifiedGameInfo";
 
 function callMove(G: ReturnType<typeof buildInitialG>, playerID: string, levyAmount: number) {
   const ctx = buildCtx(playerID);
-  return (conscriptLevies as Function)({ G, ctx, playerID }, levyAmount);
+  return conscriptLevies.fn({ G, ctx, playerID }, levyAmount);
 }
 
 describe("conscriptLevies — levy gain", () => {

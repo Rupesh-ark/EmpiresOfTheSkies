@@ -20,7 +20,7 @@ import { PlayerColour } from "../../types";
 
 function callMove(G: ReturnType<typeof buildInitialG>, playerID: string, slotIndex: number) {
   const ctx = buildCtx(playerID);
-  return (influencePrelates as Function)({ G, ctx, playerID }, slotIndex);
+  return influencePrelates.fn({ G, ctx, playerID }, slotIndex);
 }
 
 describe("influencePrelates — gold cost = target cathedral count", () => {

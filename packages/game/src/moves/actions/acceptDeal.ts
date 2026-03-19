@@ -1,5 +1,4 @@
-import { Move } from "boardgame.io";
-import { MyGameState, DealOffer } from "../../types";
+import { MyGameState, DealOffer, MoveDefinition } from "../../types";
 import { INVALID_MOVE } from "boardgame.io/core";
 import { validateOffer } from "./proposeDeal";
 
@@ -35,35 +34,38 @@ const executeSide = (
   }
 };
 
-const acceptDeal: Move<MyGameState> = ({ G, playerID }) => {
-  if (!G.pendingDeal) {
-    return INVALID_MOVE;
-  }
+const acceptDeal: MoveDefinition = {
+  fn: ({ G, playerID }) => {
+    if (!G.pendingDeal) {
+      return INVALID_MOVE;
+    }
 
-  if (G.pendingDeal.targetID !== playerID) {
-    return INVALID_MOVE;
-  }
+    if (G.pendingDeal.targetID !== playerID) {
+      return INVALID_MOVE;
+    }
 
-  const { proposerID, targetID, offering, requesting } = G.pendingDeal;
+    const { proposerID, targetID, offering, requesting } = G.pendingDeal;
 
-  // Re-validate both sides (state may have changed since proposal)
-  const offerError = validateOffer(G, proposerID, targetID, offering);
-  if (offerError) {
+    // Re-validate both sides (state may have changed since proposal)
+    const offerError = validateOffer(G, proposerID, targetID, offering);
+    if (offerError) {
+      G.pendingDeal = undefined;
+      return INVALID_MOVE;
+    }
+
+    const requestError = validateOffer(G, targetID, proposerID, requesting);
+    if (requestError) {
+      G.pendingDeal = undefined;
+      return INVALID_MOVE;
+    }
+
+    // Execute both sides atomically
+    executeSide(G, proposerID, targetID, offering);
+    executeSide(G, targetID, proposerID, requesting);
+
     G.pendingDeal = undefined;
-    return INVALID_MOVE;
-  }
-
-  const requestError = validateOffer(G, targetID, proposerID, requesting);
-  if (requestError) {
-    G.pendingDeal = undefined;
-    return INVALID_MOVE;
-  }
-
-  // Execute both sides atomically
-  executeSide(G, proposerID, targetID, offering);
-  executeSide(G, targetID, proposerID, requesting);
-
-  G.pendingDeal = undefined;
+  },
+  errorMessage: "Cannot accept this deal",
 };
 
 export default acceptDeal;
