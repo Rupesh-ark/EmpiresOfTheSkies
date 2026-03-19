@@ -15,6 +15,11 @@ export const validateMove = (
   G: MyGameState,
   opts: { costsCounsellor?: boolean; costsGold?: boolean } = {}
 ): MoveError | null => {
+  // Main action already taken this turn
+  if (opts.costsCounsellor && G.playerInfo[playerID].turnComplete) {
+    return { code: "TURN_COMPLETE", message: "You have already taken your action this turn" };
+  }
+
   // Counsellor placement check
   if (opts.costsCounsellor && G.playerInfo[playerID].resources.counsellors === 0) {
     return { code: "NO_COUNSELLORS", message: "No Counsellors available to place" };
