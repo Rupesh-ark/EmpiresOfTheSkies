@@ -23,6 +23,7 @@ import { PRISON_ICON as prisonSvg } from "@/assets/icons";
 import ArchprelateIcon from "../Icons/ArchprelateIcon";
 import CounsellorIcon from "../Icons/CounsellorIcon";
 import VictoryPointIcon from "../Icons/VictoryPointIcon";
+import RegimentIcon from "../Icons/RegimentIcon";
 import {
   CardHoldingsInlineControls,
   CardHoldingsPanels,
@@ -53,6 +54,7 @@ const ResourceTrackerBar = (props: ResourceTrackerBarProps) => {
   const colour = currentPlayer.colour;
   const victoryPoints = currentPlayer.resources.victoryPoints;
   const factories = currentPlayer.factories;
+  const eliteRegiments = currentPlayer.resources.eliteRegiments ?? 0;
   const legacyCardName = currentPlayer.resources.legacyCard?.name ?? "the builder";
   const advantageCard = currentPlayer.resources.advantageCard;
   const turnComplete =
@@ -188,6 +190,18 @@ const ResourceTrackerBar = (props: ResourceTrackerBarProps) => {
               sx={chipSx}
             />
           </Tooltip>
+          {eliteRegiments > 0 && (
+            <Tooltip title="Elite Regiments (3 swords each — cannot be re-recruited)" disableInteractive>
+              <Chip
+                icon={<RegimentIcon colour="#A74383" />}
+                label={`${eliteRegiments} Elite`}
+                sx={{
+                  ...chipSx,
+                  border: "1px solid rgba(167,67,131,0.45)",
+                }}
+              />
+            </Tooltip>
+          )}
           <Tooltip title="Victory Points" disableInteractive>
             <Chip
               icon={<VictoryPointIcon colour={colour} />}
@@ -208,7 +222,7 @@ const ResourceTrackerBar = (props: ResourceTrackerBarProps) => {
               size="small"
               variant="contained"
               color="success"
-              onClick={() => props.events.endTurn?.()}
+              onClick={() => props.moves.confirmAction()}
             >
               Confirm & End Turn
             </Button>

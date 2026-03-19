@@ -56,6 +56,7 @@ export interface MyGameState {
     | "taxes"
     | "events"
     | "discard_fow"
+    | "confirm_fow_draw"
     | "reset";
   electionResults: Record<string, number>;
   hasVoted: string[];

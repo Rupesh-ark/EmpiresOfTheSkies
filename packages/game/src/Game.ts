@@ -28,7 +28,9 @@ import {
   fullResetFortuneOfWarCardDeck,
 } from "./helpers/helpers";
 import trainTroops from "./moves/actions/trainTroops";
+import confirmAction from "./moves/actions/confirmAction";
 import discardFoWCard from "./moves/actions/discardFoWCard";
+import drawFoWCards from "./moves/actions/drawFoWCards";
 import buildSkyships from "./moves/actions/buildSkyships";
 import conscriptLevies from "./moves/actions/conscriptLevies";
 import passFleetInfoToPlayerInfo from "./moves/actions/passFleetInfoToPlayerInfo";
@@ -209,6 +211,8 @@ const MyGame: Game<MyGameState> = {
     convertMonarch: wrapMove("convertMonarch", convertMonarch),
     influencePrelates: wrapMove("influencePrelates", influencePrelates),
     trainTroops: wrapMove("trainTroops", trainTroops),
+    drawFoWCards: wrapMove("drawFoWCards", drawFoWCards),
+    confirmAction: wrapMove("confirmAction", confirmAction),
     flipCards: wrapMove("flipCards", flipCards),
     buildSkyships: wrapMove("buildSkyships", buildSkyships),
     conscriptLevies: wrapMove("conscriptLevies", conscriptLevies),
@@ -414,6 +418,8 @@ const MyGame: Game<MyGameState> = {
         convertMonarch: wrapMove("convertMonarch", convertMonarch),
         influencePrelates: wrapMove("influencePrelates", influencePrelates),
         trainTroops: wrapMove("trainTroops", trainTroops),
+        drawFoWCards: wrapMove("drawFoWCards", drawFoWCards),
+        confirmAction: wrapMove("confirmAction", confirmAction),
         discardFoWCard: wrapMove("discardFoWCard", discardFoWCard),
         flipCards: wrapMove("flipCards", flipCards),
         buildSkyships: wrapMove("buildSkyships", buildSkyships),
@@ -604,7 +610,7 @@ const MyGame: Game<MyGameState> = {
           (id, index) => {
             if (index < context.ctx.playOrder.length) {
               if (id) {
-                newTurnOrder.splice(currentTurnOrder.indexOf(id), 1);
+                currentTurnOrder.splice(currentTurnOrder.indexOf(id), 1);
                 newTurnOrder.push(id);
               } else {
                 newTurnOrder.push(currentTurnOrder.splice(0, 1)[0]);

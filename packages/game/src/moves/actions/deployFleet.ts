@@ -12,7 +12,8 @@ const validateDeployFleet = (
   destination: [number, number],
   skyshipCount: number,
   regimentCount: number,
-  levyCount: number
+  levyCount: number,
+  eliteRegimentCount: number = 0
 ): MoveError | null => {
   const base = validateMove(playerID, G, { costsCounsellor: true, costsGold: true });
   if (base) return base;
@@ -47,6 +48,12 @@ const validateDeployFleet = (
         message: `Not enough Levies — need ${levyCount}, have ${currentPlayer.resources.levies}`,
       };
     }
+    if (currentPlayer.resources.eliteRegiments < eliteRegimentCount) {
+      return {
+        code: "INSUFFICIENT_ELITE_REGIMENTS",
+        message: `Not enough Elite Regiments — need ${eliteRegimentCount}, have ${currentPlayer.resources.eliteRegiments}`,
+      };
+    }
   }
 
   if (skyshipCount === 0) {
@@ -60,7 +67,7 @@ const validateDeployFleet = (
     };
   }
 
-  if (regimentCount + levyCount > skyshipCount) {
+  if (regimentCount + levyCount + eliteRegimentCount > skyshipCount) {
     return {
       code: "TROOP_CAPACITY_EXCEEDED",
       message: "Cannot carry more troops than Skyships (1 troop per Skyship)",
@@ -87,14 +94,15 @@ const deployFleet: MoveDefinition = {
     const skyshipCount = args[2];
     const regimentCount = args[3];
     const levyCount = args[4];
+    const eliteRegimentCount = args[5] ?? 0;
 
-    if (validateDeployFleet(G, playerID, selectedFleetIndex, [x, y], skyshipCount, regimentCount, levyCount)) return INVALID_MOVE;
+    if (validateDeployFleet(G, playerID, selectedFleetIndex, [x, y], skyshipCount, regimentCount, levyCount, eliteRegimentCount)) return INVALID_MOVE;
 
     const currentPlayer = G.playerInfo[playerID];
     const fleet = currentPlayer.fleetInfo[selectedFleetIndex];
 
     const startingCoords = fleet.location;
-    const unladen = regimentCount === 0 && levyCount === 0;
+    const unladen = regimentCount === 0 && levyCount === 0 && eliteRegimentCount === 0;
 
     const [
       ,
@@ -124,10 +132,12 @@ const deployFleet: MoveDefinition = {
     fleet.skyships = skyshipCount;
     fleet.regiments = regimentCount;
     fleet.levies = levyCount;
+    fleet.eliteRegiments = eliteRegimentCount;
 
     currentPlayer.resources.skyships -= skyshipCount;
     currentPlayer.resources.regiments -= regimentCount;
     currentPlayer.resources.levies -= levyCount;
+    currentPlayer.resources.eliteRegiments -= eliteRegimentCount;
 
     G.playerInfo[playerID].fleetInfo[fleet.fleetId].location = [x, y];
 
@@ -154,9 +164,10 @@ const deployFleet: MoveDefinition = {
   },
   errorMessage: "Cannot dispatch fleet right now",
   validate: validateDeployFleet,
-  successLog: (G, pid, _fleetIndex, dest, sky, reg, lev) => {
+  successLog: (G, pid, _fleetIndex, dest, sky, reg, lev, elite) => {
     const k = G.playerInfo[pid].kingdomName;
-    return `${k} dispatches fleet to [${dest}] (${sky}S, ${reg}R, ${lev}L)`;
+    const eliteStr = elite ? `, ${elite}E` : "";
+    return `${k} dispatches fleet to [${dest}] (${sky}S, ${reg}R, ${lev}L${eliteStr})`;
   },
 };
 

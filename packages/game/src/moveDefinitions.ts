@@ -21,7 +21,9 @@ import punishDissenters from "./moves/actions/punishDissenters";
 import convertMonarch from "./moves/actions/convertMonarch";
 import influencePrelates from "./moves/actions/influencePrelates";
 import trainTroops from "./moves/actions/trainTroops";
+import confirmAction from "./moves/actions/confirmAction";
 import discardFoWCard from "./moves/actions/discardFoWCard";
+import drawFoWCards from "./moves/actions/drawFoWCards";
 import flipCards from "./moves/actions/flipCards";
 import buildSkyships from "./moves/actions/buildSkyships";
 import conscriptLevies from "./moves/actions/conscriptLevies";
@@ -53,7 +55,9 @@ export const MOVE_DEFINITIONS: Record<string, MoveDefinition> = {
   convertMonarch,
   influencePrelates,
   trainTroops,
+  confirmAction,
   discardFoWCard,
+  drawFoWCards,
   flipCards,
   buildSkyships,
   conscriptLevies,

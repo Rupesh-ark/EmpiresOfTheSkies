@@ -5,7 +5,7 @@
  *
  * Rules:
  *   - 3 slots on the action board; slots 1 and 2 cost 1 Gold each, slot 3 costs 2 Gold
- *   - Any valid slot grants +1 counsellor
+ *   - Costs 1 counsellor (placed on board), grants +1 counsellor (net 0 this round, +1 at reset)
  *   - Move is INVALID if player is already at MAX_COUNSELLORS (7)
  *   - INVALID_MOVE if: 0 counsellors, slot already taken
  *   - Marks turnComplete = true
@@ -29,7 +29,7 @@ describe("recruitCounsellors — costs", () => {
     const counsellorsBefore = G.playerInfo["0"].resources.counsellors;
     callMove(G, "0", 0);
     expect(G.playerInfo["0"].resources.gold).toBe(goldBefore - 1);
-    expect(G.playerInfo["0"].resources.counsellors).toBe(counsellorsBefore + 1);
+    expect(G.playerInfo["0"].resources.counsellors).toBe(counsellorsBefore);
   });
 
   it("slot 1 (second) costs 1 Gold and grants +1 counsellor", () => {
@@ -39,7 +39,7 @@ describe("recruitCounsellors — costs", () => {
     const counsellorsBefore = G.playerInfo["0"].resources.counsellors;
     callMove(G, "0", 1);
     expect(G.playerInfo["0"].resources.gold).toBe(goldBefore - 1);
-    expect(G.playerInfo["0"].resources.counsellors).toBe(counsellorsBefore + 1);
+    expect(G.playerInfo["0"].resources.counsellors).toBe(counsellorsBefore);
   });
 
   it("slot 2 (third) costs 2 Gold and grants +1 counsellor", () => {
@@ -50,7 +50,7 @@ describe("recruitCounsellors — costs", () => {
     const counsellorsBefore = G.playerInfo["0"].resources.counsellors;
     callMove(G, "0", 2);
     expect(G.playerInfo["0"].resources.gold).toBe(goldBefore - 2);
-    expect(G.playerInfo["0"].resources.counsellors).toBe(counsellorsBefore + 1);
+    expect(G.playerInfo["0"].resources.counsellors).toBe(counsellorsBefore);
   });
 });
 
