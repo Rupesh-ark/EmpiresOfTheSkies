@@ -1,15 +1,14 @@
-import { Move } from "boardgame.io";
-import { MyGameState } from "../../types";
+import { MoveDefinition } from "../../types";
 
-const defendGroundAttack: Move<MyGameState> = (
-  { G, ctx, playerID, events, random },
-  ...args
-) => {
-  if (G.battleState) {
-    G.battleState.defender.decision = "fight";
-    G.stage = "resolve battle";
-    events.endTurn({ next: G.battleState.attacker.id });
-  }
+const defendGroundAttack: MoveDefinition = {
+  fn: ({ G, events }, ...args) => {
+    if (G.battleState) {
+      G.battleState.defender.decision = "fight";
+      G.stage = "resolve battle";
+      events.endTurn({ next: G.battleState.attacker.id });
+    }
+  },
+  errorMessage: "Cannot defend right now",
 };
 
 export default defendGroundAttack;

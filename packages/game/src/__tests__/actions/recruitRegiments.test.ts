@@ -19,7 +19,7 @@ import { buildInitialG, buildPlayer, buildCtx, buildResources } from "../testHel
 
 function callMove(G: ReturnType<typeof buildInitialG>, playerID: string, slotIndex: number) {
   const ctx = buildCtx(playerID);
-  return (recruitRegiments as Function)({ G, ctx, playerID }, slotIndex);
+  return recruitRegiments.fn({ G, ctx, playerID }, slotIndex);
 }
 
 describe("recruitRegiments — cost and reward per slot", () => {

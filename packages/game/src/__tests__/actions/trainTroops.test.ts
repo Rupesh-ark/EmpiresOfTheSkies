@@ -20,7 +20,7 @@ import { fortuneOfWarCards } from "../../codifiedGameInfo";
 function callMove(G: ReturnType<typeof buildInitialG>, playerID: string) {
   const ctx = buildCtx(playerID);
   const random = buildRandom();
-  return (trainTroops as Function)({ G, ctx, playerID, random });
+  return trainTroops.fn({ G, ctx, playerID, random });
 }
 
 describe("trainTroops — draws 2 FoW cards", () => {

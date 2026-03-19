@@ -31,7 +31,7 @@ function callMove(
   regiments: number,
   levies: number
 ) {
-  return (transferBetweenFleets as Function)(
+  return transferBetweenFleets.fn(
     { G, playerID },
     sourceIndex,
     targetIndex,

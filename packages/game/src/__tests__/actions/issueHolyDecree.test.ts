@@ -27,7 +27,7 @@ function callMove(
   targetID?: string
 ) {
   const ctx = buildCtx(playerID);
-  return (issueHolyDecree as Function)({ G, ctx, playerID }, decree, targetID);
+  return issueHolyDecree.fn({ G, ctx, playerID }, decree, targetID);
 }
 
 describe("issueHolyDecree — reform dogma", () => {

@@ -126,7 +126,7 @@ describe("pickCardConquest — card assignment", () => {
     const cardInHand = G.playerInfo["0"].resources.fortuneCards[0];
     expect(cardInHand).toEqual(fowCard);
 
-    (pickCardConquest as Function)(
+    pickCardConquest.fn(
       { G, ctx, playerID: "0", events: stubEvents, random: stubRandom },
       0
     );
@@ -142,7 +142,7 @@ describe("pickCardConquest — hand management", () => {
     const ctx = buildConquestCtx("0");
     expect(G.playerInfo["0"].resources.fortuneCards).toHaveLength(1);
 
-    (pickCardConquest as Function)(
+    pickCardConquest.fn(
       { G, ctx, playerID: "0", events: stubEvents, random: stubRandom },
       0
     );
@@ -159,7 +159,7 @@ describe("pickCardConquest — successful conquest resolution", () => {
     const { G } = setupConquestG();
     const ctx = buildConquestCtx("0");
 
-    (pickCardConquest as Function)(
+    pickCardConquest.fn(
       { G, ctx, playerID: "0", events: stubEvents, random: stubRandom },
       0
     );

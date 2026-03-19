@@ -20,7 +20,7 @@ const stubEvents = { endTurn: () => {}, endPhase: () => {} } as any;
 
 function callMove(G: ReturnType<typeof buildInitialG>, playerID: string, card: KingdomAdvantageCard) {
   const ctx = buildCtx(playerID);
-  return (pickKingdomAdvantageCard as Function)({ G, ctx, playerID, events: stubEvents }, card);
+  return pickKingdomAdvantageCard.fn({ G, ctx, playerID, events: stubEvents }, card);
 }
 
 describe("pickKingdomAdvantageCard — card assignment", () => {

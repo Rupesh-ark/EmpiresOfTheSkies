@@ -20,15 +20,15 @@ import { buildInitialG, buildPlayer, buildFleet, buildResources } from "../testH
 import { MyGameState, MapBuildingInfo, PlayerInfo, DealOffer } from "../../types";
 
 function callPropose(G: MyGameState, playerID: string, targetID: string, offering: DealOffer, requesting: DealOffer) {
-  return (proposeDeal as Function)({ G, playerID }, targetID, offering, requesting);
+  return proposeDeal.fn({ G, playerID }, targetID, offering, requesting);
 }
 
 function callAccept(G: MyGameState, playerID: string) {
-  return (acceptDeal as Function)({ G, playerID });
+  return acceptDeal.fn({ G, playerID });
 }
 
 function callReject(G: MyGameState, playerID: string) {
-  return (rejectDeal as Function)({ G, playerID });
+  return rejectDeal.fn({ G, playerID });
 }
 
 function buildMapWithBuilding(player: PlayerInfo, buildingType: "outpost" | "colony", coords: [number, number]): MapBuildingInfo[][] {

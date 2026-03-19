@@ -18,7 +18,7 @@ import sellSkyships from "../../moves/actions/sellSkyships";
 import { buildInitialG, buildPlayer, buildResources } from "../testHelpers";
 
 function callMove(G: ReturnType<typeof buildInitialG>, playerID: string, amount: number) {
-  return (sellSkyships as Function)({ G, playerID }, amount);
+  return sellSkyships.fn({ G, playerID }, amount);
 }
 
 describe("sellSkyships — successful sales", () => {

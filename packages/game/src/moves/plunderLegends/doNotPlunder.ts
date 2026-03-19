@@ -1,12 +1,11 @@
-import { Move } from "boardgame.io";
-import { MyGameState } from "../../types";
+import { MoveDefinition } from "../../types";
 import { findNextPlunder } from "../../helpers/findNext";
 
-const doNotPlunder: Move<MyGameState> = (
-  { G, ctx, playerID, events, random },
-  ...args
-) => {
-  findNextPlunder(G, events);
+const doNotPlunder: MoveDefinition = {
+  fn: ({ G, events }, ...args) => {
+    findNextPlunder(G, events);
+  },
+  errorMessage: "Cannot pass on plundering right now",
 };
 
 export default doNotPlunder;

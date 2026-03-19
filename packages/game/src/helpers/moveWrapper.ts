@@ -1,111 +1,30 @@
 import { INVALID_MOVE } from "boardgame.io/core";
 import type { Ctx } from "boardgame.io";
 import { createLogger } from "./logger";
-import { MyGameState } from "../types";
+import { MyGameState, MoveDefinition } from "../types";
 import { logEvent } from "./stateUtils";
-import { BuildingSlot } from "../codifiedGameInfo";
 
 const log = createLogger("move");
-
-// ── Game log formatters (for player-visible game log) ───────────────────────
-
-const BUILDING_NAMES: Record<number, string> = {
-  [BuildingSlot.Cathedral]: "Cathedral",
-  [BuildingSlot.Palace]: "Palace",
-  [BuildingSlot.Shipyard]: "Shipyard",
-  [BuildingSlot.Fort]: "Fort",
-};
-
-/**
- * Formatters for the player-visible game log. Called AFTER a successful move.
- * Returns a string to push to G.gameLog, or null to skip logging.
- * Only action-phase moves are listed — events, battles, discovery etc.
- * already have their own logEvent calls inside their move functions.
- */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const LOG_FORMATTERS: Record<string, (G: MyGameState, playerID: string, ...args: any[]) => string | null> = {
-  recruitCounsellors: (G, pid) => {
-    const k = G.playerInfo[pid].kingdomName;
-    const count = G.playerInfo[pid].resources.counsellors;
-    return `${k} recruits a Counsellor (now ${count})`;
-  },
-  recruitRegiments: (G, pid) => {
-    const k = G.playerInfo[pid].kingdomName;
-    const count = G.playerInfo[pid].resources.regiments;
-    return `${k} recruits Regiments (now ${count})`;
-  },
-  purchaseSkyships: (G, pid, _slot, republic) => {
-    const k = G.playerInfo[pid].kingdomName;
-    const count = G.playerInfo[pid].resources.skyships;
-    return `${k} purchases Skyships from ${republic} (now ${count})`;
-  },
-  buildSkyships: (G, pid, perShipyard) => {
-    const k = G.playerInfo[pid].kingdomName;
-    const built = perShipyard * G.playerInfo[pid].shipyards;
-    return `${k} builds ${built} Skyship(s)`;
-  },
-  conscriptLevies: (G, pid, levyAmount) => {
-    const k = G.playerInfo[pid].kingdomName;
-    return `${k} conscripts ${levyAmount} Levies`;
-  },
-  trainTroops: (G, pid) => {
-    const k = G.playerInfo[pid].kingdomName;
-    return `${k} trains troops (draws 2 FoW cards)`;
-  },
-  deployFleet: (G, pid, _fleetIndex, dest, sky, reg, lev) => {
-    const k = G.playerInfo[pid].kingdomName;
-    return `${k} dispatches fleet to [${dest}] (${sky}S, ${reg}R, ${lev}L)`;
-  },
-  foundBuildings: (G, pid, slotIndex) => {
-    const k = G.playerInfo[pid].kingdomName;
-    const building = BUILDING_NAMES[slotIndex + 1] ?? "building";
-    return `${k} founds a ${building}`;
-  },
-  foundFactory: (G, pid) => {
-    const k = G.playerInfo[pid].kingdomName;
-    const count = G.playerInfo[pid].factories;
-    return `${k} founds a Factory (now ${count})`;
-  },
-  influencePrelates: (G, pid) => {
-    const k = G.playerInfo[pid].kingdomName;
-    return `${k} influences Prelates`;
-  },
-  punishDissenters: (G, pid, _slot, paymentType) => {
-    const k = G.playerInfo[pid].kingdomName;
-    if (paymentType === "execute") return `${k} executes a prisoner`;
-    return `${k} punishes Dissenters (pays ${paymentType})`;
-  },
-  convertMonarch: (G, pid) => {
-    const k = G.playerInfo[pid].kingdomName;
-    const alignment = G.playerInfo[pid].hereticOrOrthodox;
-    return `${k} converts Monarch (now ${alignment})`;
-  },
-  alterPlayerOrder: (G, pid, newPosition) => {
-    const k = G.playerInfo[pid].kingdomName;
-    return `${k} changes to player order position ${newPosition + 1}`;
-  },
-  pass: (G, pid) => {
-    const k = G.playerInfo[pid].kingdomName;
-    return `${k} passes`;
-  },
-  issueHolyDecree: (G, pid, decreeType) => {
-    const k = G.playerInfo[pid].kingdomName;
-    return `${k} issues Holy Decree: ${decreeType}`;
-  },
-};
 
 // ── Move wrapper ────────────────────────────────────────────────────────────
 
 /**
- * Wraps a boardgame.io move function with:
- * 1. Structured developer logging (console JSON)
- * 2. Player-visible game log entries for successful action-phase moves
+ * Wraps a MoveDefinition into a boardgame.io move function with:
+ * 1. Server-side validation safety net (returns INVALID_MOVE on failure)
+ * 2. Structured developer logging (console JSON)
+ * 3. Player-visible game log entries for successful moves
+ *
+ * Note: Error feedback to the player is handled client-side — the frontend
+ * calls validate() before invoking the move. See docs/TOAST_SYSTEM.md.
+ *
+ * Pipeline: dev log → validate? → fn → successLog
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const withLogging = (name: string, moveFn: any): any => {
+export const wrapMove = (name: string, def: MoveDefinition): any => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return (context: any, ...args: any[]) => {
     const { G, playerID, ctx } = context;
+
     log.info(name, {
       playerID,
       phase: ctx.phase,
@@ -113,7 +32,20 @@ export const withLogging = (name: string, moveFn: any): any => {
       ...(args.length > 0 && { args }),
     });
 
-    const result = moveFn(context, ...args);
+    // Server-side validation safety net
+    if (def.validate) {
+      const error = def.validate(G, playerID, ...args);
+      if (error) {
+        log.warn(`${name} REJECTED (validate)`, {
+          playerID,
+          error: error.message,
+        });
+        return INVALID_MOVE;
+      }
+    }
+
+    // Run the move
+    const result = def.fn(context, ...args);
 
     if (result === INVALID_MOVE) {
       log.warn(`${name} REJECTED`, {
@@ -122,10 +54,9 @@ export const withLogging = (name: string, moveFn: any): any => {
         ...(args.length > 0 && { args }),
       });
     } else {
-      // Move succeeded — write to player-visible game log if formatter exists
-      const formatter = LOG_FORMATTERS[name];
-      if (formatter) {
-        const message = formatter(G, playerID, ...args);
+      // Move succeeded — log to game log if formatter exists
+      if (def.successLog) {
+        const message = def.successLog(G, playerID, ...args);
         if (message) {
           logEvent(G, message);
         }

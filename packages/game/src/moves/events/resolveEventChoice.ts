@@ -1,16 +1,13 @@
-import { Move } from "boardgame.io";
 import { INVALID_MOVE } from "boardgame.io/core";
-import { EventCardName, LegacyCardInfo, MyGameState } from "../../types";
+import { EventCardName, LegacyCardInfo, MoveDefinition } from "../../types";
 import { getBattleEventTarget } from "../../helpers/eventCardDefinitions";
 import { addVPAmount, logEvent } from "../../helpers/stateUtils";
-import { EventsAPI } from "boardgame.io/dist/types/src/plugins/events/events";
-import { Ctx } from "boardgame.io/dist/types/src/types";
 
 // ── Choice handlers ──────────────────────────────────────────────────────────
 // Each handler validates the choice, applies the effect, and returns true
 // on success or false if the choice is invalid.
 
-type ChoiceHandler = (G: MyGameState, ctx: Ctx, choiceValue: any) => boolean;
+type ChoiceHandler = (G: any, ctx: any, choiceValue: any) => boolean;
 
 const CHOICE_HANDLERS: Partial<Record<EventCardName, ChoiceHandler>> = {
   the_great_fire: (G, _ctx, choiceValue) => {
@@ -31,7 +28,7 @@ const CHOICE_HANDLERS: Partial<Record<EventCardName, ChoiceHandler>> = {
     const choice = G.eventState.pendingChoice!;
     const chosenCard = choiceValue as LegacyCardInfo;
     const options = choice.legacyOptions ?? [];
-    if (!options.some((c) => c.name === chosenCard.name && c.colour === chosenCard.colour)) {
+    if (!options.some((c: LegacyCardInfo) => c.name === chosenCard.name && c.colour === chosenCard.colour)) {
       return false;
     }
 
@@ -65,7 +62,7 @@ const CHOICE_HANDLERS: Partial<Record<EventCardName, ChoiceHandler>> = {
   colonial_rebellion: (G, ctx, choiceValue) => {
     const choice = G.eventState.pendingChoice!;
     const tile = choiceValue as [number, number];
-    if (!choice.colonyOptions?.some(([x, y]) => x === tile[0] && y === tile[1])) {
+    if (!choice.colonyOptions?.some(([x, y]: [number, number]) => x === tile[0] && y === tile[1])) {
       return false;
     }
 
@@ -83,33 +80,24 @@ const CHOICE_HANDLERS: Partial<Record<EventCardName, ChoiceHandler>> = {
 
 // ── Move ─────────────────────────────────────────────────────────────────────
 
-/**
- * Move called by the target player to resolve an event card that
- * requires an interactive choice. The handler is looked up from
- * CHOICE_HANDLERS by card name — to add a new interactive card,
- * just add an entry to the map.
- */
-const resolveEventChoice: Move<MyGameState> = (
-  { G, ctx, playerID, events }: {
-    G: MyGameState;
-    ctx: Ctx;
-    playerID: string;
-    events: EventsAPI;
+const resolveEventChoice: MoveDefinition = {
+  fn: ({ G, ctx, playerID, events }, ...args) => {
+    const choiceValue = args[0];
+
+    const choice = G.eventState.pendingChoice;
+    if (!choice) return INVALID_MOVE;
+    if (choice.targetPlayerID !== playerID) return INVALID_MOVE;
+
+    const handler = CHOICE_HANDLERS[choice.card];
+    if (!handler) return INVALID_MOVE;
+
+    const success = handler(G, ctx, choiceValue);
+    if (!success) return INVALID_MOVE;
+
+    G.eventState.pendingChoice = null;
+    events.endPhase();
   },
-  choiceValue: any
-) => {
-  const choice = G.eventState.pendingChoice;
-  if (!choice) return INVALID_MOVE;
-  if (choice.targetPlayerID !== playerID) return INVALID_MOVE;
-
-  const handler = CHOICE_HANDLERS[choice.card];
-  if (!handler) return INVALID_MOVE;
-
-  const success = handler(G, ctx, choiceValue);
-  if (!success) return INVALID_MOVE;
-
-  G.eventState.pendingChoice = null;
-  events.endPhase();
+  errorMessage: "Cannot resolve this event choice",
 };
 
 export default resolveEventChoice;

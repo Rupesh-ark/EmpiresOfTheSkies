@@ -65,7 +65,7 @@ describe("relocateDefeatedFleet — fleet location", () => {
     };
     const ctx = { ...buildCtxWithPhase("0"), playOrder: ["0", "1"] };
 
-    (relocateDefeatedFleet as Function)(
+    relocateDefeatedFleet.fn(
       { G, ctx, playerID: "0", events: stubEvents, random: {} },
       [2, 1],  // destination: adjacent to [1,1]
       "1"      // defeated player
@@ -91,7 +91,7 @@ describe("relocateDefeatedFleet — battleMap update", () => {
     };
     const ctx = { ...buildCtxWithPhase("0"), playOrder: ["0", "1"] };
 
-    (relocateDefeatedFleet as Function)(
+    relocateDefeatedFleet.fn(
       { G, ctx, playerID: "0", events: stubEvents, random: {} },
       [2, 1],
       "1"
@@ -121,7 +121,7 @@ describe("relocateDefeatedFleet — evade branch", () => {
     };
     const ctx = { ...buildCtxWithPhase("0"), playOrder: ["0", "1", "2"] };
 
-    (relocateDefeatedFleet as Function)(
+    relocateDefeatedFleet.fn(
       { G, ctx, playerID: "0", events: stubEvents, random: {} },
       [3, 0],  // Faithdom — always valid destination
       "1"
@@ -154,7 +154,7 @@ describe("relocateDefeatedFleet — Faithdom destinations", () => {
     };
     const ctx = { ...buildCtxWithPhase("0"), playOrder: ["0", "1"] };
 
-    (relocateDefeatedFleet as Function)(
+    relocateDefeatedFleet.fn(
       { G, ctx, playerID: "0", events: stubEvents, random: {} },
       [4, 0],  // Faithdom tile — non-adjacent, has enemy, but exempt
       "1"
@@ -180,7 +180,7 @@ describe("relocateDefeatedFleet — same tile destination", () => {
     };
     const ctx = { ...buildCtxWithPhase("0"), playOrder: ["0", "1"] };
 
-    const result = (relocateDefeatedFleet as Function)(
+    const result = relocateDefeatedFleet.fn(
       { G, ctx, playerID: "0", events: stubEvents, random: {} },
       [1, 1],  // same tile
       "1"
@@ -208,7 +208,7 @@ describe("relocateDefeatedFleet — validation: undiscovered tile", () => {
     };
     const ctx = { ...buildCtxWithPhase("0"), playOrder: ["0", "1"] };
 
-    const result = (relocateDefeatedFleet as Function)(
+    const result = relocateDefeatedFleet.fn(
       { G, ctx, playerID: "0", events: stubEvents, random: {} },
       [2, 1],  // adjacent but not discovered
       "1"
@@ -234,7 +234,7 @@ describe("relocateDefeatedFleet — validation: non-adjacent tile", () => {
     };
     const ctx = { ...buildCtxWithPhase("0"), playOrder: ["0", "1"] };
 
-    const result = (relocateDefeatedFleet as Function)(
+    const result = relocateDefeatedFleet.fn(
       { G, ctx, playerID: "0", events: stubEvents, random: {} },
       [5, 0],  // discovered but not adjacent to [0,0]
       "1"
@@ -262,7 +262,7 @@ describe("relocateDefeatedFleet — validation: enemy fleet at destination", () 
     };
     const ctx = { ...buildCtxWithPhase("0"), playOrder: ["0", "1", "2"] };
 
-    const result = (relocateDefeatedFleet as Function)(
+    const result = relocateDefeatedFleet.fn(
       { G, ctx, playerID: "0", events: stubEvents, random: {} },
       [2, 1],  // adjacent and discovered, but player "2" is there (not "1")
       "1"

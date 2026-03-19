@@ -47,7 +47,7 @@ describe("retrieveFleets — troop return", () => {
     );
     G.mapState.battleMap[1][2] = [playerID];
 
-    (retrieveFleets as Function)(
+    retrieveFleets.fn(
       { G, ctx: buildCtx(playerID), playerID, events: stubEvents, random: {} },
       [0]
     );
@@ -68,7 +68,7 @@ describe("retrieveFleets — fleet location", () => {
     );
     G.mapState.battleMap[1][2] = [playerID];
 
-    (retrieveFleets as Function)(
+    retrieveFleets.fn(
       { G, ctx: buildCtx(playerID), playerID, events: stubEvents, random: {} },
       [0]
     );
@@ -87,7 +87,7 @@ describe("retrieveFleets — fleet stat zeroing", () => {
     );
     G.mapState.battleMap[1][2] = [playerID];
 
-    (retrieveFleets as Function)(
+    retrieveFleets.fn(
       { G, ctx: buildCtx(playerID), playerID, events: stubEvents, random: {} },
       [0]
     );
@@ -110,7 +110,7 @@ describe("retrieveFleets — battleMap scrubbing", () => {
     );
     G.mapState.battleMap[1][2] = [playerID];
 
-    (retrieveFleets as Function)(
+    retrieveFleets.fn(
       { G, ctx: buildCtx(playerID), playerID, events: stubEvents, random: {} },
       [0]
     );
@@ -129,7 +129,7 @@ describe("retrieveFleets — battleMap scrubbing", () => {
     );
     G.mapState.battleMap[1][2] = [playerID];
 
-    (retrieveFleets as Function)(
+    retrieveFleets.fn(
       { G, ctx: buildCtx(playerID), playerID, events: stubEvents, random: {} },
       [0]  // only retrieve fleet 0; fleet 1 stays at [2, 1]
     );

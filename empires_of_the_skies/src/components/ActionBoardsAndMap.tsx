@@ -28,6 +28,7 @@ import NprKingdomTable from "./PlayerTable/NprKingdomTable";
 import GameLog from "./GameLog";
 import LootValueTable from "./PlayerTable/LootValueTable";
 import { ToastProvider } from "@/hooks/useToast";
+import { useValidatedMoves } from "@/hooks/useValidatedMoves";
 
 const tabSx = {
   minWidth: 48,
@@ -47,6 +48,16 @@ const tabSx = {
 };
 
 export const ActionBoardsAndMap = (props: MyGameProps) => {
+  return (
+    <ToastProvider>
+      <ActionBoardsAndMapInner {...props} />
+    </ToastProvider>
+  );
+};
+
+const ActionBoardsAndMapInner = (props: MyGameProps) => {
+  const validatedMoves = useValidatedMoves(props);
+  const validatedProps = { ...props, moves: validatedMoves };
   const theme = useGameTheme(props.G.stage);
   const [value, setValue] = useState("0");
   const [mapDetailRequest, setMapDetailRequest] = useState<{
@@ -83,7 +94,7 @@ export const ActionBoardsAndMap = (props: MyGameProps) => {
       key: "log",
       label: "Game Log",
       icon: <Timeline sx={{ color: kingdomColour }} />,
-      panel: <GameLog {...props} />,
+      panel: <GameLog {...validatedProps} />,
       panelSx: { p: 0 },
     },
     {
@@ -92,7 +103,7 @@ export const ActionBoardsAndMap = (props: MyGameProps) => {
       icon: <Map sx={{ color: kingdomColour }} />,
       panel: (
         <WorldMap
-          {...props}
+          {...validatedProps}
           detailRequest={mapDetailRequest}
           onDetailRequestHandled={(requestKey) => {
             setMapDetailRequest((currentRequest) =>
@@ -106,14 +117,14 @@ export const ActionBoardsAndMap = (props: MyGameProps) => {
       key: "action",
       label: "Action Board",
       icon: <Dashboard sx={{ color: kingdomColour }} />,
-      panel: <ActionBoard {...props} />,
+      panel: <ActionBoard {...validatedProps} />,
     },
     {
       key: "player",
       label: "Player Board",
       icon: <Person sx={{ color: kingdomColour }} />,
       panel: (
-        <PlayerBoard {...props} onOpenFleetLocation={openMapAtLocation} />
+        <PlayerBoard {...validatedProps} onOpenFleetLocation={openMapAtLocation} />
       ),
     },
     {
@@ -140,10 +151,10 @@ export const ActionBoardsAndMap = (props: MyGameProps) => {
               <Box component="span" sx={{ color: "rgba(255,255,255,0.4)", fontSize: "0.8rem" }}>/ {props.G.finalRound}</Box>
             </Box>
           </Box>
-          <HeresyTracker {...props} />
-          <PlayerTable {...props} />
-          <NprKingdomTable {...props} />
-          <LootValueTable {...props} />
+          <HeresyTracker {...validatedProps} />
+          <PlayerTable {...validatedProps} />
+          <NprKingdomTable {...validatedProps} />
+          <LootValueTable {...validatedProps} />
         </Box>
       ),
       panelSx: { p: 0 },
@@ -158,10 +169,9 @@ export const ActionBoardsAndMap = (props: MyGameProps) => {
   ];
 
   return (
-    <ToastProvider>
     <div>
       <ThemeProvider theme={theme}>
-        {<ResourceTrackerBar {...props} />}
+        {<ResourceTrackerBar {...validatedProps} />}
         <Box sx={{ flexGrow: 1 }}>
           <TabContext value={value}>
             <Box sx={{ display: "flex" }}>
@@ -200,7 +210,7 @@ export const ActionBoardsAndMap = (props: MyGameProps) => {
             <Collapse in={chatOpen} unmountOnExit>
               <Box sx={{ height: 480, display: "flex", flexDirection: "column", overflow: "hidden", boxShadow: "0 -4px 24px rgba(0,0,0,0.25)", border: "1px solid rgba(0,0,0,0.12)", borderBottom: "none" }}>
                 <Suspense fallback={null}>
-                  <Chat {...props} />
+                  <Chat {...validatedProps} />
                 </Suspense>
               </Box>
             </Collapse>
@@ -234,10 +244,9 @@ export const ActionBoardsAndMap = (props: MyGameProps) => {
             </Box>
           </Box>
 
-          <DialogRouter {...props} />
+          <DialogRouter {...validatedProps} />
         </Box>
       </ThemeProvider>
     </div>
-    </ToastProvider>
   );
 };

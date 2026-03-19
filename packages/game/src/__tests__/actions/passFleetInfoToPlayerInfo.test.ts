@@ -27,7 +27,7 @@ describe("passFleetInfoToPlayerInfo — successful load", () => {
     ]);
     const ctx = buildCtx("0");
 
-    (passFleetInfoToPlayerInfo as Function)({ G, ctx, playerID: "0" }, 0, 3, 2, 1);
+    passFleetInfoToPlayerInfo.fn({ G, ctx, playerID: "0" }, 0, 3, 2, 1);
 
     expect(G.playerInfo["0"].fleetInfo[0].skyships).toBe(3);
     expect(G.playerInfo["0"].fleetInfo[0].regiments).toBe(2);
@@ -46,7 +46,7 @@ describe("passFleetInfoToPlayerInfo — successful load", () => {
     ]);
     const ctx = buildCtx("0");
 
-    (passFleetInfoToPlayerInfo as Function)({ G, ctx, playerID: "0" }, 0, 1, 0, 0);
+    passFleetInfoToPlayerInfo.fn({ G, ctx, playerID: "0" }, 0, 1, 0, 0);
 
     expect(G.playerInfo["0"].turnComplete).toBe(false);
   });
@@ -62,7 +62,7 @@ describe("passFleetInfoToPlayerInfo — INVALID_MOVE conditions", () => {
     ]);
     const ctx = buildCtx("0");
 
-    const result = (passFleetInfoToPlayerInfo as Function)({ G, ctx, playerID: "0" }, 0, 1, 0, 0);
+    const result = passFleetInfoToPlayerInfo.fn({ G, ctx, playerID: "0" }, 0, 1, 0, 0);
 
     expect(result).toBe(INVALID_MOVE);
   });
@@ -76,7 +76,7 @@ describe("passFleetInfoToPlayerInfo — INVALID_MOVE conditions", () => {
     ]);
     const ctx = buildCtx("0");
 
-    const result = (passFleetInfoToPlayerInfo as Function)({ G, ctx, playerID: "0" }, 5, 1, 0, 0);
+    const result = passFleetInfoToPlayerInfo.fn({ G, ctx, playerID: "0" }, 5, 1, 0, 0);
 
     expect(result).toBe(INVALID_MOVE);
   });
@@ -90,7 +90,7 @@ describe("passFleetInfoToPlayerInfo — INVALID_MOVE conditions", () => {
     ]);
     const ctx = buildCtx("0");
 
-    const result = (passFleetInfoToPlayerInfo as Function)({ G, ctx, playerID: "0" }, 0, 2, 0, 0);
+    const result = passFleetInfoToPlayerInfo.fn({ G, ctx, playerID: "0" }, 0, 2, 0, 0);
 
     // move does nothing when fleet not at reserve — turnComplete stays false, result undefined
     expect(G.playerInfo["0"].turnComplete).toBe(false);
@@ -106,7 +106,7 @@ describe("passFleetInfoToPlayerInfo — INVALID_MOVE conditions", () => {
     ]);
     const ctx = buildCtx("0");
 
-    const result = (passFleetInfoToPlayerInfo as Function)({ G, ctx, playerID: "0" }, 0, 5, 0, 0);
+    const result = passFleetInfoToPlayerInfo.fn({ G, ctx, playerID: "0" }, 0, 5, 0, 0);
 
     expect(result).toBe(INVALID_MOVE);
   });
@@ -120,7 +120,7 @@ describe("passFleetInfoToPlayerInfo — INVALID_MOVE conditions", () => {
     ]);
     const ctx = buildCtx("0");
 
-    const result = (passFleetInfoToPlayerInfo as Function)({ G, ctx, playerID: "0" }, 0, 0, 3, 0);
+    const result = passFleetInfoToPlayerInfo.fn({ G, ctx, playerID: "0" }, 0, 0, 3, 0);
 
     expect(result).toBe(INVALID_MOVE);
   });

@@ -18,7 +18,7 @@ import { buildInitialG, buildPlayer, buildCtx, buildResources } from "../testHel
 
 function callMove(G: ReturnType<typeof buildInitialG>, playerID: string, slotIndex: number, numPlayers = 2) {
   const ctx = buildCtx(playerID, numPlayers);
-  return (convertMonarch as Function)({ G, ctx, playerID }, slotIndex);
+  return convertMonarch.fn({ G, ctx, playerID }, slotIndex);
 }
 
 describe("convertMonarch — cost (v4.2: 2 Gold + 2 counsellors)", () => {

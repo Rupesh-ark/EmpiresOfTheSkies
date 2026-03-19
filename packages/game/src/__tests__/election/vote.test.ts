@@ -29,7 +29,7 @@ function callMove(G: ReturnType<typeof buildInitialG>, playerID: string, kingdom
     playOrder: Object.keys(G.playerInfo),
     playOrderPos: Object.keys(G.playerInfo).indexOf(playerID),
   };
-  return (vote as Function)({ G, ctx, playerID, events: stubEvents, random: {} }, kingdomVotedFor);
+  return vote.fn({ G, ctx, playerID, events: stubEvents, random: {} }, kingdomVotedFor);
 }
 
 function callMoveWithPlayOrder(
@@ -44,7 +44,7 @@ function callMoveWithPlayOrder(
     playOrder,
     playOrderPos: playOrder.indexOf(playerID),
   };
-  return (vote as Function)({ G, ctx, playerID, events: stubEvents, random: {} }, kingdomVotedFor);
+  return vote.fn({ G, ctx, playerID, events: stubEvents, random: {} }, kingdomVotedFor);
 }
 
 describe("vote — ballot storage (before all players have voted)", () => {

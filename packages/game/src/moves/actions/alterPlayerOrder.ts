@@ -1,9 +1,7 @@
-import { Move } from "boardgame.io";
-import { PlayerOrder, MyGameState, MoveError } from "../../types";
+import { PlayerOrder, MyGameState, MoveError, MoveDefinition } from "../../types";
 import { validateMove } from "../moveValidation";
 import { INVALID_MOVE } from "boardgame.io/core";
 import { removeOneCounsellor } from "../../helpers/stateUtils";
-import { Ctx } from "boardgame.io/dist/types/src/types";
 
 export const validateAlterPlayerOrder = (
   G: MyGameState,
@@ -34,33 +32,32 @@ export const validateAlterPlayerOrder = (
   return null;
 };
 
-export const alterPlayerOrder: Move<MyGameState> = (
-  {
-    G,
-    ctx,
-  }: {
-    G: MyGameState;
-    ctx: Ctx;
-  },
-  ...args: any[]
-) => {
-  const newPosition: keyof PlayerOrder = args[0] + 1;
-  const playerID = ctx.currentPlayer;
-  if (validateMove(playerID, G, { costsCounsellor: true })) return INVALID_MOVE;
-  if (ctx.numPlayers < newPosition) {
-    return INVALID_MOVE;
-  }
-  if (G.boardState.pendingPlayerOrder[newPosition] !== undefined) {
-    return INVALID_MOVE;
-  }
-  for (const value of Object.values(G.boardState.pendingPlayerOrder)) {
-    if (value === playerID) {
+const alterPlayerOrder: MoveDefinition = {
+  fn: ({ G, ctx }, ...args: any[]) => {
+    const newPosition: keyof PlayerOrder = args[0] + 1;
+    const playerID = ctx.currentPlayer;
+    if (validateMove(playerID, G, { costsCounsellor: true })) return INVALID_MOVE;
+    if (ctx.numPlayers < newPosition) {
       return INVALID_MOVE;
     }
-  }
-  removeOneCounsellor(G, playerID);
-  G.boardState.pendingPlayerOrder[newPosition] = playerID;
-  G.playerInfo[playerID].turnComplete = true;
+    if (G.boardState.pendingPlayerOrder[newPosition] !== undefined) {
+      return INVALID_MOVE;
+    }
+    for (const value of Object.values(G.boardState.pendingPlayerOrder)) {
+      if (value === playerID) {
+        return INVALID_MOVE;
+      }
+    }
+    removeOneCounsellor(G, playerID);
+    G.boardState.pendingPlayerOrder[newPosition] = playerID;
+    G.playerInfo[playerID].turnComplete = true;
+  },
+  errorMessage: "Cannot change player order right now",
+  validate: (G, playerID, newPosition) => validateAlterPlayerOrder(G, playerID, newPosition, Object.keys(G.playerInfo).length),
+  successLog: (G, pid, newPosition) => {
+    const k = G.playerInfo[pid].kingdomName;
+    return `${k} changes to player order position ${newPosition + 1}`;
+  },
 };
 
 export default alterPlayerOrder;

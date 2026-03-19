@@ -72,7 +72,7 @@ describe("pickCard (aerialBattle) — card assignment", () => {
     const { G, testCard } = setupPickCardBattle(3, 3);
     const ctx = buildBattleCtx("0");
 
-    (pickCard as Function)(
+    pickCard.fn(
       { G, ctx, playerID: "0", events: stubEvents, random: {} },
       0  // card index
     );
@@ -87,7 +87,7 @@ describe("pickCard (aerialBattle) — hand management", () => {
     const ctx = buildBattleCtx("0");
     expect(G.playerInfo["0"].resources.fortuneCards).toHaveLength(1);
 
-    (pickCard as Function)(
+    pickCard.fn(
       { G, ctx, playerID: "0", events: stubEvents, random: {} },
       0
     );
@@ -114,7 +114,7 @@ describe("pickCard (aerialBattle) — battle resolution", () => {
     const vpBefore = G.playerInfo["0"].resources.victoryPoints;
     const ctx = buildBattleCtx("0");
 
-    (pickCard as Function)(
+    pickCard.fn(
       { G, ctx, playerID: "0", events: stubEvents, random: {} },
       0
     );

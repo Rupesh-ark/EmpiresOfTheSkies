@@ -21,7 +21,7 @@ import { buildInitialG, buildPlayer, buildCtx } from "../testHelpers";
 // Helper: call the move as boardgame.io would
 function callMove(G: ReturnType<typeof buildInitialG>, playerID: string, slotIndex: number, republic: "zeeland" | "venoa") {
   const ctx = buildCtx(playerID);
-  return (purchaseSkyships as Function)({ G, ctx, playerID }, slotIndex, republic);
+  return purchaseSkyships.fn({ G, ctx, playerID }, slotIndex, republic);
 }
 
 describe("purchaseSkyships — cost formula (v4.2)", () => {

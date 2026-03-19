@@ -22,7 +22,7 @@ describe("flipCards — card flipping", () => {
     ]);
     const ctx = buildCtx("0");
 
-    (flipCards as Function)({ G, playerID: "0", ctx });
+    flipCards.fn({ G, playerID: "0", ctx });
 
     expect(G.playerInfo["0"].resources.fortuneCards[0].flipped).toBe(true);
     expect(G.playerInfo["0"].resources.fortuneCards[1].flipped).toBe(true);
@@ -37,7 +37,7 @@ describe("flipCards — card flipping", () => {
     ]);
     const ctx = buildCtx("0");
 
-    (flipCards as Function)({ G, playerID: "0", ctx });
+    flipCards.fn({ G, playerID: "0", ctx });
 
     expect(G.playerInfo["1"].resources.fortuneCards[0].flipped).toBe(false);
   });
@@ -49,7 +49,7 @@ describe("flipCards — card flipping", () => {
     const ctx = buildCtx("0");
 
     expect(() => {
-      (flipCards as Function)({ G, playerID: "0", ctx });
+      flipCards.fn({ G, playerID: "0", ctx });
     }).not.toThrow();
     expect(G.playerInfo["0"].resources.fortuneCards).toHaveLength(0);
   });

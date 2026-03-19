@@ -27,7 +27,7 @@ function callChoose(
     ...buildCtx(playerID, Object.keys(G.playerInfo).length),
     playOrder: playOrder ?? Object.keys(G.playerInfo),
   };
-  const result = (chooseEventCard as Function)(
+  const result = chooseEventCard.fn(
     { G, ctx, playerID, events, random: stubRandom },
     cardName
   );
@@ -45,7 +45,7 @@ function callResolveChoice(
     ...buildCtx(playerID, Object.keys(G.playerInfo).length),
     playOrder: playOrder ?? Object.keys(G.playerInfo),
   };
-  const result = (resolveEventChoice as Function)(
+  const result = resolveEventChoice.fn(
     { G, ctx, playerID, events },
     choiceValue
   );

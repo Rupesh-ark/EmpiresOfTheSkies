@@ -1,5 +1,4 @@
-import { Move } from "boardgame.io";
-import { MyGameState, MoveError } from "../../types";
+import { MyGameState, MoveError, MoveDefinition } from "../../types";
 import { findPossibleDestinations } from "../../helpers/helpers";
 import { INVALID_MOVE } from "boardgame.io/core";
 import { removeGoldAmount, removeOneCounsellor } from "../../helpers/stateUtils";
@@ -68,99 +67,99 @@ export const validateDeployFleet = (
     };
   }
 
-  // Note: destination validity (pathfinding) is checked inside deployFleet itself
-  // because findPossibleDestinations is a server-side helper. The frontend can
-  // call findPossibleDestinations independently to validate before calling this.
-
   return null;
 };
 
-const deployFleet: Move<MyGameState> = (
-  { G, playerID },
-  ...args: any[]
-) => {
-  const selectedFleetIndex = args[0];
-  const [x, y] = args[1];
-  const skyshipCount = args[2];
-  const regimentCount = args[3];
-  const levyCount = args[4];
+const deployFleet: MoveDefinition = {
+  fn: ({ G, playerID }, ...args: any[]) => {
+    const selectedFleetIndex = args[0];
+    const [x, y] = args[1];
+    const skyshipCount = args[2];
+    const regimentCount = args[3];
+    const levyCount = args[4];
 
-  if (validateDeployFleet(G, playerID, selectedFleetIndex, [x, y], skyshipCount, regimentCount, levyCount)) return INVALID_MOVE;
+    if (validateDeployFleet(G, playerID, selectedFleetIndex, [x, y], skyshipCount, regimentCount, levyCount)) return INVALID_MOVE;
 
-  const currentPlayer = G.playerInfo[playerID];
-  const fleet = currentPlayer.fleetInfo[selectedFleetIndex];
+    const currentPlayer = G.playerInfo[playerID];
+    const fleet = currentPlayer.fleetInfo[selectedFleetIndex];
 
-  const startingCoords = fleet.location;
+    const startingCoords = fleet.location;
 
-  const unladen = regimentCount === 0 && levyCount === 0;
+    const unladen = regimentCount === 0 && levyCount === 0;
 
-  fleet.skyships = skyshipCount;
-  fleet.regiments = regimentCount;
-  fleet.levies = levyCount;
+    fleet.skyships = skyshipCount;
+    fleet.regiments = regimentCount;
+    fleet.levies = levyCount;
 
-  currentPlayer.resources.skyships -= skyshipCount;
-  currentPlayer.resources.regiments -= regimentCount;
-  currentPlayer.resources.levies -= levyCount;
-  G.playerInfo[playerID].turnComplete = true;
+    currentPlayer.resources.skyships -= skyshipCount;
+    currentPlayer.resources.regiments -= regimentCount;
+    currentPlayer.resources.levies -= levyCount;
+    G.playerInfo[playerID].turnComplete = true;
 
-  let destinationValid = false;
+    let destinationValid = false;
 
-  const [
-    validDestinations,
-    coordsCostingOneGold,
-    coordsCostingTwoGold,
-    coordsCostingThreeGold,
-  ] = findPossibleDestinations(G, startingCoords, unladen);
+    const [
+      validDestinations,
+      coordsCostingOneGold,
+      coordsCostingTwoGold,
+      coordsCostingThreeGold,
+    ] = findPossibleDestinations(G, startingCoords, unladen);
 
-  validDestinations.forEach((coords) => {
-    if (coords[0] === x && coords[1] === y) {
-      destinationValid = true;
+    validDestinations.forEach((coords) => {
+      if (coords[0] === x && coords[1] === y) {
+        destinationValid = true;
+      }
+    });
+
+    if (!destinationValid) {
+      return INVALID_MOVE;
     }
-  });
 
-  if (!destinationValid) {
-    return INVALID_MOVE;
-  }
+    let cost = 0;
 
-  let cost = 0;
+    coordsCostingThreeGold.forEach((coords) => {
+      if (doCoordsMatch(coords, [x, y])) {
+        cost = 3;
+      }
+    });
+    coordsCostingTwoGold.forEach((coords) => {
+      if (doCoordsMatch(coords, [x, y])) {
+        cost = 2;
+      }
+    });
+    coordsCostingOneGold.forEach((coords) => {
+      if (doCoordsMatch(coords, [x, y])) {
+        cost = 1;
+      }
+    });
+    G.playerInfo[playerID].fleetInfo[fleet.fleetId].location = [x, y];
 
-  coordsCostingThreeGold.forEach((coords) => {
-    if (doCoordsMatch(coords, [x, y])) {
-      cost = 3;
+    G.mapState.battleMap[startingCoords[1]][startingCoords[0]].splice(
+      G.mapState.battleMap[startingCoords[1]][startingCoords[0]].indexOf(
+        playerID
+      ),
+      1
+    );
+
+    if (!G.mapState.battleMap[y][x].includes(playerID)) {
+      G.mapState.battleMap[y][x].push(playerID);
     }
-  });
-  coordsCostingTwoGold.forEach((coords) => {
-    if (doCoordsMatch(coords, [x, y])) {
-      cost = 2;
-    }
-  });
-  coordsCostingOneGold.forEach((coords) => {
-    if (doCoordsMatch(coords, [x, y])) {
-      cost = 1;
-    }
-  });
-  G.playerInfo[playerID].fleetInfo[fleet.fleetId].location = [x, y];
 
-  G.mapState.battleMap[startingCoords[1]][startingCoords[0]].splice(
-    G.mapState.battleMap[startingCoords[1]][startingCoords[0]].indexOf(
-      playerID
-    ),
-    1
-  );
+    removeGoldAmount(G, playerID, cost);
+    G.playerInfo[playerID].playerBoardCounsellorLocations.dispatchSkyshipFleet =
+      true;
 
-  if (!G.mapState.battleMap[y][x].includes(playerID)) {
-    G.mapState.battleMap[y][x].push(playerID);
-  }
+    removeOneCounsellor(G, playerID);
+    G.playerInfo[playerID].playerBoardCounsellorLocations.dispatchDisabled =
+      true;
 
-  removeGoldAmount(G, playerID, cost);
-  G.playerInfo[playerID].playerBoardCounsellorLocations.dispatchSkyshipFleet =
-    true;
-
-  removeOneCounsellor(G, playerID);
-  G.playerInfo[playerID].playerBoardCounsellorLocations.dispatchDisabled =
-    true;
-
-  G.playerInfo[playerID].turnComplete = true;
+    G.playerInfo[playerID].turnComplete = true;
+  },
+  errorMessage: "Cannot dispatch fleet right now",
+  successLog: (G, pid, _fleetIndex, dest, sky, reg, lev) => {
+    const k = G.playerInfo[pid].kingdomName;
+    return `${k} dispatches fleet to [${dest}] (${sky}S, ${reg}R, ${lev}L)`;
+  },
 };
 
 export default deployFleet;

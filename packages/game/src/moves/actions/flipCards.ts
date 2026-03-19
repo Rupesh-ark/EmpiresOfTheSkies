@@ -1,10 +1,12 @@
-import { Move } from "boardgame.io";
-import { MyGameState } from "../../types";
+import { MoveDefinition } from "../../types";
 
-const flipCards: Move<MyGameState> = ({ G, playerID }) => {
-  G.playerInfo[playerID].resources.fortuneCards.forEach((card) => {
-    card.flipped = true;
-  });
+const flipCards: MoveDefinition = {
+  fn: ({ G, playerID }) => {
+    G.playerInfo[playerID].resources.fortuneCards.forEach((card) => {
+      card.flipped = true;
+    });
+  },
+  errorMessage: "Cannot flip cards right now",
 };
 
 export default flipCards;

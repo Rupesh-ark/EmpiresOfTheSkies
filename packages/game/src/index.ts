@@ -14,3 +14,5 @@ export * from "./helpers/legacyCardRegistry";
 export * from "./types";
 
 export * from "./codifiedGameInfo"
+
+export { MOVE_VALIDATORS } from "./moveValidators";

@@ -1,5 +1,4 @@
-import { Move } from "boardgame.io";
-import { MyGameState, MoveError } from "../../types";
+import { MyGameState, MoveError, MoveDefinition } from "../../types";
 import { INVALID_MOVE } from "boardgame.io/core";
 import { validateMove } from "../moveValidation";
 import { removeOneCounsellor, HERESY_MAX, HERESY_MIN } from "../../helpers/stateUtils";
@@ -82,23 +81,36 @@ export const validateFoundBuildings = (
   return null;
 };
 
+const BUILDING_NAMES: Record<number, string> = {
+  [BuildingSlot.Cathedral]: "Cathedral",
+  [BuildingSlot.Palace]: "Palace",
+  [BuildingSlot.Shipyard]: "Shipyard",
+  [BuildingSlot.Fort]: "Fort",
+};
+
 // needs a stage where the player selects a map tile to place the fort onto and that tile is verified to ensure they can build on it
-const foundBuildings: Move<MyGameState> = (
-  { G, playerID },
-  ...args: any[]
-) => {
-  const heresyDirection: "advance" | "retreat" | undefined = args[1];
-  if (validateFoundBuildings(G, playerID, args[0], heresyDirection)) return INVALID_MOVE;
-  const value: keyof typeof G.boardState.foundBuildings = args[0] + 1;
+const foundBuildings: MoveDefinition = {
+  fn: ({ G, playerID }, ...args: any[]) => {
+    const heresyDirection: "advance" | "retreat" | undefined = args[1];
+    if (validateFoundBuildings(G, playerID, args[0], heresyDirection)) return INVALID_MOVE;
+    const value: keyof typeof G.boardState.foundBuildings = args[0] + 1;
 
-  const specialisedBuildingFunctions = {
-    [BuildingSlot.Cathedral]: foundCathedral,
-    [BuildingSlot.Palace]:    foundPalace,
-    [BuildingSlot.Shipyard]:  foundShipyard,
-    [BuildingSlot.Fort]:      foundFort,
-  };
+    const specialisedBuildingFunctions = {
+      [BuildingSlot.Cathedral]: foundCathedral,
+      [BuildingSlot.Palace]:    foundPalace,
+      [BuildingSlot.Shipyard]:  foundShipyard,
+      [BuildingSlot.Fort]:      foundFort,
+    };
 
-  return specialisedBuildingFunctions[value](G, playerID, args);
+    return specialisedBuildingFunctions[value](G, playerID, args);
+  },
+  errorMessage: "Cannot found this building right now",
+  validate: (G, playerID, slotIndex, heresyDirection) => validateFoundBuildings(G, playerID, slotIndex, heresyDirection),
+  successLog: (G, pid, slotIndex) => {
+    const k = G.playerInfo[pid].kingdomName;
+    const building = BUILDING_NAMES[slotIndex + 1] ?? "building";
+    return `${k} founds a ${building}`;
+  },
 };
 
 const foundCathedral = (

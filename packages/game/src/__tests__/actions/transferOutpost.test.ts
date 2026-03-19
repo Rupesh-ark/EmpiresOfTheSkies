@@ -27,7 +27,7 @@ function callMove(
   tileCoords: [number, number],
   targetPlayerID: string
 ) {
-  return (transferOutpost as Function)({ G, playerID }, tileCoords, targetPlayerID);
+  return transferOutpost.fn({ G, playerID }, tileCoords, targetPlayerID);
 }
 
 function buildMapWithBuilding(

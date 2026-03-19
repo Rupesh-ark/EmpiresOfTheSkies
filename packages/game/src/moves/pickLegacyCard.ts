@@ -1,35 +1,20 @@
-import { Ctx, Move } from "boardgame.io";
-import { MyGameState } from "../types";
-import { EventsAPI } from "boardgame.io/dist/types/src/plugins/plugin-events";
-import { RandomAPI } from "boardgame.io/dist/types/src/plugins/random/random";
+import { MoveDefinition } from "../types";
 import { allPlayersPassed } from "../helpers/stateUtils";
 
-const pickLegacyCard: Move<MyGameState> = (
-  {
-    G,
-    ctx,
-    playerID,
-    events,
-    random,
-  }: {
-    G: MyGameState;
-    ctx: Ctx;
-    playerID: string;
-    events: EventsAPI;
-    random: RandomAPI;
+const pickLegacyCard: MoveDefinition = {
+  fn: ({ G, playerID, events }, ...args: any[]) => {
+    const card = args[0];
+
+    G.playerInfo[playerID].resources.legacyCard = card;
+    G.playerInfo[playerID].passed = true;
+
+    if (allPlayersPassed(G)) {
+      events.endPhase();
+    } else {
+      events.endTurn();
+    }
   },
-  ...args: any[]
-) => {
-  const card = args[0];
-
-  G.playerInfo[playerID].resources.legacyCard = card;
-  G.playerInfo[playerID].passed = true;
-
-  if (allPlayersPassed(G)) {
-    events.endPhase();
-  } else {
-    events.endTurn();
-  }
+  errorMessage: "Cannot pick a legacy card right now",
 };
 
 export default pickLegacyCard;
