@@ -5,7 +5,7 @@
  * All defaults match v4.2 starting values from STARTING_RESOURCES and codifiedGameInfo.ts.
  */
 
-import { MyGameState, PlayerInfo, ActionBoardInfo, Resources, FleetInfo, PlayerBoardInfo } from "../types";
+import { MyGameState, PlayerInfo, ActionBoardInfo, Resources, FleetInfo, PlayerBoardInfo, MoveDefinition } from "../types";
 import { fortuneOfWarCards } from "../codifiedGameInfo";
 
 // ── Player builder ────────────────────────────────────────────────────────────
@@ -205,6 +205,25 @@ export function callMove<TArgs extends unknown[]>(
 ): { G: MyGameState; result: unknown } {
   const ctx = buildCtx(playerID);
   const result = moveFn({ G, ctx, playerID }, ...args);
+  return { G, result };
+}
+
+/**
+ * Simulates the wrapMove pipeline: validate → fn.
+ * Use this for MoveDefinition objects instead of calling .fn() directly.
+ */
+export function callMoveDef(
+  def: MoveDefinition,
+  G: MyGameState,
+  playerID: string,
+  ...args: unknown[]
+): { G: MyGameState; result: unknown } {
+  const ctx = buildCtx(playerID);
+  if (def.validate) {
+    const error = def.validate(G, playerID, ...args);
+    if (error) return { G, result: "INVALID_MOVE" };
+  }
+  const result = def.fn({ G, ctx, playerID, events: ctx.events } as any, ...args);
   return { G, result };
 }
 

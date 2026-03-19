@@ -7,6 +7,7 @@ import {
   addVPAmount,
   removeVPAmount,
   addRegiments,
+  logEvent,
   HERESY_MIN,
 } from "./stateUtils";
 import { CARD_RESOLVERS, resolveCardWithAlignmentPenalty } from "./legacyCardDefinitions";
@@ -463,26 +464,34 @@ export const resolveEventCard = (
     // ── Heresy shifts ──────────────────────────────────────────────────────
     case "prelacy_condemned":
       for (let i = 0; i < 4; i++) advanceAllHeresyTrackers(G);
+      logEvent(G, "Prelacy Condemned: all heresy trackers advance 4 steps");
       break;
 
     case "defence_of_the_faith":
       for (let i = 0; i < 4; i++) retreatAllHeresyTrackers(G);
+      logEvent(G, "Defence of the Faith: all heresy trackers retreat 4 steps");
       break;
 
     // ── Tax modifiers (applied during taxes phase) ─────────────────────────
     case "crops_fail":
       G.eventState.taxModifier = -3;
+      logEvent(G, "Crops Fail: tax income reduced by 3 this round");
       break;
 
     case "bumper_crops":
       G.eventState.taxModifier = 3;
+      logEvent(G, "Bumper Crops: tax income increased by 3 this round");
       break;
 
     // ── VP awards ──────────────────────────────────────────────────────────
     case "patrons_of_the_arts":
       for (const id of turnOrder) {
         const p = G.playerInfo[id];
-        addVPAmount(G, id, p.cathedrals + p.palaces);
+        const vp = p.cathedrals + p.palaces;
+        addVPAmount(G, id, vp);
+        if (vp > 0) {
+          logEvent(G, `Patrons of the Arts: ${p.kingdomName} gains ${vp} VP (${p.cathedrals} cathedrals + ${p.palaces} palaces)`);
+        }
       }
       break;
 
@@ -506,6 +515,7 @@ export const resolveEventCard = (
           tile.garrisonedLevies -= Math.floor(tile.garrisonedLevies / 2);
         }
       }
+      logEvent(G, "The Faerie Plague: all players lose half their troops (rounded down) everywhere");
       break;
 
     case "the_great_fire": {
@@ -531,6 +541,7 @@ export const resolveEventCard = (
         if (counts[0].type === "cathedral") p.cathedrals--;
         else if (counts[0].type === "palace") p.palaces--;
         else p.shipyards--;
+        logEvent(G, `The Great Fire: ${p.kingdomName} loses a ${counts[0].type}`);
       }
       break;
     }
@@ -554,14 +565,24 @@ export const resolveEventCard = (
       }
       if (target) {
         const gold = G.playerInfo[target].resources.gold;
+        const kingdomName = G.playerInfo[target].kingdomName;
         if (gold > 0) {
-          G.playerInfo[target].resources.gold -= Math.ceil(gold / 2);
+          const lost = Math.ceil(gold / 2);
+          G.playerInfo[target].resources.gold -= lost;
+          logEvent(G, `Infidel Corsairs Raid: ${kingdomName} loses ${lost} gold`);
         } else {
           // No gold — lose a building (auto-pick)
           const p = G.playerInfo[target];
-          if (p.cathedrals > 0) p.cathedrals--;
-          else if (p.palaces > 0) p.palaces--;
-          else if (p.shipyards > 0) p.shipyards--;
+          if (p.cathedrals > 0) {
+            p.cathedrals--;
+            logEvent(G, `Infidel Corsairs Raid: ${kingdomName} loses a cathedral (no gold to plunder)`);
+          } else if (p.palaces > 0) {
+            p.palaces--;
+            logEvent(G, `Infidel Corsairs Raid: ${kingdomName} loses a palace (no gold to plunder)`);
+          } else if (p.shipyards > 0) {
+            p.shipyards--;
+            logEvent(G, `Infidel Corsairs Raid: ${kingdomName} loses a shipyard (no gold to plunder)`);
+          }
         }
       }
       break;
@@ -577,6 +598,12 @@ export const resolveEventCard = (
           : card === "mysterious_disappearances"
             ? CITY_FOUNTAIN
             : DRAGONS_KRAKENS;
+      const cardLabel =
+        card === "treacherous_creatures"
+          ? "Treacherous Creatures"
+          : card === "mysterious_disappearances"
+            ? "Mysterious Disappearances"
+            : "Monsters Awake";
       const coords = findLegendTileCoords(G, tileNames);
       // One Skyship from each Fleet lost (& any troop it was carrying)
       for (const player of Object.values(G.playerInfo)) {
@@ -589,8 +616,15 @@ export const resolveEventCard = (
             )
           ) {
             fleet.skyships -= 1;
-            if (fleet.regiments > 0) fleet.regiments -= 1;
-            else if (fleet.levies > 0) fleet.levies -= 1;
+            if (fleet.regiments > 0) {
+              fleet.regiments -= 1;
+              logEvent(G, `${cardLabel}: ${player.kingdomName} loses 1 skyship and 1 regiment at a legend tile`);
+            } else if (fleet.levies > 0) {
+              fleet.levies -= 1;
+              logEvent(G, `${cardLabel}: ${player.kingdomName} loses 1 skyship and 1 levy at a legend tile`);
+            } else {
+              logEvent(G, `${cardLabel}: ${player.kingdomName} loses 1 skyship at a legend tile`);
+            }
           }
         }
       }
@@ -601,12 +635,14 @@ export const resolveEventCard = (
     case "zeeland_turns_heretic":
       if (!G.eventState.nprHeretic.includes("Zeeland")) {
         G.eventState.nprHeretic.push("Zeeland");
+        logEvent(G, "Zeeland Turns Heretic: Zeeland joins the heretic nations");
       }
       break;
 
     case "venoa_turns_heretic":
       if (!G.eventState.nprHeretic.includes("Venoa")) {
         G.eventState.nprHeretic.push("Venoa");
+        logEvent(G, "Venoa Turns Heretic: Venoa joins the heretic nations");
       }
       break;
 
@@ -621,6 +657,7 @@ export const resolveEventCard = (
       );
       if (orthodoxNPR.length > 0) {
         G.eventState.nprHeretic.push(orthodoxNPR[0]);
+        logEvent(G, `A Kingdom Turns Heretic: ${orthodoxNPR[0]} converts to heresy`);
       }
       break;
     }
@@ -628,7 +665,8 @@ export const resolveEventCard = (
     case "return_to_orthodoxy": {
       // Remove one heretic NPR kingdom (restore to orthodox)
       if (G.eventState.nprHeretic.length > 0) {
-        G.eventState.nprHeretic.pop();
+        const restored = G.eventState.nprHeretic.pop();
+        logEvent(G, `Return to Orthodoxy: ${restored} returns to the faith`);
       }
       break;
     }
@@ -636,35 +674,54 @@ export const resolveEventCard = (
     // ── Persistent effects (set flag, enforcement in other phases) ────────
     case "peace_accord_reached":
       G.eventState.peaceAccordActive = true;
+      logEvent(G, "Peace Accord Reached: no aerial battles may be declared this round");
       break;
 
-    case "schism":
+    case "schism": {
       // Advance all Heretic players' heresy by 3; mark for election exclusion
+      const schismAffectedNames: string[] = [];
       for (const id of turnOrder) {
         if (G.playerInfo[id].hereticOrOrthodox === "heretic") {
           for (let i = 0; i < 3; i++) increaseHeresyWithinMove(G, id);
           if (!G.eventState.schismAffected.includes(id)) {
             G.eventState.schismAffected.push(id);
           }
+          schismAffectedNames.push(G.playerInfo[id].kingdomName);
         }
       }
       // Schism annuls Colonial Prelates
       G.eventState.colonialPrelatesActive = false;
+      if (schismAffectedNames.length > 0) {
+        logEvent(G, `Schism: heresy advances 3 for ${schismAffectedNames.join(", ")}; they are excluded from the election`);
+      } else {
+        logEvent(G, "Schism: no heretic players affected");
+      }
       break;
+    }
 
-    case "lenders_refuse_credit":
-      G.eventState.lendersRefuseCredit = turnOrder.filter(
+    case "lenders_refuse_credit": {
+      const debtors = turnOrder.filter(
         (id) => G.playerInfo[id].resources.gold < 0
       );
+      G.eventState.lendersRefuseCredit = debtors;
+      if (debtors.length > 0) {
+        const debtorNames = debtors.map((id) => G.playerInfo[id].kingdomName).join(", ");
+        logEvent(G, `Lenders Refuse Credit: ${debtorNames} may not borrow gold this round`);
+      } else {
+        logEvent(G, "Lenders Refuse Credit: no players are in debt, no effect");
+      }
       break;
+    }
 
     case "colonial_prelates":
       G.eventState.colonialPrelatesActive = true;
+      logEvent(G, "Colonial Prelates: each colony now counts as +1 vote in elections");
       break;
 
     // ── Allies in Faerie — free regiments at outposts ──────────────────────
     case "allies_in_faerie":
       for (const id of turnOrder) {
+        let totalGained = 0;
         for (let y = 0; y < G.mapState.buildings.length; y++) {
           for (let x = 0; x < G.mapState.buildings[y].length; x++) {
             const tile = G.mapState.buildings[y][x];
@@ -678,8 +735,12 @@ export const resolveEventCard = (
                 loot.stickyIchor +
                 loot.pipeweed;
               addRegiments(G, id, tradeGains);
+              totalGained += tradeGains;
             }
           }
+        }
+        if (totalGained > 0) {
+          logEvent(G, `Allies in Faerie: ${G.playerInfo[id].kingdomName} gains ${totalGained} regiment(s) from outpost trade goods`);
         }
       }
       break;
@@ -687,6 +748,7 @@ export const resolveEventCard = (
     // ── No-op (infidel invasion not implemented) ───────────────────────────
     case "grand_infidel_dies":
       G.eventState.grandInfidelDies = true;
+      logEvent(G, "Grand Infidel Dies: the infidel invasion is delayed this round");
       break;
 
     // ── Royal Succession ─────────────────────────────────────────────────
@@ -727,6 +789,9 @@ export const resolveEventCard = (
         for (const card of drawn) {
           if (card !== bestCard) G.cardDecks.legacyDeck.push(card);
         }
+        logEvent(G, `Royal Succession: ${rsPlayer.kingdomName} scores their legacy card and receives a new one (${bestCard.name})`);
+      } else {
+        logEvent(G, `Royal Succession: ${rsPlayer.kingdomName} scores their legacy card; no new cards available`);
       }
       break;
     }

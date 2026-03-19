@@ -13,10 +13,10 @@
 import { describe, it, expect } from "vitest";
 import { INVALID_MOVE } from "boardgame.io/core";
 import sellBuilding from "../../moves/actions/sellBuilding";
-import { buildInitialG, buildPlayer, buildResources } from "../testHelpers";
+import { buildInitialG, buildPlayer, buildResources, callMoveDef } from "../testHelpers";
 
 function callMove(G: ReturnType<typeof buildInitialG>, playerID: string, buildingType: string) {
-  return sellBuilding.fn({ G, playerID }, buildingType);
+  return callMoveDef(sellBuilding, G, playerID, buildingType).result;
 }
 
 // ── Cathedral sales ──────────────────────────────────────────────────────────

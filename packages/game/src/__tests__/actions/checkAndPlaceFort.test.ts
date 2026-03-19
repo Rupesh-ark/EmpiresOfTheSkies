@@ -14,7 +14,7 @@
 import { describe, it, expect } from "vitest";
 import { INVALID_MOVE } from "boardgame.io/core";
 import checkAndPlaceFort from "../../moves/actions/checkAndPlaceFort";
-import { buildInitialG, buildPlayer, buildCtx } from "../testHelpers";
+import { buildInitialG, buildPlayer, callMoveDef } from "../testHelpers";
 import type { MapBuildingInfo } from "../../types";
 
 function buildMap(): MapBuildingInfo[][] {
@@ -42,9 +42,8 @@ describe("checkAndPlaceFort — success", () => {
       garrisonedEliteRegiments: 0,
     };
     G.mapState.buildings = buildings;
-    const ctx = buildCtx("0");
 
-    checkAndPlaceFort.fn({ G, playerID: "0", ctx }, [0, 0]);
+    callMoveDef(checkAndPlaceFort, G, "0", [0, 0]);
 
     expect(G.mapState.buildings[0][0].fort).toBe(true);
     expect(G.playerInfo["0"].turnComplete).toBe(true);
@@ -62,9 +61,8 @@ describe("checkAndPlaceFort — success", () => {
       garrisonedEliteRegiments: 0,
     };
     G.mapState.buildings = buildings;
-    const ctx = buildCtx("0");
 
-    checkAndPlaceFort.fn({ G, playerID: "0", ctx }, [2, 1]);
+    callMoveDef(checkAndPlaceFort, G, "0", [2, 1]);
 
     expect(G.mapState.buildings[1][2].fort).toBe(true);
   });
@@ -75,9 +73,8 @@ describe("checkAndPlaceFort — INVALID_MOVE conditions", () => {
     // buildings[0][99] is undefined — triggers the tileInfo === undefined guard
     const G = buildInitialG([buildPlayer("0")]);
     G.mapState.buildings = buildMap();
-    const ctx = buildCtx("0");
 
-    const result = checkAndPlaceFort.fn({ G, playerID: "0", ctx }, [99, 0]);
+    const { result } = callMoveDef(checkAndPlaceFort, G, "0", [99, 0]);
 
     expect(result).toBe(INVALID_MOVE);
   });
@@ -87,9 +84,8 @@ describe("checkAndPlaceFort — INVALID_MOVE conditions", () => {
     const buildings = buildMap();
     // tile has no player property
     G.mapState.buildings = buildings;
-    const ctx = buildCtx("0");
 
-    const result = checkAndPlaceFort.fn({ G, playerID: "0", ctx }, [0, 0]);
+    const { result } = callMoveDef(checkAndPlaceFort, G, "0", [0, 0]);
 
     expect(result).toBe(INVALID_MOVE);
   });
@@ -106,9 +102,8 @@ describe("checkAndPlaceFort — INVALID_MOVE conditions", () => {
       garrisonedEliteRegiments: 0,
     };
     G.mapState.buildings = buildings;
-    const ctx = buildCtx("0");
 
-    const result = checkAndPlaceFort.fn({ G, playerID: "0", ctx }, [0, 0]);
+    const { result } = callMoveDef(checkAndPlaceFort, G, "0", [0, 0]);
 
     expect(result).toBe(INVALID_MOVE);
   });
@@ -125,9 +120,8 @@ describe("checkAndPlaceFort — INVALID_MOVE conditions", () => {
       garrisonedEliteRegiments: 0,
     };
     G.mapState.buildings = buildings;
-    const ctx = buildCtx("0");
 
-    const result = checkAndPlaceFort.fn({ G, playerID: "0", ctx }, [0, 0]);
+    const { result } = callMoveDef(checkAndPlaceFort, G, "0", [0, 0]);
 
     expect(result).toBe(INVALID_MOVE);
   });
@@ -144,9 +138,8 @@ describe("checkAndPlaceFort — INVALID_MOVE conditions", () => {
       garrisonedEliteRegiments: 0,
     };
     G.mapState.buildings = buildings;
-    const ctx = buildCtx("0");
 
-    const result = checkAndPlaceFort.fn({ G, playerID: "0", ctx }, [0, 0]);
+    const { result } = callMoveDef(checkAndPlaceFort, G, "0", [0, 0]);
 
     expect(result).toBe(INVALID_MOVE);
   });

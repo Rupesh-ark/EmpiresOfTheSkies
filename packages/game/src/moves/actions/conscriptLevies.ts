@@ -8,7 +8,7 @@ import {
 } from "../../helpers/stateUtils";
 import { LEVY_GROUP_SIZE, MAX_LEVIES } from "../../codifiedGameInfo";
 
-export const validateConscriptLevies = (
+const validateConscriptLevies = (
   G: MyGameState,
   playerID: string,
   levyAmount: number
@@ -50,7 +50,7 @@ const conscriptLevies: MoveDefinition = {
     G.playerInfo[playerID].turnComplete = true;
   },
   errorMessage: "Cannot conscript Levies right now",
-  validate: (G, playerID, levyAmount) => validateConscriptLevies(G, playerID, levyAmount),
+  validate: validateConscriptLevies,
   successLog: (G, pid, levyAmount) => {
     const k = G.playerInfo[pid].kingdomName;
     return `${k} conscripts ${levyAmount} Levies`;

@@ -8,7 +8,7 @@ import {
 } from "../../helpers/stateUtils";
 import { RECRUIT_REGIMENTS_REWARD } from "../../codifiedGameInfo";
 
-export const validateRecruitRegiments = (
+const validateRecruitRegiments = (
   G: MyGameState,
   playerID: string,
   slotIndex: number
@@ -41,7 +41,7 @@ const recruitRegiments: MoveDefinition = {
     G.playerInfo[playerID].turnComplete = true;
   },
   errorMessage: "Cannot recruit Regiments right now",
-  validate: (G, playerID, slotIndex) => validateRecruitRegiments(G, playerID, slotIndex),
+  validate: validateRecruitRegiments,
   successLog: (G, pid) => {
     const k = G.playerInfo[pid].kingdomName;
     const count = G.playerInfo[pid].resources.regiments;

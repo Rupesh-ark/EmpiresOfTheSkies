@@ -1,15 +1,16 @@
-import { MoveDefinition } from "../../types";
-import { INVALID_MOVE } from "boardgame.io/core";
+import { MoveDefinition, MyGameState, MoveError } from "../../types";
+
+const validateEnableDispatchButtons = (G: MyGameState, playerID: string): MoveError | null => {
+  if (G.playerInfo[playerID].playerBoardCounsellorLocations.dispatchSkyshipFleet) {
+    return { code: "ALREADY_DISPATCHED", message: "Fleet dispatch already used" };
+  }
+  return null;
+};
 
 const enableDispatchButtons: MoveDefinition = {
-  fn: ({ G, playerID }) => {
-    if (
-      G.playerInfo[playerID].playerBoardCounsellorLocations.dispatchSkyshipFleet
-    ) {
-      return INVALID_MOVE;
-    }
-  },
+  fn: () => {},
   errorMessage: "Dispatch is not available",
+  validate: validateEnableDispatchButtons,
 };
 
 export default enableDispatchButtons;

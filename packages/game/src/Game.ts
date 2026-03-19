@@ -382,6 +382,7 @@ const MyGame: Game<MyGameState> = {
 
           context.G.firstTurnOfRound = false;
           const currentPlayer = context.G.playerInfo[context.ctx.currentPlayer];
+          currentPlayer.turnComplete = false;
 
           if (currentPlayer.resources.counsellors === 0 && !currentPlayer.passed) {
             currentPlayer.passed = true;

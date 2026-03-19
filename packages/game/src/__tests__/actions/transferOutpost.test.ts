@@ -18,7 +18,7 @@
 import { describe, it, expect } from "vitest";
 import { INVALID_MOVE } from "boardgame.io/core";
 import transferOutpost from "../../moves/actions/transferOutpost";
-import { buildInitialG, buildPlayer, buildFleet } from "../testHelpers";
+import { buildInitialG, buildPlayer, buildFleet, callMoveDef } from "../testHelpers";
 import { MapBuildingInfo, PlayerInfo } from "../../types";
 
 function callMove(
@@ -27,7 +27,7 @@ function callMove(
   tileCoords: [number, number],
   targetPlayerID: string
 ) {
-  return transferOutpost.fn({ G, playerID }, tileCoords, targetPlayerID);
+  return callMoveDef(transferOutpost, G, playerID, tileCoords, targetPlayerID).result;
 }
 
 function buildMapWithBuilding(

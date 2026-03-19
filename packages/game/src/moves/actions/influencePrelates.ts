@@ -7,7 +7,7 @@ import {
   removeOneCounsellor,
 } from "../../helpers/stateUtils";
 
-export const validateInfluencePrelates = (
+const validateInfluencePrelates = (
   G: MyGameState,
   playerID: string,
   slotIndex: number
@@ -69,7 +69,7 @@ const influencePrelates: MoveDefinition = {
     G.playerInfo[playerID].turnComplete = true;
   },
   errorMessage: "Cannot influence Prelates right now",
-  validate: (G, playerID, slotIndex) => validateInfluencePrelates(G, playerID, slotIndex),
+  validate: validateInfluencePrelates,
   successLog: (G, pid) => {
     const k = G.playerInfo[pid].kingdomName;
     return `${k} influences Prelates`;

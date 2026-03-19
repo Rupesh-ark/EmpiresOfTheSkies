@@ -16,19 +16,19 @@ import { INVALID_MOVE } from "boardgame.io/core";
 import proposeDeal from "../../moves/actions/proposeDeal";
 import acceptDeal from "../../moves/actions/acceptDeal";
 import rejectDeal from "../../moves/actions/rejectDeal";
-import { buildInitialG, buildPlayer, buildFleet, buildResources } from "../testHelpers";
+import { buildInitialG, buildPlayer, buildFleet, buildResources, callMoveDef } from "../testHelpers";
 import { MyGameState, MapBuildingInfo, PlayerInfo, DealOffer } from "../../types";
 
 function callPropose(G: MyGameState, playerID: string, targetID: string, offering: DealOffer, requesting: DealOffer) {
-  return proposeDeal.fn({ G, playerID }, targetID, offering, requesting);
+  return callMoveDef(proposeDeal, G, playerID, targetID, offering, requesting).result;
 }
 
 function callAccept(G: MyGameState, playerID: string) {
-  return acceptDeal.fn({ G, playerID });
+  return callMoveDef(acceptDeal, G, playerID).result;
 }
 
 function callReject(G: MyGameState, playerID: string) {
-  return rejectDeal.fn({ G, playerID });
+  return callMoveDef(rejectDeal, G, playerID).result;
 }
 
 function buildMapWithBuilding(player: PlayerInfo, buildingType: "outpost" | "colony", coords: [number, number]): MapBuildingInfo[][] {
@@ -228,24 +228,28 @@ describe("acceptDeal — INVALID_MOVE conditions", () => {
     expect(callAccept(G, "0")).toBe(INVALID_MOVE);
   });
 
-  it("returns INVALID_MOVE and clears deal when proposer can no longer fulfil", () => {
+  it("clears stale deal without executing when proposer can no longer fulfil", () => {
     const G = buildInitialG([
       buildPlayer("0", { resources: buildResources({ gold: 0 }) }), // spent their gold
       buildPlayer("1"),
     ]);
     G.pendingDeal = { proposerID: "0", targetID: "1", offering: { gold: 5 }, requesting: {} };
-    expect(callAccept(G, "1")).toBe(INVALID_MOVE);
+    callAccept(G, "1");
     expect(G.pendingDeal).toBeUndefined();
+    // Gold should be unchanged — deal was not executed
+    expect(G.playerInfo["0"].resources.gold).toBe(0);
   });
 
-  it("returns INVALID_MOVE and clears deal when target can no longer fulfil", () => {
+  it("clears stale deal without executing when target can no longer fulfil", () => {
     const G = buildInitialG([
       buildPlayer("0"),
       buildPlayer("1", { resources: buildResources({ gold: 0 }) }),
     ]);
     G.pendingDeal = { proposerID: "0", targetID: "1", offering: {}, requesting: { gold: 5 } };
-    expect(callAccept(G, "1")).toBe(INVALID_MOVE);
+    callAccept(G, "1");
     expect(G.pendingDeal).toBeUndefined();
+    // Gold should be unchanged — deal was not executed
+    expect(G.playerInfo["1"].resources.gold).toBe(0);
   });
 });
 

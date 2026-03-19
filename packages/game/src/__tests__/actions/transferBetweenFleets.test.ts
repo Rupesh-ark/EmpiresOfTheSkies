@@ -20,7 +20,7 @@
 import { describe, it, expect } from "vitest";
 import { INVALID_MOVE } from "boardgame.io/core";
 import transferBetweenFleets from "../../moves/actions/transferBetweenFleets";
-import { buildInitialG, buildPlayer, buildFleet, buildCtx } from "../testHelpers";
+import { buildInitialG, buildPlayer, buildFleet, callMoveDef } from "../testHelpers";
 
 function callMove(
   G: ReturnType<typeof buildInitialG>,
@@ -31,14 +31,7 @@ function callMove(
   regiments: number,
   levies: number
 ) {
-  return transferBetweenFleets.fn(
-    { G, playerID },
-    sourceIndex,
-    targetIndex,
-    skyships,
-    regiments,
-    levies
-  );
+  return callMoveDef(transferBetweenFleets, G, playerID, sourceIndex, targetIndex, skyships, regiments, levies).result;
 }
 
 describe("transferBetweenFleets — successful transfer", () => {

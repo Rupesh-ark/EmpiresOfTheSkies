@@ -2,7 +2,7 @@ import { MyGameState, MoveError, MoveDefinition } from "../../types";
 import { INVALID_MOVE } from "boardgame.io/core";
 import { KINGDOM_LOCATION } from "../../codifiedGameInfo";
 
-export const validatePassFleetInfo = (
+const validatePassFleetInfo = (
   G: MyGameState,
   playerID: string,
   fleetId: number,
@@ -84,6 +84,7 @@ const passFleetInfoToPlayerInfo: MoveDefinition = {
     }
   },
   errorMessage: "Cannot transfer resources to fleet",
+  validate: validatePassFleetInfo,
 };
 
 export default passFleetInfoToPlayerInfo;

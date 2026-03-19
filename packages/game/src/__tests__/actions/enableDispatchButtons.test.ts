@@ -10,9 +10,8 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { INVALID_MOVE } from "boardgame.io/core";
 import enableDispatchButtons from "../../moves/actions/enableDispatchButtons";
-import { buildInitialG, buildPlayer, buildPlayerBoard, buildCtx } from "../testHelpers";
+import { buildInitialG, buildPlayer, buildPlayerBoard, callMoveDef } from "../testHelpers";
 
 describe("enableDispatchButtons — INVALID_MOVE guard", () => {
   it("returns INVALID_MOVE when dispatchSkyshipFleet is already true", () => {
@@ -21,11 +20,10 @@ describe("enableDispatchButtons — INVALID_MOVE guard", () => {
         playerBoardCounsellorLocations: buildPlayerBoard({ dispatchSkyshipFleet: true }),
       }),
     ]);
-    const ctx = buildCtx("0");
 
-    const result = enableDispatchButtons.fn({ G, ctx, playerID: "0" });
+    const { result } = callMoveDef(enableDispatchButtons, G, "0");
 
-    expect(result).toBe(INVALID_MOVE);
+    expect(result).toBe("INVALID_MOVE");
   });
 
   it("returns undefined (no-op) when dispatchSkyshipFleet is false", () => {
@@ -34,9 +32,8 @@ describe("enableDispatchButtons — INVALID_MOVE guard", () => {
         playerBoardCounsellorLocations: buildPlayerBoard({ dispatchSkyshipFleet: false }),
       }),
     ]);
-    const ctx = buildCtx("0");
 
-    const result = enableDispatchButtons.fn({ G, ctx, playerID: "0" });
+    const { result } = callMoveDef(enableDispatchButtons, G, "0");
 
     expect(result).toBeUndefined();
   });
