@@ -10,7 +10,7 @@ const validateDiscardFoWCard = (G: MyGameState, playerID: string, cardIndex: num
 };
 
 const discardFoWCard: MoveDefinition = {
-  fn: ({ G, playerID }, ...args: any[]) => {
+  fn: ({ G, playerID, events }, ...args: any[]) => {
     const cardIndex: number = args[0];
     const hand = G.playerInfo[playerID].resources.fortuneCards;
 
@@ -18,7 +18,7 @@ const discardFoWCard: MoveDefinition = {
 
     if (hand.length <= FOW_HAND_MAX) {
       G.stage = "actions";
-      G.playerInfo[playerID].turnComplete = true;
+      events.endTurn();
     }
   },
   errorMessage: "Cannot discard this card",

@@ -27,14 +27,6 @@ const validateBuildSkyships = (
     return { code: "INVALID_PRODUCTION_RATE", message: "Choose 1 or 2 Skyships per Shipyard" };
   }
 
-  const total = perShipyard * G.playerInfo[playerID].shipyards;
-  if (G.playerInfo[playerID].resources.gold < total) {
-    return {
-      code: "INSUFFICIENT_GOLD",
-      message: `Not enough Gold — need ${total}, have ${G.playerInfo[playerID].resources.gold}`,
-    };
-  }
-
   return null;
 };
 

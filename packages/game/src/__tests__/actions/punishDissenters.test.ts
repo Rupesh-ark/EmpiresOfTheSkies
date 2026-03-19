@@ -114,13 +114,13 @@ describe("punishDissenters — INVALID_MOVE conditions", () => {
     expect(result).toBe(INVALID_MOVE);
   });
 
-  it("returns INVALID_MOVE when paying gold with < 2 Gold", () => {
+  it("allows paying gold with insufficient gold (goes into debt)", () => {
     const G = buildInitialG([
       buildPlayer("0", { resources: buildResources({ gold: 1 }) }),
       buildPlayer("1"),
     ]);
-    const result = callMove(G, "0", 0, "gold");
-    expect(result).toBe(INVALID_MOVE);
+    callMove(G, "0", 0, "gold");
+    expect(G.playerInfo["0"].resources.gold).toBe(-1);
   });
 
   it("returns INVALID_MOVE when paying counsellor with < 2 counsellors", () => {
