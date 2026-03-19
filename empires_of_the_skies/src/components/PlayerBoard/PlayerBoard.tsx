@@ -39,6 +39,7 @@ type FleetAllocation = {
   skyships: number;
   regiments: number;
   levies: number;
+  eliteRegiments: number;
 };
 
 type FleetLocationSummary = {
@@ -51,6 +52,7 @@ const emptyFleetAllocation = (): FleetAllocation => ({
   skyships: 0,
   regiments: 0,
   levies: 0,
+  eliteRegiments: 0,
 });
 
 type FleetResourceKey = keyof FleetAllocation;
@@ -89,10 +91,12 @@ const FleetManagementCard = ({
   onDispatch,
   onViewLocation,
   onAdjustAllocation,
+  hasEliteRegiments,
 }: FleetManagementCardProps) => {
   const resourceRows: { key: FleetResourceKey; label: string }[] = [
     { key: "skyships", label: "Skyships" },
     { key: "regiments", label: "Regiments" },
+    ...(hasEliteRegiments ? [{ key: "eliteRegiments" as FleetResourceKey, label: "Elite Reg." }] : []),
     { key: "levies", label: "Levies" },
   ];
   const dispatchBase = darken(playerColour, 0.12);
@@ -110,6 +114,11 @@ const FleetManagementCard = ({
       value: fleet.regiments + allocation.regiments,
       icon: <RegimentIcon colour={playerColour} />,
     },
+    ...(hasEliteRegiments ? [{
+      key: "eliteRegiments",
+      value: (fleet.eliteRegiments ?? 0) + allocation.eliteRegiments,
+      icon: <RegimentIcon colour="#A74383" />,
+    }] : []),
     {
       key: "levies",
       value: fleet.levies + allocation.levies,
@@ -223,7 +232,7 @@ const FleetManagementCard = ({
         <Box
           sx={{
             display: "grid",
-            gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+            gridTemplateColumns: `repeat(${hasEliteRegiments ? 4 : 3}, minmax(0, 1fr))`,
             gap: 0.35,
             mt: 0.35,
           }}
@@ -366,6 +375,7 @@ interface FleetManagementCardProps {
     resource: FleetResourceKey,
     delta: -1 | 1
   ) => void;
+  hasEliteRegiments: boolean;
 }
 
 // displays buttons which can build cathedrals, palaces and skyships
@@ -390,6 +400,7 @@ export const PlayerBoard = (props: PlayerBoardProps) => {
   const playerRegiments = playerInfo.resources.regiments;
   const playerSkyships = playerInfo.resources.skyships;
   const playerLevies = playerInfo.resources.levies;
+  const playerEliteRegiments = playerInfo.resources.eliteRegiments ?? 0;
   const boardSectionAccent = darken(colour, 0.28);
   const boardSectionAccentSoft = alpha(colour, 0.1);
   const dockAccent = alpha(colour, 0.28);
@@ -430,6 +441,7 @@ export const PlayerBoard = (props: PlayerBoardProps) => {
         skyships: totals.skyships + allocation.skyships,
         regiments: totals.regiments + allocation.regiments,
         levies: totals.levies + allocation.levies,
+        eliteRegiments: totals.eliteRegiments + allocation.eliteRegiments,
       }),
       emptyFleetAllocation()
     );
@@ -450,6 +462,10 @@ export const PlayerBoard = (props: PlayerBoardProps) => {
         playerRegiments - (totals.regiments - currentAllocation.regiments)
       ),
       levies: Math.max(0, playerLevies - (totals.levies - currentAllocation.levies)),
+      eliteRegiments: Math.max(
+        0,
+        playerEliteRegiments - (totals.eliteRegiments - currentAllocation.eliteRegiments)
+      ),
     };
   };
 
@@ -521,6 +537,7 @@ export const PlayerBoard = (props: PlayerBoardProps) => {
         onDispatch={openDispatchMapForFleet}
         onViewLocation={openFleetLocation}
         onAdjustAllocation={adjustFleetAllocation}
+        hasEliteRegiments={playerEliteRegiments > 0}
       />
     );
   });
@@ -529,6 +546,7 @@ export const PlayerBoard = (props: PlayerBoardProps) => {
     skyships: Math.max(0, playerSkyships - totalAllocatedResources.skyships),
     regiments: Math.max(0, playerRegiments - totalAllocatedResources.regiments),
     levies: Math.max(0, playerLevies - totalAllocatedResources.levies),
+    eliteRegiments: Math.max(0, playerEliteRegiments - totalAllocatedResources.eliteRegiments),
   };
 
   const selectedFleetAllocation =
@@ -1011,7 +1029,9 @@ export const PlayerBoard = (props: PlayerBoardProps) => {
                       <Box
                         sx={{
                           display: "grid",
-                          gridTemplateRows: "repeat(3, minmax(0, 1fr))",
+                          gridTemplateRows: playerEliteRegiments > 0
+                            ? "repeat(4, minmax(0, 1fr))"
+                            : "repeat(3, minmax(0, 1fr))",
                           gap: 0.65,
                           alignContent: "stretch",
                         }}
@@ -1214,6 +1234,75 @@ export const PlayerBoard = (props: PlayerBoardProps) => {
                             )}
                           </Box>
                         </Box>
+                        {playerEliteRegiments > 0 && (
+                          <Box
+                            sx={{
+                              p: 0.55,
+                              borderRadius: 1.1,
+                              border: "1px solid rgba(167,67,131,0.25)",
+                              backgroundColor: "rgba(167,67,131,0.06)",
+                              display: "grid",
+                              gridTemplateColumns: "92px minmax(0, 1fr)",
+                              alignItems: "center",
+                              gap: 0.6,
+                              minHeight: 46,
+                            }}
+                          >
+                            <Box
+                              sx={{
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: 0.3,
+                                fontFamily: fonts.system,
+                                fontSize: "0.78rem",
+                                fontWeight: 700,
+                                color: "#A74383",
+                              }}
+                            >
+                              <Box sx={{ display: "inline-flex", transform: "scale(0.82)" }}>
+                                <RegimentIcon colour="#A74383" />
+                              </Box>
+                              Elite Reg.
+                            </Box>
+                            <Box
+                              sx={{
+                                display: "flex",
+                                flexWrap: "wrap",
+                                alignItems: "center",
+                                gap: 0.15,
+                                minHeight: 26,
+                              }}
+                            >
+                              {availableForLoading.eliteRegiments > 0 ? (
+                                Array.from({ length: availableForLoading.eliteRegiments }).map(
+                                  (_, index) => (
+                                    <Box
+                                      key={`available-elite-${index}`}
+                                      sx={{
+                                        display: "inline-flex",
+                                        transform: "scale(0.62)",
+                                        transformOrigin: "center",
+                                      }}
+                                    >
+                                      <RegimentIcon colour="#A74383" />
+                                    </Box>
+                                  )
+                                )
+                              ) : (
+                                <Box
+                                  sx={{
+                                    display: "inline-flex",
+                                    transform: "scale(0.66)",
+                                    transformOrigin: "center",
+                                    opacity: 0.3,
+                                  }}
+                                >
+                                  <RegimentIcon colour="#A74383" />
+                                </Box>
+                              )}
+                            </Box>
+                          </Box>
+                        )}
                       </Box>
                     </Box>
                   </Box>
@@ -1287,7 +1376,8 @@ export const PlayerBoard = (props: PlayerBoardProps) => {
                       fleetDestination,
                       selectedFleetAllocation.skyships,
                       selectedFleetAllocation.regiments,
-                      selectedFleetAllocation.levies
+                      selectedFleetAllocation.levies,
+                      selectedFleetAllocation.eliteRegiments
                     );
                     setFleetAllocations((previousAllocations) => ({
                       ...previousAllocations,

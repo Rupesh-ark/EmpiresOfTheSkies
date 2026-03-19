@@ -33,22 +33,26 @@ export const useValidatedMoves = (props: BoardProps) => {
         return (...args: any[]) => {
           if (!playerID) return;
 
-          if (ctx.currentPlayer !== playerID) {
-            showToast("It's not your turn", "warning");
-            return;
-          }
+          const isActionMove = moveName in MOVE_DEFINITIONS;
 
-          if (ctx.phase !== "actions") {
-            showToast("You can't do that in this phase", "warning");
-            return;
-          }
-
-          const def = MOVE_DEFINITIONS[moveName];
-          if (def?.validate) {
-            const error = def.validate(G, playerID, ...args);
-            if (error) {
-              showToast(error.message, "error");
+          if (isActionMove) {
+            if (ctx.currentPlayer !== playerID) {
+              showToast("It's not your turn", "warning");
               return;
+            }
+
+            if (ctx.phase !== "actions") {
+              showToast("You can't do that in this phase", "warning");
+              return;
+            }
+
+            const def = MOVE_DEFINITIONS[moveName];
+            if (def?.validate) {
+              const error = def.validate(G, playerID, ...args);
+              if (error) {
+                showToast(error.message, "error");
+                return;
+              }
             }
           }
 
