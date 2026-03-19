@@ -8,7 +8,7 @@ import {
 import { INVALID_MOVE } from "boardgame.io/core";
 import { validateMove } from "../moveValidation";
 
-export const validateConvertMonarch = (
+const validateConvertMonarch = (
   G: MyGameState,
   playerID: string,
   slotIndex: number,

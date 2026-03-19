@@ -5,7 +5,7 @@ import { removeGoldAmount, removeOneCounsellor } from "../../helpers/stateUtils"
 import { validateMove } from "../moveValidation";
 import { KINGDOM_LOCATION, MAX_SKYSHIPS_PER_FLEET } from "../../codifiedGameInfo";
 
-export const validateDeployFleet = (
+const validateDeployFleet = (
   G: MyGameState,
   playerID: string,
   selectedFleetIndex: number,
@@ -67,6 +67,16 @@ export const validateDeployFleet = (
     };
   }
 
+  const startCoords = fleet.location;
+  const unladen = regimentCount === 0 && levyCount === 0;
+  const [validDestinations] = findPossibleDestinations(G, startCoords, unladen);
+  const isValidDest = validDestinations.some(
+    (c) => c[0] === destination[0] && c[1] === destination[1]
+  );
+  if (!isValidDest) {
+    return { code: "INVALID_DESTINATION", message: "That destination is not reachable" };
+  }
+
   return null;
 };
 
@@ -84,36 +94,14 @@ const deployFleet: MoveDefinition = {
     const fleet = currentPlayer.fleetInfo[selectedFleetIndex];
 
     const startingCoords = fleet.location;
-
     const unladen = regimentCount === 0 && levyCount === 0;
 
-    fleet.skyships = skyshipCount;
-    fleet.regiments = regimentCount;
-    fleet.levies = levyCount;
-
-    currentPlayer.resources.skyships -= skyshipCount;
-    currentPlayer.resources.regiments -= regimentCount;
-    currentPlayer.resources.levies -= levyCount;
-    G.playerInfo[playerID].turnComplete = true;
-
-    let destinationValid = false;
-
     const [
-      validDestinations,
+      ,
       coordsCostingOneGold,
       coordsCostingTwoGold,
       coordsCostingThreeGold,
     ] = findPossibleDestinations(G, startingCoords, unladen);
-
-    validDestinations.forEach((coords) => {
-      if (coords[0] === x && coords[1] === y) {
-        destinationValid = true;
-      }
-    });
-
-    if (!destinationValid) {
-      return INVALID_MOVE;
-    }
 
     let cost = 0;
 
@@ -132,6 +120,15 @@ const deployFleet: MoveDefinition = {
         cost = 1;
       }
     });
+
+    fleet.skyships = skyshipCount;
+    fleet.regiments = regimentCount;
+    fleet.levies = levyCount;
+
+    currentPlayer.resources.skyships -= skyshipCount;
+    currentPlayer.resources.regiments -= regimentCount;
+    currentPlayer.resources.levies -= levyCount;
+
     G.playerInfo[playerID].fleetInfo[fleet.fleetId].location = [x, y];
 
     G.mapState.battleMap[startingCoords[1]][startingCoords[0]].splice(
@@ -156,6 +153,7 @@ const deployFleet: MoveDefinition = {
     G.playerInfo[playerID].turnComplete = true;
   },
   errorMessage: "Cannot dispatch fleet right now",
+  validate: validateDeployFleet,
   successLog: (G, pid, _fleetIndex, dest, sky, reg, lev) => {
     const k = G.playerInfo[pid].kingdomName;
     return `${k} dispatches fleet to [${dest}] (${sky}S, ${reg}R, ${lev}L)`;

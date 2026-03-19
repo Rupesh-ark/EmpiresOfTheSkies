@@ -4,7 +4,7 @@ import { validateMove } from "../moveValidation";
 import { removeOneCounsellor } from "../../helpers/stateUtils";
 import { MAX_FACTORIES } from "../../codifiedGameInfo";
 
-export const validateFoundFactory = (
+const validateFoundFactory = (
   G: MyGameState,
   playerID: string,
   slotIndex: number
@@ -42,7 +42,7 @@ const foundFactory: MoveDefinition = {
     G.playerInfo[playerID].turnComplete = true;
   },
   errorMessage: "Cannot found a Factory right now",
-  validate: (G, playerID, slotIndex) => validateFoundFactory(G, playerID, slotIndex),
+  validate: validateFoundFactory,
   successLog: (G, pid) => {
     const k = G.playerInfo[pid].kingdomName;
     const count = G.playerInfo[pid].factories;

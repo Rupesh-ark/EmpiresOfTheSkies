@@ -1,13 +1,18 @@
-import { MoveDefinition } from "../types";
+import { MoveDefinition, MyGameState, MoveError } from "../types";
 import { INVALID_MOVE } from "boardgame.io/core";
 import { allPlayersPassed } from "../helpers/stateUtils";
 
+const validatePass = (G: MyGameState, _playerID: string): MoveError | null => {
+  // GAP-24: cascade flip — must keep discovering after Ocean/Legend; Land clears the flag
+  // ctx isn't available in validate, but we can check the flag on G
+  if (G.mustContinueDiscovery) {
+    return { code: "MUST_CONTINUE", message: "You must continue discovering (Ocean/Legend tile flipped)" };
+  }
+  return null;
+};
+
 const pass: MoveDefinition = {
-  fn: ({ G, ctx, playerID, events }, ...args: any[]) => {
-    // GAP-24: cascade flip — must keep discovering after Ocean/Legend; Land clears the flag
-    if (ctx.phase === "discovery" && G.mustContinueDiscovery) {
-      return INVALID_MOVE;
-    }
+  fn: ({ G, ctx, playerID, events }) => {
     G.playerInfo[playerID].passed = true;
     if (ctx.phase === "discovery") {
       G.firstTurnOfRound = false;
@@ -21,6 +26,7 @@ const pass: MoveDefinition = {
     }
   },
   errorMessage: "Cannot pass right now",
+  validate: validatePass,
   successLog: (G, pid) => {
     const k = G.playerInfo[pid].kingdomName;
     return `${k} passes`;

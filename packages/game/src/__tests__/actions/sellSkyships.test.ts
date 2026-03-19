@@ -15,10 +15,10 @@
 import { describe, it, expect } from "vitest";
 import { INVALID_MOVE } from "boardgame.io/core";
 import sellSkyships from "../../moves/actions/sellSkyships";
-import { buildInitialG, buildPlayer, buildResources } from "../testHelpers";
+import { buildInitialG, buildPlayer, buildResources, callMoveDef } from "../testHelpers";
 
 function callMove(G: ReturnType<typeof buildInitialG>, playerID: string, amount: number) {
-  return sellSkyships.fn({ G, playerID }, amount);
+  return callMoveDef(sellSkyships, G, playerID, amount).result;
 }
 
 describe("sellSkyships — successful sales", () => {

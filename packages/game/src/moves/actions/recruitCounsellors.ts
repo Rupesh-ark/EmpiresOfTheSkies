@@ -4,7 +4,7 @@ import { addOneCounsellor, removeGoldAmount } from "../../helpers/stateUtils";
 import { INVALID_MOVE } from "boardgame.io/core";
 import { CounsellorSlot, MAX_COUNSELLORS } from "../../codifiedGameInfo";
 
-export const validateRecruitCounsellors = (
+const validateRecruitCounsellors = (
   G: MyGameState,
   playerID: string,
   slotIndex: number
@@ -48,7 +48,7 @@ const recruitCounsellors: MoveDefinition = {
     G.playerInfo[playerID].turnComplete = true;
   },
   errorMessage: "Cannot recruit a Counsellor right now",
-  validate: (G, playerID, slotIndex) => validateRecruitCounsellors(G, playerID, slotIndex),
+  validate: validateRecruitCounsellors,
   successLog: (G, pid) => {
     const k = G.playerInfo[pid].kingdomName;
     const count = G.playerInfo[pid].resources.counsellors;

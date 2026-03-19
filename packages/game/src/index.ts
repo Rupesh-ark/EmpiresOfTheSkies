@@ -15,4 +15,4 @@ export * from "./types";
 
 export * from "./codifiedGameInfo"
 
-export { MOVE_VALIDATORS } from "./moveValidators";
+export { MOVE_DEFINITIONS } from "./moveDefinitions";

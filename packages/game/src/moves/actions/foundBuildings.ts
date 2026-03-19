@@ -13,7 +13,7 @@ import {
   MAX_SHIPYARDS,
 } from "../../codifiedGameInfo";
 
-export const validateFoundBuildings = (
+const validateFoundBuildings = (
   G: MyGameState,
   playerID: string,
   buildingSlotIndex: number,
@@ -105,7 +105,7 @@ const foundBuildings: MoveDefinition = {
     return specialisedBuildingFunctions[value](G, playerID, args);
   },
   errorMessage: "Cannot found this building right now",
-  validate: (G, playerID, slotIndex, heresyDirection) => validateFoundBuildings(G, playerID, slotIndex, heresyDirection),
+  validate: validateFoundBuildings,
   successLog: (G, pid, slotIndex) => {
     const k = G.playerInfo[pid].kingdomName;
     const building = BUILDING_NAMES[slotIndex + 1] ?? "building";

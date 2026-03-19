@@ -7,7 +7,7 @@ import {
   removeOneCounsellor,
 } from "../../helpers/stateUtils";
 
-export const validateBuildSkyships = (
+const validateBuildSkyships = (
   G: MyGameState,
   playerID: string,
   perShipyard: number
@@ -55,7 +55,7 @@ const buildSkyships: MoveDefinition = {
     G.playerInfo[playerID].turnComplete = true;
   },
   errorMessage: "Cannot build Skyships right now",
-  validate: (G, playerID, perShipyard) => validateBuildSkyships(G, playerID, perShipyard),
+  validate: validateBuildSkyships,
   successLog: (G, pid, perShipyard) => {
     const k = G.playerInfo[pid].kingdomName;
     const built = perShipyard * G.playerInfo[pid].shipyards;

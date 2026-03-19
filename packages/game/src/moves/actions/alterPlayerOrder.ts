@@ -3,7 +3,7 @@ import { validateMove } from "../moveValidation";
 import { INVALID_MOVE } from "boardgame.io/core";
 import { removeOneCounsellor } from "../../helpers/stateUtils";
 
-export const validateAlterPlayerOrder = (
+const validateAlterPlayerOrder = (
   G: MyGameState,
   playerID: string,
   newPosition: number,

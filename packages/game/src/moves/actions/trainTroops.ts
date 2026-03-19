@@ -5,7 +5,7 @@ import { drawFortuneOfWarCard } from "../../helpers/helpers";
 import { removeOneCounsellor } from "../../helpers/stateUtils";
 import { FOW_CARDS_DRAWN, FOW_HAND_MAX } from "../../codifiedGameInfo";
 
-export const validateTrainTroops = (
+const validateTrainTroops = (
   G: MyGameState,
   playerID: string
 ): MoveError | null => {
@@ -40,7 +40,7 @@ const trainTroops: MoveDefinition = {
     }
   },
   errorMessage: "Cannot train troops right now",
-  validate: (G, playerID) => validateTrainTroops(G, playerID),
+  validate: validateTrainTroops,
   successLog: (G, pid) => {
     const k = G.playerInfo[pid].kingdomName;
     return `${k} trains troops (draws 2 FoW cards)`;

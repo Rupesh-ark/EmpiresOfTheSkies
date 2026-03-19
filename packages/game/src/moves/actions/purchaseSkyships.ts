@@ -7,7 +7,7 @@ import {
   removeOneCounsellor,
 } from "../../helpers/stateUtils";
 
-export const validatePurchaseSkyships = (
+const validatePurchaseSkyships = (
   G: MyGameState,
   playerID: string,
   slotIndex: number,
@@ -58,7 +58,7 @@ const purchaseSkyships: MoveDefinition = {
     G.playerInfo[playerID].turnComplete = true;
   },
   errorMessage: "Cannot purchase Skyships right now",
-  validate: (G, playerID, slotIndex, republic) => validatePurchaseSkyships(G, playerID, slotIndex, republic),
+  validate: validatePurchaseSkyships,
   successLog: (G, pid, _slot, republic) => {
     const k = G.playerInfo[pid].kingdomName;
     const count = G.playerInfo[pid].resources.skyships;
