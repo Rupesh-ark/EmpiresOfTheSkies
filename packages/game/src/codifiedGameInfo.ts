@@ -1147,11 +1147,11 @@ export const FOW_CARD_CONFIG: { sword: number; shield: number; count: number }[]
   { sword: 3, shield: 0, count: 3 },
   { sword: 4, shield: 0, count: 3 },
   { sword: 5, shield: 0, count: 3 },
-  { sword: 0, shield: 1, count: 3 },
-  { sword: 0, shield: 2, count: 3 },
-  { sword: 0, shield: 3, count: 3 },
   { sword: 0, shield: 4, count: 3 },
   { sword: 0, shield: 5, count: 3 },
+  { sword: 0, shield: 6, count: 3 },
+  { sword: 0, shield: 7, count: 3 },
+  { sword: 0, shield: 8, count: 3 },
   { sword: 0, shield: 0, count: 2 }, // No Effect
 ];
 

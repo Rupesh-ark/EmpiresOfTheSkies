@@ -2,7 +2,7 @@
  * setup.test.ts
  *
  * Verifies the v4.2 game setup constants:
- *   - Fortune of War deck composition (32 cards, swords 1–5, shields 1–5, NoEffect)
+ *   - Fortune of War deck composition (32 cards, swords 1–5, shields 4–8, NoEffect)
  *   - STARTING_RESOURCES values
  *   - MAX_* enforcement constants
  */
@@ -24,8 +24,8 @@ describe("Fortune of War deck (v4.2)", () => {
     }
   });
 
-  it("contains 3 copies of each shield value 1–5 (15 shield cards)", () => {
-    for (let value = 1; value <= 5; value++) {
+  it("contains 3 copies of each shield value 4–8 (15 shield cards)", () => {
+    for (let value = 4; value <= 8; value++) {
       const shieldCards = fortuneOfWarCards.filter((c) => c.shield === value && c.sword === 0);
       expect(shieldCards).toHaveLength(3);
     }
@@ -36,8 +36,8 @@ describe("Fortune of War deck (v4.2)", () => {
     expect(noEffectCards).toHaveLength(2);
   });
 
-  it("has no shield values outside 1–5 (old v3.6 values 4–8 are gone)", () => {
-    const invalidShields = fortuneOfWarCards.filter((c) => c.shield > 5 || c.shield < 0);
+  it("has no shield values outside 4–8", () => {
+    const invalidShields = fortuneOfWarCards.filter((c) => c.shield > 0 && (c.shield < 4 || c.shield > 8));
     expect(invalidShields).toHaveLength(0);
   });
 
