@@ -1,32 +1,15 @@
 import { useState, useEffect } from "react";
-import {
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Button,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemIcon,
-  Divider,
-} from "@mui/material";
-import {
-  Gavel,
-  AttachMoney,
-  Shield,
-  HowToVote,
-  Warning,
-} from "@mui/icons-material";
+import { List, ListItem, ListItemText, ListItemIcon, Divider } from "@mui/material";
+import { Gavel, AttachMoney, Shield, HowToVote, Warning } from "@mui/icons-material";
 import { GiTrumpetFlag } from "react-icons/gi";
 import { MyGameProps, EVENT_CARD_DEFS } from "@eots/game";
+import { DialogShell } from "@/components/atoms/DialogShell";
+import React from "react";
 
 const RoundSummaryDialog = (props: MyGameProps) => {
   const [open, setOpen] = useState(false);
   const [lastRound, setLastRound] = useState(0);
 
-  // Show the dialog when the round number changes (new round started)
-  // Skip round 0 -> 1 (first round, nothing to summarize)
   useEffect(() => {
     if (props.G.round > 1 && props.G.round !== lastRound) {
       setLastRound(props.G.round);
@@ -39,7 +22,6 @@ const RoundSummaryDialog = (props: MyGameProps) => {
 
   const summaryItems: { icon: React.ReactNode; text: string }[] = [];
 
-  // Event
   if (resolvedEvent) {
     const def = EVENT_CARD_DEFS[resolvedEvent];
     summaryItems.push({
@@ -53,15 +35,13 @@ const RoundSummaryDialog = (props: MyGameProps) => {
     });
   }
 
-  // Tax modifier
   if (props.G.eventState.taxModifier !== 0) {
     const mod = props.G.eventState.taxModifier;
     summaryItems.push({
       icon: <AttachMoney />,
-      text:
-        mod > 0
-          ? `Bumper Crops: +${mod} Gold to all taxes`
-          : `Crops Fail: ${mod} Gold to all taxes`,
+      text: mod > 0
+        ? `Bumper Crops: +${mod} Gold to all taxes`
+        : `Crops Fail: ${mod} Gold to all taxes`,
     });
   }
   if (props.G.eventState.skipTaxesNextRound) {
@@ -71,7 +51,6 @@ const RoundSummaryDialog = (props: MyGameProps) => {
     });
   }
 
-  // Rebellion / battle events
   if (props.G.eventState.cannotConvertThisRound.length > 0) {
     const names = props.G.eventState.cannotConvertThisRound
       .map((id) => props.G.playerInfo[id]?.kingdomName)
@@ -82,10 +61,7 @@ const RoundSummaryDialog = (props: MyGameProps) => {
     });
   }
 
-  // Election — show current Archprelate
-  const archprelate = Object.values(props.G.playerInfo).find(
-    (p) => p.isArchprelate
-  );
+  const archprelate = Object.values(props.G.playerInfo).find((p) => p.isArchprelate);
   if (archprelate) {
     summaryItems.push({
       icon: <HowToVote />,
@@ -93,19 +69,14 @@ const RoundSummaryDialog = (props: MyGameProps) => {
     });
   }
 
-  // Infidel hosts
   if (props.G.accumulatedHosts.length > 0) {
-    const totalSwords = props.G.accumulatedHosts.reduce(
-      (sum, h) => sum + h.swords,
-      0
-    );
+    const totalSwords = props.G.accumulatedHosts.reduce((sum, h) => sum + h.swords, 0);
     summaryItems.push({
       icon: <Warning />,
       text: `Infidel Empire: ${props.G.accumulatedHosts.length} host(s) gathering (${totalSwords} total swords)`,
     });
   }
 
-  // Active persistent effects
   if (props.G.eventState.peaceAccordActive) {
     summaryItems.push({
       icon: <Gavel />,
@@ -121,33 +92,28 @@ const RoundSummaryDialog = (props: MyGameProps) => {
   }
 
   return (
-    <Dialog open={open} onClose={() => setOpen(false)} maxWidth="sm" fullWidth>
-      <DialogTitle>Round {previousRound} Summary</DialogTitle>
-      <DialogContent sx={{ p: 0 }}>
-        <List dense>
-          {summaryItems.map((item, idx) => (
-            <div key={idx}>
-              <ListItem>
-                <ListItemIcon sx={{ minWidth: 36 }}>{item.icon}</ListItemIcon>
-                <ListItemText primary={item.text} />
-              </ListItem>
-              {idx < summaryItems.length - 1 && (
-                <Divider variant="inset" component="li" />
-              )}
-            </div>
-          ))}
-        </List>
-      </DialogContent>
-      <DialogActions>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={() => setOpen(false)}
-        >
-          Continue
-        </Button>
-      </DialogActions>
-    </Dialog>
+    <DialogShell
+      open={open}
+      title={`Round ${previousRound} Summary`}
+      mood="peacetime"
+      size="sm"
+      confirmLabel="Continue"
+      onConfirm={() => setOpen(false)}
+    >
+      <List dense>
+        {summaryItems.map((item, idx) => (
+          <div key={idx}>
+            <ListItem>
+              <ListItemIcon sx={{ minWidth: 36 }}>{item.icon}</ListItemIcon>
+              <ListItemText primary={item.text} />
+            </ListItem>
+            {idx < summaryItems.length - 1 && (
+              <Divider variant="inset" component="li" />
+            )}
+          </div>
+        ))}
+      </List>
+    </DialogShell>
   );
 };
 

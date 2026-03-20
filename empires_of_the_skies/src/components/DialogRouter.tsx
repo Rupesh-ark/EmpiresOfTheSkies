@@ -1,10 +1,10 @@
 import { MyGameProps } from "@eots/game";
 
-import RoundSummaryDialog from "./RoundSummaryDialog";
-import PickKingdomAdvantageCardDialog from "./PickKingdomAdvantageCardDialog";
-import PickEventCardDialog from "./PickEventCardDialog";
-import EventChoiceDialog from "./EventChoiceDialog";
-import PickLegacyCardDialog from "./PickLegacyCardDialog";
+import RoundSummaryDialog from "./Resolution/RoundSummaryDialog";
+import PickKingdomAdvantageCardDialog from "./Cards/PickKingdomAdvantageCardDialog";
+import PickEventCardDialog from "./Events/PickEventCardDialog";
+import EventChoiceDialog from "./Events/EventChoiceDialog";
+import PickLegacyCardDialog from "./Cards/PickLegacyCardDialog";
 import AttackOrPassDiaLog from "./AerialBattle/AttackOrPassDialog";
 import AttackOrEvadeDialog from "./AerialBattle/AttackOrEvadeDialog";
 import DrawOrPickCardDialog from "./AerialBattle/DrawOrPickCardDialog";
@@ -14,17 +14,17 @@ import GroundAttackOrPassDialog from "./GroundBattle/GroundAttackOrPassDialog";
 import DefendOrYieldDialog from "./GroundBattle/DefendOrYieldDialog";
 import GarrisonTroopsDialog from "./GroundBattle/GarrisonTroopsDialog";
 import OutpostOrColonyDialog from "./Conquests/OutpostOrColonyDialog";
-import InfidelFleetCombatDialog from "./InfidelFleetCombatDialog";
-import DeferredBattleDialog from "./DeferredBattleDialog";
-import RebellionDialog from "./RebellionDialog";
-import RebellionRivalSupportDialog from "./RebellionRivalSupportDialog";
-import InvasionNominateDialog from "./InvasionNominateDialog";
-import InvasionContributeDialog from "./InvasionContributeDialog";
-import InvasionBuyoffDialog from "./InvasionBuyoffDialog";
+import InfidelFleetCombatDialog from "./Events/InfidelFleetCombatDialog";
+import DeferredBattleDialog from "./Events/DeferredBattleDialog";
+import RebellionDialog from "./Events/RebellionDialog";
+import RebellionRivalSupportDialog from "./Events/RebellionRivalSupportDialog";
+import InvasionNominateDialog from "./Events/InvasionNominateDialog";
+import InvasionContributeDialog from "./Events/InvasionContributeDialog";
+import InvasionBuyoffDialog from "./Events/InvasionBuyoffDialog";
 import RetrieveFleetsDialog from "./Resolution/RetrieveFleetsDialog";
 import ElectionDialog from "./Election/ElectionDialog";
-import DiscardFoWCardDialog from "./DiscardFoWCardDialog";
-import ConfirmDrawDialog from "./ConfirmDrawDialog";
+import DiscardFoWCardDialog from "./Cards/DiscardFoWCardDialog";
+import ConfirmDrawDialog from "./Cards/ConfirmDrawDialog";
 import GameOverView from "./GameOverView";
 
 /**

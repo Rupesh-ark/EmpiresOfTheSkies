@@ -8,7 +8,7 @@ import {
   Button,
 } from "@mui/material";
 import { MyGameProps, LegacyCardInfo } from "@eots/game";
-import svgNameToElementMap from "./WorldMap/nameToElementMap";
+import svgNameToElementMap from "../WorldMap/nameToElementMap";
 
 const PickLegacyCardDialog = (props: DrawOrPickCardDialogProps) => {
   const [x, y] = props.G.mapState.currentBattle;
