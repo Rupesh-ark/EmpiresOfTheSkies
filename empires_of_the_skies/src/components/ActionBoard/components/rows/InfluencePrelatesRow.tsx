@@ -1,7 +1,7 @@
 import { ActionBoardButton } from "../ActionBoardButton";
 import { ActionRow, RowHeader, ActionBoardProps } from "../shared";
-import { ThemeProvider } from "@emotion/react";
-import { influencePrelatesTheme } from "@/components/themes";
+import { ThemeProvider } from "@mui/material/styles";
+import { baseTheme } from "@/theme";
 import { PlayerColour } from "@eots/game";
 
 const KINGDOMS = [
@@ -29,7 +29,7 @@ const InfluencePrelatesRow = (props: ActionBoardProps) => (
       />
     }
   >
-    <ThemeProvider theme={influencePrelatesTheme}>
+    <ThemeProvider theme={baseTheme}>
       {KINGDOMS.map((kingdom, i) => (
         <ActionBoardButton
           key={`prelate-${i}`}

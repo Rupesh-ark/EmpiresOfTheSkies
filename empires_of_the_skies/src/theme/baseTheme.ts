@@ -3,7 +3,7 @@ import { tokens } from "./tokens";
 
 export const baseTheme = createTheme({
   palette: {
-    mode: "dark",
+    mode: "light",
     background: {
       default: tokens.ui.background,
       paper:   tokens.ui.surface,

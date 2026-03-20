@@ -1,336 +1,476 @@
-import { useRef, useState } from "react";
+/**
+ * ResourceTrackerBar — The Command Bridge
+ *
+ * Always visible at the top. A warm brass instrument panel —
+ * resources in recessed gauges, turn signal as a backlit lamp,
+ * mood shifts change the bridge lighting.
+ */
+import { useState } from "react";
 import { MyGameProps, GAME_PHASES } from "@eots/game";
+import { Box, Typography } from "@mui/material";
 import {
-  AppBar,
-  Box,
-  Button,
-  Chip,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  List,
-  ListItem,
-  ListItemText,
-  Toolbar,
-  Tooltip,
-} from "@mui/material";
-import { IoMdCube } from "react-icons/io";
-import { GiTrumpetFlag } from "react-icons/gi";
-import { checkPlayerIDAndReturnPlayerInfo, clearMoves } from "@/utils/gameHelpers";
-import { Factory, Person4Sharp } from "@mui/icons-material";
-import { PRISON_ICON as prisonSvg } from "@/assets/icons";
-import ArchprelateIcon from "../Icons/ArchprelateIcon";
-import CounsellorIcon from "../Icons/CounsellorIcon";
-import VictoryPointIcon from "../Icons/VictoryPointIcon";
-import RegimentIcon from "../Icons/RegimentIcon";
-import {
-  CardHoldingsInlineControls,
-  CardHoldingsPanels,
-} from "./CardHoldingsBarTabs";
+  Person,
+  Toll,
+  Factory,
+  Lock,
+  Star,
+} from "@mui/icons-material";
+import { Tooltip } from "@mui/material";
+import { clearMoves } from "@/utils/gameHelpers";
+import { tokens } from "@/theme";
+import { getMood, getMoodTokens } from "@/theme";
+import { ResourceChip } from "@/components/atoms/ResourceChip";
+import { GameButton } from "@/components/atoms/GameButton";
+import { DialogShell } from "@/components/atoms/DialogShell";
 
-const chipSx = {
-  backgroundColor: "rgba(255,255,255,1)",
-  color: "black",
-  height: 36,
-  border: "1px solid rgba(255,255,255,0.22)",
-  "& .MuiChip-icon": { fontSize: 26 },
-  "& .MuiChip-label": { fontWeight: 600 },
+const PULSING_MOODS = new Set(["battle", "crisis"]);
+
+// ── Recessed gauge styling for ResourceChips ────────────────────────────
+
+// Gauges sit on dark wood bar — light text on dark recessed panels
+const gaugeSx = {
+  borderColor: "rgba(200,170,120,0.30)",
+  background: "linear-gradient(180deg, #4A3C2C 0%, #3E3020 100%)",
+  boxShadow: "inset 0 1px 2px rgba(0,0,0,0.3), 0 1px 0 rgba(255,255,255,0.06)",
+  "& .MuiTypography-root": {
+    fontWeight: 700,
+    letterSpacing: "0.03em",
+    color: "#F5ECD8",
+  },
+  "& svg": { color: "#E8C860 !important" },
 };
+
+// ── Decorative rivet ────────────────────────────────────────────────────
+
+const BAR_GOLD = "#D4A840";
+
+const Rivet = () => (
+  <Box
+    sx={{
+      width: 7,
+      height: 7,
+      borderRadius: "50%",
+      background: `radial-gradient(circle at 30% 30%, #E8C860, ${BAR_GOLD}66 50%, ${BAR_GOLD}22)`,
+      boxShadow: `inset 0 -1px 2px rgba(0,0,0,0.4), 0 0 3px ${BAR_GOLD}33`,
+      flexShrink: 0,
+    }}
+  />
+);
+
+// ── Brass divider line ──────────────────────────────────────────────────
+
+const BrassDivider = () => (
+  <Box
+    sx={{
+      width: "1px",
+      height: 22,
+      background: `linear-gradient(180deg, transparent 0%, ${BAR_GOLD}55 30%, ${BAR_GOLD}55 70%, transparent 100%)`,
+      flexShrink: 0,
+    }}
+  />
+);
+
+// ── Main component ──────────────────────────────────────────────────────
 
 const ResourceTrackerBar = (props: ResourceTrackerBarProps) => {
   const [passDialogOpen, setPassDialogOpen] = useState(false);
-  const [phaseDialogOpen, setPhaseDialogOpen] = useState(false);
-  const [legacyCardOpen, setLegacyCardOpen] = useState(false);
-  const [advantageCardOpen, setAdvantageCardOpen] = useState(false);
-  const cardHoldingsAnchorRef = useRef<HTMLDivElement | null>(null);
-  if (!props.playerID) {
-    return <></>;
-  }
-  const currentPlayer = checkPlayerIDAndReturnPlayerInfo(props);
-  const counsellors = currentPlayer.resources.counsellors;
-  const gold = currentPlayer.resources.gold;
-  const prisoners = currentPlayer.prisoners;
-  const colour = currentPlayer.colour;
-  const victoryPoints = currentPlayer.resources.victoryPoints;
-  const factories = currentPlayer.factories;
-  const eliteRegiments = currentPlayer.resources.eliteRegiments ?? 0;
-  const legacyCardName = currentPlayer.resources.legacyCard?.name ?? "the builder";
-  const advantageCard = currentPlayer.resources.advantageCard;
-  const turnComplete =
-    props.G.playerInfo[props.playerID ?? props.ctx.currentPlayer].turnComplete;
+
+  if (!props.playerID) return null;
+
+  const playerInfo = props.G.playerInfo[props.playerID];
+  const currentPlayerInfo = props.G.playerInfo[props.ctx.currentPlayer];
   const isMyTurn = props.ctx.currentPlayer === props.playerID;
-  const showConfirmEndTurn = turnComplete && props.ctx.phase === "actions" && isMyTurn;
+  const turnComplete = playerInfo.turnComplete;
+  const showConfirmEndTurn =
+    turnComplete && props.ctx.phase === "actions" && isMyTurn;
+
+  const mood = getMood(props.G.stage);
+  const moodTokens = getMoodTokens(mood);
+  const shouldPulse = PULSING_MOODS.has(mood);
+
+  const phase = GAME_PHASES.find((p) => p.key === props.ctx.phase);
+  const phaseName = phase?.label ?? props.G.stage;
+  const currentPlayerName =
+    props.matchData?.find((p) => String(p.id) === props.ctx.currentPlayer)
+      ?.name ?? "Player";
+
+  const colour = playerInfo.colour;
+  const gold = playerInfo.resources.gold;
 
   return (
-    <AppBar
-      position={"sticky"}
-      sx={{
-        background: "linear-gradient(90deg, #1a0a14 0%, #0d0d0d 50%, #1a0a00 100%)",
-        boxShadow: "0 2px 12px rgba(0,0,0,0.6)",
-        overflow: "visible",
-      }}
-    >
-      <Toolbar
+    <>
+      <Box
         sx={{
-          justifyContent: "space-between",
-          flexWrap: "nowrap",
-          gap: 1,
-          py: 0.5,
-          overflowX: "auto",
-          scrollbarWidth: "none",
-          "&::-webkit-scrollbar": { display: "none" },
+          position: "sticky",
+          top: 0,
+          zIndex: 1200,
+          display: "flex",
+          alignItems: "center",
+          height: "clamp(44px, 5vh, 56px)",
+          px: `${tokens.spacing.md}px`,
+          gap: `${tokens.spacing.sm}px`,
+
+          // Layered panel — warm wood/parchment bar
+          background: `
+            linear-gradient(180deg,
+              #5C4A38 0%,
+              #4A3A2A 50%,
+              #3E3020 100%
+            )
+          `,
+
+          // Mood-aware bottom edge — thick enough to see
+          borderBottom: `2px solid ${moodTokens.accent}66`,
+
+          // Top brass trim
+          borderTop: `1px solid ${tokens.ui.gold}33`,
+
+          // Subtle inner shadow for recessed feel
+          boxShadow: `inset 0 -1px 0 rgba(0,0,0,0.3), 0 2px 8px rgba(0,0,0,0.5)`,
+
+          transition: `border-color ${tokens.transition.slow}`,
+
+          // Pulsing for battle/crisis
+          ...(shouldPulse && {
+            "@keyframes barPulse": {
+              "0%, 100%": {
+                borderBottomColor: `${moodTokens.accent}66`,
+                boxShadow: `inset 0 -1px 0 rgba(0,0,0,0.3), 0 2px 8px rgba(0,0,0,0.5), 0 2px 12px ${moodTokens.accent}15`,
+              },
+              "50%": {
+                borderBottomColor: moodTokens.accent,
+                boxShadow: `inset 0 -1px 0 rgba(0,0,0,0.3), 0 2px 8px rgba(0,0,0,0.5), 0 2px 20px ${moodTokens.accent}40`,
+              },
+            },
+            animation: "barPulse 2s ease-in-out infinite",
+          }),
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: "24px" }}>
-          <Tooltip title="Click for game status" disableInteractive>
-            <Chip
-              icon={<GiTrumpetFlag style={{ fontSize: 18 }} />}
-              label={(() => {
-                const phase = GAME_PHASES.find((p) => p.key === props.ctx.phase);
-                const phaseName = phase?.label ?? props.G.stage;
-                if (props.G.stage === "events") return `${phaseName} \u2014 Choose a Card`;
-                return `Round ${props.G.round} \u2014 ${phaseName}`;
-              })()}
-              onClick={() => setPhaseDialogOpen(true)}
+        {/* ── LEFT: Round + Phase + Turn ──────────────────────────── */}
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: `${tokens.spacing.sm}px`,
+            flexShrink: 0,
+          }}
+        >
+          <Rivet />
+
+          {/* Round + Phase chip */}
+          <Box sx={{ ...gaugeSx, display: "inline-flex", alignItems: "center", gap: `${tokens.spacing.xs}px`, px: `${tokens.spacing.sm}px`, height: 32, borderRadius: `${tokens.radius.pill}px` }}>
+            <Typography
               sx={{
-                ...chipSx,
-                cursor: "pointer",
-                backgroundColor: "rgba(255,255,255,0.1)",
-                color: "white",
-                border: "1px solid rgba(255,255,255,0.2)",
-                "& .MuiChip-label": { fontWeight: 600, fontSize: "0.8rem" },
+                fontFamily: tokens.font.accent,
+                fontSize: tokens.fontSize.xs,
+                color: "#E8C860",
+                fontWeight: 700,
+                lineHeight: 1,
               }}
-            />
-          </Tooltip>
-          <Tooltip title="Current turn" disableInteractive>
-            <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              <Person4Sharp
-                sx={{ color: props.G.playerInfo[props.ctx.currentPlayer].colour, fontSize: 22 }}
-              />
-              <span style={{ fontSize: "0.85rem" }}>
-                {props.matchData?.find(
-                  (p) => String(p.id) === props.ctx.currentPlayer
-                )?.name ?? "Player"}
-              </span>
-              <Chip
-                label={props.G.playerInfo[props.ctx.currentPlayer].kingdomName}
-                size="small"
+            >
+              R{props.G.round}
+            </Typography>
+            <Box sx={{ width: "1px", height: 14, backgroundColor: "rgba(200,170,120,0.3)" }} />
+            <Typography
+              sx={{
+                fontFamily: tokens.font.body,
+                fontSize: tokens.fontSize.xs,
+                color: "#F5ECD8",
+                whiteSpace: "nowrap",
+                lineHeight: 1,
+              }}
+            >
+              {phaseName}
+            </Typography>
+          </Box>
+
+          <BrassDivider />
+
+          {/* Turn indicator chip */}
+          {isMyTurn ? (
+            <Box sx={{ ...gaugeSx, display: "inline-flex", alignItems: "center", gap: `${tokens.spacing.xs}px`, px: `${tokens.spacing.sm}px`, height: 32, borderRadius: `${tokens.radius.pill}px` }}>
+              <Box
                 sx={{
-                  backgroundColor: props.G.playerInfo[props.ctx.currentPlayer].colour,
-                  color: props.G.playerInfo[props.ctx.currentPlayer].colour === "#F5DE48" ? "#333" : "white",
-                  height: 22,
-                  fontSize: "0.7rem",
-                  fontWeight: "bold",
+                  width: 10,
+                  height: 10,
+                  borderRadius: "50%",
+                  backgroundColor: colour,
+                  boxShadow: `0 0 8px ${colour}88`,
+                }}
+              />
+              <Typography
+                sx={{
+                  fontFamily: tokens.font.accent,
+                  fontSize: tokens.fontSize.xs,
+                  fontWeight: 800,
+                  color: "#E8C860",
+                  letterSpacing: "0.08em",
+                  textTransform: "uppercase",
+                  lineHeight: 1,
+                  whiteSpace: "nowrap",
+                }}
+              >
+                Your Turn
+              </Typography>
+            </Box>
+          ) : (
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: `${tokens.spacing.xs}px`,
+              }}
+            >
+              <Box
+                sx={{
+                  width: 8,
+                  height: 8,
+                  borderRadius: "50%",
+                  backgroundColor: currentPlayerInfo.colour,
+                  boxShadow: `0 0 6px ${currentPlayerInfo.colour}55`,
+                  flexShrink: 0,
+                }}
+              />
+              <Typography
+                sx={{
+                  fontFamily: tokens.font.body,
+                  fontSize: tokens.fontSize.xs,
+                  color: "#C8B898",
+                  whiteSpace: "nowrap",
+                  lineHeight: 1,
+                }}
+              >
+                {currentPlayerName}
+              </Typography>
+              <Typography
+                sx={{
+                  fontFamily: tokens.font.body,
+                  fontSize: "10px",
+                  color: currentPlayerInfo.colour,
+                  fontWeight: 600,
+                  lineHeight: 1,
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {currentPlayerInfo.kingdomName}
+              </Typography>
+            </Box>
+          )}
+        </Box>
+
+        {/* ── CENTER: Resource Gauges ─────────────────────────────── */}
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: `${tokens.spacing.xs + 2}px`,
+            flex: 1,
+            justifyContent: "center",
+            overflow: "hidden",
+            minWidth: 0,
+          }}
+        >
+          <Tooltip title="Counsellors" placement="bottom">
+            <span>
+              <ResourceChip
+                icon={<Person sx={{ fontSize: 18, color: "#E8C860" }} />}
+                value={playerInfo.resources.counsellors}
+                size="md"
+                sx={gaugeSx}
+              />
+            </span>
+          </Tooltip>
+          <Tooltip title="Gold" placement="bottom">
+            <span>
+              <ResourceChip
+                icon={<Toll sx={{ fontSize: 18, color: gold < 0 ? tokens.ui.danger : "#FFD700" }} />}
+                value={gold}
+                size="md"
+                variant={gold < 0 ? "negative" : "default"}
+                sx={{
+                  ...gaugeSx,
+                  ...(gold < 0 && {
+                    borderColor: `${tokens.ui.danger}55`,
+                    background: `linear-gradient(180deg, #F0E0D0 0%, #E8D0C0 100%)`,
+                  }),
                 }}
               />
             </span>
           </Tooltip>
-          {props.G.playerInfo[props.playerID ?? props.ctx.currentPlayer]
-            .isArchprelate && (
-            <Tooltip title="Archprelate" disableInteractive>
-              <span style={{ display: "flex", alignItems: "center" }}>
-                <ArchprelateIcon />
-              </span>
-            </Tooltip>
-          )}
-        </div>
-        <Box
-          ref={cardHoldingsAnchorRef}
-          sx={{ display: "inline-flex", alignItems: "center", flexShrink: 0 }}
-        >
-          <CardHoldingsInlineControls
-            colour={colour}
-            legacyCardOpen={legacyCardOpen}
-            advantageCardOpen={advantageCardOpen}
-            onToggleLegacy={() => setLegacyCardOpen((open) => !open)}
-            onToggleAdvantage={() => setAdvantageCardOpen((open) => !open)}
-          />
+          <Tooltip title="Factories" placement="bottom">
+            <span>
+              <ResourceChip
+                icon={<Factory sx={{ fontSize: 18, color: "#E8C860" }} />}
+                value={playerInfo.factories}
+                size="md"
+                sx={gaugeSx}
+              />
+            </span>
+          </Tooltip>
+          <Tooltip title="Prisoners" placement="bottom">
+            <span>
+              <ResourceChip
+                icon={<Lock sx={{ fontSize: 18, color: "#C8B898" }} />}
+                value={playerInfo.prisoners}
+                size="md"
+                sx={gaugeSx}
+              />
+            </span>
+          </Tooltip>
+          <Tooltip title="Victory Points" placement="bottom">
+            <span>
+              <ResourceChip
+                icon={<Star sx={{ fontSize: 18, color: "#E8C860" }} />}
+                value={playerInfo.resources.victoryPoints}
+                size="md"
+                sx={gaugeSx}
+              />
+            </span>
+          </Tooltip>
+
+          {/* Heresy gauge — shows allegiance + VP impact */}
+          {(() => {
+            const isHeretic = playerInfo.hereticOrOrthodox === "heretic";
+            const heresyVP = isHeretic ? playerInfo.heresyTracker : -playerInfo.heresyTracker;
+            const alColor = isHeretic ? tokens.allegiance.heresy : tokens.allegiance.orthodox;
+            const alLabel = isHeretic ? "Heretic" : "Orthodox";
+            const vpSign = heresyVP > 0 ? "+" : "";
+            return (
+              <Tooltip
+                title={`${alLabel} — Heresy VP: ${vpSign}${heresyVP} (track position: ${playerInfo.heresyTracker})`}
+                placement="bottom"
+              >
+                <Box
+                  sx={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "4px",
+                    px: `${tokens.spacing.sm}px`,
+                    py: "4px",
+                    borderRadius: `${tokens.radius.pill}px`,
+                    fontFamily: tokens.font.body,
+                    fontWeight: 700,
+                    lineHeight: 1,
+                    ...gaugeSx,
+                  }}
+                >
+                  {/* VP impact */}
+                  <Typography
+                    component="span"
+                    sx={{
+                      fontSize: tokens.fontSize.sm,
+                      fontFamily: tokens.font.body,
+                      fontWeight: 700,
+                      color: heresyVP >= 0 ? "#60D080" : "#F06050",
+                    }}
+                  >
+                    {vpSign}{heresyVP}
+                  </Typography>
+                  {/* Allegiance dot */}
+                  <Box
+                    sx={{
+                      width: 8,
+                      height: 8,
+                      borderRadius: "50%",
+                      backgroundColor: alColor,
+                      boxShadow: `0 0 4px ${alColor}88`,
+                      flexShrink: 0,
+                    }}
+                  />
+                </Box>
+              </Tooltip>
+            );
+          })()}
         </Box>
-        <div
-          style={{
+
+        {/* ── RIGHT: Action Buttons ──────────────────────────────── */}
+        <Box
+          sx={{
             display: "flex",
             alignItems: "center",
-            gap: "6px",
-            flexWrap: "nowrap",
+            gap: `${tokens.spacing.xs}px`,
+            flexShrink: 0,
           }}
         >
-          <Tooltip title="Counsellors" disableInteractive>
-            <Chip
-              icon={<CounsellorIcon colour={colour ?? "white"} />}
-              label={counsellors}
-              sx={chipSx}
-            />
-          </Tooltip>
-          <Tooltip title="Gold" disableInteractive>
-            <Chip
-              icon={<IoMdCube style={{ color: "#FFD700" }} />}
-              label={gold}
-              sx={chipSx}
-            />
-          </Tooltip>
-          <Tooltip title="Imprisoned Dissenters" disableInteractive>
-            <Chip
-              icon={
-                <Box
-                  component="img"
-                  src={prisonSvg}
-                  alt=""
-                  sx={{ width: 22, height: 22, objectFit: "contain" }}
-                />
-              }
-              label={prisoners}
-              sx={chipSx}
-            />
-          </Tooltip>
-          <Tooltip title="Factories" disableInteractive>
-            <Chip
-              icon={<Factory sx={{ color: "#8B6914" }} />}
-              label={factories ?? 0}
-              sx={chipSx}
-            />
-          </Tooltip>
-          {eliteRegiments > 0 && (
-            <Tooltip title="Elite Regiments (3 swords each — cannot be re-recruited)" disableInteractive>
-              <Chip
-                icon={<RegimentIcon colour="#A74383" />}
-                label={`${eliteRegiments} Elite`}
+          {isMyTurn &&
+            props.ctx.numMoves > 0 &&
+            props.ctx.phase === "actions" && (
+              <GameButton
+                variant="ghost"
+                size="sm"
+                onClick={() => clearMoves(props)}
                 sx={{
-                  ...chipSx,
-                  border: "1px solid rgba(167,67,131,0.45)",
+                  color: "#C8B898",
+                  borderColor: "rgba(200,170,120,0.30)",
+                  "&:hover": { color: "#F5ECD8", borderColor: "#E8C860", background: "rgba(200,170,120,0.12)" },
                 }}
-              />
-            </Tooltip>
-          )}
-          <Tooltip title="Victory Points" disableInteractive>
-            <Chip
-              icon={<VictoryPointIcon colour={colour} />}
-              label={victoryPoints}
-              sx={chipSx}
-            />
-          </Tooltip>
-          {isMyTurn && props.ctx.numMoves > 0 && props.ctx.phase === "actions" && (
-            <Button
-              size="small"
-              variant="contained"
-              color="error"
-              onClick={() => clearMoves(props)}
-            >
-              Clear Move
-            </Button>
-          )}
+              >
+                Clear
+              </GameButton>
+            )}
           {showConfirmEndTurn ? (
-            <Button
-              size="small"
-              variant="contained"
-              color="success"
+            <GameButton
+              variant="primary"
+              size="sm"
               onClick={() => props.moves.confirmAction()}
+              sx={{
+                boxShadow: `0 0 10px ${tokens.ui.gold}44`,
+                "@keyframes confirmGlow": {
+                  "0%, 100%": { boxShadow: `0 0 10px ${tokens.ui.gold}44` },
+                  "50%": { boxShadow: `0 0 20px ${tokens.ui.gold}66` },
+                },
+                animation: "confirmGlow 2s ease-in-out infinite",
+              }}
             >
               Confirm & End Turn
-            </Button>
+            </GameButton>
           ) : (
-            <Button
-              size="small"
-              variant="contained"
-              color="warning"
-              onClick={() => {
-                setPassDialogOpen(true);
-              }}
+            <GameButton
+              variant="ghost"
+              size="sm"
+              onClick={() => setPassDialogOpen(true)}
               disabled={!isMyTurn}
+              sx={{
+                color: "#E8C860",
+                borderColor: "rgba(200,170,120,0.30)",
+                "&:hover": { color: "#F5ECD8", borderColor: "#E8C860", background: "rgba(200,170,120,0.12)" },
+                "&.Mui-disabled": { color: "rgba(200,170,120,0.3)", borderColor: "rgba(200,170,120,0.15)" },
+              }}
             >
               Pass
-            </Button>
+            </GameButton>
           )}
-        </div>
-      </Toolbar>
-      <CardHoldingsPanels
-        anchorEl={cardHoldingsAnchorRef.current}
-        colour={colour}
-        legacyCardName={legacyCardName}
-        advantageCard={advantageCard}
-        legacyCardOpen={legacyCardOpen}
-        advantageCardOpen={advantageCardOpen}
-      />
-      <Box
-        sx={{
-          height: 3,
-          background: currentPlayer.hereticOrOrthodox === "heretic"
-            ? "linear-gradient(90deg, #E77B00, #FFB04D, #E77B00, #FFB04D, #E77B00)"
-            : "linear-gradient(90deg, #A74383, #D06AAD, #A74383, #D06AAD, #A74383)",
-          backgroundSize: "300% 100%",
-          animation: "shimmer 8s linear infinite",
-          "@keyframes shimmer": {
-            "0%": { backgroundPosition: "0% 0%" },
-            "100%": { backgroundPosition: "300% 0%" },
-          },
+
+          <Rivet />
+        </Box>
+      </Box>
+
+      {/* ── Pass confirmation dialog ────────────────────────────── */}
+      <DialogShell
+        open={passDialogOpen}
+        title="Pass Turn?"
+        mood="peacetime"
+        size="xs"
+        confirmLabel="Confirm Pass"
+        confirmColor="error"
+        onConfirm={() => {
+          setPassDialogOpen(false);
+          props.moves.pass();
         }}
-      />
-      <Dialog open={phaseDialogOpen} onClose={() => setPhaseDialogOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>Game Status</DialogTitle>
-        <DialogContent sx={{ p: 0 }}>
-          <List dense>
-            <ListItem sx={{ backgroundColor: "rgba(0,0,0,0.06)" }}>
-              <ListItemText primary={`Round ${props.G.round} of ${props.G.finalRound}`} slotProps={{ primary: { fontWeight: "bold" } }} />
-            </ListItem>
-          </List>
-          <Box sx={{ px: 2, pt: 1, pb: 0.5 }}>
-            <span style={{ fontWeight: 600, fontSize: "0.8rem", textTransform: "uppercase", color: "#888" }}>Phases</span>
-          </Box>
-          <List dense>
-            {GAME_PHASES.map((phase) => (
-              <ListItem
-                key={phase.key}
-                sx={
-                  props.ctx.phase === phase.key
-                    ? { backgroundColor: "action.selected" }
-                    : {}
-                }
-              >
-                <ListItemText
-                  primary={phase.label}
-                  slotProps={
-                    props.ctx.phase === phase.key
-                      ? { primary: { fontWeight: "bold" } }
-                      : {}
-                  }
-                />
-              </ListItem>
-            ))}
-          </List>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setPhaseDialogOpen(false)}>Close</Button>
-        </DialogActions>
-      </Dialog>
-      <Dialog open={passDialogOpen}>
-        <DialogTitle>Are you sure you want to pass?</DialogTitle>
-        <DialogContent>
-          You will not be able to make any further moves until the next phase of
-          play.
-        </DialogContent>
-        <DialogActions>
-          <Button
-            color="error"
-            variant="contained"
-            onClick={() => {
-              setPassDialogOpen(false);
-            }}
-          >
-            Cancel
-          </Button>
-          <Button
-            color="warning"
-            variant="contained"
-            onClick={() => {
-              setPassDialogOpen(false);
-              props.moves.pass();
-            }}
-          >
-            Confirm Pass
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </AppBar>
+        cancelLabel="Cancel"
+        onCancel={() => setPassDialogOpen(false)}
+      >
+        <Typography
+          sx={{
+            fontFamily: tokens.font.body,
+            color: tokens.ui.text,
+            fontSize: tokens.fontSize.sm,
+          }}
+        >
+          You will not be able to make any further moves until the next phase.
+        </Typography>
+      </DialogShell>
+    </>
   );
 };
 

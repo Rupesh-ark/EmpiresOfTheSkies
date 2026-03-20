@@ -1,20 +1,14 @@
 import { useState } from "react";
 import { MyGameProps } from "@eots/game";
-import {
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Typography,
-} from "@mui/material";
-import { fonts } from "@/designTokens";
+import { Button, Typography } from "@mui/material";
+import { tokens } from "@/theme";
 import { ButtonRow } from "../ActionBoard/components/ActionBoardButtonRow";
+import { DialogShell } from "@/components/atoms/DialogShell";
+import { GameButton } from "@/components/atoms/GameButton";
 
 const ElectionDialog = (props: MyGameProps) => {
   const [currentVote, setCurrentVote] = useState<string | null>(null);
 
-  // Show dialog if: election phase, this player is in the "voting" stage, and hasn't voted yet
   const isVoting =
     props.ctx.phase === "election" &&
     props.playerID != null &&
@@ -30,7 +24,7 @@ const ElectionDialog = (props: MyGameProps) => {
           backgroundColor: kingdom.colour,
           border: currentVote === id ? "4px solid black" : undefined,
           color: "black",
-          fontFamily: fonts.primary,
+          fontFamily: tokens.font.display,
           "&:hover": { filter: "brightness(0.9)" },
         }}
         onClick={() => setCurrentVote(id)}
@@ -41,35 +35,33 @@ const ElectionDialog = (props: MyGameProps) => {
   });
 
   return (
-    <Dialog open={!!isVoting} maxWidth="sm" fullWidth>
-      <DialogTitle sx={{ fontFamily: fonts.primary }}>
-        Archprelate Election
-      </DialogTitle>
-      <DialogContent>
-        <Typography sx={{ fontFamily: fonts.primary, mb: 2 }}>
-          Cast your vote for the next Archprelate. The kingdom with the most
-          cathedral votes wins.
+    <DialogShell
+      open={!!isVoting}
+      title="Archprelate Election"
+      mood="election"
+      size="sm"
+      hideActions
+    >
+      <Typography sx={{ fontFamily: tokens.font.display, mb: 2 }}>
+        Cast your vote for the next Archprelate. The kingdom with the most
+        cathedral votes wins.
+      </Typography>
+      <ButtonRow>{buttons}</ButtonRow>
+      {currentVote && (
+        <Typography sx={{ fontFamily: tokens.font.display, mt: 2, fontStyle: "italic" }}>
+          Voting for: {props.G.playerInfo[currentVote].kingdomName}
         </Typography>
-        <ButtonRow>{buttons}</ButtonRow>
-        {currentVote && (
-          <Typography sx={{ fontFamily: fonts.primary, mt: 2, fontStyle: "italic" }}>
-            Voting for: {props.G.playerInfo[currentVote].kingdomName}
-          </Typography>
-        )}
-      </DialogContent>
-      <DialogActions>
-        <Button
-          variant="contained"
-          color="success"
+      )}
+      <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 16 }}>
+        <GameButton
+          variant="primary"
           disabled={currentVote === null}
-          onClick={() => {
-            props.moves.vote(currentVote);
-          }}
+          onClick={() => props.moves.vote(currentVote)}
         >
           Confirm Vote
-        </Button>
-      </DialogActions>
-    </Dialog>
+        </GameButton>
+      </div>
+    </DialogShell>
   );
 };
 

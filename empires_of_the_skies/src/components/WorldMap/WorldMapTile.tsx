@@ -7,7 +7,7 @@ import { MyGameProps } from "@eots/game";
 import { Box, Button, Dialog, DialogContent, DialogTitle, IconButton, Typography } from "@mui/material";
 import { Close } from "@mui/icons-material";
 import { ThemeProvider } from "@mui/material/styles";
-import { generalTheme } from "../themes";
+import { baseTheme } from "@/theme";
 import FortIcon from "../Icons/FortIcon";
 import FleetIcon from "../Icons/FleetIcon";
 import ColonyIcon from "../Icons/ColonyIcon";
@@ -149,27 +149,59 @@ Loot:
       <Button
         value={currentTile.name}
         sx={{
-          background: "linear-gradient(135deg, #005a82 0%, #007ab5 35%, #009ee3 65%, #005a82 100%)",
-          backgroundSize: "400% 400%",
-          animation: `${keyframes`
-            0%   { background-position: 0% 50%; }
-            50%  { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-          `} 6s ease infinite`,
-          height: "100%",
-          width: "150px",
-          maxWidth: "100%",
-          minHeight: "150px",
-          minWidth: "150px",
+          background: `
+            radial-gradient(ellipse 55% 50% at 35% 55%, rgba(160,140,100,0.35) 0%, transparent 100%),
+            radial-gradient(ellipse 40% 45% at 65% 40%, rgba(140,125,90,0.25) 0%, transparent 100%),
+            linear-gradient(180deg, #2e5570 0%, #3a7090 40%, #2d6585 70%, #285575 100%)
+          `,
+          width: "100%",
+          aspectRatio: "1",
           borderRadius: 0,
-          border: "1px solid rgba(0,122,181,0.25)",
-          boxShadow: "inset 0 0 20px rgba(0,158,227,0.3), inset 0 0 5px rgba(0,200,255,0.15)",
+          border: "1px solid rgba(80,110,140,0.2)",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          transition: "filter 0.2s ease",
+          position: "relative",
+          overflow: "hidden",
+          transition: "all 0.3s ease",
+          // Soft drifting fog — large blurred blobs
+          "&::before": {
+            content: '""',
+            position: "absolute",
+            inset: "-30%",
+            background: `
+              radial-gradient(ellipse 40% 35% at 25% 45%, rgba(160,180,200,0.18) 0%, transparent 100%),
+              radial-gradient(ellipse 35% 30% at 70% 55%, rgba(160,180,200,0.14) 0%, transparent 100%),
+              radial-gradient(ellipse 45% 25% at 50% 75%, rgba(160,180,200,0.12) 0%, transparent 100%)
+            `,
+            filter: "blur(8px)",
+            animation: `${keyframes`
+              0%   { transform: translateX(-5%) translateY(0); }
+              50%  { transform: translateX(5%) translateY(-3%); }
+              100% { transform: translateX(-5%) translateY(0); }
+            `} 10s ease-in-out infinite`,
+          },
+          // Second fog layer — slower, offset
+          "&::after": {
+            content: '""',
+            position: "absolute",
+            inset: "-30%",
+            background: `
+              radial-gradient(ellipse 35% 40% at 60% 35%, rgba(160,180,200,0.12) 0%, transparent 100%),
+              radial-gradient(ellipse 40% 30% at 30% 65%, rgba(160,180,200,0.10) 0%, transparent 100%)
+            `,
+            filter: "blur(10px)",
+            animation: `${keyframes`
+              0%   { transform: translateX(4%) translateY(-2%); }
+              50%  { transform: translateX(-4%) translateY(2%); }
+              100% { transform: translateX(4%) translateY(-2%); }
+            `} 14s ease-in-out infinite`,
+          },
           "&:hover": {
-            filter: "brightness(1.4) saturate(1.4)",
+            border: "1px solid rgba(232,184,75,0.3)",
+            "&::before, &::after": {
+              opacity: 0.5,
+            },
           },
         }}
         onClick={
@@ -186,32 +218,41 @@ Loot:
         }
         {...bind}
       >
-        <span
-          style={{
-            fontSize: "40px",
-            opacity: 0.4,
-            userSelect: "none",
-            lineHeight: 1,
-            filter: "drop-shadow(0 0 6px rgba(0,200,255,0.8))",
+        <Box
+          sx={{
+            position: "relative",
+            zIndex: 1,
+            width: 6,
+            height: 6,
+            borderRadius: "50%",
+            backgroundColor: "rgba(140,160,180,0.25)",
+            boxShadow: "0 0 8px rgba(140,160,180,0.15)",
           }}
-        >
-          🔍
-        </span>
+        />
       </Button>
-      <ThemeProvider theme={generalTheme}>
+      <ThemeProvider theme={baseTheme}>
         <Button
           className="front"
           sx={{
             backgroundImage: `url(${svgNameToElementMap[currentTile.name]})`,
             backgroundSize: "cover",
             backgroundRepeat: "no-repeat",
-            height: "100%",
-            width: "150px",
-            maxWidth: "100%",
-            minHeight: "150px",
-            minWidth: "150px",
-            border: props.selectable ? "5px solid #ffe066" : "0px",
+            width: "100%",
+            aspectRatio: "1",
+            border: props.selectable
+              ? "5px solid #ffe066"
+              : props.battleHighlight
+                ? "3px solid #ef4444"
+                : "0px",
             borderRadius: 0,
+            ...(props.battleHighlight && {
+              boxShadow: "0 0 12px rgba(239,68,68,0.5)",
+              "@keyframes battlePulse": {
+                "0%, 100%": { boxShadow: "0 0 8px rgba(239,68,68,0.3)" },
+                "50%": { boxShadow: "0 0 20px rgba(239,68,68,0.6)" },
+              },
+              animation: "battlePulse 2s ease-in-out infinite",
+            }),
           }}
           onClick={props.selectable ? altOnClick : canShowDetail ? () => setDetailOpen(true) : undefined}
         >
@@ -267,6 +308,7 @@ interface worldMapTileProps extends MyGameProps {
   location: number[];
   alternateOnClick?: (coords: number[]) => void;
   selectable?: boolean;
+  battleHighlight?: boolean;
   detailRequestKey?: number;
   onDetailRequestHandled?: (requestKey: number) => void;
 }

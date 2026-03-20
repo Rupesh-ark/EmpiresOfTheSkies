@@ -17,7 +17,11 @@ import { createLogger } from "@eots/game";
 const log = createLogger("lobby");
 import { useNavigate } from "react-router-dom";
 import { BG_DESKTOP as bgDesktop, BG_TABLET as bgTablet, BG_MOBILE as bgMobile, LOGO as logo } from "../assets/homePage";
-import { colors, fonts } from "../designTokens";
+import { tokens } from "@/theme";
+
+// Local aliases matching legacy shape — home page uses its own warm palette
+const colors = { home: tokens.home } as const;
+const fonts = { accent: tokens.font.accent, primary: tokens.font.display, system: tokens.font.body } as const;
 
 const createMatch = async (
   lobbyClient: LobbyClient,

@@ -16,39 +16,89 @@ export interface GameButtonProps {
 }
 
 const sizeMap = {
-  sm: { height: 32, fontSize: tokens.fontSize.xs, px: `${tokens.spacing.sm}px` },
-  md: { height: 40, fontSize: tokens.fontSize.sm, px: `${tokens.spacing.md}px` },
-  lg: { height: 48, fontSize: tokens.fontSize.base, px: `${tokens.spacing.lg}px` },
+  sm: { height: 30, fontSize: tokens.fontSize.xs, px: `${tokens.spacing.sm + 2}px`, letterSpacing: "0.03em" },
+  md: { height: 38, fontSize: tokens.fontSize.sm, px: `${tokens.spacing.md}px`, letterSpacing: "0.02em" },
+  lg: { height: 46, fontSize: tokens.fontSize.base, px: `${tokens.spacing.lg}px`, letterSpacing: "0.01em" },
 };
 
+// Embossed brass plate — raised surface with light-catching bevel
 const variantStyleMap = {
   primary: {
-    backgroundColor: tokens.ui.gold,
-    color: tokens.ui.background,
+    background: `linear-gradient(180deg, #F5D06A 0%, ${tokens.ui.gold} 40%, #C99A30 100%)`,
+    color: "#1a1208",
     border: "none",
-    "&:hover": { backgroundColor: "#e0c27a" },
-    "&:active": { backgroundColor: "#c4a055" },
+    borderTop: "1px solid rgba(255,240,200,0.5)",
+    borderBottom: "2px solid #8A6A18",
+    boxShadow: `0 2px 6px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.25)`,
+    fontWeight: 700,
+    "&:hover": {
+      background: `linear-gradient(180deg, #FFDD80 0%, #F0C850 40%, #D4A838 100%)`,
+      boxShadow: `0 3px 10px rgba(0,0,0,0.4), 0 0 12px ${tokens.ui.gold}30, inset 0 1px 0 rgba(255,255,255,0.3)`,
+      transform: "translateY(-1px)",
+    },
+    "&:active": {
+      background: `linear-gradient(180deg, #C49930 0%, #B08828 40%, #9A7520 100%)`,
+      boxShadow: `0 1px 3px rgba(0,0,0,0.4), inset 0 2px 4px rgba(0,0,0,0.2)`,
+      borderTop: "1px solid rgba(255,240,200,0.2)",
+      transform: "translateY(0px)",
+    },
   },
   secondary: {
-    backgroundColor: tokens.ui.surfaceRaised,
+    background: `linear-gradient(180deg, ${tokens.ui.surfaceRaised} 0%, ${tokens.ui.surface} 100%)`,
     color: tokens.ui.text,
     border: `1px solid ${tokens.ui.borderMedium}`,
-    "&:hover": { backgroundColor: tokens.ui.surfaceHover },
-    "&:active": { backgroundColor: tokens.ui.surface },
+    borderTop: `1px solid rgba(255,255,255,0.4)`,
+    borderBottom: `2px solid rgba(0,0,0,0.10)`,
+    boxShadow: `0 2px 4px rgba(80,60,30,0.12), inset 0 1px 0 rgba(255,255,255,0.3)`,
+    fontWeight: 600,
+    "&:hover": {
+      background: `linear-gradient(180deg, ${tokens.ui.surfaceHover} 0%, ${tokens.ui.surface} 100%)`,
+      borderColor: `${tokens.ui.gold}55`,
+      boxShadow: `0 3px 8px rgba(80,60,30,0.18), inset 0 1px 0 rgba(255,255,255,0.3)`,
+      transform: "translateY(-1px)",
+    },
+    "&:active": {
+      background: `linear-gradient(180deg, ${tokens.ui.surface} 0%, ${tokens.ui.surfaceHover} 100%)`,
+      boxShadow: `inset 0 2px 4px rgba(0,0,0,0.08)`,
+      transform: "translateY(0px)",
+    },
   },
   danger: {
-    backgroundColor: tokens.ui.danger,
-    color: tokens.ui.textBright,
+    background: `linear-gradient(180deg, #F06050 0%, ${tokens.ui.danger} 40%, #B83828 100%)`,
+    color: "#FFF5F0",
     border: "none",
-    "&:hover": { backgroundColor: "#f87171" },
-    "&:active": { backgroundColor: "#dc2626" },
+    borderTop: "1px solid rgba(255,180,160,0.35)",
+    borderBottom: "2px solid #7A2018",
+    boxShadow: `0 2px 6px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.15)`,
+    fontWeight: 700,
+    "&:hover": {
+      background: `linear-gradient(180deg, #FF7060 0%, #F06050 40%, #C84838 100%)`,
+      boxShadow: `0 3px 10px rgba(0,0,0,0.4), 0 0 10px ${tokens.ui.danger}30, inset 0 1px 0 rgba(255,255,255,0.2)`,
+      transform: "translateY(-1px)",
+    },
+    "&:active": {
+      background: `linear-gradient(180deg, #B83020 0%, #A02818 40%, #881C10 100%)`,
+      boxShadow: `0 1px 3px rgba(0,0,0,0.4), inset 0 2px 4px rgba(0,0,0,0.2)`,
+      transform: "translateY(0px)",
+    },
   },
   ghost: {
-    backgroundColor: "transparent",
-    color: tokens.ui.text,
+    background: "transparent",
+    color: tokens.ui.textMuted,
     border: `1px solid ${tokens.ui.border}`,
-    "&:hover": { backgroundColor: tokens.ui.surfaceHover },
-    "&:active": { backgroundColor: tokens.ui.surface },
+    borderBottom: `1px solid ${tokens.ui.borderMedium}`,
+    boxShadow: "none",
+    fontWeight: 600,
+    "&:hover": {
+      background: tokens.ui.surfaceHover,
+      color: tokens.ui.text,
+      borderColor: `${tokens.ui.gold}44`,
+      boxShadow: `0 2px 4px rgba(80,60,30,0.10)`,
+    },
+    "&:active": {
+      background: tokens.ui.surface,
+      boxShadow: `inset 0 1px 3px rgba(0,0,0,0.08)`,
+    },
   },
 };
 
@@ -66,7 +116,7 @@ const InnerButton = forwardRef<HTMLButtonElement, GameButtonProps>(
     },
     ref
   ) => {
-    const { height, fontSize, px } = sizeMap[size];
+    const { height, fontSize, px, letterSpacing } = sizeMap[size];
     const variantStyles = variantStyleMap[variant];
 
     return (
@@ -75,28 +125,31 @@ const InnerButton = forwardRef<HTMLButtonElement, GameButtonProps>(
         onClick={onClick}
         disabled={disabled}
         fullWidth={fullWidth}
-        disableRipple={false}
+        disableRipple
         sx={{
           height,
           fontSize,
           px,
-          borderRadius: `${tokens.radius.md}px`,
+          letterSpacing,
+          borderRadius: `${tokens.radius.sm + 1}px`,
           textTransform: "none",
           fontFamily: tokens.font.body,
           transition: `all ${tokens.transition.fast}`,
           display: "inline-flex",
           alignItems: "center",
-          gap: icon ? `${tokens.spacing.xs}px` : 0,
+          gap: icon ? `${tokens.spacing.xs + 1}px` : 0,
           minWidth: 0,
           cursor: disabled ? "not-allowed" : "pointer",
-          opacity: disabled ? 0.5 : 1,
           ...variantStyles,
-          // MUI overrides disabled styles — reapply manually
+          // Disabled state — faded plate
           "&.Mui-disabled": {
-            opacity: 0.5,
+            opacity: 0.4,
             cursor: "not-allowed",
             color: "inherit",
-            backgroundColor: variantStyles.backgroundColor,
+            background: variantStyles.background,
+            boxShadow: "none",
+            transform: "none",
+            borderTop: variantStyles.borderTop,
           },
           ...sx,
         }}

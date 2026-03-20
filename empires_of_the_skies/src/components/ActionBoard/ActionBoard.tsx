@@ -1,6 +1,6 @@
+import { Box } from "@mui/material";
 import { MyGameProps } from "@eots/game";
-import { ThemeProvider } from "@emotion/react";
-import { generalTheme } from "../themes";
+import { tokens } from "@/theme";
 
 // ── Row components ───────────────────────────────────────────────────────────
 import PlayerOrderRow from "./components/rows/PlayerOrderRow";
@@ -20,38 +20,49 @@ import IssueHolyDecree from "./components/IssueHolyDecree";
 // ── Main component ───────────────────────────────────────────────────────────
 
 export const ActionBoard = (props: ActionBoardProps) => (
-  <ThemeProvider theme={generalTheme}>
-    <div
-      style={{
-        width: "100%",
+  <Box
+    sx={{
+      width: "100%",
+      display: "flex",
+      justifyContent: "center",
+      px: `${tokens.spacing.md}px`,
+      py: `${tokens.spacing.sm}px`,
+      backgroundColor: tokens.ui.background,
+    }}
+  >
+    <Box
+      sx={{
         display: "flex",
-        justifyContent: "center",
-        marginLeft: "20px",
-        marginRight: "20px",
+        flexDirection: "column",
+        maxWidth: 1200,
+        width: "100%",
+        gap: "2px",
       }}
     >
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          maxWidth: "1200px",
-          width: "100%",
+      <PlayerOrderRow {...props} />
+
+      {/* Recruitment & Purchase — 2x2 grid */}
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          gap: "2px",
         }}
       >
-        <PlayerOrderRow {...props} />
         <RecruitCounsellorsRow {...props} />
         <RecruitRegimentsRow {...props} />
         <PurchaseSkyshipsZeelandRow {...props} />
         <PurchaseSkyshipsVenoaRow {...props} />
-        <FoundBuildingsRow {...props} />
-        <FoundFactoriesRow {...props} />
-        <InfluencePrelatesRow {...props} />
-        <PunishDissentersRow {...props} />
-        <ConvertMonarchRow {...props} />
-        <IssueHolyDecree {...props} />
-      </div>
-    </div>
-  </ThemeProvider>
+      </Box>
+
+      <FoundBuildingsRow {...props} />
+      <FoundFactoriesRow {...props} />
+      <InfluencePrelatesRow {...props} />
+      <PunishDissentersRow {...props} />
+      <ConvertMonarchRow {...props} />
+      <IssueHolyDecree {...props} />
+    </Box>
+  </Box>
 );
 
 interface ActionBoardProps extends MyGameProps {}

@@ -1,72 +1,65 @@
+/**
+ * ActionBoard shared — unified brass panel styling.
+ *
+ * Same visual DNA as CollapsedActionRow:
+ * dark surface, gold left edge, display font labels, body font meta.
+ */
 import { ReactNode } from "react";
 import { Box, Typography } from "@mui/material";
-import { fonts } from "@/designTokens";
+import { tokens } from "@/theme";
 import { MyGameProps } from "@eots/game";
 
 export interface ActionBoardProps extends MyGameProps {}
 
-// ── Row badge style ──────────────────────────────────────────────────────────
-
-const rowBadgeStyle = {
-  fontSize: "11px",
-  border: "1px solid rgba(32,58,84,0.2)",
-  borderRadius: "999px",
-  padding: "2px 9px",
-  backgroundColor: "rgba(225, 236, 246, 0.78)",
-  color: "#1f3b58",
-  lineHeight: 1.3,
-};
-
-// ── RowHeader ────────────────────────────────────────────────────────────────
+// ── RowHeader — gold-edged label plate ────────────────────────────────────
 
 export const RowHeader = ({
   label,
   meta,
   badges,
-  accent,
 }: {
   label: string;
   meta?: Array<{ label: string; value: string }>;
   badges?: string[];
-  accent?: string;
+  accent?: string; // kept for API compat but ignored — always gold
 }) => (
   <Box
     sx={{
       display: "flex",
       flexDirection: "column",
-      gap: 0.75,
+      gap: `${tokens.spacing.xs}px`,
       maxWidth: "100%",
-      borderLeft: `4px solid ${accent ?? "#386fa4"}`,
-      pl: 1,
+      pl: `${tokens.spacing.sm}px`,
+      py: `${tokens.spacing.xs}px`,
     }}
   >
     <Typography
       sx={{
-        fontFamily: fonts.system,
-        fontWeight: 800,
-        whiteSpace: "pre-line",
-        lineHeight: 1.1,
-        fontSize: "1.02rem",
-        color: "#1a2733",
+        fontFamily: tokens.font.display,
+        fontWeight: 700,
+        lineHeight: 1.15,
+        fontSize: tokens.fontSize.sm,
+        color: tokens.ui.text,
       }}
     >
       {label}
     </Typography>
-    {meta && meta.length > 0 ? (
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 0.2 }}>
+
+    {meta && meta.length > 0 && (
+      <Box sx={{ display: "flex", flexDirection: "column", gap: "1px" }}>
         {meta.map((item) => (
           <Typography
             key={`${item.label}-${item.value}`}
             sx={{
-              fontFamily: fonts.system,
-              fontSize: "0.9rem",
-              lineHeight: 1.25,
-              color: "rgba(0,0,0,0.74)",
+              fontFamily: tokens.font.body,
+              fontSize: tokens.fontSize.xs,
+              lineHeight: 1.3,
+              color: tokens.ui.textMuted,
             }}
           >
             <Box
               component="span"
-              sx={{ fontWeight: 700, color: "#2b445e", mr: 0.5 }}
+              sx={{ fontWeight: 700, color: `${tokens.ui.gold}cc`, mr: "4px" }}
             >
               {item.label}:
             </Box>
@@ -74,27 +67,36 @@ export const RowHeader = ({
           </Typography>
         ))}
       </Box>
-    ) : null}
-    {badges && badges.length > 0 ? (
-      <div
-        style={{
-          display: "flex",
-          flexWrap: "wrap",
-          gap: "6px",
-          marginTop: "2px",
-        }}
-      >
-        {badges.map((badge, index) => (
-          <span key={`${badge}-${index}`} style={rowBadgeStyle}>
+    )}
+
+    {badges && badges.length > 0 && (
+      <Box sx={{ display: "flex", flexWrap: "wrap", gap: "4px" }}>
+        {badges.map((badge, i) => (
+          <Box
+            key={`${badge}-${i}`}
+            component="span"
+            sx={{
+              fontSize: tokens.fontSize.xs,
+              fontFamily: tokens.font.body,
+              fontWeight: 600,
+              border: `1px solid ${tokens.ui.gold}33`,
+              borderRadius: `${tokens.radius.pill}px`,
+              px: `${tokens.spacing.sm}px`,
+              py: "1px",
+              backgroundColor: `${tokens.ui.gold}0a`,
+              color: tokens.ui.gold,
+              lineHeight: 1.4,
+            }}
+          >
             {badge}
-          </span>
+          </Box>
         ))}
-      </div>
-    ) : null}
+      </Box>
+    )}
   </Box>
 );
 
-// ── ActionRow ────────────────────────────────────────────────────────────────
+// ── ActionRow — expanded panel station ────────────────────────────────────
 
 export const ActionRow = ({
   header,
@@ -106,26 +108,54 @@ export const ActionRow = ({
   <Box
     sx={{
       display: "grid",
-      gridTemplateColumns: { xs: "1fr", lg: "360px minmax(0, 1fr)" },
-      columnGap: 1.5,
-      rowGap: 1,
+      gridTemplateColumns: { xs: "1fr", lg: "260px minmax(0, 1fr)" },
+      columnGap: `${tokens.spacing.md}px`,
+      rowGap: `${tokens.spacing.sm}px`,
       alignItems: "center",
-      mb: 1.5,
-      p: { xs: 1.1, lg: 1.3 },
-      borderRadius: 2,
-      border: "1px solid rgba(15,23,42,0.12)",
-      background:
-        "linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(246,248,251,0.95) 100%)",
-      boxShadow: "0 4px 12px rgba(15,23,42,0.08)",
+      mb: "2px",
+      px: `${tokens.spacing.md}px`,
+      py: `${tokens.spacing.sm}px`,
+
+      // Unified panel surface — matches CollapsedActionRow
+      position: "relative" as const,
+      background: `linear-gradient(180deg, ${tokens.ui.surfaceRaised} 0%, ${tokens.ui.surface} 100%)`,
+      borderRadius: `${tokens.radius.md}px`,
+      border: `1px solid ${tokens.ui.border}`,
+      borderLeft: "3px solid transparent",
+      borderTop: `1px solid ${tokens.ui.gold}12`,
+
+      // Gradient gold left accent
+      "&::before": {
+        content: '""',
+        position: "absolute",
+        left: -3,
+        top: 0,
+        bottom: 0,
+        width: 3,
+        borderRadius: `${tokens.radius.md}px 0 0 ${tokens.radius.md}px`,
+        background: `linear-gradient(180deg, ${tokens.ui.gold} 0%, ${tokens.ui.gold}55 60%, transparent 100%)`,
+      },
+
+      boxShadow: `inset 0 1px 0 rgba(255,255,255,0.4), 0 1px 3px rgba(80,60,30,0.10)`,
+
+      transition: `all ${tokens.transition.fast}`,
+      "&:hover": {
+        borderColor: `${tokens.ui.gold}22`,
+        background: `linear-gradient(180deg, ${tokens.ui.surfaceRaised} 0%, ${tokens.ui.surfaceHover} 100%)`,
+        "&::before": {
+          background: `linear-gradient(180deg, ${tokens.ui.gold} 0%, ${tokens.ui.gold}88 60%, ${tokens.ui.gold}22 100%)`,
+        },
+      },
     }}
   >
     <Box sx={{ minWidth: 0 }}>{header}</Box>
     <Box
       sx={{
         display: "flex",
-        flexWrap: "wrap",
-        gap: 1,
+        flexWrap: "nowrap",
+        gap: `${tokens.spacing.sm}px`,
         alignItems: "flex-start",
+        minWidth: 0,
       }}
     >
       {children}

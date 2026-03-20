@@ -1,19 +1,12 @@
-import React, { useState } from "react";
-import { MyGameProps } from "@eots/game";
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-} from "@mui/material";
-
-import { colourToKingdomMap } from "@eots/game";
+import { useState } from "react";
+import { MyGameProps, colourToKingdomMap } from "@eots/game";
+import { Typography } from "@mui/material";
 import WorldMap from "../WorldMap/WorldMap";
+import { DialogShell } from "@/components/atoms/DialogShell";
+import { GameButton } from "@/components/atoms/GameButton";
 
 const AttackOrEvadeDialog = (props: AttackOrEvadeDialogProps) => {
   const [open, setOpen] = useState(true);
-
   const [x, y] = props.G.mapState.currentBattle;
   const inCurrentBattle =
     props.G.mapState.battleMap[y] &&
@@ -21,59 +14,49 @@ const AttackOrEvadeDialog = (props: AttackOrEvadeDialogProps) => {
       props.playerID ?? props.ctx.currentPlayer
     );
 
-  return (
-    <Dialog
-      maxWidth={"xl"}
-      open={
-        open &&
-        props.ctx.currentPlayer === props.playerID &&
-        props.ctx.phase === "aerial_battle" &&
-        inCurrentBattle &&
-        props.G.battleState?.defender.id === props.playerID &&
-        props.G.battleState.defender.decision === "undecided"
-      }
-    >
-      <DialogTitle>Your fleet is under attack!</DialogTitle>
-      <DialogContent>
-        {`Your fleet on tile [${1 + x}, ${4 - y}] is under attack by ${
-          props.G.battleState
-            ? colourToKingdomMap[props.G.battleState?.attacker.colour]
-            : "ERROR"
-        }. 
-        
-You can either evade or fight back. If you evade, the attacking kingdom will get to move your fleet to an adjoining tile of their choosing.`}
+  const isOpen =
+    open &&
+    props.ctx.currentPlayer === props.playerID &&
+    props.ctx.phase === "aerial_battle" &&
+    inCurrentBattle &&
+    props.G.battleState?.defender.id === props.playerID &&
+    props.G.battleState.defender.decision === "undecided";
 
-        <WorldMap
-          {...props}
-          selectableTiles={[props.G.mapState.currentBattle]}
-        ></WorldMap>
-      </DialogContent>
-      <DialogActions>
-        <Button
-          color="warning"
-          variant="contained"
-          onClick={() => {
-            props.moves.evadeAttackingFleet();
-            setOpen(false);
-          }}
+  return (
+    <DialogShell
+      open={isOpen}
+      title="Your fleet is under attack!"
+      mood="battle"
+      size="lg"
+      hideActions
+    >
+      <Typography sx={{ mb: 2 }}>
+        Your fleet on tile [{1 + x}, {4 - y}] is under attack by{" "}
+        {props.G.battleState
+          ? colourToKingdomMap[props.G.battleState?.attacker.colour]
+          : "ERROR"}
+        . You can either evade or fight back. If you evade, the attacking
+        kingdom will get to move your fleet to an adjoining tile of their
+        choosing.
+      </Typography>
+      <WorldMap {...props} selectableTiles={[props.G.mapState.currentBattle]} />
+      <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginTop: 16 }}>
+        <GameButton
+          variant="ghost"
+          onClick={() => { props.moves.evadeAttackingFleet(); setOpen(false); }}
         >
           Evade
-        </Button>
-        <Button
-          color="success"
-          variant="contained"
-          onClick={() => {
-            props.moves.retaliate();
-            setOpen(false);
-          }}
+        </GameButton>
+        <GameButton
+          variant="danger"
+          onClick={() => { props.moves.retaliate(); setOpen(false); }}
         >
           Attack!
-        </Button>
-      </DialogActions>
-    </Dialog>
+        </GameButton>
+      </div>
+    </DialogShell>
   );
 };
 
 interface AttackOrEvadeDialogProps extends MyGameProps {}
-
 export default AttackOrEvadeDialog;

@@ -32,12 +32,13 @@ const chooseEventCard: MoveDefinition = {
       let resolvedIndex = -1;
 
       for (let i = 0; i < shuffled.length; i++) {
-        if (!isEventVoid(shuffled[i], G, ctx.playOrder)) {
+        const voidReason = isEventVoid(shuffled[i], G, ctx.playOrder);
+        if (!voidReason) {
           resolvedIndex = i;
           break;
         }
         const voidDef = EVENT_CARD_DEFS[shuffled[i]];
-        logEvent(G, `Event card void: ${voidDef.displayName} \u2014 skipped`);
+        logEvent(G, `Event card void: ${voidDef.displayName} \u2014 ${voidReason}`);
       }
 
       if (resolvedIndex >= 0) {

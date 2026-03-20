@@ -11,11 +11,12 @@ import {
   Chip,
 } from "@mui/material";
 import { colourToKingdomMap } from "@eots/game";
+import { tokens } from "@/theme";
 
 const colHeaderCellSx = {
   fontWeight: 700,
   whiteSpace: "nowrap",
-  color: "text.secondary",
+  color: tokens.ui.textMuted,
   fontSize: "0.7rem",
   textTransform: "uppercase",
   letterSpacing: 0.5,
@@ -23,7 +24,7 @@ const colHeaderCellSx = {
 
 const PlayerTable = (props: PlayerTableProps) => {
   return (
-    <Paper elevation={2} sx={{ maxWidth: 1230, mb: 3, width: "100%", borderRadius: 2, overflow: "hidden" }}>
+    <Paper elevation={0} sx={{ maxWidth: 1230, mb: 3, width: "100%", borderRadius: 2, overflow: "hidden", backgroundColor: tokens.ui.surface, border: `1px solid ${tokens.ui.border}` }}>
       <Box
         sx={{
           background: "linear-gradient(90deg, #1a0a14 0%, #0d0d0d 50%, #1a0a00 100%)",
@@ -39,7 +40,7 @@ const PlayerTable = (props: PlayerTableProps) => {
       <Box sx={{ overflowX: "auto" }}>
         <Table size="small" aria-label="player statistics table" sx={{ mb: 2, "& td, & th": { fontSize: "0.875rem" } }}>
           <TableHead>
-            <TableRow sx={{ backgroundColor: "rgba(0,0,0,0.04)" }}>
+            <TableRow sx={{ backgroundColor: tokens.ui.surfaceRaised }}>
               <TableCell sx={colHeaderCellSx}>Kingdom</TableCell>
               <TableCell align="right" sx={colHeaderCellSx}>Counsellors</TableCell>
               <TableCell align="right" sx={colHeaderCellSx}>Gold</TableCell>
@@ -60,7 +61,7 @@ const PlayerTable = (props: PlayerTableProps) => {
               <TableRow
                 key={key}
                 hover
-                sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+                sx={{ "&:last-child td, &:last-child th": { border: 0 }, "&:hover": { backgroundColor: tokens.ui.surfaceHover } }}
               >
                 <TableCell>
                   <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
@@ -73,7 +74,7 @@ const PlayerTable = (props: PlayerTableProps) => {
                         boxShadow: "inset 0 0 0 1px rgba(0,0,0,0.1)",
                       }}
                     />
-                    <Typography variant="body2" sx={{ fontWeight: "medium" }}>
+                    <Typography variant="body2" sx={{ fontWeight: "medium", color: tokens.ui.text }}>
                       {colourToKingdomMap[value.colour]}
                     </Typography>
                     {value.isArchprelate && (

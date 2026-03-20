@@ -1,8 +1,8 @@
 import { useMemo, useState } from "react";
 import { GAME_PHASES } from "@eots/game";
-import { Box, Chip, Divider, Tab, Tabs, Typography } from "@mui/material";
+import { Box, Tab, Tabs, Typography } from "@mui/material";
 import { Campaign, Dashboard, Person } from "@mui/icons-material";
-import { fonts } from "../designTokens";
+import { tokens } from "@/theme";
 
 type RuleSection = {
   title: string;
@@ -118,12 +118,87 @@ const playerBoardRules: RuleSection[] = [
   },
 ];
 
-const sectionCardSx = {
-  p: 1.5,
-  borderRadius: 2,
-  border: "1px solid rgba(15,23,42,0.12)",
-  background: "linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(246,248,251,0.95) 100%)",
-  boxShadow: "0 3px 10px rgba(15,23,42,0.07)",
+const SectionCard = ({ section }: { section: RuleSection }) => (
+  <Box
+    sx={{
+      p: 1.5,
+      position: "relative",
+      borderRadius: `${tokens.radius.md}px`,
+      border: `1px solid ${tokens.ui.border}`,
+      borderLeft: "3px solid transparent",
+      background: `linear-gradient(180deg, ${tokens.ui.surfaceRaised} 0%, ${tokens.ui.surface} 100%)`,
+      boxShadow: `inset 0 1px 0 ${tokens.ui.gold}08`,
+      "&::before": {
+        content: '""',
+        position: "absolute",
+        left: -3,
+        top: 0,
+        bottom: 0,
+        width: 3,
+        borderRadius: `${tokens.radius.md}px 0 0 ${tokens.radius.md}px`,
+        background: `linear-gradient(180deg, ${tokens.ui.gold} 0%, ${tokens.ui.gold}55 60%, transparent 100%)`,
+      },
+    }}
+  >
+    <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.5 }}>
+      <Typography
+        sx={{
+          fontFamily: tokens.font.display,
+          fontWeight: 700,
+          fontSize: tokens.fontSize.sm,
+          color: tokens.ui.text,
+        }}
+      >
+        {section.title}
+      </Typography>
+      {section.badge && (
+        <Box
+          component="span"
+          sx={{
+            fontSize: tokens.fontSize.xs,
+            fontFamily: tokens.font.body,
+            fontWeight: 600,
+            border: `1px solid ${tokens.ui.gold}33`,
+            borderRadius: `${tokens.radius.pill}px`,
+            px: 1,
+            py: "1px",
+            backgroundColor: `${tokens.ui.gold}0a`,
+            color: tokens.ui.gold,
+          }}
+        >
+          {section.badge}
+        </Box>
+      )}
+    </Box>
+    <Box component="ul" sx={{ m: 0, pl: 2.3 }}>
+      {section.bullets.map((bullet) => (
+        <Typography
+          component="li"
+          key={bullet}
+          sx={{
+            mb: 0.35,
+            lineHeight: 1.4,
+            fontFamily: tokens.font.body,
+            fontSize: tokens.fontSize.xs,
+            color: tokens.ui.textMuted,
+            "::marker": { color: `${tokens.ui.gold}88` },
+          }}
+        >
+          {bullet}
+        </Typography>
+      ))}
+    </Box>
+  </Box>
+);
+
+const tabSx = {
+  textTransform: "none" as const,
+  fontWeight: 700,
+  fontFamily: tokens.font.body,
+  fontSize: tokens.fontSize.sm,
+  color: tokens.ui.textMuted,
+  minHeight: 36,
+  "&.Mui-selected": { color: tokens.ui.gold },
 };
 
 const RulesReference = () => {
@@ -135,11 +210,26 @@ const RulesReference = () => {
   );
 
   return (
-    <Box sx={{ maxWidth: 1230, mx: "auto", width: "100%", px: 2, py: 1 }}>
-      <Typography sx={{ fontFamily: fonts.primary, fontSize: "2rem", mb: 0.4 }}>
+    <Box sx={{ maxWidth: 1230, mx: "auto", width: "100%", px: 2, py: 1.5 }}>
+      <Typography
+        sx={{
+          fontFamily: tokens.font.accent,
+          fontSize: tokens.fontSize.lg,
+          color: tokens.ui.gold,
+          mb: 0.25,
+          letterSpacing: 1,
+        }}
+      >
         Rules Reference
       </Typography>
-      <Typography sx={{ color: "text.secondary", mb: 1.5 }}>
+      <Typography
+        sx={{
+          fontFamily: tokens.font.body,
+          fontSize: tokens.fontSize.xs,
+          color: tokens.ui.textMuted,
+          mb: 1.5,
+        }}
+      >
         Quick lookup for action costs, effects, limits, and phase flow.
       </Typography>
 
@@ -148,85 +238,29 @@ const RulesReference = () => {
         onChange={(_, value) => setTab(value)}
         sx={{
           mb: 1.5,
-          "& .MuiTabs-indicator": { height: 3 },
+          minHeight: 36,
+          "& .MuiTabs-indicator": {
+            height: 2,
+            backgroundColor: tokens.ui.gold,
+          },
         }}
       >
-        <Tab
-          value="action"
-          icon={<Dashboard fontSize="small" />}
-          iconPosition="start"
-          label="Action Board"
-          sx={{ textTransform: "none", fontWeight: 700 }}
-        />
-        <Tab
-          value="player"
-          icon={<Person fontSize="small" />}
-          iconPosition="start"
-          label="Player Board"
-          sx={{ textTransform: "none", fontWeight: 700 }}
-        />
-        <Tab
-          value="phases"
-          icon={<Campaign fontSize="small" />}
-          iconPosition="start"
-          label="Turn Flow"
-          sx={{ textTransform: "none", fontWeight: 700 }}
-        />
+        <Tab value="action" icon={<Dashboard sx={{ fontSize: 16 }} />} iconPosition="start" label="Action Board" sx={tabSx} />
+        <Tab value="player" icon={<Person sx={{ fontSize: 16 }} />} iconPosition="start" label="Player Board" sx={tabSx} />
+        <Tab value="phases" icon={<Campaign sx={{ fontSize: 16 }} />} iconPosition="start" label="Turn Flow" sx={tabSx} />
       </Tabs>
 
-      <Divider sx={{ mb: 1.5 }} />
+      <Box sx={{ height: "1px", backgroundColor: tokens.ui.border, mb: 1.5 }} />
 
-      {tab === "action" ? (
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 1.25 }}>
-          {actionBoardRules.map((section) => (
-            <Box key={section.title} sx={sectionCardSx}>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.5 }}>
-                <Typography sx={{ fontWeight: 800 }}>{section.title}</Typography>
-                {section.badge ? <Chip size="small" label={section.badge} /> : null}
-              </Box>
-              <Box component="ul" sx={{ m: 0, pl: 2.3 }}>
-                {section.bullets.map((bullet) => (
-                  <Typography component="li" key={bullet} sx={{ mb: 0.35, lineHeight: 1.35 }}>
-                    {bullet}
-                  </Typography>
-                ))}
-              </Box>
-            </Box>
-          ))}
-        </Box>
-      ) : null}
-
-      {tab === "player" ? (
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 1.25 }}>
-          {playerBoardRules.map((section) => (
-            <Box key={section.title} sx={sectionCardSx}>
-              <Typography sx={{ fontWeight: 800, mb: 0.5 }}>{section.title}</Typography>
-              <Box component="ul" sx={{ m: 0, pl: 2.3 }}>
-                {section.bullets.map((bullet) => (
-                  <Typography component="li" key={bullet} sx={{ mb: 0.35, lineHeight: 1.35 }}>
-                    {bullet}
-                  </Typography>
-                ))}
-              </Box>
-            </Box>
-          ))}
-        </Box>
-      ) : null}
-
-      {tab === "phases" ? (
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 1.25 }}>
-          <Box sx={sectionCardSx}>
-            <Typography sx={{ fontWeight: 800, mb: 0.5 }}>Game Phases</Typography>
-            <Box component="ul" sx={{ m: 0, pl: 2.3 }}>
-              {phaseSummary.map((line) => (
-                <Typography component="li" key={line} sx={{ mb: 0.35, lineHeight: 1.35 }}>
-                  {line}
-                </Typography>
-              ))}
-            </Box>
-          </Box>
-        </Box>
-      ) : null}
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+        {tab === "action" && actionBoardRules.map((s) => <SectionCard key={s.title} section={s} />)}
+        {tab === "player" && playerBoardRules.map((s) => <SectionCard key={s.title} section={s} />)}
+        {tab === "phases" && (
+          <SectionCard
+            section={{ title: "Game Phases", bullets: phaseSummary }}
+          />
+        )}
+      </Box>
     </Box>
   );
 };

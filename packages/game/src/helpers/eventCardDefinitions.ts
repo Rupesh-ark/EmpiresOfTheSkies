@@ -358,46 +358,57 @@ const resolveImmediateElection = (
 
 // ── Void condition checks ────────────────────────────────────────────────────
 
-/** Returns true if the card would have no effect and should be skipped */
+/** Returns a reason string if the card would have no effect and should be skipped, or false if it should play */
 export const isEventVoid = (
   card: EventCardName,
   G: MyGameState,
   turnOrder: string[]
-): boolean => {
+): string | false => {
   switch (card) {
     case "the_faerie_plague":
-      return !hasDiscoveredLand(G);
+      if (!hasDiscoveredLand(G)) return "no discovered land tiles";
+      return false;
 
     case "schism":
     case "orthodox_rebellion":
-      return !turnOrder.some(
-        (id) => G.playerInfo[id].hereticOrOrthodox === "heretic"
-      );
+      if (!turnOrder.some((id) => G.playerInfo[id].hereticOrOrthodox === "heretic"))
+        return "no heretic players";
+      return false;
 
     case "heretic_rebellion":
-      return !turnOrder.some(
-        (id) => G.playerInfo[id].hereticOrOrthodox === "orthodox"
-      );
+      if (!turnOrder.some((id) => G.playerInfo[id].hereticOrOrthodox === "orthodox"))
+        return "no orthodox players";
+      return false;
 
     case "treacherous_creatures":
-      return !hasPlayerFleetsOnTiles(G, findLegendTileCoords(G, MERFOLK_SEA_ELVES));
+      if (!hasPlayerFleetsOnTiles(G, findLegendTileCoords(G, MERFOLK_SEA_ELVES)))
+        return "no fleets on Merfolk/Sea Elf tiles";
+      return false;
 
     case "mysterious_disappearances":
-      return !hasPlayerFleetsOnTiles(G, findLegendTileCoords(G, CITY_FOUNTAIN));
+      if (!hasPlayerFleetsOnTiles(G, findLegendTileCoords(G, CITY_FOUNTAIN)))
+        return "no fleets on City/Fountain tiles";
+      return false;
 
     case "monsters_awake":
-      return !hasPlayerFleetsOnTiles(G, findLegendTileCoords(G, DRAGONS_KRAKENS));
+      if (!hasPlayerFleetsOnTiles(G, findLegendTileCoords(G, DRAGONS_KRAKENS)))
+        return "no fleets on Dragon/Kraken tiles";
+      return false;
 
     case "infidel_corsairs_raid":
       // Void if ALL players have a defending fleet (skyships > 0 at Kingdom)
-      return turnOrder.every((id) =>
-        G.playerInfo[id].fleetInfo.some(
-          (f) =>
-            f.skyships > 0 &&
-            f.location[0] === KINGDOM_X &&
-            f.location[1] === KINGDOM_Y
+      if (
+        turnOrder.every((id) =>
+          G.playerInfo[id].fleetInfo.some(
+            (f) =>
+              f.skyships > 0 &&
+              f.location[0] === KINGDOM_X &&
+              f.location[1] === KINGDOM_Y
+          )
         )
-      );
+      )
+        return "all players have defending fleets at home";
+      return false;
 
     case "headstrong_commander":
       // Void if no outpost has garrisoned troops
@@ -412,36 +423,45 @@ export const isEventVoid = (
           }
         }
       }
-      return true;
+      return "no garrisoned outposts";
 
     case "faerie_uprising":
     case "colonial_rebellion":
     case "colonial_prelates":
-      return !hasAnyColony(G);
+      if (!hasAnyColony(G)) return "no colonies exist";
+      return false;
 
     case "dynastic_marriage":
-      return turnOrder.length < 4;
+      if (turnOrder.length < 4) return "fewer than 4 players";
+      return false;
 
     case "infidels_invade_faerie":
-      return !hasAnyOutpost(G) && !hasAnyColony(G);
+      if (!hasAnyOutpost(G) && !hasAnyColony(G)) return "no outposts or colonies exist";
+      return false;
 
     case "allies_in_faerie":
-      return !hasAnyOutpost(G);
+      if (!hasAnyOutpost(G)) return "no outposts exist";
+      return false;
 
     case "a_kingdom_turns_heretic": {
       const assignedKingdoms = new Set(
         Object.values(G.playerInfo).map((p) => p.kingdomName)
       );
-      return !ALL_PLAYER_KINGDOMS.some(
-        (k) =>
-          !assignedKingdoms.has(k as any) &&
-          !G.eventState.nprHeretic.includes(k)
-      );
+      if (
+        !ALL_PLAYER_KINGDOMS.some(
+          (k) =>
+            !assignedKingdoms.has(k as any) &&
+            !G.eventState.nprHeretic.includes(k)
+        )
+      )
+        return "no eligible orthodox NPR kingdoms";
+      return false;
     }
 
     case "return_to_orthodoxy":
       // Void if no heretic NPR kingdom exists
-      return G.eventState.nprHeretic.length === 0;
+      if (G.eventState.nprHeretic.length === 0) return "no heretic NPR kingdoms";
+      return false;
 
     default:
       return false;
