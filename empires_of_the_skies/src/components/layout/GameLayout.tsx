@@ -5,13 +5,16 @@ import { tokens } from "@/theme";
 import { getMood } from "@/theme";
 import { PanelSlot, getPhaseLayout, MapSize } from "./phaseLayouts";
 
-/** Parchment background tints per mood */
+/**
+ * Parchment background tints per mood — derived from tokens so they
+ * respect the active preset. Each mood blends its accent into the base.
+ */
 const MOOD_BACKGROUNDS: Record<string, string> = {
-  peacetime:  "#E8DEC8",
-  discovery:  "#E0DECC",
-  battle:     "#EDDCCC",
-  election:   "#E8D8D8",
-  crisis:     "#EDE0C8",
+  peacetime:  tokens.ui.background,
+  discovery:  tokens.mood.discovery.bg,
+  battle:     tokens.mood.battle.bg,
+  election:   tokens.mood.election.bg,
+  crisis:     tokens.mood.crisis.bg,
 };
 
 interface GameLayoutProps {
@@ -75,6 +78,7 @@ export const GameLayout = ({
 
   return (
     <Box
+      className="game-layout-root"
       sx={{
         display: "flex",
         flex: 1,
@@ -95,7 +99,7 @@ export const GameLayout = ({
             overflowY: "auto",
             overflowX: "hidden",
             borderRight: `1px solid ${tokens.ui.border}`,
-            backgroundColor: tokens.ui.surface,
+            backgroundColor: `${tokens.ui.surface}`,
             transition: `width ${tokens.transition.slow}, min-width ${tokens.transition.slow}`,
           }}
         >
@@ -130,7 +134,7 @@ export const GameLayout = ({
               flex: 1,
               position: "relative",
               overflow: "auto",
-              backgroundColor: tokens.ui.background,
+              backgroundColor: `${tokens.ui.background}`,
               minWidth: 0,
             }}
           >
@@ -170,7 +174,7 @@ export const GameLayout = ({
                 overflowY: "auto",
                 overflowX: "hidden",
                 borderLeft: `1px solid ${tokens.ui.border}`,
-                backgroundColor: tokens.ui.surface,
+                backgroundColor: `${tokens.ui.surface}`,
                 transition: `width ${tokens.transition.slow}, min-width ${tokens.transition.slow}, max-width ${tokens.transition.slow}`,
               }}
             >
@@ -190,7 +194,7 @@ export const GameLayout = ({
               flexShrink: 0,
               overflowY: "auto",
               borderTop: `1px solid ${tokens.ui.border}`,
-              backgroundColor: tokens.ui.surface,
+              backgroundColor: `${tokens.ui.surface}`,
             }}
           >
             {renderSlot(config.bottom)}
@@ -207,7 +211,7 @@ export const GameLayout = ({
                   height: "35vh",
                   overflowY: "auto",
                   borderTop: `1px solid ${tokens.ui.border}`,
-                  backgroundColor: tokens.ui.surface,
+                  backgroundColor: `${tokens.ui.surface}`,
                 }}
               >
                 {extraTab !== null && renderSlot(extraTab)}
@@ -218,7 +222,7 @@ export const GameLayout = ({
             <Box
               sx={{
                 borderTop: `1px solid ${tokens.ui.border}`,
-                backgroundColor: tokens.ui.surfaceRaised,
+                backgroundColor: `${tokens.ui.surfaceRaised}`,
               }}
             >
               <Tabs

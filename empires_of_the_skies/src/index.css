@@ -10,7 +10,8 @@ body {
   padding: 0;
   width: 100%;
   min-height: 100%;
-  background-color: #E8DEC8;
+  /* Background color set by tokens via React — keep neutral fallback */
+  background-color: #C8BDAA;
   color: #3A2E22;
 }
 
@@ -130,4 +131,38 @@ table {
   margin-bottom: 20px;
   font-size: 18px;
   font-weight: bold;
+}
+
+/* ============================================================
+   Animated river background — teal flow over parchment
+   Scoped to the game layout container only.
+   ============================================================ */
+
+.game-layout-root {
+  position: relative;
+}
+
+.game-layout-root::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0.07;
+  background:
+    radial-gradient(ellipse 35% 60% at 12% 25%,  rgba(45,107,90,0.9) 0%, transparent 70%),
+    radial-gradient(ellipse 20% 80% at 35% 60%,  rgba(45,107,90,0.8) 0%, transparent 65%),
+    radial-gradient(ellipse 30% 45% at 60% 20%,  rgba(45,107,90,0.7) 0%, transparent 60%),
+    radial-gradient(ellipse 25% 70% at 80% 70%,  rgba(45,107,90,0.85) 0%, transparent 65%),
+    radial-gradient(ellipse 18% 50% at 50% 90%,  rgba(45,107,90,0.6) 0%, transparent 55%);
+  background-size: 200% 200%;
+  animation: riverFlow 18s ease-in-out infinite;
+}
+
+@keyframes riverFlow {
+  0%   { background-position: 0% 0%; }
+  25%  { background-position: 15% 25%; }
+  50%  { background-position: 5% 45%; }
+  75%  { background-position: 20% 10%; }
+  100% { background-position: 0% 0%; }
 }

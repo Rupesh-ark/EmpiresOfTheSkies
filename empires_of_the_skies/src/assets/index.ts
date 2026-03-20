@@ -6,3 +6,4 @@ export * from "./kingdomAdvantage";
 export * from "./playerBoard";
 export * from "./icons";
 export * from "./homePage";
+export * from "./backgrounds";

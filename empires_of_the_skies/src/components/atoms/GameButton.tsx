@@ -24,22 +24,22 @@ const sizeMap = {
 // Embossed brass plate — raised surface with light-catching bevel
 const variantStyleMap = {
   primary: {
-    background: `linear-gradient(180deg, #F5D06A 0%, ${tokens.ui.gold} 40%, #C99A30 100%)`,
-    color: "#1a1208",
+    background: `linear-gradient(180deg, ${tokens.ui.tealLight} 0%, ${tokens.ui.gold} 40%, #1F4F42 100%)`,
+    color: "#EAF5F1",
     border: "none",
-    borderTop: "1px solid rgba(255,240,200,0.5)",
-    borderBottom: "2px solid #8A6A18",
-    boxShadow: `0 2px 6px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.25)`,
+    borderTop: "1px solid rgba(180,230,210,0.30)",
+    borderBottom: "2px solid #163B31",
+    boxShadow: `0 2px 6px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.18)`,
     fontWeight: 700,
     "&:hover": {
-      background: `linear-gradient(180deg, #FFDD80 0%, #F0C850 40%, #D4A838 100%)`,
-      boxShadow: `0 3px 10px rgba(0,0,0,0.4), 0 0 12px ${tokens.ui.gold}30, inset 0 1px 0 rgba(255,255,255,0.3)`,
+      background: `linear-gradient(180deg, #4A8E7A 0%, ${tokens.ui.tealLight} 40%, ${tokens.ui.gold} 100%)`,
+      boxShadow: `0 3px 10px rgba(0,0,0,0.4), 0 0 12px ${tokens.ui.gold}30, inset 0 1px 0 rgba(255,255,255,0.22)`,
       transform: "translateY(-1px)",
     },
     "&:active": {
-      background: `linear-gradient(180deg, #C49930 0%, #B08828 40%, #9A7520 100%)`,
+      background: `linear-gradient(180deg, #1F4F42 0%, #193E34 40%, #132E28 100%)`,
       boxShadow: `0 1px 3px rgba(0,0,0,0.4), inset 0 2px 4px rgba(0,0,0,0.2)`,
-      borderTop: "1px solid rgba(255,240,200,0.2)",
+      borderTop: "1px solid rgba(180,230,210,0.12)",
       transform: "translateY(0px)",
     },
   },
