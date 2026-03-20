@@ -121,6 +121,15 @@ export const CounsellorSlot = {
   Third:  3,
 } as const;
 
+// ── Action board slot counts ───────────────────────────────────────────────
+export const SLOTS_RECRUIT_COUNSELLORS = 3;
+export const SLOTS_RECRUIT_REGIMENTS = 6;
+export const SLOTS_PURCHASE_SKYSHIPS = 2;
+export const SLOTS_FOUND_FACTORIES = 4;
+export const SLOTS_FOUND_BUILDINGS = 4;
+export const SLOTS_PUNISH_DISSENTERS = 6;
+export const SLOTS_CONVERT_MONARCH = 6;
+
 export const BuildingSlot = {
   Cathedral: 1,
   Palace:    2,

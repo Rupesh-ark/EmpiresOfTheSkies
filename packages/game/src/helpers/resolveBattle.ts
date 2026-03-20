@@ -14,6 +14,30 @@ import { PRICE_MARKER_MIN } from "../codifiedGameInfo";
 const GOODS: GoodKey[] = ["mithril", "dragonScales", "krakenSkin", "magicDust", "stickyIchor", "pipeweed"];
 
 // ---------------------------------------------------------------------------
+// Private loss-reporting helpers
+// ---------------------------------------------------------------------------
+
+function formatLosses(losses: { levies: number; regiments: number; eliteRegiments: number; skyships: number }): string {
+  const parts: string[] = [];
+  if (losses.levies > 0) parts.push(`${losses.levies} ${losses.levies === 1 ? 'levy' : 'levies'}`);
+  if (losses.regiments > 0) parts.push(`${losses.regiments} ${losses.regiments === 1 ? 'regiment' : 'regiments'}`);
+  if (losses.eliteRegiments > 0) parts.push(`${losses.eliteRegiments} elite`);
+  if (losses.skyships > 0) parts.push(`${losses.skyships} ${losses.skyships === 1 ? 'skyship' : 'skyships'}`);
+  return parts.length > 0 ? parts.join(', ') : 'none';
+}
+
+function snapshotFleets(fleets: FleetInfo[]): { levies: number; regiments: number; eliteRegiments: number; skyships: number } {
+  let levies = 0, regiments = 0, eliteRegiments = 0, skyships = 0;
+  for (const f of fleets) {
+    levies += f.levies;
+    regiments += f.regiments;
+    eliteRegiments += f.eliteRegiments ?? 0;
+    skyships += f.skyships;
+  }
+  return { levies, regiments, eliteRegiments, skyships };
+}
+
+// ---------------------------------------------------------------------------
 // Private battle math helpers
 // ---------------------------------------------------------------------------
 
@@ -223,6 +247,13 @@ export const resolveBattleAndReturnWinner = (
   const attackerLosses = defenderSwordValue - attackerShieldValue;
   const defenderLosses = attackerSwordValue - defenderShieldValue;
 
+  // --- Snapshot unit counts before losses (for loss reporting) ---
+  const attackerSnap = snapshotFleets(attackerFleets);
+  const defenderFleetSnap = snapshotFleets(defenderFleets);
+  const garrisonSnapLevies = ctx.phase === "ground_battle" ? (G.mapState.buildings[y][x].garrisonedLevies ?? 0) : 0;
+  const garrisonSnapRegiments = ctx.phase === "ground_battle" ? (G.mapState.buildings[y][x].garrisonedRegiments ?? 0) : 0;
+  const garrisonSnapElite = ctx.phase === "ground_battle" ? (G.mapState.buildings[y][x].garrisonedEliteRegiments ?? 0) : 0;
+
   // --- Apply losses ---
   // GAP-22: odd-hit rule applies to aerial/ground fleet combats
   applyFleetLosses(attackerFleets, attackerLosses, true);
@@ -254,6 +285,39 @@ export const resolveBattleAndReturnWinner = (
     }
   } else {
     applyFleetLosses(defenderFleets, defenderLosses, true);
+  }
+
+  // --- Log unit losses ---
+  {
+    const attackerAfter = snapshotFleets(attackerFleets);
+    const attackerLossDetail = formatLosses({
+      levies: attackerSnap.levies - attackerAfter.levies,
+      regiments: attackerSnap.regiments - attackerAfter.regiments,
+      eliteRegiments: attackerSnap.eliteRegiments - attackerAfter.eliteRegiments,
+      skyships: attackerSnap.skyships - attackerAfter.skyships,
+    });
+
+    let defenderLossDetail: string;
+    if (ctx.phase === "ground_battle") {
+      const currentBuilding = G.mapState.buildings[y][x];
+      const defenderAfter = snapshotFleets(defenderFleets);
+      defenderLossDetail = formatLosses({
+        levies: (garrisonSnapLevies - (currentBuilding.garrisonedLevies ?? 0)) + (defenderFleetSnap.levies - defenderAfter.levies),
+        regiments: (garrisonSnapRegiments - (currentBuilding.garrisonedRegiments ?? 0)) + (defenderFleetSnap.regiments - defenderAfter.regiments),
+        eliteRegiments: (garrisonSnapElite - (currentBuilding.garrisonedEliteRegiments ?? 0)) + (defenderFleetSnap.eliteRegiments - defenderAfter.eliteRegiments),
+        skyships: defenderFleetSnap.skyships - defenderAfter.skyships,
+      });
+    } else {
+      const defenderAfter = snapshotFleets(defenderFleets);
+      defenderLossDetail = formatLosses({
+        levies: defenderFleetSnap.levies - defenderAfter.levies,
+        regiments: defenderFleetSnap.regiments - defenderAfter.regiments,
+        eliteRegiments: defenderFleetSnap.eliteRegiments - defenderAfter.eliteRegiments,
+        skyships: defenderFleetSnap.skyships - defenderAfter.skyships,
+      });
+    }
+
+    logEvent(G, `Losses — ${attackerName}: ${attackerLossDetail} | ${defenderName}: ${defenderLossDetail}`);
   }
 
   // --- Determine winner ---
@@ -405,6 +469,12 @@ export const resolveConquest = (
   const attackerLosses = defenderSwordValue - attackerShieldValue;
   let attackerLossesCopy = attackerLosses.valueOf();
 
+  // --- Snapshot unit counts before losses (for loss reporting) ---
+  const conquestGarrisonSnapLevies = attackerGarrisonedLevies;
+  const conquestGarrisonSnapRegiments = attackerGarrisonedRegiments;
+  const conquestGarrisonSnapElite = attackerGarrisonedEliteRegiments;
+  const conquestFleetSnap = snapshotFleets(attackerFleets);
+
   // Garrison troops absorb losses first (conquest-specific priority — no odd-hit rule here)
   if (attackerLossesCopy > attackerGarrisonedLevies) {
     attackerLossesCopy -= attackerGarrisonedLevies;
@@ -430,6 +500,18 @@ export const resolveConquest = (
 
   // Fleet troops absorb any remaining losses (no odd-hit rule — garrison absorbed first)
   applyFleetLosses(attackerFleets, attackerLossesCopy, false);
+
+  // --- Log conquest unit losses ---
+  {
+    const conquestFleetAfter = snapshotFleets(attackerFleets);
+    const conquestLossDetail = formatLosses({
+      levies: (conquestGarrisonSnapLevies - attackerGarrisonedLevies) + (conquestFleetSnap.levies - conquestFleetAfter.levies),
+      regiments: (conquestGarrisonSnapRegiments - attackerGarrisonedRegiments) + (conquestFleetSnap.regiments - conquestFleetAfter.regiments),
+      eliteRegiments: (conquestGarrisonSnapElite - attackerGarrisonedEliteRegiments) + (conquestFleetSnap.eliteRegiments - conquestFleetAfter.eliteRegiments),
+      skyships: conquestFleetSnap.skyships - conquestFleetAfter.skyships,
+    });
+    logEvent(G, `Conquest losses — ${conquestPlayerName}: ${conquestLossDetail}`);
+  }
 
   // Count survivors (garrison + fleets) and clean up wiped fleets
   let remainingAttackers =

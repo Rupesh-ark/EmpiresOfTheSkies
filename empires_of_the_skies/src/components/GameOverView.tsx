@@ -1,17 +1,13 @@
-import { Dialog, DialogContent, DialogTitle } from "@mui/material";
 import { MyGameProps } from "@eots/game";
-import React from "react";
 import PlayerTable from "./PlayerTable/PlayerTable";
+import { DialogShell } from "@/components/atoms/DialogShell";
 
 const GameOverView = (props: MyGameProps) => {
   const open = props.ctx.gameover ?? false;
   return (
-    <Dialog open={open} maxWidth={"xl"}>
-      <DialogTitle>Game over!</DialogTitle>
-      <DialogContent>
-        <PlayerTable {...props}></PlayerTable>
-      </DialogContent>
-    </Dialog>
+    <DialogShell open={open} title="Game Over!" mood="peacetime" size="lg" hideActions>
+      <PlayerTable {...props} />
+    </DialogShell>
   );
 };
 

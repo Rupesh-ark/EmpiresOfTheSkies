@@ -565,7 +565,26 @@ const MyGame: Game<MyGameState> = {
       next: "resolution",
     },
     resolution: {
-      turn: { order: TurnOrder.CUSTOM_FROM("turnOrder") },
+      turn: {
+        order: TurnOrder.CUSTOM_FROM("turnOrder"),
+        onBegin: (context) => {
+          // Auto-skip players with no deployed fleets during retrieve fleets stage
+          if (context.G.stage !== "retrieve fleets") return;
+          const playerID = context.ctx.currentPlayer;
+          const player = context.G.playerInfo[playerID];
+          const hasDeployedFleets = player.fleetInfo.some(
+            (f) => f.skyships > 0 && (f.location[0] !== 4 || f.location[1] !== 0)
+          );
+          if (!hasDeployedFleets) {
+            player.passed = true;
+            if (allPlayersPassed(context.G)) {
+              context.events.endPhase();
+            } else {
+              context.events.endTurn();
+            }
+          }
+        },
+      },
       onBegin: (context) => {
         if (checkLoopGuard(context, "resolution")) return;
         phaseLog.info("resolution", { round: context.G.round });

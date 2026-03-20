@@ -1,38 +1,20 @@
-import { ActionBoardButton } from "../ActionBoardButton";
-import { ActionRow, RowHeader, ActionBoardProps } from "../shared";
+import { ActionBoardProps } from "../shared";
 import { RECRUIT_COUNSELLORS } from "@/assets/actionBoard";
+import { CollapsedActionRow } from "../CollapsedActionRow";
+import { clearMoves } from "@/utils/gameHelpers";
+import { SLOTS_RECRUIT_COUNSELLORS } from "@eots/game";
 
 const RecruitCounsellorsRow = (props: ActionBoardProps) => (
-  <ActionRow
-    header={
-      <RowHeader
-        label="Recruit Counsellors"
-        meta={[
-          { label: "Cost", value: "1g + row count" },
-          { label: "Gain", value: "+1 counsellor" },
-          { label: "Max", value: "7" },
-        ]}
-        accent="#6b7280"
-      />
-    }
-  >
-    {RECRUIT_COUNSELLORS.map((image, i) => (
-      <ActionBoardButton
-        key={`recruit-counsellor-${i}`}
-        value={i}
-        onClickFunction={props.moves.recruitCounsellors}
-        backgroundImage={image}
-        width="98px"
-        counsellor={
-          props.G.boardState.recruitCounsellors[
-            (i + 1) as keyof typeof props.G.boardState.recruitCounsellors
-          ]
-        }
-        requires={{ gold: true }}
-        {...props}
-      />
-    ))}
-  </ActionRow>
+  <CollapsedActionRow
+    label="Recruit Counsellors"
+    cost="1g + row count → +1 counsellor"
+    images={RECRUIT_COUNSELLORS}
+    totalSlots={SLOTS_RECRUIT_COUNSELLORS}
+    slotState={props.G.boardState.recruitCounsellors}
+    onPlace={(slot) => { clearMoves(props); props.moves.recruitCounsellors(slot); }}
+    playerInfo={props.G.playerInfo}
+    accent="#6b7280"
+  />
 );
 
 export default RecruitCounsellorsRow;

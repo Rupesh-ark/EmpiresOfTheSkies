@@ -21,35 +21,35 @@ export const tokens = {
     heresy:   "#E77B00",      // orange
   },
 
-  // ── Semantic UI colors (dark theme) ────────────────────────────────────────
+  // ── Semantic UI colors (parchment light theme) ─────────────────────────────
   ui: {
-    background:    "#0d1117",
-    surface:       "#161b22",
-    surfaceRaised: "#1c2333",
-    surfaceHover:  "#21262d",
-    border:        "rgba(255,255,255,0.08)",
-    borderMedium:  "rgba(255,255,255,0.15)",
-    borderFocus:   "rgba(255,255,255,0.3)",
-    text:          "#e6edf3",
-    textMuted:     "#8b949e",
-    textBright:    "#ffffff",
-    gold:          "#D7B469",
-    danger:        "#ef4444",
-    success:       "#22c55e",
-    warning:       "#f59e0b",
-    info:          "#3b82f6",
+    background:    "#E8DEC8",       // aged parchment
+    surface:       "#F0E8D4",       // lighter parchment panel
+    surfaceRaised: "#F5EEE0",       // raised card
+    surfaceHover:  "#EDE4CE",       // hover — slightly darker
+    border:        "rgba(120,90,50,0.18)",
+    borderMedium:  "rgba(120,90,50,0.30)",
+    borderFocus:   "rgba(160,110,30,0.55)",
+    text:          "#3A2E22",       // dark walnut ink
+    textMuted:     "#7A6A55",       // faded ink
+    textBright:    "#2A1E12",       // darkest ink
+    gold:          "#B8860B",       // dark gold / antique brass
+    danger:        "#C0392B",       // deep crimson
+    success:       "#2E7D32",       // forest green
+    warning:       "#D4820A",       // amber
+    info:          "#2874A6",       // map blue
 
     // Action board button colors
-    actionButtonDefault: "#e0e0e0",
-    actionButtonLarge:   "#5ebf85",
+    actionButtonDefault: "#5C4A38",
+    actionButtonLarge:   "#2E7D32",
 
     // Player-order tile accent
-    playerOrderTile: "#9EE8FF",
+    playerOrderTile: "#5DADE2",
 
     // Misc UI neutrals retained for backward compatibility
-    tableBorderLight: "#EAEAEA",
-    shipyardGold:     "#D7B469",
-    shipyardGrey:     "#D9DADA",
+    tableBorderLight: "rgba(120,90,50,0.15)",
+    shipyardGold:     "#B8860B",
+    shipyardGrey:     "#7A6A55",
     black:            "#000000",
     white:            "#ffffff",
   },
@@ -64,13 +64,13 @@ export const tokens = {
     pipeweed:     "#AE9675",
   },
 
-  // ── Mood palettes (per game phase) ─────────────────────────────────────────
+  // ── Mood palettes (per game phase — warm parchment accents) ─────────────────
   mood: {
-    peacetime: { accent: "#D7B469", bg: "rgba(215,180,105,0.04)", border: "rgba(215,180,105,0.15)" },
-    battle:    { accent: "#ef4444", bg: "rgba(239,68,68,0.06)",   border: "rgba(239,68,68,0.25)"  },
-    election:  { accent: "#A74383", bg: "rgba(167,67,131,0.05)",  border: "rgba(167,67,131,0.2)" },
-    discovery: { accent: "#3b82f6", bg: "rgba(59,130,246,0.05)",  border: "rgba(59,130,246,0.2)" },
-    crisis:    { accent: "#f59e0b", bg: "rgba(245,158,11,0.05)",  border: "rgba(245,158,11,0.2)" },
+    peacetime: { accent: "#B8860B", bg: "rgba(184,134,11,0.06)",  border: "rgba(184,134,11,0.25)" },
+    battle:    { accent: "#C0392B", bg: "rgba(192,57,43,0.08)",   border: "rgba(192,57,43,0.35)"  },
+    election:  { accent: "#8E44AD", bg: "rgba(142,68,173,0.07)",  border: "rgba(142,68,173,0.25)" },
+    discovery: { accent: "#2874A6", bg: "rgba(40,116,166,0.07)",  border: "rgba(40,116,166,0.25)" },
+    crisis:    { accent: "#D4820A", bg: "rgba(212,130,10,0.08)",  border: "rgba(212,130,10,0.30)" },
   },
 
   // ── Typography ─────────────────────────────────────────────────────────────
@@ -109,10 +109,10 @@ export const tokens = {
 
   // ── Shadows ────────────────────────────────────────────────────────────────
   shadow: {
-    sm:   "0 1px 3px rgba(0,0,0,0.4)",
-    md:   "0 4px 12px rgba(0,0,0,0.5)",
-    lg:   "0 8px 24px rgba(0,0,0,0.6)",
-    glow: (color: string) => `0 0 12px ${color}40, 0 0 4px ${color}20`,
+    sm:   "0 1px 3px rgba(80,60,30,0.15)",
+    md:   "0 4px 12px rgba(80,60,30,0.12)",
+    lg:   "0 8px 24px rgba(80,60,30,0.15)",
+    glow: (color: string) => `0 0 8px ${color}30, 0 0 3px ${color}15`,
   },
 
   // ── Border radii ───────────────────────────────────────────────────────────

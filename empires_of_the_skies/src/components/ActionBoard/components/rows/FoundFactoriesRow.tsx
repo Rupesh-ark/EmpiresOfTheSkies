@@ -1,46 +1,19 @@
-import { ActionBoardButton } from "../ActionBoardButton";
-import { ActionRow, RowHeader, ActionBoardProps } from "../shared";
-
-const SLOTS = [
-  { text: "Slot 1" },
-  { text: "Slot 2" },
-  { text: "Slot 3" },
-  { text: "Slot 4" },
-];
-const BG_COLOR = "#C8A96E";
+import { ActionBoardProps } from "../shared";
+import { CollapsedActionRow } from "../CollapsedActionRow";
+import { clearMoves } from "@/utils/gameHelpers";
+import { SLOTS_FOUND_FACTORIES } from "@eots/game";
 
 const FoundFactoriesRow = (props: ActionBoardProps) => (
-  <ActionRow
-    header={
-      <RowHeader
-        label="Found Factories"
-        meta={[
-          { label: "Cost", value: "1g + row count" },
-          { label: "Gain", value: "+1 factory" },
-          { label: "Max", value: "6" },
-        ]}
-        accent="#8f6f34"
-      />
-    }
-  >
-    {SLOTS.map((slot, i) => (
-      <ActionBoardButton
-        key={`found-factory-${i}`}
-        value={i}
-        onClickFunction={props.moves.foundFactory}
-        backgroundColour={BG_COLOR}
-        text={slot.text}
-        width="98px"
-        counsellor={
-          props.G.boardState.foundFactories[
-            (i + 1) as keyof typeof props.G.boardState.foundFactories
-          ]
-        }
-        requires={{ gold: true }}
-        {...props}
-      />
-    ))}
-  </ActionRow>
+  <CollapsedActionRow
+    label="Found Factories"
+    cost="1g + row count → +1 factory"
+    images={[]}
+    totalSlots={SLOTS_FOUND_FACTORIES}
+    slotState={props.G.boardState.foundFactories}
+    onPlace={(slot) => { clearMoves(props); props.moves.foundFactory(slot); }}
+    playerInfo={props.G.playerInfo}
+    accent="#8f6f34"
+  />
 );
 
 export default FoundFactoriesRow;
