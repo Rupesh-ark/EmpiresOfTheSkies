@@ -16,10 +16,10 @@ import { createLogger } from "@eots/game";
 
 const log = createLogger("lobby");
 import { useNavigate } from "react-router-dom";
-import { BG_DESKTOP as bgDesktop, BG_TABLET as bgTablet, BG_MOBILE as bgMobile, LOGO as logo } from "../assets/homePage";
+import { BG_DESKTOP as bgDesktop, BG_TABLET as bgTablet, BG_MOBILE as bgMobile } from "../assets/homePage";
+import { BG_PARCHMENT_PANEL } from "../assets/backgrounds";
 import { tokens } from "@/theme";
 
-// Local aliases matching legacy shape — home page uses its own warm palette
 const colors = { home: tokens.home } as const;
 const fonts = { accent: tokens.font.accent, primary: tokens.font.display, system: tokens.font.body } as const;
 
@@ -41,8 +41,6 @@ const createMatch = async (
   log.info("match created", { matchID: enquiry.matchID });
   setMatchReady(response.matchID);
 };
-
-// Shared sx objects defined outside the component to avoid recreation on every render
 
 const labelSx = {
   fontFamily: fonts.accent,
@@ -69,6 +67,12 @@ const textFieldSx = {
   "& .MuiOutlinedInput-notchedOutline": { border: "none" },
 } as const;
 
+const TAGLINES = [
+  ["An Age of Faith turns into an Age of ", "Discovery", "#5A9E72", "..."],
+  ["An Age of Scarcity to an Age of ", "Wealth", "#5A9E72", "..."],
+  ["An Age of Peace to an Age of ", "War!", "#C04040", ""],
+] as const;
+
 const HomePageComponent = (props: HomePageComponentProps) => {
   const [joinOrCreate, setJoinOrCreate] = useState<"join" | "create">("join");
   const [playerName, setName] = useState("");
@@ -92,9 +96,10 @@ const HomePageComponent = (props: HomePageComponentProps) => {
         backgroundRepeat: "no-repeat",
         backgroundAttachment: { xs: "scroll", md: "fixed" },
         display: "flex",
-        alignItems: { xs: "flex-end", md: "center" },
-        justifyContent: { xs: "center", md: "flex-end" },
-        px: { xs: "clamp(12px, 3vw, 24px)", md: "clamp(60px, 7vw, 140px)" },
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        px: { xs: "clamp(12px, 3vw, 24px)", md: "clamp(40px, 5vw, 80px)" },
         py: { xs: "clamp(16px, 4vh, 40px)", md: "clamp(24px, 4vh, 64px)" },
         pb: {
           xs: "calc(env(safe-area-inset-bottom) + 32px)",
@@ -103,158 +108,116 @@ const HomePageComponent = (props: HomePageComponentProps) => {
         boxSizing: "border-box",
       }}
     >
-  
+      {/* ── Centered content column ──────────────────────────────── */}
       <Box
         sx={{
-          position: "absolute",
-          top: { xs: 12, md: 24 },
-          left: { xs: "50%", md: 36 },
-          transform: { xs: "translateX(-50%)", md: "none" },
-          width: { xs: 150, sm: 190, md: 240 },
-          height: { xs: 150, sm: 190, md: 240 },
-          borderRadius: "50%",
-          overflow: "hidden",
-          boxShadow: "0 0 18px 6px rgba(200, 160, 60, 0.55)",
-          pointerEvents: "none",
-          zIndex: 1,
-          userSelect: "none",
-          flexShrink: 0,
-        }}
-      >
-        <Box
-          component="img"
-          src={logo}
-          alt="Empires of the Sky"
-          sx={{ width: "100%", height: "100%", display: "block", objectFit: "cover" }}
-        />
-      </Box>
-
-      <Box
-        sx={{
-          position: "absolute",
-          bottom: { sm: 28, md: 36 },
-          left: { sm: 28, md: 44 },
-          maxWidth: { sm: 320, md: 400 },
-          display: { xs: "none", sm: "block" },
-          zIndex: 1,
-          pointerEvents: "none",
-        }}
-      >
-        {(
-          [
-            ["An Age of Faith turns into an Age of ", "Discovery", "#7ecfa0", "..."],
-            ["An Age of Scarcity to an Age of ", "Wealth", "#7ecfa0", "..."],
-            ["An Age of Peace to an Age of ", "War!", "#e05555", ""],
-          ] as const
-        ).map(([prefix, highlight, highlightColor, suffix]) => (
-          <Typography
-            key={highlight}
-            sx={{
-              fontFamily: fonts.accent,
-              fontSize: { sm: "1rem", md: "1.1rem" },
-              lineHeight: 2,
-              fontStyle: "italic",
-              color: "rgba(235, 215, 170, 1)",
-              textShadow: "0 0 8px rgba(0,0,0,1), 1px 1px 3px rgba(0,0,0,1)",
-            }}
-          >
-            {prefix}
-            <Box component="span" sx={{ color: highlightColor }}>
-              {highlight}
-            </Box>
-            {suffix}
-          </Typography>
-        ))}
-      </Box>
-
-
-      <Box
-        sx={{
-          width: "100%",
-          maxWidth: 520,
           display: "flex",
           flexDirection: "column",
-          alignItems: { xs: "stretch", md: "flex-start" },
-          gap: { xs: 2, md: 2.5 },
+          alignItems: "center",
+          gap: { xs: 1.5, md: 2 },
+          width: "100%",
+          maxWidth: 520,
+          maxHeight: "100%",
           zIndex: 2,
         }}
       >
-        <Box sx={{ display: { xs: "block", sm: "none" }, textAlign: "center" }}>
-          {(
-            [
-              ["An Age of Faith turns into an Age of ", "Discovery", "#7ecfa0", "..."],
-              ["An Age of Scarcity to an Age of ", "Wealth", "#7ecfa0", "..."],
-              ["An Age of Peace to an Age of ", "War!", "#e05555", ""],
-            ] as const
-          ).map(([prefix, highlight, highlightColor, suffix]) => (
-            <Typography
-              key={highlight}
-              sx={{
-                fontFamily: fonts.accent,
-                fontSize: "0.95rem",
-                lineHeight: 2,
-                fontStyle: "italic",
-                color: "rgba(235, 215, 170, 1)",
-                textShadow: "0 0 8px rgba(0,0,0,1), 1px 1px 3px rgba(0,0,0,1)",
-              }}
-            >
-              {prefix}
-              <Box component="span" sx={{ color: highlightColor }}>
-                {highlight}
-              </Box>
-              {suffix}
-            </Typography>
-          ))}
-        </Box>
-
+        {/* Form panel — contains title, taglines, and form */}
         <Paper
-          elevation={6}
+          elevation={0}
           sx={{
             width: "100%",
             display: "flex",
             flexDirection: "column",
-            p: { xs: 3, md: 4 },
-            backgroundColor: colors.home.parchmentBg,
-            backgroundBlendMode: "lighten",
+            p: { xs: 2.5, md: 3 },
+            position: "relative",
+            background: "transparent",
+            backdropFilter: "blur(4px)",
             border: `2px solid ${colors.home.border}`,
-            boxShadow: "inset 0 0 10px rgba(0, 0, 0, 0.3)",
+            boxShadow: "inset 0 0 20px rgba(80, 50, 10, 0.1), 0 8px 32px rgba(0,0,0,0.25)",
             borderRadius: 1,
             gap: 1.5,
+            overflow: "hidden",
+            // Parchment texture + tinted background
+            "&::before": {
+              content: '""',
+              position: "absolute",
+              inset: 0,
+              background: `${colors.home.parchmentBg}`,
+              backgroundImage: `url(${BG_PARCHMENT_PANEL})`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+              backgroundBlendMode: "multiply",
+              opacity: 0.82,
+              pointerEvents: "none",
+              zIndex: 0,
+            },
+            // Ensure children sit above texture
+            "& > *": { position: "relative", zIndex: 1 },
           }}
         >
+          {/* Game title */}
           <Typography
             sx={{
               fontFamily: fonts.accent,
-              fontWeight: 700,
-              fontSize: { xs: "1.2rem", md: "1.5rem" },
+              fontSize: { xs: "1.5rem", sm: "1.8rem", md: "2rem" },
+              fontWeight: 800,
               color: colors.home.text,
               textAlign: "center",
               letterSpacing: "0.1em",
-              mb: 1,
+              textTransform: "uppercase",
+              lineHeight: 1.2,
+              userSelect: "none",
             }}
           >
-            COMMAND CENTER
+            Empires of the Sky
           </Typography>
+
+          {/* Taglines */}
+          <Box sx={{ textAlign: "center", mb: 0.5 }}>
+            {TAGLINES.map(([prefix, highlight, highlightColor, suffix]) => (
+              <Typography
+                key={highlight}
+                sx={{
+                  fontFamily: fonts.accent,
+                  fontSize: { xs: "0.75rem", sm: "0.82rem", md: "0.88rem" },
+                  lineHeight: 1.8,
+                  fontStyle: "italic",
+                  color: colors.home.text,
+                  opacity: 0.75,
+                }}
+              >
+                {prefix}
+                <Box component="span" sx={{ color: highlightColor, fontWeight: 700, opacity: 1 }}>
+                  {highlight}
+                </Box>
+                {suffix}
+              </Typography>
+            ))}
+          </Box>
+
 
           <ToggleButtonGroup
             color="secondary"
             value={joinOrCreate}
             exclusive
-            fullWidth
             onChange={(_, value) => value && setJoinOrCreate(value)}
             sx={{
+              alignSelf: "center",
               "& .MuiToggleButton-root": {
                 fontFamily: fonts.accent,
+                fontSize: "0.8rem",
+                letterSpacing: "0.06em",
+                px: 3,
+                py: 0.5,
                 color: colors.home.text,
                 border: `1px solid ${colors.home.border}`,
-                backgroundColor: colors.home.creamButton,
+                backgroundColor: "transparent",
                 "&.Mui-selected": {
-                  backgroundColor: colors.home.border,
-                  backgroundImage: "none",
+                  backgroundColor: `${colors.home.border}`,
                   color: "rgba(255, 255, 255, 0.9)",
                   "&:hover": { backgroundColor: "#b89062" },
                 },
-                "&:hover": { backgroundColor: colors.home.creamButtonSolid },
+                "&:hover": { backgroundColor: `${colors.home.border}22` },
               },
             }}
           >
@@ -363,7 +326,9 @@ const HomePageComponent = (props: HomePageComponentProps) => {
               width: "100%",
               p: { xs: 2.5, sm: 3, md: 4 },
               textAlign: "center",
-              backgroundColor: "rgba(240, 230, 210, 0.9)",
+              backgroundImage: `url(${BG_PARCHMENT_PANEL})`,
+              backgroundSize: "cover",
+              backgroundColor: colors.home.parchmentBg,
               backgroundBlendMode: "overlay",
               border: `2px solid ${colors.home.border}`,
               borderRadius: 1,
@@ -395,6 +360,27 @@ const HomePageComponent = (props: HomePageComponentProps) => {
           </Paper>
         )}
       </Box>
+
+      {/* Copyright */}
+      <Typography
+        sx={{
+          position: "absolute",
+          bottom: { xs: 8, md: 12 },
+          left: { xs: "50%", md: 20 },
+          transform: { xs: "translateX(-50%)", md: "none" },
+          fontFamily: fonts.accent,
+          fontSize: "0.95rem",
+          fontWeight: 600,
+          color: "rgba(255, 245, 230, 0.9)",
+          textShadow: "0 1px 4px rgba(0,0,0,0.8), 0 0 8px rgba(0,0,0,0.5)",
+          letterSpacing: "0.05em",
+          zIndex: 1,
+          userSelect: "none",
+          whiteSpace: "nowrap",
+        }}
+      >
+        &copy; NF MacCormack 2023
+      </Typography>
     </Box>
   );
 };

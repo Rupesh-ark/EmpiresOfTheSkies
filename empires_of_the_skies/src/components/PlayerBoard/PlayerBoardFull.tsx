@@ -21,10 +21,13 @@ import { lazy, Suspense } from "react";
 import { FleetInfo, MyGameProps, PlayerFortuneOfWarCardInfo, findPossibleDestinations } from "@eots/game";
 
 const WorldMap = lazy(() => import("../WorldMap/WorldMap"));
+import { IconCounsellor, IconGold, IconVP, IconRegiment, IconElite, IconLevy, IconSkyship } from "@/theme";
 import { ResourceChip } from "@/components/atoms/ResourceChip";
 import { GamePanel } from "@/components/atoms/GamePanel";
 import { GameButton } from "@/components/atoms/GameButton";
 import { CardFrame } from "@/components/atoms/CardFrame";
+import { Holdings } from "./Holdings";
+import { useActionHover } from "@/components/ActionBoard/ActionHoverContext";
 import { getLocationPresentation } from "@/utils/locationLabels";
 import {
   SWORD_CARDS,
@@ -298,12 +301,12 @@ const FleetAccordion = ({
                     color: tokens.ui.textMuted,
                   }}
                 >
-                  <span>{fleet.skyships}🚢</span>
-                  <span>{fleet.regiments}⚔</span>
+                  <Box component="span" sx={{ display: "inline-flex", alignItems: "center", gap: "1px" }}>{fleet.skyships}<IconSkyship style={{ fontSize: 12 }} /></Box>
+                  <Box component="span" sx={{ display: "inline-flex", alignItems: "center", gap: "1px" }}>{fleet.regiments}<IconRegiment style={{ fontSize: 12 }} /></Box>
                   {fleet.eliteRegiments > 0 && (
-                    <span>{fleet.eliteRegiments}🎖</span>
+                    <Box component="span" sx={{ display: "inline-flex", alignItems: "center", gap: "1px" }}>{fleet.eliteRegiments}<IconElite style={{ fontSize: 12 }} /></Box>
                   )}
-                  <span>{fleet.levies}🛡</span>
+                  <Box component="span" sx={{ display: "inline-flex", alignItems: "center", gap: "1px" }}>{fleet.levies}<IconLevy style={{ fontSize: 12 }} /></Box>
                 </Box>
               </Box>
 
@@ -420,6 +423,105 @@ const FleetAccordion = ({
   );
 };
 
+// ── Section 0: Kingdom Resources ────────────────────────────────────────
+
+const Treasury = ({
+  counsellors,
+  gold,
+  victoryPoints,
+  heresyTracker,
+  hereticOrOrthodox,
+}: {
+  counsellors: number;
+  gold: number;
+  victoryPoints: number;
+  heresyTracker: number;
+  hereticOrOrthodox: string;
+}) => {
+  const isHeretic = hereticOrOrthodox === "heretic";
+  const heresyVP = isHeretic ? heresyTracker : -heresyTracker;
+  const vpSign = heresyVP > 0 ? "+" : "";
+  const alColor = isHeretic ? tokens.allegiance.heresy : tokens.allegiance.orthodox;
+  const alLabel = isHeretic ? "Heretic" : "Orthodox";
+
+  return (
+    <GamePanel variant="default" padding="sm">
+      <SectionHeader label="Treasury" />
+      <Box sx={{ display: "flex", flexWrap: "wrap", gap: `${tokens.spacing.sm}px` }}>
+        <ResourceChip
+          icon={<IconCounsellor style={{ fontSize: 18, color: tokens.ui.gold }} />}
+          value={counsellors}
+          label="Counsel."
+          size="md"
+          variant={counsellors === 0 ? "muted" : "default"}
+        />
+        <ResourceChip
+          icon={<IconGold style={{ fontSize: 18, color: gold < 0 ? tokens.ui.danger : tokens.ui.gold }} />}
+          value={gold}
+          label="Gold"
+          size="md"
+          variant={gold < 0 ? "negative" : "default"}
+        />
+        <ResourceChip
+          icon={<IconVP style={{ fontSize: 18, color: tokens.ui.gold }} />}
+          value={victoryPoints}
+          label="VP"
+          size="md"
+        />
+        {/* Allegiance + Heresy VP */}
+        <Box
+          sx={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "6px",
+            px: `${tokens.spacing.sm}px`,
+            height: 32,
+            borderRadius: `${tokens.radius.pill}px`,
+            background: `linear-gradient(180deg, ${tokens.ui.surfaceRaised} 0%, ${tokens.ui.surface} 100%)`,
+            border: `1px solid ${alColor}44`,
+            boxShadow: `inset 0 1px 0 rgba(255,255,255,0.4), 0 1px 3px rgba(80,60,30,0.10)`,
+          }}
+        >
+          <Box
+            sx={{
+              width: 8,
+              height: 8,
+              borderRadius: "50%",
+              backgroundColor: alColor,
+              boxShadow: `0 0 4px ${alColor}88`,
+              flexShrink: 0,
+            }}
+          />
+          <Typography
+            component="span"
+            sx={{
+              fontSize: tokens.fontSize.sm,
+              fontFamily: tokens.font.body,
+              fontWeight: 600,
+              color: alColor,
+              lineHeight: 1,
+            }}
+          >
+            {alLabel}
+          </Typography>
+          <Typography
+            component="span"
+            sx={{
+              fontSize: tokens.fontSize.sm,
+              fontFamily: tokens.font.body,
+              fontWeight: 700,
+              color: heresyVP >= 0 ? tokens.ui.success : tokens.ui.danger,
+              lineHeight: 1,
+            }}
+          >
+            {vpSign}{heresyVP}VP
+          </Typography>
+        </Box>
+      </Box>
+    </GamePanel>
+  );
+};
+
 // ── Section 1: Available Forces ─────────────────────────────────────────
 
 const AvailableForces = ({
@@ -434,10 +536,10 @@ const AvailableForces = ({
   skyships: number;
 }) => {
   const forces = [
-    { icon: "⚔", value: regiments, label: "Regiments" },
-    { icon: "🎖", value: eliteRegiments, label: "Elite" },
-    { icon: "🛡", value: levies, label: "Levies" },
-    { icon: "🚢", value: skyships, label: "Skyships" },
+    { Icon: IconRegiment, value: regiments, label: "Regiments" },
+    { Icon: IconElite, value: eliteRegiments, label: "Elite" },
+    { Icon: IconLevy, value: levies, label: "Levies" },
+    { Icon: IconSkyship, value: skyships, label: "Skyships" },
   ];
 
   return (
@@ -447,7 +549,7 @@ const AvailableForces = ({
         {forces.map((f) => (
           <ResourceChip
             key={f.label}
-            icon={<Box component="span" sx={{ fontSize: "1em", lineHeight: 1 }}>{f.icon}</Box>}
+            icon={<f.Icon style={{ fontSize: 18 }} />}
             value={f.value}
             label={f.label}
             size="md"
@@ -518,6 +620,8 @@ const KingdomActions = ({
     setLevyCount(3);
   };
 
+  const { setHoveredAction } = useActionHover();
+
   return (
     <GamePanel variant="default" padding="sm">
       <SectionHeader label="Kingdom Actions" />
@@ -526,6 +630,8 @@ const KingdomActions = ({
         <GameButton
           variant="secondary"
           fullWidth
+          onMouseEnter={() => setHoveredAction("build-skyships")}
+          onMouseLeave={() => setHoveredAction(null)}
           onClick={() => {
             moves.enableDispatchButtons(true);
             setBuildDialogOpen(true);
@@ -544,6 +650,8 @@ const KingdomActions = ({
         <GameButton
           variant="secondary"
           fullWidth
+          onMouseEnter={() => setHoveredAction("conscript-levies")}
+          onMouseLeave={() => setHoveredAction(null)}
           onClick={() => setLevyDialogOpen(true)}
           disabled={counsellorLocations.conscriptLevies}
           disabledReason="Already conscripted this round"
@@ -556,6 +664,8 @@ const KingdomActions = ({
         <GameButton
           variant="secondary"
           fullWidth
+          onMouseEnter={() => setHoveredAction("train-troops")}
+          onMouseLeave={() => setHoveredAction(null)}
           onClick={() => moves.trainTroops()}
           disabled={counsellorLocations.trainTroops}
           disabledReason="Already trained this round"
@@ -568,6 +678,8 @@ const KingdomActions = ({
         <GameButton
           variant="secondary"
           fullWidth
+          onMouseEnter={() => setHoveredAction("dispatch-fleet")}
+          onMouseLeave={() => setHoveredAction(null)}
           onClick={() => {
             moves.enableDispatchButtons(true);
             setDispatchAlloc(emptyAllocation());
@@ -1066,7 +1178,7 @@ export const PlayerBoardFull = (props: PlayerBoardFullProps) => {
         height: "100%",
         overflowY: "auto",
         overflowX: "hidden",
-        backgroundColor: tokens.ui.background,
+        backgroundColor: "transparent",
         borderTop: `3px solid ${colour}`,
         "&::-webkit-scrollbar": { width: 6 },
         "&::-webkit-scrollbar-track": { background: "transparent" },
@@ -1078,35 +1190,63 @@ export const PlayerBoardFull = (props: PlayerBoardFullProps) => {
       }}
     >
       {/* Kingdom name header */}
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          gap: `${tokens.spacing.sm}px`,
-          px: `${tokens.spacing.xs}px`,
-        }}
-      >
+      <Box sx={{ px: `${tokens.spacing.xs}px` }}>
         <Box
           sx={{
-            width: 12,
-            height: 12,
-            borderRadius: "50%",
-            backgroundColor: colour,
-            boxShadow: `0 0 6px ${colour}66`,
-            flexShrink: 0,
-          }}
-        />
-        <Typography
-          sx={{
-            fontFamily: tokens.font.display,
-            fontSize: tokens.fontSize.lg,
-            color: tokens.ui.textBright,
-            lineHeight: 1.2,
+            display: "flex",
+            alignItems: "center",
+            gap: `${tokens.spacing.sm}px`,
           }}
         >
-          {playerInfo.kingdomName}
-        </Typography>
+          <Box
+            sx={{
+              width: 12,
+              height: 12,
+              borderRadius: "50%",
+              backgroundColor: colour,
+              boxShadow: `0 0 6px ${colour}66`,
+              flexShrink: 0,
+            }}
+          />
+          <Typography
+            sx={{
+              fontFamily: tokens.font.display,
+              fontSize: tokens.fontSize.lg,
+              color: colour,
+              lineHeight: 1.2,
+              textShadow: `0 0 12px ${colour}44`,
+            }}
+          >
+            {playerInfo.kingdomName}
+          </Typography>
+        </Box>
+        {(playerInfo.isArchprelate || playerInfo.isCaptainGeneral) && (
+          <Typography
+            sx={{
+              fontFamily: tokens.font.accent,
+              fontSize: tokens.fontSize.xs,
+              color: tokens.ui.gold,
+              fontStyle: "italic",
+              lineHeight: 1.2,
+              pl: `${tokens.spacing.sm + 12}px`,
+            }}
+          >
+            {[
+              playerInfo.isArchprelate && "Seat of the Archprelate",
+              playerInfo.isCaptainGeneral && "Captain-General of the Faith",
+            ].filter(Boolean).join(" · ")}
+          </Typography>
+        )}
       </Box>
+
+      {/* Section 0: Treasury */}
+      <Treasury
+        counsellors={playerInfo.resources.counsellors}
+        gold={playerInfo.resources.gold}
+        victoryPoints={playerInfo.resources.victoryPoints}
+        heresyTracker={playerInfo.heresyTracker}
+        hereticOrOrthodox={playerInfo.hereticOrOrthodox}
+      />
 
       {/* Section 1: Available Forces */}
       <AvailableForces
@@ -1146,6 +1286,9 @@ export const PlayerBoardFull = (props: PlayerBoardFullProps) => {
         legacyCard={playerInfo.resources.legacyCard}
         advantageCard={playerInfo.resources.advantageCard}
       />
+
+      {/* Section 5: Holdings (fills remaining space) */}
+      <Holdings {...props} variant="full" />
     </Box>
   );
 };

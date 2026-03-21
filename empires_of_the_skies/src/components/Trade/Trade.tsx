@@ -6,63 +6,51 @@ import { Box, Typography, Slider } from "@mui/material";
 import { tokens } from "@/theme";
 import { MyGameProps, SKYSHIP_SELL_PRICE, BUILDING_SELL_PRICE } from "@eots/game";
 import { DialogShell } from "@/components/atoms/DialogShell";
+import { GoodsValue } from "@/components/Stats/GoodsValue";
 
-// ── Clickable gradient-accent card ──────────────────────────────────────
+// ── Compact action row ──────────────────────────────────────────────────
 
-const TradeCard = ({
+const CompactAction = ({
   label,
-  description,
+  price,
   disabled,
+  disabledReason,
   onClick,
 }: {
   label: string;
-  description: string;
+  price: string;
   disabled?: boolean;
+  disabledReason?: string;
   onClick: () => void;
 }) => (
   <Box
     onClick={disabled ? undefined : onClick}
     sx={{
-      p: 1.5,
-      position: "relative",
-      borderRadius: `${tokens.radius.md}px`,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between",
+      px: `${tokens.spacing.sm}px`,
+      py: `${tokens.spacing.xs + 1}px`,
+      borderRadius: `${tokens.radius.sm}px`,
       border: `1px solid ${tokens.ui.border}`,
-      borderLeft: "3px solid transparent",
-      background: `linear-gradient(180deg, ${tokens.ui.surfaceRaised} 0%, ${tokens.ui.surface} 100%)`,
-      cursor: disabled ? "not-allowed" : "pointer",
+      backgroundColor: tokens.ui.surface,
+      cursor: disabled ? "default" : "pointer",
       opacity: disabled ? 0.45 : 1,
       transition: `all ${tokens.transition.fast}`,
-      "&::before": {
-        content: '""',
-        position: "absolute",
-        left: -3,
-        top: 0,
-        bottom: 0,
-        width: 3,
-        borderRadius: `${tokens.radius.md}px 0 0 ${tokens.radius.md}px`,
-        background: disabled
-          ? `linear-gradient(180deg, ${tokens.ui.gold}44 0%, ${tokens.ui.gold}22 60%, transparent 100%)`
-          : `linear-gradient(180deg, ${tokens.ui.gold} 0%, ${tokens.ui.gold}55 60%, transparent 100%)`,
-        transition: `background ${tokens.transition.fast}`,
-      },
       ...(!disabled && {
         "&:hover": {
-          borderColor: `${tokens.ui.gold}33`,
-          background: `linear-gradient(180deg, ${tokens.ui.surfaceHover} 0%, ${tokens.ui.surfaceRaised} 100%)`,
-          boxShadow: `0 0 8px ${tokens.ui.gold}10`,
-          "&::before": {
-            background: `linear-gradient(180deg, ${tokens.ui.gold} 0%, ${tokens.ui.gold}88 60%, ${tokens.ui.gold}22 100%)`,
-          },
+          borderColor: `${tokens.ui.gold}55`,
+          backgroundColor: tokens.ui.surfaceHover,
         },
-        "&:active": { transform: "scale(0.998)" },
+        "&:active": { transform: "scale(0.99)" },
       }),
     }}
   >
-    <Typography sx={{ fontFamily: tokens.font.display, fontSize: tokens.fontSize.sm, color: tokens.ui.text, fontWeight: 700 }}>
+    <Typography sx={{ fontFamily: tokens.font.body, fontSize: tokens.fontSize.xs, color: tokens.ui.text, fontWeight: 600, lineHeight: 1.2 }}>
       {label}
     </Typography>
-    <Typography sx={{ fontFamily: tokens.font.body, fontSize: tokens.fontSize.xs, color: tokens.ui.textMuted, mt: 0.25 }}>
-      {description}
+    <Typography sx={{ fontFamily: tokens.font.body, fontSize: 10, color: disabled ? tokens.ui.textMuted : tokens.ui.gold, fontWeight: 700, lineHeight: 1, whiteSpace: "nowrap", ml: 1 }}>
+      {disabled && disabledReason ? disabledReason : price}
     </Typography>
   </Box>
 );
@@ -80,59 +68,97 @@ const Trade = (props: MyGameProps) => {
   const isHeretic = playerInfo?.hereticOrOrthodox === "heretic";
 
   return (
-    <Box sx={{ p: 2, maxWidth: 800, mx: "auto" }}>
-      <Typography
-        sx={{
-          fontFamily: tokens.font.accent,
-          fontSize: tokens.fontSize.lg,
-          color: tokens.ui.gold,
-          mb: 0.5,
-          letterSpacing: 1,
-        }}
-      >
-        Trade
-      </Typography>
-      <Typography
-        sx={{
-          fontFamily: tokens.font.body,
-          fontSize: tokens.fontSize.xs,
-          color: tokens.ui.textMuted,
-          mb: 2,
-        }}
-      >
-        These actions can be performed at any time.
-      </Typography>
+    <Box sx={{ p: `${tokens.spacing.sm}px`, height: "100%" }}>
+      <Box sx={{ display: "flex", gap: `${tokens.spacing.md}px`, height: "100%" }}>
+        {/* ── Left: Sell Actions ─────────────────────────── */}
+        <Box sx={{ minWidth: 200, maxWidth: 260, flexShrink: 0, display: "flex", flexDirection: "column", gap: `${tokens.spacing.xs}px` }}>
+          <Typography
+            sx={{
+              fontFamily: tokens.font.accent,
+              fontSize: tokens.fontSize.xs,
+              fontWeight: 600,
+              color: tokens.ui.gold,
+              textTransform: "uppercase",
+              letterSpacing: "0.1em",
+              lineHeight: 1,
+              mb: "2px",
+            }}
+          >
+            Anytime Actions
+          </Typography>
 
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-        <TradeCard
-          label="Sell Skyships"
-          description={`Sell skyships in your kingdom for ${SKYSHIP_SELL_PRICE} gold each. You have ${skyships}.`}
-          disabled={skyships <= 0}
-          onClick={() => { setSkyshipAmount(1); setSellSkyshipsOpen(true); }}
-        />
-
-        {isHeretic && (
-          <TradeCard
-            label={`Sell Cathedral (${cathedrals})`}
-            description={`Sell a cathedral for ${BUILDING_SELL_PRICE} gold.`}
-            disabled={cathedrals <= 0}
-            onClick={() => props.moves.sellBuilding("cathedral")}
+          <CompactAction
+            label={`Sell Skyships (${skyships})`}
+            price={`${SKYSHIP_SELL_PRICE}g each`}
+            disabled={skyships <= 0}
+            onClick={() => { setSkyshipAmount(1); setSellSkyshipsOpen(true); }}
           />
-        )}
 
-        <TradeCard
-          label={`Sell Palace (${palaces})`}
-          description={`Sell a palace for ${BUILDING_SELL_PRICE} gold. Cannot sell your last palace.`}
-          disabled={palaces <= 1}
-          onClick={() => props.moves.sellBuilding("palace")}
-        />
+          {isHeretic && (
+            <CompactAction
+              label={`Sell Cathedral (${cathedrals})`}
+              price={`${BUILDING_SELL_PRICE}g`}
+              disabled={cathedrals <= 0}
+              onClick={() => props.moves.sellBuilding("cathedral")}
+            />
+          )}
 
-        <TradeCard
-          label="Propose Deal"
-          description="Offer gold, skyships, or outposts to another player in exchange for theirs."
-          disabled
-          onClick={() => {}}
-        />
+          <CompactAction
+            label={`Sell Palace (${palaces})`}
+            price={`${BUILDING_SELL_PRICE}g`}
+            disabled={palaces <= 1}
+            disabledReason="Can't sell last"
+            onClick={() => props.moves.sellBuilding("palace")}
+          />
+
+          <CompactAction
+            label="Propose Deal"
+            price="Coming soon"
+            disabled
+            onClick={() => {}}
+          />
+        </Box>
+
+        {/* ── Right: Goods Value ─────────────────────────── */}
+        <Box
+          sx={{
+            flex: 1,
+            minWidth: 0,
+            borderRadius: `${tokens.radius.md}px`,
+            border: `1px solid ${tokens.ui.border}`,
+            backgroundColor: tokens.ui.surface,
+            overflow: "hidden",
+            boxShadow: tokens.shadow.sm,
+            display: "flex",
+            flexDirection: "column",
+          }}
+        >
+          <Box
+            sx={{
+              px: `${tokens.spacing.sm}px`,
+              py: `${tokens.spacing.xs + 2}px`,
+              backgroundColor: tokens.ui.surfaceRaised,
+              borderBottom: `1px solid ${tokens.ui.border}`,
+            }}
+          >
+            <Typography
+              sx={{
+                fontFamily: tokens.font.accent,
+                fontSize: tokens.fontSize.xs,
+                fontWeight: 600,
+                color: tokens.ui.gold,
+                textTransform: "uppercase",
+                letterSpacing: "0.1em",
+                lineHeight: 1,
+              }}
+            >
+              Goods Value
+            </Typography>
+          </Box>
+          <Box sx={{ p: `${tokens.spacing.sm}px`, overflowX: "auto" }}>
+            <GoodsValue props={props} compact />
+          </Box>
+        </Box>
       </Box>
 
       {/* ── Sell Skyships dialog ────────────────────────── */}

@@ -1,11 +1,13 @@
 import { forwardRef, ReactNode } from "react";
 import { Button, Tooltip } from "@mui/material";
 import { SxProps } from "@mui/material/styles";
-import { tokens } from "@/theme";
+import { tokens, backgrounds } from "@/theme";
 
 export interface GameButtonProps {
   children: ReactNode;
   onClick?: () => void;
+  onMouseEnter?: () => void;
+  onMouseLeave?: () => void;
   disabled?: boolean;
   disabledReason?: string;
   variant?: "primary" | "secondary" | "danger" | "ghost";
@@ -24,7 +26,11 @@ const sizeMap = {
 // Embossed brass plate — raised surface with light-catching bevel
 const variantStyleMap = {
   primary: {
-    background: `linear-gradient(180deg, ${tokens.ui.tealLight} 0%, ${tokens.ui.gold} 40%, #1F4F42 100%)`,
+    background: `
+      linear-gradient(180deg, ${tokens.ui.tealLight}cc 0%, ${tokens.ui.gold}dd 40%, #1F4F42ee 100%),
+      ${backgrounds.leatherTexture}
+    `,
+    backgroundSize: "cover",
     color: "#EAF5F1",
     border: "none",
     borderTop: "1px solid rgba(180,230,210,0.30)",
@@ -32,12 +38,20 @@ const variantStyleMap = {
     boxShadow: `0 2px 6px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.18)`,
     fontWeight: 700,
     "&:hover": {
-      background: `linear-gradient(180deg, #4A8E7A 0%, ${tokens.ui.tealLight} 40%, ${tokens.ui.gold} 100%)`,
+      background: `
+        linear-gradient(180deg, #4A8E7Acc 0%, ${tokens.ui.tealLight}dd 40%, ${tokens.ui.gold}ee 100%),
+        ${backgrounds.leatherTexture}
+      `,
+      backgroundSize: "cover",
       boxShadow: `0 3px 10px rgba(0,0,0,0.4), 0 0 12px ${tokens.ui.gold}30, inset 0 1px 0 rgba(255,255,255,0.22)`,
       transform: "translateY(-1px)",
     },
     "&:active": {
-      background: `linear-gradient(180deg, #1F4F42 0%, #193E34 40%, #132E28 100%)`,
+      background: `
+        linear-gradient(180deg, #1F4F42ee 0%, #193E34f0 40%, #132E28f5 100%),
+        ${backgrounds.leatherTexture}
+      `,
+      backgroundSize: "cover",
       boxShadow: `0 1px 3px rgba(0,0,0,0.4), inset 0 2px 4px rgba(0,0,0,0.2)`,
       borderTop: "1px solid rgba(180,230,210,0.12)",
       transform: "translateY(0px)",
@@ -107,6 +121,8 @@ const InnerButton = forwardRef<HTMLButtonElement, GameButtonProps>(
     {
       children,
       onClick,
+      onMouseEnter,
+      onMouseLeave,
       disabled,
       variant = "secondary",
       size = "md",
@@ -123,6 +139,8 @@ const InnerButton = forwardRef<HTMLButtonElement, GameButtonProps>(
       <Button
         ref={ref}
         onClick={onClick}
+        onMouseEnter={onMouseEnter}
+        onMouseLeave={onMouseLeave}
         disabled={disabled}
         fullWidth={fullWidth}
         disableRipple
