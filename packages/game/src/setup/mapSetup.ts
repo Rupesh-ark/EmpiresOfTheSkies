@@ -4,7 +4,7 @@ import {
   oceanTiles,
   legendTiles,
   knownWorldTiles,
-} from "../codifiedGameInfo";
+} from "../data/tileDefinitions";
 
 export const getRandomisedMapTileArray = (
   shuffle: <T>(arr: T[]) => T[]
