@@ -327,6 +327,8 @@ export type EventChoice = {
   buildingOptions?: ("cathedral" | "palace" | "shipyard")[];
   /** Dynastic Marriage: eligible ally player IDs */
   allyOptions?: string[];
+  /** Guild Revolt / Corruption Scandal: binary choice options */
+  binaryOptions?: [string, string];
   /** Colonial Rebellion: eligible colony tile coordinates */
   colonyOptions?: [number, number][];
 };

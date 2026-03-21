@@ -608,64 +608,13 @@ export const resolveEventCard = (
 
     // ── Gap-fix events ─────────────────────────────────────────────────
 
-    case "guild_revolt": {
-      // Target: player with most factories (break ties IPO)
-      // Auto-resolve: sell one factory for 3g if factories > 2, else pay 2g per factory
-      let target = turnOrder[0];
-      let maxFactories = 0;
-      for (const id of turnOrder) {
-        if (G.playerInfo[id].factories > maxFactories) {
-          maxFactories = G.playerInfo[id].factories;
-          target = id;
-        }
-      }
-      const gp = G.playerInfo[target];
-      if (gp.factories <= 0) {
-        logEvent(G, "Guild Revolt: no player has factories — no effect");
-        break;
-      }
-      const payCost = 2 * gp.factories;
-      if (gp.factories <= 2 && gp.resources.gold >= payCost) {
-        // Pay 2g per factory (cheaper than losing the factory)
-        gp.resources.gold -= payCost;
-        logEvent(G, `Guild Revolt: ${gp.kingdomName} pays ${payCost} gold (2 per factory)`);
-      } else {
-        // Sell one factory for 3g
-        gp.factories -= 1;
-        gp.resources.gold += BUILDING_SELL_PRICE;
-        logEvent(G, `Guild Revolt: ${gp.kingdomName} sells a factory for ${BUILDING_SELL_PRICE} gold (now has ${gp.factories})`);
-      }
+    case "guild_revolt":
+      // Resolved via interactive choice (prepareEventChoice → resolveEventChoice)
       break;
-    }
 
-    case "corruption_scandal": {
-      // Target: player with most cathedrals (break ties IPO)
-      // Auto-resolve: lose one cathedral (get 3g) if cathedrals > 1, else lose 3 VP
-      let target = turnOrder[0];
-      let maxCath = 0;
-      for (const id of turnOrder) {
-        if (G.playerInfo[id].cathedrals > maxCath) {
-          maxCath = G.playerInfo[id].cathedrals;
-          target = id;
-        }
-      }
-      const cp = G.playerInfo[target];
-      if (cp.cathedrals <= 0) {
-        logEvent(G, "Corruption Scandal: no player has cathedrals — no effect");
-        break;
-      }
-      if (cp.cathedrals > 1) {
-        // Lose one cathedral, get sell price
-        cp.cathedrals -= 1;
-        cp.resources.gold += BUILDING_SELL_PRICE;
-        logEvent(G, `Corruption Scandal: ${cp.kingdomName} loses a cathedral (sold for ${BUILDING_SELL_PRICE} gold, now has ${cp.cathedrals})`);
-      } else {
-        // Protect last cathedral, lose 3 VP instead
-        removeVPAmount(G, target, 3);
-        logEvent(G, `Corruption Scandal: ${cp.kingdomName} loses 3 VP (protecting their last cathedral)`);
-      }
+    case "corruption_scandal":
+      // Resolved via interactive choice (prepareEventChoice → resolveEventChoice)
       break;
-    }
 
     case "foreign_agitators": {
       // Each player advances heresy by 1 (circular: each player "sends" to the next in IPO)
@@ -1221,6 +1170,43 @@ export const prepareEventChoice = (
         card,
         targetPlayerID: targetID,
         colonyOptions: colonies,
+      };
+    }
+
+    case "guild_revolt": {
+      // Target: player with most factories (break ties IPO)
+      let maxFactories = 0;
+      let grTargetID = turnOrder[0];
+      for (const id of turnOrder) {
+        if (G.playerInfo[id].factories > maxFactories) {
+          maxFactories = G.playerInfo[id].factories;
+          grTargetID = id;
+        }
+      }
+      if (maxFactories <= 0) return null;
+      const payCost = 2 * G.playerInfo[grTargetID].factories;
+      return {
+        card,
+        targetPlayerID: grTargetID,
+        binaryOptions: [`pay_gold:${payCost}`, "sell_factory"],
+      };
+    }
+
+    case "corruption_scandal": {
+      // Target: player with most cathedrals (break ties IPO)
+      let maxCath = 0;
+      let csTargetID = turnOrder[0];
+      for (const id of turnOrder) {
+        if (G.playerInfo[id].cathedrals > maxCath) {
+          maxCath = G.playerInfo[id].cathedrals;
+          csTargetID = id;
+        }
+      }
+      if (maxCath <= 0) return null;
+      return {
+        card,
+        targetPlayerID: csTargetID,
+        binaryOptions: ["lose_cathedral", "lose_vp"],
       };
     }
 
