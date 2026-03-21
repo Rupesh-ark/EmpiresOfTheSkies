@@ -163,6 +163,35 @@ const EventChoiceDialog = (props: MyGameProps) => {
     );
   }
 
+  if (choice.binaryOptions) {
+    const formatLabel = (opt: string): string => {
+      if (opt.startsWith("pay_gold:")) return `Pay ${opt.split(":")[1]} Gold`;
+      if (opt === "sell_factory") return "Sell One Factory (gain 3 gold)";
+      if (opt === "lose_cathedral") return "Lose One Cathedral (gain 3 gold)";
+      if (opt === "lose_vp") return "Lose 3 VP";
+      return opt;
+    };
+
+    return (
+      <DialogShell open title={def.displayName} mood="crisis" size="sm" hideActions>
+        <Typography variant="body2" sx={{ mb: 2 }}>
+          {def.description}
+        </Typography>
+        <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
+          {choice.binaryOptions.map((opt) => (
+            <GameButton
+              key={opt}
+              variant="danger"
+              onClick={() => props.moves.resolveEventChoice(opt)}
+            >
+              {formatLabel(opt)}
+            </GameButton>
+          ))}
+        </div>
+      </DialogShell>
+    );
+  }
+
   return null;
 };
 
