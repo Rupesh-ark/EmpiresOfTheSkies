@@ -1,5 +1,5 @@
 import { MoveDefinition, MyGameState, MoveError } from "../../types";
-import { FOW_HAND_MAX } from "../../codifiedGameInfo";
+import { FOW_HAND_MAX } from "../../data/gameData";
 
 const validateDiscardFoWCard = (G: MyGameState, playerID: string, cardIndex: number): MoveError | null => {
   const hand = G.playerInfo[playerID].resources.fortuneCards;

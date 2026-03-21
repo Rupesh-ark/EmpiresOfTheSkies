@@ -2,7 +2,7 @@ import type { Game, Ctx } from "boardgame.io";
 
 import { LegacyCardInfo, MyGameState, MapState } from "./types";
 
-import { ALL_KA_CARDS, CONTINGENT_COUNTERS, EVENT_HAND_SIZE, FINAL_ROUND, INFIDEL_HOST_COUNTERS, LEGACY_CARDS } from "./codifiedGameInfo";
+import { ALL_KA_CARDS, CONTINGENT_COUNTERS, EVENT_HAND_SIZE, FINAL_ROUND, INFIDEL_HOST_COUNTERS, LEGACY_CARDS } from "./data/gameData";
 import { filterKAPool, seedLegacyDeal, classifyEventDeck } from "./helpers/manufacturedFunSeed";
 import { initialBoardState, initialBattleMapState } from "./setup/boardSetup";
 import {

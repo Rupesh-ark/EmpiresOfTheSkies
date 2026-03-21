@@ -6,7 +6,7 @@ import {
   removeGoldAmount,
   removeOneCounsellor,
 } from "../../helpers/stateUtils";
-import { RECRUIT_REGIMENTS_REWARD } from "../../codifiedGameInfo";
+import { RECRUIT_REGIMENTS_REWARD } from "../../data/gameData";
 
 const validateRecruitRegiments = (
   G: MyGameState,

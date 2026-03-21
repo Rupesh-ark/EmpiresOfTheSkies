@@ -12,7 +12,7 @@
 import { MyGameState } from "../types";
 import { logEvent } from "./stateUtils";
 import { drawFortuneOfWarCard } from "./helpers";
-import { INFIDEL_EMPIRE_LOCATION } from "../codifiedGameInfo";
+import { INFIDEL_EMPIRE_LOCATION } from "../data/gameData";
 
 // ── Military power calculation ───────────────────────────────────────────────
 

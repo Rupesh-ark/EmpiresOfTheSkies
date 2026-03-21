@@ -6,7 +6,7 @@ import { enactPiracy } from "./piracy";
 import { grantTradeRouteGoods } from "./tradeRouteResolver";
 import { countActiveTradeRoutes } from "./mapUtils";
 import { removeVPAmount, logEvent } from "./stateUtils";
-import { FINAL_ROUND_GOLD_PER_VP, DEBT_PENALTY_DIVISOR, TRADE_VP_SCHEDULE, PRICE_MARKER_MAX } from "../codifiedGameInfo";
+import { FINAL_ROUND_GOLD_PER_VP, DEBT_PENALTY_DIVISOR, TRADE_VP_SCHEDULE, PRICE_MARKER_MAX } from "../data/gameData";
 
 const ALL_GOODS: GoodKey[] = ["mithril", "dragonScales", "krakenSkin", "magicDust", "stickyIchor", "pipeweed"];
 

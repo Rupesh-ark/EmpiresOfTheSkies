@@ -1,7 +1,7 @@
 import { MoveDefinition, GoodKey } from "../../types";
 import { findNextPlunder } from "../../helpers/findNext";
 import { increaseHeresyWithinMove, logEvent } from "../../helpers/stateUtils";
-import { PRICE_MARKER_MIN } from "../../codifiedGameInfo";
+import { PRICE_MARKER_MIN } from "../../data/gameData";
 
 const GOODS: GoodKey[] = ["mithril", "dragonScales", "krakenSkin", "magicDust", "stickyIchor", "pipeweed"];
 

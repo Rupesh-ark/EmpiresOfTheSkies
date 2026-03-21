@@ -8,7 +8,7 @@ import {
   removeOneCounsellor,
   removeVPAmount,
 } from "../../helpers/stateUtils";
-import { PUNISH_EXECUTE_VP_COST, BASE_PRISONERS, MORE_PRISONS_BONUS, PUNISH_GOLD_COST } from "../../codifiedGameInfo";
+import { PUNISH_EXECUTE_VP_COST, BASE_PRISONERS, MORE_PRISONS_BONUS, PUNISH_GOLD_COST } from "../../data/gameData";
 
 const validatePunishDissenters = (
   G: MyGameState,

@@ -15,7 +15,7 @@ import { describe, it, expect } from "vitest";
 import { INVALID_MOVE } from "boardgame.io/core";
 import trainTroops from "../../moves/actions/trainTroops";
 import { buildInitialG, buildPlayer, buildCtx, buildResources, buildPlayerBoard, buildRandom } from "../testHelpers";
-import { fortuneOfWarCards } from "../../codifiedGameInfo";
+import { fortuneOfWarCards } from "../../data/gameData";
 
 function callMove(G: ReturnType<typeof buildInitialG>, playerID: string) {
   const ctx = buildCtx(playerID);

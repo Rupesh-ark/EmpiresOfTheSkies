@@ -16,7 +16,7 @@ import { describe, it, expect } from "vitest";
 import { INVALID_MOVE } from "boardgame.io/core";
 import conscriptLevies from "../../moves/actions/conscriptLevies";
 import { buildInitialG, buildPlayer, buildCtx, buildResources, buildPlayerBoard } from "../testHelpers";
-import { MAX_LEVIES } from "../../codifiedGameInfo";
+import { MAX_LEVIES } from "../../data/gameData";
 
 function callMove(G: ReturnType<typeof buildInitialG>, playerID: string, levyAmount: number) {
   const ctx = buildCtx(playerID);

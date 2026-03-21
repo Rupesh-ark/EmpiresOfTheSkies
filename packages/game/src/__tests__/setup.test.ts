@@ -8,7 +8,7 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { fortuneOfWarCards, STARTING_RESOURCES, MAX_COUNSELLORS, MAX_FACTORIES, MAX_HERESY, MAX_LEVIES } from "../codifiedGameInfo";
+import { fortuneOfWarCards, STARTING_RESOURCES, MAX_COUNSELLORS, MAX_FACTORIES, MAX_HERESY, MAX_LEVIES } from "../data/gameData";
 
 // ── Fortune of War deck ───────────────────────────────────────────────────────
 

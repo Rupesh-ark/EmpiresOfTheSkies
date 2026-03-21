@@ -6,7 +6,7 @@
  */
 
 import { MyGameState, PlayerInfo, ActionBoardInfo, Resources, FleetInfo, PlayerBoardInfo, MoveDefinition } from "../types";
-import { fortuneOfWarCards } from "../codifiedGameInfo";
+import { fortuneOfWarCards } from "../data/gameData";
 
 // ── Player builder ────────────────────────────────────────────────────────────
 

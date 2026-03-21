@@ -3,7 +3,7 @@ import { findPossibleDestinations } from "../../helpers/helpers";
 import { INVALID_MOVE } from "boardgame.io/core";
 import { removeGoldAmount, removeOneCounsellor } from "../../helpers/stateUtils";
 import { validateMove } from "../moveValidation";
-import { KINGDOM_LOCATION, MAX_SKYSHIPS_PER_FLEET } from "../../codifiedGameInfo";
+import { KINGDOM_LOCATION, MAX_SKYSHIPS_PER_FLEET } from "../../data/gameData";
 
 const validateDeployFleet = (
   G: MyGameState,

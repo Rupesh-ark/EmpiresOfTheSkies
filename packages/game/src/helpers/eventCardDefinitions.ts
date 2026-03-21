@@ -12,7 +12,7 @@ import {
 } from "./stateUtils";
 import { CARD_RESOLVERS, resolveCardWithAlignmentPenalty } from "./legacyCardDefinitions";
 import { hasAnyOutpost, hasAnyColony } from "./helpers";
-import { BUILDING_SELL_PRICE } from "../codifiedGameInfo";
+import { BUILDING_SELL_PRICE } from "../data/gameData";
 
 // ── Card metadata ────────────────────────────────────────────────────────────
 

@@ -1,5 +1,5 @@
 import { ActionBoardInfo } from "../types";
-import { BuildingSlot, CounsellorSlot } from "../codifiedGameInfo";
+import { BuildingSlot, CounsellorSlot } from "../data/gameData";
 
 export const initialBoardState: ActionBoardInfo = {
   pendingPlayerOrder: {

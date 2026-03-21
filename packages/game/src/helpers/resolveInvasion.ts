@@ -23,7 +23,7 @@ import {
   SECOND_LARGEST_VP,
   TIED_LARGEST_VP,
   TOTAL_KINGDOMS,
-} from "../codifiedGameInfo";
+} from "../data/gameData";
 
 // ── Host counter draw ────────────────────────────────────────────────────────
 
