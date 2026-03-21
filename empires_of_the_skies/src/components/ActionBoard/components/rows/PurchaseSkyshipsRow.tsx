@@ -1,5 +1,5 @@
 import { ActionBoardProps } from "../shared";
-import { PURCHASE_SKYSHIPS_ZEELAND, PURCHASE_SKYSHIPS_VENOA, BTN_BG } from "@/assets/actionBoard";
+import { BTN_BG } from "@/assets/actionBoard";
 import { CollapsedActionRow } from "../CollapsedActionRow";
 import { clearMoves } from "@/utils/gameHelpers";
 import { SLOTS_PURCHASE_SKYSHIPS } from "@eots/game";
@@ -9,7 +9,7 @@ export const PurchaseSkyshipsZeelandRow = (props: ActionBoardProps) => (
     label="Skyships (Zeeland)"
     cost=""
     actionId="skyships-zeeland"
-    images={PURCHASE_SKYSHIPS_ZEELAND}
+    images={[]}
     totalSlots={SLOTS_PURCHASE_SKYSHIPS}
     slotState={props.G.boardState.purchaseSkyshipsZeeland}
     onPlace={(slot) => { clearMoves(props); props.moves.purchaseSkyships(slot, "zeeland"); }}
@@ -24,7 +24,7 @@ export const PurchaseSkyshipsVenoaRow = (props: ActionBoardProps) => (
     label="Skyships (Venoa)"
     cost=""
     actionId="skyships-venoa"
-    images={PURCHASE_SKYSHIPS_VENOA}
+    images={[]}
     totalSlots={SLOTS_PURCHASE_SKYSHIPS}
     slotState={props.G.boardState.purchaseSkyshipsVenoa}
     onPlace={(slot) => { clearMoves(props); props.moves.purchaseSkyships(slot, "venoa"); }}

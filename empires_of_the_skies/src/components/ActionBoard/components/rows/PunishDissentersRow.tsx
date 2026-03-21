@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { ActionBoardProps } from "../shared";
-import { PUNISH_DISSENTERS, BTN_BG } from "@/assets/actionBoard";
+import { BTN_BG } from "@/assets/actionBoard";
 import { CollapsedActionRow } from "../CollapsedActionRow";
 import {
   BASE_PRISONERS,
@@ -41,7 +41,7 @@ const PunishDissentersRow = (props: ActionBoardProps) => {
         label="Punish Dissenters"
         cost=""
         actionId="punish-dissenters"
-        images={PUNISH_DISSENTERS}
+        images={[]}
         totalSlots={SLOTS_PUNISH_DISSENTERS}
         slotState={props.G.boardState.punishDissenters}
         onPlace={(slot) => {
