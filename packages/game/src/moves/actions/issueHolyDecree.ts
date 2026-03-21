@@ -2,8 +2,10 @@ import { MyGameState, MoveError, MoveDefinition } from "../../types";
 import {
   addVPAmount,
   advanceAllHeresyTrackers,
+  increaseHeresyWithinMove,
   removeVPAmount,
   retreatAllHeresyTrackers,
+  logEvent,
 } from "../../helpers/stateUtils";
 import { INVALID_MOVE } from "boardgame.io/core";
 import { blessingOrCurseVPAmount } from "../../helpers/helpers";
@@ -50,6 +52,15 @@ const validateIssueHolyDecree = (
     }
   }
 
+  if (value === "inquisition") {
+    if (!targetID || !G.playerInfo[targetID]) {
+      return { code: "INVALID_TARGET", message: "Must target a player" };
+    }
+    if (G.playerInfo[targetID].prisoners <= 0) {
+      return { code: "NO_PRISONERS", message: "Target has no imprisoned Dissenters" };
+    }
+  }
+
   return null;
 };
 
@@ -73,6 +84,18 @@ const issueHolyDecree: MoveDefinition = {
       case "bless monarch":
         addVPAmount(G, id, blessingOrCurseVPAmount(G));
         break;
+      case "inquisition": {
+        const target = G.playerInfo[id];
+        const released = target.prisoners;
+        target.prisoners = 0;
+        increaseHeresyWithinMove(G, id);
+        increaseHeresyWithinMove(G, id);
+        logEvent(
+          G,
+          `Inquisition: ${target.kingdomName} releases ${released} prisoners, heresy advances 2`,
+        );
+        break;
+      }
     }
 
     G.boardState.issueHolyDecree = true;

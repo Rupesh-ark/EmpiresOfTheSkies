@@ -61,6 +61,8 @@ export interface MyGameState {
   electionResults: Record<string, number>;
   hasVoted: string[];
   voteSubmitted: Record<string, string>;
+  /** Archprelate Fatigue: consecutive wins by the same player */
+  consecutiveArchprelateWins: number;
   round: number;
   finalRound: number;
   firstTurnOfRound: boolean;
@@ -271,6 +273,8 @@ export type EventCardName =
   | "the_faerie_plague"
   | "schism"
   | "royal_succession"
+  | "race_to_discovery"
+  | "royal_patronage"
   | "pretender_rebellion"
   | "prelacy_condemned"
   | "peace_accord_reached"
@@ -284,11 +288,14 @@ export type EventCardName =
   | "infidel_corsairs_raid"
   | "heretic_rebellion"
   | "headstrong_commander"
+  | "guild_revolt"
   | "grand_infidel_dies"
+  | "foreign_agitators"
   | "faerie_uprising"
   | "dynastic_marriage"
   | "defence_of_the_faith"
   | "crops_fail"
+  | "corruption_scandal"
   | "colonial_rebellion"
   | "colonial_prelates"
   | "bumper_crops"
@@ -326,6 +333,7 @@ export type EventChoice = {
 
 export type EventState = {
   deck: EventCardName[];
+  lateDeck: EventCardName[];
   chosenCards: EventCardName[];
   resolvedEvent: EventCardName | null;
   deferredEvents: DeferredEvent[];
@@ -340,6 +348,10 @@ export type EventState = {
   skipTaxesNextRound: boolean;
   cannotConvertThisRound: string[];
   grandInfidelDies: boolean;
+  /** Royal Patronage: first player to claim land this round gets +2 VP and 2g */
+  royalPatronageActive: boolean;
+  /** Race to Discovery: per-player tile discovery count (keys = playerIDs) */
+  raceToDiscoveryCounters: Record<string, number> | null;
 };
 
 export type LegacyCardName =

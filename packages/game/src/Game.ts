@@ -3,6 +3,7 @@ import type { Game, Ctx } from "boardgame.io";
 import { LegacyCardInfo, MyGameState, MapState } from "./types";
 
 import { ALL_KA_CARDS, CONTINGENT_COUNTERS, EVENT_HAND_SIZE, FINAL_ROUND, INFIDEL_HOST_COUNTERS, LEGACY_CARDS } from "./codifiedGameInfo";
+import { filterKAPool, seedLegacyDeal, classifyEventDeck } from "./helpers/manufacturedFunSeed";
 import { initialBoardState, initialBattleMapState } from "./setup/boardSetup";
 import {
   getRandomisedMapTileArray,
@@ -44,6 +45,7 @@ import acceptDeal from "./moves/actions/acceptDeal";
 import rejectDeal from "./moves/actions/rejectDeal";
 import enableDispatchButtons from "./moves/actions/enableDispatchButtons";
 import issueHolyDecree from "./moves/actions/issueHolyDecree";
+import sendAgitators from "./moves/actions/sendAgitators";
 import declareSmugglerGood from "./moves/actions/declareSmugglerGood";
 import pass from "./moves/pass";
 import attackOtherPlayersFleet from "./moves/aerialBattle/attackOtherPlayersFleet";
@@ -136,13 +138,12 @@ const MyGame: Game<MyGameState> = {
     // Shuffle Infidel Host counter pool
     const infidelHostPool = random.Shuffle(INFIDEL_HOST_COUNTERS.map((c) => ({ ...c })));
 
-    // Shuffle event deck and deal EVENT_HAND_SIZE cards to each player
-    const eventDeck = random.Shuffle([...ALL_EVENT_CARD_NAMES]);
+    // Split event deck into early/late epochs and deal from early deck
+    const { earlyDeck, lateDeck, log: eventSeedLog } = classifyEventDeck(
+      ALL_EVENT_CARD_NAMES, ctx.numPlayers, random.Shuffle
+    );
     for (const id of ctx.playOrder) {
-      playerInfoMap[id].resources.eventCards = eventDeck.splice(
-        0,
-        EVENT_HAND_SIZE
-      );
+      playerInfoMap[id].resources.eventCards = earlyDeck.splice(0, EVENT_HAND_SIZE);
     }
 
     return {
@@ -159,6 +160,7 @@ const MyGame: Game<MyGameState> = {
       electionResults: {},
       hasVoted: [],
       voteSubmitted: {},
+      consecutiveArchprelateWins: 0,
       round: 0,
       finalRound: FINAL_ROUND,
       firstTurnOfRound: true,
@@ -170,7 +172,7 @@ const MyGame: Game<MyGameState> = {
       infidelHostPool,
       accumulatedHosts: [],
       infidelFleet: null,
-      gameLog: [],
+      gameLog: eventSeedLog.map((msg) => ({ round: 0, message: msg })),
       currentRebellion: null,
       currentInvasion: null,
       infidelFleetCombat: null,
@@ -179,7 +181,8 @@ const MyGame: Game<MyGameState> = {
       _loopGuard: 0,
       _halted: false,
       eventState: {
-        deck: eventDeck,
+        deck: earlyDeck,
+        lateDeck,
         chosenCards: [],
         resolvedEvent: null,
         deferredEvents: [],
@@ -194,6 +197,8 @@ const MyGame: Game<MyGameState> = {
         skipTaxesNextRound: false,
         cannotConvertThisRound: [],
         grandInfidelDies: false,
+        royalPatronageActive: false,
+        raceToDiscoveryCounters: null,
       },
     };
   },
@@ -251,9 +256,13 @@ const MyGame: Game<MyGameState> = {
       next: "legacy_card",
       onBegin: withPhaseGuard("kingdom_advantage", (context) => {
         phaseLog.info("kingdom_advantage", { round: context.G.round });
-        context.G.cardDecks.kingdomAdvantagePool = context.random.Shuffle(
-          context.G.cardDecks.kingdomAdvantagePool
+        const { pool: filteredPool, log: kaLog } = filterKAPool(
+          context.G.cardDecks.kingdomAdvantagePool,
+          context.ctx.numPlayers,
+          context.random.Shuffle,
         );
+        context.G.cardDecks.kingdomAdvantagePool = context.random.Shuffle(filteredPool);
+        for (const msg of kaLog) logEvent(context.G, msg);
       }),
       turn: {
         order: {
@@ -272,14 +281,19 @@ const MyGame: Game<MyGameState> = {
       onBegin: withPhaseGuard("legacy_card", (context) => {
         phaseLog.info("legacy_card", { round: context.G.round });
         context.G.stage = "pick legacy card";
-        const cards: LegacyCardInfo[] = context.random.Shuffle([...LEGACY_CARDS]);
-        let cardIndex = 0;
-        Object.values(context.G.playerInfo).forEach((player) => {
-          player.legacyCardOptions = cards.slice(cardIndex, cardIndex + 3);
-          cardIndex += 3;
-        });
-        // Store remaining cards for Royal Succession event
-        context.G.cardDecks.legacyDeck = cards.slice(cardIndex);
+        const { hands, remainder, log: legacyLog } = seedLegacyDeal(
+          LEGACY_CARDS,
+          context.ctx.playOrder,
+          Object.fromEntries(
+            context.ctx.playOrder.map((id) => [id, context.G.playerInfo[id].resources.advantageCard]),
+          ),
+          context.random.Shuffle,
+        );
+        for (const id of context.ctx.playOrder) {
+          context.G.playerInfo[id].legacyCardOptions = hands[id];
+        }
+        context.G.cardDecks.legacyDeck = remainder;
+        for (const msg of legacyLog) logEvent(context.G, msg);
       }),
     },
     events: {
@@ -293,6 +307,17 @@ const MyGame: Game<MyGameState> = {
         context.G.eventState.chosenCards = [];
         context.G.eventState.resolvedEvent = null;
         context.G.eventState.cannotConvertThisRound = [];
+        context.G.eventState.royalPatronageActive = false;
+        context.G.eventState.raceToDiscoveryCounters = null;
+
+        // Merge late-game events into active deck from round 2 onward
+        if (context.G.round >= 2 && context.G.eventState.lateDeck.length > 0) {
+          const mergeCount = context.G.eventState.lateDeck.length;
+          context.G.eventState.deck.push(...context.G.eventState.lateDeck);
+          context.G.eventState.lateDeck = [];
+          context.G.eventState.deck = context.random.Shuffle(context.G.eventState.deck);
+          logEvent(context.G, `Event deck: merged ${mergeCount} late-game cards into active deck`);
+        }
       }),
       moves: {
         chooseEventCard: wrapMove("chooseEventCard", chooseEventCard),
@@ -336,6 +361,41 @@ const MyGame: Game<MyGameState> = {
         Object.values(context.G.playerInfo).forEach((playerInfo: any) => {
           playerInfo.passed = false;
         });
+
+        // Race to Discovery: score the player who discovered the most tiles
+        const counters = context.G.eventState.raceToDiscoveryCounters;
+        if (counters) {
+          const entries = Object.entries(counters).sort((a, b) => b[1] - a[1]);
+          if (entries.length >= 2 && entries[0][1] > entries[1][1]) {
+            const winnerID = entries[0][0];
+            const bonusVP = entries[0][1] - entries[1][1];
+            context.G.playerInfo[winnerID].resources.victoryPoints += bonusVP;
+            logEvent(
+              context.G,
+              `Race to Discovery: ${context.G.playerInfo[winnerID].kingdomName} discovered most tiles (+${bonusVP} VP)`,
+            );
+          } else if (entries.length >= 2 && entries[0][1] === entries[1][1]) {
+            // Tie — break by IPO (first in turn order wins)
+            const tiedCount = entries[0][1];
+            if (tiedCount > 0) {
+              const tiedIDs = entries.filter(([, c]) => c === tiedCount).map(([id]) => id);
+              const winnerID = context.G.turnOrder.find((id: string) => tiedIDs.includes(id));
+              if (winnerID && entries.length >= 2) {
+                // Winner by IPO gets +1 VP per tile beyond second-most non-tied
+                const secondBest = entries.find(([id, c]) => !tiedIDs.includes(id))?.[1] ?? 0;
+                const bonusVP = tiedCount - secondBest;
+                if (bonusVP > 0) {
+                  context.G.playerInfo[winnerID].resources.victoryPoints += bonusVP;
+                  logEvent(
+                    context.G,
+                    `Race to Discovery: ${context.G.playerInfo[winnerID].kingdomName} wins tie by IPO (+${bonusVP} VP)`,
+                  );
+                }
+              }
+            }
+          }
+          context.G.eventState.raceToDiscoveryCounters = null;
+        }
       },
     },
     taxes: {
@@ -435,6 +495,7 @@ const MyGame: Game<MyGameState> = {
         rejectDeal: wrapMove("rejectDeal", rejectDeal),
         enableDispatchButtons: wrapMove("enableDispatchButtons", enableDispatchButtons),
         issueHolyDecree: wrapMove("issueHolyDecree", issueHolyDecree),
+        sendAgitators: wrapMove("sendAgitators", sendAgitators),
         declareSmugglerGood: wrapMove("declareSmugglerGood", declareSmugglerGood),
         pass: wrapMove("pass", pass),
       },

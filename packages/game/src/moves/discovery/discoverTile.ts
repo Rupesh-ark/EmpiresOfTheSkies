@@ -58,6 +58,12 @@ export const discoverTile: MoveDefinition = {
     G.mapState.mostRecentlyDiscoveredTile = [x, y];
     G.firstTurnOfRound = false;
 
+    // Race to Discovery: count tiles discovered per player
+    if (G.eventState.raceToDiscoveryCounters && playerID) {
+      G.eventState.raceToDiscoveryCounters[playerID] =
+        (G.eventState.raceToDiscoveryCounters[playerID] ?? 0) + 1;
+    }
+
     let allDiscovered = true;
     Object.values(G.mapState.discoveredTiles).forEach((tileRow) => {
       tileRow.forEach((tile) => {

@@ -127,6 +127,7 @@ export function buildInitialG(
     electionResults: {},
     hasVoted: [],
     voteSubmitted: {},
+    consecutiveArchprelateWins: 0,
     turnOrder: players.map((p) => p.id),
     playerInfo,
     boardState: buildActionBoard(),
@@ -168,6 +169,7 @@ export function buildInitialG(
     _halted: false,
     eventState: {
       deck: [],
+      lateDeck: [],
       chosenCards: [],
       resolvedEvent: null,
       deferredEvents: [],
@@ -182,6 +184,8 @@ export function buildInitialG(
       skipTaxesNextRound: false,
       cannotConvertThisRound: [],
       grandInfidelDies: false,
+      royalPatronageActive: false,
+      raceToDiscoveryCounters: null,
     },
     ...overrides,
   };
