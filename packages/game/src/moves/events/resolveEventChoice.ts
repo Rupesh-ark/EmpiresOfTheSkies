@@ -1,7 +1,8 @@
 import { INVALID_MOVE } from "boardgame.io/core";
 import { EventCardName, LegacyCardInfo, MoveDefinition } from "../../types";
 import { getBattleEventTarget } from "../../helpers/eventCardDefinitions";
-import { addVPAmount, logEvent } from "../../helpers/stateUtils";
+import { addVPAmount, removeVPAmount, logEvent } from "../../helpers/stateUtils";
+import { BUILDING_SELL_PRICE } from "../../data/gameData";
 
 // ── Choice handlers ──────────────────────────────────────────────────────────
 // Each handler validates the choice, applies the effect, and returns true
@@ -74,6 +75,47 @@ const CHOICE_HANDLERS: Partial<Record<EventCardName, ChoiceHandler>> = {
 
     const land = G.mapState.currentTileArray[tile[1]][tile[0]];
     logEvent(G, `Colonial Rebellion: ${G.playerInfo[choice.targetPlayerID].kingdomName} risks colony at ${land.name}`);
+    return true;
+  },
+
+  guild_revolt: (G, _ctx, choiceValue) => {
+    const choice = G.eventState.pendingChoice!;
+    const option = choiceValue as string;
+    if (!choice.binaryOptions?.includes(option)) return false;
+
+    const p = G.playerInfo[choice.targetPlayerID];
+
+    if (option.startsWith("pay_gold:")) {
+      const cost = parseInt(option.split(":")[1], 10);
+      p.resources.gold -= cost;
+      logEvent(G, `Guild Revolt: ${p.kingdomName} pays ${cost} gold (2 per factory)`);
+    } else if (option === "sell_factory") {
+      p.factories -= 1;
+      p.resources.gold += BUILDING_SELL_PRICE;
+      logEvent(G, `Guild Revolt: ${p.kingdomName} sells a factory for ${BUILDING_SELL_PRICE} gold (now has ${p.factories})`);
+    } else {
+      return false;
+    }
+    return true;
+  },
+
+  corruption_scandal: (G, _ctx, choiceValue) => {
+    const choice = G.eventState.pendingChoice!;
+    const option = choiceValue as string;
+    if (!choice.binaryOptions?.includes(option)) return false;
+
+    const p = G.playerInfo[choice.targetPlayerID];
+
+    if (option === "lose_cathedral") {
+      p.cathedrals -= 1;
+      p.resources.gold += BUILDING_SELL_PRICE;
+      logEvent(G, `Corruption Scandal: ${p.kingdomName} loses a cathedral (sold for ${BUILDING_SELL_PRICE} gold, now has ${p.cathedrals})`);
+    } else if (option === "lose_vp") {
+      removeVPAmount(G, choice.targetPlayerID, 3);
+      logEvent(G, `Corruption Scandal: ${p.kingdomName} loses 3 VP (protecting their cathedrals)`);
+    } else {
+      return false;
+    }
     return true;
   },
 };
