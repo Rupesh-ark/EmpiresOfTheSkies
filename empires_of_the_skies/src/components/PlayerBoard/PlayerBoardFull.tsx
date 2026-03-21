@@ -1015,7 +1015,7 @@ const CardDrawers = ({
 }: {
   fortuneCards: PlayerFortuneOfWarCardInfo[];
   legacyCard: { name: string; colour: string } | undefined;
-  advantageCard: { type: string } | undefined;
+  advantageCard: string | undefined;
 }) => {
   const [openTab, setOpenTab] = useState<CardTab | null>(null);
 
@@ -1139,8 +1139,8 @@ const CardDrawers = ({
         <Box sx={{ display: "flex", justifyContent: "center" }}>
           {advantageCard ? (
             <CardFrame
-              title={advantageCard.type.replace(/_/g, " ")}
-              imageUrl={KA_CARD_IMAGES[advantageCard.type]}
+              title={advantageCard.replace(/_/g, " ")}
+              imageUrl={KA_CARD_IMAGES[advantageCard]}
               width={CARD_WIDTH}
               height={CARD_HEIGHT}
             />

@@ -77,8 +77,8 @@ const IconTabStrip = ({
       gap: "2px",
       px: 1,
       py: "3px",
-      borderBottom: `1px solid ${tokens.ui.border}`,
       backgroundColor: tokens.ui.surfaceRaised,
+      boxShadow: `0 1px 4px rgba(0,0,0,0.06)`,
     }}
   >
     {tabs
@@ -189,9 +189,9 @@ export const GameLayout = ({
             flexShrink: 0,
             overflowY: "auto",
             overflowX: "hidden",
-            borderRight: `1px solid ${tokens.ui.border}`,
             background: backgrounds.parchmentPanelTinted,
             backgroundColor: moodBg,
+            boxShadow: `2px 0 8px rgba(0,0,0,0.08)`,
             transition: `width ${tokens.transition.slow}, min-width ${tokens.transition.slow}, background-color ${tokens.transition.slow}`,
           }}
         >
@@ -265,8 +265,8 @@ export const GameLayout = ({
                 flexShrink: 0,
                 overflowY: "auto",
                 overflowX: "hidden",
-                borderLeft: `1px solid ${tokens.ui.border}`,
                 background: backgrounds.parchmentPanelTinted,
+                boxShadow: `-2px 0 8px rgba(0,0,0,0.08)`,
                 transition: `width ${tokens.transition.slow}, min-width ${tokens.transition.slow}, max-width ${tokens.transition.slow}`,
               }}
             >
@@ -286,7 +286,7 @@ export const GameLayout = ({
               height: config.bottomHeight,
               minHeight: "200px",
               flexShrink: 0,
-              borderTop: `1px solid ${tokens.ui.border}`,
+              boxShadow: `0 -3px 10px rgba(0,0,0,0.1)`,
             }}
           >
             {/* Left: Action board (60%) */}
@@ -307,7 +307,8 @@ export const GameLayout = ({
                 display: "flex",
                 flexDirection: "column",
                 overflow: "hidden",
-                backgroundColor: tokens.ui.surfaceRaised,
+                background: backgrounds.parchmentPanelTinted,
+                boxShadow: `-2px 0 8px rgba(0,0,0,0.06)`,
               }}
             >
               {/* Tab strip header */}
@@ -339,7 +340,7 @@ export const GameLayout = ({
                   minHeight: "200px",
                   flexShrink: 0,
                   overflowY: "auto",
-                  borderTop: `1px solid ${tokens.ui.border}`,
+                  boxShadow: `0 -3px 10px rgba(0,0,0,0.1)`,
                   background: backgrounds.parchmentPanelTinted,
                 }}
               >
@@ -355,7 +356,7 @@ export const GameLayout = ({
                     sx={{
                       height: "35vh",
                       overflowY: "auto",
-                      borderTop: `1px solid ${tokens.ui.border}`,
+                      boxShadow: `0 -3px 10px rgba(0,0,0,0.1)`,
                       background: backgrounds.parchmentPanelTinted,
                     }}
                   >

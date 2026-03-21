@@ -150,9 +150,9 @@ Loot:
         value={currentTile.name}
         sx={{
           background: `
-            radial-gradient(ellipse 55% 50% at 35% 55%, rgba(160,140,100,0.35) 0%, transparent 100%),
-            radial-gradient(ellipse 40% 45% at 65% 40%, rgba(140,125,90,0.25) 0%, transparent 100%),
-            linear-gradient(180deg, rgba(46,85,112,0.7) 0%, rgba(58,112,144,0.6) 40%, rgba(45,101,133,0.7) 70%, rgba(40,85,117,0.8) 100%),
+            radial-gradient(ellipse 55% 50% at 35% 55%, rgba(160,140,100,0.2) 0%, transparent 100%),
+            radial-gradient(ellipse 40% 45% at 65% 40%, rgba(140,125,90,0.15) 0%, transparent 100%),
+            linear-gradient(180deg, rgba(46,85,112,0.4) 0%, rgba(58,112,144,0.35) 40%, rgba(45,101,133,0.4) 70%, rgba(40,85,117,0.45) 100%),
             ${backgrounds.mapFog}
           `,
           width: "100%",

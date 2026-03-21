@@ -132,12 +132,12 @@ const HomePageComponent = (props: HomePageComponentProps) => {
             position: "relative",
             background: "transparent",
             backdropFilter: "blur(4px)",
-            border: `2px solid ${colors.home.border}`,
+            border: "none",
             boxShadow: "inset 0 0 20px rgba(80, 50, 10, 0.1), 0 8px 32px rgba(0,0,0,0.25)",
-            borderRadius: 1,
+            borderRadius: "6px",
             gap: 1.5,
-            overflow: "hidden",
-            // Parchment texture + tinted background
+            overflow: "visible",
+            // Parchment texture
             "&::before": {
               content: '""',
               position: "absolute",
@@ -150,8 +150,45 @@ const HomePageComponent = (props: HomePageComponentProps) => {
               opacity: 0.82,
               pointerEvents: "none",
               zIndex: 0,
+              borderRadius: "inherit",
             },
-            // Ensure children sit above texture
+            // Wire border — pulsing green glow using token colors
+            "@keyframes wirePulse": {
+              "0%, 100%": {
+                boxShadow: `
+                  inset 0 0 0 1px ${colors.home.border}40,
+                  0 0 0 1px ${colors.home.border}50,
+                  0 0 0 3px ${colors.home.gradientBottom}18,
+                  0 0 0 4px ${colors.home.border}40,
+                  0 0 0 6px ${colors.home.gradientBottom}10,
+                  0 0 0 7px ${colors.home.darkBrown}30,
+                  0 0 12px ${colors.home.gradientBottom}00
+                `,
+                borderColor: `${colors.home.border}80`,
+              },
+              "50%": {
+                boxShadow: `
+                  inset 0 0 0 1px ${colors.home.gradientTop}40,
+                  0 0 0 1px ${colors.home.gradientTop}70,
+                  0 0 0 3px ${colors.home.gradientTop}30,
+                  0 0 0 4px ${colors.home.gradientBottom}50,
+                  0 0 0 6px ${colors.home.gradientTop}20,
+                  0 0 0 7px ${colors.home.gradientBottom}35,
+                  0 0 16px ${colors.home.gradientTop}25
+                `,
+                borderColor: `${colors.home.gradientTop}90`,
+              },
+            },
+            "&::after": {
+              content: '""',
+              position: "absolute",
+              inset: -3,
+              borderRadius: "8px",
+              border: `2px solid ${colors.home.border}80`,
+              animation: "wirePulse 3s ease-in-out infinite",
+              pointerEvents: "none",
+              zIndex: 3,
+            },
             "& > *": { position: "relative", zIndex: 1 },
           }}
         >
