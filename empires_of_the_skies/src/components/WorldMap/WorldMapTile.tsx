@@ -7,7 +7,7 @@ import { MyGameProps } from "@eots/game";
 import { Box, Button, Dialog, DialogContent, DialogTitle, IconButton, Typography } from "@mui/material";
 import { Close } from "@mui/icons-material";
 import { ThemeProvider } from "@mui/material/styles";
-import { baseTheme } from "@/theme";
+import { baseTheme, backgrounds } from "@/theme";
 import FortIcon from "../Icons/FortIcon";
 import FleetIcon from "../Icons/FleetIcon";
 import ColonyIcon from "../Icons/ColonyIcon";
@@ -152,7 +152,8 @@ Loot:
           background: `
             radial-gradient(ellipse 55% 50% at 35% 55%, rgba(160,140,100,0.35) 0%, transparent 100%),
             radial-gradient(ellipse 40% 45% at 65% 40%, rgba(140,125,90,0.25) 0%, transparent 100%),
-            linear-gradient(180deg, #2e5570 0%, #3a7090 40%, #2d6585 70%, #285575 100%)
+            linear-gradient(180deg, rgba(46,85,112,0.7) 0%, rgba(58,112,144,0.6) 40%, rgba(45,101,133,0.7) 70%, rgba(40,85,117,0.8) 100%),
+            ${backgrounds.mapFog}
           `,
           width: "100%",
           aspectRatio: "1",

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { ActionBoardProps } from "../shared";
-import { PUNISH_DISSENTERS } from "@/assets/actionBoard";
+import { PUNISH_DISSENTERS, BTN_BG } from "@/assets/actionBoard";
 import { CollapsedActionRow } from "../CollapsedActionRow";
 import {
   BASE_PRISONERS,
@@ -39,7 +39,8 @@ const PunishDissentersRow = (props: ActionBoardProps) => {
     <>
       <CollapsedActionRow
         label="Punish Dissenters"
-        cost="2g or 1 counsellor → imprison/execute"
+        cost=""
+        actionId="punish-dissenters"
         images={PUNISH_DISSENTERS}
         totalSlots={SLOTS_PUNISH_DISSENTERS}
         slotState={props.G.boardState.punishDissenters}
@@ -50,6 +51,7 @@ const PunishDissentersRow = (props: ActionBoardProps) => {
         }}
         playerInfo={props.G.playerInfo}
         accent="#7f1d1d"
+        bgImage={BTN_BG.punishDissenters}
       />
 
       <DialogShell

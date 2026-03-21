@@ -1,12 +1,13 @@
 /**
  * CollapsedActionRow — compact single-action strip.
  *
- * Layout: [Gold edge | Label + cost | Artwork thumb | Slot count + dots]
- * Artwork is a small thumbnail, not a stretched viewport.
+ * Layout: [Gold edge | Thumbnail (feathered) | Label | Slot count + dots]
+ * Hovering sets the action ID in context so the info panel shows details.
  */
 import { Box, Tooltip, Typography } from "@mui/material";
 import { tokens } from "@/theme";
 import { PlayerDot } from "@/components/atoms/PlayerDot";
+import { useActionHover } from "../ActionHoverContext";
 
 export interface CollapsedActionRowProps {
   label: string;
@@ -19,11 +20,15 @@ export interface CollapsedActionRowProps {
   disabledReason?: string;
   accent?: string;
   playerInfo: Record<string, { colour: string; kingdomName: string }>;
+  bgImage?: string;
+  /** Action ID for hover info panel */
+  actionId?: string;
 }
+
+const THUMB_W = 56;
 
 export const CollapsedActionRow = ({
   label,
-  cost,
   images,
   totalSlots,
   slotState,
@@ -31,7 +36,11 @@ export const CollapsedActionRow = ({
   disabled,
   disabledReason,
   playerInfo,
+  bgImage,
+  actionId,
 }: CollapsedActionRowProps) => {
+  const { setHoveredAction } = useActionHover();
+
   let nextSlot: number | null = null;
   for (let i = 0; i < totalSlots; i++) {
     if (!slotState[i + 1]) {
@@ -43,26 +52,7 @@ export const CollapsedActionRow = ({
   const allFilled = nextSlot === null;
   const isDisabled = disabled || allFilled;
 
-  // Placed counsellor dots
-  const placedDots = Object.entries(slotState)
-    .filter(([, pid]) => pid !== undefined)
-    .map(([key, pid]) => {
-      const info = playerInfo[pid!];
-      if (!info) return null;
-      return (
-        <PlayerDot
-          key={key}
-          colour={info.colour}
-          initial={info.kingdomName[0]}
-          size="sm"
-          tooltip={info.kingdomName}
-        />
-      );
-    })
-    .filter(Boolean);
-
-  // Show image for next available slot
-  const displayImage = images[nextSlot ?? totalSlots - 1];
+  const placedCount = Object.values(slotState).filter(Boolean).length;
 
   const handleClick = () => {
     if (!isDisabled && nextSlot !== null) onPlace(nextSlot);
@@ -71,23 +61,20 @@ export const CollapsedActionRow = ({
   const row = (
     <Box
       onClick={handleClick}
+      onMouseEnter={() => actionId && setHoveredAction(actionId)}
+      onMouseLeave={() => setHoveredAction(null)}
       sx={{
         display: "flex",
         alignItems: "center",
-        height: 48,
-        px: `${tokens.spacing.md}px`,
-        gap: `${tokens.spacing.md}px`,
-        mb: "2px",
-
-        // Unified panel surface
+        height: 60,
         position: "relative" as const,
+        overflow: "hidden",
         background: `linear-gradient(180deg, ${tokens.ui.surfaceRaised} 0%, ${tokens.ui.surface} 100%)`,
         borderRadius: `${tokens.radius.md}px`,
         border: `1px solid ${tokens.ui.border}`,
         borderLeft: "3px solid transparent",
         borderTop: `1px solid ${tokens.ui.gold}12`,
 
-        // Gradient gold left accent
         "&::before": {
           content: '""',
           position: "absolute",
@@ -108,7 +95,7 @@ export const CollapsedActionRow = ({
         ...(!isDisabled && {
           "&:hover": {
             borderColor: `${tokens.ui.gold}33`,
-            background: `linear-gradient(180deg, ${tokens.ui.surfaceHover} 0%, ${tokens.ui.surfaceRaised} 100%)`,
+            backgroundColor: tokens.ui.surfaceHover,
             boxShadow: `0 0 6px ${tokens.ui.gold}10`,
             "&::before": {
               background: `linear-gradient(180deg, ${tokens.ui.gold} 0%, ${tokens.ui.gold}88 60%, ${tokens.ui.gold}22 100%)`,
@@ -118,9 +105,39 @@ export const CollapsedActionRow = ({
         }),
       }}
     >
-      {/* ── Label + cost ────────────────────────────────── */}
-      <Box sx={{ flex: 1, minWidth: 0 }}>
+      {/* ── Thumbnail with feathered right edge ────────── */}
+      {bgImage && (
+        <Box
+          sx={{
+            width: THUMB_W,
+            alignSelf: "stretch",
+            flexShrink: 0,
+            position: "relative",
+            overflow: "hidden",
+            ml: "3px",
+          }}
+        >
+          <Box
+            component="img"
+            src={bgImage}
+            alt=""
+            sx={{
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+              objectPosition: "center",
+              display: "block",
+              maskImage: "linear-gradient(to right, black 50%, transparent 100%)",
+              WebkitMaskImage: "linear-gradient(to right, black 50%, transparent 100%)",
+            }}
+          />
+        </Box>
+      )}
+
+      {/* ── Label ────────────────────────────────── */}
+      <Box sx={{ flex: 1, minWidth: 0, pl: bgImage ? 0 : `${tokens.spacing.md}px` }}>
         <Typography
+          noWrap
           sx={{
             fontFamily: tokens.font.display,
             fontSize: tokens.fontSize.sm,
@@ -130,56 +147,52 @@ export const CollapsedActionRow = ({
         >
           {label}
         </Typography>
-        <Typography
-          sx={{
-            fontFamily: tokens.font.body,
-            fontSize: tokens.fontSize.xs,
-            color: tokens.ui.textMuted,
-            lineHeight: 1.2,
-          }}
-        >
-          {cost}
-        </Typography>
       </Box>
-
-      {/* TODO: Replace with proper SVG artwork images when available.
-       * Use the `images` prop — each slot has a corresponding image.
-       * displayImage = images[nextSlot ?? totalSlots - 1]
-       * Render as: <Box sx={{ backgroundImage: `url(${displayImage})`, ... }} />
-       */}
 
       {/* ── Slot count + counsellor dots ──────────────── */}
       <Box
         sx={{
           display: "flex",
           alignItems: "center",
-          gap: `${tokens.spacing.xs}px`,
+          gap: "3px",
           flexShrink: 0,
+          pr: `${tokens.spacing.sm}px`,
         }}
       >
         <Typography
           sx={{
             fontFamily: tokens.font.body,
-            fontSize: tokens.fontSize.xs,
+            fontSize: 10,
             color: tokens.ui.textMuted,
             fontWeight: 600,
           }}
         >
-          {placedDots.length}/{totalSlots}
+          {placedCount}/{totalSlots}
         </Typography>
-        {placedDots.length > 0
-          ? placedDots
-          : Array.from({ length: Math.min(totalSlots, 3) }).map((_, i) => (
-              <Box
-                key={i}
-                sx={{
-                  width: 10,
-                  height: 10,
-                  borderRadius: "50%",
-                  border: `1px solid ${tokens.ui.borderMedium}`,
-                }}
-              />
-            ))}
+        {Array.from({ length: totalSlots }).map((_, i) => {
+          const slotPid = slotState[i + 1];
+          const info = slotPid ? playerInfo[slotPid] : null;
+          return info ? (
+            <PlayerDot
+              key={i}
+              colour={info.colour}
+              initial={info.kingdomName[0]}
+              size="sm"
+              tooltip={info.kingdomName}
+            />
+          ) : (
+            <Box
+              key={i}
+              sx={{
+                width: 10,
+                height: 10,
+                borderRadius: "50%",
+                border: `1.5px solid ${tokens.ui.borderMedium}`,
+                backgroundColor: `${tokens.ui.surface}88`,
+              }}
+            />
+          );
+        })}
       </Box>
     </Box>
   );
@@ -187,7 +200,13 @@ export const CollapsedActionRow = ({
   if (isDisabled && (disabledReason || allFilled)) {
     return (
       <Tooltip title={disabledReason ?? "All slots filled"} placement="top" arrow>
-        <span style={{ display: "block" }}>{row}</span>
+        <span
+          style={{ display: "block" }}
+          onMouseEnter={() => actionId && setHoveredAction(actionId)}
+          onMouseLeave={() => setHoveredAction(null)}
+        >
+          {row}
+        </span>
       </Tooltip>
     );
   }

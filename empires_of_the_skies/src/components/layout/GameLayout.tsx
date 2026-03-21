@@ -1,9 +1,15 @@
-import { ReactNode, useEffect, useState } from "react";
-import { Box, Collapse, IconButton, Tab, Tabs, Tooltip } from "@mui/material";
+import { ReactNode, useEffect, useRef, useState } from "react";
+import React from "react";
+import { Box, Collapse, IconButton, Tooltip } from "@mui/material";
 import { CloseFullscreen, OpenInFull } from "@mui/icons-material";
-import { tokens } from "@/theme";
+import { tokens, backgrounds } from "@/theme";
 import { getMood } from "@/theme";
 import { PanelSlot, getPhaseLayout, MapSize } from "./phaseLayouts";
+import { useActionHover } from "@/components/ActionBoard/ActionHoverContext";
+import {
+  GiInfo, GiScrollUnfurled, GiBarracks, GiSwapBag, GiConversation,
+} from "react-icons/gi";
+import { MdQueryStats } from "react-icons/md";
 
 /**
  * Parchment background tints per mood — derived from tokens so they
@@ -36,13 +42,79 @@ const SLOT_LABELS: Record<PanelSlot, string> = {
   "action-board": "Actions",
   "game-log":     "Log",
   "stats":        "Stats",
-  "rules":        "Rules",
   "player-board": "Kingdom",
   "chat":         "Chat",
   "trade":        "Trade",
+  "action-info":  "Info",
   "map":          "Map",
   "empty":        "",
 };
+
+const SLOT_ICONS: Partial<Record<PanelSlot, React.ComponentType<{ size?: number }>>> = {
+  "action-info":  GiInfo,
+  "game-log":     GiScrollUnfurled,
+  "stats":        MdQueryStats as React.ComponentType<{ size?: number }>,
+  "trade":        GiSwapBag,
+  "chat":         GiConversation,
+  "action-board": GiBarracks,
+};
+
+/** Compact icon tab strip */
+const IconTabStrip = ({
+  tabs,
+  activeTab,
+  onTabClick,
+}: {
+  tabs: PanelSlot[];
+  activeTab: PanelSlot | null;
+  onTabClick: (slot: PanelSlot) => void;
+}) => (
+  <Box
+    sx={{
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: "2px",
+      px: 1,
+      py: "3px",
+      borderBottom: `1px solid ${tokens.ui.border}`,
+      backgroundColor: tokens.ui.surfaceRaised,
+    }}
+  >
+    {tabs
+      .filter(slot => slot !== "empty")
+      .map(slot => {
+        const Icon = SLOT_ICONS[slot];
+        const isActive = activeTab === slot;
+        return (
+          <Tooltip key={slot} title={SLOT_LABELS[slot]} placement="top" arrow>
+            <Box
+              onClick={() => onTabClick(slot)}
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: 32,
+                height: 28,
+                borderRadius: `${tokens.radius.sm}px`,
+                cursor: "pointer",
+                color: isActive ? tokens.ui.gold : tokens.ui.textMuted,
+                backgroundColor: isActive ? `${tokens.ui.gold}15` : "transparent",
+                borderBottom: isActive ? `2px solid ${tokens.ui.gold}` : "2px solid transparent",
+                transition: `all ${tokens.transition.fast}`,
+                "&:hover": {
+                  color: isActive ? tokens.ui.gold : tokens.ui.text,
+                  backgroundColor: `${tokens.ui.gold}10`,
+                },
+              }}
+            >
+              {Icon ? <Icon size={16} /> : <span style={{ fontSize: 10 }}>{SLOT_LABELS[slot]?.[0]}</span>}
+            </Box>
+          </Tooltip>
+        );
+      })}
+  </Box>
+);
 
 export const GameLayout = ({
   phase,
@@ -57,6 +129,23 @@ export const GameLayout = ({
   const moodBg = MOOD_BACKGROUNDS[mood] ?? MOOD_BACKGROUNDS.peacetime;
   const [mapExpanded, setMapExpanded] = useState(false);
   const [extraTab, setExtraTab] = useState<PanelSlot | null>(null);
+  const { hoveredAction } = useActionHover();
+  const tabBeforeHover = useRef<PanelSlot | null>(null);
+
+  // Auto-switch to Info tab when hovering an action button
+  useEffect(() => {
+    if (hoveredAction && config.tabExtras.includes("action-info")) {
+      // Save current tab before switching
+      if (tabBeforeHover.current === null) {
+        tabBeforeHover.current = extraTab;
+      }
+      setExtraTab("action-info");
+    } else if (!hoveredAction && tabBeforeHover.current !== undefined) {
+      // Restore previous tab when hover ends
+      setExtraTab(tabBeforeHover.current);
+      tabBeforeHover.current = null;
+    }
+  }, [hoveredAction, config.tabExtras]);
 
   // Reset tab selection when phase changes or selected tab is no longer available
   useEffect(() => {
@@ -86,6 +175,8 @@ export const GameLayout = ({
         minHeight: 0,
         height: "100%",
         backgroundColor: moodBg,
+        backgroundImage: `${backgrounds.riverTexture}`.replace("center / cover no-repeat", "center / cover"),
+        backgroundBlendMode: "soft-light",
         transition: `background-color ${tokens.transition.slow}`,
       }}
     >
@@ -99,8 +190,9 @@ export const GameLayout = ({
             overflowY: "auto",
             overflowX: "hidden",
             borderRight: `1px solid ${tokens.ui.border}`,
-            backgroundColor: `${tokens.ui.surface}`,
-            transition: `width ${tokens.transition.slow}, min-width ${tokens.transition.slow}`,
+            background: backgrounds.parchmentPanelTinted,
+            backgroundColor: moodBg,
+            transition: `width ${tokens.transition.slow}, min-width ${tokens.transition.slow}, background-color ${tokens.transition.slow}`,
           }}
         >
           {config.left.map((slot, i) => (
@@ -174,7 +266,7 @@ export const GameLayout = ({
                 overflowY: "auto",
                 overflowX: "hidden",
                 borderLeft: `1px solid ${tokens.ui.border}`,
-                backgroundColor: `${tokens.ui.surface}`,
+                background: backgrounds.parchmentPanelTinted,
                 transition: `width ${tokens.transition.slow}, min-width ${tokens.transition.slow}, max-width ${tokens.transition.slow}`,
               }}
             >
@@ -185,83 +277,100 @@ export const GameLayout = ({
           )}
         </Box>
 
-        {/* ── Bottom panel (pinned, e.g. action board during actions) ── */}
-        {hasBottom && (
+        {/* ── Bottom panel: split (action board + tabs) or tabs-only ── */}
+        {hasBottom && hasExtras ? (
+          /* Split bottom: 60% action board, 40% tabbed panel */
           <Box
             sx={{
+              display: "flex",
               height: config.bottomHeight,
               minHeight: "200px",
               flexShrink: 0,
-              overflowY: "auto",
               borderTop: `1px solid ${tokens.ui.border}`,
-              backgroundColor: `${tokens.ui.surface}`,
             }}
           >
-            {renderSlot(config.bottom)}
-          </Box>
-        )}
+            {/* Left: Action board (60%) */}
+            <Box
+              sx={{
+                flex: "0 0 60%",
+                overflowY: "auto",
+                background: backgrounds.parchmentPanelTinted,
+              }}
+            >
+              {renderSlot(config.bottom)}
+            </Box>
 
-        {/* ── Tab extras strip (bottom edge) ─────────────────────── */}
-        {hasExtras && (
-          <Box sx={{ flexShrink: 0 }}>
-            {/* Expanded drawer */}
-            <Collapse in={extraTab !== null} unmountOnExit>
+            {/* Right: Tabbed panel (40%) */}
+            <Box
+              sx={{
+                flex: "0 0 40%",
+                display: "flex",
+                flexDirection: "column",
+                overflow: "hidden",
+                backgroundColor: tokens.ui.surfaceRaised,
+              }}
+            >
+              {/* Tab strip header */}
+              <IconTabStrip
+                tabs={config.tabExtras}
+                activeTab={extraTab}
+                onTabClick={(slot) => setExtraTab(prev => (prev === slot ? null : slot))}
+              />
+
+              {/* Tab content */}
               <Box
                 sx={{
-                  height: "35vh",
+                  flex: 1,
                   overflowY: "auto",
-                  borderTop: `1px solid ${tokens.ui.border}`,
-                  backgroundColor: `${tokens.ui.surface}`,
+                  minHeight: 0,
                 }}
               >
                 {extraTab !== null && renderSlot(extraTab)}
               </Box>
-            </Collapse>
-
-            {/* Tab strip */}
-            <Box
-              sx={{
-                borderTop: `1px solid ${tokens.ui.border}`,
-                backgroundColor: `${tokens.ui.surfaceRaised}`,
-              }}
-            >
-              <Tabs
-                value={extraTab ?? false}
-                onChange={() => {}}
-                variant="scrollable"
-                scrollButtons="auto"
-                sx={{
-                  minHeight: 32,
-                  "& .MuiTabs-indicator": {
-                    backgroundColor: tokens.ui.gold,
-                    height: 2,
-                  },
-                  "& .MuiTab-root": {
-                    minHeight: 32,
-                    fontFamily: tokens.font.body,
-                    fontSize: tokens.fontSize.sm,
-                    textTransform: "none",
-                    color: tokens.ui.textMuted,
-                    padding: "4px 16px",
-                    "&.Mui-selected": {
-                      color: tokens.ui.gold,
-                    },
-                  },
-                }}
-              >
-                {config.tabExtras
-                  .filter(slot => slot !== "empty")
-                  .map(slot => (
-                    <Tab
-                      key={slot}
-                      label={SLOT_LABELS[slot]}
-                      value={slot}
-                      onClick={() => setExtraTab(prev => (prev === slot ? null : slot))}
-                    />
-                  ))}
-              </Tabs>
             </Box>
           </Box>
+        ) : (
+          <>
+            {/* Bottom panel only (no tabs alongside) */}
+            {hasBottom && (
+              <Box
+                sx={{
+                  height: config.bottomHeight,
+                  minHeight: "200px",
+                  flexShrink: 0,
+                  overflowY: "auto",
+                  borderTop: `1px solid ${tokens.ui.border}`,
+                  background: backgrounds.parchmentPanelTinted,
+                }}
+              >
+                {renderSlot(config.bottom)}
+              </Box>
+            )}
+
+            {/* Tab extras strip (collapse drawer — non-actions phases) */}
+            {hasExtras && (
+              <Box sx={{ flexShrink: 0 }}>
+                <Collapse in={extraTab !== null} unmountOnExit>
+                  <Box
+                    sx={{
+                      height: "35vh",
+                      overflowY: "auto",
+                      borderTop: `1px solid ${tokens.ui.border}`,
+                      background: backgrounds.parchmentPanelTinted,
+                    }}
+                  >
+                    {extraTab !== null && renderSlot(extraTab)}
+                  </Box>
+                </Collapse>
+
+                <IconTabStrip
+                  tabs={config.tabExtras}
+                  activeTab={extraTab}
+                  onTabClick={(slot) => setExtraTab(prev => (prev === slot ? null : slot))}
+                />
+              </Box>
+            )}
+          </>
         )}
       </Box>
 

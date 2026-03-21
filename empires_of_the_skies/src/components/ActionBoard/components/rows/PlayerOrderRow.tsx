@@ -1,41 +1,165 @@
-import { ActionBoardButton } from "../ActionBoardButton";
-import { ActionRow, RowHeader, ActionBoardProps } from "../shared";
-import { PLAYER_ORDER } from "@/assets/actionBoard";
+/**
+ * PlayerOrderRow — Compact row with feathered thumbnail and numbered position buttons.
+ */
+import { Box, Tooltip, Typography } from "@mui/material";
+import { tokens } from "@/theme";
+import { BTN_BG } from "@/assets/actionBoard";
+import { ActionBoardProps } from "../shared";
+import { clearMoves } from "@/utils/gameHelpers";
+import { PlayerDot } from "@/components/atoms/PlayerDot";
+import { useActionHover } from "../../ActionHoverContext";
 
-const LABELS = ["1st\t", "2nd\t", "3rd\t", "4th\t", "5th\t", "6th\t"];
-const BG_COLOR = "#9EE8FF";
+const ORDINALS = ["1st", "2nd", "3rd", "4th", "5th", "6th"];
+const THUMB_W = 80;
 
-const PlayerOrderRow = (props: ActionBoardProps) => (
-  <ActionRow
-    header={
-      <RowHeader
-        label="Change Player Order"
-        meta={[
-          { label: "Cost", value: "1 counsellor" },
-          { label: "Effect", value: "takes effect at Reset" },
-        ]}
-        accent="#2a7fa5"
-      />
-    }
-  >
-    {PLAYER_ORDER.map((image, i) => (
-      <ActionBoardButton
-        key={`player-order-${i}`}
-        value={i}
-        onClickFunction={props.moves.alterPlayerOrder}
-        backgroundImage={image}
-        backgroundColour={BG_COLOR}
-        text={LABELS[i]}
-        width="98px"
-        counsellor={
-          props.G.boardState.pendingPlayerOrder[
-            (i + 1) as keyof typeof props.G.boardState.pendingPlayerOrder
-          ]
-        }
-        {...props}
-      />
-    ))}
-  </ActionRow>
-);
+const PlayerOrderRow = (props: ActionBoardProps) => {
+  const { setHoveredAction } = useActionHover();
+  const numPlayers = Object.keys(props.G.playerInfo).length;
+
+  const alreadyPlaced = Object.values(props.G.boardState.pendingPlayerOrder).some(
+    (id) => id === props.playerID
+  );
+
+  return (
+    <Box
+      onMouseEnter={() => setHoveredAction("change-player-order")}
+      onMouseLeave={() => setHoveredAction(null)}
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        height: 60,
+        position: "relative",
+        overflow: "hidden",
+        background: `linear-gradient(180deg, ${tokens.ui.surfaceRaised} 0%, ${tokens.ui.surface} 100%)`,
+        borderRadius: `${tokens.radius.md}px`,
+        border: `1px solid ${tokens.ui.border}`,
+        borderLeft: "3px solid transparent",
+        borderTop: `1px solid ${tokens.ui.gold}12`,
+        "&::before": {
+          content: '""',
+          position: "absolute",
+          left: -3,
+          top: 0,
+          bottom: 0,
+          width: 3,
+          borderRadius: `${tokens.radius.md}px 0 0 ${tokens.radius.md}px`,
+          background: alreadyPlaced
+            ? `linear-gradient(180deg, ${tokens.ui.gold}44 0%, ${tokens.ui.gold}22 60%, transparent 100%)`
+            : `linear-gradient(180deg, ${tokens.ui.gold} 0%, ${tokens.ui.gold}55 60%, transparent 100%)`,
+        },
+        boxShadow: `inset 0 1px 0 rgba(255,255,255,0.4), 0 1px 3px rgba(80,60,30,0.10)`,
+        opacity: alreadyPlaced ? 0.5 : 1,
+      }}
+    >
+      {/* Feathered thumbnail */}
+      <Box
+        sx={{
+          width: THUMB_W,
+          alignSelf: "stretch",
+          flexShrink: 0,
+          overflow: "hidden",
+          ml: "3px",
+        }}
+      >
+        <Box
+          component="img"
+          src={BTN_BG.changePlayerOrder}
+          alt=""
+          sx={{
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+            objectPosition: "center",
+            display: "block",
+            maskImage: "linear-gradient(to right, black 50%, transparent 100%)",
+            WebkitMaskImage: "linear-gradient(to right, black 50%, transparent 100%)",
+          }}
+        />
+      </Box>
+
+      {/* Label */}
+      <Box sx={{ flex: 1, minWidth: 0, pr: `${tokens.spacing.sm}px` }}>
+        <Typography
+          noWrap
+          sx={{
+            fontFamily: tokens.font.display,
+            fontSize: tokens.fontSize.sm,
+            color: tokens.ui.text,
+            lineHeight: 1.2,
+          }}
+        >
+          Player Order
+        </Typography>
+      </Box>
+
+      {/* Position buttons */}
+      <Box sx={{ display: "flex", gap: "4px", flexShrink: 0, pr: `${tokens.spacing.md}px` }}>
+        {Array.from({ length: numPlayers }, (_, i) => {
+          const slot = (i + 1) as keyof typeof props.G.boardState.pendingPlayerOrder;
+          const occupant = props.G.boardState.pendingPlayerOrder[slot];
+          const occupantInfo = occupant ? props.G.playerInfo[occupant] : null;
+          const isTaken = occupant !== undefined;
+
+          return (
+            <Tooltip
+              key={i}
+              title={occupantInfo ? `${ORDINALS[i]} — ${occupantInfo.kingdomName}` : `${ORDINALS[i]} — available`}
+              placement="top"
+              arrow
+            >
+              <Box
+                onClick={() => {
+                  if (!isTaken && !alreadyPlaced) {
+                    clearMoves(props);
+                    props.moves.alterPlayerOrder(i);
+                  }
+                }}
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  width: 32,
+                  height: 32,
+                  borderRadius: `${tokens.radius.sm}px`,
+                  border: `1px solid ${isTaken ? "transparent" : tokens.ui.borderMedium}`,
+                  backgroundColor: isTaken ? `${occupantInfo!.colour}22` : tokens.ui.surface,
+                  cursor: isTaken || alreadyPlaced ? "default" : "pointer",
+                  transition: `all ${tokens.transition.fast}`,
+                  ...(!isTaken && !alreadyPlaced && {
+                    "&:hover": {
+                      borderColor: `${tokens.ui.gold}55`,
+                      backgroundColor: tokens.ui.surfaceHover,
+                    },
+                  }),
+                }}
+              >
+                {occupantInfo ? (
+                  <PlayerDot
+                    colour={occupantInfo.colour}
+                    initial={occupantInfo.kingdomName[0]}
+                    size="sm"
+                    tooltip={occupantInfo.kingdomName}
+                  />
+                ) : (
+                  <Typography
+                    sx={{
+                      fontSize: 10,
+                      fontFamily: tokens.font.body,
+                      fontWeight: 600,
+                      color: tokens.ui.textMuted,
+                      lineHeight: 1,
+                    }}
+                  >
+                    {ORDINALS[i]}
+                  </Typography>
+                )}
+              </Box>
+            </Tooltip>
+          );
+        })}
+      </Box>
+    </Box>
+  );
+};
 
 export default PlayerOrderRow;

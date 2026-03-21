@@ -6,15 +6,51 @@
  *
  * Usage:
  *   import { backgrounds } from "@/theme";
- *   <Box sx={{ background: backgrounds.parchment }} />
- *   <Box sx={{ background: backgrounds.river }} />
+ *   <Box sx={{ background: backgrounds.parchmentPanel }} />
+ *   <Box sx={{ background: backgrounds.darkWoodTexture }} />
  */
 import { tokens } from "./tokens";
-import { BG_PARCHMENT } from "@/assets/backgrounds";
+import {
+  BG_PARCHMENT,
+  BG_PARCHMENT_PANEL,
+  BG_RIVER,
+  BG_LEATHER,
+  BG_ORNATE_BORDER,
+  BG_SECTION_DIVIDER,
+  BG_MAP_FOG,
+} from "@/assets/backgrounds";
 
 export const backgrounds = {
-  /** Parchment texture — tiled, subtle, works on any surface */
+  // ── Image-based textures ─────────────────────────────────────────────────
+
+  /** Original parchment texture — tiled, subtle */
   parchment: `url(${BG_PARCHMENT}) center / 600px repeat`,
+
+  /** Parchment panel texture — for sidebars, action board, tab drawers */
+  parchmentPanel: `url(${BG_PARCHMENT_PANEL}) center / 800px repeat`,
+
+  /** Parchment panel with surface color overlay for readability */
+  parchmentPanelTinted: `
+    linear-gradient(180deg, ${tokens.ui.surface}dd 0%, ${tokens.ui.surface}cc 100%),
+    url(${BG_PARCHMENT_PANEL}) center / 800px repeat
+  `.trim(),
+
+  /** River water — aerial satellite texture for game background */
+  riverTexture: `url(${BG_RIVER}) center / cover no-repeat`,
+
+  /** Leather button — for primary action buttons */
+  leatherTexture: `url(${BG_LEATHER}) center / cover no-repeat`,
+
+  /** Ornate border frame — for dialogs and card frames */
+  ornateBorder: BG_ORNATE_BORDER,
+
+  /** Section divider banner — for section headers */
+  sectionDivider: BG_SECTION_DIVIDER,
+
+  /** Map fog overlay — for unrevealed tiles */
+  mapFog: `url(${BG_MAP_FOG}) center / cover no-repeat`,
+
+  // ── CSS gradient patterns (no images) ────────────────────────────────────
 
   /** Parchment with color tint overlay */
   parchmentTinted: `
@@ -22,7 +58,7 @@ export const backgrounds = {
     url(${BG_PARCHMENT}) center / 600px repeat
   `.trim(),
 
-  /** Animated river flow — teal gradient blobs (use with animation class) */
+  /** Animated river flow — teal gradient blobs (use with .game-layout-root animation) */
   river: `
     radial-gradient(ellipse 35% 60% at 12% 25%,  rgba(45,107,90,0.9) 0%, transparent 70%),
     radial-gradient(ellipse 20% 80% at 35% 60%,  rgba(45,107,90,0.8) 0%, transparent 65%),
@@ -37,7 +73,7 @@ export const backgrounds = {
     radial-gradient(ellipse 40% 60% at 70% 60%, ${tokens.ui.tealMuted} 0%, transparent 70%)
   `.trim(),
 
-  /** Dark wood panel (like the resource tracker bar) */
+  /** Dark wood panel — CSS-only fallback */
   darkWood: "linear-gradient(180deg, #5C4A38 0%, #4A3A2A 50%, #3E3020 100%)",
 
   /** Recessed gauge (dark inset panel) */
