@@ -1,5 +1,5 @@
 import { MyGameState, MoveDefinition, MoveError } from "../../types";
-import { BUILDING_SELL_PRICE } from "../../codifiedGameInfo";
+import { BUILDING_SELL_PRICE } from "../../data/gameData";
 
 const validateSellBuilding = (G: MyGameState, playerID: string, buildingType: string): MoveError | null => {
   const player = G.playerInfo[playerID];

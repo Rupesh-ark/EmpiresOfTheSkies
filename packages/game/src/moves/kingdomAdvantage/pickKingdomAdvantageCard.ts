@@ -1,6 +1,6 @@
 import { INVALID_MOVE } from "boardgame.io/core";
 import { MoveDefinition, KingdomAdvantageCard } from "../../types";
-import { ELITE_REGIMENTS_COUNT } from "../../codifiedGameInfo";
+import { ELITE_REGIMENTS_COUNT } from "../../data/gameData";
 
 const pickKingdomAdvantageCard: MoveDefinition = {
   fn: ({ G, playerID, events }, ...args) => {

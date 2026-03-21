@@ -2,7 +2,7 @@ import { MyGameState, MoveError, MoveDefinition } from "../../types";
 import { validateMove } from "../moveValidation";
 import { addOneCounsellor, removeOneCounsellor, removeGoldAmount } from "../../helpers/stateUtils";
 import { INVALID_MOVE } from "boardgame.io/core";
-import { CounsellorSlot, MAX_COUNSELLORS } from "../../codifiedGameInfo";
+import { CounsellorSlot, MAX_COUNSELLORS } from "../../data/gameData";
 
 const validateRecruitCounsellors = (
   G: MyGameState,

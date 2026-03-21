@@ -1,6 +1,6 @@
 import type { Ctx } from "boardgame.io";
 import { PlayerInfo, PlayerColour } from "../types";
-import { colourToKingdomMap, STARTING_RESOURCES, BASE_GOLD_INCOME } from "../codifiedGameInfo";
+import { colourToKingdomMap, STARTING_RESOURCES, BASE_GOLD_INCOME } from "../data/gameData";
 import { initialBattleMapState } from "./boardSetup";
 
 export const getPlayerColours = (ctx: Ctx): string[] => {

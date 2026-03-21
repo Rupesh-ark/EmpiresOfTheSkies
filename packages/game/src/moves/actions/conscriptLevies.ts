@@ -6,7 +6,7 @@ import {
   removeOneCounsellor,
   removeVPAmount,
 } from "../../helpers/stateUtils";
-import { LEVY_GROUP_SIZE, MAX_LEVIES } from "../../codifiedGameInfo";
+import { LEVY_GROUP_SIZE, MAX_LEVIES } from "../../data/gameData";
 
 const validateConscriptLevies = (
   G: MyGameState,

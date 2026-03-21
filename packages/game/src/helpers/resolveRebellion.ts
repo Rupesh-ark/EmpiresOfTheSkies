@@ -16,7 +16,7 @@ import {
 } from "./stateUtils";
 import { drawFortuneOfWarCard, hasFortAt } from "./helpers";
 import { CARD_RESOLVERS, resolveCardWithAlignmentPenalty } from "./legacyCardDefinitions";
-import { KINGDOM_LOCATION } from "../codifiedGameInfo";
+import { KINGDOM_LOCATION } from "../data/gameData";
 
 // ── Battle math ──────────────────────────────────────────────────────────────
 

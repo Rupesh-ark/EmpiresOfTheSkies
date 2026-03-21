@@ -1,7 +1,7 @@
 import { MoveDefinition, MyGameState, MoveError } from "../../types";
 import { INVALID_MOVE } from "boardgame.io/core";
 import { drawFortuneOfWarCard } from "../../helpers/helpers";
-import { FOW_CARDS_DRAWN, FOW_HAND_MAX } from "../../codifiedGameInfo";
+import { FOW_CARDS_DRAWN, FOW_HAND_MAX } from "../../data/gameData";
 
 const validateDrawFoWCards = (
   G: MyGameState,

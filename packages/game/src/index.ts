@@ -13,6 +13,6 @@ export * from "./helpers/legacyCardRegistry";
 
 export * from "./types";
 
-export * from "./codifiedGameInfo"
+export * from "./data/gameData"
 
 export { MOVE_DEFINITIONS } from "./moveDefinitions";

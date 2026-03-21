@@ -1,6 +1,6 @@
 import { MyGameState, MoveError, MoveDefinition } from "../../types";
 import { INVALID_MOVE } from "boardgame.io/core";
-import { KINGDOM_LOCATION } from "../../codifiedGameInfo";
+import { KINGDOM_LOCATION } from "../../data/gameData";
 
 const validatePassFleetInfo = (
   G: MyGameState,

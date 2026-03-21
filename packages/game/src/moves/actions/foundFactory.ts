@@ -2,7 +2,7 @@ import { MyGameState, MoveError, MoveDefinition } from "../../types";
 import { INVALID_MOVE } from "boardgame.io/core";
 import { validateMove } from "../moveValidation";
 import { removeOneCounsellor } from "../../helpers/stateUtils";
-import { MAX_FACTORIES } from "../../codifiedGameInfo";
+import { MAX_FACTORIES } from "../../data/gameData";
 
 const validateFoundFactory = (
   G: MyGameState,

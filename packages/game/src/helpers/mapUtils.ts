@@ -1,5 +1,5 @@
 import { MyGameState } from "../types";
-import { MAP_WIDTH, MAP_HEIGHT } from "../codifiedGameInfo";
+import { MAP_WIDTH, MAP_HEIGHT } from "../data/gameData";
 
 export const FAITHDOM_TILES: [number, number][] = [
   [3, 0],

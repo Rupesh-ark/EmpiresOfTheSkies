@@ -15,7 +15,7 @@ import { describe, it, expect } from "vitest";
 import { INVALID_MOVE } from "boardgame.io/core";
 import recruitCounsellors from "../../moves/actions/recruitCounsellors";
 import { buildInitialG, buildPlayer, buildCtx, buildResources } from "../testHelpers";
-import { MAX_COUNSELLORS } from "../../codifiedGameInfo";
+import { MAX_COUNSELLORS } from "../../data/gameData";
 
 function callMove(G: ReturnType<typeof buildInitialG>, playerID: string, slotIndex: number) {
   const ctx = buildCtx(playerID);

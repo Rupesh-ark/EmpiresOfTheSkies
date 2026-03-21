@@ -1,5 +1,5 @@
 import { MyGameState } from "../types";
-import { MAX_SKYSHIPS, MAX_REGIMENTS, HERESY_MAX, HERESY_MIN } from "../codifiedGameInfo";
+import { MAX_SKYSHIPS, MAX_REGIMENTS, HERESY_MAX, HERESY_MIN } from "../data/gameData";
 
 export { HERESY_MAX, HERESY_MIN };
 

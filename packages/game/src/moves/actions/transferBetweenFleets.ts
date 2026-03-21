@@ -1,5 +1,5 @@
 import { MoveDefinition, MyGameState, MoveError } from "../../types";
-import { MAX_SKYSHIPS_PER_FLEET, KINGDOM_LOCATION } from "../../codifiedGameInfo";
+import { MAX_SKYSHIPS_PER_FLEET, KINGDOM_LOCATION } from "../../data/gameData";
 
 const validateTransferBetweenFleets = (
   G: MyGameState,

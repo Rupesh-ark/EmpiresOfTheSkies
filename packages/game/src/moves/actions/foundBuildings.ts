@@ -11,7 +11,7 @@ import {
   MAX_CATHEDRALS,
   MAX_PALACES,
   MAX_SHIPYARDS,
-} from "../../codifiedGameInfo";
+} from "../../data/gameData";
 
 const validateFoundBuildings = (
   G: MyGameState,

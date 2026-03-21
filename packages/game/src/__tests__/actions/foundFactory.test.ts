@@ -16,7 +16,7 @@ import { describe, it, expect } from "vitest";
 import { INVALID_MOVE } from "boardgame.io/core";
 import foundFactory from "../../moves/actions/foundFactory";
 import { buildInitialG, buildPlayer, buildCtx } from "../testHelpers";
-import { MAX_FACTORIES } from "../../codifiedGameInfo";
+import { MAX_FACTORIES } from "../../data/gameData";
 
 function callMove(G: ReturnType<typeof buildInitialG>, playerID: string, slotIndex: number) {
   const ctx = buildCtx(playerID);

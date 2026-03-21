@@ -2,7 +2,7 @@ import {
   FortuneOfWarCardInfo,
   MyGameState,
 } from "../types";
-import { fortuneOfWarCards } from "../codifiedGameInfo";
+import { fortuneOfWarCards } from "../data/gameData";
 import { Ctx } from "boardgame.io";
 import { EventsAPI } from "boardgame.io/dist/types/src/plugins/events/events";
 import {
