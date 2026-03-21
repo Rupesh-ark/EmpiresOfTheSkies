@@ -1,11 +1,13 @@
 /**
- * Trade — Anytime actions: sell skyships, sell buildings, propose deals.
+ * Trade — Anytime actions: sell skyships, sell buildings, propose deals,
+ *         send agitators, set piracy intent.
  */
 import { useState } from "react";
-import { Box, Typography, Slider } from "@mui/material";
+import { Box, Typography, Slider, Button } from "@mui/material";
 import { tokens } from "@/theme";
 import { MyGameProps, SKYSHIP_SELL_PRICE, BUILDING_SELL_PRICE } from "@eots/game";
 import { DialogShell } from "@/components/atoms/DialogShell";
+import { GameButton } from "@/components/atoms/GameButton";
 import { GoodsValue } from "@/components/Stats/GoodsValue";
 
 // ── Compact action row ──────────────────────────────────────────────────
@@ -61,11 +63,22 @@ const Trade = (props: MyGameProps) => {
   const playerInfo = props.playerID ? props.G.playerInfo[props.playerID] : null;
   const [sellSkyshipsOpen, setSellSkyshipsOpen] = useState(false);
   const [skyshipAmount, setSkyshipAmount] = useState(1);
+  const [agitatorsOpen, setAgitatorsOpen] = useState(false);
+  const [agitatorTarget, setAgitatorTarget] = useState<string | null>(null);
 
   const skyships = playerInfo?.resources.skyships ?? 0;
   const cathedrals = playerInfo?.cathedrals ?? 0;
   const palaces = playerInfo?.palaces ?? 0;
   const isHeretic = playerInfo?.hereticOrOrthodox === "heretic";
+  const gold = playerInfo?.resources.gold ?? 0;
+  const piracyIntent = playerInfo?.piracyIntent ?? "tax";
+  const hasFleets = (playerInfo?.fleetInfo ?? []).length > 0;
+
+  const rivals = props.playerID
+    ? Object.entries(props.G.playerInfo)
+        .filter(([id]) => id !== props.playerID)
+        .map(([id, p]) => ({ id, name: p.kingdomName, colour: p.colour }))
+    : [];
 
   return (
     <Box sx={{ p: `${tokens.spacing.sm}px`, height: "100%" }}>
@@ -117,6 +130,22 @@ const Trade = (props: MyGameProps) => {
             disabled
             onClick={() => {}}
           />
+
+          <CompactAction
+            label="Send Agitators"
+            price="2g"
+            disabled={gold < 2}
+            disabledReason="Need 2g"
+            onClick={() => { setAgitatorTarget(null); setAgitatorsOpen(true); }}
+          />
+
+          {hasFleets && (
+            <CompactAction
+              label={piracyIntent === "tax" ? "Tax Routes" : "Cut Routes"}
+              price={piracyIntent === "tax" ? "→ Cut" : "→ Tax"}
+              onClick={() => props.moves.setPiracyIntent(piracyIntent === "tax" ? "cut" : "tax")}
+            />
+          )}
         </Box>
 
         {/* ── Right: Goods Value ─────────────────────────── */}
@@ -188,6 +217,46 @@ const Trade = (props: MyGameProps) => {
           valueLabelDisplay="auto"
           sx={{ color: tokens.ui.gold }}
         />
+      </DialogShell>
+
+      {/* ── Send Agitators dialog ─────────────────────── */}
+      <DialogShell
+        open={agitatorsOpen}
+        title="Send Agitators"
+        mood="crisis"
+        size="xs"
+        confirmLabel="Send (−2g)"
+        confirmDisabled={!agitatorTarget}
+        onConfirm={() => {
+          if (agitatorTarget) {
+            props.moves.sendAgitators(agitatorTarget);
+            setAgitatorsOpen(false);
+          }
+        }}
+        cancelLabel="Cancel"
+        onCancel={() => setAgitatorsOpen(false)}
+      >
+        <Typography sx={{ fontFamily: tokens.font.body, fontSize: tokens.fontSize.sm, color: tokens.ui.text, mb: 2 }}>
+          Choose a rival to place a free dissenter on:
+        </Typography>
+        <Box sx={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+          {rivals.map((r) => (
+            <Button
+              key={r.id}
+              onClick={() => setAgitatorTarget(r.id)}
+              sx={{
+                backgroundColor: r.colour,
+                border: agitatorTarget === r.id ? "2px solid black" : "none",
+                color: "#000",
+                textTransform: "none",
+                fontWeight: 600,
+                "&:hover": { backgroundColor: r.colour, opacity: 0.85 },
+              }}
+            >
+              {r.name}
+            </Button>
+          ))}
+        </Box>
       </DialogShell>
     </Box>
   );

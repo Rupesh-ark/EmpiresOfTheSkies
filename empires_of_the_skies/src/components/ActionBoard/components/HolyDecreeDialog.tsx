@@ -21,6 +21,15 @@ const HolyDecreeDialog = (props: HolyDecreeDialogProps) => {
     <KingdomButton selectedKingdom={orthodoxKingdom} setSelectedKingdom={setOrthodoxKingdom} id={id} {...props} key={`orthodox-${id}`} />
   ));
 
+  const playersWithPrisoners = Object.entries(props.G.playerInfo)
+    .filter(([, p]) => p.prisoners > 0)
+    .map(([id]) => id);
+  const [inquisitionTarget, setInquisitionTarget] = useState(playersWithPrisoners[0] ?? "");
+
+  const inquisitionButtons = playersWithPrisoners.map((id) => (
+    <KingdomButton selectedKingdom={inquisitionTarget} setSelectedKingdom={setInquisitionTarget} id={id} {...props} key={`inq-${id}`} />
+  ));
+
   return (
     <DialogShell
       open={props.open}
@@ -43,6 +52,18 @@ const HolyDecreeDialog = (props: HolyDecreeDialogProps) => {
       </Button>
       <h4>Bless the orthodox monarch who has the least advanced heresy tracker and increase their victory points.</h4>
       <ButtonRow>{orthodoxButtons}</ButtonRow>
+
+      <Button variant="text" sx={{ border: "none", height: "45px", overflow: "visible" }}
+        disabled={playersWithPrisoners.length === 0}
+        onClick={() => { props.moves.issueHolyDecree("inquisition", inquisitionTarget); props.setOpen(false); }}>
+        <h2>Inquisition</h2>
+      </Button>
+      <h4>Target kingdom releases all prisoners, heresy advances 2</h4>
+      {playersWithPrisoners.length > 0 ? (
+        <ButtonRow>{inquisitionButtons}</ButtonRow>
+      ) : (
+        <h4 style={{ fontStyle: "italic", opacity: 0.6 }}>No player has prisoners</h4>
+      )}
 
       <Button variant="text" sx={{ border: "none", height: "45px", overflow: "visible" }}
         onClick={() => { props.moves.issueHolyDecree("reform dogma"); props.setOpen(false); }}>
