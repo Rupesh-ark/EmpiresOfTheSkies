@@ -119,6 +119,11 @@ const punishDissenters: MoveDefinition = {
     removeOneCounsellor(G, playerID); // counsellor placed on board
     playerInfo.prisoners += 1;
 
+    // If player has free dissenters (from Send Agitators), imprisoning one removes it
+    if (playerInfo.freeDissenters > 0) {
+      playerInfo.freeDissenters -= 1;
+    }
+
     if (playerInfo.hereticOrOrthodox === "orthodox") {
       increaseOrthodoxyWithinMove(G, playerID);
     } else {

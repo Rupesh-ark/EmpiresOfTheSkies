@@ -133,10 +133,8 @@ export const enactPiracy = (G: MyGameState): void => {
           const hasSanctionedPiracy =
             G.playerInfo[rivalID].resources.advantageCard === "sanctioned_piracy";
 
-          // Cut the Route: pirate without sanctioned_piracy on a low-value
-          // route cuts a skyship instead of taxing (more strategic disruption).
-          // Sanctioned piracy players always tax (gold + VP is too valuable).
-          const shouldCut = !hasSanctionedPiracy && routeValue <= 1;
+          // Cut the Route: pirate declared "cut" intent during actions phase
+          const shouldCut = G.playerInfo[rivalID].piracyIntent === "cut";
 
           if (shouldCut) {
             // Find route owner's nearest fleet on the route to cut from

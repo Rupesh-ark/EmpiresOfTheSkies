@@ -46,6 +46,7 @@ import rejectDeal from "./moves/actions/rejectDeal";
 import enableDispatchButtons from "./moves/actions/enableDispatchButtons";
 import issueHolyDecree from "./moves/actions/issueHolyDecree";
 import sendAgitators from "./moves/actions/sendAgitators";
+import setPiracyIntent from "./moves/actions/setPiracyIntent";
 import declareSmugglerGood from "./moves/actions/declareSmugglerGood";
 import pass from "./moves/pass";
 import attackOtherPlayersFleet from "./moves/aerialBattle/attackOtherPlayersFleet";
@@ -340,6 +341,7 @@ const MyGame: Game<MyGameState> = {
 
         Object.values(context.G.playerInfo).forEach((playerInfo: any) => {
           playerInfo.passed = false;
+          playerInfo.piracyIntent = "tax"; // reset each round
         });
         context.events.endTurn({ next: context.ctx.playOrder[0] });
         context.events.pass();
@@ -496,6 +498,7 @@ const MyGame: Game<MyGameState> = {
         enableDispatchButtons: wrapMove("enableDispatchButtons", enableDispatchButtons),
         issueHolyDecree: wrapMove("issueHolyDecree", issueHolyDecree),
         sendAgitators: wrapMove("sendAgitators", sendAgitators),
+        setPiracyIntent: wrapMove("setPiracyIntent", setPiracyIntent),
         declareSmugglerGood: wrapMove("declareSmugglerGood", declareSmugglerGood),
         pass: wrapMove("pass", pass),
       },

@@ -22,6 +22,8 @@ export function buildPlayer(id: string, overrides: Partial<PlayerInfo> = {}): Pl
     hereticOrOrthodox: "orthodox",
     heresyTracker: 0, // actual game starting value (playerSetup.ts)
     prisoners: 0,
+    freeDissenters: 0,
+    piracyIntent: "tax" as const,
     shipyards: 0,
     factories: 1,      // v4.2: all players start with 1 factory
     cathedrals: 1,

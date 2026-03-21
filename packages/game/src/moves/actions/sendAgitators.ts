@@ -1,6 +1,6 @@
 import { INVALID_MOVE } from "boardgame.io/core";
 import { MoveDefinition, MoveError } from "../../types";
-import { increaseHeresyWithinMove, logEvent } from "../../helpers/stateUtils";
+import { logEvent } from "../../helpers/stateUtils";
 
 const AGITATOR_COST = 2;
 
@@ -22,9 +22,10 @@ const validateSendAgitators = (
 };
 
 /**
- * Send Agitators: pay 2 gold to advance a rival's heresy by 1.
- * Anytime action during the actions phase — does not cost a counsellor
- * and does not end the player's turn.
+ * Send Agitators: pay 2 gold to place a free dissenter in a rival's kingdom.
+ * The target can imprison the dissenter via Punish Dissenters. If unhandled,
+ * the dissenter shifts the target's heresy +1 at end of round.
+ * Anytime action — does not cost a counsellor or end the player's turn.
  */
 const sendAgitators: MoveDefinition = {
   fn: ({ G, playerID }, ...args: any[]) => {
@@ -33,13 +34,11 @@ const sendAgitators: MoveDefinition = {
     if (validateSendAgitators(G, playerID, targetID)) return INVALID_MOVE;
 
     G.playerInfo[playerID].resources.gold -= AGITATOR_COST;
-    increaseHeresyWithinMove(G, targetID);
+    G.playerInfo[targetID].freeDissenters += 1;
 
     const senderName = G.playerInfo[playerID].kingdomName;
     const targetName = G.playerInfo[targetID].kingdomName;
-    logEvent(G, `${senderName} sends agitators to ${targetName} (−${AGITATOR_COST} gold, heresy +1)`);
-
-    // Does NOT set turnComplete — this is an anytime action
+    logEvent(G, `${senderName} sends agitators to ${targetName} (−${AGITATOR_COST} gold, 1 free dissenter placed)`);
   },
   errorMessage: "Cannot send agitators right now",
   validate: (G, playerID, targetID) => validateSendAgitators(G, playerID, targetID),
