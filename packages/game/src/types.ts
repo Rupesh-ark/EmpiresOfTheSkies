@@ -199,6 +199,10 @@ export type PlayerInfo = {
   palaces: number;
   heresyTracker: number;
   prisoners: number;
+  /** Agitator dissenters not yet imprisoned — shift heresy at end of round if unhandled */
+  freeDissenters: number;
+  /** Piracy intent for this round: "tax" (default) or "cut" (remove a skyship instead) */
+  piracyIntent: "tax" | "cut";
   shipyards: number;
   factories: number;
   troopsToGarrison?: TroopInfo;

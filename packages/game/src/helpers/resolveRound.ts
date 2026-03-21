@@ -5,7 +5,7 @@ import legacyResolutions from "./legacyResolutions";
 import { enactPiracy } from "./piracy";
 import { grantTradeRouteGoods } from "./tradeRouteResolver";
 import { countActiveTradeRoutes } from "./mapUtils";
-import { removeVPAmount, logEvent } from "./stateUtils";
+import { removeVPAmount, increaseHeresyWithinMove, logEvent } from "./stateUtils";
 import { FINAL_ROUND_GOLD_PER_VP, DEBT_PENALTY_DIVISOR, TRADE_VP_SCHEDULE, PRICE_MARKER_MAX } from "../data/gameData";
 
 const ALL_GOODS: GoodKey[] = ["mithril", "dragonScales", "krakenSkin", "magicDust", "stickyIchor", "pipeweed"];
@@ -175,6 +175,17 @@ const resolveRound = (G: MyGameState, events: EventsAPI, random: RandomAPI) => {
 
   // B2: factory income
   collectFactoryIncome(G);
+
+  // Free dissenters (from Send Agitators): advance heresy +1 each if unimprisoned
+  Object.values(G.playerInfo).forEach((player) => {
+    if (player.freeDissenters > 0) {
+      for (let i = 0; i < player.freeDissenters; i++) {
+        increaseHeresyWithinMove(G, player.id);
+      }
+      logEvent(G, `Free dissenters: ${player.kingdomName} heresy +${player.freeDissenters} (${player.freeDissenters} unimprisoned agitators)`);
+      player.freeDissenters = 0;
+    }
+  });
 
   // D8: debt penalty — gold < 0 only (not at exactly 0)
   // GAP-16: VP floor enforced inside removeVPAmount
