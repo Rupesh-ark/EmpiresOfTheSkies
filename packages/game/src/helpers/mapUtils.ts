@@ -110,3 +110,27 @@ export const buildPlayerNetwork = (G: MyGameState, playerID: string): Set<string
   });
   return network;
 };
+
+/**
+ * Count how many of a player's outposts/colonies are connected to Faithdom
+ * via their skyship chain. Used by Engaged Factories rule to cap factory income.
+ */
+export const countActiveTradeRoutes = (G: MyGameState, playerID: string): number => {
+  const playerNetwork = buildPlayerNetwork(G, playerID);
+  let count = 0;
+
+  for (let y = 0; y < G.mapState.buildings.length; y++) {
+    for (let x = 0; x < G.mapState.buildings[y].length; x++) {
+      const building = G.mapState.buildings[y][x];
+      if (building.player?.id !== playerID || !building.buildings) continue;
+      if (building.buildings !== "outpost" && building.buildings !== "colony") continue;
+
+      const network = new Set(playerNetwork);
+      network.add(tileKey(x, y));
+      const reachable = bfsReachable(FAITHDOM_TILES, network);
+      if (reachable.has(tileKey(x, y))) count++;
+    }
+  }
+
+  return count;
+};

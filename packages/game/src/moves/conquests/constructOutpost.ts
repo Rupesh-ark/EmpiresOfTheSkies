@@ -1,5 +1,5 @@
 import { MoveDefinition, GoodKey } from "../../types";
-import { increaseHeresyWithinMove } from "../../helpers/stateUtils";
+import { increaseHeresyWithinMove, addVPAmount, logEvent } from "../../helpers/stateUtils";
 import { PRICE_MARKER_MIN } from "../../codifiedGameInfo";
 
 const GOODS: GoodKey[] = ["mithril", "dragonScales", "krakenSkin", "magicDust", "stickyIchor", "pipeweed"];
@@ -27,6 +27,14 @@ const constructOutpost: MoveDefinition = {
 
     currentPlayer.resources.victoryPoints += 1;
     increaseHeresyWithinMove(G, playerID);
+
+    // Royal Patronage: first player to claim a Land this round
+    if (G.eventState.royalPatronageActive) {
+      addVPAmount(G, playerID, 2);
+      currentPlayer.resources.gold += 2;
+      logEvent(G, `Royal Patronage: ${currentPlayer.kingdomName} is first to claim — +2 VP and 2 gold`);
+      G.eventState.royalPatronageActive = false;
+    }
 
     G.stage = "garrison troops";
   },

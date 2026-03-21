@@ -265,22 +265,56 @@ describe("resolveRound — D4: palace bonus", () => {
 // ── D5: Factory income ────────────────────────────────────────────────────────
 
 describe("resolveRound — D5: factory income", () => {
+  // Helper: create a buildings grid with settlements owned by players and
+  // connected to Faithdom. Settlements are placed at Faithdom-adjacent tiles
+  // so a single skyship at the tile creates a valid trade route.
+  const emptyCell = { buildings: null, player: null, fort: false, garrisonedRegiments: 0, garrisonedLevies: 0 };
+  const emptyLoot = { gold: 0, mithril: 0, dragonScales: 0, krakenSkin: 0, magicDust: 0, stickyIchor: 0, pipeweed: 0, victoryPoints: 0 };
+  const emptyTile = { name: "Test", blocked: [], sword: 0, shield: 0, type: "land", loot: { outpost: { ...emptyLoot }, colony: { ...emptyLoot } } };
+  const makeTileRow = () => Array.from({ length: 8 }, () => ({ ...emptyTile, loot: { outpost: { ...emptyLoot }, colony: { ...emptyLoot } } }));
+  const makeSettlement = (type: "outpost" | "colony", playerID: string) => ({
+    buildings: type,
+    player: { id: playerID },
+    fort: false,
+    garrisonedRegiments: 0,
+    garrisonedLevies: 0,
+  });
+
+  // Place a fleet with 1 skyship at (x,y) for a player (so the tile is in their network)
+  const addFleetAt = (G: any, playerID: string, x: number, y: number) => {
+    G.playerInfo[playerID].fleetInfo.push({
+      fleetId: G.playerInfo[playerID].fleetInfo.length,
+      location: [x, y], skyships: 1, regiments: 0, levies: 0, eliteRegiments: 0,
+    });
+  };
+
   it("player receives gold equal to their factory count (when pool is large enough)", () => {
     const G = buildInitialG([
       buildPlayer("0", { factories: 3, resources: buildResources({ gold: 0 }) }),
       buildPlayer("1", { factories: 1, resources: buildResources({ gold: 0 }) }),
     ]);
-    // Pool = number of settlements on map
-    G.mapState.buildings = [
-      [
-        { buildings: "outpost", fort: false, garrisonedRegiments: 0, garrisonedLevies: 0 },
-        { buildings: "colony", fort: false, garrisonedRegiments: 0, garrisonedLevies: 0 },
-        { buildings: "outpost", fort: false, garrisonedRegiments: 0, garrisonedLevies: 0 },
-        { buildings: "colony", fort: false, garrisonedRegiments: 0, garrisonedLevies: 0 },
-        { buildings: "outpost", fort: false, garrisonedRegiments: 0, garrisonedLevies: 0 },
-      ],
-    ] as any;
-    // Pool = 5; player "0" has 3 factories → gets 3 gold; player "1" has 1 → gets 1 gold
+    // 8-wide grid, 2 rows. Settlements at known coords so we can connect them.
+    // Row 0: Faithdom at [3,0] and [4,0]. Place settlements at [2,0],[5,0],[6,0],[7,0],[1,0].
+    // Player "0" owns 3 outposts, player "1" owns 2 colonies.
+    const row0 = Array.from({ length: 8 }, () => ({ ...emptyCell }));
+    row0[1] = makeSettlement("outpost", "0") as any;
+    row0[2] = makeSettlement("outpost", "0") as any;
+    row0[5] = makeSettlement("outpost", "0") as any;
+    row0[6] = makeSettlement("colony", "1") as any;
+    row0[7] = makeSettlement("colony", "1") as any;
+    G.mapState.buildings = [row0] as any;
+    G.mapState.currentTileArray = [makeTileRow()] as any;
+
+    // Connect player "0"'s settlements to Faithdom via skyships
+    addFleetAt(G, "0", 2, 0); // [2,0] → adjacent to Faithdom [3,0]
+    addFleetAt(G, "0", 1, 0); // [1,0] → adjacent to [2,0] which reaches Faithdom
+    addFleetAt(G, "0", 5, 0); // [5,0] → adjacent to Faithdom [4,0]
+    // Connect player "1"'s settlements
+    addFleetAt(G, "1", 6, 0); // [6,0] → adjacent to [5,0]... but needs Faithdom path
+    addFleetAt(G, "1", 5, 0); // [5,0] → reaches [4,0] (Faithdom)
+    addFleetAt(G, "1", 7, 0); // [7,0] → adjacent to [6,0]
+
+    // Pool = 5 settlements; player "0" has 3 factories, 3 routes → eff 3; player "1" has 1 factory, 2 routes → eff 1
     resolveRound(G, stubEvents, stubRandom);
     expect(G.playerInfo["0"].resources.gold).toBeGreaterThanOrEqual(3);
     expect(G.playerInfo["1"].resources.gold).toBeGreaterThanOrEqual(1);
@@ -291,15 +325,25 @@ describe("resolveRound — D5: factory income", () => {
       buildPlayer("0", { factories: 3, resources: buildResources({ gold: 0 }) }),
       buildPlayer("1", { factories: 3, resources: buildResources({ gold: 0 }) }),
     ]);
-    // Pool of only 4 settlements
-    G.mapState.buildings = [[
-      { buildings: "outpost" as const, fort: false, garrisonedRegiments: 0, garrisonedLevies: 0 },
-      { buildings: "outpost" as const, fort: false, garrisonedRegiments: 0, garrisonedLevies: 0 },
-      { buildings: "outpost" as const, fort: false, garrisonedRegiments: 0, garrisonedLevies: 0 },
-      { buildings: "outpost" as const, fort: false, garrisonedRegiments: 0, garrisonedLevies: 0 },
-    ]] as any;
+    // 4 settlements total (pool = 4), both players have 3 factories each
+    const row0 = Array.from({ length: 8 }, () => ({ ...emptyCell }));
+    row0[2] = makeSettlement("outpost", "0") as any;
+    row0[5] = makeSettlement("outpost", "0") as any;
+    row0[6] = makeSettlement("outpost", "1") as any;
+    row0[7] = makeSettlement("outpost", "1") as any;
+    G.mapState.buildings = [row0] as any;
+    G.mapState.currentTileArray = [makeTileRow()] as any;
+
+    // Connect all settlements to Faithdom
+    addFleetAt(G, "0", 2, 0);
+    addFleetAt(G, "0", 5, 0);
+    addFleetAt(G, "1", 5, 0);
+    addFleetAt(G, "1", 6, 0);
+    addFleetAt(G, "1", 7, 0);
+
     resolveRound(G, stubEvents, stubRandom);
     // Total income distributed = 4 (pool size), not 6 (sum of factories)
+    // Player "0" eff factories = min(3, 2 routes) = 2; Player "1" eff = min(3, 2 routes) = 2
     const totalGold = G.playerInfo["0"].resources.gold + G.playerInfo["1"].resources.gold;
     expect(totalGold).toBe(4);
   });

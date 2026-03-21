@@ -12,6 +12,7 @@ import {
 } from "./stateUtils";
 import { CARD_RESOLVERS, resolveCardWithAlignmentPenalty } from "./legacyCardDefinitions";
 import { hasAnyOutpost, hasAnyColony } from "./helpers";
+import { BUILDING_SELL_PRICE } from "../codifiedGameInfo";
 
 // ── Card metadata ────────────────────────────────────────────────────────────
 
@@ -50,6 +51,16 @@ export const EVENT_CARD_DEFS: Record<EventCardName, EventCardDef> = {
   schism: {
     displayName: "Schism",
     description: "Heretic Clergy Break with the Prelacy",
+    isBattle: false,
+  },
+  royal_patronage: {
+    displayName: "Royal Patronage",
+    description: "The Crown Rewards Swift Exploration",
+    isBattle: false,
+  },
+  race_to_discovery: {
+    displayName: "Race to Discovery",
+    description: "Rival Courts Compete for Prestige",
     isBattle: false,
   },
   royal_succession: {
@@ -122,9 +133,19 @@ export const EVENT_CARD_DEFS: Record<EventCardName, EventCardDef> = {
     description: "Ambitious Outpost Governor Attempts Conquest",
     isBattle: true,
   },
+  guild_revolt: {
+    displayName: "Guild Revolt",
+    description: "Factory Workers Demand Better Conditions",
+    isBattle: false,
+  },
   grand_infidel_dies: {
     displayName: "Grand Infidel Dies",
     description: "Succession Struggle Delays Invasion Preparations",
+    isBattle: false,
+  },
+  foreign_agitators: {
+    displayName: "Foreign Agitators",
+    description: "Neighbouring Realms Send Troublemakers",
     isBattle: false,
   },
   faerie_uprising: {
@@ -135,6 +156,11 @@ export const EVENT_CARD_DEFS: Record<EventCardName, EventCardDef> = {
   dynastic_marriage: {
     displayName: "Dynastic Marriage",
     description: "Two Monarchies Make A Lasting Alliance",
+    isBattle: false,
+  },
+  corruption_scandal: {
+    displayName: "Corruption Scandal",
+    description: "Cathedral Prelates Caught in Embezzlement",
     isBattle: false,
   },
   defence_of_the_faith: {
@@ -515,6 +541,20 @@ export const resolveEventCard = (
       }
       break;
 
+    // ── Round-tracking events (flags set here, scored in moves/phases) ──
+    case "royal_patronage":
+      G.eventState.royalPatronageActive = true;
+      logEvent(G, "Royal Patronage: the first player to claim a Land this round gains +2 VP and 2 gold");
+      break;
+
+    case "race_to_discovery": {
+      const counters: Record<string, number> = {};
+      for (const id of turnOrder) counters[id] = 0;
+      G.eventState.raceToDiscoveryCounters = counters;
+      logEvent(G, "Race to Discovery: the player who discovers the most tiles this round gains bonus VP");
+      break;
+    }
+
     // ── Disasters ──────────────────────────────────────────────────────────
     case "the_faerie_plague":
       // Lose half (rounded down) of all Regiments & Levies everywhere
@@ -562,6 +602,82 @@ export const resolveEventCard = (
         else if (counts[0].type === "palace") p.palaces--;
         else p.shipyards--;
         logEvent(G, `The Great Fire: ${p.kingdomName} loses a ${counts[0].type}`);
+      }
+      break;
+    }
+
+    // ── Gap-fix events ─────────────────────────────────────────────────
+
+    case "guild_revolt": {
+      // Target: player with most factories (break ties IPO)
+      // Auto-resolve: sell one factory for 3g if factories > 2, else pay 2g per factory
+      let target = turnOrder[0];
+      let maxFactories = 0;
+      for (const id of turnOrder) {
+        if (G.playerInfo[id].factories > maxFactories) {
+          maxFactories = G.playerInfo[id].factories;
+          target = id;
+        }
+      }
+      const gp = G.playerInfo[target];
+      if (gp.factories <= 0) {
+        logEvent(G, "Guild Revolt: no player has factories — no effect");
+        break;
+      }
+      const payCost = 2 * gp.factories;
+      if (gp.factories <= 2 && gp.resources.gold >= payCost) {
+        // Pay 2g per factory (cheaper than losing the factory)
+        gp.resources.gold -= payCost;
+        logEvent(G, `Guild Revolt: ${gp.kingdomName} pays ${payCost} gold (2 per factory)`);
+      } else {
+        // Sell one factory for 3g
+        gp.factories -= 1;
+        gp.resources.gold += BUILDING_SELL_PRICE;
+        logEvent(G, `Guild Revolt: ${gp.kingdomName} sells a factory for ${BUILDING_SELL_PRICE} gold (now has ${gp.factories})`);
+      }
+      break;
+    }
+
+    case "corruption_scandal": {
+      // Target: player with most cathedrals (break ties IPO)
+      // Auto-resolve: lose one cathedral (get 3g) if cathedrals > 1, else lose 3 VP
+      let target = turnOrder[0];
+      let maxCath = 0;
+      for (const id of turnOrder) {
+        if (G.playerInfo[id].cathedrals > maxCath) {
+          maxCath = G.playerInfo[id].cathedrals;
+          target = id;
+        }
+      }
+      const cp = G.playerInfo[target];
+      if (cp.cathedrals <= 0) {
+        logEvent(G, "Corruption Scandal: no player has cathedrals — no effect");
+        break;
+      }
+      if (cp.cathedrals > 1) {
+        // Lose one cathedral, get sell price
+        cp.cathedrals -= 1;
+        cp.resources.gold += BUILDING_SELL_PRICE;
+        logEvent(G, `Corruption Scandal: ${cp.kingdomName} loses a cathedral (sold for ${BUILDING_SELL_PRICE} gold, now has ${cp.cathedrals})`);
+      } else {
+        // Protect last cathedral, lose 3 VP instead
+        removeVPAmount(G, target, 3);
+        logEvent(G, `Corruption Scandal: ${cp.kingdomName} loses 3 VP (protecting their last cathedral)`);
+      }
+      break;
+    }
+
+    case "foreign_agitators": {
+      // Each player advances heresy by 1 (circular: each player "sends" to the next in IPO)
+      // Mechanically equivalent to advancing all trackers by 1, but logged with circular targeting
+      for (let i = 0; i < turnOrder.length; i++) {
+        const senderID = turnOrder[i];
+        const targetID = turnOrder[(i + 1) % turnOrder.length];
+        increaseHeresyWithinMove(G, targetID);
+        logEvent(
+          G,
+          `Foreign Agitators: ${G.playerInfo[senderID].kingdomName} sends agitators to ${G.playerInfo[targetID].kingdomName} (heresy +1)`,
+        );
       }
       break;
     }

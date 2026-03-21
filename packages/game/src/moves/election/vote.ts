@@ -123,6 +123,12 @@ const vote: MoveDefinition = {
         finalWinner = winners[0];
       }
 
+      // Track who was Archprelate before this election (for fatigue)
+      let previousArchprelateKingdom: string | undefined;
+      Object.values(G.playerInfo).forEach((player) => {
+        if (player.isArchprelate) previousArchprelateKingdom = player.kingdomName;
+      });
+
       Object.values(G.playerInfo).forEach((player) => {
         if (player.kingdomName === finalWinner) {
           player.isArchprelate = true;
@@ -136,10 +142,24 @@ const vote: MoveDefinition = {
               orthodoxRealms += 1;
             }
           });
-          // Rule: floor(2 × orthodoxRealms / 3), maximum 6 VP
-          const electionVP = Math.min(6, Math.floor((2 * orthodoxRealms) / 3));
+
+          // Archprelate Fatigue: consecutive wins reduce VP
+          if (player.kingdomName === previousArchprelateKingdom) {
+            G.consecutiveArchprelateWins += 1;
+          } else {
+            G.consecutiveArchprelateWins = 1;
+          }
+          const fatigueReduction = Math.max(0, (G.consecutiveArchprelateWins - 1) * 2);
+
+          // Rule: floor(2 × orthodoxRealms / 3), maximum 6 VP, minus fatigue
+          const baseVP = Math.min(6, Math.floor((2 * orthodoxRealms) / 3));
+          const electionVP = Math.max(0, baseVP - fatigueReduction);
           player.resources.victoryPoints += electionVP;
-          logEvent(G, `Archprelate elected: ${player.kingdomName} (+${electionVP} VP)`);
+          if (fatigueReduction > 0) {
+            logEvent(G, `Archprelate elected: ${player.kingdomName} (+${electionVP} VP, fatigue −${fatigueReduction})`);
+          } else {
+            logEvent(G, `Archprelate elected: ${player.kingdomName} (+${electionVP} VP)`);
+          }
         } else {
           player.isArchprelate = false;
         }

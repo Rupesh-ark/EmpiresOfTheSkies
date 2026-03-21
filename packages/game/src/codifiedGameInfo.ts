@@ -169,7 +169,7 @@ export const LEGACY_CARDS: LegacyCardInfo[] = [
   { name: "the conqueror",   colour: "purple" },
   { name: "the navigator",   colour: "purple" },
   { name: "the great",       colour: "purple" },
-  { name: "the magnificent", colour: "purple" },
+  { name: "the magnificent", colour: "orange" },
   { name: "the merchant",    colour: "purple" },
   { name: "the mighty",      colour: "purple" },
   { name: "the aviator",     colour: "purple" },
@@ -182,7 +182,7 @@ export const LEGACY_CARDS: LegacyCardInfo[] = [
   { name: "the merchant",    colour: "orange" },
   { name: "the mighty",      colour: "orange" },
   { name: "the aviator",     colour: "orange" },
-  { name: "the pious",       colour: "orange" },
+  { name: "the pious",       colour: "purple" },
 ];
 
 export const GAME_PHASES: { key: string; label: string }[] = [
