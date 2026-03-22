@@ -12,8 +12,12 @@ const validateConfirmAction = (
 };
 
 const confirmAction: MoveDefinition = {
-  fn: ({ G, playerID, events }) => {
+  fn: ({ G, playerID, events }, ...args: any[]) => {
     if (validateConfirmAction(G, playerID)) return INVALID_MOVE;
+    const piracyIntent = args[0] as "tax" | "cut" | undefined;
+    if (piracyIntent === "tax" || piracyIntent === "cut") {
+      G.playerInfo[playerID].piracyIntent = piracyIntent;
+    }
     events.endTurn();
   },
   errorMessage: "Cannot confirm action right now",

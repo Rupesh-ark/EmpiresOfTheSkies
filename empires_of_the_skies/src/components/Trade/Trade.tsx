@@ -6,6 +6,7 @@ import { useState } from "react";
 import { Box, Typography, Slider, Button } from "@mui/material";
 import { tokens } from "@/theme";
 import { MyGameProps, SKYSHIP_SELL_PRICE, BUILDING_SELL_PRICE } from "@eots/game";
+import { usePiracyIntent } from "@/contexts/PiracyIntentContext";
 import { DialogShell } from "@/components/atoms/DialogShell";
 import { GameButton } from "@/components/atoms/GameButton";
 import { GoodsValue } from "@/components/Stats/GoodsValue";
@@ -66,12 +67,13 @@ const Trade = (props: MyGameProps) => {
   const [agitatorsOpen, setAgitatorsOpen] = useState(false);
   const [agitatorTarget, setAgitatorTarget] = useState<string | null>(null);
 
+  const { intent: piracyIntent, setIntent } = usePiracyIntent();
+
   const skyships = playerInfo?.resources.skyships ?? 0;
   const cathedrals = playerInfo?.cathedrals ?? 0;
   const palaces = playerInfo?.palaces ?? 0;
   const isHeretic = playerInfo?.hereticOrOrthodox === "heretic";
   const gold = playerInfo?.resources.gold ?? 0;
-  const piracyIntent = playerInfo?.piracyIntent ?? "tax";
   const hasFleets = (playerInfo?.fleetInfo ?? []).length > 0;
 
   const rivals = props.playerID
@@ -136,7 +138,7 @@ const Trade = (props: MyGameProps) => {
             <CompactAction
               label={piracyIntent === "tax" ? "Tax Routes" : "Cut Routes"}
               price={piracyIntent === "tax" ? "→ Cut" : "→ Tax"}
-              onClick={() => props.moves.setPiracyIntent(piracyIntent === "tax" ? "cut" : "tax")}
+              onClick={() => setIntent(piracyIntent === "tax" ? "cut" : "tax")}
             />
           )}
         </Box>
