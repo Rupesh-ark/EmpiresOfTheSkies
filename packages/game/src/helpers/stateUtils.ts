@@ -1,5 +1,6 @@
 import { MyGameState } from "../types";
 import { MAX_SKYSHIPS, MAX_REGIMENTS, HERESY_MAX, HERESY_MIN } from "../data/gameData";
+import { archiveGameLogEntries } from "./gameLogArchive";
 
 export { HERESY_MAX, HERESY_MIN };
 
@@ -110,8 +111,14 @@ export const addEliteRegiments = (
   G.playerInfo[playerID].resources.eliteRegiments += amount;
 };
 
+const MAX_LOG_ENTRIES = 200;
+
 export const logEvent = (G: MyGameState, message: string) => {
   G.gameLog.push({ round: G.round, message });
+  if (G.gameLog.length > MAX_LOG_ENTRIES) {
+    const trimmed = G.gameLog.splice(0, G.gameLog.length - MAX_LOG_ENTRIES);
+    archiveGameLogEntries(trimmed);
+  }
 };
 
 export const allPlayersPassed = (G: MyGameState): boolean =>

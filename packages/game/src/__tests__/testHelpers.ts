@@ -5,7 +5,10 @@
  * All defaults match v4.2 starting values from STARTING_RESOURCES and codifiedGameInfo.ts.
  */
 
-import { MyGameState, PlayerInfo, ActionBoardInfo, Resources, FleetInfo, PlayerBoardInfo, MoveDefinition } from "../types";
+import { MyGameState, PlayerInfo, ActionBoardInfo, Resources, FleetInfo, PlayerBoardInfo, MoveDefinition, MoveContext } from "../types";
+import type { Ctx } from "boardgame.io";
+import type { EventsAPI } from "boardgame.io/dist/types/src/plugins/events/events";
+import type { RandomAPI } from "boardgame.io/dist/types/src/plugins/random/random";
 import { fortuneOfWarCards } from "../data/gameData";
 
 // ── Player builder ────────────────────────────────────────────────────────────
@@ -205,7 +208,7 @@ export function buildInitialG(
  * we pass G directly so mutations apply in place.
  */
 export function callMove<TArgs extends unknown[]>(
-  moveFn: (params: { G: MyGameState; ctx: MockCtx; playerID: string }, ...args: TArgs) => unknown,
+  moveFn: (params: { G: MyGameState; ctx: Ctx; playerID: string }, ...args: TArgs) => unknown,
   G: MyGameState,
   playerID: string,
   ...args: TArgs
@@ -226,36 +229,41 @@ export function callMoveDef(
   ...args: unknown[]
 ): { G: MyGameState; result: unknown } {
   const ctx = buildCtx(playerID);
+  const events = buildEvents();
   if (def.validate) {
     const error = def.validate(G, playerID, ...args);
     if (error) return { G, result: "INVALID_MOVE" };
   }
-  const result = def.fn({ G, ctx, playerID, events: ctx.events } as any, ...args);
+  const result = def.fn({ G, ctx, playerID, events }, ...args);
   return { G, result };
 }
 
-export type MockCtx = {
-  currentPlayer: string;
-  playOrderPos: number;
-  numPlayers: number;
-  events: { endTurn: () => void; endPhase: () => void };
-};
+/** @deprecated Use Ctx directly — kept for back-compat with existing test imports */
+export type MockCtx = Ctx;
 
-export function buildCtx(currentPlayer: string, numPlayers = 2): MockCtx {
+export function buildCtx(currentPlayer: string, numPlayers = 2): Ctx {
   return {
     currentPlayer,
     playOrderPos: 0,
     numPlayers,
-    events: {
-      endTurn: () => {},
-      endPhase: () => {},
-    },
-  };
+    playOrder: Array.from({ length: numPlayers }, (_, i) => String(i)),
+    activePlayers: null,
+    turn: 1,
+    phase: "actions",
+  } as Ctx;
+}
+
+/** Mock events — only stubs endTurn/endPhase (the ones tests actually call). */
+export function buildEvents(): EventsAPI {
+  return {
+    endTurn: () => {},
+    endPhase: () => {},
+  } as unknown as EventsAPI;
 }
 
 /** Mock boardgame.io random plugin — Shuffle returns array as-is (deterministic for tests). */
-export function buildRandom() {
+export function buildRandom(): RandomAPI {
   return {
     Shuffle: <T>(arr: T[]): T[] => [...arr],
-  };
+  } as unknown as RandomAPI;
 }

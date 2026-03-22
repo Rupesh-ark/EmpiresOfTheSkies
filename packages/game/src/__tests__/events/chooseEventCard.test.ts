@@ -9,12 +9,13 @@
 import { describe, it, expect, vi } from "vitest";
 import chooseEventCard from "../../moves/events/chooseEventCard";
 import resolveEventChoice from "../../moves/events/resolveEventChoice";
-import { buildInitialG, buildPlayer, buildCtx, buildResources } from "../testHelpers";
+import { buildInitialG, buildPlayer, buildCtx, buildResources, buildRandom } from "../testHelpers";
 import { INVALID_MOVE } from "boardgame.io/core";
 import { EventCardName } from "../../types";
+import type { EventsAPI } from "boardgame.io/dist/types/src/plugins/events/events";
 
-const stubEvents = () => ({ endTurn: vi.fn(), endPhase: vi.fn() });
-const stubRandom = { Shuffle: <T>(arr: T[]) => arr };
+const stubEvents = () => ({ endTurn: vi.fn(), endPhase: vi.fn() } as unknown as EventsAPI & { endTurn: ReturnType<typeof vi.fn>; endPhase: ReturnType<typeof vi.fn> });
+const stubRandom = buildRandom();
 
 function callChoose(
   G: ReturnType<typeof buildInitialG>,

@@ -13,9 +13,10 @@ import { describe, it, expect } from "vitest";
 import { INVALID_MOVE } from "boardgame.io/core";
 import constructOutpost from "../../moves/conquests/constructOutpost";
 import coloniseLand from "../../moves/conquests/coloniseLand";
-import { buildInitialG, buildPlayer, buildCtx } from "../testHelpers";
+import { buildInitialG, buildPlayer, buildCtx, buildRandom } from "../testHelpers";
+import type { EventsAPI } from "boardgame.io/dist/types/src/plugins/events/events";
 
-const stubEvents = { endTurn: () => {}, endPhase: () => {} } as any;
+const stubEvents = { endTurn: () => {}, endPhase: () => {} } as unknown as EventsAPI;
 
 function buildMapWithLoot(outpostLoot: Record<string, number>) {
   const ROWS = 4, COLS = 8;
@@ -50,7 +51,7 @@ describe("constructOutpost — placing an outpost", () => {
     G.mapState = { ...G.mapState, ...buildMapWithLoot({}) };
     G.mapState.currentBattle = [0, 0];
     const ctx = { ...buildCtx("0"), currentPlayer: "0" };
-    constructOutpost.fn({ G, ctx, playerID: "0", events: stubEvents, random: {} });
+    constructOutpost.fn({ G, ctx, playerID: "0", events: stubEvents, random: buildRandom() });
     expect(G.mapState.buildings[0][0].buildings).toBe("outpost");
   });
 
@@ -59,7 +60,7 @@ describe("constructOutpost — placing an outpost", () => {
     G.mapState = { ...G.mapState, ...buildMapWithLoot({}) };
     G.mapState.currentBattle = [0, 0];
     const ctx = { ...buildCtx("0"), currentPlayer: "0" };
-    constructOutpost.fn({ G, ctx, playerID: "0", events: stubEvents, random: {} });
+    constructOutpost.fn({ G, ctx, playerID: "0", events: stubEvents, random: buildRandom() });
     expect(G.mapState.buildings[0][0].player?.id).toBe("0");
   });
 
@@ -69,7 +70,7 @@ describe("constructOutpost — placing an outpost", () => {
     G.mapState.currentBattle = [0, 0];
     const vpBefore = G.playerInfo["0"].resources.victoryPoints;
     const ctx = { ...buildCtx("0"), currentPlayer: "0" };
-    constructOutpost.fn({ G, ctx, playerID: "0", events: stubEvents, random: {} });
+    constructOutpost.fn({ G, ctx, playerID: "0", events: stubEvents, random: buildRandom() });
     expect(G.playerInfo["0"].resources.victoryPoints).toBe(vpBefore + 1);
   });
 
@@ -78,7 +79,7 @@ describe("constructOutpost — placing an outpost", () => {
     G.mapState = { ...G.mapState, ...buildMapWithLoot({}) };
     G.mapState.currentBattle = [0, 0];
     const ctx = { ...buildCtx("0"), currentPlayer: "0" };
-    constructOutpost.fn({ G, ctx, playerID: "0", events: stubEvents, random: {} });
+    constructOutpost.fn({ G, ctx, playerID: "0", events: stubEvents, random: buildRandom() });
     expect(G.playerInfo["0"].heresyTracker).toBe(6);
   });
 
@@ -89,7 +90,7 @@ describe("constructOutpost — placing an outpost", () => {
     const goldBefore = G.playerInfo["0"].resources.gold;
     const mithrilBefore = G.playerInfo["0"].resources.mithril;
     const ctx = { ...buildCtx("0"), currentPlayer: "0" };
-    constructOutpost.fn({ G, ctx, playerID: "0", events: stubEvents, random: {} });
+    constructOutpost.fn({ G, ctx, playerID: "0", events: stubEvents, random: buildRandom() });
     // Goods are no longer granted at claim time — they recur via grantTradeRouteGoods in resolveRound
     expect(G.playerInfo["0"].resources.gold).toBe(goldBefore);
     expect(G.playerInfo["0"].resources.mithril).toBe(mithrilBefore);
@@ -100,7 +101,7 @@ describe("constructOutpost — placing an outpost", () => {
     G.mapState = { ...G.mapState, ...buildMapWithLoot({}) };
     G.mapState.currentBattle = [0, 0];
     const ctx = { ...buildCtx("0"), currentPlayer: "0" };
-    constructOutpost.fn({ G, ctx, playerID: "0", events: stubEvents, random: {} });
+    constructOutpost.fn({ G, ctx, playerID: "0", events: stubEvents, random: buildRandom() });
     expect(G.stage).toBe("garrison troops");
   });
 
@@ -110,7 +111,7 @@ describe("constructOutpost — placing an outpost", () => {
     G.mapState.currentBattle = [0, 0];
     const markerBefore = G.mapState.goodsPriceMarkers.mithril; // default 2
     const ctx = { ...buildCtx("0"), currentPlayer: "0" };
-    constructOutpost.fn({ G, ctx, playerID: "0", events: stubEvents, random: {} });
+    constructOutpost.fn({ G, ctx, playerID: "0", events: stubEvents, random: buildRandom() });
     // marker = max(1, 2 - 2) = max(1, 0) = 1
     expect(G.mapState.goodsPriceMarkers.mithril).toBe(Math.max(1, markerBefore - 2));
   });
@@ -121,7 +122,7 @@ describe("constructOutpost — placing an outpost", () => {
     G.mapState.currentBattle = [0, 0];
     G.mapState.goodsPriceMarkers.dragonScales = 3;
     const ctx = { ...buildCtx("0"), currentPlayer: "0" };
-    constructOutpost.fn({ G, ctx, playerID: "0", events: stubEvents, random: {} });
+    constructOutpost.fn({ G, ctx, playerID: "0", events: stubEvents, random: buildRandom() });
     // marker = max(1, 3 - 5) = max(1, -2) = 1
     expect(G.mapState.goodsPriceMarkers.dragonScales).toBe(1);
   });
@@ -132,7 +133,7 @@ describe("constructOutpost — placing an outpost", () => {
     G.mapState.currentBattle = [0, 0];
     G.mapState.goodsPriceMarkers.mithril = 5;
     const ctx = { ...buildCtx("0"), currentPlayer: "0" };
-    constructOutpost.fn({ G, ctx, playerID: "0", events: stubEvents, random: {} });
+    constructOutpost.fn({ G, ctx, playerID: "0", events: stubEvents, random: buildRandom() });
     expect(G.mapState.goodsPriceMarkers.mithril).toBe(5);
   });
 });
@@ -145,7 +146,7 @@ describe("coloniseLand — initiating a colonisation attempt", () => {
     G.mapState = { ...G.mapState, ...buildMapWithLoot({}) };
     G.mapState.currentBattle = [0, 0];
     const ctx = { ...buildCtx("0"), currentPlayer: "0" };
-    coloniseLand.fn({ G, ctx, playerID: "0", events: stubEvents, random: {} });
+    coloniseLand.fn({ G, ctx, playerID: "0", events: stubEvents, random: buildRandom() });
     expect(G.conquestState?.decision).toBe("fight");
   });
 
@@ -154,7 +155,7 @@ describe("coloniseLand — initiating a colonisation attempt", () => {
     G.mapState = { ...G.mapState, ...buildMapWithLoot({}) };
     G.mapState.currentBattle = [0, 0];
     const ctx = { ...buildCtx("0"), currentPlayer: "0" };
-    coloniseLand.fn({ G, ctx, playerID: "0", events: stubEvents, random: {} });
+    coloniseLand.fn({ G, ctx, playerID: "0", events: stubEvents, random: buildRandom() });
     expect(G.stage).toBe("conquest draw or pick card");
   });
 
@@ -165,7 +166,7 @@ describe("coloniseLand — initiating a colonisation attempt", () => {
     G.mapState.buildings[0][0].buildings = "outpost";
     G.mapState.buildings[0][0].player = G.playerInfo["1"];
     const ctx = { ...buildCtx("0"), currentPlayer: "0" };
-    const result = coloniseLand.fn({ G, ctx, playerID: "0", events: stubEvents, random: {} });
+    const result = coloniseLand.fn({ G, ctx, playerID: "0", events: stubEvents, random: buildRandom() });
     expect(result).toBe(INVALID_MOVE);
   });
 
@@ -176,7 +177,7 @@ describe("coloniseLand — initiating a colonisation attempt", () => {
     G.mapState.buildings[0][0].buildings = "outpost";
     G.mapState.buildings[0][0].player = G.playerInfo["0"];
     const ctx = { ...buildCtx("0"), currentPlayer: "0" };
-    coloniseLand.fn({ G, ctx, playerID: "0", events: stubEvents, random: {} });
+    coloniseLand.fn({ G, ctx, playerID: "0", events: stubEvents, random: buildRandom() });
     expect(G.stage).toBe("conquest draw or pick card");
   });
 
@@ -186,7 +187,7 @@ describe("coloniseLand — initiating a colonisation attempt", () => {
     G.mapState.currentBattle = [0, 0];
     G.failedConquests = [{ playerId: "0", tile: [0, 0] }];
     const ctx = { ...buildCtx("0"), currentPlayer: "0" };
-    const result = coloniseLand.fn({ G, ctx, playerID: "0", events: stubEvents, random: {} });
+    const result = coloniseLand.fn({ G, ctx, playerID: "0", events: stubEvents, random: buildRandom() });
     expect(result).toBe(INVALID_MOVE);
   });
 
@@ -196,7 +197,7 @@ describe("coloniseLand — initiating a colonisation attempt", () => {
     G.mapState.currentBattle = [0, 0];
     G.failedConquests = [{ playerId: "1", tile: [0, 0] }];
     const ctx = { ...buildCtx("0"), currentPlayer: "0" };
-    coloniseLand.fn({ G, ctx, playerID: "0", events: stubEvents, random: {} });
+    coloniseLand.fn({ G, ctx, playerID: "0", events: stubEvents, random: buildRandom() });
     expect(G.stage).toBe("conquest draw or pick card");
   });
 });

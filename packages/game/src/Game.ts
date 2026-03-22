@@ -736,20 +736,20 @@ const MyGame: Game<MyGameState> = {
         // Reset action board
         context.G.boardState = { ...initialBoardState };
 
-        // Return counsellors from player board slots
+        // Return counsellors from player board slots and reset flags
         Object.values(context.G.playerInfo).forEach((player: any) => {
-          Object.values(player.playerBoardCounsellorLocations).forEach(
-            (counsellor, index) => {
-              if (counsellor && index !== 3) {
-                player.resources.counsellors += 1;
-                counsellor = false;
-              }
-            }
-          );
-          player.playerBoardCounsellorLocations.buildSkyships = false;
-          player.playerBoardCounsellorLocations.conscriptLevies = false;
-          player.playerBoardCounsellorLocations.dispatchSkyshipFleet = false;
-          player.playerBoardCounsellorLocations.dispatchDisabled = false;
+          const pb = player.playerBoardCounsellorLocations;
+          // Return 1 counsellor for each used slot (dispatchDisabled is not a counsellor slot)
+          if (pb.buildSkyships) player.resources.counsellors += 1;
+          if (pb.conscriptLevies) player.resources.counsellors += 1;
+          if (pb.dispatchSkyshipFleet) player.resources.counsellors += 1;
+          if (pb.trainTroops) player.resources.counsellors += 1;
+          // Reset all flags
+          pb.buildSkyships = false;
+          pb.conscriptLevies = false;
+          pb.dispatchSkyshipFleet = false;
+          pb.trainTroops = false;
+          pb.dispatchDisabled = false;
         });
 
         context.events.endPhase();

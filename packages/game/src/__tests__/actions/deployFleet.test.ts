@@ -15,9 +15,10 @@
 import { describe, it, expect } from "vitest";
 import { INVALID_MOVE } from "boardgame.io/core";
 import deployFleet from "../../moves/actions/deployFleet";
-import { buildInitialG, buildPlayer, buildCtx, buildFleet, buildResources } from "../testHelpers";
+import { buildInitialG, buildPlayer, buildCtx, buildFleet, buildResources, buildEvents, buildRandom } from "../testHelpers";
+import type { EventsAPI } from "boardgame.io/dist/types/src/plugins/events/events";
 
-const stubEvents = { endTurn: (_args?: any) => {}, endPhase: () => {} } as any;
+const stubEvents = { endTurn: (_args?: any) => {}, endPhase: () => {} } as unknown as EventsAPI;
 
 // ── Map helper ─────────────────────────────────────────────────────────────────
 // Builds a full 4×8 map that findPossibleDestinations can traverse.
@@ -77,7 +78,7 @@ function callDeploy(
 ) {
   const ctx = buildCtx("0");
   return deployFleet.fn(
-    { G, ctx, playerID: "0", events: stubEvents, random: {} },
+    { G, ctx, playerID: "0", events: stubEvents, random: buildRandom() },
     fleetIndex,
     dest,
     skyships,

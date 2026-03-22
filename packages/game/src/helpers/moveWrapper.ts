@@ -5,6 +5,46 @@ import { MyGameState, MoveDefinition } from "../types";
 import { logEvent } from "./stateUtils";
 
 const log = createLogger("move");
+const stageLog = createLogger("stage-desync");
+
+// ── Stage ↔ Phase validation ────────────────────────────────────────────────
+
+/**
+ * Maps each ctx.phase to the set of G.stage values that are valid within it.
+ * Used by the debug assertion in wrapMove to catch stage/phase desyncs during
+ * playtesting. See docs/STAGE_PHASE_MAP.md for full documentation.
+ */
+const VALID_STAGES: Record<string, Set<string>> = {
+  kingdom_advantage: new Set(["discovery", "reset"]),         // onBegin doesn't set G.stage; inherits from setup or reset
+  legacy_card:       new Set(["pick legacy card"]),
+  events:            new Set(["events"]),
+  discovery:         new Set(["discovery"]),
+  taxes:             new Set(["taxes"]),
+  actions:           new Set(["actions", "confirm_fow_draw", "discard_fow", "attack or pass"]),
+  aerial_battle:     new Set(["attack or pass", "attack or evade", "resolve battle", "relocate loser"]),
+  plunder_legends:   new Set(["plunder legends", "attack or pass"]),
+  ground_battle:     new Set(["attack or pass", "defend or yield", "resolve battle", "garrison troops", "relocate loser", "conquest"]),
+  conquest:          new Set(["attack or pass", "conquest", "conquest draw or pick card", "garrison troops", "election"]),
+  election:          new Set(["election", "attack or pass", "conquest"]),  // election onBegin doesn't set G.stage; inherits from conquest exit
+  resolution:        new Set(["infidel_fleet_combat", "deferred_battle", "rebellion", "rebellion_rival_support", "invasion_nominate", "invasion_contribute", "invasion_buyoff", "retrieve fleets"]),
+  reset:             new Set(["reset", "retrieve fleets"]),   // onBegin doesn't set G.stage; inherits from resolution exit
+};
+
+const checkStagePhaseSync = (G: MyGameState, ctx: { phase?: string | null }, moveName: string) => {
+  const phase = ctx.phase;
+  if (!phase) return;
+  const validStages = VALID_STAGES[phase];
+  if (!validStages) return;  // unknown phase — skip check
+  if (!validStages.has(G.stage)) {
+    stageLog.error(`STAGE/PHASE DESYNC in move "${moveName}"`, {
+      move: moveName,
+      phase,
+      stage: G.stage,
+      expected: [...validStages],
+      round: G.round,
+    });
+  }
+};
 
 // ── Move wrapper ────────────────────────────────────────────────────────────
 
@@ -31,6 +71,9 @@ export const wrapMove = (name: string, def: MoveDefinition): any => {
       turn: ctx.turn,
       ...(args.length > 0 && { args }),
     });
+
+    // Debug: catch G.stage / ctx.phase desyncs early
+    checkStagePhaseSync(G, ctx, name);
 
     // Server-side validation safety net
     if (def.validate) {

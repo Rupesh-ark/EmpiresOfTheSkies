@@ -18,8 +18,9 @@ import { setupNextDeferredBattle } from "../../helpers/resolutionFlow";
 import { buildInitialG, buildPlayer, buildCtx, buildResources, buildFleet, buildRandom } from "../testHelpers";
 import { INVALID_MOVE } from "boardgame.io/core";
 import { MyGameState, DeferredEvent, MapBuildingInfo, TileInfoProps } from "../../types";
+import type { EventsAPI } from "boardgame.io/dist/types/src/plugins/events/events";
 
-const stubEvents = () => ({ endTurn: vi.fn(), endPhase: vi.fn() });
+const stubEvents = () => ({ endTurn: vi.fn(), endPhase: vi.fn() } as unknown as EventsAPI & { endTurn: ReturnType<typeof vi.fn>; endPhase: ReturnType<typeof vi.fn> });
 
 function callNominate(
   G: ReturnType<typeof buildInitialG>,

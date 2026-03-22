@@ -1,4 +1,7 @@
 import { BoardProps } from "boardgame.io/dist/types/packages/react";
+import type { Ctx } from "boardgame.io";
+import type { EventsAPI } from "boardgame.io/dist/types/src/plugins/events/events";
+import type { RandomAPI } from "boardgame.io/dist/types/src/plugins/random/random";
 
 export interface MyGameProps extends BoardProps<MyGameState> {}
 
@@ -477,9 +480,9 @@ export type ActionBoardInfo = {
 export type MoveContext = {
   G: MyGameState;
   playerID: string;
-  ctx?: any;
-  events?: any;
-  random?: any;
+  ctx?: Ctx;
+  events?: EventsAPI;
+  random?: RandomAPI;
 };
 
 export type MoveDefinition = {

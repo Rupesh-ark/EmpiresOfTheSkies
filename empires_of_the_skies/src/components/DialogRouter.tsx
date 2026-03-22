@@ -58,7 +58,7 @@ export const DialogRouter = (props: MyGameProps) => {
         <PickLegacyCardDialog {...props} />
       )}
 
-      {props.G.stage === "attack or pass" && (
+      {props.G.stage === "attack or pass" && props.ctx.phase === "aerial_battle" && (
         <AttackOrPassDiaLog {...props} />
       )}
 
@@ -77,7 +77,7 @@ export const DialogRouter = (props: MyGameProps) => {
         <PlunderLegendsDialog {...props} />
       )}
 
-      {props.G.stage === "attack or pass" && (
+      {props.G.stage === "attack or pass" && props.ctx.phase === "ground_battle" && (
         <GroundAttackOrPassDialog {...props} />
       )}
 

@@ -1,5 +1,5 @@
 import "dotenv/config";
-import { Server } from "boardgame.io/server";
+import { Server, FlatFile } from "boardgame.io/server";
 import cors from "@koa/cors";
 import { MyGame, createLogger } from "@eots/game";
 
@@ -18,6 +18,7 @@ const allowOrigin = (origin?: string) => {
 const server = Server({
   games: [MyGame],
   origins: (origin) => !!allowOrigin(origin),
+  db: new FlatFile({ dir: "./storage" }),
 });
 
 server.app.use(
