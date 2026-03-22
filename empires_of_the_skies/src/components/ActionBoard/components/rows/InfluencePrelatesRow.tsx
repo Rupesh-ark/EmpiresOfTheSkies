@@ -4,7 +4,7 @@
  * Each button uses a muted, parchment-blended version of the kingdom colour
  * with a Church (orthodox) or Castle (heretic) icon inside.
  */
-import { Box, Tooltip, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import { IconOrthodox, IconHeretic } from "@/theme";
 import { tokens } from "@/theme";
 import { BTN_BG } from "@/assets/actionBoard";
@@ -24,9 +24,6 @@ const KINGDOMS = [
   { name: "Ostreich",    color: PlayerColour.white,  key: 7 },
   { name: "Constantium", color: PlayerColour.green,  key: 8 },
 ] as const;
-
-/** Light colours need dark icons, dark colours need light icons */
-const LIGHT_KINGDOMS = new Set([PlayerColour.yellow, PlayerColour.white, "#FE9ACC"]);
 
 const THUMB_W = 80;
 
@@ -108,13 +105,11 @@ const InfluencePrelatesRow = (props: ActionBoardProps) => {
       <Box
         sx={{
           display: "flex",
-          flexWrap: "wrap",
-          gap: "4px",
+          gap: "3px",
           flex: 1,
           alignSelf: "stretch",
           alignItems: "stretch",
-          justifyContent: "flex-end",
-          pr: `${tokens.spacing.md}px`,
+          pr: `${tokens.spacing.sm}px`,
           py: `${tokens.spacing.xs}px`,
         }}
       >
@@ -135,22 +130,12 @@ const InfluencePrelatesRow = (props: ActionBoardProps) => {
             ? props.G.eventState.schismAffected.includes(playerEntry.id)
             : false;
 
-          const isLight = LIGHT_KINGDOMS.has(kingdom.color as string);
-          const iconColor = isLight ? "rgba(60,40,20,0.5)" : "rgba(255,245,230,0.7)";
+          const iconColor = "rgba(60,40,20,0.6)";
           const IconComponent = isHeretic ? IconHeretic : IconOrthodox;
 
           return (
-            <Tooltip
-              key={kingdom.name}
-              title={
-                isSchismAffected
-                  ? `${kingdom.name} — Schism (cannot vote)`
-                  : `${kingdom.name}${isHeretic ? " (Heretic)" : " (Orthodox)"}${occupantInfo ? ` — ${occupantInfo.kingdomName}` : ""}`
-              }
-              placement="top"
-              arrow
-            >
               <Box
+                key={kingdom.name}
                 onClick={() => {
                   if (!isSchismAffected) {
                     clearMoves(props);
@@ -158,34 +143,56 @@ const InfluencePrelatesRow = (props: ActionBoardProps) => {
                   }
                 }}
                 sx={{
-                  width: 32,
+                  flex: 1,
+                  minWidth: 0,
                   alignSelf: "stretch",
                   borderRadius: `${tokens.radius.sm}px`,
-                  // Muted, washed-out version of kingdom color blended with parchment
-                  backgroundColor: `${kingdom.color}30`,
-                  border: `1.5px solid ${kingdom.color}40`,
+                  background: `
+                    radial-gradient(ellipse at 50% 30%, ${kingdom.color}18 0%, transparent 70%),
+                    linear-gradient(180deg, ${tokens.ui.surfaceRaised} 0%, ${tokens.ui.surface} 100%)
+                  `,
+                  border: `1px solid ${tokens.ui.border}`,
+                  borderBottom: `2.5px solid ${kingdom.color}88`,
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                   cursor: isSchismAffected ? "not-allowed" : "pointer",
                   position: "relative",
                   transition: `all ${tokens.transition.fast}`,
-                  boxShadow: `inset 0 1px 0 rgba(255,255,255,0.3)`,
+                  boxShadow: `inset 0 1px 0 rgba(255,255,255,0.35), inset 0 -1px 3px ${kingdom.color}10`,
                   ...(isSchismAffected && {
                     opacity: 0.35,
                     filter: "grayscale(0.6)",
                   }),
                   ...(!isSchismAffected && {
                     "&:hover": {
-                      backgroundColor: `${kingdom.color}50`,
-                      borderColor: `${kingdom.color}70`,
-                      transform: "scale(1.08)",
-                      boxShadow: `inset 0 1px 0 rgba(255,255,255,0.3), 0 2px 6px ${kingdom.color}25`,
+                      background: `
+                        radial-gradient(ellipse at 50% 30%, ${kingdom.color}30 0%, ${kingdom.color}08 70%),
+                        linear-gradient(180deg, ${tokens.ui.surfaceHover} 0%, ${tokens.ui.surface} 100%)
+                      `,
+                      borderColor: `${kingdom.color}55`,
+                      borderBottomColor: kingdom.color,
+                      boxShadow: `inset 0 1px 0 rgba(255,255,255,0.35), 0 2px 8px ${kingdom.color}20`,
                     },
+                    "&:active": { transform: "scale(0.96)" },
                   }),
                 }}
               >
-                <IconComponent sx={{ fontSize: 15, color: iconColor }} />
+                <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "1px" }}>
+                  <IconComponent sx={{ fontSize: 13, color: iconColor }} />
+                  <Typography
+                    sx={{
+                      fontFamily: tokens.font.body,
+                      fontSize: 8,
+                      fontWeight: 700,
+                      color: iconColor,
+                      lineHeight: 1,
+                      letterSpacing: "0.04em",
+                    }}
+                  >
+                    {kingdom.name.slice(0, 3).toUpperCase()}
+                  </Typography>
+                </Box>
 
                 {/* Schism strikethrough */}
                 {isSchismAffected && (
@@ -212,7 +219,6 @@ const InfluencePrelatesRow = (props: ActionBoardProps) => {
                   </Box>
                 )}
               </Box>
-            </Tooltip>
           );
         })}
       </Box>

@@ -22,7 +22,7 @@ export const ActionHoverProvider = ({ children }: { children: ReactNode }) => {
 };
 
 /** Action descriptions shown in the info panel on hover */
-export const ACTION_INFO: Record<string, { title: string; cost: string; description: string }> = {
+export const ACTION_INFO: Record<string, { title: string; cost: string; description: ReactNode }> = {
   "change-player-order": {
     title: "Change Player Order",
     cost: "1 Counsellor",

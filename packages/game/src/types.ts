@@ -341,6 +341,8 @@ export type EventState = {
   deck: EventCardName[];
   lateDeck: EventCardName[];
   chosenCards: EventCardName[];
+  /** Who chose what: playerID → card chosen this round (persists after resolution) */
+  eventContributions: Record<string, EventCardName>;
   resolvedEvent: EventCardName | null;
   deferredEvents: DeferredEvent[];
   pendingChoice: EventChoice | null;

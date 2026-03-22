@@ -65,6 +65,7 @@ export const ActionInfoPanel = () => {
           color: tokens.ui.text,
           lineHeight: 1.5,
           maxWidth: 280,
+          whiteSpace: "pre-line",
         }}
       >
         {info.description}

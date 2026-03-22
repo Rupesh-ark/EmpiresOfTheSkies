@@ -185,6 +185,7 @@ const MyGame: Game<MyGameState> = {
         deck: earlyDeck,
         lateDeck,
         chosenCards: [],
+        eventContributions: {},
         resolvedEvent: null,
         deferredEvents: [],
         pendingChoice: null,
@@ -306,6 +307,7 @@ const MyGame: Game<MyGameState> = {
         context.G.stage = "events";
         context.G.eventState.taxModifier = 0;
         context.G.eventState.chosenCards = [];
+        context.G.eventState.eventContributions = {};
         context.G.eventState.resolvedEvent = null;
         context.G.eventState.cannotConvertThisRound = [];
         context.G.eventState.royalPatronageActive = false;

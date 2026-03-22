@@ -19,6 +19,7 @@ const chooseEventCard: MoveDefinition = {
     // Remove from hand, add to face-down chosen pile
     hand.splice(idx, 1);
     G.eventState.chosenCards.push(cardName);
+    G.eventState.eventContributions[playerID] = cardName;
 
     const numPlayers = Object.keys(G.playerInfo).length;
 

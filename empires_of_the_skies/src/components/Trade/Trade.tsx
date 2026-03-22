@@ -100,44 +100,37 @@ const Trade = (props: MyGameProps) => {
             Anytime Actions
           </Typography>
 
-          <CompactAction
-            label={`Sell Skyships (${skyships})`}
-            price={`${SKYSHIP_SELL_PRICE}g each`}
-            disabled={skyships <= 0}
-            onClick={() => { setSkyshipAmount(1); setSellSkyshipsOpen(true); }}
-          />
+          {skyships > 0 && (
+            <CompactAction
+              label={`Sell Skyships (${skyships})`}
+              price={`${SKYSHIP_SELL_PRICE}g each`}
+              onClick={() => { setSkyshipAmount(1); setSellSkyshipsOpen(true); }}
+            />
+          )}
 
-          {isHeretic && (
+          {isHeretic && cathedrals > 0 && (
             <CompactAction
               label={`Sell Cathedral (${cathedrals})`}
               price={`${BUILDING_SELL_PRICE}g`}
-              disabled={cathedrals <= 0}
               onClick={() => props.moves.sellBuilding("cathedral")}
             />
           )}
 
-          <CompactAction
-            label={`Sell Palace (${palaces})`}
-            price={`${BUILDING_SELL_PRICE}g`}
-            disabled={palaces <= 1}
-            disabledReason="Can't sell last"
-            onClick={() => props.moves.sellBuilding("palace")}
-          />
+          {palaces > 1 && (
+            <CompactAction
+              label={`Sell Palace (${palaces})`}
+              price={`${BUILDING_SELL_PRICE}g`}
+              onClick={() => props.moves.sellBuilding("palace")}
+            />
+          )}
 
-          <CompactAction
-            label="Propose Deal"
-            price="Coming soon"
-            disabled
-            onClick={() => {}}
-          />
-
-          <CompactAction
-            label="Send Agitators"
-            price="2g"
-            disabled={gold < 2}
-            disabledReason="Need 2g"
-            onClick={() => { setAgitatorTarget(null); setAgitatorsOpen(true); }}
-          />
+          {gold >= 2 && (
+            <CompactAction
+              label="Send Agitators"
+              price="2g"
+              onClick={() => { setAgitatorTarget(null); setAgitatorsOpen(true); }}
+            />
+          )}
 
           {hasFleets && (
             <CompactAction
