@@ -1,100 +1,68 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { MyGameProps } from "@eots/game";
 import FleetDisplay from "../PlayerBoard/FleetDisplay";
 import WorldMap from "../WorldMap/WorldMap";
-import {
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-} from "@mui/material";
+import { DialogShell } from "@/components/atoms/DialogShell";
 import { getLocationPresentation } from "@/utils/locationLabels";
 
-const RetrieveFleetsDialog = (props: RetrieveFleetsDialogProps) => {
-  const [open, setOpen] = useState(true);
-  let hasNoFleets = true;
-  const setFleetsHolder: number[] = [0];
-  const [selectedFleets, setSelectedFleets] = useState(setFleetsHolder);
-  const fleets = props.G.playerInfo[
-    props.playerID ?? props.ctx.currentPlayer
-  ].fleetInfo.map((fleet) => {
-    const [x, y] = fleet.location;
-    if (x !== 4 || y !== 0) {
-      hasNoFleets = false;
-      const locationPresentation = getLocationPresentation(
-        props.G.mapState.currentTileArray,
-        fleet.location
-      );
-      return (
-        <FleetDisplay
-          fleetId={fleet.fleetId}
-          location={fleet.location}
-          locationLabel={locationPresentation.name}
-          locationReference={locationPresentation.reference}
-          skyships={fleet.skyships}
-          regiments={fleet.regiments}
-          levies={fleet.levies}
-          selected={selectedFleets.includes(fleet.fleetId) ? fleet.fleetId : -1}
-          onClickFunction={() => {
-            let newFleetArray = [...selectedFleets];
-            if (selectedFleets.includes(fleet.fleetId)) {
-              newFleetArray.splice(newFleetArray.indexOf(fleet.fleetId, 1));
-              setSelectedFleets(newFleetArray);
-            } else {
-              newFleetArray.push(fleet.fleetId);
-              setSelectedFleets(newFleetArray);
-            }
-          }}
-        />
-      );
-    }
-  });
+const RetrieveFleetsDialog = (props: MyGameProps) => {
+  const [selectedFleets, setSelectedFleets] = useState<number[]>([]);
 
-  // Auto-skip for no fleets is now handled server-side in turn.onBegin
+  const player = props.G.playerInfo[props.playerID ?? props.ctx.currentPlayer];
+  const deployedFleets = player?.fleetInfo.filter(
+    (f) => f.location[0] !== 4 || f.location[1] !== 0
+  ) ?? [];
+
+  const toggleFleet = (fleetId: number) => {
+    setSelectedFleets((prev) =>
+      prev.includes(fleetId)
+        ? prev.filter((id) => id !== fleetId)
+        : [...prev, fleetId]
+    );
+  };
+
+  const isOpen =
+    props.ctx.phase === "resolution" &&
+    props.G.stage === "retrieve fleets" &&
+    props.ctx.currentPlayer === props.playerID;
+
   return (
-    <Dialog
-      maxWidth="xl"
-      open={
-        open &&
-        props.ctx.phase === "resolution" &&
-        props.G.stage === "retrieve fleets" &&
-        props.ctx.currentPlayer === props.playerID
-      }
+    <DialogShell
+      open={isOpen}
+      title="Do you want to retrieve any fleets?"
+      subtitle="Bring home any of your dispatched fleets for free, allowing you to restock them with skyships and troops."
+      mood="peacetime"
+      size="lg"
+      confirmLabel="Retrieve fleets"
+      confirmColor="success"
+      onConfirm={() => props.moves.retrieveFleets(selectedFleets)}
+      cancelLabel="Skip"
+      cancelColor="error"
+      onCancel={() => props.moves.retrieveFleets([])}
     >
-      <DialogTitle>Do you want to retrieve any fleets?</DialogTitle>
-      <DialogContent>
-        Bring home any of your dispatched fleets for free, this allows you to
-        restock them with skyships and troops.
-        {fleets}
-        <WorldMap {...props} />
-      </DialogContent>
-      <DialogActions>
-        <Button
-          color="error"
-          variant="contained"
-          onClick={() => {
-            props.moves.retrieveFleets([]);
-            setOpen(false);
-          }}
-        >
-          Cancel
-        </Button>
-        <Button
-          color="success"
-          variant="contained"
-          onClick={() => {
-            props.moves.retrieveFleets(selectedFleets);
-            setOpen(false);
-          }}
-        >
-          Retrieve fleets
-        </Button>
-      </DialogActions>
-    </Dialog>
+      {deployedFleets.map((fleet) => {
+        const loc = getLocationPresentation(
+          props.G.mapState.currentTileArray,
+          fleet.location
+        );
+        return (
+          <FleetDisplay
+            key={fleet.fleetId}
+            fleetId={fleet.fleetId}
+            location={fleet.location}
+            locationLabel={loc.name}
+            locationReference={loc.reference}
+            skyships={fleet.skyships}
+            regiments={fleet.regiments}
+            levies={fleet.levies}
+            selected={selectedFleets.includes(fleet.fleetId) ? fleet.fleetId : -1}
+            onClickFunction={() => toggleFleet(fleet.fleetId)}
+          />
+        );
+      })}
+      <WorldMap {...props} />
+    </DialogShell>
   );
 };
-
-interface RetrieveFleetsDialogProps extends MyGameProps {}
 
 export default RetrieveFleetsDialog;

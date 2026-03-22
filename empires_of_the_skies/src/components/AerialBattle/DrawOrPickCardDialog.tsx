@@ -1,20 +1,13 @@
-import React, { useState } from "react";
-
-import {
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Button,
-} from "@mui/material";
+import { useState } from "react";
 import { MyGameProps } from "@eots/game";
 import FortuneOfWarCardDisplay from "../PlayerBoard/FortuneOfWarCardDisplay";
 import WorldMap from "../WorldMap/WorldMap";
+import { DialogShell } from "@/components/atoms/DialogShell";
+import { GameButton } from "@/components/atoms/GameButton";
 
-const DrawOrPickCardDialog = (props: DrawOrPickCardDialogProps) => {
+const DrawOrPickCardDialog = (props: MyGameProps) => {
   const [x, y] = props.G.mapState.currentBattle;
   const [currentCard, setCurrentCard] = useState(0);
-  const [open, setOpen] = useState(true);
 
   const inCurrentBattle =
     props.G.mapState.battleMap[y] &&
@@ -22,90 +15,72 @@ const DrawOrPickCardDialog = (props: DrawOrPickCardDialogProps) => {
       props.playerID ?? props.ctx.currentPlayer
     );
 
-  const cards = props.G.playerInfo[
-    props.playerID ?? props.ctx.currentPlayer
-  ].resources.fortuneCards.map((card, index) => {
-    return (
-      <div
-        onClick={() => setCurrentCard(index)}
-        key={index}
-        style={{
-          cursor: "pointer",
-          height: "fit-content",
-          width: "fit-content",
-          border: index === currentCard ? "2px solid black" : "none",
-        }}
-      >
-        <FortuneOfWarCardDisplay
-          value={index}
-          {...props}
-        ></FortuneOfWarCardDisplay>
-      </div>
-    );
-  });
+  // ── Visibility ─────────────────────────────────────────────────────────
+  const isMyTurn = props.playerID === props.ctx.currentPlayer && inCurrentBattle;
+
+  const isBattleReady =
+    props.G.battleState?.attacker.decision === "fight" &&
+    props.G.battleState?.defender.decision === "fight" &&
+    !props.G.battleState?.attacker.victorious &&
+    !props.G.battleState?.defender.victorious;
+
+  const isConquestDraw =
+    props.G.stage === "conquest draw or pick card" &&
+    props.ctx.phase === "conquest" &&
+    props.G.conquestState !== undefined &&
+    props.G.conquestState.id === props.playerID;
+
+  const isOpen = isMyTurn && (isBattleReady || isConquestDraw);
+
+  // ── Move dispatch ──────────────────────────────────────────────────────
+  const isConquest = props.ctx.phase === "conquest";
+  const handlePick = () =>
+    isConquest ? props.moves.pickCardConquest(currentCard) : props.moves.pickCard(currentCard);
+  const handleDraw = () =>
+    isConquest ? props.moves.drawCardConquest() : props.moves.drawCard();
+
+  // ── Card hand ──────────────────────────────────────────────────────────
+  const hand = props.G.playerInfo[props.playerID ?? props.ctx.currentPlayer]
+    .resources.fortuneCards;
 
   return (
-    <Dialog
-      maxWidth={"xl"}
-      open={
-        open &&
-        ((props.playerID === props.ctx.currentPlayer &&
-          inCurrentBattle &&
-          props.G.battleState?.attacker.decision === "fight" &&
-          props.G.battleState?.defender.decision === "fight" &&
-          !props.G.battleState?.attacker.victorious &&
-          !props.G.battleState?.defender.victorious) ||
-          (props.playerID === props.ctx.currentPlayer &&
-            inCurrentBattle &&
-            props.G.stage === "conquest draw or pick card" &&
-            props.ctx.phase === "conquest" &&
-            props.G.conquestState !== undefined &&
-            props.G.conquestState.id === props.playerID))
-      }
+    <DialogShell
+      open={isOpen}
+      title="Draw or Pick a Card"
+      subtitle="You can either draw a random Fortune of War card, or pick one from your hand."
+      mood="battle"
+      size="lg"
+      hideActions
     >
-      <DialogTitle>Draw or Pick a Card</DialogTitle>
-      <DialogContent>
-        You can either draw a random fortune of war card, or pick one from your
-        hand if you have any.
-        <div style={{ display: "flex", flexDirection: "row" }}>{cards}</div>
-        <WorldMap
-          {...props}
-          selectableTiles={[props.G.mapState.currentBattle]}
-        ></WorldMap>
-      </DialogContent>
-      <DialogActions>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={() => {
-            props.ctx.phase === "conquest"
-              ? props.moves.pickCardConquest(currentCard)
-              : props.moves.pickCard(currentCard);
+      <div style={{ display: "flex", flexDirection: "row" }}>
+        {hand.map((_, index) => (
+          <div
+            key={index}
+            onClick={() => setCurrentCard(index)}
+            style={{
+              cursor: "pointer",
+              height: "fit-content",
+              width: "fit-content",
+              border: index === currentCard ? "2px solid black" : "none",
+            }}
+          >
+            <FortuneOfWarCardDisplay value={index} {...props} />
+          </div>
+        ))}
+      </div>
 
-            setOpen(false);
-          }}
-          disabled={cards.length === 0}
-        >
+      <WorldMap {...props} selectableTiles={[props.G.mapState.currentBattle]} />
+
+      <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginTop: 16 }}>
+        <GameButton variant="primary" disabled={hand.length === 0} onClick={handlePick}>
           Use selected card
-        </Button>
-        <Button
-          variant="contained"
-          color="secondary"
-          onClick={() => {
-            props.ctx.phase === "conquest"
-              ? props.moves.drawCardConquest()
-              : props.moves.drawCard();
-
-            setOpen(false);
-          }}
-        >
+        </GameButton>
+        <GameButton variant="secondary" onClick={handleDraw}>
           Draw random card
-        </Button>
-      </DialogActions>
-    </Dialog>
+        </GameButton>
+      </div>
+    </DialogShell>
   );
 };
-
-interface DrawOrPickCardDialogProps extends MyGameProps {}
 
 export default DrawOrPickCardDialog;
