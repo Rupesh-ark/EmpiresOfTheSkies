@@ -1,18 +1,9 @@
-import React, { useState } from "react";
 import { MyGameProps } from "@eots/game";
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-} from "@mui/material";
-
+import { DialogShell } from "@/components/atoms/DialogShell";
 import WorldMap from "../WorldMap/WorldMap";
 
-const GroundAttackOrPassDialog = (props: GroundAttackOrPassDialogProps) => {
+const GroundAttackOrPassDialog = (props: MyGameProps) => {
   const [x, y] = props.G.mapState.currentBattle;
-  const [open, setOpen] = useState(true);
 
   const inCurrentBattle =
     props.G.mapState.battleMap[y] &&
@@ -20,57 +11,30 @@ const GroundAttackOrPassDialog = (props: GroundAttackOrPassDialogProps) => {
       props.playerID ?? props.ctx.currentPlayer
     );
 
-  return (
-    <Dialog
-      maxWidth={"xl"}
-      open={
-        open &&
-        props.ctx.currentPlayer === props.playerID &&
-        props.ctx.phase === "ground_battle" &&
-        inCurrentBattle &&
-        props.G.battleState === undefined &&
-        props.G.stage === "attack or pass"
-      }
-      style={{
-        color:
-          props.G.playerInfo[props.playerID ?? props.ctx.currentPlayer].colour,
-      }}
-    >
-      <DialogTitle>Choose your battle action</DialogTitle>
-      <DialogContent>
-        {`Do you want to attack this enemy's region? You must completely wipe them out in order to take control of the region.
-Current battle tile: [${1 + x}, ${4 - y}]`}
+  const isOpen =
+    props.ctx.currentPlayer === props.playerID &&
+    props.ctx.phase === "ground_battle" &&
+    inCurrentBattle &&
+    props.G.battleState === undefined &&
+    props.G.stage === "attack or pass";
 
-        <WorldMap
-          {...props}
-          selectableTiles={[props.G.mapState.currentBattle]}
-        ></WorldMap>
-      </DialogContent>
-      <DialogActions>
-        <Button
-          color="warning"
-          variant="contained"
-          onClick={() => {
-            props.moves.doNotGroundAttack();
-            setOpen(false);
-          }}
-        >
-          Pass
-        </Button>
-        <Button
-          color="success"
-          variant="contained"
-          onClick={() => {
-            props.moves.attackPlayersBuilding();
-            setOpen(false);
-          }}
-        >
-          Attack!
-        </Button>
-      </DialogActions>
-    </Dialog>
+  return (
+    <DialogShell
+      open={isOpen}
+      title="Choose your battle action"
+      subtitle={`Do you want to attack this enemy's region? You must completely wipe them out in order to take control. Current battle tile: [${1 + x}, ${4 - y}]`}
+      mood="battle"
+      size="lg"
+      confirmLabel="Attack!"
+      confirmColor="success"
+      onConfirm={() => props.moves.attackPlayersBuilding()}
+      cancelLabel="Pass"
+      cancelColor="error"
+      onCancel={() => props.moves.doNotGroundAttack()}
+    >
+      <WorldMap {...props} selectableTiles={[props.G.mapState.currentBattle]} />
+    </DialogShell>
   );
 };
 
-export interface GroundAttackOrPassDialogProps extends MyGameProps {}
 export default GroundAttackOrPassDialog;

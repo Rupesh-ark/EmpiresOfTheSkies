@@ -6,17 +6,17 @@ export { ActionInfoPanel } from "./ActionInfoPanel";
 
 // ── Row components ───────────────────────────────────────────────────────────
 import PlayerOrderRow from "./components/rows/PlayerOrderRow";
-import RecruitCounsellorsRow from "./components/rows/RecruitCounsellorsRow";
-import RecruitRegimentsRow from "./components/rows/RecruitRegimentsRow";
 import {
+  RecruitCounsellorsRow,
+  RecruitRegimentsRow,
   PurchaseSkyshipsZeelandRow,
   PurchaseSkyshipsVenoaRow,
-} from "./components/rows/PurchaseSkyshipsRow";
+  FoundFactoriesRow,
+  ConvertMonarchRow,
+} from "./components/rows/SimpleActionRows";
 import FoundBuildingsRow from "./components/rows/FoundBuildingsRow";
-import FoundFactoriesRow from "./components/rows/FoundFactoriesRow";
 import InfluencePrelatesRow from "./components/rows/InfluencePrelatesRow";
 import PunishDissentersRow from "./components/rows/PunishDissentersRow";
-import ConvertMonarchRow from "./components/rows/ConvertMonarchRow";
 import IssueHolyDecree from "./components/IssueHolyDecree";
 
 // ── Main component ───────────────────────────────────────────────────────────
