@@ -1,17 +1,9 @@
 import { useState } from "react";
-import { Chip } from "@mui/material";
-import { MyGameProps, KingdomAdvantageCard } from "@eots/game";
+import { Box, Typography } from "@mui/material";
+import { MyGameProps, KingdomAdvantageCard, KA_CARD_DEFS } from "@eots/game";
 import { DialogShell } from "@/components/atoms/DialogShell";
-
-const CARD_LABELS: Record<KingdomAdvantageCard, string> = {
-  elite_regiments: "Elite Regiments",
-  improved_training: "Improved Training",
-  licenced_smugglers: "Licenced Smugglers",
-  more_efficient_taxation: "More Efficient Taxation",
-  more_prisons: "More Prisons",
-  patriarch_of_the_church: "Patriarch of the Church",
-  sanctioned_piracy: "Sanctioned Piracy",
-};
+import { KA_CARD_IMAGES } from "@/assets/kingdomAdvantage";
+import { tokens } from "@/theme";
 
 const PickKingdomAdvantageCardDialog = (props: MyGameProps) => {
   const [selectedCard, setSelectedCard] = useState<KingdomAdvantageCard | undefined>(undefined);
@@ -35,18 +27,79 @@ const PickKingdomAdvantageCardDialog = (props: MyGameProps) => {
         props.moves.pickKingdomAdvantageCard(selectedCard);
       }}
     >
-      <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginTop: "8px" }}>
-        {availableCards.map((card) => (
-          <Chip
-            key={card}
-            label={CARD_LABELS[card]}
-            onClick={() => setSelectedCard(card)}
-            variant={selectedCard === card ? "filled" : "outlined"}
-            color={selectedCard === card ? "primary" : "default"}
-            style={{ cursor: "pointer", fontSize: "14px", padding: "4px" }}
-          />
-        ))}
-      </div>
+      <Box sx={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+        {availableCards.map((card) => {
+          const def = KA_CARD_DEFS[card];
+          const isSelected = selectedCard === card;
+          return (
+            <Box
+              key={card}
+              onClick={() => setSelectedCard(card)}
+              sx={{
+                display: "flex",
+                gap: "12px",
+                alignItems: "center",
+                p: "8px",
+                borderRadius: `${tokens.radius.md}px`,
+                border: `2px solid ${isSelected ? tokens.ui.gold : tokens.ui.border}`,
+                background: isSelected
+                  ? `linear-gradient(135deg, ${tokens.ui.surface}, ${tokens.ui.surfaceRaised})`
+                  : tokens.ui.surfaceRaised,
+                boxShadow: isSelected ? tokens.shadow.glow(tokens.ui.gold) : "none",
+                cursor: "pointer",
+                transition: `all ${tokens.transition.fast}`,
+                "&:hover": {
+                  borderColor: isSelected ? tokens.ui.gold : tokens.ui.borderMedium,
+                  background: tokens.ui.surfaceHover,
+                },
+              }}
+            >
+              {/* Landscape card thumbnail */}
+              <Box
+                sx={{
+                  width: 160,
+                  height: 113,
+                  flexShrink: 0,
+                  borderRadius: `${tokens.radius.sm}px`,
+                  overflow: "hidden",
+                }}
+              >
+                <img
+                  src={KA_CARD_IMAGES[card]}
+                  alt={def.displayName}
+                  style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                />
+              </Box>
+
+              {/* Card info */}
+              <Box sx={{ flex: 1, minWidth: 0 }}>
+                <Typography
+                  sx={{
+                    fontFamily: tokens.font.accent,
+                    fontSize: 14,
+                    color: isSelected ? tokens.ui.gold : tokens.ui.text,
+                    lineHeight: 1.2,
+                    mb: "4px",
+                    transition: `color ${tokens.transition.fast}`,
+                  }}
+                >
+                  {def.displayName}
+                </Typography>
+                <Typography
+                  sx={{
+                    fontFamily: tokens.font.body,
+                    fontSize: 12,
+                    color: tokens.ui.textMuted,
+                    lineHeight: 1.5,
+                  }}
+                >
+                  {def.description}
+                </Typography>
+              </Box>
+            </Box>
+          );
+        })}
+      </Box>
     </DialogShell>
   );
 };

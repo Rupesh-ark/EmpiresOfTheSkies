@@ -118,12 +118,24 @@ const PickEventCardDialog = (props: MyGameProps) => {
                   sx={{
                     fontFamily: tokens.font.body,
                     fontSize: 10,
+                    fontStyle: "italic",
                     color: tokens.ui.textMuted,
                     lineHeight: 1.3,
                     mt: "1px",
                   }}
                 >
                   {def.description}
+                </Typography>
+                <Typography
+                  sx={{
+                    fontFamily: tokens.font.body,
+                    fontSize: 11,
+                    color: tokens.ui.text,
+                    lineHeight: 1.4,
+                    mt: "4px",
+                  }}
+                >
+                  {def.effect}
                 </Typography>
               </Box>
 

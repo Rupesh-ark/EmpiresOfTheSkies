@@ -19,6 +19,7 @@ import { BUILDING_SELL_PRICE } from "../data/gameData";
 export type EventCardDef = {
   displayName: string;
   description: string;
+  effect: string;
   isBattle: boolean;
 };
 
@@ -26,186 +27,223 @@ export const EVENT_CARD_DEFS: Record<EventCardName, EventCardDef> = {
   zeeland_turns_heretic: {
     displayName: "Zeeland Turns Heretic",
     description: "Ruling Council Opts For Religious Reform",
+    effect: "Zeeland becomes a heretic NPR kingdom, affecting election vote counts.",
     isBattle: false,
   },
   venoa_turns_heretic: {
     displayName: "Venoa Turns Heretic",
     description: "Ruling Council Opts For Religious Reform",
+    effect: "Venoa becomes a heretic NPR kingdom, affecting election vote counts.",
     isBattle: false,
   },
   treacherous_creatures: {
     displayName: "Treacherous Creatures",
     description: "Merfolk & Sea Elves Attack",
+    effect: "Each fleet on Merfolk or Sea Elf legend tiles loses 1 skyship and 1 troop.",
     isBattle: false,
   },
   the_great_fire: {
     displayName: "The Great Fire",
     description: "Colossal Conflagration Destroys Grand Building",
+    effect: "The player with the most buildings loses one building (highest-count type chosen automatically).",
     isBattle: false,
   },
   the_faerie_plague: {
     displayName: "The Faerie Plague",
     description: "A New and Deadly Pestilence Strikes",
+    effect: "All players lose half their regiments and levies everywhere — kingdom, fleets, and garrisons.",
     isBattle: false,
   },
   schism: {
     displayName: "Schism",
     description: "Heretic Clergy Break with the Prelacy",
+    effect: "All heretic players: heresy advances 3, excluded from this round's election. Annuls Colonial Prelates.",
     isBattle: false,
   },
   royal_patronage: {
     displayName: "Royal Patronage",
     description: "The Crown Rewards Swift Exploration",
+    effect: "The first player to claim a land tile this round gains +2 VP and 2 gold.",
     isBattle: false,
   },
   race_to_discovery: {
     displayName: "Race to Discovery",
     description: "Rival Courts Compete for Prestige",
+    effect: "The player who discovers the most tiles this round gains bonus VP.",
     isBattle: false,
   },
   royal_succession: {
     displayName: "Royal Succession",
     description: "Heir Apparent Takes The Throne",
+    effect: "Fewest-VP player scores their legacy card early, returns it, then draws 2 new cards and keeps the best.",
     isBattle: false,
   },
   pretender_rebellion: {
     displayName: "Pretender REBELLION",
     description: "Scion Of A Rival Dynasty Raises Their Banner",
+    effect: "Rebellion targets the player with fewest VP. Commit troops to defend or surrender.",
     isBattle: true,
   },
   prelacy_condemned: {
     displayName: "Prelacy Condemned",
     description: "Radical Cleric Publishes Critical Theses",
+    effect: "All players' heresy trackers advance 4 steps toward heresy.",
     isBattle: false,
   },
   peace_accord_reached: {
     displayName: "Peace Accord Reached",
     description: "Peace Of The Faith Extended To Whole Globe",
+    effect: "No aerial battles may be declared this round.",
     isBattle: false,
   },
   peasant_rebellion: {
     displayName: "Peasant REBELLION",
     description: "Common People Rise Up Against Heavy Taxation",
+    effect: "Rebellion targets the player with the most gold. Commit troops to defend or surrender.",
     isBattle: true,
   },
   patrons_of_the_arts: {
     displayName: "Patrons Of The Arts",
     description: "Architecture, Music & Painting Flourish",
+    effect: "Each player gains VP equal to the number of cathedrals + palaces they own.",
     isBattle: false,
   },
   orthodox_rebellion: {
     displayName: "Orthodox REBELLION",
     description: "Believers Rise Up Against A Heretic Monarch",
+    effect: "Rebellion targets a heretic player. Commit troops to defend or surrender. Void if no heretic players.",
     isBattle: true,
   },
   mysterious_disappearances: {
     displayName: "Mysterious Disappearances",
     description: "Vanishings at City of Gold & Fountain of Youth",
+    effect: "Each fleet on City of Gold or Fountain of Youth tiles loses 1 skyship and 1 troop.",
     isBattle: false,
   },
   monsters_awake: {
     displayName: "Monsters Awake",
     description: "Dragons & Krakens Claim Victims",
+    effect: "Each fleet on Dragon or Kraken legend tiles loses 1 skyship and 1 troop.",
     isBattle: false,
   },
   lenders_refuse_credit: {
     displayName: "Lenders Refuse Credit",
     description: "The Banking Guilds Stop Further Loans",
+    effect: "Players currently in debt may not borrow gold this round.",
     isBattle: false,
   },
   infidels_invade_faerie: {
     displayName: "Infidels Invade Faerie",
     description: "An Infidel Host Attacks a Colony or Outpost",
+    effect: "An infidel host attacks. Archprelate nominates a Captain-General; all players contribute troops.",
     isBattle: true,
   },
   infidel_corsairs_raid: {
     displayName: "Infidel Corsairs Raid",
     description: "Aerial Pirates Descend on Faithdom",
+    effect: "The richest player without a defending fleet at home loses half their gold (or a building if broke).",
     isBattle: false,
   },
   heretic_rebellion: {
     displayName: "Heretic REBELLION",
     description: "Heretics Rise Up Against An Orthodox Monarch",
+    effect: "Rebellion targets an orthodox player. Commit troops to defend or surrender. Void if no orthodox players.",
     isBattle: true,
   },
   headstrong_commander: {
     displayName: "Headstrong Commander",
     description: "Ambitious Outpost Governor Attempts Conquest",
+    effect: "A garrisoned outpost commander forces a battle. Void if no outposts have garrisons.",
     isBattle: true,
   },
   guild_revolt: {
     displayName: "Guild Revolt",
     description: "Factory Workers Demand Better Conditions",
+    effect: "Targeted player must choose: lose a building or pay gold to settle the dispute.",
     isBattle: false,
   },
   grand_infidel_dies: {
     displayName: "Grand Infidel Dies",
     description: "Succession Struggle Delays Invasion Preparations",
+    effect: "The infidel invasion is delayed — no invasion event this round.",
     isBattle: false,
   },
   foreign_agitators: {
     displayName: "Foreign Agitators",
     description: "Neighbouring Realms Send Troublemakers",
+    effect: "All players' heresy trackers advance 1 step.",
     isBattle: false,
   },
   faerie_uprising: {
     displayName: "Faerie Uprising",
     description: "Faerie Folk Rise Up Against Colonial Oppression",
+    effect: "A colony faces rebellion from the local faerie folk. Commit troops or lose the colony.",
     isBattle: true,
   },
   dynastic_marriage: {
     displayName: "Dynastic Marriage",
     description: "Two Monarchies Make A Lasting Alliance",
+    effect: "Two players form a marriage alliance. Void if fewer than 4 players.",
     isBattle: false,
   },
   corruption_scandal: {
     displayName: "Corruption Scandal",
     description: "Cathedral Prelates Caught in Embezzlement",
+    effect: "Targeted player must choose: lose a cathedral or pay gold to cover the scandal.",
     isBattle: false,
   },
   defence_of_the_faith: {
     displayName: "Defence of the Faith",
     description: "Devout Cleric Publishes Counter to Criticism",
+    effect: "All players' heresy trackers retreat 4 steps toward orthodoxy.",
     isBattle: false,
   },
   crops_fail: {
     displayName: "Crops Fail",
     description: "Poor Harvests Reduce Tax Take",
+    effect: "All players collect 3 less gold during taxes this round.",
     isBattle: false,
   },
   colonial_rebellion: {
     displayName: "Colonial REBELLION",
     description: "Colonists Rise Up Against Royal Authority",
+    effect: "A colony rebels. Its owner must commit troops to defend or lose the colony. Void if no colonies.",
     isBattle: true,
   },
   colonial_prelates: {
     displayName: "Colonial Prelates",
     description: "The Church Expands to Minister to Faerie",
+    effect: "Each colony now counts as +1 vote in Archprelate elections (persistent). Void if no colonies.",
     isBattle: false,
   },
   bumper_crops: {
     displayName: "Bumper Crops",
     description: "Good Harvests Increase Tax Take",
+    effect: "All players collect 3 extra gold during taxes this round.",
     isBattle: false,
   },
   archprelate_dies: {
     displayName: "Archprelate Dies",
     description: "Council of Prelates Enters Emergency Session",
+    effect: "An immediate emergency election is held (no bribes, own kingdom votes only).",
     isBattle: false,
   },
   allies_in_faerie: {
     displayName: "Allies in Faerie",
     description: "Outpost Governors Obtain Local Recruits",
+    effect: "Each outpost owner gains free regiments equal to that outpost's trade goods value. Void if no outposts.",
     isBattle: false,
   },
   a_kingdom_turns_heretic: {
     displayName: "A Kingdom Turns Heretic",
     description: "Monarch Opts For Religious Reform",
+    effect: "An NPR kingdom converts to heresy, affecting election vote counts. Void if no eligible orthodox NPR.",
     isBattle: false,
   },
   return_to_orthodoxy: {
     displayName: "Return to Orthodoxy",
     description: "Monarch Reverses Religious Reform",
+    effect: "A heretic NPR kingdom returns to orthodoxy. Void if no heretic NPR kingdoms.",
     isBattle: false,
   },
 };
