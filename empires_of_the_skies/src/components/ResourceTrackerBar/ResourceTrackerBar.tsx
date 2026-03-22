@@ -240,19 +240,10 @@ const ResourceTrackerBar = (props: ResourceTrackerBarProps) => {
                   lineHeight: 1,
                 }}
               >
-                {currentPlayerName}
-              </Typography>
-              <Typography
-                sx={{
-                  fontFamily: tokens.font.body,
-                  fontSize: "10px",
-                  color: currentPlayerInfo.colour,
-                  fontWeight: 600,
-                  lineHeight: 1,
-                  whiteSpace: "nowrap",
-                }}
-              >
-                {currentPlayerInfo.kingdomName}
+                Waiting for{" "}
+                <span style={{ color: currentPlayerInfo.colour, fontWeight: 600 }}>
+                  {currentPlayerName} ({currentPlayerInfo.kingdomName})
+                </span>
               </Typography>
             </Box>
           )}

@@ -50,6 +50,24 @@ export const useValidatedMoves = (props: BoardProps) => {
             if (def?.validate) {
               const error = def.validate(G, playerID, ...args);
               if (error) {
+                // TURN_COMPLETE is suppressed client-side because every action
+                // button calls clearMoves() (undo) before making a new move.
+                // The undo resets turnComplete on the server, but the client's
+                // G closure still has the old state during the same click event.
+                // This causes a false positive — validation rejects the move
+                // even though the undo will have cleared turnComplete by the
+                // time the move reaches the server.
+                //
+                // Server-side validation in moveWrapper.ts still blocks actual
+                // double actions if someone bypasses the UI.
+                //
+                // If TURN_COMPLETE toasts start appearing again in a context
+                // where clearMoves is NOT called first, this suppression is
+                // hiding a real bug — investigate the calling button's onClick.
+                if (error.code === "TURN_COMPLETE") {
+                  originalMove(...args);
+                  return;
+                }
                 showToast(error.message, "error");
                 return;
               }

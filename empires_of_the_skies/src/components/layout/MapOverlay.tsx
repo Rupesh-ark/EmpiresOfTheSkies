@@ -155,31 +155,20 @@ export const MapOverlay = (props: MyGameProps) => {
               Your Turn
             </Typography>
           ) : (
-            <>
-              <Typography
-                sx={{
-                  fontFamily: tokens.font.body,
-                  fontSize: 11,
-                  color: "#C8B898",
-                  whiteSpace: "nowrap",
-                  lineHeight: 1,
-                }}
-              >
-                {currentPlayerName}
-              </Typography>
-              <Typography
-                sx={{
-                  fontFamily: tokens.font.body,
-                  fontSize: "10px",
-                  color: currentPlayerInfo.colour,
-                  fontWeight: 600,
-                  lineHeight: 1,
-                  whiteSpace: "nowrap",
-                }}
-              >
-                {currentPlayerInfo.kingdomName}
-              </Typography>
-            </>
+            <Typography
+              sx={{
+                fontFamily: tokens.font.body,
+                fontSize: 11,
+                color: "#C8B898",
+                whiteSpace: "nowrap",
+                lineHeight: 1,
+              }}
+            >
+              Waiting for{" "}
+              <span style={{ color: currentPlayerInfo.colour, fontWeight: 600 }}>
+                {currentPlayerName} ({currentPlayerInfo.kingdomName})
+              </span>
+            </Typography>
           )}
         </Box>
       </Box>
