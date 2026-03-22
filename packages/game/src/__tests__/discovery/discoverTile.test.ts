@@ -15,7 +15,7 @@
 import { describe, it, expect } from "vitest";
 import { INVALID_MOVE } from "boardgame.io/core";
 import discoverTile from "../../moves/discovery/discoverTile";
-import { buildInitialG, buildPlayer, buildCtx } from "../testHelpers";
+import { buildInitialG, buildPlayer, buildCtx, buildEvents, buildRandom } from "../testHelpers";
 import type { TileInfoProps } from "../../types";
 
 // ── Map helpers ───────────────────────────────────────────────────────────────
@@ -77,8 +77,8 @@ function callDiscover(
   numMoves = 0
 ) {
   const ctx = { ...buildCtx(playerID), numMoves, playOrder: [playerID], playOrderPos: 0 };
-  const events = { endTurn: () => {}, endPhase: () => {} };
-  return discoverTile.fn({ G, ctx, playerID, events, random: {} }, coords);
+  const events = buildEvents();
+  return discoverTile.fn({ G, ctx, playerID, events, random: buildRandom() }, coords);
 }
 
 // ── New race heresy advance ───────────────────────────────────────────────────

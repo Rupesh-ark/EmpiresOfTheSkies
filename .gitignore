@@ -2,6 +2,9 @@
 **/node_modules/
 **/.pnpm-store/
 
+# --- boardgame.io FlatFile persistence ---
+server/storage/
+
 # --- build outputs (Vite + server builds) ---
 **/dist/
 **/dist-ssr/

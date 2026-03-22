@@ -14,6 +14,7 @@
 import { describe, it, expect, vi } from "vitest";
 import pass from "../../moves/pass";
 import { buildInitialG, buildPlayer, buildCtx } from "../testHelpers";
+import type { EventsAPI } from "boardgame.io/dist/types/src/plugins/events/events";
 
 function buildPassCtx(
   playerID: string,
@@ -33,7 +34,7 @@ function buildEvents() {
   return {
     endTurn: vi.fn(),
     endPhase: vi.fn(),
-  };
+  } as unknown as EventsAPI & { endTurn: ReturnType<typeof vi.fn>; endPhase: ReturnType<typeof vi.fn> };
 }
 
 // ── discovery phase ────────────────────────────────────────────────────────────

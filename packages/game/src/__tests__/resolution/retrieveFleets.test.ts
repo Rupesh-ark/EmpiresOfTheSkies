@@ -13,10 +13,10 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { buildInitialG, buildPlayer, buildCtx, buildFleet, buildResources } from "../testHelpers";
+import { buildInitialG, buildPlayer, buildCtx, buildFleet, buildResources, buildEvents, buildRandom } from "../testHelpers";
 import retrieveFleets from "../../moves/resolution/retrieveFleets";
 
-const stubEvents = { endTurn: (_args?: any) => {}, endPhase: () => {} } as any;
+const stubEvents = buildEvents();
 
 // ── Map helpers ───────────────────────────────────────────────────────────────
 
@@ -48,7 +48,7 @@ describe("retrieveFleets — troop return", () => {
     G.mapState.battleMap[1][2] = [playerID];
 
     retrieveFleets.fn(
-      { G, ctx: buildCtx(playerID), playerID, events: stubEvents, random: {} },
+      { G, ctx: buildCtx(playerID), playerID, events: stubEvents, random: buildRandom() },
       [0]
     );
 
@@ -69,7 +69,7 @@ describe("retrieveFleets — fleet location", () => {
     G.mapState.battleMap[1][2] = [playerID];
 
     retrieveFleets.fn(
-      { G, ctx: buildCtx(playerID), playerID, events: stubEvents, random: {} },
+      { G, ctx: buildCtx(playerID), playerID, events: stubEvents, random: buildRandom() },
       [0]
     );
 
@@ -88,7 +88,7 @@ describe("retrieveFleets — fleet stat zeroing", () => {
     G.mapState.battleMap[1][2] = [playerID];
 
     retrieveFleets.fn(
-      { G, ctx: buildCtx(playerID), playerID, events: stubEvents, random: {} },
+      { G, ctx: buildCtx(playerID), playerID, events: stubEvents, random: buildRandom() },
       [0]
     );
 
@@ -111,7 +111,7 @@ describe("retrieveFleets — battleMap scrubbing", () => {
     G.mapState.battleMap[1][2] = [playerID];
 
     retrieveFleets.fn(
-      { G, ctx: buildCtx(playerID), playerID, events: stubEvents, random: {} },
+      { G, ctx: buildCtx(playerID), playerID, events: stubEvents, random: buildRandom() },
       [0]
     );
 
@@ -130,7 +130,7 @@ describe("retrieveFleets — battleMap scrubbing", () => {
     G.mapState.battleMap[1][2] = [playerID];
 
     retrieveFleets.fn(
-      { G, ctx: buildCtx(playerID), playerID, events: stubEvents, random: {} },
+      { G, ctx: buildCtx(playerID), playerID, events: stubEvents, random: buildRandom() },
       [0]  // only retrieve fleet 0; fleet 1 stays at [2, 1]
     );
 

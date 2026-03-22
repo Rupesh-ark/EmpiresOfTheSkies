@@ -18,9 +18,10 @@
 
 import { describe, it, expect } from "vitest";
 import vote from "../../moves/election/vote";
-import { buildInitialG, buildPlayer, buildCtx, buildResources } from "../testHelpers";
+import { buildInitialG, buildPlayer, buildCtx, buildResources, buildRandom } from "../testHelpers";
+import type { EventsAPI } from "boardgame.io/dist/types/src/plugins/events/events";
 
-const stubEvents = { endTurn: () => {}, endPhase: () => {} } as any;
+const stubEvents = { endTurn: () => {}, endPhase: () => {} } as unknown as EventsAPI;
 
 function callMove(G: ReturnType<typeof buildInitialG>, playerID: string, kingdomVotedFor: string) {
   const ctx = {
@@ -29,7 +30,7 @@ function callMove(G: ReturnType<typeof buildInitialG>, playerID: string, kingdom
     playOrder: Object.keys(G.playerInfo),
     playOrderPos: Object.keys(G.playerInfo).indexOf(playerID),
   };
-  return vote.fn({ G, ctx, playerID, events: stubEvents, random: {} }, kingdomVotedFor);
+  return vote.fn({ G, ctx, playerID, events: stubEvents, random: buildRandom() }, kingdomVotedFor);
 }
 
 function callMoveWithPlayOrder(
@@ -44,7 +45,7 @@ function callMoveWithPlayOrder(
     playOrder,
     playOrderPos: playOrder.indexOf(playerID),
   };
-  return vote.fn({ G, ctx, playerID, events: stubEvents, random: {} }, kingdomVotedFor);
+  return vote.fn({ G, ctx, playerID, events: stubEvents, random: buildRandom() }, kingdomVotedFor);
 }
 
 describe("vote — ballot storage (before all players have voted)", () => {
