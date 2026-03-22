@@ -12,7 +12,11 @@ const validatePass = (G: MyGameState, _playerID: string): MoveError | null => {
 };
 
 const pass: MoveDefinition = {
-  fn: ({ G, ctx, playerID, events }) => {
+  fn: ({ G, ctx, playerID, events }, ...args: any[]) => {
+    const piracyIntent = args[0] as "tax" | "cut" | undefined;
+    if (piracyIntent === "tax" || piracyIntent === "cut") {
+      G.playerInfo[playerID].piracyIntent = piracyIntent;
+    }
     G.playerInfo[playerID].passed = true;
     if (ctx.phase === "discovery") {
       G.firstTurnOfRound = false;

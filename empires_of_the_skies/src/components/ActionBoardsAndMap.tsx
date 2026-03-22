@@ -17,6 +17,7 @@ import { StatsPanel } from "./Stats/StatsPanel";
 import { ToastProvider, useToast } from "@/hooks/useToast";
 import { useValidatedMoves } from "@/hooks/useValidatedMoves";
 import { ActionHoverProvider } from "./ActionBoard/ActionHoverContext";
+import { PiracyIntentProvider } from "@/contexts/PiracyIntentContext";
 
 import { GameLayout } from "./layout";
 import type { PanelSlot, MapSize } from "./layout";
@@ -284,6 +285,7 @@ const ActionBoardsAndMapInner = (props: MyGameProps) => {
   return (
     <ThemeProvider theme={theme}>
       <ActionHoverProvider>
+        <PiracyIntentProvider round={props.G.round}>
         <Box sx={{ display: "flex", flexDirection: "column", height: "100vh" }}>
           <GameLayout
             phase={props.ctx.phase ?? ""}
@@ -296,6 +298,7 @@ const ActionBoardsAndMapInner = (props: MyGameProps) => {
             <DialogRouter {...validatedProps} />
           </GameLayout>
         </Box>
+        </PiracyIntentProvider>
       </ActionHoverProvider>
     </ThemeProvider>
   );

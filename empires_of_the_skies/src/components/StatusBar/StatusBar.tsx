@@ -6,6 +6,7 @@
  */
 import { useState } from "react";
 import { MyGameProps, GAME_PHASES } from "@eots/game";
+import { usePiracyIntent } from "@/contexts/PiracyIntentContext";
 import { Box, Typography } from "@mui/material";
 import { clearMoves } from "@/utils/gameHelpers";
 import { tokens } from "@/theme";
@@ -63,6 +64,7 @@ const BrassDivider = () => (
 
 const StatusBar = (props: StatusBarProps) => {
   const [passDialogOpen, setPassDialogOpen] = useState(false);
+  const { intent: piracyIntent } = usePiracyIntent();
 
   if (!props.playerID) return null;
 
@@ -267,7 +269,7 @@ const StatusBar = (props: StatusBarProps) => {
             <GameButton
               variant="primary"
               size="sm"
-              onClick={() => props.moves.confirmAction()}
+              onClick={() => props.moves.confirmAction(piracyIntent)}
               sx={{
                 boxShadow: `0 0 10px ${tokens.ui.gold}44`,
                 "@keyframes confirmGlow": {
@@ -310,7 +312,7 @@ const StatusBar = (props: StatusBarProps) => {
         confirmColor="error"
         onConfirm={() => {
           setPassDialogOpen(false);
-          props.moves.pass();
+          props.moves.pass(piracyIntent);
         }}
         cancelLabel="Cancel"
         onCancel={() => setPassDialogOpen(false)}

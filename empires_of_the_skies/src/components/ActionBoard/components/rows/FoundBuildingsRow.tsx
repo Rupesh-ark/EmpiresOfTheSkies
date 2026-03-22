@@ -9,7 +9,7 @@ import { PlayerDot } from "@/components/atoms/PlayerDot";
 import { ActionBoardProps, ActionTooltipContent, TOOLTIP_DELAY } from "../shared";
 import { useActionHover } from "../../ActionHoverContext";
 
-const THUMB_W = 48;
+const THUMB_W = 40;
 
 const BUILDINGS = [
   { label: "Cathedral", index: 0, key: 1, bg: BTN_BG.cathedral, actionId: "cathedral" },

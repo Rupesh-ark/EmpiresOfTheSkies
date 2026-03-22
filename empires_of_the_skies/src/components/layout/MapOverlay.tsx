@@ -16,12 +16,14 @@ import { GameButton } from "@/components/atoms/GameButton";
 import { DialogShell } from "@/components/atoms/DialogShell";
 import { clearMoves } from "@/utils/gameHelpers";
 import { useActionHover } from "@/components/ActionBoard/ActionHoverContext";
+import { usePiracyIntent } from "@/contexts/PiracyIntentContext";
 
 const PULSING_MOODS = new Set(["battle", "crisis"]);
 
 export const MapOverlay = (props: MyGameProps) => {
   const [passDialogOpen, setPassDialogOpen] = useState(false);
   const { setHoveredAction } = useActionHover();
+  const { intent: piracyIntent } = usePiracyIntent();
 
   if (!props.playerID) return null;
 
@@ -233,7 +235,7 @@ export const MapOverlay = (props: MyGameProps) => {
               size="sm"
               onMouseEnter={() => setHoveredAction("confirm-end-turn")}
               onMouseLeave={() => setHoveredAction(null)}
-              onClick={() => props.moves.confirmAction()}
+              onClick={() => props.moves.confirmAction(piracyIntent)}
               sx={{
                 boxShadow: `0 0 10px ${tokens.ui.gold}44`,
                 "@keyframes confirmGlow": {
@@ -286,7 +288,7 @@ export const MapOverlay = (props: MyGameProps) => {
         confirmColor="error"
         onConfirm={() => {
           setPassDialogOpen(false);
-          props.moves.pass();
+          props.moves.pass(piracyIntent);
         }}
         cancelLabel="Cancel"
         onCancel={() => setPassDialogOpen(false)}
