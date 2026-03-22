@@ -3,6 +3,7 @@ import { Typography, Slider, Box, Chip } from "@mui/material";
 import { MyGameProps, EVENT_CARD_DEFS } from "@eots/game";
 import { DialogShell } from "@/components/atoms/DialogShell";
 import { GameButton } from "@/components/atoms/GameButton";
+import { FoWCardSelector } from "@/components/atoms/FoWCardSelector";
 
 const RebellionDialog = (props: MyGameProps) => {
   const rebellion = props.G.currentRebellion;
@@ -87,30 +88,7 @@ const RebellionDialog = (props: MyGameProps) => {
         sx={{ mb: 2 }}
       />
 
-      {fowHand.length > 0 && (
-        <>
-          <Typography variant="subtitle2" sx={{ mb: 1 }}>
-            Play a Fortune of War card (optional)
-          </Typography>
-          <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginBottom: "16px" }}>
-            {fowHand.map((card, idx) => {
-              const label = card.sword > 0
-                ? `${card.sword} Sword${card.sword > 1 ? "s" : ""}`
-                : `${card.shield} Shield${card.shield > 1 ? "s" : ""}`;
-              return (
-                <Chip
-                  key={idx}
-                  label={label}
-                  onClick={() => setSelectedFoW(selectedFoW === idx ? undefined : idx)}
-                  variant={selectedFoW === idx ? "filled" : "outlined"}
-                  color={selectedFoW === idx ? "success" : "default"}
-                  sx={{ cursor: "pointer" }}
-                />
-              );
-            })}
-          </div>
-        </>
-      )}
+      <FoWCardSelector fowHand={fowHand} selectedIndex={selectedFoW} onSelect={setSelectedFoW} />
 
       {totalSwords === 0 && (
         <Typography variant="body2" color="error" sx={{ mt: 1 }}>

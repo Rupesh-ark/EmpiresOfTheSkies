@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Chip, Typography, Box } from "@mui/material";
 import { MyGameProps } from "@eots/game";
 import { DialogShell } from "@/components/atoms/DialogShell";
-import { GameButton } from "@/components/atoms/GameButton";
 
 const InvasionNominateDialog = (props: MyGameProps) => {
   const [selected, setSelected] = useState<string | undefined>(undefined);
@@ -15,7 +14,15 @@ const InvasionNominateDialog = (props: MyGameProps) => {
   const eligible = props.ctx.playOrder.filter((id) => !hasOrthodox || props.G.playerInfo[id].hereticOrOrthodox === "orthodox");
 
   return (
-    <DialogShell open title="Infidel Invasion!" mood="crisis" size="sm" hideActions>
+    <DialogShell
+      open
+      title="Infidel Invasion!"
+      mood="crisis"
+      size="sm"
+      confirmLabel="Nominate Captain-General"
+      confirmDisabled={!selected}
+      onConfirm={() => props.moves.nominateCaptainGeneral(selected)}
+    >
       <Box sx={{ p: 2, mb: 2, backgroundColor: "rgba(255, 112, 67, 0.08)", borderRadius: 1 }}>
         <Chip label={`Infidel Host: ${invasion.totalHostSwords} Swords`} color="error" sx={{ fontWeight: "bold" }} />
       </Box>
@@ -34,9 +41,6 @@ const InvasionNominateDialog = (props: MyGameProps) => {
             />
           );
         })}
-      </div>
-      <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 16 }}>
-        <GameButton variant="primary" disabled={!selected} onClick={() => props.moves.nominateCaptainGeneral(selected)}>Nominate Captain-General</GameButton>
       </div>
     </DialogShell>
   );

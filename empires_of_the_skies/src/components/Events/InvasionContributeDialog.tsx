@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Chip, Typography, Slider, Box } from "@mui/material";
 import { MyGameProps } from "@eots/game";
 import { DialogShell } from "@/components/atoms/DialogShell";
-import { GameButton } from "@/components/atoms/GameButton";
 
 const InvasionContributeDialog = (props: MyGameProps) => {
   const invasion = props.G.currentInvasion;
@@ -23,7 +22,16 @@ const InvasionContributeDialog = (props: MyGameProps) => {
   const captainGeneral = Object.values(props.G.playerInfo).find((p) => p.isCaptainGeneral);
 
   return (
-    <DialogShell open title="Grand Army — Contribute Troops" mood="crisis" size="sm" hideActions>
+    <DialogShell
+      open
+      title="Grand Army — Contribute Troops"
+      mood="crisis"
+      size="sm"
+      confirmLabel="Contribute Troops"
+      onConfirm={() => props.moves.contributeToGrandArmy(regiments, levies)}
+      cancelLabel="Contribute Nothing"
+      onCancel={() => props.moves.contributeToGrandArmy(0, 0)}
+    >
       <Box sx={{ display: "flex", gap: 2, mb: 2, p: 2, backgroundColor: "rgba(255, 112, 67, 0.08)", borderRadius: 1, flexWrap: "wrap" }}>
         <Chip label={`Infidel Host: ${invasion.totalHostSwords} Swords`} color="error" variant="outlined" sx={{ fontWeight: "bold" }} />
         {captainGeneral && <Chip label={`Captain-General: ${captainGeneral.kingdomName}`} color="warning" variant="outlined" sx={{ fontWeight: "bold" }} />}
@@ -42,10 +50,6 @@ const InvasionContributeDialog = (props: MyGameProps) => {
       <Slider value={levies} onChange={(_, v) => setLevies(v as number)} min={0} max={maxLevies} step={1} marks valueLabelDisplay="auto" disabled={maxLevies === 0} sx={{ mb: 2 }} />
       <Chip label={`Your contribution: ${totalSwords} Swords`} color="primary" variant="outlined" sx={{ fontWeight: "bold" }} />
       {totalSwords === 0 && <Typography variant="body2" color="error" sx={{ mt: 1 }}>Contributing nothing shames your realm — heresy penalty applies!</Typography>}
-      <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginTop: 16 }}>
-        <GameButton variant="ghost" onClick={() => props.moves.contributeToGrandArmy(0, 0)}>Contribute Nothing</GameButton>
-        <GameButton variant="primary" onClick={() => props.moves.contributeToGrandArmy(regiments, levies)}>Contribute Troops</GameButton>
-      </div>
     </DialogShell>
   );
 };

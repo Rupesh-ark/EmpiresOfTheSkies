@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { Chip, Typography, Box } from "@mui/material";
+import { Typography, Box, Chip } from "@mui/material";
 import { MyGameProps } from "@eots/game";
 import { DialogShell } from "@/components/atoms/DialogShell";
 import { GameButton } from "@/components/atoms/GameButton";
+import { FoWCardSelector } from "@/components/atoms/FoWCardSelector";
 
 const InfidelFleetCombatDialog = (props: MyGameProps) => {
   const [selectedFoW, setSelectedFoW] = useState<number | undefined>(undefined);
@@ -32,19 +33,7 @@ const InfidelFleetCombatDialog = (props: MyGameProps) => {
       <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
         <strong>Evade:</strong> Your fleet avoids combat. The Infidel Fleet remains for piracy.
       </Typography>
-      {fowHand.length > 0 && (
-        <>
-          <Typography variant="subtitle2" sx={{ mt: 2, mb: 1 }}>Play a Fortune of War card (optional)</Typography>
-          <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-            {fowHand.map((card, idx) => {
-              const label = card.sword > 0 ? `${card.sword} Sword${card.sword > 1 ? "s" : ""}` : `${card.shield} Shield${card.shield > 1 ? "s" : ""}`;
-              return (
-                <Chip key={idx} label={label} onClick={() => setSelectedFoW(selectedFoW === idx ? undefined : idx)} variant={selectedFoW === idx ? "filled" : "outlined"} color={selectedFoW === idx ? "success" : "default"} sx={{ cursor: "pointer" }} />
-              );
-            })}
-          </div>
-        </>
-      )}
+      <FoWCardSelector fowHand={fowHand} selectedIndex={selectedFoW} onSelect={setSelectedFoW} />
       <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginTop: 16 }}>
         <GameButton variant="ghost" onClick={() => props.moves.respondToInfidelFleet("evade")}>Evade</GameButton>
         <GameButton variant="danger" onClick={() => props.moves.respondToInfidelFleet("fight", selectedFoW)}>Fight!</GameButton>
