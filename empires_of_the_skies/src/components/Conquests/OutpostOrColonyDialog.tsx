@@ -1,18 +1,10 @@
-import React, { useState } from "react";
 import { MyGameProps } from "@eots/game";
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-} from "@mui/material";
+import { DialogShell } from "@/components/atoms/DialogShell";
+import { GameButton } from "@/components/atoms/GameButton";
 import WorldMap from "../WorldMap/WorldMap";
 
-const AttackOrPassDiaLog = (props: AerialBattleDialogProps) => {
+const OutpostOrColonyDialog = (props: MyGameProps) => {
   const [x, y] = props.G.mapState.currentBattle;
-
-  const [open, setOpen] = useState(true);
 
   const inCurrentBattle =
     props.G.mapState.battleMap[y] &&
@@ -20,65 +12,35 @@ const AttackOrPassDiaLog = (props: AerialBattleDialogProps) => {
       props.playerID ?? props.ctx.currentPlayer
     );
 
+  const isOpen =
+    props.ctx.currentPlayer === props.playerID &&
+    props.ctx.phase === "conquest" &&
+    inCurrentBattle &&
+    props.G.conquestState === undefined &&
+    props.G.stage === "conquest";
+
   return (
-    <Dialog
-      maxWidth={"xl"}
-      open={
-        open &&
-        props.ctx.currentPlayer === props.playerID &&
-        props.ctx.phase === "conquest" &&
-        inCurrentBattle &&
-        props.G.conquestState === undefined &&
-        props.G.stage === "conquest"
+    <DialogShell
+      open={isOpen}
+      title="Choose your battle action"
+      subtitle={`Would you like to establish an outpost or battle with the local inhabitants to create a colony? If you lose and already have an outpost, it will be lost along with any garrisoned troops who cannot fit aboard your remaining skyships. Current map tile: [${1 + x}, ${4 - y}]`}
+      mood="discovery"
+      size="lg"
+      confirmLabel="Colony"
+      confirmColor="success"
+      onConfirm={() => props.moves.coloniseLand()}
+      cancelLabel="Pass"
+      cancelColor="error"
+      onCancel={() => props.moves.doNothing()}
+      extraActions={
+        <GameButton variant="primary" onClick={() => props.moves.constructOutpost()}>
+          Outpost
+        </GameButton>
       }
     >
-      <DialogTitle>Choose your battle action</DialogTitle>
-      <DialogContent>
-        {`Would you like to establish an outpost or battle with the local inhabitants in an attempt to create a colony? You must completely wipe out the locals to be successful. 
-If you lose and you already have an outpost in this region, it will be lost along with any garrisoned troops who cannot fit on board your remaining skyships.
-
-Current map tile: [${1 + x}, ${4 - y}]`}
-
-        <WorldMap
-          {...props}
-          selectableTiles={[props.G.mapState.currentBattle]}
-        ></WorldMap>
-      </DialogContent>
-      <DialogActions>
-        <Button
-          color="warning"
-          variant="contained"
-          onClick={() => {
-            props.moves.doNothing();
-            setOpen(false);
-          }}
-        >
-          Pass
-        </Button>
-        <Button
-          color="success"
-          variant="contained"
-          onClick={() => {
-            props.moves.constructOutpost();
-            setOpen(false);
-          }}
-        >
-          Outpost
-        </Button>
-        <Button
-          color="success"
-          variant="contained"
-          onClick={() => {
-            props.moves.coloniseLand();
-            setOpen(false);
-          }}
-        >
-          Colony
-        </Button>
-      </DialogActions>
-    </Dialog>
+      <WorldMap {...props} selectableTiles={[props.G.mapState.currentBattle]} />
+    </DialogShell>
   );
 };
 
-export interface AerialBattleDialogProps extends MyGameProps {}
-export default AttackOrPassDiaLog;
+export default OutpostOrColonyDialog;

@@ -1,13 +1,7 @@
 import { useState } from "react";
-import {
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Button,
-  Chip,
-} from "@mui/material";
+import { Chip } from "@mui/material";
 import { MyGameProps, KingdomAdvantageCard } from "@eots/game";
+import { DialogShell } from "@/components/atoms/DialogShell";
 
 const CARD_LABELS: Record<KingdomAdvantageCard, string> = {
   elite_regiments: "Elite Regiments",
@@ -21,50 +15,39 @@ const CARD_LABELS: Record<KingdomAdvantageCard, string> = {
 
 const PickKingdomAdvantageCardDialog = (props: MyGameProps) => {
   const [selectedCard, setSelectedCard] = useState<KingdomAdvantageCard | undefined>(undefined);
-  const [open, setOpen] = useState(true);
+
+  const isOpen =
+    props.ctx.phase === "kingdom_advantage" &&
+    props.ctx.currentPlayer === props.playerID;
 
   const availableCards = props.G.cardDecks.kingdomAdvantagePool;
 
   return (
-    <Dialog
-      maxWidth="sm"
-      fullWidth
-      open={
-        open &&
-        props.ctx.phase === "kingdom_advantage" &&
-        props.ctx.currentPlayer === props.playerID
-      }
+    <DialogShell
+      open={isOpen}
+      title="Pick a Kingdom Advantage Card"
+      subtitle="This card gives you a permanent rule advantage for the entire game."
+      mood="discovery"
+      size="sm"
+      confirmLabel="Choose Card"
+      confirmDisabled={!selectedCard}
+      onConfirm={() => {
+        props.moves.pickKingdomAdvantageCard(selectedCard);
+      }}
     >
-      <DialogTitle>Pick a Kingdom Advantage Card</DialogTitle>
-      <DialogContent>
-        This card gives you a permanent rule advantage for the entire game.
-        <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginTop: "16px" }}>
-          {availableCards.map((card) => (
-            <Chip
-              key={card}
-              label={CARD_LABELS[card]}
-              onClick={() => setSelectedCard(card)}
-              variant={selectedCard === card ? "filled" : "outlined"}
-              color={selectedCard === card ? "primary" : "default"}
-              style={{ cursor: "pointer", fontSize: "14px", padding: "4px" }}
-            />
-          ))}
-        </div>
-      </DialogContent>
-      <DialogActions>
-        <Button
-          variant="contained"
-          color="primary"
-          disabled={!selectedCard}
-          onClick={() => {
-            props.moves.pickKingdomAdvantageCard(selectedCard);
-            setOpen(false);
-          }}
-        >
-          Choose Card
-        </Button>
-      </DialogActions>
-    </Dialog>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginTop: "8px" }}>
+        {availableCards.map((card) => (
+          <Chip
+            key={card}
+            label={CARD_LABELS[card]}
+            onClick={() => setSelectedCard(card)}
+            variant={selectedCard === card ? "filled" : "outlined"}
+            color={selectedCard === card ? "primary" : "default"}
+            style={{ cursor: "pointer", fontSize: "14px", padding: "4px" }}
+          />
+        ))}
+      </div>
+    </DialogShell>
   );
 };
 
