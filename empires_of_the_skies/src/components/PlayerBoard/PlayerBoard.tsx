@@ -14,17 +14,6 @@ import { PlayerBoardCompact } from "./PlayerBoardCompact";
 import { getMood, getMoodTokens } from "@/theme";
 import { tokens } from "@/theme";
 
-// Player board is now always visible — no hidden phases.
-
-// Phases where FoW cards should be shown expanded (battle decisions)
-const FOW_EXPANDED_PHASES = new Set([
-  "aerial_battle",
-  "ground_battle",
-  "plunder_legends",
-  "conquest",
-  "resolution",
-]);
-
 // Phases with pulsing border animation (battle + crisis moods)
 const PULSING_MOODS = new Set(["battle", "crisis"]);
 
@@ -47,7 +36,6 @@ export const PlayerBoard = (props: PlayerBoardProps) => {
     ) : (
       <PlayerBoardCompact
         {...props}
-        showFoWCards={FOW_EXPANDED_PHASES.has(phase)}
         showHeresy={phase === "election"}
       />
     );

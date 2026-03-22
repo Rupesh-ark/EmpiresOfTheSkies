@@ -15,6 +15,8 @@ import { ExpandMore, ExpandLess } from "@mui/icons-material";
 import { MyGameProps, PlayerInfo, colourToKingdomMap } from "@eots/game";
 import { tokens, IconCounsellor, IconGold, IconVP, IconRegiment, IconElite, IconLevy, IconSkyship, IconFoWCard } from "@/theme";
 import { ResourceChip } from "@/components/atoms/ResourceChip";
+import popeLogo from "@/boards_and_assets/action_board/pope_logo.png";
+import captainGeneralLogo from "@/boards_and_assets/action_board/captain_general.png";
 
 // ── Shared card wrapper ─────────────────────────────────────────────────
 
@@ -152,6 +154,38 @@ const OpponentSummary = ({ props }: { props: MyGameProps }) => {
                     </Box>
                   )}
                 </Typography>
+                {(player.isArchprelate || player.isCaptainGeneral) && (
+                  <Box sx={{ display: "flex", alignItems: "center", gap: "3px", ml: "auto" }}>
+                    {player.isArchprelate && (
+                      <Box
+                        component="img"
+                        src={popeLogo}
+                        alt="Archprelate"
+                        sx={{
+                          width: 36,
+                          height: 36,
+                          objectFit: "contain",
+                          filter: "sepia(0.6) saturate(1.5) hue-rotate(260deg) brightness(0.9)",
+                          opacity: 0.75,
+                        }}
+                      />
+                    )}
+                    {player.isCaptainGeneral && (
+                      <Box
+                        component="img"
+                        src={captainGeneralLogo}
+                        alt="Captain-General"
+                        sx={{
+                          width: 36,
+                          height: 36,
+                          objectFit: "contain",
+                          filter: "sepia(0.6) saturate(1.5) hue-rotate(90deg) brightness(0.9)",
+                          opacity: 0.75,
+                        }}
+                      />
+                    )}
+                  </Box>
+                )}
               </Box>
               <Box sx={{ display: "flex", alignItems: "center", gap: "3px" }}>
                 <IconVP style={{ fontSize: 16, color: tokens.ui.gold }} />

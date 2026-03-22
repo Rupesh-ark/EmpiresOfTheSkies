@@ -173,6 +173,7 @@ export function buildInitialG(
       deck: [],
       lateDeck: [],
       chosenCards: [],
+      eventContributions: {},
       resolvedEvent: null,
       deferredEvents: [],
       pendingChoice: null,

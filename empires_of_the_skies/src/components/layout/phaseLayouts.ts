@@ -50,7 +50,7 @@ const SIDEBAR_LAYOUT: PhaseLayoutConfig = {
   left: ["player-board"],
   right: [],
   bottom: "empty",
-  tabExtras: ["action-board", ...COMMON_TABS],
+  tabExtras: COMMON_TABS,
   bottomHeight: "0px",
   leftWidth: NARROW_LEFT,
 };
@@ -78,7 +78,7 @@ const ELECTION_LAYOUT: PhaseLayoutConfig = {
   left: ["player-board"],
   right: ["stats"],
   bottom: "empty",
-  tabExtras: ["action-board", ...COMMON_TABS],
+  tabExtras: COMMON_TABS,
   bottomHeight: "0px",
   leftWidth: "clamp(240px, 20vw, 320px)",
 };

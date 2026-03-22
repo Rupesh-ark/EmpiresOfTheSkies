@@ -7,7 +7,8 @@
  *
  * Read-only. No interactions.
  */
-import { Box, Typography } from "@mui/material";
+import { useState } from "react";
+import { Box, Dialog, Typography } from "@mui/material";
 import { IconCounsellor, IconGold, IconVP, IconRegiment, IconElite, IconLevy, IconSkyship } from "@/theme";
 import { tokens } from "@/theme";
 import { MyGameProps } from "@eots/game";
@@ -21,12 +22,17 @@ import {
   NO_EFFECT_CARD,
   FOW_CARD_BACK,
 } from "@/assets/fortuneOfWarCards";
+import { LEGACY_CARD_IMAGES } from "@/assets/legacyCards";
+import { KA_CARD_IMAGES } from "@/assets/kingdomAdvantage";
 import type { PlayerFortuneOfWarCardInfo } from "@eots/game";
+import { LEGACY_CARD_DEFS, KA_CARD_DEFS, EVENT_CARD_DEFS } from "@eots/game";
+import { EVENT_ICONS } from "@/components/Events/eventCardIcons";
 import { Holdings } from "./Holdings";
+import popeLogo from "@/boards_and_assets/action_board/pope_logo.png";
+import captainGeneralLogo from "@/boards_and_assets/action_board/captain_general.png";
 
 interface PlayerBoardCompactProps extends MyGameProps {
   onOpenFleetLocation?: (location: number[]) => void;
-  showFoWCards?: boolean;
   showHeresy?: boolean;
 }
 
@@ -83,7 +89,11 @@ const CompactSectionHeader = ({ label }: { label: string }) => (
 
 // ── Main component ──────────────────────────────────────────────────────
 
+type CardTab = "fow" | "legacy" | "ka" | "events";
+
 export const PlayerBoardCompact = (props: PlayerBoardCompactProps) => {
+  const [openCardTab, setOpenCardTab] = useState<CardTab | null>(null);
+  const [enlargedCard, setEnlargedCard] = useState<{ src: string; title: string; description?: string } | null>(null);
   const playerInfo = props.G.playerInfo[props.playerID ?? props.ctx.currentPlayer];
   const colour = playerInfo.colour;
   const { regiments, eliteRegiments, levies, skyships, fortuneCards } = playerInfo.resources;
@@ -132,6 +142,38 @@ export const PlayerBoardCompact = (props: PlayerBoardCompactProps) => {
           >
             {playerInfo.kingdomName}
           </Typography>
+          {(playerInfo.isArchprelate || playerInfo.isCaptainGeneral) && (
+            <Box sx={{ display: "flex", alignItems: "center", gap: "4px", ml: "auto" }}>
+              {playerInfo.isArchprelate && (
+                <Box
+                  component="img"
+                  src={popeLogo}
+                  alt="Archprelate"
+                  sx={{
+                    width: 48,
+                    height: 48,
+                    objectFit: "contain",
+                    filter: "sepia(0.6) saturate(1.5) hue-rotate(260deg) brightness(0.9)",
+                    opacity: 0.75,
+                  }}
+                />
+              )}
+              {playerInfo.isCaptainGeneral && (
+                <Box
+                  component="img"
+                  src={captainGeneralLogo}
+                  alt="Captain-General"
+                  sx={{
+                    width: 48,
+                    height: 48,
+                    objectFit: "contain",
+                    filter: "sepia(0.6) saturate(1.5) hue-rotate(90deg) brightness(0.9)",
+                    opacity: 0.75,
+                  }}
+                />
+              )}
+            </Box>
+          )}
         </Box>
         {(playerInfo.isArchprelate || playerInfo.isCaptainGeneral) && (
           <Typography
@@ -336,65 +378,322 @@ export const PlayerBoardCompact = (props: PlayerBoardCompactProps) => {
       {/* ── Cards ────────────────────────────────────────────────── */}
       <GamePanel variant="default" padding="sm">
         <CompactSectionHeader label="Cards" />
-        {props.showFoWCards ? (
-          <Box>
+
+        {/* Tab buttons */}
+        <Box sx={{ display: "flex", gap: "2px", mb: openCardTab ? `${tokens.spacing.xs}px` : 0 }}>
+          {([
+            { key: "fow" as CardTab, label: "FoW", count: fortuneCards.length },
+            { key: "legacy" as CardTab, label: "Legacy", count: playerInfo.resources.legacyCard ? 1 : 0 },
+            { key: "ka" as CardTab, label: "KA", count: playerInfo.resources.advantageCard ? 1 : 0 },
+            { key: "events" as CardTab, label: "Events", count: playerInfo.resources.eventCards.length },
+          ]).map(({ key, label, count }) => (
             <Box
+              key={key}
+              onClick={() => count > 0 && setOpenCardTab(prev => prev === key ? null : key)}
               sx={{
-                display: "flex",
-                gap: `${tokens.spacing.xs}px`,
-                flexWrap: "wrap",
+                flex: 1,
+                textAlign: "center",
+                py: `${tokens.spacing.xs}px`,
+                cursor: count > 0 ? "pointer" : "default",
+                borderRadius: `${tokens.radius.sm}px`,
+                backgroundColor: openCardTab === key ? tokens.ui.surfaceHover : "transparent",
+                border: `1px solid ${openCardTab === key ? tokens.ui.borderMedium : tokens.ui.border}`,
+                opacity: count === 0 ? 0.4 : 1,
+                transition: `all ${tokens.transition.fast}`,
+                "&:hover": count > 0 ? { backgroundColor: tokens.ui.surfaceHover } : {},
               }}
             >
-              {fortuneCards.map((card, i) => (
+              <Typography sx={{ fontFamily: tokens.font.body, fontSize: tokens.fontSize.xs, color: openCardTab === key ? tokens.ui.gold : tokens.ui.textMuted, fontWeight: 600, lineHeight: 1 }}>
+                {label} ({count})
+              </Typography>
+            </Box>
+          ))}
+        </Box>
+
+        {/* FoW drawer */}
+        {openCardTab === "fow" && (
+          <Box sx={{ display: "flex", gap: `${tokens.spacing.xs}px`, flexWrap: "wrap", justifyContent: "center" }}>
+            {fortuneCards.map((card, i) => {
+              const img = getFoWCardImage(card);
+              return (
                 <CardFrame
                   key={i}
-                  title={!card.flipped ? undefined : card.name}
-                  description={
-                    !card.flipped ? undefined : `⚔ ${card.sword}  🛡 ${card.shield}`
-                  }
-                  imageUrl={getFoWCardImage(card)}
+                  title={card.flipped ? card.name : undefined}
+                  description={card.flipped ? `⚔ ${card.sword}  🛡 ${card.shield}` : undefined}
+                  imageUrl={img}
                   faceDown={!card.flipped}
                   cardBackUrl={FOW_CARD_BACK}
                   width={70}
                   height={120}
+                  onClick={card.flipped ? () => setEnlargedCard({ src: img, title: card.name }) : undefined}
                 />
-              ))}
-              {fortuneCards.length === 0 && (
+              );
+            })}
+            {fortuneCards.length === 0 && (
+              <Typography sx={{ fontFamily: tokens.font.body, fontSize: tokens.fontSize.xs, color: tokens.ui.textMuted, fontStyle: "italic" }}>
+                No FoW cards
+              </Typography>
+            )}
+          </Box>
+        )}
+
+        {/* Legacy drawer */}
+        {openCardTab === "legacy" && (
+          <>
+            {playerInfo.resources.legacyCard ? (() => {
+              const name = playerInfo.resources.legacyCard!.name;
+              const img = LEGACY_CARD_IMAGES[name.toLowerCase()];
+              const def = LEGACY_CARD_DEFS[name.toLowerCase() as keyof typeof LEGACY_CARD_DEFS];
+              return (
+                <Box
+                  onClick={() => setEnlargedCard({ src: img, title: name, description: def?.description })}
+                  sx={{
+                    position: "relative",
+                    borderRadius: `${tokens.radius.md}px`,
+                    overflow: "hidden",
+                    cursor: "pointer",
+                    transition: `all ${tokens.transition.fast}`,
+                    boxShadow: `0 2px 8px rgba(0,0,0,0.15)`,
+                    "&:hover": { boxShadow: `0 4px 16px rgba(0,0,0,0.25)`, transform: "scale(1.01)" },
+                  }}
+                >
+                  <Box component="img" src={img} alt={name} sx={{ width: "100%", height: 120, objectFit: "cover", display: "block" }} />
+                  <Box sx={{ position: "absolute", bottom: 0, left: 0, right: 0, background: "linear-gradient(to top, rgba(15,10,5,0.88) 0%, rgba(15,10,5,0.6) 60%, transparent 100%)", px: 1.5, pt: 3, pb: 1 }}>
+                    <Typography sx={{ fontFamily: tokens.font.display, fontSize: tokens.fontSize.sm, color: tokens.ui.gold, lineHeight: 1.2, textTransform: "capitalize" }}>
+                      {name}
+                    </Typography>
+                    {def && (
+                      <Typography sx={{ fontFamily: tokens.font.body, fontSize: 9, color: "rgba(235,225,210,0.85)", lineHeight: 1.3, mt: "1px" }}>
+                        {def.description}
+                      </Typography>
+                    )}
+                  </Box>
+                </Box>
+              );
+            })() : (
+              <Typography sx={{ fontFamily: tokens.font.body, fontSize: tokens.fontSize.xs, color: tokens.ui.textMuted, fontStyle: "italic" }}>
+                No Legacy Card
+              </Typography>
+            )}
+          </>
+        )}
+
+        {/* KA drawer */}
+        {openCardTab === "ka" && (
+          <>
+            {playerInfo.resources.advantageCard ? (() => {
+              const key = playerInfo.resources.advantageCard!;
+              const img = KA_CARD_IMAGES[key];
+              const def = KA_CARD_DEFS[key as keyof typeof KA_CARD_DEFS];
+              const title = def?.displayName ?? key.replace(/_/g, " ");
+              return (
+                <Box
+                  onClick={() => setEnlargedCard({ src: img, title, description: def?.description })}
+                  sx={{
+                    position: "relative",
+                    borderRadius: `${tokens.radius.md}px`,
+                    overflow: "hidden",
+                    cursor: "pointer",
+                    transition: `all ${tokens.transition.fast}`,
+                    boxShadow: `0 2px 8px rgba(0,0,0,0.15)`,
+                    "&:hover": { boxShadow: `0 4px 16px rgba(0,0,0,0.25)`, transform: "scale(1.01)" },
+                  }}
+                >
+                  <Box component="img" src={img} alt={title} sx={{ width: "100%", height: 120, objectFit: "cover", display: "block" }} />
+                  <Box sx={{ position: "absolute", bottom: 0, left: 0, right: 0, background: "linear-gradient(to top, rgba(15,10,5,0.88) 0%, rgba(15,10,5,0.6) 60%, transparent 100%)", px: 1.5, pt: 3, pb: 1 }}>
+                    <Typography sx={{ fontFamily: tokens.font.display, fontSize: tokens.fontSize.sm, color: tokens.ui.gold, lineHeight: 1.2, textTransform: "capitalize" }}>
+                      {title}
+                    </Typography>
+                    {def && (
+                      <Typography sx={{ fontFamily: tokens.font.body, fontSize: 9, color: "rgba(235,225,210,0.85)", lineHeight: 1.3, mt: "1px" }}>
+                        {def.description}
+                      </Typography>
+                    )}
+                  </Box>
+                </Box>
+              );
+            })() : (
+              <Typography sx={{ fontFamily: tokens.font.body, fontSize: tokens.fontSize.xs, color: tokens.ui.textMuted, fontStyle: "italic" }}>
+                No Advantage Card
+              </Typography>
+            )}
+          </>
+        )}
+
+        {/* Events drawer */}
+        {openCardTab === "events" && (() => {
+          const contributions = props.G.eventState.eventContributions;
+          const resolved = props.G.eventState.resolvedEvent;
+          const hasContributions = Object.keys(contributions).length > 0;
+
+          return (
+            <Box sx={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+              {/* Resolved event */}
+              {resolved && (() => {
+                const def = EVENT_CARD_DEFS[resolved];
+                const Icon = EVENT_ICONS[resolved];
+                return (
+                  <Box sx={{ display: "flex", alignItems: "center", gap: `${tokens.spacing.xs}px`, px: `${tokens.spacing.xs}px`, py: `${tokens.spacing.xs + 1}px`, borderRadius: `${tokens.radius.sm}px`, border: `1px solid ${tokens.ui.gold}55`, background: `linear-gradient(135deg, ${tokens.ui.gold}12 0%, transparent 100%)` }}>
+                    <Box sx={{ width: 28, height: 28, borderRadius: `${tokens.radius.sm}px`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, background: `radial-gradient(circle, ${tokens.ui.gold}25 0%, transparent 70%)` }}>
+                      {Icon && <Icon size={16} color={tokens.ui.gold} style={{ opacity: 0.9 }} />}
+                    </Box>
+                    <Box sx={{ flex: 1, minWidth: 0 }}>
+                      <Typography sx={{ fontFamily: tokens.font.body, fontSize: 8, color: tokens.ui.gold, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", lineHeight: 1 }}>
+                        Resolved
+                      </Typography>
+                      <Typography sx={{ fontFamily: tokens.font.display, fontSize: tokens.fontSize.xs, color: tokens.ui.gold, lineHeight: 1.2 }}>
+                        {def.displayName}
+                      </Typography>
+                    </Box>
+                  </Box>
+                );
+              })()}
+
+              {/* Who chose what */}
+              {hasContributions && (
+                <>
+                  <Typography sx={{ fontFamily: tokens.font.body, fontSize: 8, color: tokens.ui.textMuted, textTransform: "uppercase", letterSpacing: "0.08em", mt: "2px" }}>
+                    Chosen Cards
+                  </Typography>
+                  {Object.entries(contributions).map(([pid, card]) => {
+                    const def = EVENT_CARD_DEFS[card];
+                    const Icon = EVENT_ICONS[card];
+                    const player = props.G.playerInfo[pid];
+                    const isResolved = card === resolved;
+                    return (
+                      <Box
+                        key={pid}
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: `${tokens.spacing.xs}px`,
+                          px: `${tokens.spacing.xs}px`,
+                          py: "3px",
+                          borderRadius: `${tokens.radius.sm}px`,
+                          border: `1px solid ${isResolved ? `${tokens.ui.gold}44` : tokens.ui.border}`,
+                          backgroundColor: isResolved ? `${tokens.ui.gold}08` : tokens.ui.surface,
+                        }}
+                      >
+                        <Box sx={{ width: 8, height: 8, borderRadius: "50%", backgroundColor: player?.colour, flexShrink: 0, boxShadow: `0 0 4px ${player?.colour}66` }} />
+                        <Box sx={{ width: 22, height: 22, borderRadius: `${tokens.radius.sm}px`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                          {Icon && <Icon size={13} color={def.isBattle ? tokens.ui.danger : tokens.ui.gold} style={{ opacity: 0.7 }} />}
+                        </Box>
+                        <Typography sx={{ fontFamily: tokens.font.body, fontSize: 10, color: tokens.ui.text, lineHeight: 1.2, flex: 1 }}>
+                          {def.displayName}
+                        </Typography>
+                        {isResolved && (
+                          <Typography sx={{ fontFamily: tokens.font.body, fontSize: 7, fontWeight: 700, color: tokens.ui.gold, textTransform: "uppercase", flexShrink: 0 }}>
+                            ★
+                          </Typography>
+                        )}
+                      </Box>
+                    );
+                  })}
+                </>
+              )}
+
+              {/* Hand */}
+              {playerInfo.resources.eventCards.length > 0 && (
+                <>
+                  <Typography sx={{ fontFamily: tokens.font.body, fontSize: 8, color: tokens.ui.textMuted, textTransform: "uppercase", letterSpacing: "0.08em", mt: "2px" }}>
+                    Your Hand
+                  </Typography>
+                  {playerInfo.resources.eventCards.map((card, i) => {
+                    const def = EVENT_CARD_DEFS[card];
+                    const Icon = EVENT_ICONS[card];
+                    return (
+                      <Box key={`${card}-${i}`} sx={{ display: "flex", alignItems: "center", gap: `${tokens.spacing.xs}px`, px: `${tokens.spacing.xs}px`, py: "3px", borderRadius: `${tokens.radius.sm}px`, border: `1px solid ${tokens.ui.border}`, backgroundColor: tokens.ui.surface }}>
+                        <Box sx={{ width: 22, height: 22, borderRadius: `${tokens.radius.sm}px`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                          {Icon && <Icon size={13} color={def.isBattle ? tokens.ui.danger : tokens.ui.gold} style={{ opacity: 0.7 }} />}
+                        </Box>
+                        <Typography sx={{ fontFamily: tokens.font.body, fontSize: 10, color: tokens.ui.textMuted, lineHeight: 1.2 }}>
+                          {def.displayName}
+                        </Typography>
+                      </Box>
+                    );
+                  })}
+                </>
+              )}
+            </Box>
+          );
+        })()}
+      </GamePanel>
+
+      {/* ── Card Lightbox ──────────────────────────────────────── */}
+      <Dialog
+        open={!!enlargedCard}
+        onClose={() => setEnlargedCard(null)}
+        PaperProps={{
+          sx: {
+            backgroundColor: "transparent",
+            boxShadow: "none",
+            overflow: "visible",
+            maxWidth: "min(85vw, 520px)",
+          },
+        }}
+        slotProps={{ backdrop: { sx: { backgroundColor: "rgba(0,0,0,0.75)", backdropFilter: "blur(6px)" } } }}
+        onClick={() => setEnlargedCard(null)}
+      >
+        {enlargedCard && (
+          <Box
+            sx={{
+              position: "relative",
+              borderRadius: `${tokens.radius.md}px`,
+              overflow: "hidden",
+              boxShadow: "0 12px 48px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.08)",
+            }}
+          >
+            <Box
+              component="img"
+              src={enlargedCard.src}
+              alt={enlargedCard.title}
+              sx={{
+                width: "100%",
+                display: "block",
+              }}
+            />
+            <Box
+              sx={{
+                position: "absolute",
+                bottom: 0,
+                left: 0,
+                right: 0,
+                background: "linear-gradient(to top, rgba(15,10,5,0.92) 0%, rgba(15,10,5,0.7) 60%, transparent 100%)",
+                px: 3,
+                pt: 5,
+                pb: 2.5,
+              }}
+            >
+              <Typography
+                sx={{
+                  fontFamily: tokens.font.display,
+                  fontSize: tokens.fontSize.lg,
+                  color: tokens.ui.gold,
+                  textAlign: "center",
+                  textTransform: "capitalize",
+                  lineHeight: 1.2,
+                  mb: 0.5,
+                }}
+              >
+                {enlargedCard.title}
+              </Typography>
+              {enlargedCard.description && (
                 <Typography
                   sx={{
                     fontFamily: tokens.font.body,
-                    fontSize: tokens.fontSize.xs,
-                    color: tokens.ui.textMuted,
-                    fontStyle: "italic",
+                    fontSize: tokens.fontSize.sm,
+                    color: "rgba(235,225,210,0.9)",
+                    textAlign: "center",
+                    lineHeight: 1.5,
                   }}
                 >
-                  No FoW cards
+                  {enlargedCard.description}
                 </Typography>
               )}
             </Box>
-            <Typography
-              sx={{
-                fontFamily: tokens.font.body,
-                fontSize: tokens.fontSize.xs,
-                color: tokens.ui.textMuted,
-                mt: `${tokens.spacing.xs}px`,
-              }}
-            >
-              Legacy: {playerInfo.resources.legacyCard ? 1 : 0} · KA: {playerInfo.resources.advantageCard ? 1 : 0}
-            </Typography>
           </Box>
-        ) : (
-          <Typography
-            sx={{
-              fontFamily: tokens.font.body,
-              fontSize: tokens.fontSize.xs,
-              color: tokens.ui.textMuted,
-            }}
-          >
-            {fortuneCards.length} FoW · {playerInfo.resources.legacyCard ? 1 : 0} Legacy · {playerInfo.resources.advantageCard ? 1 : 0} KA
-          </Typography>
         )}
-      </GamePanel>
+      </Dialog>
 
       {/* ── Holdings (fills remaining space) ─────────────────────── */}
       <Holdings {...props} variant="compact" />
