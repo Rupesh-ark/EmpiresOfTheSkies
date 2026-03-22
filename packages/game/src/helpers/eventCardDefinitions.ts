@@ -919,9 +919,10 @@ export const resolveEventCard = (
       break;
     }
 
-    // ── Archprelate Dies — immediate election without bribes ─────────────
+    // ── Archprelate Dies — deferred to interactive election within events phase
     case "archprelate_dies":
-      resolveImmediateElection(G, turnOrder);
+      G.eventState.immediateElectionPending = true;
+      logEvent(G, "Archprelate Dies: an emergency election will now be held");
       break;
 
     // ── Dynastic Marriage — auto-pick: fewest + second-fewest VP ─────────

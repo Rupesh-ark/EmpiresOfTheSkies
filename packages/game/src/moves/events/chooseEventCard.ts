@@ -99,6 +99,13 @@ const chooseEventCard: MoveDefinition = {
       if (G.eventState.pendingChoice) {
         // Transfer turn to the player who needs to make a choice
         events.endTurn({ next: G.eventState.pendingChoice.targetPlayerID });
+      } else if (G.eventState.immediateElectionPending) {
+        // Archprelate Dies — enter interactive election within events phase
+        G.stage = "immediate_election";
+        G.electionResults = {};
+        G.hasVoted = [];
+        G.voteSubmitted = {};
+        events.endTurn({ next: ctx.playOrder[0] });
       } else {
         events.endPhase();
       }

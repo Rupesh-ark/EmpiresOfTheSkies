@@ -304,7 +304,7 @@ export function seedLegacyDeal(
 
 // ── Event Deck Epoch Split ─────────────────────────────────────────────────────
 
-/** Events that are always void at game start (no colonies, outposts, heretics, etc.) */
+/** Events deferred to late deck (void at game start, or unfair tie-targeting in round 1) */
 const LATE_GAME_EVENTS: ReadonlySet<EventCardName> = new Set<EventCardName>([
   "allies_in_faerie" as EventCardName,
   "colonial_prelates" as EventCardName,
@@ -315,7 +315,10 @@ const LATE_GAME_EVENTS: ReadonlySet<EventCardName> = new Set<EventCardName>([
   "monsters_awake" as EventCardName,
   "mysterious_disappearances" as EventCardName,
   "orthodox_rebellion" as EventCardName,
+  "peasant_rebellion" as EventCardName,
+  "pretender_rebellion" as EventCardName,
   "return_to_orthodoxy" as EventCardName,
+  "royal_succession" as EventCardName,
   "schism" as EventCardName,
   "the_faerie_plague" as EventCardName,
   "treacherous_creatures" as EventCardName,

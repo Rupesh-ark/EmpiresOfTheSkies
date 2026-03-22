@@ -6,14 +6,23 @@ import { ButtonRow } from "../ActionBoard/components/ActionBoardButtonRow";
 import { DialogShell } from "@/components/atoms/DialogShell";
 import { GameButton } from "@/components/atoms/GameButton";
 
-const ElectionDialog = (props: MyGameProps) => {
-  const [currentVote, setCurrentVote] = useState<string | null>(null);
+interface ElectionDialogProps extends MyGameProps {
+  immediate?: boolean;
+}
 
-  const isVoting =
-    props.ctx.phase === "election" &&
-    props.playerID != null &&
-    props.ctx.activePlayers?.[props.playerID] === "voting" &&
-    !props.G.hasVoted.includes(props.playerID);
+const ElectionDialog = (props: ElectionDialogProps) => {
+  const [currentVote, setCurrentVote] = useState<string | null>(null);
+  const { immediate = false } = props;
+
+  const isVoting = immediate
+    ? props.G.stage === "immediate_election" &&
+      props.playerID != null &&
+      props.ctx.currentPlayer === props.playerID &&
+      !props.G.hasVoted.includes(props.playerID)
+    : props.ctx.phase === "election" &&
+      props.playerID != null &&
+      props.ctx.activePlayers?.[props.playerID] === "voting" &&
+      !props.G.hasVoted.includes(props.playerID);
 
   const buttons = props.ctx.playOrder.map((id) => {
     const kingdom = props.G.playerInfo[id];
@@ -37,7 +46,8 @@ const ElectionDialog = (props: MyGameProps) => {
   return (
     <DialogShell
       open={!!isVoting}
-      title="Archprelate Election"
+      title={immediate ? "Emergency Archprelate Election" : "Archprelate Election"}
+      subtitle={immediate ? "The Archprelate has died. An emergency election is held immediately — no bribes." : undefined}
       mood="election"
       size="sm"
       hideActions
@@ -56,7 +66,13 @@ const ElectionDialog = (props: MyGameProps) => {
         <GameButton
           variant="primary"
           disabled={currentVote === null}
-          onClick={() => props.moves.vote(currentVote)}
+          onClick={() => {
+            if (immediate) {
+              props.moves.immediateElectionVote(currentVote);
+            } else {
+              props.moves.vote(currentVote);
+            }
+          }}
         >
           Confirm Vote
         </GameButton>

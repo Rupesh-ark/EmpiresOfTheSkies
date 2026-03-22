@@ -79,6 +79,7 @@ import pickLegacyCard from "./moves/pickLegacyCard";
 import pickKingdomAdvantageCard from "./moves/kingdomAdvantage/pickKingdomAdvantageCard";
 import chooseEventCard from "./moves/events/chooseEventCard";
 import resolveEventChoice from "./moves/events/resolveEventChoice";
+import immediateElectionVote from "./moves/events/immediateElectionVote";
 import { ALL_EVENT_CARD_NAMES } from "./helpers/eventCardDefinitions";
 import { prepareInfidelFleetCombat } from "./helpers/resolveInfidelFleet";
 import { continueResolution } from "./helpers/resolutionFlow";
@@ -201,6 +202,7 @@ const MyGame: Game<MyGameState> = {
         grandInfidelDies: false,
         royalPatronageActive: false,
         raceToDiscoveryCounters: null,
+        immediateElectionPending: false,
       },
     };
   },
@@ -325,6 +327,7 @@ const MyGame: Game<MyGameState> = {
       moves: {
         chooseEventCard: wrapMove("chooseEventCard", chooseEventCard),
         resolveEventChoice: wrapMove("resolveEventChoice", resolveEventChoice),
+        immediateElectionVote: wrapMove("immediateElectionVote", immediateElectionVote),
       },
       next: "discovery",
     },

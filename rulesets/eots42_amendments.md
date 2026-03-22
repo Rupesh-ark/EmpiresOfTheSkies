@@ -78,7 +78,7 @@ Replace the paragraph beginning "Shuffle the (remaining) Event cards and deal th
 
 **AMENDMENT — Epoch-Based Event Deck:** At setup, separate all Event cards into two sub-decks: the **Early deck** and the **Late deck**. The Early deck contains only cards that are viable at game start (no preconditions depending on colonies, outposts, discovered lands, heretic players, or fleets on the map). The Late deck contains all conditionally-void cards.
 
-**Early Deck (22 cards):**
+**Early Deck (19 cards):**
 
 | Card | Qty |
 |---|---|
@@ -96,14 +96,12 @@ Replace the paragraph beginning "Shuffle the (remaining) Event cards and deal th
 | Zeeland Turns Heretic | 1 |
 | Infidel Corsairs Raid | 2 |
 | Heretic Rebellion | 1 |
-| Peasant Rebellion | 1 |
-| Pretender Rebellion | 1 |
 | Royal Patronage *(new)* | 1 |
 | Race to Discovery *(new)* | 1 |
 | Foreign Agitators *(new)* | 1 |
-| **Total** | **22** |
+| **Total** | **19** |
 
-**Late Deck (19 cards):**
+**Late Deck (22 cards):**
 
 | Card | Qty |
 |---|---|
@@ -117,15 +115,17 @@ Replace the paragraph beginning "Shuffle the (remaining) Event cards and deal th
 | Mysterious Disappearances | 1 |
 | Treacherous Creatures | 1 |
 | Orthodox Rebellion | 1 |
+| Peasant Rebellion | 1 |
+| Pretender Rebellion | 1 |
 | Return to Orthodoxy | 1 |
+| Royal Succession | 1 |
 | Schism | 1 |
 | The Faerie Plague | 1 |
 | Lenders Refuse Credit | 1 |
 | Dynastic Marriage | 1 |
-| Royal Succession | 1 |
 | Guild Revolt *(new)* | 1 |
 | Corruption Scandal *(new)* | 1 |
-| **Total** | **19** |
+| **Total** | **22** |
 
 Shuffle each deck independently. Deal starting hands of 3 from the **Early deck only**. During Rounds 1 and 2, replenish hands by drawing from the Early deck. If the Early deck is exhausted, shuffle the Early discard pile to form a new Early deck.
 
@@ -227,8 +227,8 @@ The Archprelate player must pay **2 Gold** to the bank to issue an Inquisition d
 | Deck | Original | Added | New Total |
 |---|---|---|---|
 | Full Event Deck | 36 | 5 | 41 |
-| Early Deck (rounds 1–2) | 19 | 3 | 22 |
-| Late Deck (round 3+ merge) | 17 | 2 | 19 |
+| Early Deck (rounds 1–2) | 16 | 3 | 19 |
+| Late Deck (round 3+ merge) | 20 | 2 | 22 |
 
 ---
 

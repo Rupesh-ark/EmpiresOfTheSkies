@@ -19,6 +19,7 @@ ctx.phase             Valid G.stage values              Set where
 kingdom_advantage     "discovery" | "reset"             NOT SET — inherits from setup or reset
 legacy_card           "pick legacy card"                Game.ts onBegin
 events                "events"                          Game.ts onBegin
+                      "immediate_election"              chooseEventCard.ts (archprelate_dies)
 discovery             "discovery"                       Game.ts onBegin
 taxes                 "taxes"                           Game.ts onBegin
 actions               "actions"                         Game.ts onBegin
