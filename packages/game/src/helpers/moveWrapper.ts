@@ -17,7 +17,7 @@ const stageLog = createLogger("stage-desync");
 const VALID_STAGES: Record<string, Set<string>> = {
   kingdom_advantage: new Set(["discovery", "reset"]),         // onBegin doesn't set G.stage; inherits from setup or reset
   legacy_card:       new Set(["pick legacy card"]),
-  events:            new Set(["events"]),
+  events:            new Set(["events", "immediate_election"]),
   discovery:         new Set(["discovery"]),
   taxes:             new Set(["taxes"]),
   actions:           new Set(["actions", "confirm_fow_draw", "discard_fow", "attack or pass"]),

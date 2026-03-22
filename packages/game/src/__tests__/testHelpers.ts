@@ -192,6 +192,7 @@ export function buildInitialG(
       grandInfidelDies: false,
       royalPatronageActive: false,
       raceToDiscoveryCounters: null,
+      immediateElectionPending: false,
     },
     ...overrides,
   };

@@ -127,6 +127,8 @@ export const DialogRouter = (props: MyGameProps) => {
 
       {props.ctx.phase === "election" && <ElectionDialog {...props} />}
 
+      {props.G.stage === "immediate_election" && <ElectionDialog {...props} immediate />}
+
       {props.G.stage === "confirm_fow_draw" && <ConfirmDrawDialog {...props} />}
 
       {props.G.stage === "discard_fow" && <DiscardFoWCardDialog {...props} />}

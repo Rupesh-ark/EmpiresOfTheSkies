@@ -60,6 +60,7 @@ export interface MyGameState {
     | "events"
     | "discard_fow"
     | "confirm_fow_draw"
+    | "immediate_election"
     | "reset";
   electionResults: Record<string, number>;
   hasVoted: string[];
@@ -363,6 +364,8 @@ export type EventState = {
   royalPatronageActive: boolean;
   /** Race to Discovery: per-player tile discovery count (keys = playerIDs) */
   raceToDiscoveryCounters: Record<string, number> | null;
+  /** Archprelate Dies: deferred interactive election within events phase */
+  immediateElectionPending: boolean;
 };
 
 export type LegacyCardName =
