@@ -1,5 +1,4 @@
 import { Tooltip } from "@mui/material";
-import React from "react";
 
 const OutpostIcon = (props: OutpostIconProps) => {
   return (

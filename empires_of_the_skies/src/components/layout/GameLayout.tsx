@@ -1,13 +1,12 @@
-import { ReactNode, useEffect, useRef, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import React from "react";
 import { Box, Collapse, IconButton, Tooltip } from "@mui/material";
 import { CloseFullscreen, OpenInFull } from "@mui/icons-material";
 import { tokens, backgrounds } from "@/theme";
 import { getMood } from "@/theme";
 import { PanelSlot, getPhaseLayout, MapSize } from "./phaseLayouts";
-import { useActionHover } from "@/components/ActionBoard/ActionHoverContext";
 import {
-  GiInfo, GiScrollUnfurled, GiBarracks, GiSwapBag, GiConversation,
+  GiScrollUnfurled, GiBarracks, GiSwapBag, GiConversation,
 } from "react-icons/gi";
 import { MdQueryStats } from "react-icons/md";
 
@@ -34,6 +33,8 @@ interface GameLayoutProps {
   renderSlot: (slot: PanelSlot) => ReactNode;
   /** Render function for the center map area */
   renderMap: (size: MapSize) => ReactNode;
+  /** Heresy tracker rendered below the map, spanning its full width */
+  heresyTracker?: ReactNode;
   /** Floating children (dialogs, overlays) */
   children?: ReactNode;
 }
@@ -51,7 +52,6 @@ const SLOT_LABELS: Record<PanelSlot, string> = {
 };
 
 const SLOT_ICONS: Partial<Record<PanelSlot, React.ComponentType<{ size?: number }>>> = {
-  "action-info":  GiInfo,
   "game-log":     GiScrollUnfurled,
   "stats":        MdQueryStats as React.ComponentType<{ size?: number }>,
   "trade":        GiSwapBag,
@@ -122,30 +122,14 @@ export const GameLayout = ({
   isMyTurn,
   renderSlot,
   renderMap,
+  heresyTracker,
   children,
 }: GameLayoutProps) => {
   const config = getPhaseLayout(phase, stage, isMyTurn);
   const mood = getMood(stage);
   const moodBg = MOOD_BACKGROUNDS[mood] ?? MOOD_BACKGROUNDS.peacetime;
   const [mapExpanded, setMapExpanded] = useState(false);
-  const [extraTab, setExtraTab] = useState<PanelSlot | null>(null);
-  const { hoveredAction } = useActionHover();
-  const tabBeforeHover = useRef<PanelSlot | null>(null);
-
-  // Auto-switch to Info tab when hovering an action button
-  useEffect(() => {
-    if (hoveredAction && config.tabExtras.includes("action-info")) {
-      // Save current tab before switching
-      if (tabBeforeHover.current === null) {
-        tabBeforeHover.current = extraTab;
-      }
-      setExtraTab("action-info");
-    } else if (!hoveredAction && tabBeforeHover.current !== undefined) {
-      // Restore previous tab when hover ends
-      setExtraTab(tabBeforeHover.current);
-      tabBeforeHover.current = null;
-    }
-  }, [hoveredAction, config.tabExtras]);
+  const [extraTab, setExtraTab] = useState<PanelSlot | null>("game-log");
 
   // Reset tab selection when phase changes or selected tab is no longer available
   useEffect(() => {
@@ -217,7 +201,7 @@ export const GameLayout = ({
             display: "flex",
             flex: hasBottom ? "1 1 55%" : "1 1 100%",
             overflow: "hidden",
-            minHeight: 0,
+            minHeight: "150px",
           }}
         >
           {/* Center — map (always visible) */}
@@ -239,8 +223,8 @@ export const GameLayout = ({
                 onClick={() => setMapExpanded(v => !v)}
                 sx={{
                   position: "absolute",
-                  top: 8,
-                  right: 8,
+                  bottom: 8,
+                  left: 8,
                   zIndex: 10,
                   backgroundColor: "rgba(0,0,0,0.55)",
                   color: tokens.ui.textBright,
@@ -276,6 +260,22 @@ export const GameLayout = ({
             </Box>
           )}
         </Box>
+
+        {/* ── Heresy tracker — always visible below the map ── */}
+        {heresyTracker && (
+          <Box
+            sx={{
+              flexShrink: 0,
+              px: `${tokens.spacing.sm}px`,
+              py: "3px",
+              background: backgrounds.parchmentPanelTinted,
+              borderTop: `1px solid ${tokens.ui.border}`,
+              borderBottom: `1px solid ${tokens.ui.border}`,
+            }}
+          >
+            {heresyTracker}
+          </Box>
+        )}
 
         {/* ── Bottom panel: split (action board + tabs) or tabs-only ── */}
         {hasBottom && hasExtras ? (

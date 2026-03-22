@@ -35,7 +35,7 @@ export interface PhaseLayoutConfig {
 // ── Reusable layout fragments ──────────────────────────────────────────
 
 const COMMON_TABS: PanelSlot[] = ["game-log", "stats", "trade", "chat"];
-const ACTIONS_TABS: PanelSlot[] = ["action-info", ...COMMON_TABS];
+const ACTIONS_TABS: PanelSlot[] = COMMON_TABS;
 
 /** Narrow sidebar width for compact player board */
 const NARROW_LEFT = "clamp(240px, 18vw, 300px)";
@@ -65,7 +65,7 @@ const ACTIONS_LAYOUT: PhaseLayoutConfig = {
   right: [],
   bottom: "action-board",
   tabExtras: ACTIONS_TABS,
-  bottomHeight: "45vh",
+  bottomHeight: "40vh",
   leftWidth: "clamp(320px, 24vw, 380px)",
 };
 

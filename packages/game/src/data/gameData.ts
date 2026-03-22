@@ -185,17 +185,17 @@ export const LEGACY_CARDS: LegacyCardInfo[] = [
   { name: "the pious",       colour: "purple" },
 ];
 
-export const GAME_PHASES: { key: string; label: string }[] = [
-  { key: "legacy_card",     label: "Legacy Card" },
-  { key: "events",          label: "Events" },
-  { key: "discovery",       label: "Discovery" },
-  { key: "taxes",           label: "Taxes" },
-  { key: "actions",         label: "Actions" },
-  { key: "battle",          label: "Battle" },
-  { key: "plunder_legends", label: "Plunder Legends" },
-  { key: "conquest",        label: "Conquest" },
-  { key: "election",        label: "Election" },
-  { key: "resolution",      label: "Resolution" },
+export const GAME_PHASES: { key: string; label: string; hint: string }[] = [
+  { key: "legacy_card",     label: "Legacy Card",       hint: "Draw a legacy card for a permanent bonus" },
+  { key: "events",          label: "Events",             hint: "Respond to world events affecting your kingdom" },
+  { key: "discovery",       label: "Discovery",          hint: "Flip map tiles to reveal new territories" },
+  { key: "taxes",           label: "Taxes",              hint: "Collect income from your territories" },
+  { key: "actions",         label: "Actions",            hint: "Place counsellors on the board to take actions" },
+  { key: "battle",          label: "Battle",             hint: "Resolve aerial and ground combat" },
+  { key: "plunder_legends", label: "Plunder & Legends",  hint: "Claim rewards from conquered territories" },
+  { key: "conquest",        label: "Conquest",           hint: "Take control of territories where you have forces" },
+  { key: "election",        label: "Election",           hint: "Vote for the next Archprelate" },
+  { key: "resolution",      label: "Resolution",         hint: "End-of-round income, scoring, and cleanup" },
 ];
 
 export const colourToKingdomMap: Record<string, KingdomName> = {

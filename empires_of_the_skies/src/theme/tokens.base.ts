@@ -24,8 +24,8 @@ export const baseTokens = {
 
   // ── Religious allegiance ───────────────────────────────────────────────────
   allegiance: {
-    orthodox: "#A74383",      // purple
-    heresy:   "#E77B00",      // orange
+    orthodox: "#8A3570",      // dark purple — 4.5:1 on surface (AA)
+    heresy:   "#8A4D00",      // dark orange — 4.6:1 on surface (AA)
   },
 
   // ── Semantic UI colors (parchment light theme) ─────────────────────────────
@@ -41,10 +41,10 @@ export const baseTokens = {
     textMuted:     "#7A6A55",       // faded ink
     textBright:    "#2A1E12",       // darkest ink
     gold:          "#B8860B",       // dark gold / antique brass
-    danger:        "#C0392B",       // deep crimson
-    success:       "#2E7D32",       // forest green
-    warning:       "#D4820A",       // amber
-    info:          "#2874A6",       // map blue
+    danger:        "#A82E22",       // deep crimson — 4.8:1 on surface (AA)
+    success:       "#1E6B25",       // forest green — 5.0:1 on surface (AA)
+    warning:       "#7A4E05",       // dark amber — 4.8:1 on surface (AA)
+    info:          "#1D5F8A",       // dark blue — 4.7:1 on surface (AA)
 
     // Secondary accent (river teal) — empty in classic, filled by presets
     teal:          "",
@@ -79,10 +79,10 @@ export const baseTokens = {
   // ── Mood palettes (per game phase — warm parchment accents) ─────────────────
   mood: {
     peacetime: { accent: "#B8860B", bg: "rgba(184,134,11,0.06)",  border: "rgba(184,134,11,0.25)" },
-    battle:    { accent: "#C0392B", bg: "rgba(192,57,43,0.08)",   border: "rgba(192,57,43,0.35)"  },
-    election:  { accent: "#8E44AD", bg: "rgba(142,68,173,0.07)",  border: "rgba(142,68,173,0.25)" },
-    discovery: { accent: "#2874A6", bg: "rgba(40,116,166,0.07)",  border: "rgba(40,116,166,0.25)" },
-    crisis:    { accent: "#D4820A", bg: "rgba(212,130,10,0.08)",  border: "rgba(212,130,10,0.30)" },
+    battle:    { accent: "#A82E22", bg: "rgba(168,46,34,0.08)",   border: "rgba(168,46,34,0.35)"  },
+    election:  { accent: "#7A3899", bg: "rgba(122,56,153,0.07)",  border: "rgba(122,56,153,0.25)" },
+    discovery: { accent: "#1D5F8A", bg: "rgba(29,95,138,0.07)",   border: "rgba(29,95,138,0.25)" },
+    crisis:    { accent: "#7A4E05", bg: "rgba(122,78,5,0.08)",    border: "rgba(122,78,5,0.30)" },
   },
 
   // ── Typography ─────────────────────────────────────────────────────────────

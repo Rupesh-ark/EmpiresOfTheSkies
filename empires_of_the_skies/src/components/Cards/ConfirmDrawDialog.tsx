@@ -1,6 +1,7 @@
 import { Typography } from "@mui/material";
 import { MyGameProps } from "@eots/game";
 import { DialogShell } from "@/components/atoms/DialogShell";
+import { clearMoves } from "@/utils/gameHelpers";
 
 const ConfirmDrawDialog = (props: MyGameProps) => {
   const isOpen = props.G.stage === "confirm_fow_draw" && props.ctx.currentPlayer === props.playerID;
@@ -13,6 +14,8 @@ const ConfirmDrawDialog = (props: MyGameProps) => {
       size="sm"
       confirmLabel="Draw Cards"
       onConfirm={() => props.moves.drawFoWCards()}
+      cancelLabel="Cancel"
+      onCancel={() => clearMoves(props)}
     >
       <Typography>
         You are about to draw 2 Fortune of War cards. These cards are used in

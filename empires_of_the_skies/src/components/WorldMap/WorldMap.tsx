@@ -1,4 +1,4 @@
-import { ReactElement } from "react";
+import { memo, ReactElement } from "react";
 
 import { Box, Grid } from "@mui/material";
 import { WorldMapTile } from "./WorldMapTile";
@@ -107,4 +107,4 @@ interface WorldMapProps extends MyGameProps {
   onDetailRequestHandled?: (requestKey: number) => void;
 }
 
-export default WorldMap;
+export default memo(WorldMap);

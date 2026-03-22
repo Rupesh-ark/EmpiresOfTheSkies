@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback, useEffect } from "react";
+import React, { memo, useState, useRef, useCallback, useEffect } from "react";
 import { keyframes } from "@emotion/react";
 
 import ReactCardFlip from "react-card-flip";
@@ -16,7 +16,7 @@ import svgNameToElementMap from "./nameToElementMap";
 import { getLocationPresentation } from "@/utils/locationLabels";
 
 //Method for displaying a flippable tile which contains a world map tile image
-export const WorldMapTile = (props: worldMapTileProps) => {
+export const WorldMapTile = memo((props: worldMapTileProps) => {
   const xPosition = useRef(0);
   const yPosition = useRef(0);
   const longPressCallback = useCallback(() => {}, []);
@@ -306,7 +306,7 @@ Loot:
       </ThemeProvider>
     </ReactCardFlip>
   );
-};
+});
 
 interface worldMapTileProps extends MyGameProps {
   location: number[];

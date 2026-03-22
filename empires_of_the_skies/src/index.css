@@ -15,6 +15,44 @@ body {
   color: #3A2E22;
 }
 
+/* ============================================================
+   Custom scrollbars — narrow, warm-toned to match parchment theme.
+   Webkit (Chrome/Edge/Safari) + Firefox.
+   ============================================================ */
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(100,75,40,0.7) rgba(100,75,40,0.12);
+}
+
+/* Webkit — track (visible tinted gutter) */
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  background: rgba(100,75,40,0.10);
+  border-radius: 4px;
+}
+
+/* Webkit — thumb (solid, always visible) */
+*::-webkit-scrollbar-thumb {
+  background: rgba(100,75,40,0.55);
+  border-radius: 4px;
+  border: 1px solid rgba(100,75,40,0.15);
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: rgba(100,75,40,0.75);
+}
+
+/* Webkit — corner (where h/v scrollbars meet) */
+*::-webkit-scrollbar-corner {
+  background: rgba(100,75,40,0.10);
+}
+
 body {
   min-width: 320px;
   overflow-x: hidden;

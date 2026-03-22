@@ -57,7 +57,7 @@ const EventChoiceDialog = (props: MyGameProps) => {
       if (opt.startsWith("pay_gold:")) return `Pay ${opt.split(":")[1]} Gold`;
       if (opt === "sell_factory") return "Sell One Factory (gain 3 gold)";
       if (opt === "lose_cathedral") return "Lose One Cathedral (gain 3 gold)";
-      if (opt === "lose_vp") return "Lose 3 VP";
+      if (opt === "lose_vp") return "Lose 3 Victory Points";
       return opt;
     };
 
@@ -127,7 +127,7 @@ const EventChoiceDialog = (props: MyGameProps) => {
     });
   } else if (choice.allyOptions) {
     title = "Dynastic Marriage";
-    description = "Choose a kingdom to form an alliance with. Both gain +3 VP and cannot attack each other.";
+    description = "Choose a kingdom to form an alliance with. Both gain +3 Victory Points and cannot attack each other.";
     confirmLabel = "Form Alliance";
 
     chips = choice.allyOptions.map((id) => {

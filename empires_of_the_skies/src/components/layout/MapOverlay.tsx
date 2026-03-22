@@ -38,6 +38,7 @@ export const MapOverlay = (props: MyGameProps) => {
 
   const phase = GAME_PHASES.find((p) => p.key === props.ctx.phase);
   const phaseName = phase?.label ?? props.G.stage;
+  const phaseHint = phase?.hint ?? "";
   const currentPlayerName =
     props.matchData?.find((p) => String(p.id) === props.ctx.currentPlayer)
       ?.name ?? "Player";
@@ -50,19 +51,54 @@ export const MapOverlay = (props: MyGameProps) => {
 
   return (
     <>
-      {/* ── Top-left: Status chip ──────────────────────────────── */}
+      {/* ── Top bar: Hint (left) + Round/Phase/Turn (right) ──── */}
       <Box
         sx={{
           position: "absolute",
           top: 8,
           left: 8,
+          right: 8,
           zIndex: 10,
           display: "flex",
-          flexDirection: "column",
-          gap: "4px",
+          justifyContent: "space-between",
+          alignItems: "flex-start",
+          gap: `${tokens.spacing.sm}px`,
+          pointerEvents: "none",
+          "& > *": { pointerEvents: "auto" },
         }}
       >
-        {/* Round + Phase */}
+        {/* Left: Phase guidance hint */}
+        {phaseHint && (
+          <Box
+            sx={{
+              display: "inline-flex",
+              alignItems: "center",
+              px: `${tokens.spacing.sm + 2}px`,
+              height: 28,
+              borderRadius: `${tokens.radius.pill}px`,
+              background: "rgba(30,24,16,0.82)",
+              backdropFilter: "blur(8px)",
+              border: `1px solid rgba(200,170,120,0.25)`,
+              boxShadow: "0 2px 8px rgba(0,0,0,0.4)",
+              borderBottomColor: `${moodTokens.accent}66`,
+            }}
+          >
+            <Typography
+              sx={{
+                fontFamily: tokens.font.body,
+                fontSize: tokens.fontSize.xs,
+                color: "#F5ECD8",
+                whiteSpace: "nowrap",
+                lineHeight: 1,
+                fontStyle: "italic",
+              }}
+            >
+              {phaseHint}
+            </Typography>
+          </Box>
+        )}
+
+        {/* Right: Round + Phase + Turn (combined chip) */}
         <Box
           sx={{
             display: "inline-flex",
@@ -75,8 +111,6 @@ export const MapOverlay = (props: MyGameProps) => {
             backdropFilter: "blur(8px)",
             border: `1px solid rgba(200,170,120,0.25)`,
             boxShadow: "0 2px 8px rgba(0,0,0,0.4)",
-
-            // Mood-aware bottom accent
             borderBottomColor: `${moodTokens.accent}66`,
 
             ...(shouldPulse && {
@@ -97,7 +131,7 @@ export const MapOverlay = (props: MyGameProps) => {
               lineHeight: 1,
             }}
           >
-            R{props.G.round}
+            Round {props.G.round}
           </Typography>
           <Box sx={{ width: "1px", height: 14, backgroundColor: "rgba(200,170,120,0.3)" }} />
           <Typography
@@ -111,24 +145,9 @@ export const MapOverlay = (props: MyGameProps) => {
           >
             {phaseName}
           </Typography>
-        </Box>
+          <Box sx={{ width: "1px", height: 14, backgroundColor: "rgba(200,170,120,0.3)" }} />
 
-        {/* Turn indicator */}
-        <Box
-          sx={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: `${tokens.spacing.xs}px`,
-            px: `${tokens.spacing.sm}px`,
-            height: 24,
-            borderRadius: `${tokens.radius.pill}px`,
-            background: "rgba(30,24,16,0.75)",
-            backdropFilter: "blur(8px)",
-            border: `1px solid rgba(200,170,120,0.18)`,
-            boxShadow: "0 1px 4px rgba(0,0,0,0.3)",
-            width: "fit-content",
-          }}
-        >
+          {/* Turn indicator */}
           <Box
             sx={{
               width: 8,

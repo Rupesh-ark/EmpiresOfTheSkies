@@ -71,7 +71,7 @@ const PunishDissentersRow = (props: ActionBoardProps) => {
             Imprison (1 Counsellor){!canAffordCounsellor ? " — need 2" : prisonFull ? " — prison full" : ""}
           </GameButton>
           <GameButton variant="danger" fullWidth disabled={!hasPrisoners} onClick={() => handlePay("execute")}>
-            Execute Prisoner (-{PUNISH_EXECUTE_VP_COST} VP){!hasPrisoners ? " — no prisoners" : ""}
+            Execute Prisoner (-{PUNISH_EXECUTE_VP_COST} Victory Points){!hasPrisoners ? " — no prisoners" : ""}
           </GameButton>
         </Stack>
       </DialogShell>

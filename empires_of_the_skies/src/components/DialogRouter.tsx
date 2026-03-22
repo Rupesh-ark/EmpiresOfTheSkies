@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { MyGameProps } from "@eots/game";
 
 import RoundSummaryDialog from "./Resolution/RoundSummaryDialog";
@@ -38,7 +39,7 @@ import GameOverView from "./GameOverView";
  * Rule: do NOT add layout, tabs, or non-dialog UI here.
  * Rule: do NOT modify the individual dialog components — only their mount conditions.
  */
-export const DialogRouter = (props: MyGameProps) => {
+export const DialogRouter = memo((props: MyGameProps) => {
   return (
     <>
       <RoundSummaryDialog {...props} />
@@ -136,4 +137,4 @@ export const DialogRouter = (props: MyGameProps) => {
       <GameOverView {...props} />
     </>
   );
-};
+});

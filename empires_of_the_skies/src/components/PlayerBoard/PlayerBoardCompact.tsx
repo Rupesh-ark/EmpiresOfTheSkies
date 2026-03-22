@@ -7,7 +7,7 @@
  *
  * Read-only. No interactions.
  */
-import { useState } from "react";
+import { memo, useState } from "react";
 import { Box, Dialog, Typography } from "@mui/material";
 import { IconCounsellor, IconGold, IconVP, IconRegiment, IconElite, IconLevy, IconSkyship } from "@/theme";
 import { tokens } from "@/theme";
@@ -28,8 +28,8 @@ import type { PlayerFortuneOfWarCardInfo } from "@eots/game";
 import { LEGACY_CARD_DEFS, KA_CARD_DEFS, EVENT_CARD_DEFS } from "@eots/game";
 import { EVENT_ICONS } from "@/components/Events/eventCardIcons";
 import { Holdings } from "./Holdings";
-import popeLogo from "@/boards_and_assets/action_board/pope_logo.png";
-import captainGeneralLogo from "@/boards_and_assets/action_board/captain_general.png";
+import popeLogo from "@/boards_and_assets/action_board/pope_logo.webp";
+import captainGeneralLogo from "@/boards_and_assets/action_board/captain_general.webp";
 
 interface PlayerBoardCompactProps extends MyGameProps {
   onOpenFleetLocation?: (location: number[]) => void;
@@ -91,7 +91,7 @@ const CompactSectionHeader = ({ label }: { label: string }) => (
 
 type CardTab = "fow" | "legacy" | "ka" | "events";
 
-export const PlayerBoardCompact = (props: PlayerBoardCompactProps) => {
+export const PlayerBoardCompact = memo((props: PlayerBoardCompactProps) => {
   const [openCardTab, setOpenCardTab] = useState<CardTab | null>(null);
   const [enlargedCard, setEnlargedCard] = useState<{ src: string; title: string; description?: string } | null>(null);
   const playerInfo = props.G.playerInfo[props.playerID ?? props.ctx.currentPlayer];
@@ -137,7 +137,7 @@ export const PlayerBoardCompact = (props: PlayerBoardCompactProps) => {
               fontSize: tokens.fontSize.lg,
               color: colour,
               lineHeight: 1.2,
-              textShadow: `0 0 12px ${colour}44`,
+              textShadow: `0 1px 2px rgba(0,0,0,0.5), 0 0 12px ${colour}44`,
             }}
           >
             {playerInfo.kingdomName}
@@ -415,17 +415,27 @@ export const PlayerBoardCompact = (props: PlayerBoardCompactProps) => {
           <Box sx={{ display: "flex", gap: `${tokens.spacing.xs}px`, flexWrap: "wrap", justifyContent: "center" }}>
             {fortuneCards.map((card, i) => {
               const img = getFoWCardImage(card);
+              const fowTitle = card.sword > 0
+                ? `${card.sword} Sword${card.sword > 1 ? "s" : ""}`
+                : card.shield > 0
+                  ? `${card.shield} Shield${card.shield > 1 ? "s" : ""}`
+                  : "No Effect";
+              const fowDesc = card.sword > 0
+                ? `Adds ${card.sword} sword${card.sword > 1 ? "s" : ""} to your combat strength when played in battle.`
+                : card.shield > 0
+                  ? `Absorbs ${card.shield} sword${card.shield > 1 ? "s" : ""} of enemy damage when played in battle.`
+                  : "This card has no combat effect when played.";
               return (
                 <CardFrame
                   key={i}
-                  title={card.flipped ? card.name : undefined}
+                  title={card.flipped ? fowTitle : undefined}
                   description={card.flipped ? `⚔ ${card.sword}  🛡 ${card.shield}` : undefined}
                   imageUrl={img}
                   faceDown={!card.flipped}
                   cardBackUrl={FOW_CARD_BACK}
                   width={70}
                   height={120}
-                  onClick={card.flipped ? () => setEnlargedCard({ src: img, title: card.name }) : undefined}
+                  onClick={card.flipped ? () => setEnlargedCard({ src: img, title: fowTitle, description: fowDesc }) : undefined}
                 />
               );
             })}
@@ -699,4 +709,4 @@ export const PlayerBoardCompact = (props: PlayerBoardCompactProps) => {
       <Holdings {...props} variant="compact" />
     </Box>
   );
-};
+});
