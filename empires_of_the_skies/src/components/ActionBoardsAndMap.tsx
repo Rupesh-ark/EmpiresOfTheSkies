@@ -66,7 +66,7 @@ const ActionBoardsAndMapInner = (props: MyGameProps) => {
         );
 
       case "action-info":
-        return <ActionInfoPanel />;
+        return <ActionInfoPanel boardState={props.G.boardState} />;
 
       case "game-log":
         return <GameLog {...validatedProps} />;

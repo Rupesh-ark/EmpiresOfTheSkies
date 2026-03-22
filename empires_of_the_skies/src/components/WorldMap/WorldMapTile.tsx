@@ -123,6 +123,9 @@ Loot:
   const [flip, setFlip] = useState(
     props.G.mapState.discoveredTiles[yLocation][xLocation]
   );
+  useEffect(() => {
+    setFlip(props.G.mapState.discoveredTiles[yLocation][xLocation]);
+  }, [props.G.mapState.discoveredTiles[yLocation][xLocation]]);
   const [detailOpen, setDetailOpen] = useState(false);
   const locationPresentation = getLocationPresentation(props.G.mapState.currentTileArray, [
     xLocation,
