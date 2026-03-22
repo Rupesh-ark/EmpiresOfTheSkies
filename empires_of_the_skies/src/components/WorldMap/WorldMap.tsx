@@ -10,54 +10,47 @@ const BATTLE_PHASES = new Set([
 ]);
 
 const WorldMap = (props: WorldMapProps) => {
-  const GridItems = (props: WorldMapProps) => {
-    const currentMap = props.G.mapState.currentTileArray;
-    const battleCoords = props.G.mapState.currentBattle;
-    const isBattlePhase = BATTLE_PHASES.has(props.ctx.phase ?? "");
-    let tiles: ReactElement[][] = [[], [], [], []];
-    for (let y = 0; y < currentMap.length; y++) {
-      for (let x = 0; x < currentMap[y].length; x++) {
-        const tileProps = {
-          location: [x, y],
-          ...props,
-        };
-        let selectable = false;
-        props.selectableTiles?.forEach((coord) => {
-          if (coord[0] === x && coord[1] === y) {
-            selectable = true;
-          }
-        });
-        const isBattleTile = isBattlePhase &&
-          battleCoords &&
-          battleCoords[0] === x &&
-          battleCoords[1] === y;
-        const detailRequestKey =
-          props.detailRequest &&
-          props.detailRequest.location[0] === x &&
-          props.detailRequest.location[1] === y
-            ? props.detailRequest.key
-            : undefined;
-        tiles[y].push(
-          <Grid
-            size={{ lg: 1 }}
-            key={`World Map Tile at (${x.toString()}, ${y.toString()})`}
-          >
-            <WorldMapTile
-              {...tileProps}
-              alternateOnClick={
-                props.alternateOnClick ? props.alternateOnClick : undefined
-              }
-              selectable={selectable}
-              battleHighlight={!!isBattleTile}
-              detailRequestKey={detailRequestKey}
-              onDetailRequestHandled={props.onDetailRequestHandled}
-            />
-          </Grid>
-        );
-      }
+  const currentMap = props.G.mapState.currentTileArray;
+  const battleCoords = props.G.mapState.currentBattle;
+  const isBattlePhase = BATTLE_PHASES.has(props.ctx.phase ?? "");
+
+  const tiles: ReactElement[][] = [[], [], [], []];
+  for (let y = 0; y < currentMap.length; y++) {
+    for (let x = 0; x < currentMap[y].length; x++) {
+      const selectable = props.selectableTiles?.some(
+        (coord) => coord[0] === x && coord[1] === y
+      ) ?? false;
+
+      const isBattleTile = isBattlePhase &&
+        battleCoords &&
+        battleCoords[0] === x &&
+        battleCoords[1] === y;
+
+      const detailRequestKey =
+        props.detailRequest &&
+        props.detailRequest.location[0] === x &&
+        props.detailRequest.location[1] === y
+          ? props.detailRequest.key
+          : undefined;
+
+      tiles[y].push(
+        <Grid
+          size={{ lg: 1 }}
+          key={`World Map Tile at (${x}, ${y})`}
+        >
+          <WorldMapTile
+            location={[x, y]}
+            {...props}
+            alternateOnClick={props.alternateOnClick}
+            selectable={selectable}
+            battleHighlight={!!isBattleTile}
+            detailRequestKey={detailRequestKey}
+            onDetailRequestHandled={props.onDetailRequestHandled}
+          />
+        </Grid>
+      );
     }
-    return <>{tiles}</>;
-  };
+  }
 
   return (
     <div
@@ -86,7 +79,7 @@ const WorldMap = (props: WorldMapProps) => {
           columns={8}
           sx={{ width: "100%" }}
         >
-          <GridItems {...props} />
+          {tiles}
         </Grid>
 
         {/* Cloud edge overlay — softens map boundaries */}
