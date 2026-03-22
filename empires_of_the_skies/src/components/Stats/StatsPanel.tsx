@@ -15,8 +15,8 @@ import { ExpandMore, ExpandLess } from "@mui/icons-material";
 import { MyGameProps, PlayerInfo, colourToKingdomMap } from "@eots/game";
 import { tokens, IconCounsellor, IconGold, IconVP, IconRegiment, IconElite, IconLevy, IconSkyship, IconFoWCard } from "@/theme";
 import { ResourceChip } from "@/components/atoms/ResourceChip";
-import popeLogo from "@/boards_and_assets/action_board/pope_logo.png";
-import captainGeneralLogo from "@/boards_and_assets/action_board/captain_general.png";
+import popeLogo from "@/boards_and_assets/action_board/pope_logo.webp";
+import captainGeneralLogo from "@/boards_and_assets/action_board/captain_general.webp";
 
 // ── Shared card wrapper ─────────────────────────────────────────────────
 
@@ -338,7 +338,7 @@ const HeresyTrack = ({ props }: { props: MyGameProps }) => {
                 position: "relative",
               }}
             >
-              {playersHere.map(([id, p]) => (
+              {playersHere.map(([id, p], i) => (
                 <Box
                   key={id}
                   sx={{
@@ -346,9 +346,13 @@ const HeresyTrack = ({ props }: { props: MyGameProps }) => {
                     height: 12,
                     borderRadius: "50%",
                     backgroundColor: p.colour,
-                    border: `1px solid rgba(0,0,0,0.2)`,
+                    border: `1.5px solid rgba(255,255,255,0.5)`,
                     boxShadow: `0 1px 2px rgba(0,0,0,0.3)`,
                     flexShrink: 0,
+                    // Overlap tokens when multiple share a cell
+                    ml: i > 0 ? "-5px" : 0,
+                    zIndex: i,
+                    position: "relative",
                   }}
                 />
               ))}
@@ -522,16 +526,10 @@ export const StatsPanel = (props: MyGameProps) => {
         flexDirection: "column",
         gap: `${tokens.spacing.sm}px`,
         p: `${tokens.spacing.sm}px`,
-        overflowY: "auto",
-        height: "100%",
       }}
     >
       <StatsCard title="Realm Overview" defaultOpen>
         <OpponentSummary props={props} />
-      </StatsCard>
-
-      <StatsCard title="Heresy Track" defaultOpen>
-        <HeresyTrack props={props} />
       </StatsCard>
 
       <StatsCard title="Non-Player Kingdoms">

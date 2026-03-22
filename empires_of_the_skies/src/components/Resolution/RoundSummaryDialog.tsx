@@ -80,7 +80,7 @@ const RoundSummaryDialog = (props: MyGameProps) => {
   if (props.G.eventState.peaceAccordActive) {
     summaryItems.push({
       icon: <Gavel />,
-      text: "Peace Accord is active \u2014 first to attack loses 3 VP",
+      text: "Peace Accord is active \u2014 first to attack loses 3 Victory Points",
     });
   }
   if (props.G.eventState.dynasticMarriage) {

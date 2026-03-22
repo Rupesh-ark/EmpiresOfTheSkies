@@ -328,7 +328,7 @@ const MyGame: Game<MyGameState> = {
         chooseEventCard: wrapMove("chooseEventCard", chooseEventCard),
         resolveEventChoice: wrapMove("resolveEventChoice", resolveEventChoice),
         immediateElectionVote: wrapMove("immediateElectionVote", immediateElectionVote),
-      },
+          },
       next: "discovery",
     },
     discovery: {
@@ -362,7 +362,7 @@ const MyGame: Game<MyGameState> = {
       moves: {
         discoverTile: wrapMove("discoverTile", discoverTile),
         pass: wrapMove("pass", pass),
-      },
+          },
       next: "taxes",
       onEnd: (context) => {
         Object.values(context.G.playerInfo).forEach((playerInfo: any) => {
@@ -506,7 +506,7 @@ const MyGame: Game<MyGameState> = {
         setPiracyIntent: wrapMove("setPiracyIntent", setPiracyIntent),
         declareSmugglerGood: wrapMove("declareSmugglerGood", declareSmugglerGood),
         pass: wrapMove("pass", pass),
-      },
+          },
       onEnd: (context) => {
         Object.values(context.G.playerInfo).forEach((playerInfo: any) => {
           playerInfo.passed = false;
@@ -539,7 +539,7 @@ const MyGame: Game<MyGameState> = {
         drawCard: wrapMove("drawCard", drawCard),
         pickCard: wrapMove("pickCard", pickCard),
         relocateDefeatedFleet: wrapMove("relocateDefeatedFleet", relocateDefeatedFleet),
-      },
+          },
     },
     ground_battle: {
       onBegin: (context) => {
@@ -566,7 +566,7 @@ const MyGame: Game<MyGameState> = {
         yieldToAttacker: wrapMove("yieldToAttacker", yieldToAttacker),
         drawCard: wrapMove("drawCard", drawCard),
         pickCard: wrapMove("pickCard", pickCard),
-      },
+          },
     },
     plunder_legends: {
       onBegin: (context) => {
@@ -578,7 +578,7 @@ const MyGame: Game<MyGameState> = {
       moves: {
         plunder: wrapMove("plunder", plunder),
         doNotPlunder: wrapMove("doNotPlunder", doNotPlunder),
-      },
+          },
       next: "ground_battle",
       turn: {
         onBegin: (context) => {
@@ -612,7 +612,7 @@ const MyGame: Game<MyGameState> = {
         drawCardConquest: wrapMove("drawCardConquest", drawCardConquest),
         pickCardConquest: wrapMove("pickCardConquest", pickCardConquest),
         garrisonTroops: wrapMove("garrisonTroops", garrisonTroops),
-      },
+          },
       next: "election",
     },
     election: {
@@ -683,7 +683,7 @@ const MyGame: Game<MyGameState> = {
         respondToInfidelFleet: wrapMove("respondToInfidelFleet", respondToInfidelFleet),
         offerBuyoffGold: wrapMove("offerBuyoffGold", offerBuyoffGold),
         commitDeferredBattleCard: wrapMove("commitDeferredBattleCard", commitDeferredBattleCard),
-      },
+          },
       next: "reset",
     },
     reset: {

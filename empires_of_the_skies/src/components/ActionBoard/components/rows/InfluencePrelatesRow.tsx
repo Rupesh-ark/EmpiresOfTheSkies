@@ -4,12 +4,12 @@
  * Each button uses a muted, parchment-blended version of the kingdom colour
  * with a Church (orthodox) or Castle (heretic) icon inside.
  */
-import { Box, Typography } from "@mui/material";
+import { Box, Tooltip, Typography } from "@mui/material";
 import { IconOrthodox, IconHeretic } from "@/theme";
 import { tokens } from "@/theme";
 import { BTN_BG } from "@/assets/actionBoard";
 import { PlayerColour } from "@eots/game";
-import { ActionBoardProps } from "../shared";
+import { ActionBoardProps, ActionTooltipContent, TOOLTIP_DELAY } from "../shared";
 import { clearMoves } from "@/utils/gameHelpers";
 import { PlayerDot } from "@/components/atoms/PlayerDot";
 import { useActionHover } from "../../ActionHoverContext";
@@ -32,6 +32,7 @@ const InfluencePrelatesRow = (props: ActionBoardProps) => {
   const nprHeretics = new Set(props.G.eventState.nprHeretic);
 
   return (
+    <Tooltip title={<ActionTooltipContent actionId="influence-prelates" />} placement="right" arrow enterDelay={TOOLTIP_DELAY.enter} enterNextDelay={TOOLTIP_DELAY.enterNext}>
     <Box
       onMouseEnter={() => setHoveredAction("influence-prelates")}
       onMouseLeave={() => setHoveredAction(null)}
@@ -223,6 +224,7 @@ const InfluencePrelatesRow = (props: ActionBoardProps) => {
         })}
       </Box>
     </Box>
+    </Tooltip>
   );
 };
 

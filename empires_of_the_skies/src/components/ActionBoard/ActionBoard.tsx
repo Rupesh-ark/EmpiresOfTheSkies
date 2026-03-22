@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Box } from "@mui/material";
 import { MyGameProps } from "@eots/game";
 import { tokens } from "@/theme";
@@ -21,7 +22,7 @@ import IssueHolyDecree from "./components/IssueHolyDecree";
 
 // ── Main component ───────────────────────────────────────────────────────────
 
-export const ActionBoard = (props: ActionBoardProps) => (
+export const ActionBoard = memo((props: ActionBoardProps) => (
     <Box
       sx={{
         width: "100%",
@@ -70,6 +71,6 @@ export const ActionBoard = (props: ActionBoardProps) => (
         </Box>
       </Box>
     </Box>
-);
+));
 
 interface ActionBoardProps extends MyGameProps {}

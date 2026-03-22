@@ -2,10 +2,10 @@
  * IssueHolyDecree — Archprelate-only action with wax seal button.
  */
 import { useState } from "react";
-import { Box, Typography } from "@mui/material";
+import { Box, Tooltip, Typography } from "@mui/material";
 import { tokens, IconOrthodox } from "@/theme";
 import { BTN_BG } from "@/assets/actionBoard";
-import { ActionBoardProps } from "./shared";
+import { ActionBoardProps, ActionTooltipContent, TOOLTIP_DELAY } from "./shared";
 import HolyDecreeDialog from "./HolyDecreeDialog";
 import { PlayerDot } from "@/components/atoms/PlayerDot";
 import { useActionHover } from "../ActionHoverContext";
@@ -30,6 +30,7 @@ const IssueHolyDecree = (props: ActionBoardProps) => {
 
   return (
     <>
+      <Tooltip title={<ActionTooltipContent actionId="issue-holy-decree" />} placement="right" arrow enterDelay={TOOLTIP_DELAY.enter} enterNextDelay={TOOLTIP_DELAY.enterNext}>
       <Box
         onMouseEnter={() => setHoveredAction("issue-holy-decree")}
         onMouseLeave={() => setHoveredAction(null)}
@@ -187,6 +188,7 @@ const IssueHolyDecree = (props: ActionBoardProps) => {
           />
         </Box>
       </Box>
+      </Tooltip>
 
       <HolyDecreeDialog
         open={dialogOpen}

@@ -4,7 +4,7 @@
 import { Box, Tooltip, Typography } from "@mui/material";
 import { tokens } from "@/theme";
 import { BTN_BG } from "@/assets/actionBoard";
-import { ActionBoardProps } from "../shared";
+import { ActionBoardProps, ActionTooltipContent, TOOLTIP_DELAY } from "../shared";
 import { clearMoves } from "@/utils/gameHelpers";
 import { PlayerDot } from "@/components/atoms/PlayerDot";
 import { useActionHover } from "../../ActionHoverContext";
@@ -21,6 +21,7 @@ const PlayerOrderRow = (props: ActionBoardProps) => {
   );
 
   return (
+    <Tooltip title={<ActionTooltipContent actionId="change-player-order" />} placement="right" arrow enterDelay={TOOLTIP_DELAY.enter} enterNextDelay={TOOLTIP_DELAY.enterNext}>
     <Box
       onMouseEnter={() => setHoveredAction("change-player-order")}
       onMouseLeave={() => setHoveredAction(null)}
@@ -159,6 +160,7 @@ const PlayerOrderRow = (props: ActionBoardProps) => {
         })}
       </Box>
     </Box>
+    </Tooltip>
   );
 };
 

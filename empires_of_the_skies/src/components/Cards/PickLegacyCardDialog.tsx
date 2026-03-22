@@ -29,7 +29,7 @@ const PickLegacyCardDialog = (props: MyGameProps) => {
     <DialogShell
       open={isOpen}
       title="Pick a Legacy Card"
-      subtitle="Scored at end of game. If your alignment (Orthodox/Heretic) doesn't match the card's colour, VP earned from this card is halved."
+      subtitle="Scored at end of game. If your alignment (Orthodox/Heretic) doesn't match the card's colour, Victory Points earned from this card are halved."
       mood="discovery"
       size="md"
       confirmLabel="Use selected card"

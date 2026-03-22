@@ -33,7 +33,7 @@ const InvasionBuyoffDialog = (props: MyGameProps) => {
       onCancel={() => props.moves.offerBuyoffGold(0)}
     >
       <Typography variant="body2" sx={{ mb: 2 }}>
-        The Grand Army has been defeated. The Infidels demand gold to leave. Any shortfall is paid in VP.
+        The Grand Army has been defeated. The Infidels demand gold to leave. Any shortfall is paid in Victory Points.
       </Typography>
       <Box sx={{ display: "flex", gap: 2, mb: 2, flexWrap: "wrap" }}>
         <Chip label={`Buy-off cost: ${cost} Gold`} color="error" variant="outlined" sx={{ fontWeight: "bold" }} />
@@ -51,7 +51,7 @@ const InvasionBuyoffDialog = (props: MyGameProps) => {
       <Typography variant="subtitle2" sx={{ mb: 1 }}>Your offer ({amount} of {maxOffer} Gold available)</Typography>
       <Slider value={amount} onChange={(_, v) => setAmount(v as number)} min={0} max={maxOffer} step={1} marks valueLabelDisplay="auto" disabled={maxOffer === 0} sx={{ mb: 2 }} />
       {amount === 0 && remaining > 0 && (
-        <Typography variant="body2" color="error" sx={{ mt: 1 }}>Offering nothing risks VP penalties if the total falls short!</Typography>
+        <Typography variant="body2" color="error" sx={{ mt: 1 }}>Offering nothing risks Victory Point penalties if the total falls short!</Typography>
       )}
     </DialogShell>
   );

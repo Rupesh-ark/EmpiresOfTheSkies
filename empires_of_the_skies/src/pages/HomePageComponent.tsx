@@ -232,6 +232,31 @@ const HomePageComponent = (props: HomePageComponentProps) => {
             ))}
           </Box>
 
+          {/* Game description */}
+          <Box
+            sx={{
+              textAlign: "center",
+              px: { xs: 1, md: 2 },
+              py: 1.5,
+              borderTop: `1px solid ${colors.home.border}40`,
+              borderBottom: `1px solid ${colors.home.border}40`,
+            }}
+          >
+            <Typography
+              sx={{
+                fontFamily: fonts.system,
+                fontSize: { xs: "0.78rem", md: "0.84rem" },
+                lineHeight: 1.65,
+                color: colors.home.text,
+                opacity: 0.85,
+              }}
+            >
+              A multiplayer strategy board game for 2–6 players. Command a kingdom in a fantasy world of
+              aerial fleets, religious politics, and territorial conquest. Discover new lands, build
+              skyships, recruit armies, and outmanoeuvre your rivals through trade, diplomacy, and war.
+              The player with the most Victory Points after 8 rounds wins the empire.
+            </Typography>
+          </Box>
 
           <ToggleButtonGroup
             color="secondary"

@@ -7,7 +7,7 @@
  *   3. Fleets (accordion with skyship visuals)
  *   4. Cards (drawer tabs: FoW / Legacy / KA)
  */
-import { useState } from "react";
+import { memo, useState } from "react";
 import {
   Box,
   Typography,
@@ -20,8 +20,8 @@ import { tokens } from "@/theme";
 import { lazy, Suspense } from "react";
 import { FleetInfo, MyGameProps, PlayerFortuneOfWarCardInfo, findPossibleDestinations, LEGACY_CARD_DEFS, KA_CARD_DEFS, EVENT_CARD_DEFS } from "@eots/game";
 import { EVENT_ICONS } from "@/components/Events/eventCardIcons";
-import popeLogo from "@/boards_and_assets/action_board/pope_logo.png";
-import captainGeneralLogo from "@/boards_and_assets/action_board/captain_general.png";
+import popeLogo from "@/boards_and_assets/action_board/pope_logo.webp";
+import captainGeneralLogo from "@/boards_and_assets/action_board/captain_general.webp";
 
 const WorldMap = lazy(() => import("../WorldMap/WorldMap"));
 import { IconCounsellor, IconGold, IconVP, IconRegiment, IconElite, IconLevy, IconSkyship } from "@/theme";
@@ -468,7 +468,7 @@ const Treasury = ({
         <ResourceChip
           icon={<IconVP style={{ fontSize: 18, color: tokens.ui.gold }} />}
           value={victoryPoints}
-          label="VP"
+          label="Victory Points"
           size="md"
         />
         {/* Allegiance + Heresy VP */}
@@ -517,7 +517,7 @@ const Treasury = ({
               lineHeight: 1,
             }}
           >
-            {vpSign}{heresyVP}VP
+            {vpSign}{heresyVP} Victory Points
           </Typography>
         </Box>
       </Box>
@@ -763,7 +763,7 @@ const KingdomActions = ({
         </DialogTitle>
         <DialogContent>
           <Typography sx={{ fontFamily: tokens.font.body, color: tokens.ui.text, fontSize: tokens.fontSize.sm, mb: 2 }}>
-            Choose how many levies to raise (in batches of 3). Costs 1 VP per 10 levies.
+            Choose how many levies to raise (in batches of 3). Costs 1 Victory Point per 10 levies.
           </Typography>
           <Box sx={{ display: "flex", alignItems: "center", gap: `${tokens.spacing.md}px`, justifyContent: "center" }}>
             <GameButton
@@ -1017,6 +1017,8 @@ const CardDrawers = ({
   advantageCard,
   eventCards,
   resolvedEvent,
+  eventContributions,
+  playerInfo,
 }: {
   fortuneCards: PlayerFortuneOfWarCardInfo[];
   legacyCard: { name: string; colour: string } | undefined;
@@ -1104,10 +1106,20 @@ const CardDrawers = ({
         >
           {fortuneCards.map((card, i) => {
             const img = getFoWCardImage(card);
+            const fowTitle = card.sword > 0
+              ? `${card.sword} Sword${card.sword > 1 ? "s" : ""}`
+              : card.shield > 0
+                ? `${card.shield} Shield${card.shield > 1 ? "s" : ""}`
+                : "No Effect";
+            const fowDesc = card.sword > 0
+              ? `Adds ${card.sword} sword${card.sword > 1 ? "s" : ""} to your combat strength when played in battle.`
+              : card.shield > 0
+                ? `Absorbs ${card.shield} sword${card.shield > 1 ? "s" : ""} of enemy damage when played in battle.`
+                : "This card has no combat effect when played.";
             return (
               <CardFrame
                 key={i}
-                title={card.flipped ? card.name : undefined}
+                title={card.flipped ? fowTitle : undefined}
                 description={
                   card.flipped
                     ? `⚔ ${card.sword}  🛡 ${card.shield}`
@@ -1118,7 +1130,7 @@ const CardDrawers = ({
                 cardBackUrl={FOW_CARD_BACK}
                 width={CARD_WIDTH}
                 height={CARD_HEIGHT}
-                onClick={card.flipped ? () => setEnlargedCard({ src: img, title: card.name }) : undefined}
+                onClick={card.flipped ? () => setEnlargedCard({ src: img, title: fowTitle, description: fowDesc }) : undefined}
               />
             );
           })}
@@ -1370,7 +1382,7 @@ const CardDrawers = ({
 
 // ── Main component ──────────────────────────────────────────────────────
 
-export const PlayerBoardFull = (props: PlayerBoardFullProps) => {
+export const PlayerBoardFull = memo((props: PlayerBoardFullProps) => {
   const playerInfo = props.G.playerInfo[props.playerID ?? props.ctx.currentPlayer];
   const colour = playerInfo.colour;
 
@@ -1420,7 +1432,7 @@ export const PlayerBoardFull = (props: PlayerBoardFullProps) => {
               fontSize: tokens.fontSize.lg,
               color: colour,
               lineHeight: 1.2,
-              textShadow: `0 0 12px ${colour}44`,
+              textShadow: `0 1px 2px rgba(0,0,0,0.5), 0 0 12px ${colour}44`,
             }}
           >
             {playerInfo.kingdomName}
@@ -1533,4 +1545,4 @@ export const PlayerBoardFull = (props: PlayerBoardFullProps) => {
       <Holdings {...props} variant="full" />
     </Box>
   );
-};
+});

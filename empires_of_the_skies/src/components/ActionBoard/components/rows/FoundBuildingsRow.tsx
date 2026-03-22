@@ -1,12 +1,12 @@
 /**
  * FoundBuildingsRow — 4 individual building cells in a single horizontal row.
  */
-import { Box, Typography } from "@mui/material";
+import { Box, Tooltip, Typography } from "@mui/material";
 import { tokens } from "@/theme";
 import { BTN_BG } from "@/assets/actionBoard";
 import { clearMoves } from "@/utils/gameHelpers";
 import { PlayerDot } from "@/components/atoms/PlayerDot";
-import { ActionBoardProps } from "../shared";
+import { ActionBoardProps, ActionTooltipContent, TOOLTIP_DELAY } from "../shared";
 import { useActionHover } from "../../ActionHoverContext";
 
 const THUMB_W = 48;
@@ -36,6 +36,7 @@ const BuildingCell = ({
   const { setHoveredAction } = useActionHover();
 
   return (
+    <Tooltip title={<ActionTooltipContent actionId={actionId} />} placement="top" arrow enterDelay={TOOLTIP_DELAY.enter} enterNextDelay={TOOLTIP_DELAY.enterNext}>
     <Box
       onClick={onClick}
       onMouseEnter={() => setHoveredAction(actionId)}
@@ -155,6 +156,7 @@ const BuildingCell = ({
         })}
       </Box>
     </Box>
+    </Tooltip>
   );
 };
 

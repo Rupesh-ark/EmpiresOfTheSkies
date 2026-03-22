@@ -7,7 +7,8 @@
 import { Box, Tooltip, Typography } from "@mui/material";
 import { tokens } from "@/theme";
 import { PlayerDot } from "@/components/atoms/PlayerDot";
-import { useActionHover } from "../ActionHoverContext";
+import { useActionHover, ACTION_INFO } from "../ActionHoverContext";
+import { TOOLTIP_DELAY } from "./shared";
 
 export interface CollapsedActionRowProps {
   label: string;
@@ -90,7 +91,7 @@ export const CollapsedActionRow = ({
         },
 
         cursor: isDisabled ? "not-allowed" : "pointer",
-        opacity: isDisabled ? 0.45 : 1,
+        opacity: isDisabled ? 0.55 : 1,
         transition: `all ${tokens.transition.fast}`,
         ...(!isDisabled && {
           "&:hover": {
@@ -197,9 +198,41 @@ export const CollapsedActionRow = ({
     </Box>
   );
 
-  if (isDisabled && (disabledReason || allFilled)) {
+  // ── Rich tooltip content (inline hover info) ──────────────────
+  const actionInfo = actionId ? ACTION_INFO[actionId] : null;
+  const richTooltip = actionInfo ? (
+    <Box sx={{ p: 0.5, maxWidth: 260 }}>
+      <Typography sx={{ fontFamily: tokens.font.display, fontSize: 13, fontWeight: 700, color: tokens.ui.text, lineHeight: 1.3 }}>
+        {actionInfo.title}
+      </Typography>
+      {actionInfo.cost && (
+        <Typography sx={{ fontFamily: tokens.font.body, fontSize: 11, color: tokens.ui.gold, fontWeight: 600, mt: 0.25 }}>
+          Cost: {actionInfo.cost}
+        </Typography>
+      )}
+      <Typography sx={{ fontFamily: tokens.font.body, fontSize: 11, color: tokens.ui.text, lineHeight: 1.4, mt: 0.5 }}>
+        {actionInfo.description}
+      </Typography>
+      <Typography sx={{ fontFamily: tokens.font.body, fontSize: 10, color: tokens.ui.textMuted, mt: 0.5 }}>
+        {placedCount} of {totalSlots} slots filled{totalSlots > 1 ? " — cost increases per slot" : ""}
+      </Typography>
+      {isDisabled && disabledReason && (
+        <Typography sx={{ fontFamily: tokens.font.body, fontSize: 11, color: tokens.ui.danger, fontWeight: 600, mt: 0.5 }}>
+          {disabledReason}
+        </Typography>
+      )}
+      {isDisabled && allFilled && !disabledReason && (
+        <Typography sx={{ fontFamily: tokens.font.body, fontSize: 11, color: tokens.ui.danger, fontWeight: 600, mt: 0.5 }}>
+          All slots filled
+        </Typography>
+      )}
+    </Box>
+  ) : (isDisabled ? (disabledReason ?? "All slots filled") : "");
+
+  // Always wrap in tooltip — rich content for actions with info, simple for disabled-only
+  if (richTooltip) {
     return (
-      <Tooltip title={disabledReason ?? "All slots filled"} placement="top" arrow>
+      <Tooltip title={richTooltip} placement="right" arrow enterDelay={TOOLTIP_DELAY.enter} enterNextDelay={TOOLTIP_DELAY.enterNext}>
         <span
           style={{ display: "block" }}
           onMouseEnter={() => actionId && setHoveredAction(actionId)}

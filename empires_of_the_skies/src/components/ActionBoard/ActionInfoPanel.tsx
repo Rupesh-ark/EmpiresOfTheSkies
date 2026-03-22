@@ -145,6 +145,24 @@ export const ActionInfoPanel = ({ boardState }: ActionInfoPanelProps) => {
       >
         {info.description}
       </Typography>
+
+      {info.details && (
+        <Typography
+          sx={{
+            fontFamily: tokens.font.body,
+            fontSize: tokens.fontSize.xs,
+            color: tokens.ui.textMuted,
+            lineHeight: 1.5,
+            maxWidth: 280,
+            whiteSpace: "pre-line",
+            mt: 1,
+            pt: 1,
+            borderTop: `1px solid ${tokens.ui.border}`,
+          }}
+        >
+          {info.details}
+        </Typography>
+      )}
     </Box>
   );
 };
