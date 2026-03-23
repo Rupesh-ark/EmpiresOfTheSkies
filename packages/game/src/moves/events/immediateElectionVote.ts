@@ -13,10 +13,9 @@ const immediateElectionVote: MoveDefinition = {
     if (!G.eventState.immediateElectionPending) return INVALID_MOVE;
     if (G.hasVoted.includes(playerID)) return INVALID_MOVE;
 
-    const kingdomVotedFor: string = args[0];
-    // Validate the vote target is a valid player kingdom
-    const validKingdoms: string[] = Object.values(G.playerInfo).map((p) => p.kingdomName);
-    if (!validKingdoms.includes(kingdomVotedFor)) return INVALID_MOVE;
+    const voteTarget: string = args[0];
+    // Validate the vote target is a valid player ID
+    if (!ctx.playOrder.includes(voteTarget)) return INVALID_MOVE;
 
     const kingdomToNumberMap: Record<
       string,
@@ -42,7 +41,7 @@ const immediateElectionVote: MoveDefinition = {
       8: "Constantium",
     };
 
-    G.voteSubmitted[playerID] = kingdomVotedFor;
+    G.voteSubmitted[playerID] = voteTarget;
     G.hasVoted.push(playerID);
 
     if (G.hasVoted.length < ctx.playOrder.length) {
@@ -125,26 +124,26 @@ const immediateElectionVote: MoveDefinition = {
     });
     let finalWinner: string;
     if (winners.length > 1) {
-      let incumbentKingdom: string | undefined;
+      let incumbentId: string | undefined;
       Object.values(G.playerInfo).forEach((player) => {
         if (player.isArchprelate) {
-          incumbentKingdom = player.kingdomName;
+          incumbentId = player.id;
         }
       });
-      finalWinner = incumbentKingdom ?? winners[0];
+      finalWinner = incumbentId ?? winners[0];
     } else {
       finalWinner = winners[0];
     }
 
     // Track fatigue
-    let previousArchprelateKingdom: string | undefined;
+    let previousArchprelateId: string | undefined;
     Object.values(G.playerInfo).forEach((player) => {
-      if (player.isArchprelate) previousArchprelateKingdom = player.kingdomName;
+      if (player.isArchprelate) previousArchprelateId = player.id;
     });
 
     // Apply results
     Object.values(G.playerInfo).forEach((player) => {
-      if (player.kingdomName === finalWinner) {
+      if (player.id === finalWinner) {
         player.isArchprelate = true;
         if (player.heresyTracker > HERESY_MIN) {
           player.heresyTracker -= 1;
@@ -156,7 +155,7 @@ const immediateElectionVote: MoveDefinition = {
           }
         });
 
-        if (player.kingdomName === previousArchprelateKingdom) {
+        if (player.id === previousArchprelateId) {
           G.consecutiveArchprelateWins += 1;
         } else {
           G.consecutiveArchprelateWins = 1;

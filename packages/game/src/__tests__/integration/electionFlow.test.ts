@@ -59,15 +59,15 @@ describe("electionFlow — most votes wins", () => {
 
     const order = ["0", "1", "2"];
     // Each player self-votes
-    castVote(G, "0", "Angland", order);
-    castVote(G, "1", "Gallois", order);
-    castVote(G, "2", "Castillia", order);
+    castVote(G, "0", "0", order);
+    castVote(G, "1", "1", order);
+    castVote(G, "2", "2", order);
 
-    // Angland has 4 cathedral votes, others have 1 each
+    // Angland (player "0") has 4 cathedral votes, others have 1 each
     expect(G.playerInfo["0"].isArchprelate).toBe(true);
     expect(G.playerInfo["1"].isArchprelate).toBe(false);
     expect(G.playerInfo["2"].isArchprelate).toBe(false);
-    expect(G.electionResults["Angland"]).toBe(4);
+    expect(G.electionResults["0"]).toBe(4);
   });
 });
 
@@ -83,19 +83,18 @@ describe("electionFlow — tie goes to incumbent Archprelate", () => {
 
     const order = ["0", "1", "2"];
     // Both top candidates self-vote; Castillia votes for Gallois
-    castVote(G, "0", "Angland", order);
-    castVote(G, "1", "Gallois", order);
-    castVote(G, "2", "Gallois", order);
+    castVote(G, "0", "0", order);
+    castVote(G, "1", "1", order);
+    castVote(G, "2", "1", order);
 
-    // Angland: 2, Gallois: 2+1=3 — Gallois wins (not a tie)
-    // Let's re-do with pure tie: Castillia votes for Angland
-    // Reset state
+    // player "0": 2, player "1": 2+1=3 — player "1" wins (not a tie)
+    // Let's re-do with pure tie: reset state
     const G2 = buildInitialG([
       buildPlayer("0", { kingdomName: "Angland", cathedrals: 2, isArchprelate: true }),
       buildPlayer("1", { kingdomName: "Gallois", cathedrals: 2, isArchprelate: false }),
     ]);
-    castVote(G2, "0", "Angland", ["0", "1"]);
-    castVote(G2, "1", "Gallois", ["0", "1"]);
+    castVote(G2, "0", "0", ["0", "1"]);
+    castVote(G2, "1", "1", ["0", "1"]);
 
     // 2–2 tie: incumbent (Angland / player "0") keeps title
     expect(G2.playerInfo["0"].isArchprelate).toBe(true);
@@ -116,9 +115,9 @@ describe("electionFlow — new Archprelate gains VP based on orthodox count", ()
     const vpBefore = G.playerInfo["0"].resources.victoryPoints;
 
     const order = ["0", "1", "2"];
-    castVote(G, "0", "Angland", order);
-    castVote(G, "1", "Angland", order);
-    castVote(G, "2", "Angland", order);
+    castVote(G, "0", "0", order);
+    castVote(G, "1", "0", order);
+    castVote(G, "2", "0", order);
 
     // All 3 orthodox → floor(6/3) = 2 VP
     expect(G.playerInfo["0"].resources.victoryPoints).toBe(vpBefore + 2);
@@ -135,9 +134,9 @@ describe("electionFlow — new Archprelate gains VP based on orthodox count", ()
     const vpBefore = G.playerInfo["0"].resources.victoryPoints;
 
     const order = ["0", "1", "2"];
-    castVote(G, "0", "Angland", order);
-    castVote(G, "1", "Angland", order);
-    castVote(G, "2", "Angland", order);
+    castVote(G, "0", "0", order);
+    castVote(G, "1", "0", order);
+    castVote(G, "2", "0", order);
 
     // floor(2*3/3) = 2 (only 3 players, orthodox count is 3)
     expect(G.playerInfo["0"].resources.victoryPoints).toBe(vpBefore + 2);
@@ -153,10 +152,10 @@ describe("electionFlow — previous Archprelate loses flag", () => {
       buildPlayer("1", { kingdomName: "Gallois", cathedrals: 4, isArchprelate: false }),
     ]);
 
-    castVote(G, "0", "Angland", ["0", "1"]);
-    castVote(G, "1", "Gallois", ["0", "1"]);
+    castVote(G, "0", "0", ["0", "1"]);
+    castVote(G, "1", "1", ["0", "1"]);
 
-    // Gallois wins 4 vs 1
+    // player "1" (Gallois) wins 4 vs 1
     expect(G.playerInfo["1"].isArchprelate).toBe(true);
     expect(G.playerInfo["0"].isArchprelate).toBe(false);
   });
@@ -173,8 +172,8 @@ describe("electionFlow — consecutive wins tracking", () => {
     ]);
     G.consecutiveArchprelateWins = 1;
 
-    castVote(G, "0", "Angland", ["0", "1"]);
-    castVote(G, "1", "Angland", ["0", "1"]);
+    castVote(G, "0", "0", ["0", "1"]);
+    castVote(G, "1", "0", ["0", "1"]);
 
     // Same player wins again → increment to 2
     expect(G.consecutiveArchprelateWins).toBe(2);
@@ -187,10 +186,10 @@ describe("electionFlow — consecutive wins tracking", () => {
     ]);
     G.consecutiveArchprelateWins = 3;
 
-    castVote(G, "0", "Angland", ["0", "1"]);
-    castVote(G, "1", "Gallois", ["0", "1"]);
+    castVote(G, "0", "0", ["0", "1"]);
+    castVote(G, "1", "1", ["0", "1"]);
 
-    // New winner (Gallois) → reset to 1
+    // New winner (player "1", Gallois) → reset to 1
     expect(G.consecutiveArchprelateWins).toBe(1);
     expect(G.playerInfo["1"].isArchprelate).toBe(true);
   });
@@ -214,8 +213,8 @@ describe("electionFlow — consecutive wins tracking", () => {
     G.consecutiveArchprelateWins = 1;
 
     const vpBefore = G.playerInfo["0"].resources.victoryPoints;
-    castVote(G, "0", "Angland", ["0", "1"]);
-    castVote(G, "1", "Angland", ["0", "1"]);
+    castVote(G, "0", "0", ["0", "1"]);
+    castVote(G, "1", "0", ["0", "1"]);
 
     // consecutiveArchprelateWins becomes 2 → fatigueReduction = (2-1)*2 = 2
     // baseVP = floor(2*2/3) = 1, after fatigue: max(0, 1-2) = 0
@@ -236,14 +235,14 @@ describe("electionFlow — influence prelates affect vote tallying", () => {
     // Player "1" has influenced Angland's prelate (slot 1 = Angland)
     G.boardState.influencePrelates[1] = "1";
 
-    castVote(G, "0", "Angland", ["0", "1"]);
-    castVote(G, "1", "Gallois", ["0", "1"]);
+    castVote(G, "0", "0", ["0", "1"]);
+    castVote(G, "1", "1", ["0", "1"]);
 
     // Angland is influenced by player "1" → Angland's own 3 votes don't count
-    // Player "1" controls Angland's 3 cathedrals + own 1 = 4 votes for Gallois
-    // Player "0" gets 0 votes for Angland (blocked by influence)
-    expect(G.electionResults["Gallois"]).toBe(4);
-    expect(G.electionResults["Angland"]).toBe(0);
+    // Player "1" controls Angland's 3 cathedrals + own 1 = 4 votes for player "1"
+    // Player "0" gets 0 votes (blocked by influence)
+    expect(G.electionResults["1"]).toBe(4);
+    expect(G.electionResults["0"]).toBe(0);
     expect(G.playerInfo["1"].isArchprelate).toBe(true);
   });
 });

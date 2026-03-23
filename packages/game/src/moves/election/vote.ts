@@ -1,9 +1,11 @@
+import { INVALID_MOVE } from "boardgame.io/core";
 import { MoveDefinition } from "../../types";
 import { HERESY_MIN, logEvent } from "../../helpers/stateUtils";
 
 const vote: MoveDefinition = {
   fn: ({ G, ctx, playerID, events }, ...args) => {
-    const kingdomVotedFor = args[0];
+    const voteTarget: string = args[0];
+    if (!ctx.playOrder.includes(voteTarget)) return INVALID_MOVE;
 
     const kingdomToNumberMap: Record<
       string,
@@ -30,7 +32,7 @@ const vote: MoveDefinition = {
     };
 
     // Store the ballot — hidden from other players until all have voted
-    G.voteSubmitted[playerID] = kingdomVotedFor;
+    G.voteSubmitted[playerID] = voteTarget;
     G.hasVoted.push(playerID);
 
     // Only tally and resolve once every player has submitted their vote
@@ -112,25 +114,25 @@ const vote: MoveDefinition = {
       let finalWinner: string;
       if (winners.length > 1) {
         // Tie-break: incumbent keeps title
-        let incumbentKingdom: string | undefined;
+        let incumbentId: string | undefined;
         Object.values(G.playerInfo).forEach((player) => {
           if (player.isArchprelate) {
-            incumbentKingdom = player.kingdomName;
+            incumbentId = player.id;
           }
         });
-        finalWinner = incumbentKingdom ?? winners[0];
+        finalWinner = incumbentId ?? winners[0];
       } else {
         finalWinner = winners[0];
       }
 
       // Track who was Archprelate before this election (for fatigue)
-      let previousArchprelateKingdom: string | undefined;
+      let previousArchprelateId: string | undefined;
       Object.values(G.playerInfo).forEach((player) => {
-        if (player.isArchprelate) previousArchprelateKingdom = player.kingdomName;
+        if (player.isArchprelate) previousArchprelateId = player.id;
       });
 
       Object.values(G.playerInfo).forEach((player) => {
-        if (player.kingdomName === finalWinner) {
+        if (player.id === finalWinner) {
           player.isArchprelate = true;
           // Elected Archprelate's heresy marker retreats one space
           if (player.heresyTracker > HERESY_MIN) {
@@ -144,7 +146,7 @@ const vote: MoveDefinition = {
           });
 
           // Archprelate Fatigue: consecutive wins reduce VP
-          if (player.kingdomName === previousArchprelateKingdom) {
+          if (player.id === previousArchprelateId) {
             G.consecutiveArchprelateWins += 1;
           } else {
             G.consecutiveArchprelateWins = 1;
