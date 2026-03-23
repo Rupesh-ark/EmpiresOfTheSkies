@@ -86,7 +86,7 @@ describe("actionPhase — foundFactory adds factory and deducts gold", () => {
     foundFactory.fn({ G, ctx, playerID: "0" }, 0);
 
     expect(G.playerInfo["0"].factories).toBe(factoriesBefore + 1);
-    expect(G.playerInfo["0"].resources.gold).toBe(goldBefore - 1);
+    expect(G.playerInfo["0"].resources.gold).toBe(goldBefore - 2);
     expect(G.playerInfo["0"].turnComplete).toBe(true);
   });
 
@@ -96,16 +96,16 @@ describe("actionPhase — foundFactory adds factory and deducts gold", () => {
       buildPlayer("1", { resources: buildResources({ gold: 10, counsellors: 4 }), factories: 1 }),
     ]);
 
-    // Player 0 takes slot 0 (costs 1G)
+    // Player 0 takes slot 0 (costs 2G: 1 base + 1 for self)
     foundFactory.fn({ G, ctx: buildCtx("0"), playerID: "0" }, 0);
     const goldAfterFirst = G.playerInfo["1"].resources.gold;
 
-    // Player 1 takes slot 1 (costs 2G because slot 0 already taken)
+    // Player 1 takes slot 1 (costs 3G: 1 base + 1 already taken + 1 for self)
     foundFactory.fn({ G, ctx: buildCtx("1"), playerID: "1" }, 1);
 
     expect(G.playerInfo["0"].factories).toBe(2);
     expect(G.playerInfo["1"].factories).toBe(2);
-    expect(G.playerInfo["1"].resources.gold).toBe(goldAfterFirst - 2);
+    expect(G.playerInfo["1"].resources.gold).toBe(goldAfterFirst - 3);
   });
 });
 

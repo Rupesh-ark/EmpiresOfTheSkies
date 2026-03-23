@@ -12,14 +12,15 @@ import { useActionHover } from "../../ActionHoverContext";
 const THUMB_W = 40;
 
 const BUILDINGS = [
-  { label: "Cathedral", index: 0, key: 1, bg: BTN_BG.cathedral, actionId: "cathedral" },
-  { label: "Palace",    index: 1, key: 2, bg: BTN_BG.palace,    actionId: "palace" },
-  { label: "Shipyard",  index: 2, key: 3, bg: BTN_BG.shipyard,  actionId: "shipyard" },
-  { label: "Fort",      index: 3, key: 4, bg: BTN_BG.fort,      actionId: "fort" },
+  { label: "Cathedral", index: 0, key: 1, bg: BTN_BG.cathedral, actionId: "cathedral", baseCost: 5 },
+  { label: "Palace",    index: 1, key: 2, bg: BTN_BG.palace,    actionId: "palace",    baseCost: 5 },
+  { label: "Shipyard",  index: 2, key: 3, bg: BTN_BG.shipyard,  actionId: "shipyard",  baseCost: 3 },
+  { label: "Fort",      index: 3, key: 4, bg: BTN_BG.fort,      actionId: "fort",      baseCost: 2 },
 ] as const;
 
 const BuildingCell = ({
   label,
+  cost,
   counsellors,
   playerInfo,
   onClick,
@@ -27,6 +28,7 @@ const BuildingCell = ({
   actionId,
 }: {
   label: string;
+  cost: number;
   counsellors: string[];
   playerInfo: Record<string, { colour: string; kingdomName: string }>;
   onClick: () => void;
@@ -117,6 +119,17 @@ const BuildingCell = ({
           >
             {label}
           </Typography>
+          <Typography
+            sx={{
+              fontFamily: tokens.font.body,
+              fontSize: tokens.fontSize.xs,
+              color: tokens.ui.gold,
+              fontWeight: 600,
+              lineHeight: 1,
+            }}
+          >
+            {cost}g
+          </Typography>
         </Box>
       </Box>
 
@@ -166,10 +179,12 @@ const FoundBuildingsRow = (props: ActionBoardProps) => (
       const counsellors = (props.G.boardState.foundBuildings[
         b.key as keyof typeof props.G.boardState.foundBuildings
       ] as string[]) ?? [];
+      const cost = b.baseCost + counsellors.length + 1;
       return (
         <BuildingCell
           key={b.label}
           label={b.label}
+          cost={cost}
           counsellors={counsellors}
           playerInfo={props.G.playerInfo}
           bg={b.bg}

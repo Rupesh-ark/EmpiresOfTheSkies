@@ -33,7 +33,7 @@ const foundFactory: MoveDefinition = {
     const takenSlots = Object.values(G.boardState.foundFactories).filter(
       (v) => v !== undefined
     ).length;
-    const cost = 1 + takenSlots;
+    const cost = 1 + takenSlots + 1;
 
     G.playerInfo[playerID].resources.gold -= cost;
     G.playerInfo[playerID].factories += 1;

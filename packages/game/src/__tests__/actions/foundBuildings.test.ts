@@ -29,18 +29,18 @@ function callMove(G: ReturnType<typeof buildInitialG>, playerID: string, slotInd
 // ── Cathedral (slot 0) ─────────────────────────────────────────────────────
 
 describe("foundBuildings — Cathedral (v4.2: 5 Gold base)", () => {
-  it("first cathedral this round costs 5 Gold", () => {
+  it("first cathedral this round costs 6 Gold (5 base + 1 for self)", () => {
     const G = buildInitialG();
     G.playerInfo["0"].resources.gold = 10;
     callMove(G, "0", 0);
-    expect(G.playerInfo["0"].resources.gold).toBe(5);
+    expect(G.playerInfo["0"].resources.gold).toBe(4);
   });
 
-  it("second cathedral costs 6 Gold (5 base + 1 for prior)", () => {
+  it("second cathedral costs 7 Gold (5 base + 1 prior + 1 self)", () => {
     const G = buildInitialG([buildPlayer("0", { resources: buildResources({ gold: 20 }) })]);
     G.boardState.foundBuildings[1].push("1"); // one already taken this round
     callMove(G, "0", 0);
-    expect(G.playerInfo["0"].resources.gold).toBe(14); // 20 - 6
+    expect(G.playerInfo["0"].resources.gold).toBe(13); // 20 - 7
   });
 
   it("increments the player's cathedral count", () => {
@@ -91,11 +91,11 @@ describe("foundBuildings — Cathedral (v4.2: 5 Gold base)", () => {
 // ── Palace (slot 1) ──────────────────────────────────────────────────────────
 
 describe("foundBuildings — Palace (v4.2: 5 Gold base)", () => {
-  it("first palace costs 5 Gold", () => {
+  it("first palace costs 6 Gold (5 base + 1 for self)", () => {
     const G = buildInitialG();
     G.playerInfo["0"].resources.gold = 10;
     callMove(G, "0", 1, "advance");
-    expect(G.playerInfo["0"].resources.gold).toBe(5);
+    expect(G.playerInfo["0"].resources.gold).toBe(4);
   });
 
   it("orthodox player gains +1 VP", () => {
@@ -122,11 +122,11 @@ describe("foundBuildings — Palace (v4.2: 5 Gold base)", () => {
 // ── Shipyard (slot 2) ─────────────────────────────────────────────────────────
 
 describe("foundBuildings — Shipyard (3 Gold base)", () => {
-  it("first shipyard costs 3 Gold", () => {
+  it("first shipyard costs 4 Gold (3 base + 1 for self)", () => {
     const G = buildInitialG();
     G.playerInfo["0"].resources.gold = 10;
     callMove(G, "0", 2);
-    expect(G.playerInfo["0"].resources.gold).toBe(7);
+    expect(G.playerInfo["0"].resources.gold).toBe(6);
   });
 
   it("increments the player's shipyard count", () => {
@@ -159,22 +159,22 @@ function addValidFortTile(G: ReturnType<typeof buildInitialG>, playerID: string)
   } as any;
 }
 
-describe("foundBuildings — Fort (v4.2: 2 Gold base + 1 per counsellor in slot)", () => {
-  it("costs 2 Gold when first in slot", () => {
+describe("foundBuildings — Fort (v4.2: 2 Gold base + 1 per counsellor in slot including self)", () => {
+  it("costs 3 Gold when first in slot (2 base + 1 for self)", () => {
     const G = buildInitialG();
     addValidFortTile(G, "0");
     const goldBefore = G.playerInfo["0"].resources.gold;
     callMove(G, "0", 3);
-    expect(G.playerInfo["0"].resources.gold).toBe(goldBefore - 2);
+    expect(G.playerInfo["0"].resources.gold).toBe(goldBefore - 3);
   });
 
-  it("costs 3 Gold when one counsellor already in slot", () => {
+  it("costs 4 Gold when one counsellor already in slot", () => {
     const G = buildInitialG();
     addValidFortTile(G, "0");
     G.boardState.foundBuildings[4] = ["1"];
     const goldBefore = G.playerInfo["0"].resources.gold;
     callMove(G, "0", 3);
-    expect(G.playerInfo["0"].resources.gold).toBe(goldBefore - 3);
+    expect(G.playerInfo["0"].resources.gold).toBe(goldBefore - 4);
   });
 
   it("costs 1 counsellor", () => {

@@ -118,7 +118,7 @@ const foundCathedral = (
   playerID: string,
   _args: any[]
 ): void => {
-  const cost = BUILDING_BASE_COST.cathedral + G.boardState.foundBuildings[BuildingSlot.Cathedral].length;
+  const cost = BUILDING_BASE_COST.cathedral + G.boardState.foundBuildings[BuildingSlot.Cathedral].length + 1;
   G.playerInfo[playerID].resources.gold -= cost;
   G.playerInfo[playerID].cathedrals += 1;
   G.playerInfo[playerID].resources.victoryPoints += CATHEDRAL_VP;
@@ -138,7 +138,7 @@ const foundPalace = (
   // validateFoundBuildings already confirmed this is "advance" or "retreat"
   const heresyDirection: "advance" | "retreat" = args[1];
 
-  const cost = BUILDING_BASE_COST.palace + G.boardState.foundBuildings[BuildingSlot.Palace].length;
+  const cost = BUILDING_BASE_COST.palace + G.boardState.foundBuildings[BuildingSlot.Palace].length + 1;
 
   G.playerInfo[playerID].resources.gold -= cost;
   G.playerInfo[playerID].palaces += 1;
@@ -167,7 +167,7 @@ const foundShipyard = (
   playerID: string,
   _args: any[]
 ): void => {
-  const cost = BUILDING_BASE_COST.shipyard + G.boardState.foundBuildings[BuildingSlot.Shipyard].length;
+  const cost = BUILDING_BASE_COST.shipyard + G.boardState.foundBuildings[BuildingSlot.Shipyard].length + 1;
 
   G.playerInfo[playerID].resources.gold -= cost;
   G.playerInfo[playerID].shipyards += 1;
@@ -184,7 +184,7 @@ const foundFort = (
   _args: any[]
 ): void => {
   // validateFoundBuildings already confirmed a valid tile exists before we charge.
-  const cost = BUILDING_BASE_COST.fort + G.boardState.foundBuildings[BuildingSlot.Fort].length;
+  const cost = BUILDING_BASE_COST.fort + G.boardState.foundBuildings[BuildingSlot.Fort].length + 1;
 
   G.playerInfo[playerID].resources.gold -= cost;
   G.boardState.foundBuildings[BuildingSlot.Fort].push(playerID);

@@ -50,23 +50,23 @@ const computeRowCost = (
       return `${cost}g + 1 Counsellor`;
     }
     case "cathedral": {
-      const filled = countOccupied(boardState.foundBuildings);
-      const cost = 5 + filled;
+      const filled = boardState.foundBuildings[1].length;
+      const cost = 5 + filled + 1;
       return `${cost}g + 1 Counsellor`;
     }
     case "palace": {
-      const filled = countOccupied(boardState.foundBuildings);
-      const cost = 5 + filled;
+      const filled = boardState.foundBuildings[2].length;
+      const cost = 5 + filled + 1;
       return `${cost}g + 1 Counsellor`;
     }
     case "shipyard": {
-      const filled = countOccupied(boardState.foundBuildings);
-      const cost = 3 + filled;
+      const filled = boardState.foundBuildings[3].length;
+      const cost = 3 + filled + 1;
       return `${cost}g + 1 Counsellor`;
     }
     case "fort": {
-      const filled = countOccupied(boardState.foundBuildings);
-      const cost = 2 + filled;
+      const filled = boardState.foundBuildings[4].length;
+      const cost = 2 + filled + 1;
       return `${cost}g + 1 Counsellor`;
     }
     default:
