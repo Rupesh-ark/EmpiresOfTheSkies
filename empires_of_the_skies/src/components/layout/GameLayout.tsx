@@ -212,8 +212,12 @@ export const GameLayout = ({
               overflow: "auto",
               backgroundColor: `${tokens.ui.background}`,
               minWidth: 0,
+              display: "flex",
+              flexDirection: "column",
             }}
           >
+            {/* Map top spacer */}
+            <Box sx={{ height: 8, flexShrink: 0 }} />
             {renderMap(resolvedMapSize)}
 
             {/* Enlarge / restore toggle */}
@@ -277,101 +281,79 @@ export const GameLayout = ({
           </Box>
         )}
 
-        {/* ── Bottom panel: split (action board + tabs) or tabs-only ── */}
-        {hasBottom && hasExtras ? (
-          /* Split bottom: 60% action board, 40% tabbed panel */
+        {/* ── Bottom panel: split (action board + tabs) — slides in/out ── */}
+        <Box
+          sx={{
+            display: "flex",
+            height: mapExpanded ? "0px" : (hasBottom && hasExtras ? config.bottomHeight : "0px"),
+            minHeight: mapExpanded ? 0 : (hasBottom && hasExtras ? "200px" : 0),
+            flexShrink: 0,
+            overflow: "hidden",
+            boxShadow: !mapExpanded && hasBottom && hasExtras ? `0 -3px 10px rgba(0,0,0,0.1)` : "none",
+            transition: `height ${tokens.transition.slow}, min-height ${tokens.transition.slow}`,
+          }}
+        >
+          {/* Left: Action board (60%) */}
           <Box
             sx={{
-              display: "flex",
-              height: config.bottomHeight,
-              minHeight: "200px",
-              flexShrink: 0,
-              boxShadow: `0 -3px 10px rgba(0,0,0,0.1)`,
+              flex: "0 0 60%",
+              overflowY: "auto",
+              background: backgrounds.parchmentPanelTinted,
             }}
           >
-            {/* Left: Action board (60%) */}
+            {renderSlot("action-board")}
+          </Box>
+
+          {/* Right: Tabbed panel (40%) */}
+          <Box
+            sx={{
+              flex: "0 0 40%",
+              display: "flex",
+              flexDirection: "column",
+              overflow: "hidden",
+              background: backgrounds.parchmentPanelTinted,
+              boxShadow: `-2px 0 8px rgba(0,0,0,0.06)`,
+            }}
+          >
+            <IconTabStrip
+              tabs={config.tabExtras.length > 0 ? config.tabExtras : ["game-log", "stats", "trade", "chat"]}
+              activeTab={extraTab}
+              onTabClick={(slot) => setExtraTab(prev => (prev === slot ? null : slot))}
+            />
             <Box
               sx={{
-                flex: "0 0 60%",
+                flex: 1,
                 overflowY: "auto",
-                background: backgrounds.parchmentPanelTinted,
+                minHeight: 0,
               }}
             >
-              {renderSlot(config.bottom)}
-            </Box>
-
-            {/* Right: Tabbed panel (40%) */}
-            <Box
-              sx={{
-                flex: "0 0 40%",
-                display: "flex",
-                flexDirection: "column",
-                overflow: "hidden",
-                background: backgrounds.parchmentPanelTinted,
-                boxShadow: `-2px 0 8px rgba(0,0,0,0.06)`,
-              }}
-            >
-              {/* Tab strip header */}
-              <IconTabStrip
-                tabs={config.tabExtras}
-                activeTab={extraTab}
-                onTabClick={(slot) => setExtraTab(prev => (prev === slot ? null : slot))}
-              />
-
-              {/* Tab content */}
-              <Box
-                sx={{
-                  flex: 1,
-                  overflowY: "auto",
-                  minHeight: 0,
-                }}
-              >
-                {extraTab !== null && renderSlot(extraTab)}
-              </Box>
+              {extraTab !== null && renderSlot(extraTab)}
             </Box>
           </Box>
-        ) : (
-          <>
-            {/* Bottom panel only (no tabs alongside) */}
-            {hasBottom && (
+        </Box>
+
+        {/* ── Tab extras strip (collapse drawer — non-actions phases) ── */}
+        {!hasBottom && hasExtras && (
+          <Box sx={{ flexShrink: 0 }}>
+            <Collapse in={extraTab !== null} unmountOnExit>
               <Box
                 sx={{
-                  height: config.bottomHeight,
-                  minHeight: "200px",
-                  flexShrink: 0,
+                  height: "35vh",
                   overflowY: "auto",
                   boxShadow: `0 -3px 10px rgba(0,0,0,0.1)`,
                   background: backgrounds.parchmentPanelTinted,
                 }}
               >
-                {renderSlot(config.bottom)}
+                {extraTab !== null && renderSlot(extraTab)}
               </Box>
-            )}
+            </Collapse>
 
-            {/* Tab extras strip (collapse drawer — non-actions phases) */}
-            {hasExtras && (
-              <Box sx={{ flexShrink: 0 }}>
-                <Collapse in={extraTab !== null} unmountOnExit>
-                  <Box
-                    sx={{
-                      height: "35vh",
-                      overflowY: "auto",
-                      boxShadow: `0 -3px 10px rgba(0,0,0,0.1)`,
-                      background: backgrounds.parchmentPanelTinted,
-                    }}
-                  >
-                    {extraTab !== null && renderSlot(extraTab)}
-                  </Box>
-                </Collapse>
-
-                <IconTabStrip
-                  tabs={config.tabExtras}
-                  activeTab={extraTab}
-                  onTabClick={(slot) => setExtraTab(prev => (prev === slot ? null : slot))}
-                />
-              </Box>
-            )}
-          </>
+            <IconTabStrip
+              tabs={config.tabExtras}
+              activeTab={extraTab}
+              onTabClick={(slot) => setExtraTab(prev => (prev === slot ? null : slot))}
+            />
+          </Box>
         )}
       </Box>
 

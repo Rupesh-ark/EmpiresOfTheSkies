@@ -6,11 +6,11 @@
  * Rules:
  *   Two fleets at the same map square may transfer Skyships, Regiments,
  *   and Levies between them. No counsellor cost, no turnComplete.
+ *   Transfers are now allowed at Kingdom [4,0] (tile-level dialog support).
  *
  *   INVALID_MOVE if:
  *     - Same fleet index
  *     - Fleets at different locations
- *     - Fleets at Kingdom [4,0]
  *     - Source lacks resources
  *     - Target would exceed 5 Skyships
  *     - Target troops would exceed target Skyships
@@ -103,7 +103,7 @@ describe("transferBetweenFleets — INVALID_MOVE conditions", () => {
     expect(callMove(G, "0", 0, 1, 1, 0, 0)).toBe(INVALID_MOVE);
   });
 
-  it("returns INVALID_MOVE when fleets are at Kingdom [4,0]", () => {
+  it("allows transfer when both fleets are at Kingdom [4,0]", () => {
     const G = buildInitialG([
       buildPlayer("0", {
         fleetInfo: [
@@ -112,7 +112,9 @@ describe("transferBetweenFleets — INVALID_MOVE conditions", () => {
         ],
       }),
     ]);
-    expect(callMove(G, "0", 0, 1, 1, 0, 0)).toBe(INVALID_MOVE);
+    callMove(G, "0", 0, 1, 1, 0, 0);
+    expect(G.playerInfo["0"].fleetInfo[0].skyships).toBe(2);
+    expect(G.playerInfo["0"].fleetInfo[1].skyships).toBe(2);
   });
 
   it("returns INVALID_MOVE when source lacks skyships", () => {

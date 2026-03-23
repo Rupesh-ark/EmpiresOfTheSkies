@@ -36,6 +36,7 @@ import buildSkyships from "./moves/actions/buildSkyships";
 import conscriptLevies from "./moves/actions/conscriptLevies";
 import passFleetInfoToPlayerInfo from "./moves/actions/passFleetInfoToPlayerInfo";
 import deployFleet from "./moves/actions/deployFleet";
+import moveFleet from "./moves/actions/moveFleet";
 import transferBetweenFleets from "./moves/actions/transferBetweenFleets";
 import sellSkyships from "./moves/actions/sellSkyships";
 import sellBuilding from "./moves/actions/sellBuilding";
@@ -45,6 +46,7 @@ import acceptDeal from "./moves/actions/acceptDeal";
 import rejectDeal from "./moves/actions/rejectDeal";
 import enableDispatchButtons from "./moves/actions/enableDispatchButtons";
 import issueHolyDecree from "./moves/actions/issueHolyDecree";
+import garrisonTransfer from "./moves/actions/garrisonTransfer";
 import sendAgitators from "./moves/actions/sendAgitators";
 import declareSmugglerGood from "./moves/actions/declareSmugglerGood";
 import pass from "./moves/pass";
@@ -228,6 +230,7 @@ const MyGame: Game<MyGameState> = {
     deployFleet: wrapMove("deployFleet", deployFleet),
     enableDispatchButtons: wrapMove("enableDispatchButtons", enableDispatchButtons),
     issueHolyDecree: wrapMove("issueHolyDecree", issueHolyDecree),
+    garrisonTransfer: wrapMove("garrisonTransfer", garrisonTransfer),
     pass: wrapMove("pass", pass),
     attackOtherPlayersFleet: wrapMove("attackOtherPlayersFleet", attackOtherPlayersFleet),
     evadeAttackingFleet: wrapMove("evadeAttackingFleet", evadeAttackingFleet),
@@ -492,6 +495,7 @@ const MyGame: Game<MyGameState> = {
         conscriptLevies: wrapMove("conscriptLevies", conscriptLevies),
         passFleetInfoToPlayerInfo: wrapMove("passFleetInfoToPlayerInfo", passFleetInfoToPlayerInfo),
         deployFleet: wrapMove("deployFleet", deployFleet),
+        moveFleet: wrapMove("moveFleet", moveFleet),
         transferBetweenFleets: wrapMove("transferBetweenFleets", transferBetweenFleets),
         sellSkyships: wrapMove("sellSkyships", sellSkyships),
         sellBuilding: wrapMove("sellBuilding", sellBuilding),
@@ -501,6 +505,7 @@ const MyGame: Game<MyGameState> = {
         rejectDeal: wrapMove("rejectDeal", rejectDeal),
         enableDispatchButtons: wrapMove("enableDispatchButtons", enableDispatchButtons),
         issueHolyDecree: wrapMove("issueHolyDecree", issueHolyDecree),
+        garrisonTransfer: wrapMove("garrisonTransfer", garrisonTransfer),
         sendAgitators: wrapMove("sendAgitators", sendAgitators),
         declareSmugglerGood: wrapMove("declareSmugglerGood", declareSmugglerGood),
         pass: wrapMove("pass", pass),

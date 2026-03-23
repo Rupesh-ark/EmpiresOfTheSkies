@@ -141,12 +141,15 @@ const deployFleet: MoveDefinition = {
 
     G.playerInfo[playerID].fleetInfo[fleet.fleetId].location = [x, y];
 
-    G.mapState.battleMap[startingCoords[1]][startingCoords[0]].splice(
-      G.mapState.battleMap[startingCoords[1]][startingCoords[0]].indexOf(
-        playerID
-      ),
-      1
+    // Only remove from battleMap if no other fleets of this player remain on the old tile
+    const otherFleetsOnOldTile = currentPlayer.fleetInfo.some(
+      (f) => f.fleetId !== fleet.fleetId && f.location[0] === startingCoords[0] && f.location[1] === startingCoords[1] && f.skyships > 0
     );
+    if (!otherFleetsOnOldTile) {
+      const oldArr = G.mapState.battleMap[startingCoords[1]][startingCoords[0]];
+      const idx = oldArr.indexOf(playerID);
+      if (idx !== -1) oldArr.splice(idx, 1);
+    }
 
     if (!G.mapState.battleMap[y][x].includes(playerID)) {
       G.mapState.battleMap[y][x].push(playerID);

@@ -29,6 +29,7 @@ import buildSkyships from "./moves/actions/buildSkyships";
 import conscriptLevies from "./moves/actions/conscriptLevies";
 import passFleetInfoToPlayerInfo from "./moves/actions/passFleetInfoToPlayerInfo";
 import deployFleet from "./moves/actions/deployFleet";
+import moveFleet from "./moves/actions/moveFleet";
 import transferBetweenFleets from "./moves/actions/transferBetweenFleets";
 import sellSkyships from "./moves/actions/sellSkyships";
 import sellBuilding from "./moves/actions/sellBuilding";
@@ -38,6 +39,7 @@ import acceptDeal from "./moves/actions/acceptDeal";
 import rejectDeal from "./moves/actions/rejectDeal";
 import enableDispatchButtons from "./moves/actions/enableDispatchButtons";
 import issueHolyDecree from "./moves/actions/issueHolyDecree";
+import garrisonTransfer from "./moves/actions/garrisonTransfer";
 import declareSmugglerGood from "./moves/actions/declareSmugglerGood";
 import pass from "./moves/pass";
 
@@ -63,6 +65,7 @@ export const MOVE_DEFINITIONS: Record<string, MoveDefinition> = {
   conscriptLevies,
   passFleetInfoToPlayerInfo,
   deployFleet,
+  moveFleet,
   transferBetweenFleets,
   sellSkyships,
   sellBuilding,
@@ -72,6 +75,7 @@ export const MOVE_DEFINITIONS: Record<string, MoveDefinition> = {
   rejectDeal,
   enableDispatchButtons,
   issueHolyDecree,
+  garrisonTransfer,
   declareSmugglerGood,
   pass,
 };

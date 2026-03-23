@@ -261,12 +261,13 @@ const ActionBoardsAndMapInner = (props: MyGameProps) => {
 
   // ── Map renderer ───────────────────────────────────────────────
 
-  const renderMap = useCallback((_size: MapSize): React.ReactNode => {
+  const renderMap = useCallback((size: MapSize): React.ReactNode => {
     return (
       <>
         <Suspense fallback={null}>
           <WorldMap
             {...validatedProps}
+            expanded={size === "large"}
             detailRequest={mapDetailRequest}
             onDetailRequestHandled={(requestKey) => {
               setMapDetailRequest((current) =>

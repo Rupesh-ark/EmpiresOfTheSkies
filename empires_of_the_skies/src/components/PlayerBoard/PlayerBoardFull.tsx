@@ -17,18 +17,17 @@ import {
   DialogActions,
 } from "@mui/material";
 import { tokens } from "@/theme";
-import { lazy, Suspense } from "react";
-import { FleetInfo, MyGameProps, PlayerFortuneOfWarCardInfo, findPossibleDestinations, LEGACY_CARD_DEFS, KA_CARD_DEFS, EVENT_CARD_DEFS } from "@eots/game";
+import { FleetInfo, MyGameProps, PlayerFortuneOfWarCardInfo, LEGACY_CARD_DEFS, KA_CARD_DEFS, EVENT_CARD_DEFS } from "@eots/game";
 import { EVENT_ICONS } from "@/components/Events/eventCardIcons";
 import popeLogo from "@/boards_and_assets/action_board/pope_logo.webp";
 import captainGeneralLogo from "@/boards_and_assets/action_board/captain_general.webp";
 
-const WorldMap = lazy(() => import("../WorldMap/WorldMap"));
 import { IconCounsellor, IconGold, IconVP, IconRegiment, IconElite, IconLevy, IconSkyship } from "@/theme";
 import { ResourceChip } from "@/components/atoms/ResourceChip";
 import { GamePanel } from "@/components/atoms/GamePanel";
 import { GameButton } from "@/components/atoms/GameButton";
 import { CardFrame } from "@/components/atoms/CardFrame";
+import { CardLightbox, type EnlargedCard } from "@/components/atoms/CardLightbox";
 import { Holdings } from "./Holdings";
 import { useActionHover } from "@/components/ActionBoard/ActionHoverContext";
 import { getLocationPresentation } from "@/utils/locationLabels";
@@ -214,210 +213,74 @@ const MAX_SKYSHIPS = 5;
 
 const FleetAccordion = ({
   fleets,
-  colour,
   tileMap,
   onViewLocation,
-  onDeploy,
-  moves,
 }: {
   fleets: FleetInfo[];
-  colour: string;
   tileMap: any[][];
   onViewLocation?: (location: number[]) => void;
-  onDeploy?: (fleetIndex: number) => void;
-  moves: MyGameProps["moves"];
 }) => {
-  const [expandedFleet, setExpandedFleet] = useState<number | null>(null);
-
   return (
     <GamePanel variant="default" padding="sm">
       <SectionHeader label="Fleets" />
       <Box sx={{ display: "flex", flexDirection: "column", gap: "2px" }}>
         {fleets.map((fleet) => {
-          const isExpanded = expandedFleet === fleet.fleetId;
           const loc = getLocationPresentation(tileMap, fleet.location);
-          const troopSlots = distributeTroops(fleet);
 
           return (
-            <Box key={fleet.fleetId}>
-              {/* Fleet header — click to expand/collapse */}
-              <Box
-                onClick={() =>
-                  setExpandedFleet(isExpanded ? null : fleet.fleetId)
-                }
+            <Box
+              key={fleet.fleetId}
+              onClick={() => onViewLocation?.(fleet.location)}
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: `${tokens.spacing.sm}px`,
+                px: `${tokens.spacing.sm}px`,
+                py: `${tokens.spacing.xs}px`,
+                cursor: onViewLocation ? "pointer" : "default",
+                borderRadius: `${tokens.radius.sm}px`,
+                "&:hover": {
+                  backgroundColor: onViewLocation ? tokens.ui.surfaceHover : "transparent",
+                },
+                transition: `background-color ${tokens.transition.fast}`,
+              }}
+            >
+              {/* Fleet name + location */}
+              <Typography
                 sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: `${tokens.spacing.sm}px`,
-                  px: `${tokens.spacing.sm}px`,
-                  py: `${tokens.spacing.xs}px`,
-                  cursor: "pointer",
-                  borderRadius: `${tokens.radius.sm}px`,
-                  backgroundColor: isExpanded
-                    ? tokens.ui.surfaceHover
-                    : "transparent",
-                  "&:hover": {
-                    backgroundColor: tokens.ui.surfaceHover,
-                  },
-                  transition: `background-color ${tokens.transition.fast}`,
+                  fontFamily: tokens.font.body,
+                  fontSize: tokens.fontSize.sm,
+                  color: tokens.ui.text,
+                  flex: 1,
+                  lineHeight: 1.3,
                 }}
               >
-                {/* Expand/collapse indicator */}
-                <Typography
-                  sx={{
-                    fontSize: tokens.fontSize.xs,
-                    color: tokens.ui.textMuted,
-                    lineHeight: 1,
-                    width: 12,
-                    flexShrink: 0,
-                  }}
-                >
-                  {isExpanded ? "▾" : "▸"}
-                </Typography>
-
-                {/* Fleet name + location */}
-                <Typography
-                  sx={{
-                    fontFamily: tokens.font.body,
-                    fontSize: tokens.fontSize.sm,
-                    color: tokens.ui.text,
-                    flex: 1,
-                    lineHeight: 1.3,
-                  }}
-                >
-                  Fleet {fleet.fleetId + 1}
-                  <Box
-                    component="span"
-                    sx={{ color: tokens.ui.textMuted, ml: 0.5 }}
-                  >
-                    — {loc.name} [{loc.reference}]
-                  </Box>
-                </Typography>
-
-                {/* Summary chips */}
+                Fleet {fleet.fleetId + 1}
                 <Box
-                  sx={{
-                    display: "flex",
-                    gap: "6px",
-                    flexShrink: 0,
-                    fontSize: tokens.fontSize.xs,
-                    color: tokens.ui.textMuted,
-                  }}
+                  component="span"
+                  sx={{ color: tokens.ui.textMuted, ml: 0.5 }}
                 >
-                  <Box component="span" sx={{ display: "inline-flex", alignItems: "center", gap: "1px" }}>{fleet.skyships}<IconSkyship style={{ fontSize: 12 }} /></Box>
-                  <Box component="span" sx={{ display: "inline-flex", alignItems: "center", gap: "1px" }}>{fleet.regiments}<IconRegiment style={{ fontSize: 12 }} /></Box>
-                  {fleet.eliteRegiments > 0 && (
-                    <Box component="span" sx={{ display: "inline-flex", alignItems: "center", gap: "1px" }}>{fleet.eliteRegiments}<IconElite style={{ fontSize: 12 }} /></Box>
-                  )}
-                  <Box component="span" sx={{ display: "inline-flex", alignItems: "center", gap: "1px" }}>{fleet.levies}<IconLevy style={{ fontSize: 12 }} /></Box>
+                  — {loc.name} [{loc.reference}]
                 </Box>
+              </Typography>
+
+              {/* Summary chips */}
+              <Box
+                sx={{
+                  display: "flex",
+                  gap: "6px",
+                  flexShrink: 0,
+                  fontSize: tokens.fontSize.xs,
+                  color: tokens.ui.textMuted,
+                }}
+              >
+                <Box component="span" sx={{ display: "inline-flex", alignItems: "center", gap: "1px" }}>{fleet.skyships}<IconSkyship style={{ fontSize: 12 }} /></Box>
+                <Box component="span" sx={{ display: "inline-flex", alignItems: "center", gap: "1px" }}>{fleet.regiments}<IconRegiment style={{ fontSize: 12 }} /></Box>
+                {fleet.eliteRegiments > 0 && (
+                  <Box component="span" sx={{ display: "inline-flex", alignItems: "center", gap: "1px" }}>{fleet.eliteRegiments}<IconElite style={{ fontSize: 12 }} /></Box>
+                )}
+                <Box component="span" sx={{ display: "inline-flex", alignItems: "center", gap: "1px" }}>{fleet.levies}<IconLevy style={{ fontSize: 12 }} /></Box>
               </Box>
-
-              {/* Expanded fleet content */}
-              {isExpanded && (
-                <Box
-                  sx={{
-                    mt: "2px",
-                    p: `${tokens.spacing.sm}px`,
-                    backgroundColor: tokens.ui.surface,
-                    border: `1px solid ${tokens.ui.border}`,
-                    borderRadius: `${tokens.radius.md}px`,
-                  }}
-                >
-                  {/* Skyship grid */}
-                  {fleet.skyships === 0 ? (
-                    <Typography
-                      sx={{
-                        fontFamily: tokens.font.body,
-                        fontSize: tokens.fontSize.xs,
-                        color: tokens.ui.textMuted,
-                        textAlign: "center",
-                        py: `${tokens.spacing.sm}px`,
-                      }}
-                    >
-                      No skyships in this fleet
-                    </Typography>
-                  ) : (
-                    <Box
-                      sx={{
-                        display: "grid",
-                        gridTemplateColumns: `repeat(auto-fill, minmax(56px, 1fr))`,
-                        gap: `${tokens.spacing.sm}px`,
-                        justifyItems: "center",
-                        mb: `${tokens.spacing.sm}px`,
-                      }}
-                    >
-                      {Array.from({ length: Math.max(fleet.skyships, 1) }).map(
-                        (_, i) => (
-                          <SkyshipVisual
-                            key={i}
-                            hasSkyship={i < fleet.skyships}
-                            troopType={troopSlots[i] ?? "empty"}
-                            colour={colour}
-                          />
-                        )
-                      )}
-                    </Box>
-                  )}
-
-                  {/* Fleet actions */}
-                  <Box
-                    sx={{
-                      display: "flex",
-                      gap: `${tokens.spacing.sm}px`,
-                      flexWrap: "wrap",
-                    }}
-                  >
-                    {onDeploy && (
-                      <GameButton
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => onDeploy(fleet.fleetId)}
-                        disabled={fleet.skyships === 0}
-                        disabledReason="No skyships to deploy"
-                      >
-                        Deploy
-                      </GameButton>
-                    )}
-                    <GameButton
-                      variant="ghost"
-                      size="sm"
-                      disabled={fleets.length < 2}
-                      disabledReason="Need multiple fleets to transfer"
-                      onClick={() => {
-                        // Transfer: move all from this fleet to the next fleet at same location
-                        const otherFleet = fleets.find(
-                          (f) =>
-                            f.fleetId !== fleet.fleetId &&
-                            f.location[0] === fleet.location[0] &&
-                            f.location[1] === fleet.location[1]
-                        );
-                        if (otherFleet) {
-                          moves.transferBetweenFleets(
-                            fleet.fleetId,
-                            otherFleet.fleetId,
-                            fleet.skyships,
-                            fleet.regiments,
-                            fleet.levies,
-                            fleet.eliteRegiments
-                          );
-                        }
-                      }}
-                    >
-                      Transfer
-                    </GameButton>
-                    {onViewLocation && (
-                      <GameButton
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => onViewLocation(fleet.location)}
-                      >
-                        View on Map
-                      </GameButton>
-                    )}
-                  </Box>
-                </Box>
-              )}
             </Box>
           );
         })}
@@ -571,24 +434,11 @@ const AvailableForces = ({
 
 // ── Section 2: Kingdom Actions ──────────────────────────────────────────
 
-type FleetAllocation = {
-  skyships: number;
-  regiments: number;
-  levies: number;
-  eliteRegiments: number;
-};
-
-const emptyAllocation = (): FleetAllocation => ({
-  skyships: 0, regiments: 0, levies: 0, eliteRegiments: 0,
-});
-
 const KingdomActions = ({
   colour,
   shipyards,
   counsellorLocations,
   moves,
-  fleets,
-  gameProps,
 }: {
   colour: string;
   shipyards: number;
@@ -596,20 +446,12 @@ const KingdomActions = ({
     buildSkyships: boolean;
     conscriptLevies: boolean;
     trainTroops: boolean;
-    dispatchSkyshipFleet: boolean;
-    dispatchDisabled: boolean;
   };
   moves: MyGameProps["moves"];
-  fleets: FleetInfo[];
-  gameProps: MyGameProps;
 }) => {
   const [buildDialogOpen, setBuildDialogOpen] = useState(false);
   const [levyDialogOpen, setLevyDialogOpen] = useState(false);
   const [levyCount, setLevyCount] = useState(3);
-  const [dispatchOpen, setDispatchOpen] = useState(false);
-  const [dispatchFleetIndex, setDispatchFleetIndex] = useState(0);
-  const [dispatchDest, setDispatchDest] = useState<number[] | null>(null);
-  const [dispatchAlloc, setDispatchAlloc] = useState<FleetAllocation>(emptyAllocation());
 
   const handleBuildSkyships = (perYard: number) => {
     moves.buildSkyships(perYard);
@@ -677,28 +519,6 @@ const KingdomActions = ({
           Train Troops
         </GameButton>
 
-        {/* 4. Dispatch Fleet */}
-        <GameButton
-          variant="secondary"
-          fullWidth
-          onMouseEnter={() => setHoveredAction("dispatch-fleet")}
-          onMouseLeave={() => setHoveredAction(null)}
-          onClick={() => {
-            moves.enableDispatchButtons(true);
-            setDispatchAlloc(emptyAllocation());
-            setDispatchDest(null);
-            setDispatchFleetIndex(0);
-            setDispatchOpen(true);
-          }}
-          disabled={counsellorLocations.dispatchSkyshipFleet || counsellorLocations.dispatchDisabled}
-          disabledReason={
-            counsellorLocations.dispatchSkyshipFleet ? "Already dispatched this round"
-              : "Dispatch unavailable"
-          }
-          icon={<CounsellorDot placed={counsellorLocations.dispatchSkyshipFleet} colour={colour} />}
-        >
-          Dispatch Fleet
-        </GameButton>
       </Box>
 
       {/* ── Build Skyships dialog ──────────────────────────────────── */}
@@ -806,200 +626,6 @@ const KingdomActions = ({
         </DialogActions>
       </Dialog>
 
-      {/* ── Dispatch Fleet dialog ──────────────────────────────────── */}
-      <Dialog
-        open={dispatchOpen}
-        onClose={() => setDispatchOpen(false)}
-        maxWidth="md"
-        fullWidth
-        PaperProps={{
-          sx: {
-            backgroundColor: tokens.ui.surface,
-            border: `1px solid ${tokens.ui.borderMedium}`,
-            borderRadius: `${tokens.radius.lg}px`,
-            maxHeight: "85vh",
-          },
-        }}
-      >
-        <DialogTitle
-          sx={{ fontFamily: tokens.font.display, color: tokens.ui.gold, pb: 1 }}
-        >
-          Dispatch Fleet
-        </DialogTitle>
-        <DialogContent>
-          {/* Fleet selector */}
-          <Typography
-            sx={{
-              fontFamily: tokens.font.body,
-              fontSize: tokens.fontSize.sm,
-              color: tokens.ui.textMuted,
-              mb: 1,
-            }}
-          >
-            Select fleet:
-          </Typography>
-          <Box sx={{ display: "flex", gap: 1, mb: 2 }}>
-            {fleets.map((f, i) => (
-              <GameButton
-                key={f.fleetId}
-                variant={dispatchFleetIndex === i ? "primary" : "ghost"}
-                size="sm"
-                onClick={() => {
-                  setDispatchFleetIndex(i);
-                  setDispatchAlloc(emptyAllocation());
-                  setDispatchDest(null);
-                }}
-              >
-                Fleet {i + 1}
-              </GameButton>
-            ))}
-          </Box>
-
-          {/* Resource allocation */}
-          <Typography
-            sx={{
-              fontFamily: tokens.font.body,
-              fontSize: tokens.fontSize.sm,
-              color: tokens.ui.textMuted,
-              mb: 1,
-            }}
-          >
-            Load from reserves:
-          </Typography>
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 1, mb: 2 }}>
-            {([
-              { key: "skyships" as const, label: "🚢 Skyships", max: gameProps.G.playerInfo[gameProps.playerID ?? gameProps.ctx.currentPlayer].resources.skyships },
-              { key: "regiments" as const, label: "⚔ Regiments", max: gameProps.G.playerInfo[gameProps.playerID ?? gameProps.ctx.currentPlayer].resources.regiments },
-              { key: "eliteRegiments" as const, label: "🎖 Elite", max: gameProps.G.playerInfo[gameProps.playerID ?? gameProps.ctx.currentPlayer].resources.eliteRegiments ?? 0 },
-              { key: "levies" as const, label: "🛡 Levies", max: gameProps.G.playerInfo[gameProps.playerID ?? gameProps.ctx.currentPlayer].resources.levies },
-            ]).map(({ key, label, max }) => (
-              <Box key={key} sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                <Typography
-                  sx={{
-                    fontFamily: tokens.font.body,
-                    fontSize: tokens.fontSize.sm,
-                    color: tokens.ui.text,
-                    width: 100,
-                  }}
-                >
-                  {label}
-                </Typography>
-                <GameButton
-                  variant="ghost"
-                  size="sm"
-                  onClick={() =>
-                    setDispatchAlloc((a) => ({ ...a, [key]: Math.max(0, a[key] - 1) }))
-                  }
-                  disabled={dispatchAlloc[key] <= 0}
-                >
-                  −
-                </GameButton>
-                <Typography
-                  sx={{
-                    fontFamily: tokens.font.body,
-                    fontSize: tokens.fontSize.base,
-                    color: tokens.ui.text,
-                    fontWeight: 700,
-                    minWidth: 28,
-                    textAlign: "center",
-                  }}
-                >
-                  {dispatchAlloc[key]}
-                </Typography>
-                <GameButton
-                  variant="ghost"
-                  size="sm"
-                  onClick={() =>
-                    setDispatchAlloc((a) => ({ ...a, [key]: Math.min(max, a[key] + 1) }))
-                  }
-                  disabled={dispatchAlloc[key] >= max}
-                >
-                  +
-                </GameButton>
-                <Typography
-                  sx={{
-                    fontFamily: tokens.font.body,
-                    fontSize: tokens.fontSize.xs,
-                    color: tokens.ui.textMuted,
-                  }}
-                >
-                  / {max}
-                </Typography>
-              </Box>
-            ))}
-          </Box>
-
-          {/* Destination map */}
-          <Typography
-            sx={{
-              fontFamily: tokens.font.body,
-              fontSize: tokens.fontSize.sm,
-              color: tokens.ui.textMuted,
-              mb: 1,
-            }}
-          >
-            Select destination:{" "}
-            {dispatchDest ? (
-              <Box component="span" sx={{ color: tokens.ui.gold, fontWeight: 600 }}>
-                {getLocationPresentation(gameProps.G.mapState.currentTileArray, dispatchDest).fullLabel}
-              </Box>
-            ) : (
-              "click a tile on the map"
-            )}
-          </Typography>
-          <Box
-            sx={{
-              height: 300,
-              border: `1px solid ${tokens.ui.border}`,
-              borderRadius: `${tokens.radius.md}px`,
-              overflow: "hidden",
-            }}
-          >
-            <Suspense fallback={null}>
-              <WorldMap
-                {...gameProps}
-                alternateOnClick={(coords) => setDispatchDest(coords)}
-                selectableTiles={(() => {
-                  const fleet = fleets[dispatchFleetIndex];
-                  if (!fleet) return [];
-                  const unladen = dispatchAlloc.regiments === 0 && dispatchAlloc.levies === 0 && dispatchAlloc.eliteRegiments === 0;
-                  const [dests] = findPossibleDestinations(gameProps.G, fleet.location, unladen);
-                  return dests;
-                })()}
-              />
-            </Suspense>
-          </Box>
-        </DialogContent>
-        <DialogActions sx={{ px: 3, pb: 2, gap: 1 }}>
-          <GameButton variant="ghost" onClick={() => setDispatchOpen(false)}>
-            Cancel
-          </GameButton>
-          <GameButton
-            variant="primary"
-            disabled={!dispatchDest || dispatchAlloc.skyships === 0}
-            disabledReason={
-              dispatchAlloc.skyships === 0
-                ? "Must assign at least 1 skyship"
-                : "Select a destination"
-            }
-            onClick={() => {
-              if (!dispatchDest) return;
-              moves.enableDispatchButtons(true);
-              moves.deployFleet(
-                dispatchFleetIndex,
-                dispatchDest,
-                dispatchAlloc.skyships,
-                dispatchAlloc.regiments,
-                dispatchAlloc.levies,
-                dispatchAlloc.eliteRegiments
-              );
-              setDispatchOpen(false);
-            }}
-          >
-            Deploy Fleet
-          </GameButton>
-        </DialogActions>
-      </Dialog>
     </GamePanel>
   );
 };
@@ -1029,7 +655,7 @@ const CardDrawers = ({
   playerInfo: Record<string, { colour: string; kingdomName: string }>;
 }) => {
   const [openTab, setOpenTab] = useState<CardTab | null>(null);
-  const [enlargedCard, setEnlargedCard] = useState<{ src: string; title: string; description?: string } | null>(null);
+  const [enlargedCard, setEnlargedCard] = useState<EnlargedCard | null>(null);
 
   const toggleTab = (tab: CardTab) =>
     setOpenTab((prev) => (prev === tab ? null : tab));
@@ -1145,7 +771,7 @@ const CardDrawers = ({
             const def = LEGACY_CARD_DEFS[legacyCard.name.toLowerCase() as keyof typeof LEGACY_CARD_DEFS];
             return (
               <Box
-                onClick={() => setEnlargedCard({ src: img, title: legacyCard.name, description: def?.description })}
+                onClick={() => setEnlargedCard({ src: img, title: legacyCard.name, description: def?.description, colour: legacyCard.colour })}
                 sx={{
                   position: "relative",
                   borderRadius: `${tokens.radius.md}px`,
@@ -1156,16 +782,24 @@ const CardDrawers = ({
                   "&:hover": { boxShadow: `0 4px 16px rgba(0,0,0,0.25)`, transform: "scale(1.01)" },
                 }}
               >
+                {/* Coloured accent bar — left edge indicates card alignment */}
+                <Box sx={{ position: "absolute", top: 0, left: 0, bottom: 0, width: 4, backgroundColor: legacyCard.colour === "purple" ? tokens.allegiance.orthodox : tokens.allegiance.heresy, zIndex: 2 }} />
                 <Box component="img" src={img} alt={legacyCard.name} sx={{ width: "100%", height: 160, objectFit: "cover", display: "block" }} />
-                <Box sx={{ position: "absolute", bottom: 0, left: 0, right: 0, background: "linear-gradient(to top, rgba(15,10,5,0.88) 0%, rgba(15,10,5,0.6) 60%, transparent 100%)", px: 2, pt: 4, pb: 1.5 }}>
-                  <Typography sx={{ fontFamily: tokens.font.display, fontSize: tokens.fontSize.base, color: tokens.ui.gold, lineHeight: 1.2, textTransform: "capitalize" }}>
-                    {legacyCard.name}
-                  </Typography>
+                <Box sx={{ position: "absolute", bottom: 0, left: 0, right: 0, background: "linear-gradient(to top, rgba(15,10,5,0.95) 0%, rgba(15,10,5,0.8) 60%, transparent 100%)", px: 2, pt: 4, pb: 1.5 }}>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                    <Typography sx={{ fontFamily: tokens.font.display, fontSize: tokens.fontSize.base, color: "#F0D080", lineHeight: 1.2, textTransform: "capitalize", textShadow: "0 1px 3px rgba(0,0,0,0.8)" }}>
+                      {legacyCard.name}
+                    </Typography>
+                    <Box sx={{ width: 12, height: 12, borderRadius: "50%", backgroundColor: legacyCard.colour === "purple" ? "#9b59b6" : "#e67e22", border: "1.5px solid rgba(255,255,255,0.5)", flexShrink: 0 }} />
+                  </Box>
                   {def && (
-                    <Typography sx={{ fontFamily: tokens.font.body, fontSize: tokens.fontSize.xs, color: "rgba(235,225,210,0.85)", lineHeight: 1.4, mt: "2px" }}>
+                    <Typography sx={{ fontFamily: tokens.font.body, fontSize: tokens.fontSize.xs, color: "rgba(245,240,230,0.95)", lineHeight: 1.4, mt: "2px", textShadow: "0 1px 2px rgba(0,0,0,0.7)" }}>
                       {def.description}
                     </Typography>
                   )}
+                  <Typography sx={{ fontFamily: tokens.font.body, fontSize: 9, color: legacyCard.colour === "purple" ? tokens.allegiance.orthodox : tokens.allegiance.heresy, lineHeight: 1.3, mt: "3px", fontWeight: 600, textShadow: "0 1px 2px rgba(0,0,0,0.7)" }}>
+                    {legacyCard.colour === "purple" ? "Orthodox — full VP if Orthodox, half if Heretic" : "Heretic — full VP if Heretic, half if Orthodox"}
+                  </Typography>
                 </Box>
               </Box>
             );
@@ -1301,81 +935,7 @@ const CardDrawers = ({
         );
       })()}
 
-      {/* Card Lightbox */}
-      <Dialog
-        open={!!enlargedCard}
-        onClose={() => setEnlargedCard(null)}
-        PaperProps={{
-          sx: {
-            backgroundColor: "transparent",
-            boxShadow: "none",
-            overflow: "visible",
-            maxWidth: "min(85vw, 520px)",
-          },
-        }}
-        slotProps={{ backdrop: { sx: { backgroundColor: "rgba(0,0,0,0.75)", backdropFilter: "blur(6px)" } } }}
-        onClick={() => setEnlargedCard(null)}
-      >
-        {enlargedCard && (
-          <Box
-            sx={{
-              position: "relative",
-              borderRadius: `${tokens.radius.md}px`,
-              overflow: "hidden",
-              boxShadow: "0 12px 48px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.08)",
-            }}
-          >
-            <Box
-              component="img"
-              src={enlargedCard.src}
-              alt={enlargedCard.title}
-              sx={{
-                width: "100%",
-                display: "block",
-              }}
-            />
-            <Box
-              sx={{
-                position: "absolute",
-                bottom: 0,
-                left: 0,
-                right: 0,
-                background: "linear-gradient(to top, rgba(15,10,5,0.92) 0%, rgba(15,10,5,0.7) 60%, transparent 100%)",
-                px: 3,
-                pt: 5,
-                pb: 2.5,
-              }}
-            >
-              <Typography
-                sx={{
-                  fontFamily: tokens.font.display,
-                  fontSize: tokens.fontSize.lg,
-                  color: tokens.ui.gold,
-                  textAlign: "center",
-                  textTransform: "capitalize",
-                  lineHeight: 1.2,
-                  mb: 0.5,
-                }}
-              >
-                {enlargedCard.title}
-              </Typography>
-              {enlargedCard.description && (
-                <Typography
-                  sx={{
-                    fontFamily: tokens.font.body,
-                    fontSize: tokens.fontSize.sm,
-                    color: "rgba(235,225,210,0.9)",
-                    textAlign: "center",
-                    lineHeight: 1.5,
-                  }}
-                >
-                  {enlargedCard.description}
-                </Typography>
-              )}
-            </Box>
-          </Box>
-        )}
-      </Dialog>
+      <CardLightbox card={enlargedCard} onClose={() => setEnlargedCard(null)} />
     </GamePanel>
   );
 };
@@ -1512,22 +1072,13 @@ export const PlayerBoardFull = memo((props: PlayerBoardFullProps) => {
         shipyards={playerInfo.shipyards}
         counsellorLocations={playerInfo.playerBoardCounsellorLocations}
         moves={props.moves}
-        fleets={playerInfo.fleetInfo}
-        gameProps={props}
       />
 
       {/* Section 3: Fleets */}
       <FleetAccordion
         fleets={playerInfo.fleetInfo}
-        colour={colour}
         tileMap={props.G.mapState.currentTileArray}
         onViewLocation={props.onOpenFleetLocation}
-        onDeploy={(fleetIndex) => {
-          // Open the dispatch dialog from Section 2 isn't possible here,
-          // so Deploy triggers the dispatch flow directly for this fleet
-          props.moves.enableDispatchButtons(true);
-        }}
-        moves={props.moves}
       />
 
       {/* Section 4: Cards */}

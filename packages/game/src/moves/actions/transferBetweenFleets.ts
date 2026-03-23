@@ -1,5 +1,5 @@
 import { MoveDefinition, MyGameState, MoveError } from "../../types";
-import { MAX_SKYSHIPS_PER_FLEET, KINGDOM_LOCATION } from "../../data/gameData";
+import { MAX_SKYSHIPS_PER_FLEET } from "../../data/gameData";
 
 const validateTransferBetweenFleets = (
   G: MyGameState,
@@ -24,9 +24,6 @@ const validateTransferBetweenFleets = (
   }
   if (sourceFleet.location[0] !== targetFleet.location[0] || sourceFleet.location[1] !== targetFleet.location[1]) {
     return { code: "DIFFERENT_LOCATION", message: "Fleets must be at the same location" };
-  }
-  if (sourceFleet.location[0] === KINGDOM_LOCATION[0] && sourceFleet.location[1] === KINGDOM_LOCATION[1]) {
-    return { code: "AT_KINGDOM", message: "Use kingdom reserves transfer instead" };
   }
   if (sourceFleet.skyships < skyships || sourceFleet.regiments < regiments || sourceFleet.levies < levies || sourceFleet.eliteRegiments < elite) {
     return { code: "INSUFFICIENT_RESOURCES", message: "Source fleet doesn't have enough to transfer" };
