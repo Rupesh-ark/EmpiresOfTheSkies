@@ -1,4 +1,4 @@
-import { MyGameState } from "../types";
+import { MyGameState, TileInfoProps } from "../types";
 import { MAP_WIDTH, MAP_HEIGHT } from "../data/gameData";
 
 export const FAITHDOM_TILES: [number, number][] = [
@@ -10,6 +10,40 @@ export const FAITHDOM_TILES: [number, number][] = [
 
 
 export const tileKey = (x: number, y: number): string => `${x},${y}`;
+
+// ── Direction helpers for mountain blocking ──────────────────────────────
+
+/** Maps a (dx, dy) offset to its compass direction string. */
+const offsetToDir = (dx: number, dy: number): string => {
+  // dy is inverted: -1 = north (row above), +1 = south (row below)
+  const ns = dy < 0 ? "N" : dy > 0 ? "S" : "";
+  const ew = dx < 0 ? "W" : dx > 0 ? "E" : "";
+  return ns + ew;
+};
+
+
+/**
+ * Check if movement from (x,y) to (nx,ny) is blocked by mountains.
+ * Mountains are printed on the SOURCE tile's edge — they only block
+ * movement away from that tile, not approaches from the other side.
+ */
+const isEdgeBlocked = (
+  x: number, y: number,
+  nx: number, ny: number,
+  tileArray: TileInfoProps[][],
+): boolean => {
+  // Compute the raw dx accounting for east-west wrap
+  let dx = nx - x;
+  if (dx > MAP_WIDTH / 2) dx -= MAP_WIDTH;
+  if (dx < -MAP_WIDTH / 2) dx += MAP_WIDTH;
+  const dy = ny - y;
+
+  const dir = offsetToDir(dx, dy);
+  const srcTile = tileArray[y]?.[x];
+  return srcTile?.blocked.includes(dir) ?? false;
+};
+
+// ── Adjacency ────────────────────────────────────────────────────────────
 
 // Adjacency with east-west wrap. edgesOnly=true gives 4 cardinal directions only.
 export const getNeighbors = (x: number, y: number, edgesOnly = false): [number, number][] => {
@@ -26,18 +60,38 @@ export const getNeighbors = (x: number, y: number, edgesOnly = false): [number, 
   return result;
 };
 
-// BFS from start tiles through a network of allowed tiles
-export const bfsReachable = (
-  starts: [number, number][],
-  network: Set<string>
-): Set<string> => {
-  return new Set(bfsWithDistance(starts, network).keys());
+/**
+ * Like getNeighbors, but filters out tiles blocked by mountain edges.
+ * Pass the tile array so both source and destination blocked edges are checked.
+ */
+export const getPassableNeighbors = (
+  x: number, y: number,
+  tileArray: TileInfoProps[][],
+  edgesOnly = false,
+): [number, number][] => {
+  return getNeighbors(x, y, edgesOnly).filter(
+    ([nx, ny]) => !isEdgeBlocked(x, y, nx, ny, tileArray)
+  );
 };
 
-// BFS returning a map of tileKey → distance from nearest start tile
+// ── BFS ──────────────────────────────────────────────────────────────────
+
+// BFS from start tiles through a network of allowed tiles.
+// When tileArray is provided, mountain edges are respected.
+export const bfsReachable = (
+  starts: [number, number][],
+  network: Set<string>,
+  tileArray?: TileInfoProps[][],
+): Set<string> => {
+  return new Set(bfsWithDistance(starts, network, tileArray).keys());
+};
+
+// BFS returning a map of tileKey → distance from nearest start tile.
+// When tileArray is provided, mountain edges are respected.
 export const bfsWithDistance = (
   starts: [number, number][],
-  network: Set<string>
+  network: Set<string>,
+  tileArray?: TileInfoProps[][],
 ): Map<string, number> => {
   const visited = new Map<string, number>();
   const queue: [number, number, number][] = [];
@@ -50,7 +104,10 @@ export const bfsWithDistance = (
   });
   while (queue.length > 0) {
     const [cx, cy, dist] = queue.shift()!;
-    for (const [nx, ny] of getNeighbors(cx, cy)) {
+    const neighbors = tileArray
+      ? getPassableNeighbors(cx, cy, tileArray)
+      : getNeighbors(cx, cy);
+    for (const [nx, ny] of neighbors) {
       const k = tileKey(nx, ny);
       if (network.has(k) && !visited.has(k)) {
         visited.set(k, dist + 1);
@@ -84,8 +141,8 @@ export const isValidRetreatDestination = (
   // Must be discovered
   if (!G.mapState.discoveredTiles[dy]?.[dx]) return false;
 
-  // Must be adjacent to battle location
-  const neighbors = getNeighbors(bx, by);
+  // Must be adjacent to battle location and not blocked by mountains
+  const neighbors = getPassableNeighbors(bx, by, G.mapState.currentTileArray);
   const isAdjacent = neighbors.some(([nx, ny]) => nx === dx && ny === dy);
   if (!isAdjacent) return false;
 
@@ -127,7 +184,7 @@ export const countActiveTradeRoutes = (G: MyGameState, playerID: string): number
 
       const network = new Set(playerNetwork);
       network.add(tileKey(x, y));
-      const reachable = bfsReachable(FAITHDOM_TILES, network);
+      const reachable = bfsReachable(FAITHDOM_TILES, network, G.mapState.currentTileArray);
       if (reachable.has(tileKey(x, y))) count++;
     }
   }

@@ -55,14 +55,14 @@ export const enactPiracy = (G: MyGameState): void => {
         network.add(outpostKey);
 
         // Only routes connected to Faithdom are vulnerable to piracy
-        const reachable = bfsReachable(FAITHDOM_TILES, network);
+        const reachable = bfsReachable(FAITHDOM_TILES, network, G.mapState.currentTileArray);
         if (!reachable.has(outpostKey)) return;
 
         const routeValue = getTileRouteValue(G, x, y, cell.buildings);
         let goldRemainingToLose = routeValue;
 
         // BFS from outpost to get distance of each tile on the route
-        const distFromOutpost = bfsWithDistance([[x, y]], network);
+        const distFromOutpost = bfsWithDistance([[x, y]], network, G.mapState.currentTileArray);
 
         // Collect all rival blocking fleets with their distance from the outpost
         const blockingPirates: { rivalID: string; distance: number }[] = [];
@@ -89,7 +89,8 @@ export const enactPiracy = (G: MyGameState): void => {
             reducedNetwork.delete(rivalKey);
             const reachableWithout = bfsReachable(
               FAITHDOM_TILES,
-              reducedNetwork
+              reducedNetwork,
+              G.mapState.currentTileArray
             );
             if (!reachableWithout.has(outpostKey)) {
               blockingPirates.push({
@@ -115,7 +116,8 @@ export const enactPiracy = (G: MyGameState): void => {
             reducedNetwork.delete(fleetKey);
             const reachableWithout = bfsReachable(
               FAITHDOM_TILES,
-              reducedNetwork
+              reducedNetwork,
+              G.mapState.currentTileArray
             );
             if (!reachableWithout.has(outpostKey)) {
               const goldLost = Math.min(1, goldRemainingToLose);

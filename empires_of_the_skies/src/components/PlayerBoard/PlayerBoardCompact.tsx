@@ -8,13 +8,14 @@
  * Read-only. No interactions.
  */
 import { memo, useState } from "react";
-import { Box, Dialog, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import { IconCounsellor, IconGold, IconVP, IconRegiment, IconElite, IconLevy, IconSkyship } from "@/theme";
 import { tokens } from "@/theme";
 import { MyGameProps } from "@eots/game";
 import { ResourceChip } from "@/components/atoms/ResourceChip";
 import { GamePanel } from "@/components/atoms/GamePanel";
 import { CardFrame } from "@/components/atoms/CardFrame";
+import { CardLightbox, type EnlargedCard } from "@/components/atoms/CardLightbox";
 import { getLocationPresentation } from "@/utils/locationLabels";
 import {
   SWORD_CARDS,
@@ -93,7 +94,7 @@ type CardTab = "fow" | "legacy" | "ka" | "events";
 
 export const PlayerBoardCompact = memo((props: PlayerBoardCompactProps) => {
   const [openCardTab, setOpenCardTab] = useState<CardTab | null>(null);
-  const [enlargedCard, setEnlargedCard] = useState<{ src: string; title: string; description?: string } | null>(null);
+  const [enlargedCard, setEnlargedCard] = useState<EnlargedCard | null>(null);
   const playerInfo = props.G.playerInfo[props.playerID ?? props.ctx.currentPlayer];
   const colour = playerInfo.colour;
   const { regiments, eliteRegiments, levies, skyships, fortuneCards } = playerInfo.resources;
@@ -456,7 +457,7 @@ export const PlayerBoardCompact = memo((props: PlayerBoardCompactProps) => {
               const def = LEGACY_CARD_DEFS[name.toLowerCase() as keyof typeof LEGACY_CARD_DEFS];
               return (
                 <Box
-                  onClick={() => setEnlargedCard({ src: img, title: name, description: def?.description })}
+                  onClick={() => setEnlargedCard({ src: img, title: name, description: def?.description, colour: playerInfo.resources.legacyCard!.colour })}
                   sx={{
                     position: "relative",
                     borderRadius: `${tokens.radius.md}px`,
@@ -467,16 +468,24 @@ export const PlayerBoardCompact = memo((props: PlayerBoardCompactProps) => {
                     "&:hover": { boxShadow: `0 4px 16px rgba(0,0,0,0.25)`, transform: "scale(1.01)" },
                   }}
                 >
+                  {/* Coloured accent bar — left edge indicates card alignment */}
+                  <Box sx={{ position: "absolute", top: 0, left: 0, bottom: 0, width: 4, backgroundColor: playerInfo.resources.legacyCard!.colour === "purple" ? tokens.allegiance.orthodox : tokens.allegiance.heresy, zIndex: 2 }} />
                   <Box component="img" src={img} alt={name} sx={{ width: "100%", height: 120, objectFit: "cover", display: "block" }} />
-                  <Box sx={{ position: "absolute", bottom: 0, left: 0, right: 0, background: "linear-gradient(to top, rgba(15,10,5,0.88) 0%, rgba(15,10,5,0.6) 60%, transparent 100%)", px: 1.5, pt: 3, pb: 1 }}>
-                    <Typography sx={{ fontFamily: tokens.font.display, fontSize: tokens.fontSize.sm, color: tokens.ui.gold, lineHeight: 1.2, textTransform: "capitalize" }}>
-                      {name}
-                    </Typography>
+                  <Box sx={{ position: "absolute", bottom: 0, left: 0, right: 0, background: "linear-gradient(to top, rgba(15,10,5,0.95) 0%, rgba(15,10,5,0.8) 60%, transparent 100%)", px: 1.5, pt: 3, pb: 1 }}>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                      <Typography sx={{ fontFamily: tokens.font.display, fontSize: tokens.fontSize.sm, color: "#F0D080", lineHeight: 1.2, textTransform: "capitalize", textShadow: "0 1px 3px rgba(0,0,0,0.8)" }}>
+                        {name}
+                      </Typography>
+                      <Box sx={{ width: 10, height: 10, borderRadius: "50%", backgroundColor: playerInfo.resources.legacyCard!.colour === "purple" ? "#9b59b6" : "#e67e22", border: "1px solid rgba(255,255,255,0.5)", flexShrink: 0 }} />
+                    </Box>
                     {def && (
-                      <Typography sx={{ fontFamily: tokens.font.body, fontSize: 9, color: "rgba(235,225,210,0.85)", lineHeight: 1.3, mt: "1px" }}>
+                      <Typography sx={{ fontFamily: tokens.font.body, fontSize: 9, color: "rgba(245,240,230,0.95)", lineHeight: 1.3, mt: "1px", textShadow: "0 1px 2px rgba(0,0,0,0.7)" }}>
                         {def.description}
                       </Typography>
                     )}
+                    <Typography sx={{ fontFamily: tokens.font.body, fontSize: 8, color: playerInfo.resources.legacyCard!.colour === "purple" ? tokens.allegiance.orthodox : tokens.allegiance.heresy, lineHeight: 1.2, mt: "2px", fontWeight: 600, textShadow: "0 1px 2px rgba(0,0,0,0.7)" }}>
+                      {playerInfo.resources.legacyCard!.colour === "purple" ? "Orthodox — full VP if Orthodox, half if Heretic" : "Heretic — full VP if Heretic, half if Orthodox"}
+                    </Typography>
                   </Box>
                 </Box>
               );
@@ -629,81 +638,7 @@ export const PlayerBoardCompact = memo((props: PlayerBoardCompactProps) => {
         })()}
       </GamePanel>
 
-      {/* ── Card Lightbox ──────────────────────────────────────── */}
-      <Dialog
-        open={!!enlargedCard}
-        onClose={() => setEnlargedCard(null)}
-        PaperProps={{
-          sx: {
-            backgroundColor: "transparent",
-            boxShadow: "none",
-            overflow: "visible",
-            maxWidth: "min(85vw, 520px)",
-          },
-        }}
-        slotProps={{ backdrop: { sx: { backgroundColor: "rgba(0,0,0,0.75)", backdropFilter: "blur(6px)" } } }}
-        onClick={() => setEnlargedCard(null)}
-      >
-        {enlargedCard && (
-          <Box
-            sx={{
-              position: "relative",
-              borderRadius: `${tokens.radius.md}px`,
-              overflow: "hidden",
-              boxShadow: "0 12px 48px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.08)",
-            }}
-          >
-            <Box
-              component="img"
-              src={enlargedCard.src}
-              alt={enlargedCard.title}
-              sx={{
-                width: "100%",
-                display: "block",
-              }}
-            />
-            <Box
-              sx={{
-                position: "absolute",
-                bottom: 0,
-                left: 0,
-                right: 0,
-                background: "linear-gradient(to top, rgba(15,10,5,0.92) 0%, rgba(15,10,5,0.7) 60%, transparent 100%)",
-                px: 3,
-                pt: 5,
-                pb: 2.5,
-              }}
-            >
-              <Typography
-                sx={{
-                  fontFamily: tokens.font.display,
-                  fontSize: tokens.fontSize.lg,
-                  color: tokens.ui.gold,
-                  textAlign: "center",
-                  textTransform: "capitalize",
-                  lineHeight: 1.2,
-                  mb: 0.5,
-                }}
-              >
-                {enlargedCard.title}
-              </Typography>
-              {enlargedCard.description && (
-                <Typography
-                  sx={{
-                    fontFamily: tokens.font.body,
-                    fontSize: tokens.fontSize.sm,
-                    color: "rgba(235,225,210,0.9)",
-                    textAlign: "center",
-                    lineHeight: 1.5,
-                  }}
-                >
-                  {enlargedCard.description}
-                </Typography>
-              )}
-            </Box>
-          </Box>
-        )}
-      </Dialog>
+      <CardLightbox card={enlargedCard} onClose={() => setEnlargedCard(null)} />
 
       {/* ── Holdings (fills remaining space) ─────────────────────── */}
       <Holdings {...props} variant="compact" />

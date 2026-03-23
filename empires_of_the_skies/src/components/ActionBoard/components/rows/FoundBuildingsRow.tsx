@@ -43,8 +43,7 @@ const BuildingCell = ({
       onMouseLeave={() => setHoveredAction(null)}
       sx={{
         display: "flex",
-        alignItems: "center",
-        height: 52,
+        flexDirection: "column",
         flex: 1,
         minWidth: 0,
         position: "relative",
@@ -78,64 +77,66 @@ const BuildingCell = ({
         "&:active": { transform: "scale(0.998)" },
       }}
     >
-      {/* Feathered thumbnail */}
-      {bg && (
-        <Box
-          sx={{
-            width: THUMB_W,
-            alignSelf: "stretch",
-            flexShrink: 0,
-            overflow: "hidden",
-            ml: "3px",
-          }}
-        >
+      {/* Top: thumbnail + label */}
+      <Box sx={{ display: "flex", alignItems: "center", flex: 1 }}>
+        {bg && (
           <Box
-            component="img"
-            src={bg}
-            alt=""
             sx={{
-              width: "100%",
-              height: "100%",
-              objectFit: "cover",
-              objectPosition: "center",
-              display: "block",
-              maskImage: "linear-gradient(to right, black 50%, transparent 100%)",
-              WebkitMaskImage: "linear-gradient(to right, black 50%, transparent 100%)",
+              width: THUMB_W,
+              alignSelf: "stretch",
+              flexShrink: 0,
+              overflow: "hidden",
+              ml: "3px",
             }}
-          />
+          >
+            <Box
+              component="img"
+              src={bg}
+              alt=""
+              sx={{
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+                objectPosition: "center",
+                display: "block",
+                maskImage: "linear-gradient(to right, black 50%, transparent 100%)",
+                WebkitMaskImage: "linear-gradient(to right, black 50%, transparent 100%)",
+              }}
+            />
+          </Box>
+        )}
+        <Box sx={{ flex: 1, minWidth: 0, pl: bg ? 0 : `${tokens.spacing.sm}px`, pr: `${tokens.spacing.xs}px` }}>
+          <Typography
+            noWrap
+            sx={{
+              fontFamily: tokens.font.display,
+              fontSize: tokens.fontSize.sm,
+              color: tokens.ui.text,
+              lineHeight: 1.2,
+            }}
+          >
+            {label}
+          </Typography>
         </Box>
-      )}
-
-      {/* Label */}
-      <Box sx={{ flex: 1, minWidth: 0, pl: bg ? 0 : `${tokens.spacing.md}px`, pr: `${tokens.spacing.sm}px` }}>
-        <Typography
-          noWrap
-          sx={{
-            fontFamily: tokens.font.display,
-            fontSize: tokens.fontSize.sm,
-            color: tokens.ui.text,
-            lineHeight: 1.2,
-          }}
-        >
-          {label}
-        </Typography>
       </Box>
 
-      {/* Counsellor dots */}
+      {/* Bottom: counsellor dots */}
       <Box
         sx={{
           display: "flex",
           alignItems: "center",
-          gap: `${tokens.spacing.xs}px`,
-          flexShrink: 0,
-          pr: `${tokens.spacing.sm}px`,
+          justifyContent: "center",
+          gap: "2px",
+          px: `${tokens.spacing.xs}px`,
+          pb: "3px",
+          minHeight: 14,
         }}
       >
         {counsellors.length > 0 && (
           <Typography
             sx={{
               fontFamily: tokens.font.body,
-              fontSize: 10,
+              fontSize: 9,
               color: tokens.ui.textMuted,
               fontWeight: 600,
             }}
@@ -149,8 +150,7 @@ const BuildingCell = ({
             <PlayerDot
               key={i}
               colour={info.colour}
-              initial={info.kingdomName[0]}
-              size="sm"
+              size="xs"
             />
           ) : null;
         })}

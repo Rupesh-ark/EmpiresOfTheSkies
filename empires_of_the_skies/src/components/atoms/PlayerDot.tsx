@@ -5,13 +5,14 @@ import { tokens } from "@/theme";
 export interface PlayerDotProps {
   colour: string;
   initial?: string;
-  size?: "sm" | "md" | "lg";
+  size?: "xs" | "sm" | "md" | "lg";
   tooltip?: string;
   active?: boolean;
   sx?: SxProps;
 }
 
 const sizeMap = {
+  xs: { diameter: 10, fontSize: 7 },
   sm: { diameter: 16, fontSize: tokens.fontSize.xs },
   md: { diameter: 24, fontSize: tokens.fontSize.sm },
   lg: { diameter: 32, fontSize: tokens.fontSize.base },

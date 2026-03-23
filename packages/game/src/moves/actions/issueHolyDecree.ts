@@ -31,10 +31,9 @@ const validateIssueHolyDecree = (
         return { code: "INVALID_CURSE_TARGET", message: "Must curse a Heretic monarch" };
       }
     } else {
-      const mostAdvanced = allPlayers
-        .filter((p) => p.hereticOrOrthodox === "orthodox")
-        .reduce((prev, curr) => (curr.heresyTracker > prev.heresyTracker ? curr : prev));
-      if (targetID !== mostAdvanced.id) {
+      const orthodox = allPlayers.filter((p) => p.hereticOrOrthodox === "orthodox");
+      const highestHeresy = Math.max(...orthodox.map((p) => p.heresyTracker));
+      if (G.playerInfo[targetID!].heresyTracker !== highestHeresy) {
         return { code: "INVALID_CURSE_TARGET", message: "Must curse the most heresy-advanced Orthodox monarch" };
       }
     }
@@ -44,10 +43,10 @@ const validateIssueHolyDecree = (
     if (G.playerInfo[targetID!]?.hereticOrOrthodox !== "orthodox") {
       return { code: "INVALID_BLESS_TARGET", message: "Can only bless an Orthodox monarch" };
     }
-    const leastAdvanced = Object.values(G.playerInfo)
-      .filter((p) => p.hereticOrOrthodox === "orthodox")
-      .reduce((prev, curr) => (curr.heresyTracker < prev.heresyTracker ? curr : prev));
-    if (targetID !== leastAdvanced.id) {
+    const orthodox = Object.values(G.playerInfo)
+      .filter((p) => p.hereticOrOrthodox === "orthodox");
+    const lowestHeresy = Math.min(...orthodox.map((p) => p.heresyTracker));
+    if (G.playerInfo[targetID!].heresyTracker !== lowestHeresy) {
       return { code: "INVALID_BLESS_TARGET", message: "Must bless the least heresy-advanced Orthodox monarch" };
     }
   }
