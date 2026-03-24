@@ -4,8 +4,9 @@ import { tokens } from "@/theme";
 /**
  * OutpostIcon — 50×50 map tile icon for outpost buildings.
  *
- * Pure SVG watchtower that colors dynamically with the owning kingdom's colour.
- * Structure: stone base → tower body → battlements → flag.
+ * Pure SVG watchtower with palisade wall, matching ColonyIcon design language.
+ * Structure: stone base → tower body → palisade wall → battlements → flag.
+ * Visually lighter than ColonyIcon to convey a smaller settlement.
  * Garrison counts shown via tooltip.
  */
 const OutpostIcon = (props: OutpostIconProps) => {
@@ -28,53 +29,69 @@ Levies: ${props.levies}`}
         <rect width="96" height="96" fill={`${props.colour}20`} />
 
         {/* Stone base platform */}
-        <rect x="20" y="78" width="56" height="10" rx="2" fill={stroke} fillOpacity="0.15" stroke={stroke} strokeWidth={sw} />
+        <rect x="10" y="80" width="76" height="8" rx="2" fill={stroke} fillOpacity="0.15" stroke={stroke} strokeWidth={sw} />
 
-        {/* Tower body */}
+        {/* Palisade wall (right side, lower than tower) */}
+        <rect x="50" y="52" width="30" height="28" fill={props.colour} fillOpacity="0.7" stroke={stroke} strokeWidth={sw} />
+        {/* Palisade inner texture */}
+        <rect x="54" y="56" width="22" height="20" rx="1" fill="rgba(0,0,0,0.06)" />
+
+        {/* Palisade gate */}
         <path
-          d="M32 78 L32 30 L64 30 L64 78 Z"
-          fill={props.colour}
+          d="M60 80 L60 66 Q65 60 70 66 L70 80 Z"
+          fill={`${props.colour}50`}
           stroke={stroke}
           strokeWidth={sw}
           strokeLinejoin="round"
         />
+        <path
+          d="M62 80 L62 68 Q65 63 68 68 L68 80 Z"
+          fill="rgba(0,0,0,0.12)"
+        />
 
-        {/* Tower inner shadow (depth) */}
-        <rect x="38" y="34" width="20" height="40" rx="1" fill="rgba(0,0,0,0.08)" />
+        {/* Palisade battlements */}
+        <rect x="50" y="46" width="8" height="8" fill={props.colour} stroke={stroke} strokeWidth={sw} />
+        <rect x="62" y="46" width="8" height="8" fill={props.colour} stroke={stroke} strokeWidth={sw} />
+        <rect x="74" y="46" width="8" height="8" fill={props.colour} stroke={stroke} strokeWidth={sw} />
+        <rect x="50" y="50" width="32" height="4" fill={props.colour} stroke={stroke} strokeWidth={sw} />
 
-        {/* Window slits */}
-        <rect x="44" y="40" width="8" height="14" rx="4" fill={`${props.colour}40`} stroke={stroke} strokeWidth={sw} />
-        <rect x="44" y="60" width="8" height="10" rx="1" fill={`${props.colour}40`} stroke={stroke} strokeWidth={sw} />
+        {/* Tower body */}
+        <rect x="14" y="30" width="28" height="50" fill={props.colour} stroke={stroke} strokeWidth={sw} strokeLinejoin="round" />
+        {/* Tower inner shadow */}
+        <rect x="18" y="34" width="20" height="42" rx="1" fill="rgba(0,0,0,0.08)" />
 
-        {/* Battlements (crenellations) */}
-        <rect x="28" y="24" width="10" height="8" fill={props.colour} stroke={stroke} strokeWidth={sw} />
-        <rect x="43" y="24" width="10" height="8" fill={props.colour} stroke={stroke} strokeWidth={sw} />
-        <rect x="58" y="24" width="10" height="8" fill={props.colour} stroke={stroke} strokeWidth={sw} />
-        {/* Battlement base bar */}
-        <rect x="28" y="28" width="40" height="4" fill={props.colour} stroke={stroke} strokeWidth={sw} />
+        {/* Tower windows */}
+        <rect x="24" y="42" width="8" height="12" rx="4" fill={`${props.colour}40`} stroke={stroke} strokeWidth={sw} />
+        <rect x="24" y="62" width="8" height="8" rx="1" fill={`${props.colour}40`} stroke={stroke} strokeWidth={sw} />
+
+        {/* Tower battlements */}
+        <rect x="12" y="24" width="8" height="8" fill={props.colour} stroke={stroke} strokeWidth={sw} />
+        <rect x="22" y="24" width="8" height="8" fill={props.colour} stroke={stroke} strokeWidth={sw} />
+        <rect x="32" y="24" width="8" height="8" fill={props.colour} stroke={stroke} strokeWidth={sw} />
+        <rect x="12" y="28" width="30" height="4" fill={props.colour} stroke={stroke} strokeWidth={sw} />
 
         {/* Flag pole */}
-        <line x1="48" y1="24" x2="48" y2="8" stroke={stroke} strokeWidth="1.5" strokeLinecap="round" />
+        <line x1="28" y1="24" x2="28" y2="8" stroke={stroke} strokeWidth="1.5" strokeLinecap="round" />
 
         {/* Flag — uses kingdom colour */}
         <path
-          d="M48 8 L48 18 L62 13 Z"
+          d="M28 8 L28 18 L42 13 Z"
           fill={props.colour}
           stroke={stroke}
           strokeWidth={sw}
           strokeLinejoin="round"
         />
 
-        {/* Kingdom colour circle (bottom-right, same position as original) */}
-        <circle cx="72" cy="72" r="14" fill={props.colour} stroke={stroke} strokeWidth={sw} />
+        {/* Kingdom colour circle (top-right) */}
+        <circle cx="78" cy="14" r="12" fill={props.colour} stroke={stroke} strokeWidth={sw} />
 
         {/* "O" label in circle */}
         <text
-          x="72"
-          y="77"
+          x="78"
+          y="19"
           textAnchor="middle"
           fontFamily={tokens.font.accent}
-          fontSize="16"
+          fontSize="15"
           fontWeight="700"
           fill="white"
           stroke="none"

@@ -51,7 +51,7 @@ const RoundSummaryDialog = (props: MyGameProps) => {
     });
   }
 
-  const mercyEntries = Object.entries(props.G.mercyGold);
+  const mercyEntries = Object.entries(props.G.mercyGold ?? {});
   if (mercyEntries.length > 0) {
     const details = mercyEntries
       .map(([id, gold]) => `${props.G.playerInfo[id]?.kingdomName}: +${gold}`)
