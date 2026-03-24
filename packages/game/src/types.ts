@@ -124,6 +124,8 @@ export interface MyGameState {
     event: DeferredEvent;
     description: string;
   } | null;
+  /** Maps playerID to mercy gold received this round — read by RoundSummaryDialog */
+  mercyGold: Record<string, number>;
   _loopGuard: number;
   _halted: boolean;
 }

@@ -175,6 +175,7 @@ export function buildInitialG(
     infidelFleetCombat: null,
     pendingDeal: undefined,
     currentDeferredBattle: null,
+    mercyGold: {},
     _loopGuard: 0,
     _halted: false,
     eventState: {

@@ -91,7 +91,7 @@ import offerBuyoffGold from "./moves/events/offerBuyoffGold";
 import nominateCaptainGeneral from "./moves/events/nominateCaptainGeneral";
 import commitDeferredBattleCard from "./moves/events/commitDeferredBattleCard";
 import contributeToGrandArmy from "./moves/events/contributeToGrandArmy";
-import { logEvent, allPlayersPassed } from "./helpers/stateUtils";
+import { logEvent, allPlayersPassed, calculateMercy } from "./helpers/stateUtils";
 import { wrapMove, withPhaseGuard, withPhaseReset, checkLoopGuard } from "./helpers/moveWrapper";
 import { createLogger } from "./helpers/logger";
 
@@ -186,6 +186,7 @@ const MyGame: Game<MyGameState> = {
       infidelFleetCombat: null,
       currentDeferredBattle: null,
       pendingDeal: undefined,
+      mercyGold: {},
       _loopGuard: 0,
       _halted: false,
       eventState: {
@@ -436,6 +437,7 @@ const MyGame: Game<MyGameState> = {
           }
           context.G.playerInfo[id].resources.gold += Math.max(0, income);
         });
+        calculateMercy(context.G);
         logEvent(context.G, `Taxes collected${taxMod !== 0 ? ` (modifier: ${taxMod > 0 ? "+" : ""}${taxMod})` : ""}`);
         context.events.endPhase();
       },
