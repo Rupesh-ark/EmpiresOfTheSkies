@@ -271,18 +271,40 @@ export const executeInfidelFleetCombat = (
     logEvent(G, `${kingdom} loses ${skyshipsLost} skyship(s)`);
   }
 
+  let outcomeText: string;
   if (infidelWins) {
     logEvent(G, "Infidel Fleet wins \u2014 its losses are ignored");
+    outcomeText = "Infidel Fleet wins — losses ignored";
   } else {
     if (hitsOnInfidel >= infidel.swords) {
       logEvent(G, "Infidel Fleet destroyed!");
       G.infidelFleet.destroyed = true;
       G.infidelFleet.active = false;
+      outcomeText = `${kingdom} destroys the Infidel Fleet!`;
     } else {
       G.infidelFleet.active = false;
       logEvent(G, "Infidel Fleet defeated but survives \u2014 flipped inactive");
+      outcomeText = `${kingdom} defeats the Infidel Fleet (flipped inactive)`;
     }
   }
+
+  const playerSwords = fleet.skyships + fleet.regiments * 2 + fleet.levies;
+  const playerShields = fleet.skyships;
+  G.battleResult = {
+    battleType: "Infidel Fleet",
+    attackerName: "Infidel Fleet",
+    defenderName: kingdom,
+    attackerSwords: infidel.swords,
+    attackerShields: infidel.shields,
+    defenderSwords: playerSwords,
+    defenderShields: playerShields,
+    attackerFoW: null,
+    defenderFoW: fowCard ?? null,
+    attackerLosses: infidelWins ? "none (ignored)" : `${hitsOnInfidel} hits`,
+    defenderLosses: hitsOnPlayer > 0 ? `${Math.min(hitsOnPlayer, fleet.skyships)} skyship(s)` : "none",
+    winner: infidelWins ? "Infidel Fleet" : kingdom,
+    outcome: outcomeText,
+  };
 
   G.infidelFleetCombat = null;
 };

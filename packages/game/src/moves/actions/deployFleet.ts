@@ -88,7 +88,7 @@ const validateDeployFleet = (
 };
 
 const deployFleet: MoveDefinition = {
-  fn: ({ G, playerID }, ...args: any[]) => {
+  fn: ({ G, playerID, events }, ...args: any[]) => {
     const selectedFleetIndex = args[0];
     const [x, y] = args[1];
     const skyshipCount = args[2];
@@ -164,6 +164,7 @@ const deployFleet: MoveDefinition = {
       true;
 
     G.playerInfo[playerID].turnComplete = true;
+    events.endTurn();
   },
   errorMessage: "Cannot dispatch fleet right now",
   validate: validateDeployFleet,

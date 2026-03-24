@@ -44,6 +44,7 @@ function buildInvasion(totalHostSwords = 5) {
     totalHostSwords,
     contributions: {} as Record<string, { regiments: number; levies: number; skyships: number }>,
     phase: "nominate" as const,
+    eligibleCaptainGenerals: ["0", "1"] as string[],
   };
 }
 
@@ -233,6 +234,7 @@ describe("invasionFlow — buyoff phase", () => {
       totalHostSwords: 20,
       contributions: {},
       phase: "buyoff",
+      eligibleCaptainGenerals: ["0", "1"],
       buyoffCost: 10,
       buyoffOffered: {},
     };
@@ -258,6 +260,7 @@ describe("invasionFlow — buyoff phase", () => {
       totalHostSwords: 20,
       contributions: {},
       phase: "buyoff",
+      eligibleCaptainGenerals: ["0", "1"],
       buyoffCost: 10,
       buyoffOffered: {},
     };
@@ -275,6 +278,7 @@ describe("invasionFlow — buyoff phase", () => {
       totalHostSwords: 10,
       contributions: {},
       phase: "buyoff",
+      eligibleCaptainGenerals: ["0", "1"],
       buyoffCost: 5,
       buyoffOffered: {},
     };

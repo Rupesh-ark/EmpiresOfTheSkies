@@ -124,19 +124,8 @@ export const ActionBoardButtonLarge = (props: ActionBoardButtonProps) => {
     setSelectedTile(coords);
   };
 
-  let possibleFortTiles: number[][] = [];
-  props.G.mapState.buildings.forEach((tileRow, yIndex) => {
-    tileRow.forEach((tile, xIndex) => {
-      if (
-        tile.player?.id === props.playerID &&
-        tile.buildings &&
-        (tile.garrisonedRegiments > 0 || tile.garrisonedLevies > 0) &&
-        !tile.fort
-      ) {
-        possibleFortTiles.push([xIndex, yIndex]);
-      }
-    });
-  });
+  // Valid fort locations are computed by the backend when foundBuildings(3) fires
+  const possibleFortTiles = props.G.validFortLocations ?? [];
 
   return (
     <>

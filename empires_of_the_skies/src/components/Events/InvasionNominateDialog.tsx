@@ -10,8 +10,9 @@ const InvasionNominateDialog = (props: MyGameProps) => {
   const isArchprelate = props.G.playerInfo[props.playerID ?? ""]?.isArchprelate;
   if (!isArchprelate || props.ctx.currentPlayer !== props.playerID) return null;
 
-  const hasOrthodox = props.ctx.playOrder.some((id) => props.G.playerInfo[id].hereticOrOrthodox === "orthodox");
-  const eligible = props.ctx.playOrder.filter((id) => !hasOrthodox || props.G.playerInfo[id].hereticOrOrthodox === "orthodox");
+  // Eligible candidates are pre-computed by the backend when invasion triggers
+  const hasOrthodox = invasion.eligibleCaptainGenerals?.some((id) => props.G.playerInfo[id]?.hereticOrOrthodox === "orthodox") ?? false;
+  const eligible = invasion.eligibleCaptainGenerals ?? [];
 
   return (
     <DialogShell

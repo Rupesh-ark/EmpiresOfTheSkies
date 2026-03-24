@@ -38,7 +38,7 @@ const validateMoveFleet = (
 };
 
 const moveFleet: MoveDefinition = {
-  fn: ({ G, playerID }, ...args: any[]) => {
+  fn: ({ G, playerID, events }, ...args: any[]) => {
     const fleetIndex: number = args[0];
     const [x, y]: [number, number] = args[1];
 
@@ -91,6 +91,7 @@ const moveFleet: MoveDefinition = {
     G.playerInfo[playerID].playerBoardCounsellorLocations.dispatchDisabled = true;
 
     G.playerInfo[playerID].turnComplete = true;
+    events.endTurn();
   },
   errorMessage: "Cannot move fleet right now",
   validate: validateMoveFleet,

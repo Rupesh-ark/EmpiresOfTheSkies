@@ -291,6 +291,10 @@ const TileDetailContent = ({
                 "@keyframes threatPulse": { "0%,100%": { opacity: 1 }, "50%": { opacity: 0.4 } },
                 animation: "threatPulse 1.2s ease-in-out infinite",
               }),
+              ...(threatLevel === "high" && {
+                "@keyframes threatPulseSlow": { "0%,100%": { opacity: 1, transform: "scale(1)" }, "50%": { opacity: 0.5, transform: "scale(1.3)" } },
+                animation: "threatPulseSlow 2s ease-in-out infinite",
+              }),
             }} />
             <Typography sx={{ fontSize: "0.8rem", fontWeight: 700, color: threatColor, letterSpacing: "0.05em", textTransform: "uppercase" }}>
               {threatLabel}
@@ -625,12 +629,14 @@ const DraggableFleetIcon = ({
   skyships,
   regiments,
   levies,
+  compact,
 }: {
   draggableId: string;
   colour: string;
   skyships: number;
   regiments: number;
   levies: number;
+  compact?: boolean;
 }) => {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: draggableId,
@@ -653,6 +659,7 @@ const DraggableFleetIcon = ({
         skyships={skyships}
         regiments={regiments}
         levies={levies}
+        compact={compact}
       />
     </div>
   );
@@ -718,13 +725,14 @@ export const WorldMapTile = memo((props: worldMapTileProps) => {
   };
 
   // Generic positions for non-kingdom tiles (up to 18 slots: 6 players × 3 fleets)
+  // Centered layout — fills from the middle outward so small groups stay central
   const TILE_SLOTS = [
-    { top: "8%",  left: "8%" },  { top: "8%",  left: "30%" }, { top: "8%",  left: "52%" },
-    { top: "8%",  left: "74%" }, { top: "36%", left: "8%" },  { top: "36%", left: "74%" },
-    { top: "64%", left: "8%" },  { top: "64%", left: "30%" }, { top: "64%", left: "52%" },
-    { top: "64%", left: "74%" }, { top: "36%", left: "30%" }, { top: "36%", left: "52%" },
-    { top: "22%", left: "18%" }, { top: "22%", left: "62%" }, { top: "50%", left: "18%" },
-    { top: "50%", left: "62%" }, { top: "78%", left: "18%" }, { top: "78%", left: "62%" },
+    { top: "35%", left: "35%" }, { top: "35%", left: "55%" }, { top: "55%", left: "35%" },
+    { top: "55%", left: "55%" }, { top: "25%", left: "45%" }, { top: "65%", left: "45%" },
+    { top: "45%", left: "20%" }, { top: "45%", left: "70%" }, { top: "15%", left: "30%" },
+    { top: "15%", left: "60%" }, { top: "75%", left: "30%" }, { top: "75%", left: "60%" },
+    { top: "25%", left: "15%" }, { top: "25%", left: "75%" }, { top: "65%", left: "15%" },
+    { top: "65%", left: "75%" }, { top: "45%", left: "45%" }, { top: "10%", left: "45%" },
   ];
 
   interface PositionedFleet {
@@ -777,7 +785,7 @@ export const WorldMapTile = memo((props: worldMapTileProps) => {
             onClick={(e) => { e.stopPropagation(); props.onFleetDragAttempt?.(getReason()); }}
             sx={{ cursor: "not-allowed" }}
           >
-            <FleetIcon colour={playerInfo.colour} skyships={fleet.skyships} regiments={fleet.regiments} levies={fleet.levies} />
+            <FleetIcon colour={playerInfo.colour} skyships={fleet.skyships} regiments={fleet.regiments} levies={fleet.levies} compact={isHomeWaters} />
           </Box>
         );
       } else if (canDrag) {
@@ -788,11 +796,12 @@ export const WorldMapTile = memo((props: worldMapTileProps) => {
             skyships={fleet.skyships}
             regiments={fleet.regiments}
             levies={fleet.levies}
+            compact={isHomeWaters}
           />
         );
       } else {
         element = (
-          <FleetIcon colour={playerInfo.colour} skyships={fleet.skyships} regiments={fleet.regiments} levies={fleet.levies} />
+          <FleetIcon colour={playerInfo.colour} skyships={fleet.skyships} regiments={fleet.regiments} levies={fleet.levies} compact={isHomeWaters} />
         );
       }
 

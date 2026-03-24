@@ -44,30 +44,44 @@ const WorldMap = (props: WorldMapProps) => {
     }
   }, [props.expanded]);
 
-  // Space-to-pan
+  // Space-to-pan — uses refs to avoid stale closures in mouse handlers
   const scrollRef = useRef<HTMLDivElement>(null);
-  const [isPanning, setIsPanning] = useState(false);
+  const isPanningRef = useRef(false);
+  const [isPanningState, setIsPanningState] = useState(false);
   const panStart = useRef<{ x: number; y: number; scrollX: number; scrollY: number } | null>(null);
 
   useEffect(() => {
-    const onKeyDown = (e: KeyboardEvent) => { if (e.code === "Space" && !e.repeat) { e.preventDefault(); setIsPanning(true); } };
-    const onKeyUp = (e: KeyboardEvent) => { if (e.code === "Space") { setIsPanning(false); panStart.current = null; } };
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.code === "Space" && !e.repeat) {
+        e.preventDefault();
+        isPanningRef.current = true;
+        setIsPanningState(true);
+      }
+    };
+    const onKeyUp = (e: KeyboardEvent) => {
+      if (e.code === "Space") {
+        isPanningRef.current = false;
+        setIsPanningState(false);
+        panStart.current = null;
+      }
+    };
     window.addEventListener("keydown", onKeyDown);
     window.addEventListener("keyup", onKeyUp);
     return () => { window.removeEventListener("keydown", onKeyDown); window.removeEventListener("keyup", onKeyUp); };
   }, []);
 
   const onPanMouseDown = useCallback((e: React.MouseEvent) => {
-    if (!isPanning || !scrollRef.current) return;
+    if (!isPanningRef.current || !scrollRef.current) return;
     e.preventDefault();
     panStart.current = { x: e.clientX, y: e.clientY, scrollX: scrollRef.current.scrollLeft, scrollY: scrollRef.current.scrollTop };
-  }, [isPanning]);
+  }, []);
 
   const onPanMouseMove = useCallback((e: React.MouseEvent) => {
-    if (!isPanning || !panStart.current || !scrollRef.current) return;
+    if (!isPanningRef.current || !panStart.current || !scrollRef.current) return;
+    e.preventDefault();
     scrollRef.current.scrollLeft = panStart.current.scrollX - (e.clientX - panStart.current.x);
     scrollRef.current.scrollTop = panStart.current.scrollY - (e.clientY - panStart.current.y);
-  }, [isPanning]);
+  }, []);
 
   const onPanMouseUp = useCallback(() => { panStart.current = null; }, []);
 
@@ -107,6 +121,19 @@ const WorldMap = (props: WorldMapProps) => {
     for (const [x, y] of within3) costMap.set(`${x},${y}`, 3);
     for (const [x, y] of within2) costMap.set(`${x},${y}`, 2);
     for (const [x, y] of within1) costMap.set(`${x},${y}`, 1);
+
+    // DEBUG: log BFS results and blocked edges for ALL reachable tiles
+    console.group(`[Fleet Cost Debug] Fleet ${fleetId} at [${fleet.location}], laden=${isLaden}`);
+    console.log("Source tile blocked:", props.G.mapState.currentTileArray[fleet.location[1]][fleet.location[0]].blocked);
+    const allUniqueKeys = new Set<string>();
+    [...within1, ...within2, ...within3].forEach(([x,y]) => allUniqueKeys.add(`${x},${y}`));
+    allUniqueKeys.forEach((key) => {
+      const [x, y] = key.split(",").map(Number);
+      const t = props.G.mapState.currentTileArray[y]?.[x];
+      const cost = costMap.get(key);
+      console.log(`  [${x},${y}] "${t?.name}" cost=${cost}g blocked=[${t?.blocked?.join(", ") ?? ""}]`);
+    });
+    console.groupEnd();
 
     setFleetDragState({
       fleetId,
@@ -162,7 +189,6 @@ const WorldMap = (props: WorldMapProps) => {
       pendingDeploy.fleetIndex,
       pendingDeploy.destination
     );
-    props.moves.confirmAction();
     setPendingDeploy(null);
   };
   const pendingFleet = pendingDeploy
@@ -265,7 +291,8 @@ const WorldMap = (props: WorldMapProps) => {
           backgroundImage: `url(${mapFogImg})`,
           backgroundSize: "250px 250px",
           backgroundRepeat: "repeat",
-          cursor: isPanning ? "grab" : "default",
+          cursor: isPanningState ? "grab" : "default",
+          userSelect: isPanningState ? "none" : "auto",
         }}
       >
         <Box
@@ -294,7 +321,7 @@ const WorldMap = (props: WorldMapProps) => {
           </Grid>
 
           {/* Pan overlay — blocks tile clicks while Space is held */}
-          {isPanning && (
+          {isPanningState && (
             <Box sx={{ position: "absolute", inset: 0, zIndex: 10, cursor: "grab" }} />
           )}
 

@@ -13,13 +13,16 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
+// Note: Dialog/Button/etc still used by Palace heresy dialog
 import { tokens } from "@/theme";
 import { BTN_BG } from "@/assets/actionBoard";
 import { clearMoves } from "@/utils/gameHelpers";
 import { PlayerDot } from "@/components/atoms/PlayerDot";
 import { ActionBoardProps, ActionTooltipContent, TOOLTIP_DELAY } from "../shared";
 import { useActionHover } from "../../ActionHoverContext";
-import WorldMap from "@/components/WorldMap/WorldMap";
+import { DialogShell } from "@/components/atoms/DialogShell";
+import { IconFort } from "@/theme";
+import { getLocationPresentation } from "@/utils/locationLabels";
 
 const THUMB_W = 40;
 
@@ -188,21 +191,9 @@ const BuildingCell = ({
 const FoundBuildingsRow = (props: ActionBoardProps) => {
   const [palaceDialogOpen, setPalaceDialogOpen] = useState(false);
   const [fortDialogOpen, setFortDialogOpen] = useState(false);
-  const [selectedFortTile, setSelectedFortTile] = useState([4, 0]);
 
-  const possibleFortTiles: number[][] = [];
-  props.G.mapState.buildings.forEach((tileRow, yIndex) => {
-    tileRow.forEach((tile, xIndex) => {
-      if (
-        tile.player?.id === props.playerID &&
-        tile.buildings &&
-        (tile.garrisonedRegiments > 0 || tile.garrisonedLevies > 0) &&
-        !tile.fort
-      ) {
-        possibleFortTiles.push([xIndex, yIndex]);
-      }
-    });
-  });
+  // Valid fort locations are computed by the backend when foundBuildings(3) fires
+  const possibleFortTiles = props.G.validFortLocations ?? [];
 
   const handleClick = (index: number) => {
     if (index === 1) {
@@ -288,42 +279,121 @@ const FoundBuildingsRow = (props: ActionBoardProps) => {
         </DialogActions>
       </Dialog>
 
-      {/* Fort: map tile selection dialog */}
-      <Dialog maxWidth={false} open={fortDialogOpen}>
-        <DialogTitle sx={{ fontFamily: tokens.font.display }}>
-          {`Select location for your fort. Current selection: [${selectedFortTile[0] + 1}, ${4 - selectedFortTile[1]}]`}
-        </DialogTitle>
-        <DialogContent>
-          <WorldMap
-            {...props}
-            alternateOnClick={(coords: number[]) => setSelectedFortTile(coords)}
-            selectableTiles={possibleFortTiles}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button
-            variant="contained"
-            color="error"
-            onClick={() => {
-              clearMoves(props);
-              setFortDialogOpen(false);
-            }}
-          >
-            Cancel
-          </Button>
-          <Button
-            variant="contained"
-            color="success"
-            disabled={selectedFortTile[0] === 4 && selectedFortTile[1] === 0}
-            onClick={() => {
-              props.moves.checkAndPlaceFort(selectedFortTile);
-              setFortDialogOpen(false);
-            }}
-          >
-            Confirm
-          </Button>
-        </DialogActions>
-      </Dialog>
+      {/* Fort: location selection dialog */}
+      <DialogShell
+        open={fortDialogOpen}
+        title="Build Fort"
+        subtitle="Select a garrisoned colony or outpost to fortify."
+        mood="peacetime"
+        size="sm"
+        cancelLabel="Cancel"
+        cancelColor="error"
+        onCancel={() => {
+          clearMoves(props);
+          setFortDialogOpen(false);
+        }}
+        hideActions={false}
+      >
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+          {possibleFortTiles.map((coords) => {
+            const [cx, cy] = coords;
+            const loc = getLocationPresentation(props.G.mapState.currentTileArray, coords);
+            const building = props.G.mapState.buildings[cy]?.[cx];
+            return (
+              <Box
+                key={`${cx}-${cy}`}
+                onClick={() => {
+                  props.moves.checkAndPlaceFort(coords);
+                  setFortDialogOpen(false);
+                }}
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1.5,
+                  p: 1.5,
+                  borderRadius: `${tokens.radius.md}px`,
+                  border: `1px solid ${tokens.ui.border}`,
+                  background: tokens.ui.surface,
+                  cursor: "pointer",
+                  transition: `all ${tokens.transition.fast}`,
+                  "&:hover": {
+                    background: tokens.ui.surfaceHover,
+                    boxShadow: tokens.shadow.md,
+                    transform: "translateY(-1px)",
+                  },
+                  "&:active": { transform: "translateY(0)" },
+                }}
+              >
+                <Box
+                  sx={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: `${tokens.radius.md}px`,
+                    background: `${tokens.ui.gold}20`,
+                    border: `1.5px solid ${tokens.ui.gold}50`,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexShrink: 0,
+                    color: tokens.ui.gold,
+                  }}
+                >
+                  <IconFort size={20} />
+                </Box>
+                <Box sx={{ flex: 1, minWidth: 0 }}>
+                  <Box sx={{ display: "flex", alignItems: "baseline", gap: 0.75 }}>
+                    <Typography sx={{
+                      fontFamily: tokens.font.accent,
+                      fontSize: tokens.fontSize.sm,
+                      fontWeight: 700,
+                      color: tokens.ui.text,
+                    }}>
+                      {loc.name}
+                    </Typography>
+                    <Box
+                      component="span"
+                      sx={{
+                        px: 0.5, py: 0.1,
+                        borderRadius: `${tokens.radius.pill}px`,
+                        backgroundColor: `${tokens.ui.textMuted}15`,
+                        border: `1px solid ${tokens.ui.border}`,
+                        fontFamily: tokens.font.body,
+                        fontSize: 10,
+                        fontWeight: 700,
+                        letterSpacing: "0.06em",
+                        color: tokens.ui.textMuted,
+                      }}
+                    >
+                      {loc.reference}
+                    </Box>
+                  </Box>
+                  <Typography sx={{
+                    fontFamily: tokens.font.body,
+                    fontSize: tokens.fontSize.xs,
+                    color: tokens.ui.textMuted,
+                  }}>
+                    {building?.buildings === "colony" ? "Colony" : "Outpost"}
+                    {" · "}
+                    {building?.garrisonedRegiments ?? 0} reg, {building?.garrisonedLevies ?? 0} levy
+                  </Typography>
+                </Box>
+              </Box>
+            );
+          })}
+          {possibleFortTiles.length === 0 && (
+            <Typography sx={{
+              fontFamily: tokens.font.body,
+              fontSize: tokens.fontSize.xs,
+              color: tokens.ui.textMuted,
+              fontStyle: "italic",
+              textAlign: "center",
+              py: 2,
+            }}>
+              No garrisoned colonies or outposts available
+            </Typography>
+          )}
+        </Box>
+      </DialogShell>
     </>
   );
 };

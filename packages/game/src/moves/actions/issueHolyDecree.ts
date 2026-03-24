@@ -73,16 +73,24 @@ const issueHolyDecree: MoveDefinition = {
     switch (value) {
       case "reform dogma":
         retreatAllHeresyTrackers(G);
+        logEvent(G, "Holy Decree — Reform Dogma: all heresy markers retreat 1");
         break;
       case "confirm dogma":
         advanceAllHeresyTrackers(G);
+        logEvent(G, "Holy Decree — Confirm Dogma: all heresy markers advance 1");
         break;
-      case "curse monarch":
-        removeVPAmount(G, id, blessingOrCurseVPAmount(G));
+      case "curse monarch": {
+        const vpLost = blessingOrCurseVPAmount(G);
+        removeVPAmount(G, id, vpLost);
+        logEvent(G, `Holy Decree — Curse: ${G.playerInfo[id].kingdomName} loses ${vpLost} VP`);
         break;
-      case "bless monarch":
-        addVPAmount(G, id, blessingOrCurseVPAmount(G));
+      }
+      case "bless monarch": {
+        const vpGained = blessingOrCurseVPAmount(G);
+        addVPAmount(G, id, vpGained);
+        logEvent(G, `Holy Decree — Bless: ${G.playerInfo[id].kingdomName} gains ${vpGained} VP`);
         break;
+      }
       case "inquisition": {
         const target = G.playerInfo[id];
         const released = target.prisoners;

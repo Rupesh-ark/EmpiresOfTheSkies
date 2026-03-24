@@ -2,6 +2,12 @@ import { Tooltip, Box } from "@mui/material";
 import { GiZeppelin } from "react-icons/gi";
 
 const FleetIcon = (props: FleetIconProps) => {
+  const compact = props.compact ?? false;
+  const size = compact
+    ? { xs: 16, sm: 18, md: 20 }
+    : { xs: 32, sm: 36, md: 40 };
+  const iconSize = compact ? 10 : 22;
+
   return (
     <Tooltip
       title={`Skyships: ${props.skyships}
@@ -10,9 +16,8 @@ Levies: ${props.levies}`}
     >
       <Box
         sx={{
-          // Scale with tile size using container-relative units
-          width: { xs: 16, sm: 18, md: 20 },
-          height: { xs: 16, sm: 18, md: 20 },
+          width: size,
+          height: size,
           borderRadius: "50%",
           backgroundColor: props.colour,
           border: "2px solid rgba(255,255,255,0.8)",
@@ -24,7 +29,7 @@ Levies: ${props.levies}`}
         }}
       >
         <GiZeppelin
-          size={10}
+          size={iconSize}
           style={{ color: "#fff" }}
         />
       </Box>
@@ -37,5 +42,7 @@ type FleetIconProps = {
   skyships: number;
   regiments: number;
   levies: number;
+  /** Use smaller size for crowded tiles like the home kingdom */
+  compact?: boolean;
 };
 export default FleetIcon;

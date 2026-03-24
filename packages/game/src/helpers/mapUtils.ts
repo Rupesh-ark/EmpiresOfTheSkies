@@ -24,8 +24,8 @@ const offsetToDir = (dx: number, dy: number): string => {
 
 /**
  * Check if movement from (x,y) to (nx,ny) is blocked by mountains.
- * Mountains are printed on the SOURCE tile's edge — they only block
- * movement away from that tile, not approaches from the other side.
+ * Mountains block movement in BOTH directions — check the source tile's
+ * outgoing direction AND the destination tile's reverse (incoming) direction.
  */
 const isEdgeBlocked = (
   x: number, y: number,
@@ -39,8 +39,13 @@ const isEdgeBlocked = (
   const dy = ny - y;
 
   const dir = offsetToDir(dx, dy);
+  const reverseDir = offsetToDir(-dx, -dy);
+
   const srcTile = tileArray[y]?.[x];
-  return srcTile?.blocked.includes(dir) ?? false;
+  const dstTile = tileArray[ny]?.[nx];
+
+  return (srcTile?.blocked.includes(dir) ?? false) ||
+         (dstTile?.blocked.includes(reverseDir) ?? false);
 };
 
 // ── Adjacency ────────────────────────────────────────────────────────────

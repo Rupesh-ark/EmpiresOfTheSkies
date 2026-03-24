@@ -8,15 +8,10 @@ import { GameButton } from "@/components/atoms/GameButton";
 
 const AttackOrPassDiaLog = (props: AerialBattleDialogProps) => {
   const [x, y] = props.G.mapState.currentBattle;
-  const possibleDefenders: string[] = [];
   const [open, setOpen] = useState(true);
 
-  props.G.mapState.battleMap[y] &&
-    props.G.mapState.battleMap[y][x].forEach((currentItem) => {
-      if (currentItem !== props.playerID) {
-        possibleDefenders.push(currentItem);
-      }
-    });
+  // Possible defenders are pre-computed by the backend when the battle stage is set
+  const possibleDefenders = props.G.possibleDefenders ?? [];
 
   const [currentKingdom, setCurrentKingdom] = useState(possibleDefenders[0]);
   const buttons = possibleDefenders.map((currentItem) => (

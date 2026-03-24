@@ -66,10 +66,16 @@ export const checkForInvasion = (G: MyGameState): boolean => {
     const totalHostSwords = G.accumulatedHosts.reduce(
       (sum, h) => sum + h.swords, 0
     );
+    // Pre-compute eligible Captain-General candidates
+    const playerIds = Object.keys(G.playerInfo);
+    const hasOrthodox = playerIds.some((id) => G.playerInfo[id].hereticOrOrthodox === "orthodox");
+    const eligibleCaptainGenerals = playerIds.filter((id) => !hasOrthodox || G.playerInfo[id].hereticOrOrthodox === "orthodox");
+
     G.currentInvasion = {
       totalHostSwords,
       contributions: {},
       phase: "nominate",
+      eligibleCaptainGenerals,
     };
     return true;
   }
@@ -190,6 +196,24 @@ export const resolveGrandArmyBattle = (G: MyGameState, shuffle: <T>(arr: T[]) =>
     // VP penalties applied now; buy-off gold handled interactively by caller
     applyDefeatVPPenalties(G, captainGeneral, sorted);
   }
+
+  G.battleResult = {
+    battleType: "Infidel Invasion",
+    attackerName: "Infidel Host",
+    defenderName: "Grand Army of the Faith",
+    attackerSwords: infidelSwords,
+    attackerShields: infidelShields,
+    defenderSwords: grandArmySwords,
+    defenderShields: grandArmyShields,
+    attackerFoW: fowInfidel,
+    defenderFoW: fowArmy,
+    attackerLosses: grandArmyWins ? `${hitsOnInfidel} hits — hosts destroyed` : "—",
+    defenderLosses: `${hitsOnArmy} hits absorbed`,
+    winner: grandArmyWins ? "Grand Army" : "Infidel Host",
+    outcome: grandArmyWins
+      ? `Grand Army victorious! Captain-General ${captainKingdom} +3 VP`
+      : `Grand Army defeated! Buy-off: ${buyoffCost} Gold`,
+  };
 
   // ── 7. Heresy shame — non-contributors ──
   for (const c of contributions) {

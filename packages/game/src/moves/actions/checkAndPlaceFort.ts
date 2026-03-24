@@ -28,6 +28,7 @@ const checkAndPlaceFort: MoveDefinition = {
     const tileInfo = G.mapState.buildings[y][x];
 
     tileInfo.fort = true;
+    G.validFortLocations = [];
     G.playerInfo[playerID].turnComplete = true;
   },
   errorMessage: "Cannot place a Fort here",

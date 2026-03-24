@@ -181,7 +181,8 @@ const foundShipyard = (
   G.playerInfo[playerID].turnComplete = true;
 };
 // Fort placement: pays cost here, then player picks a tile via checkAndPlaceFort move.
-// Frontend shows valid tiles in a dialog (ActionBoardButton handles this).
+// Valid locations are computed here and written to G.validFortLocations so the
+// frontend just reads them instead of duplicating the eligibility logic.
 const foundFort = (
   G: MyGameState,
   playerID: string,
@@ -193,6 +194,26 @@ const foundFort = (
   G.playerInfo[playerID].resources.gold -= cost;
   G.boardState.foundBuildings[BuildingSlot.Fort].push(playerID);
   removeOneCounsellor(G, playerID);
+
+  // Compute valid fort locations for the frontend to display
+  const locations: [number, number][] = [];
+  G.mapState.buildings.forEach((row, y) => {
+    row.forEach((tile, x) => {
+      const hasBuilding =
+        tile.player?.id === playerID &&
+        (tile.buildings === "colony" || tile.buildings === "outpost");
+      const hasTroops =
+        tile.garrisonedRegiments > 0 ||
+        tile.garrisonedLevies > 0 ||
+        G.playerInfo[playerID].fleetInfo.some(
+          (f) => f.location[0] === x && f.location[1] === y && (f.regiments > 0 || f.levies > 0)
+        );
+      if (hasBuilding && !tile.fort && hasTroops) {
+        locations.push([x, y]);
+      }
+    });
+  });
+  G.validFortLocations = locations;
 
   G.playerInfo[playerID].turnComplete = false;
 };

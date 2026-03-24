@@ -374,12 +374,31 @@ export const resolveRebellionWithTroops = (
     applyTroopLosses(G, targetPlayerID, hitsOnDefender);
   }
 
+  const defenderSwords = regiments * 2 + levies;
+  const defenderShields = fortPresent ? regiments + levies : 0;
+
   logEvent(
     G,
     defenderWins
       ? `${kingdom} defeats the rebels!`
       : `Rebels overwhelm ${kingdom}'s defenders!`
   );
+
+  G.battleResult = {
+    battleType: "Rebellion",
+    attackerName: "Rebels",
+    defenderName: kingdom,
+    attackerSwords: counterSwords,
+    attackerShields: 0,
+    defenderSwords,
+    defenderShields,
+    attackerFoW: fowRebel,
+    defenderFoW: fowDefender,
+    attackerLosses: "—",
+    defenderLosses: hitsOnDefender > 0 ? `${hitsOnDefender} hits absorbed` : "none",
+    winner: defenderWins ? kingdom : "Rebels",
+    outcome: defenderWins ? `${kingdom} defeats the rebels!` : `Rebels overwhelm ${kingdom}!`,
+  };
 
   applyOutcome(G, card, targetPlayerID, defenderWins, counterSwords, targetTile);
   returnCounter(G, card, defenderWins, counterSwords);
@@ -457,6 +476,24 @@ export const resolveRebellionWithTroopsAndRivals = (
     ? `${kingdom} defeats the rebels! (${totalDefenderSwords}S vs ${totalRebelSwords}S)`
     : `Rebels overwhelm the defenders! (${totalRebelSwords}S vs ${totalDefenderSwords}S)`
   );
+
+  G.battleResult = {
+    battleType: "Rebellion",
+    attackerName: "Rebels",
+    defenderName: kingdom,
+    attackerSwords: totalRebelSwords,
+    attackerShields: 0,
+    defenderSwords: totalDefenderSwords,
+    defenderShields: totalDefShields,
+    attackerFoW: fowRebel,
+    defenderFoW: fowDefender,
+    attackerLosses: "—",
+    defenderLosses: hitsOnDefender > 0 ? `${hitsOnDefender} hits absorbed` : "none",
+    winner: defenderWins ? kingdom : "Rebels",
+    outcome: defenderWins
+      ? `${kingdom} defeats the rebels!`
+      : `Rebels overwhelm ${kingdom}!`,
+  };
 
   applyOutcome(G, card, targetPlayerID, defenderWins, counterSwords, targetTile);
   returnCounter(G, card, defenderWins, counterSwords);

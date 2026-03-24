@@ -30,8 +30,14 @@ export interface MyGameState {
   boardState: ActionBoardInfo;
   cardDecks: CardDeckInfo;
   battleState?: BattleState;
+  /** Last resolved battle summary — shown by BattleResultDialog, cleared on dismiss */
+  battleResult: BattleResult | null;
   conquestState?: BattlePlayerInfo;
   pendingDeal?: DealProposal;
+  /** Pre-computed by backend for frontend display — avoids duplicating game logic */
+  possibleDefenders: string[];
+  validRelocationTiles: number[][];
+  troopsAvailableForGarrison: { regiments: number; elites: number; levies: number };
   stage:
     | "discovery"
     | "actions"
@@ -73,6 +79,7 @@ export interface MyGameState {
   mustContinueDiscovery: boolean;
   nprCathedrals: Record<string, number>;
   turnOrder: string[];
+  validFortLocations: [number, number][];
   failedConquests: { playerId: string; tile: [number, number] }[];
   contingentPool: number[];
   infidelHostPool: InfidelHostCounter[];
@@ -105,6 +112,7 @@ export interface MyGameState {
     phase: "nominate" | "contribute" | "buyoff";
     buyoffCost?: number;
     buyoffOffered?: Record<string, number>;
+    eligibleCaptainGenerals: string[];
   } | null;
   /** Infidel Fleet combat: targeted player must choose fight or evade */
   infidelFleetCombat: {
@@ -119,6 +127,23 @@ export interface MyGameState {
   _loopGuard: number;
   _halted: boolean;
 }
+
+/** Frontend-readable summary of the most recent battle resolution */
+export type BattleResult = {
+  battleType: string;
+  attackerName: string;
+  defenderName: string;
+  attackerSwords: number;
+  attackerShields: number;
+  defenderSwords: number;
+  defenderShields: number;
+  attackerFoW: { sword: number; shield: number } | null;
+  defenderFoW: { sword: number; shield: number } | null;
+  attackerLosses: string;
+  defenderLosses: string;
+  winner: string;
+  outcome: string;
+};
 
 export type BattleState = {
   attacker: BattlePlayerInfo;

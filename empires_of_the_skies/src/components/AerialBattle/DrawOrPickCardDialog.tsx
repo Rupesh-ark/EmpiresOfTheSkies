@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { MyGameProps } from "@eots/game";
 import FortuneOfWarCardDisplay from "../PlayerBoard/FortuneOfWarCardDisplay";
-import WorldMap from "../WorldMap/WorldMap";
 import { DialogShell } from "@/components/atoms/DialogShell";
 import { GameButton } from "@/components/atoms/GameButton";
 
@@ -49,7 +48,7 @@ const DrawOrPickCardDialog = (props: MyGameProps) => {
       title="Draw or Pick a Card"
       subtitle="You can either draw a random Fortune of War card, or pick one from your hand."
       mood="battle"
-      size="lg"
+      size="sm"
       hideActions
     >
       <div style={{ display: "flex", flexDirection: "row" }}>
@@ -68,8 +67,6 @@ const DrawOrPickCardDialog = (props: MyGameProps) => {
           </div>
         ))}
       </div>
-
-      <WorldMap {...props} selectableTiles={[props.G.mapState.currentBattle]} />
 
       <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginTop: 16 }}>
         <GameButton variant="primary" disabled={hand.length === 0} onClick={handlePick}>

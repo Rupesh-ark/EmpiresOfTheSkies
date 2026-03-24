@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { MyGameProps } from "@eots/game";
-import { findPossibleDestinations } from "@eots/game";
 import { DialogShell } from "@/components/atoms/DialogShell";
 import WorldMap from "../WorldMap/WorldMap";
 
@@ -20,22 +19,8 @@ const RelocateLoserDialog = (props: MyGameProps) => {
       }
     });
 
-  const possibleTiles = findPossibleDestinations(
-    props.G,
-    props.G.mapState.currentBattle,
-    true
-  );
-
-  const emptyTiles: number[][] = [];
-  for (let i = 1; i < possibleTiles.length; i++) {
-    possibleTiles[i].forEach((tile) => {
-      if (emptyTiles.length === 0 || i === 1) {
-        if (props.G.mapState.battleMap[tile[1]][tile[0]].length === 0) {
-          emptyTiles.push(tile);
-        }
-      }
-    });
-  }
+  // Valid relocation tiles are pre-computed by the backend when battle resolves
+  const emptyTiles = props.G.validRelocationTiles ?? [];
 
   return (
     <DialogShell

@@ -9,6 +9,7 @@ import PickLegacyCardDialog from "./Cards/PickLegacyCardDialog";
 import AttackOrPassDiaLog from "./AerialBattle/AttackOrPassDialog";
 import AttackOrEvadeDialog from "./AerialBattle/AttackOrEvadeDialog";
 import DrawOrPickCardDialog from "./AerialBattle/DrawOrPickCardDialog";
+import BattleResultDialog from "./AerialBattle/BattleResultDialog";
 import RelocateLoserDialog from "./AerialBattle/RelocateLoserDialog";
 import PlunderLegendsDialog from "./PlunderLegends/PlunderLegendsDialog";
 import GroundAttackOrPassDialog from "./GroundBattle/GroundAttackOrPassDialog";
@@ -66,6 +67,9 @@ export const DialogRouter = memo((props: MyGameProps) => {
       {props.G.stage === "attack or evade" && (
         <AttackOrEvadeDialog {...props} />
       )}
+
+      {/* BattleResultDialog manages its own open state — shows after any battle resolves */}
+      <BattleResultDialog {...props} />
 
       {/* DrawOrPickCardDialog manages its own open state internally */}
       <DrawOrPickCardDialog {...props} />
