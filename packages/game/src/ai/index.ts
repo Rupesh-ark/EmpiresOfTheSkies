@@ -28,3 +28,21 @@ export type {
 } from "./AILogger";
 export { evaluateState, estimateMoveValue } from "./evaluate";
 export { EmpiresBot } from "./EmpiresBot";
+export { runSelfPlay, runSingleGame, printBalanceReport } from "./selfPlay";
+export type { GameResult, BalanceReport } from "./selfPlay";
+export {
+  runTournament,
+  runHillClimb,
+  runLeague,
+  printTournamentResult,
+  printHillClimbResult,
+  printLeagueResult,
+} from "./tournament";
+export type {
+  TournamentMatchup,
+  TournamentResult,
+  HillClimbConfig,
+  HillClimbResult,
+  LeagueConfig,
+  LeagueResult,
+} from "./tournament";
