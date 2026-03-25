@@ -56,3 +56,4 @@ server/storage/
 # AI weights local overrides (JSON, not committed)
 packages/game/src/ai/weightsConfig.local.json
 packages/game/src/ai/tournament-results/
+bot-logs/
