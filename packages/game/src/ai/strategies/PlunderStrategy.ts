@@ -1,0 +1,63 @@
+import type { PhaseStrategy, AIPersonality, AIMove } from "../types";
+import type { MyGameState } from "../../types";
+import type { Ctx } from "boardgame.io";
+import { enumerateLegalMoves } from "../enumerate";
+
+/**
+ * Plunder legends strategy: decide whether to plunder a legend tile.
+ * Plundering gives resources but advances heresy by 1.
+ * - Aggressive/Economic: plunder for resources
+ * - Religious (orthodox): avoid plundering (heresy cost)
+ * - Heretic: plunder freely (heresy advance is beneficial)
+ */
+export class PlunderStrategy implements PhaseStrategy {
+  selectMove(
+    G: MyGameState,
+    ctx: Ctx,
+    playerID: string,
+    personality: AIPersonality
+  ): AIMove {
+    const moves = enumerateLegalMoves(G, ctx, playerID);
+    if (moves.length === 0) return { move: "doNotPlunder", args: [] };
+    if (moves.length === 1) return moves[0];
+
+    const plunderMove = moves.find((m) => m.move === "plunder");
+    const doNotPlunder = moves.find((m) => m.move === "doNotPlunder");
+
+    if (!plunderMove) return doNotPlunder ?? moves[0];
+    if (!doNotPlunder) return plunderMove;
+
+    const player = G.playerInfo[playerID];
+    const w = personality.weights;
+    const aggression = personality.tacticalPreferences.aggressionLevel;
+
+    // Check the loot value at the current battle tile
+    const [bx, by] = G.mapState.currentBattle ?? [0, 0];
+    const tile = G.mapState.currentTileArray[by]?.[bx];
+    let lootValue = 0;
+    if (tile?.loot?.colony) {
+      const loot = tile.loot.colony;
+      lootValue = loot.gold + loot.mithril + loot.dragonScales +
+        loot.krakenSkin + loot.magicDust + loot.stickyIchor + loot.pipeweed;
+    }
+
+    // Heresy cost assessment
+    let heresyCost = 0;
+    if (player.hereticOrOrthodox === "orthodox") {
+      // Heresy advance is bad for orthodox players
+      heresyCost = 0.15 * w.religion;
+    } else {
+      // Heresy advance is neutral/good for heretics
+      heresyCost = -0.05 * w.religion; // slight benefit
+    }
+
+    // Plunder value
+    const resourceValue = lootValue * 0.03 * w.economy;
+    const aggressionBonus = aggression * 0.1;
+
+    const plunderScore = resourceValue + aggressionBonus - heresyCost;
+    const passScore = 0.02; // small baseline for not plundering
+
+    return plunderScore > passScore ? plunderMove : doNotPlunder;
+  }
+}

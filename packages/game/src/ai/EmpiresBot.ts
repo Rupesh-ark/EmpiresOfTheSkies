@@ -3,6 +3,15 @@ import type { MyGameState } from "../types";
 import type { AIMove, AIPersonality, BotConfig, AIWeights } from "./types";
 import { AIStrategyRegistry } from "./AIStrategyRegistry";
 import { RandomFallbackStrategy } from "./strategies/RandomFallback";
+import { DiscoveryStrategy } from "./strategies/DiscoveryStrategy";
+import { EventsStrategy } from "./strategies/EventsStrategy";
+import { ActionsStrategy } from "./strategies/ActionsStrategy";
+import { AerialBattleStrategy } from "./strategies/AerialBattleStrategy";
+import { GroundBattleStrategy } from "./strategies/GroundBattleStrategy";
+import { ElectionStrategy } from "./strategies/ElectionStrategy";
+import { ConquestStrategy } from "./strategies/ConquestStrategy";
+import { PlunderStrategy } from "./strategies/PlunderStrategy";
+import { ResolutionStrategy } from "./strategies/ResolutionStrategy";
 import { deriveWeightsFromCards } from "./personalities";
 import { enumerateLegalMoves } from "./enumerate";
 import { estimateMoveValue } from "./evaluate";
@@ -135,7 +144,20 @@ export class EmpiresBot {
       return this.chooseLegacyCard(G, playerID);
     }
 
-    // Normal move selection
+    const personality = this.personality ?? this.defaultPersonality();
+
+    // Check if a dedicated strategy is registered for this phase
+    const strategy = this.registry.getStrategy(ctx.phase ?? "");
+    const isRegisteredStrategy = !(strategy instanceof RandomFallbackStrategy);
+
+    if (isRegisteredStrategy) {
+      // Use the dedicated phase strategy
+      const chosen = strategy.selectMove(G, ctx, playerID, personality);
+      this.logDecision(G, ctx, playerID, [chosen], chosen, 0, "best_score", startTime);
+      return chosen;
+    }
+
+    // Default path: enumerate + score with estimateMoveValue
     const moves = enumerateLegalMoves(G, ctx, playerID);
     if (moves.length === 0) return null;
     if (moves.length === 1) {
@@ -143,19 +165,14 @@ export class EmpiresBot {
       return moves[0];
     }
 
-    // Score all moves
-    const personality = this.personality ?? this.defaultPersonality();
     const scored = moves.map((m) => ({
       move: m,
       score: estimateMoveValue(G, playerID, m, personality.weights),
     }));
     scored.sort((a, b) => b.score - a.score);
 
-    // Always pick the highest-scored move (deterministic for simulations)
     const chosen = scored[0];
-    const reason: "best_score" | "random_override" | "forced" | "fallback" = "best_score";
-
-    this.logDecision(G, ctx, playerID, moves, chosen.move, chosen.score, reason, startTime);
+    this.logDecision(G, ctx, playerID, moves, chosen.move, chosen.score, "best_score", startTime);
     return chosen.move;
   }
 
@@ -288,9 +305,15 @@ export class EmpiresBot {
   static createRegistry(): AIStrategyRegistry {
     const fallback = new RandomFallbackStrategy();
     const registry = new AIStrategyRegistry(fallback);
-    // All phases use RandomFallback for now.
-    // Future: registry.register("actions", new WeightedActionsStrategy());
-    // Future: registry.register("discovery", new WeightedDiscoveryStrategy());
+    registry.register("discovery", new DiscoveryStrategy());
+    registry.register("events", new EventsStrategy());
+    registry.register("actions", new ActionsStrategy());
+    registry.register("aerial_battle", new AerialBattleStrategy());
+    registry.register("ground_battle", new GroundBattleStrategy());
+    registry.register("election", new ElectionStrategy());
+    registry.register("conquest", new ConquestStrategy());
+    registry.register("plunder_legends", new PlunderStrategy());
+    registry.register("resolution", new ResolutionStrategy());
     return registry;
   }
 }
