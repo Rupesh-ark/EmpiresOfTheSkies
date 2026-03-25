@@ -41,38 +41,26 @@ export interface BalanceReport {
   worstCardCombo: { ka: string; legacy: string; winRate: number; games: number } | null;
 }
 
-// ── Single game runner ──────────────────────────────────────────────────────
+// ── Shared game loop ─────────────────────────────────────────────────────────
 
-export function runSingleGame(gameNumber: number): GameResult | null {
-  // Create 6 local clients sharing the same match via Local multiplayer
-  const clients: ReturnType<typeof Client>[] = [];
-  const bots: EmpiresBot[] = [];
-
-  for (let p = 0; p < 6; p++) {
-    const playerID = String(p);
-    const bot = new EmpiresBot({ playerID });
-    bots.push(bot);
-
-    const client = Client({
-      game: MyGame,
-      numPlayers: 6,
-      multiplayer: Local(),
-      playerID,
-    });
-    client.start();
-    clients.push(client);
-  }
-
-  // Game loop: iterate until gameover or safety limit
-  const MAX_ITERATIONS = 50000;
+/**
+ * Runs the boardgame.io local client loop until gameover or maxIterations.
+ * Handles both activePlayers (simultaneous) and sequential turns.
+ * When a bot has nothing to do (enumerate returns []), it skips — matching
+ * the live game behavior (setupBotClients.ts does nothing on null moves).
+ * Stops all clients before returning.
+ */
+export function runGameLoop(
+  clients: ReturnType<typeof Client>[],
+  bots: EmpiresBot[],
+  maxIterations = 50000
+): { finalState: any; iterations: number } {
   let iterations = 0;
 
-  while (iterations < MAX_ITERATIONS) {
+  while (iterations < maxIterations) {
     const state = clients[0].getState();
-    if (!state) { iterations++; continue; }
-    if (state.ctx.gameover) break;
+    if (!state || state.ctx.gameover) break;
 
-    const G = state.G as MyGameState;
     const ctx = state.ctx;
 
     // Handle activePlayers (election — all players act simultaneously)
@@ -96,20 +84,42 @@ export function runSingleGame(gameNumber: number): GameResult | null {
       const move = bots[pIdx].chooseMove(botState.G as MyGameState, botState.ctx, currentPlayer);
       if (move) {
         (clients[pIdx] as any).moves[move.move]?.(...move.args);
-      } else {
-        // No move available — try to pass to unstick
-        (clients[pIdx] as any).moves.pass?.();
       }
+      // null move → skip. EmpiresBot returns null when enumerate has no valid moves.
     }
 
     iterations++;
   }
 
-  // Extract result
   const finalState = clients[0].getState();
-
-  // Clean up
   for (const c of clients) c.stop();
+
+  return { finalState, iterations };
+}
+
+// ── Single game runner ──────────────────────────────────────────────────────
+
+export function runSingleGame(gameNumber: number): GameResult | null {
+  // Create 6 local clients sharing the same match via Local multiplayer
+  const clients: ReturnType<typeof Client>[] = [];
+  const bots: EmpiresBot[] = [];
+
+  for (let p = 0; p < 6; p++) {
+    const playerID = String(p);
+    const bot = new EmpiresBot({ playerID });
+    bots.push(bot);
+
+    const client = Client({
+      game: MyGame,
+      numPlayers: 6,
+      multiplayer: Local(),
+      playerID,
+    });
+    client.start();
+    clients.push(client);
+  }
+
+  const { finalState, iterations } = runGameLoop(clients, bots);
 
   if (!finalState?.ctx.gameover) {
     console.warn(`Game ${gameNumber}: did not complete (${iterations} iterations)`);

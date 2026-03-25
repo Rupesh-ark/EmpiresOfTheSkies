@@ -28,7 +28,7 @@ export type {
 } from "./AILogger";
 export { evaluateState, estimateMoveValue } from "./evaluate";
 export { EmpiresBot } from "./EmpiresBot";
-export { runSelfPlay, runSingleGame, printBalanceReport } from "./selfPlay";
+export { runSelfPlay, runSingleGame, runGameLoop, printBalanceReport } from "./selfPlay";
 export type { GameResult, BalanceReport } from "./selfPlay";
 export {
   runTournament,

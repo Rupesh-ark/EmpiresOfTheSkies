@@ -13,6 +13,7 @@ import type { MyGameState } from "../types";
 import type { AIWeights } from "./types";
 import { EmpiresBot } from "./EmpiresBot";
 import { AILogger, setAILogger } from "./AILogger";
+import { runGameLoop } from "./selfPlay";
 
 // ── Types ───────────────────────────────────────────────────────────────────
 
@@ -114,42 +115,7 @@ function runConfiguredGame(slots: BotSlotConfig[]): {
     clients.push(client);
   }
 
-  // Game loop
-  const MAX_ITER = 50000;
-  let iter = 0;
-
-  while (iter < MAX_ITER) {
-    const state = clients[0].getState();
-    if (!state || state.ctx.gameover) break;
-
-    const ctx = state.ctx;
-
-    if (ctx.activePlayers) {
-      for (const [pid] of Object.entries(ctx.activePlayers)) {
-        const pIdx = parseInt(pid);
-        const botState = clients[pIdx].getState();
-        if (!botState) continue;
-        const move = bots[pIdx].chooseMove(botState.G as MyGameState, botState.ctx, pid);
-        if (move) {
-          (clients[pIdx] as any).moves[move.move]?.(...move.args);
-        }
-      }
-    } else {
-      const pIdx = parseInt(ctx.currentPlayer);
-      const botState = clients[pIdx].getState();
-      if (!botState) { iter++; continue; }
-      const move = bots[pIdx].chooseMove(botState.G as MyGameState, botState.ctx, ctx.currentPlayer);
-      if (move) {
-        (clients[pIdx] as any).moves[move.move]?.(...move.args);
-      } else {
-        (clients[pIdx] as any).moves.pass?.();
-      }
-    }
-    iter++;
-  }
-
-  const finalState = clients[0].getState();
-  for (const c of clients) c.stop();
+  const { finalState } = runGameLoop(clients, bots);
 
   if (!finalState?.ctx.gameover) return null;
 

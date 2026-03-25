@@ -151,7 +151,11 @@ export class EmpiresBot {
     const isRegisteredStrategy = !(strategy instanceof RandomFallbackStrategy);
 
     if (isRegisteredStrategy) {
-      // Use the dedicated phase strategy
+      // If enumerate says nothing to do, don't call the strategy
+      // (strategies return fallback moves like "pass" when empty, which may not exist)
+      const availableMoves = enumerateLegalMoves(G, ctx, playerID);
+      if (availableMoves.length === 0) return null;
+
       const chosen = strategy.selectMove(G, ctx, playerID, personality);
       this.logDecision(G, ctx, playerID, [chosen], chosen, 0, "best_score", startTime);
       return chosen;

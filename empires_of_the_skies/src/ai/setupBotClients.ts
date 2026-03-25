@@ -39,6 +39,7 @@ export function setupBotClients(
       playerID,
       matchID,
       credentials: botCredentials[playerID],
+      debug: false,
     });
 
     botClient.subscribe((state: any) => {

@@ -142,12 +142,8 @@ function deepMerge(target: any, source: any): any {
   return result;
 }
 
-let localOverrides: Record<string, unknown> = {};
-try {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  localOverrides = require("./weightsConfig.local.json");
-} catch {
-  // No local overrides — use defaults
-}
+// Local weight overrides — deep-merged on top of defaults.
+// This file is gitignored during tuning. Once finalized, remove from .gitignore.
+import localOverrides from "./weightsConfig.local.json";
 
-export const AI_CONFIG: typeof DEFAULTS = deepMerge(DEFAULTS, localOverrides);
+export const AI_CONFIG: typeof DEFAULTS = deepMerge(DEFAULTS, localOverrides as Record<string, unknown>);

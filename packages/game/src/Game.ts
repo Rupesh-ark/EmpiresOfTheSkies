@@ -83,7 +83,7 @@ import resolveEventChoice from "./moves/events/resolveEventChoice";
 import immediateElectionVote from "./moves/events/immediateElectionVote";
 import { ALL_EVENT_CARD_NAMES } from "./helpers/eventCardDefinitions";
 import { prepareInfidelFleetCombat } from "./helpers/resolveInfidelFleet";
-import { continueResolution } from "./helpers/resolutionFlow";
+import { continueResolution, getResolutionTarget } from "./helpers/resolutionFlow";
 import respondToInfidelFleet from "./moves/events/respondToInfidelFleet";
 import commitRebellionTroops from "./moves/events/commitRebellionTroops";
 import contributeToRebellion from "./moves/events/contributeToRebellion";
@@ -647,6 +647,16 @@ const MyGame: Game<MyGameState> = {
       turn: {
         order: TurnOrder.CUSTOM_FROM("turnOrder"),
         onBegin: (context) => {
+          // Redirect turn to the correct player for the current stage.
+          // Phase onBegin sets up G.stage but cannot call endTurn (boardgame.io
+          // silently discards it — see docs/BOARDGAMEIO_ENDTURN_ONBEGIN.md).
+          // This hook runs AFTER the turn is initialized, so endTurn works here.
+          const target = getResolutionTarget(context.G);
+          if (target && target !== context.ctx.currentPlayer) {
+            context.events.endTurn({ next: target });
+            return;
+          }
+
           // Auto-skip players with no deployed fleets during retrieve fleets stage
           if (context.G.stage !== "retrieve fleets") return;
           const playerID = context.ctx.currentPlayer;
@@ -671,14 +681,13 @@ const MyGame: Game<MyGameState> = {
         const hasCombat = prepareInfidelFleetCombat(context.G);
 
         if (hasCombat) {
-          // Interactive: target player chooses fight or evade
+          // State setup only — turn.onBegin handles the endTurn redirect
           context.G.stage = "infidel_fleet_combat";
-          context.events.endTurn({
-            next: context.G.infidelFleetCombat!.targetPlayerID,
-          });
         } else {
-          // No Fleet combat — continue to deferred events, rebellions, invasion
-          continueResolution(context.G, context.events);
+          // No Fleet combat — set up deferred events, rebellions, invasion
+          // skipEndTurn=true: endTurn is discarded in phase onBegin (boardgame.io bug)
+          // turn.onBegin will redirect via getResolutionTarget()
+          continueResolution(context.G, context.events, true);
         }
       },
       onEnd: (context) => {
