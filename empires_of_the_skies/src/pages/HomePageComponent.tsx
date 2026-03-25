@@ -74,10 +74,52 @@ const TAGLINES = [
 ] as const;
 
 const HomePageComponent = (props: HomePageComponentProps) => {
-  const [joinOrCreate, setJoinOrCreate] = useState<"join" | "create">("join");
+  const [joinOrCreate, setJoinOrCreate] = useState<"join" | "create" | "ai">("join");
   const [playerName, setName] = useState("");
   const [matchIDInput, setMatchIDInput] = useState("");
+  const [numBots, setNumBots] = useState(5);
   const navigate = useNavigate();
+
+  const startAIGame = async () => {
+    const totalPlayers = 1 + numBots;
+
+    const { matchID } = await props.lobbyClient.createMatch("empires-of-the-skies", {
+      numPlayers: totalPlayers,
+    });
+    if (!matchID) { alert("Failed to create match"); return; }
+
+    const humanResponse = await props.lobbyClient.joinMatch(
+      "empires-of-the-skies",
+      matchID,
+      { playerName, playerID: "0" }
+    );
+
+    const storageKey = `eots_${matchID}_${playerName}`;
+    localStorage.setItem(storageKey, JSON.stringify({
+      playerID: humanResponse.playerID,
+      credentials: humanResponse.playerCredentials,
+    }));
+
+    const botCredentials: Record<string, string> = {};
+    const botPlayerIDs: string[] = [];
+    for (let i = 1; i <= numBots; i++) {
+      const botName = `Bot ${i}`;
+      const botResponse = await props.lobbyClient.joinMatch(
+        "empires-of-the-skies",
+        matchID,
+        { playerName: botName, playerID: String(i) }
+      );
+      botCredentials[String(i)] = botResponse.playerCredentials;
+      botPlayerIDs.push(String(i));
+    }
+
+    localStorage.setItem(`eots_bots_${matchID}`, JSON.stringify({
+      botPlayerIDs,
+      botCredentials,
+    }));
+
+    navigate(`/game/${matchID}/${playerName}`);
+  };
 
   return (
     <Box
@@ -285,6 +327,7 @@ const HomePageComponent = (props: HomePageComponentProps) => {
           >
             <ToggleButton value="join">Join</ToggleButton>
             <ToggleButton value="create">Create</ToggleButton>
+            <ToggleButton value="ai">Play vs AI</ToggleButton>
           </ToggleButtonGroup>
 
           <Typography sx={{ ...labelSx, mt: 1 }}>Player Name</Typography>
@@ -339,6 +382,34 @@ const HomePageComponent = (props: HomePageComponentProps) => {
             </>
           )}
 
+          {joinOrCreate === "ai" && (
+            <>
+              <Typography sx={labelSx}>Number of AI Opponents</Typography>
+              <Select
+                size="small"
+                fullWidth
+                value={numBots}
+                onChange={(event) => setNumBots(Number(event.target.value))}
+                sx={{
+                  fontFamily: fonts.accent,
+                  color: colors.home.text,
+                  backgroundColor: colors.home.textFieldBg,
+                  borderRadius: "2px",
+                  border: `1px solid ${colors.home.border}`,
+                  "&:hover": { borderColor: colors.home.hoverBronze },
+                  "& .MuiSelect-select": { color: colors.home.text },
+                  "& .MuiOutlinedInput-notchedOutline": { border: "none" },
+                }}
+              >
+                {[1, 2, 3, 4, 5].map((n) => (
+                  <MenuItem key={n} value={n}>
+                    {n}
+                  </MenuItem>
+                ))}
+              </Select>
+            </>
+          )}
+
           <Button
             fullWidth
             size="large"
@@ -373,12 +444,14 @@ const HomePageComponent = (props: HomePageComponentProps) => {
             onClick={() => {
               if (joinOrCreate === "create") {
                 createMatch(props.lobbyClient, props.numPlayers, props.setMatchReady);
+              } else if (joinOrCreate === "ai") {
+                startAIGame();
               } else {
                 navigate(`/match/${matchIDInput}/${playerName}`);
               }
             }}
           >
-            {joinOrCreate === "join" ? "JOIN" : "CREATE"} GAME
+            {joinOrCreate === "join" ? "JOIN" : joinOrCreate === "create" ? "CREATE" : "START"} GAME
           </Button>
         </Paper>
 
