@@ -24,6 +24,30 @@ export type DealProposal = {
   requesting: DealOffer;
 };
 
+// ── Discriminated-union game stage ──────────────────────────────────
+export type GameStage =
+  | { phase: "setup";      sub: "kingdom_advantage" | "legacy_card" }
+  | { phase: "events";     sub: "default" | "immediate_election" }
+  | { phase: "discovery";  sub: "default" }
+  | { phase: "taxes";      sub: "default" }
+  | { phase: "actions";    sub: "default" | "confirm_fow_draw" | "discard_fow" }
+  | { phase: "resolution"; sub:
+      | "rebellion" | "rebellion_rival_support"
+      | "aerial_attack_or_pass" | "aerial_attack_or_evade" | "aerial_resolve" | "aerial_relocate"
+      | "plunder_legends"
+      | "ground_attack_or_pass" | "ground_defend_or_yield" | "ground_resolve" | "ground_garrison" | "ground_relocate"
+      | "conquest" | "conquest_draw_or_pick" | "conquest_garrison"
+      | "election"
+      | "infidel_fleet_combat" | "deferred_battle"
+      | "invasion_nominate" | "invasion_contribute" | "invasion_buyoff"
+      | "retrieve_fleets"
+    }
+  | { phase: "scoring";    sub: "default" }
+  | { phase: "reset";      sub: "default" };
+
+export type StagePhase = GameStage["phase"];
+export type StageSub = GameStage["sub"];
+
 export interface MyGameState {
   playerInfo: { [details: string]: PlayerInfo };
   mapState: MapState;
@@ -38,36 +62,7 @@ export interface MyGameState {
   possibleDefenders: string[];
   validRelocationTiles: number[][];
   troopsAvailableForGarrison: { regiments: number; elites: number; levies: number };
-  stage:
-    | "discovery"
-    | "actions"
-    | "attack or pass"
-    | "attack or evade"
-    | "resolve battle"
-    | "plunder legends"
-    | "relocate loser"
-    | "ground battle"
-    | "conquest"
-    | "conquest draw or pick card"
-    | "election"
-    | "defend or yield"
-    | "resolve ground battle"
-    | "garrison troops"
-    | "retrieve fleets"
-    | "rebellion"
-    | "invasion_nominate"
-    | "invasion_contribute"
-    | "invasion_buyoff"
-    | "infidel_fleet_combat"
-    | "rebellion_rival_support"
-    | "deferred_battle"
-    | "pick legacy card"
-    | "taxes"
-    | "events"
-    | "discard_fow"
-    | "confirm_fow_draw"
-    | "immediate_election"
-    | "reset";
+  stage: GameStage;
   electionResults: Record<string, number>;
   hasVoted: string[];
   voteSubmitted: Record<string, string>;
@@ -128,6 +123,7 @@ export interface MyGameState {
   mercyGold: Record<string, number>;
   _loopGuard: number;
   _halted: boolean;
+  _turnEndingCount: number;
 }
 
 /** Frontend-readable summary of the most recent battle resolution */

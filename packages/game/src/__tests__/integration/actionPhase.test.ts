@@ -124,7 +124,7 @@ describe("actionPhase — trainTroops deducts counsellor and changes stage", () 
 
     expect(G.playerInfo["0"].resources.counsellors).toBe(counsellorsBefore - 1);
     expect(G.playerInfo["0"].playerBoardCounsellorLocations.trainTroops).toBe(true);
-    expect(G.stage).toBe("confirm_fow_draw");
+    expect(G.stage).toEqual({ phase: "actions", sub: "confirm_fow_draw" });
   });
 
   it("returns INVALID_MOVE if trainTroops already used this round", () => {
@@ -155,7 +155,7 @@ describe("actionPhase — both players pass advances to 'attack or pass'", () =>
     expect(G.playerInfo["0"].passed).toBe(true);
     expect(events.endTurn).toHaveBeenCalled();
     expect(events.endPhase).not.toHaveBeenCalled();
-    expect(G.stage).toBe("actions"); // stage unchanged
+    expect(G.stage).toEqual({ phase: "actions", sub: "default" }); // stage unchanged
   });
 
   it("second player's pass ends phase and transitions to 'attack or pass'", () => {
@@ -168,7 +168,7 @@ describe("actionPhase — both players pass advances to 'attack or pass'", () =>
     pass.fn({ G, ctx, playerID: "1", events });
 
     expect(G.playerInfo["1"].passed).toBe(true);
-    expect(G.stage).toBe("attack or pass");
+    expect(G.stage).toEqual({ phase: "actions", sub: "default" });
     expect(events.endPhase).toHaveBeenCalled();
     expect(events.endTurn).not.toHaveBeenCalled();
   });

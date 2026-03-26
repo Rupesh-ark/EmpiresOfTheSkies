@@ -290,7 +290,7 @@ export class EmpiresBot {
     getAILogger().logDecision({
       round: G.round,
       phase: ctx.phase ?? "unknown",
-      stage: G.stage ?? "unknown",
+      stage: G.stage ? `${G.stage.phase}/${G.stage.sub}` : "unknown",
       playerID,
       personalityName: personality.name,
       legalMoveCount: allMoves.length,

@@ -18,17 +18,17 @@ export class AerialBattleStrategy implements PhaseStrategy {
     if (moves.length === 0) return { move: "doNotAttack", args: [] };
     if (moves.length === 1) return moves[0];
 
-    switch (G.stage) {
-      case "attack or pass":
+    switch (G.stage.sub) {
+      case "aerial_attack_or_pass":
         return this.decideAttack(G, ctx, playerID, personality, moves);
 
-      case "attack or evade":
+      case "aerial_attack_or_evade":
         return this.decideEvade(G, playerID, personality, moves);
 
-      case "conquest draw or pick card":
+      case "conquest_draw_or_pick":
         return this.pickFoWCard(G, playerID, moves);
 
-      case "relocate loser":
+      case "aerial_relocate":
         return this.relocate(G, playerID, moves);
 
       default:

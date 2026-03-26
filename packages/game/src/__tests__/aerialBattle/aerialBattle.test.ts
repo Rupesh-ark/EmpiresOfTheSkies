@@ -57,33 +57,48 @@ describe("attackOtherPlayersFleet — initiating battle", () => {
     const G = buildInitialG();
     const ctx = buildCtxWithPhase("0");
     attackOtherPlayersFleet.fn({ G, ctx, playerID: "0", events: stubEvents, random: buildRandom() }, "1");
-    expect(G.stage).toBe("attack or evade");
+    expect(G.stage).toEqual({ phase: "resolution", sub: "aerial_attack_or_evade" });
   });
 });
 
 // ── evadeAttackingFleet ───────────────────────────────────────────────────────
 
 describe("evadeAttackingFleet — defender chooses to evade", () => {
-  it("sets defender decision to 'evade'", () => {
-    const G = buildInitialG();
+  function buildEvasionG() {
+    const G = buildInitialG([
+      buildPlayer("0", { fleetInfo: [buildFleet(0, { location: [0, 0] })] }),
+      buildPlayer("1", { fleetInfo: [buildFleet(1, { location: [0, 0] })] }),
+    ]);
+    G.mapState.currentBattle = [0, 0];
+    G.mapState.battleMap = Array.from({ length: 4 }, (_, y) =>
+      Array.from({ length: 8 }, (_, x) =>
+        x === 0 && y === 0 ? ["0", "1"] : []
+      )
+    );
+    // Battles only happen on discovered tiles — adjacent tiles must be
+    // discovered too so the evading fleet has somewhere to relocate
+    G.mapState.discoveredTiles = Array.from({ length: 4 }, () =>
+      Array.from({ length: 8 }, () => true)
+    );
     G.battleState = {
       attacker: { decision: "fight", ...G.playerInfo["0"] },
       defender: { decision: "undecided", ...G.playerInfo["1"] },
     };
+    return G;
+  }
+
+  it("sets defender decision to 'evade'", () => {
+    const G = buildEvasionG();
     const ctx = buildCtxWithPhase("1");
     evadeAttackingFleet.fn({ G, ctx, playerID: "1", events: stubEvents, random: buildRandom() });
     expect(G.battleState?.defender.decision).toBe("evade");
   });
 
   it("advances game stage to 'relocate loser'", () => {
-    const G = buildInitialG();
-    G.battleState = {
-      attacker: { decision: "fight", ...G.playerInfo["0"] },
-      defender: { decision: "undecided", ...G.playerInfo["1"] },
-    };
+    const G = buildEvasionG();
     const ctx = buildCtxWithPhase("1");
     evadeAttackingFleet.fn({ G, ctx, playerID: "1", events: stubEvents, random: buildRandom() });
-    expect(G.stage).toBe("relocate loser");
+    expect(G.stage).toEqual({ phase: "resolution", sub: "aerial_relocate" });
   });
 });
 

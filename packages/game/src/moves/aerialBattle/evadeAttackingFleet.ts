@@ -1,6 +1,8 @@
 import { MoveDefinition } from "../../types";
 import { findPossibleDestinations } from "../../helpers/helpers";
 import { findNextPlayerInBattleSequence } from "../../helpers/findNext";
+import { forceRetrieveFleets } from "../../helpers/resolveBattle";
+import { setStage } from "../../helpers/stageUtils";
 
 const evadeAttackingFleet: MoveDefinition = {
   fn: ({ G, ctx, playerID, events }, ...args) => {
@@ -27,10 +29,12 @@ const evadeAttackingFleet: MoveDefinition = {
       }
 
       if (G.validRelocationTiles.length === 0) {
-        // No valid relocation tiles — skip relocate, advance battle
+        // No valid relocation tiles — evading fleet forced home
+        const [bx, by] = G.mapState.currentBattle;
+        forceRetrieveFleets(G, playerID, bx, by);
         findNextPlayerInBattleSequence(attackerID, ctx, G, events);
       } else {
-        G.stage = "relocate loser";
+        setStage(G, "resolution", "aerial_relocate");
         events.endTurn({ next: attackerID });
       }
     }

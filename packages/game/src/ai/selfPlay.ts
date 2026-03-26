@@ -56,12 +56,46 @@ export function runGameLoop(
   maxIterations = 50000
 ): { finalState: any; iterations: number } {
   let iterations = 0;
+  const fs = require("fs");
+  let lastStateKey = "";
+  let staleCount = 0;
 
   while (iterations < maxIterations) {
     const state = clients[0].getState();
     if (!state || state.ctx.gameover) break;
 
     const ctx = state.ctx;
+    const G = state.G as MyGameState;
+
+    // Detect stalls: same phase/stage/turn/player repeating
+    const stateKey = `${ctx.phase}/${G.stage}/t${ctx.turn}/P${ctx.currentPlayer}`;
+    if (stateKey === lastStateKey) {
+      staleCount++;
+      if (staleCount === 5) {
+        const pIdx = parseInt(ctx.currentPlayer);
+        const botState = clients[pIdx].getState();
+        const move = botState ? bots[pIdx].chooseMove(botState.G as MyGameState, botState.ctx, ctx.currentPlayer) : null;
+        const invasion = G.currentInvasion;
+        const conquestState = G.conquestState;
+        fs.appendFileSync("/tmp/selfplay_trace.log",
+          `[STALL] iter=${iterations} R${G.round} ${stateKey}\n` +
+          `  move=${move ? move.move + "(" + JSON.stringify(move.args) + ")" : "NULL"}\n` +
+          `  invasion=${invasion ? JSON.stringify({ phase: invasion.phase, contributions: Object.keys(invasion.contributions || {}), buyoffCost: invasion.buyoffCost }) : "none"}\n` +
+          `  conquestState=${conquestState ? "exists" : "none"}\n` +
+          `  battleState=${G.battleState ? `att=${G.battleState.attacker?.id} def=${G.battleState.defender?.id}` : "none"}\n` +
+          `  validReloc=${G.validRelocationTiles?.length ?? 0}\n` +
+          `  playerRegs=${G.playerInfo[ctx.currentPlayer]?.resources?.regiments} levies=${G.playerInfo[ctx.currentPlayer]?.resources?.levies} sky=${G.playerInfo[ctx.currentPlayer]?.resources?.skyships}\n`);
+      }
+    } else {
+      staleCount = 0;
+      lastStateKey = stateKey;
+    }
+
+    // Trace every 50th iteration
+    if (iterations % 50 === 0) {
+      fs.appendFileSync("/tmp/selfplay_trace.log",
+        `[iter=${iterations}] R${G.round} ${ctx.phase}/${G.stage} P${ctx.currentPlayer} turn=${ctx.turn}\n`);
+    }
 
     // Handle activePlayers (election — all players act simultaneously)
     if (ctx.activePlayers) {
@@ -118,6 +152,8 @@ export function runGameLoop(
 // ── Single game runner ──────────────────────────────────────────────────────
 
 export function runSingleGame(gameNumber: number): GameResult | null {
+  const fs = require("fs");
+  fs.appendFileSync("/tmp/selfplay_trace.log", `[${Date.now()}] START creating clients\n`);
   // Create 6 local clients sharing the same match via Local multiplayer
   const clients: ReturnType<typeof Client>[] = [];
   const bots: EmpiresBot[] = [];
@@ -133,11 +169,15 @@ export function runSingleGame(gameNumber: number): GameResult | null {
       multiplayer: Local(),
       playerID,
     });
+    fs.appendFileSync("/tmp/selfplay_trace.log", `[${Date.now()}] starting client P${p}\n`);
     client.start();
+    fs.appendFileSync("/tmp/selfplay_trace.log", `[${Date.now()}] client P${p} started\n`);
     clients.push(client);
   }
 
+  fs.appendFileSync("/tmp/selfplay_trace.log", `[${Date.now()}] entering game loop\n`);
   const { finalState, iterations } = runGameLoop(clients, bots);
+  fs.appendFileSync("/tmp/selfplay_trace.log", `[${Date.now()}] game loop done, iterations=${iterations}\n`);
 
   if (!finalState?.ctx.gameover) {
     console.warn(`Game ${gameNumber}: did not complete (${iterations} iterations)`);

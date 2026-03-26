@@ -19,8 +19,8 @@ export class ResolutionStrategy implements PhaseStrategy {
     if (moves.length === 0) return { move: "pass", args: [] };
     if (moves.length === 1) return moves[0];
 
-    switch (G.stage) {
-      case "retrieve fleets":
+    switch (G.stage.sub) {
+      case "retrieve_fleets":
         return this.retrieveFleets(G, playerID, personality, moves);
 
       case "infidel_fleet_combat":

@@ -63,7 +63,7 @@ describe("trainTroops — once-per-round flag", () => {
     const G = buildInitialG();
     G.cardDecks.fortuneOfWarCards = [...fortuneOfWarCards];
     callMove(G, "0");
-    expect(G.stage).toBe("confirm_fow_draw");
+    expect(G.stage).toEqual({ phase: "actions", sub: "confirm_fow_draw" });
     expect(G.playerInfo["0"].turnComplete).toBe(false);
   });
 });

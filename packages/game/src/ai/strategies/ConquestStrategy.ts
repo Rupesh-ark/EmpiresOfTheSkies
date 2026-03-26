@@ -21,7 +21,7 @@ export class ConquestStrategy implements PhaseStrategy {
     if (moves.length === 1) return moves[0];
 
     // Handle card draw/pick sub-stages
-    if (G.stage === "conquest draw or pick card") {
+    if (G.stage.sub === "conquest_draw_or_pick") {
       return this.pickConquestCard(G, playerID, moves);
     }
 

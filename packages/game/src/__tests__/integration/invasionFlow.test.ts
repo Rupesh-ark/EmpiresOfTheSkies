@@ -128,7 +128,7 @@ describe("invasionFlow — Archprelate nominates Captain-General", () => {
     callNominate(G, "0", "1", ["0", "1"]);
 
     expect(G.currentInvasion?.phase).toBe("contribute");
-    expect(G.stage).toBe("invasion_contribute");
+    expect(G.stage).toEqual({ phase: "resolution", sub: "invasion_contribute" });
   });
 
   it("returns INVALID_MOVE if the player is not the Archprelate", () => {
@@ -195,7 +195,7 @@ describe("invasionFlow — all players contribute troops", () => {
     const allContributed =
       G.currentInvasion === null ||
       G.currentInvasion.phase === "buyoff" ||
-      G.stage === "retrieve fleets";
+      G.stage.sub === "retrieve_fleets";
     expect(allContributed).toBe(true);
   });
 });
@@ -248,7 +248,7 @@ describe("invasionFlow — buyoff phase", () => {
     callBuyoff(G, "1", 5, ["0", "1"]);
 
     // Both offered → should transition away from buyoff
-    expect(G.stage).toBe("retrieve fleets");
+    expect(G.stage).toEqual({ phase: "resolution", sub: "retrieve_fleets" });
   });
 
   it("returns INVALID_MOVE if player offers more gold than they have", () => {

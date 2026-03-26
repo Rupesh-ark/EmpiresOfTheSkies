@@ -197,7 +197,7 @@ describe("nominateCaptainGeneral — state mutations", () => {
     };
     callNominate(G, "0", "1", ["0", "1"]);
     expect(G.currentInvasion!.phase).toBe("contribute");
-    expect(G.stage).toBe("invasion_contribute");
+    expect(G.stage).toEqual({ phase: "resolution", sub: "invasion_contribute" });
   });
 
   it("allows nominating Heretic when all players are Heretic", () => {
@@ -477,7 +477,7 @@ describe("offerBuyoffGold — state mutations", () => {
     expect(G.playerInfo["0"].resources.gold).toBe(6); // 10 - 4
     expect(G.playerInfo["1"].resources.gold).toBe(6);
     expect(G.currentInvasion).toBeNull();
-    expect(G.stage).toBe("retrieve fleets");
+    expect(G.stage).toEqual({ phase: "resolution", sub: "retrieve_fleets" });
   });
 });
 
@@ -699,7 +699,7 @@ describe("setupNextDeferredBattle", () => {
     expect(G.currentDeferredBattle).not.toBeNull();
     expect(G.currentDeferredBattle!.event.card).toBe("faerie_uprising");
     expect(G.currentDeferredBattle!.event.targetPlayerID).toBe("0");
-    expect(G.stage).toBe("deferred_battle");
+    expect(G.stage).toEqual({ phase: "resolution", sub: "deferred_battle" });
     // The event should be removed from the deferred list
     expect(G.eventState.deferredEvents).toHaveLength(0);
     // Should end turn to the target player

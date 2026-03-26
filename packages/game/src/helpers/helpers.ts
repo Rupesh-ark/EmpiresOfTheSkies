@@ -237,23 +237,26 @@ export const checkIfCurrentPlayerIsInCurrentBattle = (
     if (bs && (ctx.phase === "aerial_battle" || ctx.phase === "ground_battle")) {
       let target: string | undefined;
 
-      switch (G.stage) {
-        case "attack or pass":
+      switch (G.stage.sub) {
+        case "aerial_attack_or_pass":
+        case "ground_attack_or_pass":
           // Normal turn order — attacker picks target or passes
           break;
 
-        case "attack or evade":   // aerial: defender decides to evade or fight
-        case "defend or yield":   // ground: defender decides to defend or yield
+        case "aerial_attack_or_evade":   // aerial: defender decides to evade or fight
+        case "ground_defend_or_yield":   // ground: defender decides to defend or yield
           target = bs.defender?.id;
           break;
 
-        case "resolve battle":
+        case "aerial_resolve":
+        case "ground_resolve":
           // Both sides commit FoW cards — route to whoever hasn't committed yet
           if (!bs.attacker?.fowCard) target = bs.attacker?.id;
           else if (!bs.defender?.fowCard) target = bs.defender?.id;
           break;
 
-        case "relocate loser":
+        case "aerial_relocate":
+        case "ground_relocate":
           // After evasion: attacker relocates the evader
           // After battle: victor relocates the loser
           if (bs.defender?.decision === "evade") {
@@ -263,15 +266,18 @@ export const checkIfCurrentPlayerIsInCurrentBattle = (
           }
           break;
 
-        case "garrison troops":
+        case "ground_garrison":
+        case "conquest_garrison":
           // Victor garrisons troops at the captured building
           target = bs.attacker?.victorious ? bs.attacker.id : bs.defender?.id;
           break;
       }
 
-      if (target && target !== ctx.currentPlayer) {
-        events.endTurn({ next: target });
-        return;
+      if (target) {
+        if (target !== ctx.currentPlayer) {
+          events.endTurn({ next: target });
+        }
+        return; // target found — don't fall through to battleMap fallback
       }
     }
 

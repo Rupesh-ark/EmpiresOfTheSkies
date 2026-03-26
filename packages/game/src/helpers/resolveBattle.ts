@@ -10,6 +10,7 @@ import { drawFortuneOfWarCard, findPossibleDestinations } from "./helpers";
 import { RandomAPI } from "boardgame.io/dist/types/src/plugins/random/random";
 import { increaseHeresyWithinMove, increaseOrthodoxyWithinMove, logEvent } from "./stateUtils";
 import { PRICE_MARKER_MIN } from "../data/gameData";
+import { setStage } from "./stageUtils";
 
 const GOODS: GoodKey[] = ["mithril", "dragonScales", "krakenSkin", "magicDust", "stickyIchor", "pipeweed"];
 
@@ -186,6 +187,43 @@ const cleanupWipedFleets = (
     }
   });
   return remaining;
+};
+
+/**
+ * Force-retrieves all of a player's fleets at (x, y) back to home [4, 0].
+ * Returns troops to the player's resource pool and removes them from battleMap.
+ * Used when a defeated/evading fleet has no valid retreat destination.
+ */
+export const forceRetrieveFleets = (
+  G: MyGameState,
+  playerID: string,
+  x: number,
+  y: number,
+): void => {
+  const player = G.playerInfo[playerID];
+  if (!player) return;
+
+  player.fleetInfo.forEach((fleet) => {
+    if (fleet.location[0] === x && fleet.location[1] === y) {
+      player.resources.skyships += fleet.skyships;
+      player.resources.regiments += fleet.regiments;
+      player.resources.levies += fleet.levies;
+      player.resources.eliteRegiments += fleet.eliteRegiments;
+      fleet.skyships = 0;
+      fleet.regiments = 0;
+      fleet.levies = 0;
+      fleet.eliteRegiments = 0;
+      fleet.location = [4, 0];
+    }
+  });
+
+  const tile = G.mapState.battleMap[y]?.[x];
+  if (tile) {
+    const idx = tile.indexOf(playerID);
+    if (idx !== -1) tile.splice(idx, 1);
+  }
+
+  logEvent(G, `${player.kingdomName}'s fleet forced to retreat home — no valid destination`);
 };
 
 // ---------------------------------------------------------------------------
@@ -421,7 +459,7 @@ export const resolveBattleAndReturnWinner = (
         remainingDefenders === 0 &&
         remainingAttackers > 0
       ) {
-        G.stage = "garrison troops";
+        setStage(G, "resolution", "ground_garrison");
         computeGarrisonTroops(G, winner);
         events.endTurn({ next: winner });
       } else {
@@ -457,7 +495,7 @@ export const resolveBattleAndReturnWinner = (
           // No valid relocation destinations — skip relocate stage, advance battle
           findNextPlayerInBattleSequence(winner, ctx, G, events);
         } else {
-          G.stage = "relocate loser";
+          setStage(G, "resolution", "aerial_relocate");
           events.endTurn({ next: winner });
         }
       }
@@ -676,7 +714,7 @@ export const resolveConquest = (
     currentBuilding.player = currentPlayer;
     currentBuilding.buildings = "colony";
     G.conquestState = undefined;
-    G.stage = "garrison troops";
+    setStage(G, "resolution", "conquest_garrison");
     computeGarrisonTroops(G, attackerID);
   }
 };

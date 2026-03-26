@@ -1,6 +1,7 @@
 import { INVALID_MOVE } from "boardgame.io/core";
 import { MoveDefinition } from "../../types";
 import { logEvent } from "../../helpers/stateUtils";
+import { setStage } from "../../helpers/stageUtils";
 import {
   resolveRebellionWithTroops,
   setupNextRebellion,
@@ -55,7 +56,7 @@ const commitRebellionTroops: MoveDefinition = {
       G.currentRebellion = null;
 
       if (setupNextRebellion(G)) {
-        G.stage = "rebellion";
+        setStage(G, "resolution", "rebellion");
         events.endTurn({ next: G.currentRebellion!.event.targetPlayerID });
       } else {
         continueResolution(G, events);
@@ -64,7 +65,7 @@ const commitRebellionTroops: MoveDefinition = {
     }
 
     // Transition to rival support stage
-    G.stage = "rebellion_rival_support";
+    setStage(G, "resolution", "rebellion_rival_support");
     events.endTurn({ next: rivals[0] });
   },
   errorMessage: "Cannot commit rebellion troops right now",

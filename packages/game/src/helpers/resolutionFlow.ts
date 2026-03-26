@@ -10,6 +10,7 @@
  */
 
 import { MyGameState } from "../types";
+import { setStage } from "./stageUtils";
 import { setupNextRebellion } from "./resolveRebellion";
 import { getDeferredBattleDescription } from "./resolveDeferredBattles";
 import { checkForInvasion, getArchprelateForNomination } from "./resolveInvasion";
@@ -41,7 +42,7 @@ export const setupNextDeferredBattle = (
       event,
       description: getDeferredBattleDescription(G, event),
     };
-    G.stage = "deferred_battle";
+    setStage(G, "resolution", "deferred_battle");
     if (!skipEndTurn) events.endTurn({ next: event.targetPlayerID });
     return;
   }
@@ -60,7 +61,7 @@ const continueAfterDeferredBattles = (
 ): void => {
   // Interactive rebellions
   if (G.eventState.deferredEvents.length > 0 && setupNextRebellion(G)) {
-    G.stage = "rebellion";
+    setStage(G, "resolution", "rebellion");
     if (!skipEndTurn) events.endTurn({ next: G.currentRebellion!.event.targetPlayerID });
     return;
   }
@@ -70,14 +71,14 @@ const continueAfterDeferredBattles = (
   if (invasionTriggered) {
     const archprelate = getArchprelateForNomination(G);
     if (archprelate) {
-      G.stage = "invasion_nominate";
+      setStage(G, "resolution", "invasion_nominate");
       if (!skipEndTurn) events.endTurn({ next: archprelate });
       return;
     }
   }
 
   // Nothing interactive left — retrieve fleets
-  G.stage = "retrieve fleets";
+  setStage(G, "resolution", "retrieve_fleets");
   if (!skipEndTurn) events.endTurn({ next: G.turnOrder[0] });
 };
 
@@ -104,7 +105,7 @@ export const continueResolution = (
  * Returns the target playerID, or null if normal turn order is fine.
  */
 export const getResolutionTarget = (G: MyGameState): string | null => {
-  switch (G.stage) {
+  switch (G.stage.sub) {
     case "infidel_fleet_combat":
       return G.infidelFleetCombat?.targetPlayerID ?? null;
 

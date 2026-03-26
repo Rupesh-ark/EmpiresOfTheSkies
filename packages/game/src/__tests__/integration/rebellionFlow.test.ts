@@ -113,7 +113,7 @@ describe("rebellionFlow — defender commits troops", () => {
     expect(G.currentRebellion?.defenderRegiments).toBe(4);
     expect(G.currentRebellion?.defenderLevies).toBe(0);
     // Should transition stage and call endTurn with next rival
-    expect(G.stage).toBe("rebellion_rival_support");
+    expect(G.stage).toEqual({ phase: "resolution", sub: "rebellion_rival_support" });
     expect(events.endTurn).toHaveBeenCalledWith({ next: "1" });
   });
 

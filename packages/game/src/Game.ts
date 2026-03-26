@@ -93,9 +93,130 @@ import commitDeferredBattleCard from "./moves/events/commitDeferredBattleCard";
 import contributeToGrandArmy from "./moves/events/contributeToGrandArmy";
 import { logEvent, allPlayersPassed, calculateMercy } from "./helpers/stateUtils";
 import { wrapMove, withPhaseGuard, withPhaseReset, checkLoopGuard } from "./helpers/moveWrapper";
+
+import { setStage, isStage } from "./helpers/stageUtils";
+import type { GameStage } from "./types";
 import { createLogger } from "./helpers/logger";
 
 const phaseLog = createLogger("phase");
+const budgetLog = createLogger("turn-budget");
+
+// ── Turn-ending budget tracker ──────────────────────────────────────────────
+// Module-level counter — avoids Immer frozen-object issues.
+// Reset each round in discovery.onBegin. Logged at milestones.
+const TURN_ENDING_LIMIT = 550; // bail before boardgame.io's 600 (numPlayers * 100)
+let _turnEndingCounter = 0;
+let _turnEndingRound = 0;
+
+const turnBudgetPlugin = {
+  name: "turn-budget",
+  fnWrap: (fn: (...args: any[]) => any, methodType: string) =>
+    (context: any, ...args: any[]) => {
+      const events = context.events;
+
+      if (events && !events._budgetWrapped) {
+        const origEndTurn = events.endTurn?.bind(events);
+        const origEndPhase = events.endPhase?.bind(events);
+
+        if (origEndTurn) {
+          events.endTurn = (endTurnArgs?: any) => {
+            _turnEndingCounter++;
+            const phase = context.ctx?.phase ?? "?";
+            const G = context.G;
+            const stage = G?.stage ? `${G.stage.phase}/${G.stage.sub}` : "?";
+
+            if (_turnEndingCounter >= TURN_ENDING_LIMIT) {
+              budgetLog.error("BUDGET EXCEEDED — halting game", {
+                count: _turnEndingCounter,
+                type: "endTurn",
+                method: methodType,
+                phase,
+                stage,
+                round: _turnEndingRound,
+                turn: context.ctx?.turn,
+                next: endTurnArgs?.next,
+              });
+              return;
+            }
+
+            if (_turnEndingCounter % 50 === 0) {
+              budgetLog.warn("endTurn milestone", {
+                count: _turnEndingCounter,
+                method: methodType,
+                phase,
+                stage,
+                round: _turnEndingRound,
+                turn: context.ctx?.turn,
+                next: endTurnArgs?.next,
+              });
+            }
+
+            return origEndTurn(endTurnArgs);
+          };
+        }
+
+        if (origEndPhase) {
+          events.endPhase = (...phaseArgs: any[]) => {
+            _turnEndingCounter++;
+            const phase = context.ctx?.phase ?? "?";
+            const G = context.G;
+            const stage = G?.stage ? `${G.stage.phase}/${G.stage.sub}` : "?";
+
+            if (_turnEndingCounter >= TURN_ENDING_LIMIT) {
+              budgetLog.error("BUDGET EXCEEDED — halting game", {
+                count: _turnEndingCounter,
+                type: "endPhase",
+                method: methodType,
+                phase,
+                stage,
+                round: _turnEndingRound,
+                turn: context.ctx?.turn,
+              });
+              return;
+            }
+
+            if (_turnEndingCounter % 50 === 0) {
+              budgetLog.warn("endPhase milestone", {
+                count: _turnEndingCounter,
+                method: methodType,
+                phase,
+                stage,
+                round: _turnEndingRound,
+                turn: context.ctx?.turn,
+              });
+            }
+
+            return origEndPhase(...phaseArgs);
+          };
+        }
+
+        events._budgetWrapped = true;
+      }
+
+      const result = fn(context, ...args);
+
+      if (events) events._budgetWrapped = false;
+
+      return result;
+    },
+};
+
+/** Call from discovery.onBegin to reset the per-round budget counter. */
+export function resetTurnEndingBudget(round: number): void {
+  if (_turnEndingCounter > 0) {
+    budgetLog.info("round budget summary", {
+      count: _turnEndingCounter,
+      round: _turnEndingRound,
+    });
+  }
+  _turnEndingCounter = 0;
+  _turnEndingRound = round;
+}
+
+/** Read-only access for tests / diagnostics. */
+export function getTurnEndingCount(): number {
+  return _turnEndingCounter;
+}
 
 const MyGame: Game<MyGameState> = {
   turn: { minMoves: 1 },
@@ -159,7 +280,7 @@ const MyGame: Game<MyGameState> = {
         kingdomAdvantagePool: [...ALL_KA_CARDS],
         legacyDeck: [],
       },
-      stage: "discovery",
+      stage: { phase: "setup", sub: "kingdom_advantage" } as GameStage,
       electionResults: {},
       hasVoted: [],
       voteSubmitted: {},
@@ -189,6 +310,7 @@ const MyGame: Game<MyGameState> = {
       mercyGold: {},
       _loopGuard: 0,
       _halted: false,
+      _turnEndingCount: 0,
       eventState: {
         deck: earlyDeck,
         lateDeck,
@@ -292,7 +414,7 @@ const MyGame: Game<MyGameState> = {
       next: "events",
       onBegin: withPhaseGuard("legacy_card", (context) => {
         phaseLog.info("legacy_card", { round: context.G.round });
-        context.G.stage = "pick legacy card";
+        setStage(context.G, "setup", "legacy_card");
         const { hands, remainder, log: legacyLog } = seedLegacyDeal(
           LEGACY_CARDS,
           context.ctx.playOrder,
@@ -314,7 +436,7 @@ const MyGame: Game<MyGameState> = {
       },
       onBegin: withPhaseGuard("events", (context) => {
         phaseLog.info("events", { round: context.G.round });
-        context.G.stage = "events";
+        setStage(context.G, "events", "default");
         context.G.eventState.taxModifier = 0;
         context.G.eventState.chosenCards = [];
         context.G.eventState.eventContributions = {};
@@ -344,11 +466,12 @@ const MyGame: Game<MyGameState> = {
         // Reset the loop guard at the start of each new round, then check.
         context.G._loopGuard = 0;
         context.G._halted = false;
+        resetTurnEndingBudget(context.G.round + 1);
         if (checkLoopGuard(context, "discovery")) return;
         phaseLog.info("discovery", { round: context.G.round + 1 });
         context.G.round += 1;
         context.ctx.playOrderPos = 0;
-        context.G.stage = "discovery";
+        setStage(context.G, "discovery", "default");
 
         context.G.firstTurnOfRound = true;
 
@@ -419,7 +542,7 @@ const MyGame: Game<MyGameState> = {
         if (context.G._halted) return;
         if (checkLoopGuard(context, "taxes")) return;
         phaseLog.info("taxes", { round: context.G.round });
-        context.G.stage = "taxes";
+        setStage(context.G, "taxes", "default");
 
         // Peasant REBELLION loss: skip taxes this round
         if (context.G.eventState.skipTaxesNextRound) {
@@ -450,7 +573,7 @@ const MyGame: Game<MyGameState> = {
         if (checkLoopGuard(context, "actions")) return;
         phaseLog.info("actions", { round: context.G.round });
         context.G.firstTurnOfRound = true;
-        context.G.stage = "actions";
+        setStage(context.G, "actions", "default");
       },
       turn: {
         onBegin: (context) => {
@@ -471,7 +594,7 @@ const MyGame: Game<MyGameState> = {
 
           if (currentPlayer.passed) {
             if (allPlayersPassed(context.G)) {
-              context.G.stage = "attack or pass";
+              setStage(context.G, "actions", "default");
               context.events.endPhase();
             } else {
               context.events.endTurn();
@@ -582,7 +705,7 @@ const MyGame: Game<MyGameState> = {
       onBegin: (context) => {
         if (checkLoopGuard(context, "plunder_legends")) return;
         phaseLog.info("plunder_legends", { round: context.G.round });
-        context.G.stage = "plunder legends";
+        setStage(context.G, "resolution", "plunder_legends");
         findNextPlunder(context.G, context.events);
       },
       moves: {
@@ -604,7 +727,7 @@ const MyGame: Game<MyGameState> = {
       onBegin: (context) => {
         if (checkLoopGuard(context, "conquest")) return;
         phaseLog.info("conquest", { round: context.G.round });
-        context.G.stage = "attack or pass";
+        setStage(context.G, "resolution", "conquest");
       },
       turn: {
         onBegin: (context) => {
@@ -647,6 +770,13 @@ const MyGame: Game<MyGameState> = {
       turn: {
         order: TurnOrder.CUSTOM_FROM("turnOrder"),
         onBegin: (context) => {
+          // Stage/phase desync guard: if G.stage was advanced past this phase
+          // (because phase.onBegin's endPhase was discarded), skip to next phase.
+          if (context.G.stage.phase !== "resolution") {
+            context.events.endPhase();
+            return;
+          }
+
           // Redirect turn to the correct player for the current stage.
           // Phase onBegin sets up G.stage but cannot call endTurn (boardgame.io
           // silently discards it — see docs/BOARDGAMEIO_ENDTURN_ONBEGIN.md).
@@ -658,7 +788,7 @@ const MyGame: Game<MyGameState> = {
           }
 
           // Auto-skip players with no retrievable fleets during retrieve fleets stage
-          if (context.G.stage !== "retrieve fleets") return;
+          if (!isStage(context.G, "resolution", "retrieve_fleets")) return;
           const playerID = context.ctx.currentPlayer;
           const player = context.G.playerInfo[playerID];
           const hasRetrievableFleets = player.fleetInfo.some(
@@ -682,7 +812,7 @@ const MyGame: Game<MyGameState> = {
 
         if (hasCombat) {
           // State setup only — turn.onBegin handles the endTurn redirect
-          context.G.stage = "infidel_fleet_combat";
+          setStage(context.G, "resolution", "infidel_fleet_combat");
         } else {
           // No Fleet combat — set up deferred events, rebellions, invasion
           // skipEndTurn=true: endTurn is discarded in phase onBegin (boardgame.io bug)
@@ -784,6 +914,7 @@ const MyGame: Game<MyGameState> = {
   },
   maxPlayers: 6,
   minPlayers: 1,
+  plugins: [turnBudgetPlugin],
 };
 
 export { MyGame };

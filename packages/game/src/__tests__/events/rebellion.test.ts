@@ -205,7 +205,7 @@ describe("commitRebellionTroops — flow control", () => {
     ]);
     G.currentRebellion = buildRebellion("0");
     const { events } = callCommit(G, "0", 3, 0, undefined, ["0", "1"]);
-    expect(G.stage).toBe("rebellion_rival_support");
+    expect(G.stage).toEqual({ phase: "resolution", sub: "rebellion_rival_support" });
     expect(events.endTurn).toHaveBeenCalledWith({ next: "1" });
   });
 
