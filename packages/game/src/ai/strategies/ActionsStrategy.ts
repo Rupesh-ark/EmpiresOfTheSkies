@@ -4,7 +4,6 @@ import type { Ctx } from "boardgame.io";
 import { enumerateLegalMoves } from "../enumerate";
 import { estimateMoveValue } from "../evaluate";
 import { countActiveTradeRoutes } from "../../helpers/mapUtils";
-import { FINAL_ROUND } from "../../data/gameData";
 
 /**
  * Actions phase strategy: score each legal move using personality weights
@@ -21,7 +20,7 @@ export class ActionsStrategy implements PhaseStrategy {
   ): AIMove {
     // ── Sub-stage handling ─────────────────────────────────────────────
     if (G.stage === "confirm_fow_draw") {
-      return { move: "confirmAction", args: [] };
+      return { move: "drawFoWCards", args: [] };
     }
 
     if (G.stage === "discard_fow") {
@@ -32,6 +31,13 @@ export class ActionsStrategy implements PhaseStrategy {
       return { move: "pass", args: [] };
     }
 
+    // ── Counsellor action already done this turn → end turn immediately ──
+    // confirmAction calls endTurn() so we come back for another action next cycle.
+    // Free actions (sendAgitators, convertMonarch) happen BEFORE the counsellor action.
+    if (G.playerInfo[playerID].turnComplete) {
+      return { move: "confirmAction", args: [] };
+    }
+
     // ── Normal actions (G.stage === "actions") ────────────────────────
     const moves = enumerateLegalMoves(G, ctx, playerID);
     if (moves.length === 0) return { move: "pass", args: [] };
@@ -40,11 +46,11 @@ export class ActionsStrategy implements PhaseStrategy {
     const player = G.playerInfo[playerID];
     const w = personality.weights;
 
-    // Should pass? (no counsellors or only pass/confirmAction available)
+    // Should pass? (only pass/confirmAction available)
     const actionMoves = moves.filter(
       (m) => m.move !== "pass" && m.move !== "confirmAction"
     );
-    if (actionMoves.length === 0 || player.resources.counsellors === 0) {
+    if (actionMoves.length === 0) {
       return { move: "pass", args: [] };
     }
 
@@ -55,7 +61,7 @@ export class ActionsStrategy implements PhaseStrategy {
     const vpGap = leaderVP - myVP;
     const amLeading = myVP >= leaderVP;
     const activeRoutes = countActiveTradeRoutes(G, playerID);
-    const isFinalRound = G.round >= FINAL_ROUND;
+    const isFinalRound = G.round >= G.finalRound;
 
     const scored = moves.map((m) => {
       let score = estimateMoveValue(G, playerID, m, w);
@@ -64,6 +70,14 @@ export class ActionsStrategy implements PhaseStrategy {
     });
 
     scored.sort((a, b) => b.score - a.score);
+
+    // Diagnostic: disabled for performance — re-enable for debugging
+    // console.log(`[ACT] P${playerID} R${G.round} | ${personality.name} | gold=${player.resources.gold} couns=${player.resources.counsellors} sky=${player.resources.skyships} regs=${player.resources.regiments}`);
+    // for (const s of scored) {
+    //   const argsStr = s.move.args.length > 0 ? ` ${JSON.stringify(s.move.args)}` : "";
+    //   console.log(`  ${s.score.toFixed(3)} ${s.move.move}${argsStr}`);
+    // }
+
     return scored[0].move;
   }
 
@@ -81,6 +95,49 @@ export class ActionsStrategy implements PhaseStrategy {
   ): number {
     let bonus = 0;
     const player = G.playerInfo[playerID];
+    const gameProgress = Math.min(1, (G.round - 1) / Math.max(1, G.finalRound - 1));
+    const earlyGame = G.round <= 2;
+    const allVPs = Object.values(G.playerInfo).map((p) => p.resources.victoryPoints);
+    const leaderVP = Math.max(...allVPs);
+
+    // ═══════════════════════════════════════════════════════════════════
+    // ROUND-AWARE INVESTMENT BONUSES
+    // Early game: buy skyships, recruit counsellors, deploy fleets
+    // Mid game: factories, buildings, regiments
+    // Late game: direct VP moves
+    // ═══════════════════════════════════════════════════════════════════
+
+    if (earlyGame) {
+      // R1-2: skyships + counsellors are critical investments
+      if (m.move === "purchaseSkyships") bonus += 0.15;
+      if (m.move === "buildSkyships") bonus += 0.12;
+      if (m.move === "recruitCounsellors") bonus += 0.1;
+      if (m.move === "deployFleet") bonus += 0.1;
+      // Avoid wasting gold on agitators early
+      if (m.move === "sendAgitators") bonus -= 0.1;
+      // Penalise expensive buildings early (cathedrals/palaces cost 5g)
+      if (m.move === "foundBuildings" && (m.args[0] === 0 || m.args[0] === 1)) {
+        bonus -= 0.1;
+      }
+    }
+
+    // Mid game: factories become valuable when routes exist
+    if (G.round >= 2 && G.round <= 4 && m.move === "foundFactory" && player.factories < activeRoutes) {
+      bonus += 0.1;
+    }
+
+    // Personality-scaled investment: scales down as game progresses
+    const investmentBonus = 0.08 * (1 - gameProgress);
+    if (m.move === "recruitRegiments" || m.move === "trainTroops") {
+      bonus += investmentBonus * w.military * 2;
+    }
+    if (m.move === "foundBuildings" && m.args[0] === 2) { // shipyard
+      bonus += investmentBonus * w.military * 2;
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    // EXISTING CONTEXT BONUSES (refined)
+    // ═══════════════════════════════════════════════════════════════════
 
     // ── Gold pressure: avoid spending when broke ──
     if (player.resources.gold < 3) {
@@ -110,6 +167,12 @@ export class ActionsStrategy implements PhaseStrategy {
       }
     }
 
+    // ── Late game: direct VP moves ──
+    if (gameProgress > 0.6) {
+      if (m.move === "foundBuildings") bonus += 0.1;
+      if (m.move === "coloniseLand") bonus += 0.1;
+    }
+
     // ── Leading: play defensive ──
     if (amLeading) {
       if (m.move === "foundBuildings" && m.args[0] === 3) {
@@ -129,26 +192,20 @@ export class ActionsStrategy implements PhaseStrategy {
 
     // ── Trailing: play aggressive + secure Mercy ──
     if (vpGap >= 6) {
-      // Republic Influence becomes critical for Mercy access
       if (m.move === "influencePrelates") {
         const slot = m.args[0] as number;
         if (slot === 4 || slot === 5) {
-          // Check if bot lacks natural alignment with this republic
           const republic = slot === 4 ? "Zeeland" : "Venoa";
           const repHeretic = G.eventState.nprHeretic.includes(republic);
           const repAlignment = repHeretic ? "heretic" : "orthodox";
           const misaligned = repAlignment !== player.hereticOrOrthodox;
           if (misaligned) {
-            // Influence is the ONLY way to get Mercy from this republic
             bonus += 0.3 * Math.min(1, vpGap / 15);
           } else {
-            // Already aligned, but influence still adds blocking value
             bonus += 0.05;
           }
         }
       }
-
-      // Aggressive expansion when behind
       if (m.move === "deployFleet" || m.move === "moveFleet") {
         bonus += 0.05;
       }
@@ -160,7 +217,7 @@ export class ActionsStrategy implements PhaseStrategy {
     // ── Engaged Factories: don't build unengaged factories ──
     if (m.move === "foundFactory") {
       if (player.factories >= activeRoutes) {
-        bonus -= 0.3; // would be unengaged, near-worthless
+        bonus -= 0.3;
       }
     }
 
@@ -169,14 +226,12 @@ export class ActionsStrategy implements PhaseStrategy {
       bonus += 0.15 * player.freeDissenters;
     }
 
-    // ── sendAgitators: target the leader ──
+    // ── sendAgitators: only target leader, suppress in early game ──
     if (m.move === "sendAgitators") {
       const targetID = m.args[0] as string;
       const targetVP = G.playerInfo[targetID]?.resources.victoryPoints ?? 0;
-      const allVPs = Object.values(G.playerInfo).map((p) => p.resources.victoryPoints);
-      const maxVP = Math.max(...allVPs);
-      if (targetVP === maxVP && targetID !== playerID) {
-        bonus += 0.1;
+      if (targetVP === leaderVP && targetID !== playerID) {
+        bonus += 0.03;
       }
     }
 

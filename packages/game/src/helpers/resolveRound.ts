@@ -286,7 +286,7 @@ const resolveRound = (G: MyGameState, events: EventsAPI, random: RandomAPI) => {
     });
   }
 
-  if (G.round === G.finalRound) {
+  if (G.round >= G.finalRound) {
     applyFinalRoundBonus(G);
     legacyResolutions(G);
     // GAP-17: final score tie-break — most Gold, then earliest IPO position

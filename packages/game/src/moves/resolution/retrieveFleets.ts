@@ -40,9 +40,12 @@ const retrieveFleets: MoveDefinition = {
     }
 
     G.playerInfo[playerID].passed = true;
+    const flags = Object.entries(G.playerInfo).map(([id, p]) => `${id}:${p.passed}`).join(" ");
     if (allPlayersPassed(G)) {
+      console.log(`[RET] P${playerID} ALL PASSED → endPhase [${flags}]`);
       events.endPhase();
     } else {
+      console.log(`[RET] P${playerID} not all → endTurn [${flags}]`);
       events.endTurn();
     }
   },

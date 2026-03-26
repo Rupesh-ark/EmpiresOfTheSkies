@@ -1,5 +1,5 @@
-import type { PhaseStrategy, AIPersonality, AIMove } from "../types";
-import type { MyGameState } from "../../types";
+import type { PhaseStrategy, AIPersonality, AIMove, AIWeights } from "../types";
+import type { MyGameState, FleetInfo } from "../../types";
 import type { Ctx } from "boardgame.io";
 import { enumerateLegalMoves } from "../enumerate";
 import { KINGDOM_LOCATION } from "../../data/gameData";
@@ -62,8 +62,8 @@ export class ResolutionStrategy implements PhaseStrategy {
 
     if (!retrieveMove) return passMove ?? moves[0];
 
-    // Should we retrieve? Check if fleets have purpose where they are
     const player = G.playerInfo[playerID];
+    const w = personality.weights;
     const deployedFleets = player.fleetInfo.filter((f) => {
       const isHome = f.location[0] === KINGDOM_LOCATION[0] && f.location[1] === KINGDOM_LOCATION[1];
       return f.skyships > 0 && !isHome;
@@ -71,21 +71,91 @@ export class ResolutionStrategy implements PhaseStrategy {
 
     if (deployedFleets.length === 0) return passMove ?? moves[0];
 
-    // Territory-focused bots keep fleets deployed (maintaining presence)
-    const w = personality.weights;
-    if (w.territory > 0.18 || w.positioning > 0.15) {
-      // Check if fleets are at our own buildings (guarding them)
-      const guarding = deployedFleets.filter((f) => {
-        const building = G.mapState.buildings[f.location[1]]?.[f.location[0]];
-        return building?.player?.id === playerID && building?.buildings;
-      });
-      if (guarding.length > 0) {
-        return passMove ?? moves[0]; // keep guarding fleets deployed
+    // Score each fleet: is it generating value where it is?
+    const idleIndices: number[] = [];
+    for (const fleet of deployedFleets) {
+      const score = this.scoreFleetPosition(G, playerID, fleet, w);
+      if (score < 0.05) {
+        // Fleet is idle — retrieve it
+        idleIndices.push(fleet.fleetId);
       }
     }
 
-    // Default: retrieve (get troops back for next round)
-    return retrieveMove;
+    if (idleIndices.length === 0) {
+      // All fleets are useful — keep them all deployed
+      return passMove ?? moves[0];
+    }
+
+    if (idleIndices.length === deployedFleets.length) {
+      // All fleets are idle — retrieve all
+      return retrieveMove;
+    }
+
+    // Selective retrieval: find the move that retrieves only idle fleets
+    const selectiveMove = moves.find((m) => {
+      if (m.move !== "retrieveFleets") return false;
+      const indices = m.args[0] as number[];
+      return indices.length === idleIndices.length &&
+        indices.every((idx) => idleIndices.includes(idx));
+    });
+
+    return selectiveMove ?? retrieveMove;
+  }
+
+  /**
+   * Score a deployed fleet's position: is it generating value where it is?
+   * Returns 0 for idle fleets, higher values for fleets doing useful work.
+   *
+   * Reasons to keep a fleet deployed:
+   * 1. Protecting own outpost/colony (garrison deterrent)
+   * 2. On a trade route tile (piracy collection/protection)
+   * 3. Blocking rival from sole occupation (preventing their conquest)
+   * 4. On a rival's route (piracy income for Sanctioned Piracy)
+   */
+  private scoreFleetPosition(
+    G: MyGameState,
+    playerID: string,
+    fleet: FleetInfo,
+    w: AIWeights
+  ): number {
+    const [fx, fy] = fleet.location;
+    let score = 0;
+
+    // 1. Guarding own building
+    const building = G.mapState.buildings[fy]?.[fx];
+    if (building?.player?.id === playerID && building?.buildings) {
+      score += 0.15 * w.territory + 0.1 * w.threats;
+      // Extra value if fleet has troops (stronger deterrent)
+      if (fleet.regiments + fleet.eliteRegiments > 0) {
+        score += 0.05;
+      }
+    }
+
+    // 2. Trade route presence — fleet skyships form part of the chain
+    // If removing this fleet would break a trade route, it's very valuable
+    const tile = G.mapState.currentTileArray[fy]?.[fx];
+    if (tile && tile.type !== "ocean" && tile.type !== "home") {
+      // Check if any rival has an outpost/colony that routes through this tile
+      const rivalsOnTile = (G.mapState.battleMap[fy]?.[fx] ?? []).filter(
+        (id: string) => id !== playerID
+      );
+      if (rivalsOnTile.length > 0) {
+        // Piracy opportunity — rival fleet/route passes through here
+        score += 0.1 * w.economy + 0.05 * w.military;
+      }
+    }
+
+    // 3. Blocking rival from sole occupation
+    const playersOnTile = G.mapState.battleMap[fy]?.[fx] ?? [];
+    if (playersOnTile.length === 2 && playersOnTile.includes(playerID)) {
+      // Two players on this tile — our presence blocks their conquest
+      score += 0.05 * w.military;
+    }
+
+    // 4. Personality boost for keeping fleets out
+    score += 0.02 * w.positioning; // positioning bots prefer fleet presence
+
+    return score;
   }
 
   // ── Infidel Fleet Combat ────────────────────────────────────────────────

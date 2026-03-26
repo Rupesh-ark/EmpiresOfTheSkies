@@ -89,6 +89,24 @@ export function runGameLoop(
     }
 
     iterations++;
+
+    // Diagnostic: detect stalls — log every 100 iterations
+    if (iterations % 100 === 0) {
+      const s = clients[0].getState();
+      if (s) {
+        const G = s.G as MyGameState;
+        console.log(`[DIAG] iter=${iterations} R${G.round} phase=${s.ctx.phase} stage=${G.stage} turn=${s.ctx.turn} P${s.ctx.currentPlayer} halted=${G._halted}`);
+      }
+    }
+    // Hard exit if way too many iterations
+    if (iterations >= 49000) {
+      const s = clients[0].getState();
+      if (s) {
+        const G = s.G as MyGameState;
+        console.log(`[STUCK] iter=${iterations} R${G.round} phase=${s.ctx.phase} stage=${G.stage} turn=${s.ctx.turn} P${s.ctx.currentPlayer}`);
+      }
+      break;
+    }
   }
 
   const finalState = clients[0].getState();

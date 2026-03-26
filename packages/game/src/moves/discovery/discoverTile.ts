@@ -2,6 +2,7 @@ import { INVALID_MOVE } from "boardgame.io/core/";
 import { MoveDefinition } from "../../types";
 import { advanceAllHeresyTrackers, logEvent, allPlayersPassed } from "../../helpers/stateUtils";
 import { getNeighbors } from "../../helpers/mapUtils";
+import { MIN_ROUNDS } from "../../data/gameData";
 
 export const discoverTile: MoveDefinition = {
   fn: ({ G, ctx, playerID, events }, ...args: any[]) => {
@@ -74,6 +75,12 @@ export const discoverTile: MoveDefinition = {
     });
 
     if (allDiscovered) {
+      // Variable-length game: play until all tiles discovered, minimum MIN_ROUNDS
+      if (G.round >= MIN_ROUNDS) {
+        G.finalRound = G.round; // all discovered this round — end the round
+      } else {
+        G.finalRound = MIN_ROUNDS; // not yet at minimum — play to round 6
+      }
       G.mustContinueDiscovery = false;
       events.endPhase();
       return;

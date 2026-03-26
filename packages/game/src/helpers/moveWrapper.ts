@@ -59,18 +59,26 @@ const checkStagePhaseSync = (G: MyGameState, ctx: { phase?: string | null }, mov
  *
  * Pipeline: dev log → validate? → fn → successLog
  */
+// Dedup: boardgame.io Local() calls moves twice (client + server).
+// Track last logged move to skip the duplicate.
+let _lastLogKey = "";
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const wrapMove = (name: string, def: MoveDefinition): any => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return (context: any, ...args: any[]) => {
     const { G, playerID, ctx } = context;
 
-    log.info(name, {
-      playerID,
-      phase: ctx.phase,
-      turn: ctx.turn,
-      ...(args.length > 0 && { args }),
-    });
+    const logKey = `${ctx.turn}:${name}:${playerID}:${JSON.stringify(args)}`;
+    if (logKey !== _lastLogKey) {
+      _lastLogKey = logKey;
+      log.info(name, {
+        playerID,
+        phase: ctx.phase,
+        turn: ctx.turn,
+        ...(args.length > 0 && { args }),
+      });
+    }
 
     // Debug: catch G.stage / ctx.phase desyncs early
     checkStagePhaseSync(G, ctx, name);

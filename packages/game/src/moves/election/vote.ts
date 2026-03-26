@@ -1,35 +1,106 @@
 import { INVALID_MOVE } from "boardgame.io/core";
-import { MoveDefinition } from "../../types";
+import { MoveDefinition, MyGameState } from "../../types";
 import { HERESY_MIN, logEvent } from "../../helpers/stateUtils";
+
+const kingdomToNumberMap: Record<string, number> = {
+  Angland: 1,
+  Gallois: 2,
+  Castillia: 3,
+  Zeeland: 4,
+  Venoa: 5,
+  Nordmark: 6,
+  Ostreich: 7,
+  Constantium: 8,
+};
+
+const numberToKingdomMap: Record<string, string> = {
+  1: "Angland",
+  2: "Gallois",
+  3: "Castillia",
+  4: "Zeeland",
+  5: "Venoa",
+  6: "Nordmark",
+  7: "Ostreich",
+  8: "Constantium",
+};
+
+/**
+ * Calculates the vote power a player contributes to whomever they vote for.
+ * This mirrors the tally logic in the vote move exactly.
+ */
+export function calculateVotePower(G: MyGameState, playerID: string): number {
+  const playerInfo = G.playerInfo[playerID];
+  if (!playerInfo) return 0;
+
+  const kingdomName = playerInfo.kingdomName;
+  const kingdomIndex = kingdomToNumberMap[kingdomName];
+
+  // Is this player's own prelate already influenced by someone else?
+  const isInfluenced =
+    G.boardState.influencePrelates[
+      kingdomIndex as keyof typeof G.boardState.influencePrelates
+    ] !== undefined;
+
+  // Which kingdoms has this player influenced?
+  const kingdomsUnderOurInfluence: string[] = [];
+  Object.entries(G.boardState.influencePrelates).forEach(([index, id]) => {
+    if (id === playerID) {
+      kingdomsUnderOurInfluence.push(numberToKingdomMap[index]);
+    }
+  });
+
+  let votes = 0;
+
+  // Schism: affected players' prelates cannot participate in election
+  const schismBlocked = G.eventState.schismAffected.includes(playerID);
+
+  if (!isInfluenced && !schismBlocked) {
+    votes += playerInfo.cathedrals;
+  }
+
+  // Cathedrals from influenced player kingdoms
+  Object.values(G.playerInfo).forEach((kingdom) => {
+    if (kingdomsUnderOurInfluence.includes(kingdom.kingdomName)) {
+      if (!G.eventState.schismAffected.includes(kingdom.id)) {
+        votes += kingdom.cathedrals;
+      }
+    }
+  });
+
+  // GAP-18: NPR kingdoms under our influence contribute their cathedral count
+  kingdomsUnderOurInfluence.forEach((kName) => {
+    const nprVotes = G.nprCathedrals[kName];
+    if (nprVotes !== undefined) {
+      votes += nprVotes;
+    }
+  });
+
+  if (kingdomsUnderOurInfluence.includes("Venoa")) votes += 1;
+  if (kingdomsUnderOurInfluence.includes("Zeeland")) votes += 1;
+
+  // GAP-7: patriarch_of_the_church KA adds +1 permanent vote
+  if (playerInfo.resources.advantageCard === "patriarch_of_the_church") {
+    votes += 1;
+  }
+
+  // Colonial Prelates: each colony adds +1 vote to its owner
+  if (G.eventState.colonialPrelatesActive) {
+    for (const row of G.mapState.buildings) {
+      for (const tile of row) {
+        if (tile.player?.id === playerID && tile.buildings === "colony") {
+          votes += 1;
+        }
+      }
+    }
+  }
+
+  return votes;
+}
 
 const vote: MoveDefinition = {
   fn: ({ G, ctx, playerID, events }, ...args) => {
     const voteTarget: string = args[0];
     if (!ctx.playOrder.includes(voteTarget)) return INVALID_MOVE;
-
-    const kingdomToNumberMap: Record<
-      string,
-      keyof typeof G.boardState.influencePrelates
-    > = {
-      Angland: 1,
-      Gallois: 2,
-      Castillia: 3,
-      Zeeland: 4,
-      Venoa: 5,
-      Nordmark: 6,
-      Ostreich: 7,
-      Constantium: 8,
-    };
-    const numberToKingdomMap: Record<string, string> = {
-      1: "Angland",
-      2: "Gallois",
-      3: "Castillia",
-      4: "Zeeland",
-      5: "Venoa",
-      6: "Nordmark",
-      7: "Ostreich",
-      8: "Constantium",
-    };
 
     // Store the ballot — hidden from other players until all have voted
     G.voteSubmitted[playerID] = voteTarget;
@@ -37,64 +108,9 @@ const vote: MoveDefinition = {
 
     // Only tally and resolve once every player has submitted their vote
     if (G.hasVoted.length === ctx.playOrder.length) {
-      // Tally: calculate each player's votes at reveal time
+      // Tally: each voter contributes their vote power to their chosen target
       for (const [pid, target] of Object.entries(G.voteSubmitted)) {
-        const kingdomName = G.playerInfo[pid].kingdomName;
-        const isInfluenced =
-          G.boardState.influencePrelates[kingdomToNumberMap[kingdomName]] !==
-          undefined;
-
-        const kingdomsUnderOurInfluence: string[] = [];
-        Object.entries(G.boardState.influencePrelates).forEach(([index, id]) => {
-          if (id === pid) {
-            kingdomsUnderOurInfluence.push(numberToKingdomMap[index]);
-          }
-        });
-
-        let votes = 0;
-
-        // Schism: affected players' prelates cannot participate in election
-        const schismBlocked = G.eventState.schismAffected.includes(pid);
-
-        if (!isInfluenced && !schismBlocked) {
-          votes += G.playerInfo[pid].cathedrals;
-        }
-
-        Object.values(G.playerInfo).forEach((kingdom) => {
-          if (kingdomsUnderOurInfluence.includes(kingdom.kingdomName)) {
-            // Schism also blocks influenced kingdoms' cathedrals
-            if (!G.eventState.schismAffected.includes(kingdom.id)) {
-              votes += kingdom.cathedrals;
-            }
-          }
-        });
-
-        // GAP-18: NPR kingdoms under our influence contribute their cathedral count
-        kingdomsUnderOurInfluence.forEach((kName) => {
-          const nprVotes = G.nprCathedrals[kName];
-          if (nprVotes !== undefined) {
-            votes += nprVotes;
-          }
-        });
-
-        if (kingdomsUnderOurInfluence.includes("Venoa")) votes += 1;
-        if (kingdomsUnderOurInfluence.includes("Zeeland")) votes += 1;
-
-        // GAP-7: patriarch_of_the_church KA adds +1 permanent vote
-        if (G.playerInfo[pid].resources.advantageCard === "patriarch_of_the_church") {
-          votes += 1;
-        }
-
-        // Colonial Prelates: each colony adds +1 vote to its owner
-        if (G.eventState.colonialPrelatesActive) {
-          for (const row of G.mapState.buildings) {
-            for (const tile of row) {
-              if (tile.player?.id === pid && tile.buildings === "colony") {
-                votes += 1;
-              }
-            }
-          }
-        }
+        const votes = calculateVotePower(G, pid);
 
         if (G.electionResults[target]) {
           G.electionResults[target] += votes;

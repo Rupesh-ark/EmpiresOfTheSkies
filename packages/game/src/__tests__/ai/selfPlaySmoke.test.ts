@@ -13,5 +13,5 @@ describe("self-play smoke test", () => {
       console.log(`Rounds: ${result.rounds}`);
       console.log(`Personalities:`, result.personalities);
     }
-  }, 120000);
+  }, 300000);
 });

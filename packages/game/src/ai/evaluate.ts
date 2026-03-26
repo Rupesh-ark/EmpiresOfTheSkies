@@ -1,8 +1,8 @@
 import type { MyGameState, PlayerInfo } from "../types";
 import type { AIWeights, AIMove } from "./types";
 import { CARD_RESOLVERS } from "../helpers/legacyCardDefinitions";
-import { countActiveTradeRoutes } from "../helpers/mapUtils";
-import { HERESY_MAX, FINAL_ROUND, MAX_COUNSELLORS } from "../data/gameData";
+import { countActiveTradeRoutes, bfsWithDistance, tileKey, FAITHDOM_TILES } from "../helpers/mapUtils";
+import { HERESY_MAX, MAX_COUNSELLORS, MAP_WIDTH, MAP_HEIGHT, KINGDOM_LOCATION } from "../data/gameData";
 import { AI_CONFIG } from "./weightsConfig";
 
 // ── Internal helpers ──────────────────────────────────────────────────────────
@@ -18,8 +18,9 @@ function normalizeAgainstMax(myValue: number, allValues: number[]): number {
 }
 
 function gameProgress(G: MyGameState): number {
-  // round 1 → 0, round 4 → 1
-  return Math.min(1, (G.round - 1) / (FINAL_ROUND - 1));
+  // round 1 → 0, finalRound → 1
+  const totalRounds = Math.max(2, G.finalRound); // avoid division by zero
+  return Math.min(1, (G.round - 1) / (totalRounds - 1));
 }
 
 function countPlayerBuildings(
@@ -383,14 +384,135 @@ export function estimateMoveValue(
       return isTargetLeader ? base + (AI_CONFIG.moveValues.sendAgitatorsLeaderBonus as number) : base;
     }
 
-    case "deployFleet":
-      return computeMoveValue("deployFleet", weights);
+    case "deployFleet": {
+      const base = computeMoveValue("deployFleet", weights);
+      const dest = move.args[1] as [number, number];
+      if (!dest) return base;
+      const [dx, dy] = dest;
+      const tile = G.mapState.currentTileArray[dy]?.[dx];
+      const building = G.mapState.buildings[dy]?.[dx];
+      if (!tile) return base;
+
+      let tileBonus = 0;
+
+      // ── P0: Tile type value ──
+      if (tile.type === "land") {
+        if (!building?.player) {
+          // Unclaimed land → outpost/colony potential
+          const fleetRegs = (move.args[3] as number) ?? 0;
+          const fleetElites = (move.args[5] as number) ?? 0;
+          const fleetSky = (move.args[2] as number) ?? 0;
+          const armySwords = fleetRegs * 2 + fleetElites * 3 + fleetSky;
+          const canConquer = armySwords > tile.sword * 1.4;
+
+          const loot = canConquer ? tile.loot.colony : tile.loot.outpost;
+          // P2: Goods saturation — value goods at current market price
+          const markers = G.mapState.goodsPriceMarkers;
+          const goodsGold =
+            (loot.mithril ?? 0) * (markers.mithril ?? 1) +
+            (loot.dragonScales ?? 0) * (markers.dragonScales ?? 1) +
+            (loot.krakenSkin ?? 0) * (markers.krakenSkin ?? 1) +
+            (loot.magicDust ?? 0) * (markers.magicDust ?? 1) +
+            (loot.stickyIchor ?? 0) * (markers.stickyIchor ?? 1) +
+            (loot.pipeweed ?? 0) * (markers.pipeweed ?? 1);
+          const lootValue = (loot.gold ?? 0) + goodsGold + (loot.victoryPoints ?? 0) * 2;
+
+          tileBonus = 0.2 * weights.territory + 0.1 * weights.economy + lootValue * 0.015;
+
+          // Strong tile but weak army → harder to upgrade to colony later
+          if (!canConquer && tile.sword > 8) {
+            tileBonus *= 0.7;
+          }
+
+          // P2: Race discovery heresy — new race = heresy advance for all
+          const tileRace = tile.name.split(/(\d+)/)[0].toLowerCase();
+          if (tileRace !== "ocean" && !G.mapState.discoveredRaces.includes(tileRace)) {
+            if (player.hereticOrOrthodox === "heretic") {
+              tileBonus += 0.03 * weights.religion; // heresy is good for us
+            } else {
+              tileBonus -= 0.02 * weights.religion; // heresy hurts us
+            }
+          }
+        } else if (building.player.id !== playerID) {
+          // Rival territory — conquest/piracy opportunity
+          tileBonus = 0.15 * weights.military + 0.05 * weights.territory;
+        } else {
+          // Own territory — reinforce
+          tileBonus = 0.05 * weights.threats;
+        }
+      } else if (tile.type === "legend") {
+        const loot = tile.loot.outpost;
+        const lootValue = (loot.gold ?? 0) + (loot.victoryPoints ?? 0) * 2;
+        tileBonus = 0.1 * weights.economy + 0.05 * weights.territory + lootValue * 0.015;
+      }
+      // ocean/home → tileBonus stays 0
+
+      // ── P0: Hop cost ──
+      const discoveredNet = new Set<string>();
+      for (let iy = 0; iy < MAP_HEIGHT; iy++)
+        for (let ix = 0; ix < MAP_WIDTH; ix++)
+          if (G.mapState.discoveredTiles[iy]?.[ix])
+            discoveredNet.add(tileKey(ix, iy));
+      const dists = bfsWithDistance([KINGDOM_LOCATION], discoveredNet, G.mapState.currentTileArray);
+      const hopDist = dists.get(tileKey(dx, dy)) ?? 3;
+      tileBonus -= hopDist * 0.03;
+
+      // ── P1: Trade route hazard — path through Infidel Empire ──
+      if (dists.has(tileKey(4, 1))) {
+        // Check if destination is only reachable through infidel tile
+        // Simple heuristic: if dest is south of row 1, likely passes through [4,1]
+        if (dy >= 2 && dx >= 3 && dx <= 5) {
+          tileBonus -= 0.04;
+        }
+      }
+
+      // ── P1: Rival fleet crowding — sole occupation needed for conquest ──
+      const rivalsOnTile = (G.mapState.battleMap[dy]?.[dx] ?? []).filter(
+        (id: string) => id !== playerID
+      ).length;
+      if (rivalsOnTile > 0) {
+        // Can't build outpost with rivals present — heavy penalty
+        tileBonus -= rivalsOnTile * 0.08;
+      }
+
+      // ── P1: Strategic positioning — rival presence NEAR destination ──
+      const rivalFleetsNearby = getAllPlayers(G).some((p) =>
+        p.id !== playerID && p.fleetInfo.some((f) =>
+          f.skyships > 0 &&
+          Math.abs(f.location[0] - dx) <= 1 && Math.abs(f.location[1] - dy) <= 1
+        )
+      );
+      if (rivalFleetsNearby) {
+        tileBonus += 0.04 * weights.military;  // opportunity for military bots
+        tileBonus -= 0.02 * weights.economy;   // risk for economy bots
+      }
+
+      return base + tileBonus;
+    }
 
     case "moveFleet":
       return computeMoveValue("moveFleet", weights);
 
     case "garrisonTransfer":
       return computeMoveValue("garrisonTransfer", weights);
+
+    case "transferBetweenFleets":
+      return computeMoveValue("transferBetweenFleets", weights);
+
+    case "transferOutpost":
+      return computeMoveValue("transferOutpost", weights);
+
+    case "declareSmugglerGood":
+      return computeMoveValue("declareSmugglerGood", weights);
+
+    case "checkAndPlaceFort":
+      return computeMoveValue("checkAndPlaceFort", weights);
+
+    case "retaliate":
+      return computeMoveValue("retaliate", weights);
+
+    case "commitDeferredBattleCard":
+      return computeMoveValue("commitDeferredBattleCard", weights);
 
     case "trainTroops":
       return computeMoveValue("trainTroops", weights);
@@ -464,6 +586,56 @@ export function estimateMoveValue(
     case "pickKingdomAdvantageCard":
     case "pickLegacyCard":
       return computeMoveValue("pickCard", weights);
+
+    case "punishDissenters":
+      return computeMoveValue("punishDissenters", weights);
+
+    case "drawCard":
+    case "drawCardConquest":
+      return computeMoveValue("drawBattleCard", weights);
+
+    case "pickCard":
+    case "pickCardConquest":
+      return computeMoveValue("playBattleCard", weights);
+
+    case "garrisonTroops":
+      return computeMoveValue("garrisonTroops", weights);
+
+    case "defendGroundAttack":
+      return computeMoveValue("defendGround", weights);
+
+    case "yieldToAttacker":
+      return computeMoveValue("yieldGround", weights);
+
+    case "commitRebellionTroops":
+      return computeMoveValue("commitRebellionTroops", weights);
+
+    case "contributeToRebellion":
+      return computeMoveValue("contributeToRebellion", weights);
+
+    case "contributeToGrandArmy":
+      return computeMoveValue("contributeToGrandArmy", weights);
+
+    case "nominateCaptainGeneral":
+      return computeMoveValue("nominateCaptainGeneral", weights);
+
+    case "offerBuyoffGold":
+      return computeMoveValue("offerBuyoffGold", weights);
+
+    case "immediateElectionVote":
+      return computeMoveValue("immediateElectionVote", weights);
+
+    case "relocateDefeatedFleet":
+      return computeMoveValue("relocateDefeatedFleet", weights);
+
+    case "resolveEventChoice":
+      return computeMoveValue("resolveEventChoice", weights);
+
+    case "respondToInfidelFleet":
+      return computeMoveValue("respondToInfidelFleet", weights);
+
+    case "discardFoWCard":
+      return computeMoveValue("discardFoWCard", weights);
 
     case "pass":
     case "confirmAction":

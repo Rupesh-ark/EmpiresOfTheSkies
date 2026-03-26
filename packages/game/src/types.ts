@@ -234,6 +234,8 @@ export type PlayerInfo = {
   freeDissenters: number;
   /** Piracy intent for this round: "tax" (default) or "cut" (remove a skyship instead) */
   piracyIntent: "tax" | "cut";
+  /** Rival player IDs already targeted by Send Agitators this round */
+  agitatorsSentThisRound: string[];
   shipyards: number;
   factories: number;
   troopsToGarrison?: TroopInfo;

@@ -36,13 +36,13 @@ export class DiscoveryStrategy implements PhaseStrategy {
 
     const scored = discoverMoves.map((m) => {
       const [x, y] = m.args[0] as [number, number];
-      return { move: m, score: this.scoreTile(x, y, G, w, playerBuildings, opponentBuildings, opponentFleets) };
+      return { move: m, score: this.scoreTile(x, y, G, playerID, w, playerBuildings, opponentBuildings, opponentFleets) };
     });
 
     scored.sort((a, b) => b.score - a.score);
 
     // Should we pass instead of discovering?
-    if (this.shouldPass(G, playerID, ctx, scored[0].score)) {
+    if (this.shouldPass(G, playerID, ctx, scored[0].score, w)) {
       return passMove;
     }
 
@@ -53,12 +53,19 @@ export class DiscoveryStrategy implements PhaseStrategy {
     x: number,
     y: number,
     G: MyGameState,
+    playerID: string,
     w: AIWeights,
     playerBuildings: [number, number][],
     opponentBuildings: [number, number][],
     opponentFleets: [number, number][],
   ): number {
     let score = 0;
+    const player = G.playerInfo[playerID];
+
+    // 0. Heresy bonus: heretics gain from every discovery (heresy advances)
+    if (player.hereticOrOrthodox === "heretic") {
+      score += 0.03 * w.religion;
+    }
 
     // 1. Proximity to player's existing territory → expansion bonus
     if (playerBuildings.length > 0) {
@@ -121,24 +128,53 @@ export class DiscoveryStrategy implements PhaseStrategy {
     playerID: string,
     _ctx: Ctx,
     bestTileScore: number,
+    w: AIWeights,
   ): boolean {
     // If forced to continue (ocean/legend cascade), never pass
     if (G.mustContinueDiscovery) return false;
 
-    // If best tile score is very low, pass
-    if (bestTileScore < 0.01) return true;
+    const player = G.playerInfo[playerID];
+    const allVPs = Object.values(G.playerInfo).map(p => p.resources.victoryPoints);
+    const leaderVP = Math.max(...allVPs);
+    const myVP = player.resources.victoryPoints;
+    const amLeading = myVP >= leaderVP;
+    const vpGap = leaderVP - myVP;
 
-    // Count how many players have already passed
-    const players = Object.values(G.playerInfo);
-    const passedCount = players.filter((p) => p.passed && p.id !== playerID).length;
-    const totalOthers = players.length - 1;
-
-    // If most players have passed, and we've already had a turn, consider passing
-    if (passedCount >= totalOthers * 0.5 && bestTileScore < 0.05) {
-      return true;
+    // Count undiscovered tiles
+    let undiscovered = 0;
+    for (let y = 0; y < MAP_HEIGHT; y++) {
+      for (let x = 0; x < MAP_WIDTH; x++) {
+        if (!G.mapState.discoveredTiles[y]?.[x]) undiscovered++;
+      }
     }
 
-    return false;
+    // Base threshold (lowered from 0.05)
+    let threshold = 0.02;
+
+    // Alignment: heretics discover eagerly (heresy helps them),
+    // orthodox are selective (heresy hurts, especially pious ones)
+    if (player.hereticOrOrthodox === "heretic") {
+      threshold *= 0.5;
+    } else {
+      threshold *= (1 + w.religion); // pious orthodox very selective
+    }
+
+    // VP position: leaders rush game clock, trailers stall
+    if (amLeading) {
+      threshold *= 0.5;
+      if (undiscovered < 6) threshold *= 0.3; // finish it
+    } else if (vpGap > 5) {
+      threshold *= 1.5;
+      if (undiscovered < 6) threshold *= 2.0; // stall hard
+    }
+
+    // Event awareness: Race to Discovery / Royal Patronage incentivise discovery
+    const activeEvent = G.eventState.resolvedEvent;
+    if (activeEvent === "race_to_discovery" || activeEvent === "royal_patronage") {
+      threshold *= 0.3;
+    }
+
+    return bestTileScore < threshold;
   }
 
   private hexDist(x1: number, y1: number, x2: number, y2: number): number {

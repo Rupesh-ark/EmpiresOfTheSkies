@@ -124,13 +124,16 @@ export const resolveGrandArmyBattle = (G: MyGameState, shuffle: <T>(arr: T[]) =>
   // Build contributions from currentInvasion
   const contributions: PlayerContribution[] = turnOrder.map((id) => {
     const c = invasion.contributions[id] ?? { regiments: 0, levies: 0, skyships: 0 };
+    const regs = c.regiments ?? 0;
+    const levs = c.levies ?? 0;
+    const sky = c.skyships ?? 0;
     return {
       playerID: id,
-      regiments: c.regiments,
-      levies: c.levies,
-      skyships: c.skyships,
-      totalSwords: c.regiments * 2 + c.levies + c.skyships,
-      totalShields: c.skyships, // each skyship contributes 1 shield
+      regiments: regs,
+      levies: levs,
+      skyships: sky,
+      totalSwords: regs * 2 + levs + sky,
+      totalShields: sky, // each skyship contributes 1 shield
     };
   });
 
@@ -306,6 +309,7 @@ const applyDefeatVPPenalties = (
 
   const smallestSwords = ascending[0].totalSwords;
   const smallestGroup = ascending.filter((c) => c.totalSwords === smallestSwords);
+
 
   if (smallestGroup.length > 1) {
     for (const c of smallestGroup) removeVPAmount(G, c.playerID, TIED_LARGEST_VP);

@@ -70,6 +70,7 @@ export const buildPlayerInfoMap = (ctx: Ctx): { [id: string]: PlayerInfo } => {
       prisoners: 0,
       freeDissenters: 0,
       piracyIntent: "tax",
+      agitatorsSentThisRound: [],
       shipyards: 0,
       factories: STARTING_RESOURCES.factories,
     };

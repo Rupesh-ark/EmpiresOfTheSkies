@@ -106,6 +106,28 @@ const DEFAULTS = {
     pickCard:                  { base: 0.1 },
     pass:                      { base: 0.0 },
     defaultMove:               { base: 0.05 },
+    punishDissenters:          { base: 0.1 },
+    drawBattleCard:            { base: 0.1 },
+    playBattleCard:            { base: 0.1 },
+    garrisonTroops:            { base: 0.1 },
+    defendGround:              { base: 0.1 },
+    yieldGround:               { base: 0.05 },
+    commitRebellionTroops:     { base: 0.1 },
+    contributeToRebellion:     { base: 0.05 },
+    contributeToGrandArmy:     { base: 0.1 },
+    nominateCaptainGeneral:    { base: 0.1 },
+    offerBuyoffGold:           { base: 0.1 },
+    immediateElectionVote:     { base: 0.1 },
+    relocateDefeatedFleet:     { base: 0.1 },
+    resolveEventChoice:        { base: 0.1 },
+    respondToInfidelFleet:     { base: 0.1 },
+    discardFoWCard:            { base: 0.05 },
+    transferBetweenFleets:     { base: 0.05 },
+    transferOutpost:           { base: 0.02 },
+    declareSmugglerGood:       { base: 0.08 },
+    checkAndPlaceFort:         { base: 0.1 },
+    retaliate:                 { base: 0.1 },
+    commitDeferredBattleCard:  { base: 0.15 },
   } as Record<string, Record<string, number> | number>,
 
   defaultPersonality: {
@@ -121,6 +143,7 @@ const DEFAULTS = {
 // ═══════════════════════════════════════════════════════════════════════════
 // JSON override: deep-merge weightsConfig.local.json on top of defaults.
 // If the file doesn't exist, defaults are used as-is.
+// IMPORTANT: To override a base value, set it explicitly (e.g. "base": 0).
 // ═══════════════════════════════════════════════════════════════════════════
 
 function deepMerge(target: any, source: any): any {
@@ -142,8 +165,6 @@ function deepMerge(target: any, source: any): any {
   return result;
 }
 
-// Local weight overrides — deep-merged on top of defaults.
-// This file is gitignored during tuning. Once finalized, remove from .gitignore.
 import localOverrides from "./weightsConfig.local.json";
 
 export const AI_CONFIG: typeof DEFAULTS = deepMerge(DEFAULTS, localOverrides as Record<string, unknown>);

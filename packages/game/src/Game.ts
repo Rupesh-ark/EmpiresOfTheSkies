@@ -2,7 +2,7 @@ import type { Game, Ctx } from "boardgame.io";
 
 import { LegacyCardInfo, MyGameState, MapState } from "./types";
 
-import { ALL_KA_CARDS, CONTINGENT_COUNTERS, EVENT_HAND_SIZE, FINAL_ROUND, INFIDEL_HOST_COUNTERS, LEGACY_CARDS } from "./data/gameData";
+import { ALL_KA_CARDS, CONTINGENT_COUNTERS, EVENT_HAND_SIZE, MAX_ROUNDS, INFIDEL_HOST_COUNTERS, LEGACY_CARDS } from "./data/gameData";
 import { filterKAPool, seedLegacyDeal, classifyEventDeck } from "./helpers/manufacturedFunSeed";
 import { initialBoardState, initialBattleMapState } from "./setup/boardSetup";
 import {
@@ -165,7 +165,7 @@ const MyGame: Game<MyGameState> = {
       voteSubmitted: {},
       consecutiveArchprelateWins: 0,
       round: 0,
-      finalRound: FINAL_ROUND,
+      finalRound: MAX_ROUNDS,
       firstTurnOfRound: true,
       mustContinueDiscovery: false,
       nprCathedrals,
@@ -657,14 +657,14 @@ const MyGame: Game<MyGameState> = {
             return;
           }
 
-          // Auto-skip players with no deployed fleets during retrieve fleets stage
+          // Auto-skip players with no retrievable fleets during retrieve fleets stage
           if (context.G.stage !== "retrieve fleets") return;
           const playerID = context.ctx.currentPlayer;
           const player = context.G.playerInfo[playerID];
-          const hasDeployedFleets = player.fleetInfo.some(
-            (f) => f.skyships > 0 && (f.location[0] !== 4 || f.location[1] !== 0)
+          const hasRetrievableFleets = player.fleetInfo.some(
+            (f: any) => f.skyships > 0 && (f.location[0] !== 4 || f.location[1] !== 0)
           );
-          if (!hasDeployedFleets) {
+          if (!hasRetrievableFleets || player.passed) {
             player.passed = true;
             if (allPlayersPassed(context.G)) {
               context.events.endPhase();
@@ -694,6 +694,7 @@ const MyGame: Game<MyGameState> = {
         resolveRound(context.G, context.events, context.random);
       },
       moves: {
+        pass: wrapMove("pass", pass),
         retrieveFleets: wrapMove("retrieveFleets", retrieveFleets),
         commitRebellionTroops: wrapMove("commitRebellionTroops", commitRebellionTroops),
         contributeToRebellion: wrapMove("contributeToRebellion", contributeToRebellion),
@@ -772,6 +773,7 @@ const MyGame: Game<MyGameState> = {
           pb.dispatchSkyshipFleet = false;
           pb.trainTroops = false;
           pb.dispatchDisabled = false;
+          player.agitatorsSentThisRound = [];
         });
 
         context.events.endPhase();

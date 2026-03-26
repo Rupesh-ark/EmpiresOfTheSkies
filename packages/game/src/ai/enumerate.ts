@@ -193,12 +193,15 @@ export function enumerateLegalMoves(G: MyGameState, ctx: Ctx, playerID: string):
       }
 
       const moves: AIMove[] = [];
+      const _failedValidations: string[] = [];
 
       // Slot-based moves
       for (const moveName of ["recruitCounsellors", "recruitRegiments", "purchaseSkyships"] as const) {
         for (const slotIndex of [0, 1, 2]) {
           if (tryValidate(moveName, G, playerID, slotIndex)) {
             moves.push({ move: moveName, args: [slotIndex] });
+          } else {
+            _failedValidations.push(`${moveName}[${slotIndex}]`);
           }
         }
       }
@@ -207,6 +210,8 @@ export function enumerateLegalMoves(G: MyGameState, ctx: Ctx, playerID: string):
       for (const slotIndex of [0, 1, 2, 3]) {
         if (tryValidate("foundBuildings", G, playerID, slotIndex)) {
           moves.push({ move: "foundBuildings", args: [slotIndex] });
+        } else {
+          _failedValidations.push(`foundBuildings[${slotIndex}]`);
         }
       }
 
@@ -214,6 +219,8 @@ export function enumerateLegalMoves(G: MyGameState, ctx: Ctx, playerID: string):
       for (const slotIndex of [0, 1, 2, 3]) {
         if (tryValidate("foundFactory", G, playerID, slotIndex)) {
           moves.push({ move: "foundFactory", args: [slotIndex] });
+        } else {
+          _failedValidations.push(`foundFactory[${slotIndex}]`);
         }
       }
 
@@ -229,6 +236,8 @@ export function enumerateLegalMoves(G: MyGameState, ctx: Ctx, playerID: string):
       ] as const) {
         if (tryValidate(moveName, G, playerID)) {
           moves.push({ move: moveName, args: [] });
+        } else {
+          _failedValidations.push(moveName);
         }
       }
 
@@ -272,10 +281,11 @@ export function enumerateLegalMoves(G: MyGameState, ctx: Ctx, playerID: string):
         moves.push({ move: "sellBuilding", args: [] });
       }
 
-      // sendAgitators — costs 2 gold, no counsellor cost
+      // sendAgitators — costs 2 gold, no counsellor cost; at most once per rival per round
       if (G.playerInfo[playerID].resources.gold >= 2) {
+        const sentThisRound = G.playerInfo[playerID].agitatorsSentThisRound;
         for (const otherID of ctx.playOrder) {
-          if (otherID !== playerID) {
+          if (otherID !== playerID && !sentThisRound.includes(otherID)) {
             moves.push({ move: "sendAgitators", args: [otherID] });
           }
         }
@@ -410,11 +420,100 @@ export function enumerateLegalMoves(G: MyGameState, ctx: Ctx, playerID: string):
         }
       }
 
-      // TODO: enumerate transferBetweenFleets options (fleet-to-fleet transfers at same tile)
+      // transferBetweenFleets — transfer troops between co-located fleets
+      for (let si = 0; si < player.fleetInfo.length; si++) {
+        const src = player.fleetInfo[si];
+        const srcAtHome =
+          src.location[0] === KINGDOM_LOCATION[0] &&
+          src.location[1] === KINGDOM_LOCATION[1];
+        if (src.skyships === 0 || srcAtHome) continue;
+        for (let ti = 0; ti < player.fleetInfo.length; ti++) {
+          if (si === ti) continue;
+          const tgt = player.fleetInfo[ti];
+          if (
+            src.location[0] !== tgt.location[0] ||
+            src.location[1] !== tgt.location[1]
+          ) continue;
+          // Transfer all troops (no skyships) from src → tgt
+          const hasTroops = src.regiments + src.levies + src.eliteRegiments > 0;
+          if (hasTroops) {
+            if (
+              tryValidate(
+                "transferBetweenFleets",
+                G,
+                playerID,
+                si, ti, 0, src.regiments, src.levies, src.eliteRegiments
+              )
+            ) {
+              moves.push({
+                move: "transferBetweenFleets",
+                args: [si, ti, 0, src.regiments, src.levies, src.eliteRegiments],
+              });
+            }
+          }
+        }
+      }
+
+      // declareSmugglerGood — pick which good to smuggle (licenced_smugglers KA)
+      // Only enumerate if not already declared (the move is a one-time choice per round)
+      if (
+        player.resources.advantageCard === "licenced_smugglers" &&
+        !player.resources.smugglerGoodChoice
+      ) {
+        const GOODS = [
+          "mithril", "dragonScales", "krakenSkin", "magicDust", "stickyIchor", "pipeweed",
+        ] as const;
+        for (const good of GOODS) {
+          moves.push({ move: "declareSmugglerGood", args: [good] });
+        }
+      }
+
+      // checkAndPlaceFort — place fort at a valid location (after foundBuildings slot 3)
+      if (G.validFortLocations.length > 0) {
+        for (const coords of G.validFortLocations) {
+          if (tryValidate("checkAndPlaceFort", G, playerID, coords)) {
+            moves.push({ move: "checkAndPlaceFort", args: [coords] });
+          }
+        }
+      }
+
+      // transferOutpost — transfer own outpost/colony to a rival whose fleet is present
+      for (let y = 0; y < MAP_HEIGHT; y++) {
+        for (let x = 0; x < MAP_WIDTH; x++) {
+          const cell = G.mapState.buildings[y]?.[x];
+          if (!cell || cell.player?.id !== playerID) continue;
+          if (cell.buildings !== "outpost" && cell.buildings !== "colony") continue;
+          // Find rivals with a fleet at this tile
+          for (const otherID of ctx.playOrder) {
+            if (otherID === playerID) continue;
+            const rivalHasFleet = G.playerInfo[otherID]?.fleetInfo.some(
+              (f) => f.location[0] === x && f.location[1] === y && f.skyships > 0
+            );
+            if (rivalHasFleet) {
+              if (tryValidate("transferOutpost", G, playerID, [x, y] as [number, number], otherID)) {
+                moves.push({ move: "transferOutpost", args: [[x, y], otherID] });
+              }
+            }
+          }
+        }
+      }
+
       // TODO: enumerate proposeDeal options (trade negotiations with other players)
 
+      // Diagnostic: disabled for performance — re-enable for debugging
+      // if (_failedValidations.length > 0) {
+      //   const player = G.playerInfo[playerID];
+      //   const p = player.resources;
+      //   console.log(`[ENUM] P${playerID} R${G.round} gold=${p.gold} couns=${p.counsellors} sky=${p.skyships} regs=${p.regiments} levies=${p.levies} | valid=${moves.length} failed=${_failedValidations.length}`);
+      //   console.log(`  FAILED: ${_failedValidations.join(", ")}`);
+      //   console.log(`  VALID: ${[...new Set(validNames)].join(", ")}`);
+      // }
+
       moves.push({ move: "pass", args: [] });
-      moves.push({ move: "confirmAction", args: [] });
+      // confirmAction only valid after a counsellor action (turnComplete = true)
+      if (G.playerInfo[playerID].turnComplete) {
+        moves.push({ move: "confirmAction", args: [] });
+      }
 
       return moves;
     }
@@ -424,30 +523,46 @@ export function enumerateLegalMoves(G: MyGameState, ctx: Ctx, playerID: string):
 
       if (G.stage === "attack or pass") {
         moves.push({ move: "doNotAttack", args: [] });
-        for (const otherID of ctx.playOrder) {
-          if (otherID !== playerID) {
-            moves.push({ move: "attackOtherPlayersFleet", args: [otherID] });
-          }
+        for (const defenderID of G.possibleDefenders ?? []) {
+          moves.push({ move: "attackOtherPlayersFleet", args: [defenderID] });
         }
       } else if (G.stage === "attack or evade") {
-        moves.push({ move: "evadeAttackingFleet", args: [] });
-        moves.push({ move: "drawCard", args: [] });
-      } else if (G.stage === "resolve battle") {
-        const cards = G.playerInfo[playerID].resources.fortuneCards;
-        for (let i = 0; i < cards.length; i++) {
-          moves.push({ move: "pickCard", args: [i] });
+        // Only the defender decides to evade or fight
+        if (G.battleState?.defender?.id === playerID) {
+          moves.push({ move: "evadeAttackingFleet", args: [] });
+          moves.push({ move: "drawCard", args: [] });
         }
-        moves.push({ move: "drawCard", args: [] });
+      } else if (G.stage === "resolve battle") {
+        // Only enumerate for the player who hasn't committed a FoW card yet
+        const bs = G.battleState;
+        const needsCard =
+          (bs?.attacker?.id === playerID && !bs.attacker.fowCard) ||
+          (bs?.defender?.id === playerID && !bs.defender.fowCard);
+        if (needsCard) {
+          const cards = G.playerInfo[playerID].resources.fortuneCards;
+          for (let i = 0; i < cards.length; i++) {
+            moves.push({ move: "pickCard", args: [i] });
+          }
+          moves.push({ move: "drawCard", args: [] });
+        }
       } else if (G.stage === "relocate loser") {
         const battleState = G.battleState;
         if (battleState) {
-          const defeatedPlayerID =
-            battleState.attacker.id === playerID
-              ? battleState.defender.id
-              : battleState.attacker.id;
-          for (const tile of G.validRelocationTiles) {
-            moves.push({ move: "relocateDefeatedFleet", args: [tile, defeatedPlayerID] });
+          // Only the winner relocates the loser
+          const isParticipant =
+            battleState.attacker.id === playerID ||
+            battleState.defender.id === playerID;
+          if (isParticipant) {
+            const defeatedPlayerID =
+              battleState.attacker.id === playerID
+                ? battleState.defender.id
+                : battleState.attacker.id;
+            for (const tile of G.validRelocationTiles) {
+              moves.push({ move: "relocateDefeatedFleet", args: [tile, defeatedPlayerID] });
+            }
           }
+        } else {
+          // no battleState in relocate loser — skip
         }
       } else if (G.stage === "conquest draw or pick card") {
         const cards = G.playerInfo[playerID].resources.fortuneCards;
@@ -474,20 +589,31 @@ export function enumerateLegalMoves(G: MyGameState, ctx: Ctx, playerID: string):
 
       if (G.stage === "attack or pass") {
         moves.push({ move: "doNotGroundAttack", args: [] });
-        for (const otherID of ctx.playOrder) {
-          if (otherID !== playerID) {
-            moves.push({ move: "attackPlayersBuilding", args: [otherID] });
-          }
+        // Only list rivals who have a building at the current battle tile
+        const [gbx, gby] = G.mapState.currentBattle;
+        const tileBuilding = G.mapState.buildings[gby]?.[gbx];
+        if (tileBuilding?.player && tileBuilding.player.id !== playerID && tileBuilding.buildings) {
+          moves.push({ move: "attackPlayersBuilding", args: [tileBuilding.player.id] });
         }
       } else if (G.stage === "defend or yield" || G.stage.includes("defend")) {
-        moves.push({ move: "defendGroundAttack", args: [] });
-        moves.push({ move: "yieldToAttacker", args: [] });
-      } else if (G.stage === "resolve battle") {
-        const cards = G.playerInfo[playerID].resources.fortuneCards;
-        for (let i = 0; i < cards.length; i++) {
-          moves.push({ move: "pickCard", args: [i] });
+        // Only the defender decides to defend or yield
+        if (G.battleState?.defender?.id === playerID) {
+          moves.push({ move: "defendGroundAttack", args: [] });
+          moves.push({ move: "yieldToAttacker", args: [] });
         }
-        moves.push({ move: "drawCard", args: [] });
+      } else if (G.stage === "resolve battle") {
+        // Only enumerate for the player who hasn't committed a FoW card yet
+        const bs = G.battleState;
+        const needsCard =
+          (bs?.attacker?.id === playerID && !bs.attacker.fowCard) ||
+          (bs?.defender?.id === playerID && !bs.defender.fowCard);
+        if (needsCard) {
+          const cards = G.playerInfo[playerID].resources.fortuneCards;
+          for (let i = 0; i < cards.length; i++) {
+            moves.push({ move: "pickCard", args: [i] });
+          }
+          moves.push({ move: "drawCard", args: [] });
+        }
       } else if (G.stage === "garrison troops") {
         const avail = G.troopsAvailableForGarrison;
         // All available troops
@@ -580,8 +706,8 @@ export function enumerateLegalMoves(G: MyGameState, ctx: Ctx, playerID: string):
       const moves: AIMove[] = [];
 
       if (G.stage === "retrieve fleets") {
-        const deployedIndices: number[] = [];
         const fleets = G.playerInfo[playerID].fleetInfo;
+        const deployedIndices: number[] = [];
         for (let i = 0; i < fleets.length; i++) {
           const f = fleets[i];
           const isAtHome =
@@ -592,19 +718,30 @@ export function enumerateLegalMoves(G: MyGameState, ctx: Ctx, playerID: string):
           }
         }
         if (deployedIndices.length > 0) {
+          // Option: retrieve ALL deployed fleets
           moves.push({ move: "retrieveFleets", args: [deployedIndices] });
+          // Options: retrieve individual fleets (for selective retrieval)
+          if (deployedIndices.length > 1) {
+            for (const idx of deployedIndices) {
+              moves.push({ move: "retrieveFleets", args: [[idx]] });
+            }
+          }
         }
         moves.push({ move: "pass", args: [] });
       } else if (G.stage === "infidel_fleet_combat") {
         moves.push({ move: "respondToInfidelFleet", args: ["fight"] });
         moves.push({ move: "respondToInfidelFleet", args: ["evade"] });
       } else if (G.stage === "deferred_battle") {
-        // Pick or draw a FoW card for the deferred battle
-        const cards = G.playerInfo[playerID].resources.fortuneCards;
-        for (let i = 0; i < cards.length; i++) {
-          moves.push({ move: "pickCard", args: [i] });
+        // Only the target player commits a FoW card for a deferred battle
+        const deferredBattle = G.currentDeferredBattle;
+        if (deferredBattle && deferredBattle.event.targetPlayerID === playerID) {
+          const cards = G.playerInfo[playerID].resources.fortuneCards;
+          for (let i = 0; i < cards.length; i++) {
+            moves.push({ move: "commitDeferredBattleCard", args: [i] });
+          }
+          // Draw from deck (no card index = undefined)
+          moves.push({ move: "commitDeferredBattleCard", args: [] });
         }
-        moves.push({ move: "drawCard", args: [] });
       } else if (G.stage === "rebellion") {
         const rebellion = G.currentRebellion;
         if (rebellion && rebellion.event.targetPlayerID === playerID) {
