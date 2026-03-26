@@ -11,6 +11,7 @@ import { RandomAPI } from "boardgame.io/dist/types/src/plugins/random/random";
 import { increaseHeresyWithinMove, increaseOrthodoxyWithinMove, logEvent } from "./stateUtils";
 import { PRICE_MARKER_MIN } from "../data/gameData";
 import { setStage } from "./stageUtils";
+import { calculateCombat } from "./combatMath";
 
 const GOODS: GoodKey[] = ["mithril", "dragonScales", "krakenSkin", "magicDust", "stickyIchor", "pipeweed"];
 
@@ -296,8 +297,10 @@ export const resolveBattleAndReturnWinner = (
   const battleType = ctx.phase === "ground_battle" ? "Ground battle" : "Aerial battle";
   logEvent(G, `${battleType}: ${attackerName} (${attackerSwordValue}S/${attackerShieldValue}Sh) vs ${defenderName} (${defenderSwordValue}S/${defenderShieldValue}Sh)`);
 
-  const attackerLosses = defenderSwordValue - attackerShieldValue;
-  const defenderLosses = attackerSwordValue - defenderShieldValue;
+  const { hitsOnAttacker: attackerLosses, hitsOnDefender: defenderLosses } = calculateCombat(
+    { swords: attackerSwordValue, shields: attackerShieldValue, fowSword: 0, fowShield: 0 },
+    { swords: defenderSwordValue, shields: defenderShieldValue, fowSword: 0, fowShield: 0 },
+  );
 
   // --- Snapshot unit counts before losses (for loss reporting) ---
   const attackerSnap = snapshotFleets(attackerFleets);
@@ -574,8 +577,11 @@ export const resolveConquest = (
   const landName = G.mapState.currentTileArray[y][x]?.name ?? "unknown land";
   logEvent(G, `Conquest: ${conquestPlayerName} attacks ${landName} (${attackerSwordValue}S vs ${defenderSwordValue}S/${defenderShieldValue}Sh)`);
 
-  const attackerLosses = defenderSwordValue - attackerShieldValue;
-  let attackerLossesCopy = attackerLosses.valueOf();
+  const { hitsOnAttacker: attackerLosses, hitsOnDefender: attackerHits } = calculateCombat(
+    { swords: attackerSwordValue, shields: attackerShieldValue, fowSword: 0, fowShield: 0 },
+    { swords: defenderSwordValue, shields: defenderShieldValue, fowSword: 0, fowShield: 0 },
+  );
+  let attackerLossesCopy = attackerLosses;
 
   // --- Snapshot unit counts before losses (for loss reporting) ---
   const conquestGarrisonSnapLevies = attackerGarrisonedLevies;
@@ -630,7 +636,6 @@ export const resolveConquest = (
     G.mapState.battleMap
   );
 
-  const attackerHits = Math.max(0, attackerSwordValue - defenderShieldValue);
   const tileStrength = G.mapState.currentTileArray[y][x].sword;
 
   const conquestResultBase = {

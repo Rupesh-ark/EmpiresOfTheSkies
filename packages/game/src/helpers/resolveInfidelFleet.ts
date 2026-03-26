@@ -12,6 +12,7 @@
 import { MyGameState } from "../types";
 import { logEvent } from "./stateUtils";
 import { drawFortuneOfWarCard } from "./helpers";
+import { calculateCombat } from "./combatMath";
 import { INFIDEL_EMPIRE_LOCATION } from "../data/gameData";
 
 // ── Military power calculation ───────────────────────────────────────────────
@@ -135,13 +136,11 @@ const resolveCombat = (
   // Use player's hand card if provided, otherwise draw from deck
   const fowPlayer = playerFoWCard ?? drawFortuneOfWarCard(G, shuffle);
 
-  const totalInfidelSwords = infidelSwords + fowInfidel.sword;
-  const totalInfidelShields = infidelShields + fowInfidel.shield;
-  const totalPlayerSwords = playerSwords + fowPlayer.sword;
-  const totalPlayerShields = playerShields + fowPlayer.shield;
-
-  const hitsOnPlayer = Math.max(0, totalInfidelSwords - totalPlayerShields);
-  const hitsOnInfidel = Math.max(0, totalPlayerSwords - totalInfidelShields);
+  // Infidel Fleet = attacker, Player = defender
+  const { hitsOnDefender: hitsOnPlayer, hitsOnAttacker: hitsOnInfidel } = calculateCombat(
+    { swords: infidelSwords, shields: infidelShields, fowSword: fowInfidel.sword, fowShield: fowInfidel.shield },
+    { swords: playerSwords, shields: playerShields, fowSword: fowPlayer.sword, fowShield: fowPlayer.shield },
+  );
 
   // Player fleet HP = skyships (each takes 1 hit to destroy)
   // Infidel Fleet HP = its swords value

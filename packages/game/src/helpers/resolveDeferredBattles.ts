@@ -13,6 +13,7 @@
 import { MyGameState, DeferredEvent } from "../types";
 import { addVPAmount, logEvent } from "./stateUtils";
 import { drawFortuneOfWarCard, hasFortAt } from "./helpers";
+import { calculateCombat } from "./combatMath";
 
 // ── Faerie Uprising ─────────────────────────────────────────────────────────
 
@@ -42,8 +43,10 @@ const resolveFaerieUprising = (
   const fowLand = drawFortuneOfWarCard(G, shuffle);
   const fowDefender = fowCard ?? drawFortuneOfWarCard(G, shuffle);
 
-  const hitsOnDefender = Math.max(0, landSwords + fowLand.sword - defShields - fowDefender.shield);
-  const hitsOnLand = Math.max(0, defSwords + fowDefender.sword - landShields - fowLand.shield);
+  const { hitsOnDefender, hitsOnAttacker: hitsOnLand } = calculateCombat(
+    { swords: landSwords, shields: landShields, fowSword: fowLand.sword, fowShield: fowLand.shield },
+    { swords: defSwords, shields: defShields, fowSword: fowDefender.sword, fowShield: fowDefender.shield },
+  );
 
   const defenderHP = defRegiments * 2 + defLevies;
   const landHP = landSwords;
@@ -108,8 +111,11 @@ const resolveHeadstrongCommander = (
   const fowAttacker = fowCard ?? drawFortuneOfWarCard(G, shuffle);
   const fowLand = drawFortuneOfWarCard(G, shuffle);
 
-  const hitsOnLand = Math.max(0, atkSwords + fowAttacker.sword - landShields - fowLand.shield);
-  const hitsOnAttacker = Math.max(0, landSwords + fowLand.sword - fowAttacker.shield);
+  // Player garrison = attacker, Land = defender
+  const { hitsOnDefender: hitsOnLand, hitsOnAttacker } = calculateCombat(
+    { swords: atkSwords, shields: 0, fowSword: fowAttacker.sword, fowShield: fowAttacker.shield },
+    { swords: landSwords, shields: landShields, fowSword: fowLand.sword, fowShield: fowLand.shield },
+  );
 
   const landHP = landSwords;
   const attackerHP = atkRegiments * 2 + atkLevies;
@@ -181,8 +187,10 @@ const resolveInfidelsInvadeFaerie = (
   const fowHost = drawFortuneOfWarCard(G, shuffle);
   const fowDefender = fowCard ?? drawFortuneOfWarCard(G, shuffle);
 
-  const hitsOnDefender = Math.max(0, host.swords + fowHost.sword - defShields - fowDefender.shield);
-  const hitsOnHost = Math.max(0, defSwords + fowDefender.sword - host.shields - fowHost.shield);
+  const { hitsOnDefender, hitsOnAttacker: hitsOnHost } = calculateCombat(
+    { swords: host.swords, shields: host.shields, fowSword: fowHost.sword, fowShield: fowHost.shield },
+    { swords: defSwords, shields: defShields, fowSword: fowDefender.sword, fowShield: fowDefender.shield },
+  );
 
   const defenderHP = defRegiments * 2 + defLevies;
   const defenderWins = hitsOnHost >= host.swords || hitsOnDefender < defenderHP;
