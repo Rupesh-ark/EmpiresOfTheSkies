@@ -57,3 +57,4 @@ server/storage/
 packages/game/src/ai/weightsConfig.local.json
 packages/game/src/ai/tournament-results/
 bot-logs/
+bot-training/

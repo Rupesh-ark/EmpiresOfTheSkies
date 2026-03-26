@@ -7,7 +7,7 @@
  */
 import { ReactNode } from "react";
 import { Box, Typography } from "@mui/material";
-import { tokens, IconCathedral, IconPalace, IconShipyard, IconFactory, IconPrisoner, IconOutpost, IconColony, IconFort } from "@/theme";
+import { tokens, IconCathedral, IconPalace, IconShipyard, IconFactory, IconPrisoner, IconOutpost, IconColony, IconFort, IconDissenter } from "@/theme";
 import { MyGameProps } from "@eots/game";
 import { getLocationPresentation } from "@/utils/locationLabels";
 
@@ -48,10 +48,12 @@ const HoldingRow = ({
   icon,
   value,
   label,
+  danger,
 }: {
   icon: ReactNode;
   value: number;
   label: string;
+  danger?: boolean;
 }) => (
   <Box
     sx={{
@@ -65,7 +67,7 @@ const HoldingRow = ({
       transition: `opacity ${tokens.transition.fast}`,
     }}
   >
-    <Box sx={{ color: tokens.ui.gold, display: "flex", flexShrink: 0, fontSize: 18 }}>
+    <Box sx={{ color: danger && value > 0 ? tokens.ui.danger : tokens.ui.gold, display: "flex", flexShrink: 0, fontSize: 18 }}>
       {icon}
     </Box>
     <Typography
@@ -73,7 +75,7 @@ const HoldingRow = ({
         fontSize: tokens.fontSize.sm,
         fontFamily: tokens.font.body,
         fontWeight: 700,
-        color: tokens.ui.text,
+        color: danger && value > 0 ? tokens.ui.danger : tokens.ui.text,
         lineHeight: 1,
         minWidth: 14,
       }}
@@ -84,7 +86,7 @@ const HoldingRow = ({
       sx={{
         fontSize: tokens.fontSize.xs,
         fontFamily: tokens.font.body,
-        color: tokens.ui.textMuted,
+        color: danger && value > 0 ? tokens.ui.danger : tokens.ui.textMuted,
         lineHeight: 1,
       }}
     >
@@ -172,6 +174,7 @@ export const Holdings = (props: HoldingsProps) => {
         <HoldingRow icon={<IconShipyard />} value={playerInfo.shipyards} label="Shipyards" />
         <HoldingRow icon={<IconFactory />} value={playerInfo.factories} label="Factories" />
         <HoldingRow icon={<IconPrisoner />} value={playerInfo.prisoners} label="Prisoners" />
+        <HoldingRow icon={<IconDissenter />} value={playerInfo.freeDissenters} label="Dissenters" danger />
         <HoldingRow icon={<IconOutpost />} value={outposts} label="Outposts" />
         <HoldingRow icon={<IconColony />} value={colonies} label="Colonies" />
         <HoldingRow icon={<IconFort />} value={forts} label="Forts" />

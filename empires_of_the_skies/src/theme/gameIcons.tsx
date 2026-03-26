@@ -23,6 +23,7 @@ import {
   GiVillage,
   GiMilitaryFort,
   GiCastle,
+  GiAngryEyes,
 } from "react-icons/gi";
 
 // ── Resource icons ──────────────────────────────────────────────────────
@@ -52,6 +53,7 @@ export const IconFort = GiMilitaryFort;
 export const IconOutpost = GiWatchtower;
 export const IconColony = GiVillage;
 export const IconPrisoner = GiPrisoner;
+export const IconDissenter = GiAngryEyes;
 
 // ── Allegiance icons ────────────────────────────────────────────────────
 
