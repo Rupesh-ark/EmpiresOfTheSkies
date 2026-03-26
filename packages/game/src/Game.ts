@@ -2,8 +2,8 @@ import type { Game, Ctx } from "boardgame.io";
 
 import { LegacyCardInfo, MyGameState, MapState } from "./types";
 
-import { ALL_KA_CARDS, CONTINGENT_COUNTERS, EVENT_HAND_SIZE, MAX_ROUNDS, INFIDEL_HOST_COUNTERS, LEGACY_CARDS } from "./data/gameData";
-import { filterKAPool, seedLegacyDeal, classifyEventDeck } from "./helpers/manufacturedFunSeed";
+import { ALL_KA_CARDS, CONTINGENT_COUNTERS, EVENT_HAND_SIZE, MAX_ROUNDS, INFIDEL_HOST_COUNTERS } from "./data/gameData";
+import { filterKAPool, classifyEventDeck } from "./helpers/manufacturedFunSeed";
 import { initialBoardState, initialBattleMapState } from "./setup/boardSetup";
 import {
   getRandomisedMapTileArray,
@@ -384,12 +384,16 @@ const MyGame: Game<MyGameState> = {
     offerBuyoffGold: wrapMove("offerBuyoffGold", offerBuyoffGold),
   },
   phases: {
-    kingdom_advantage: {
+    setup: {
       start: true,
-      moves: { pickKingdomAdvantageCard: wrapMove("pickKingdomAdvantageCard", pickKingdomAdvantageCard) },
-      next: "legacy_card",
-      onBegin: withPhaseGuard("kingdom_advantage", (context) => {
-        phaseLog.info("kingdom_advantage", { round: context.G.round });
+      moves: {
+        pickKingdomAdvantageCard: wrapMove("pickKingdomAdvantageCard", pickKingdomAdvantageCard),
+        pickLegacyCard: wrapMove("pickLegacyCard", pickLegacyCard),
+      },
+      next: "events",
+      onBegin: (context) => {
+        phaseLog.info("setup", { round: context.G.round });
+        setStage(context.G, "setup", "kingdom_advantage");
         const { pool: filteredPool, log: kaLog } = filterKAPool(
           context.G.cardDecks.kingdomAdvantagePool,
           context.ctx.numPlayers,
@@ -397,7 +401,7 @@ const MyGame: Game<MyGameState> = {
         );
         context.G.cardDecks.kingdomAdvantagePool = context.random.Shuffle(filteredPool);
         for (const msg of kaLog) logEvent(context.G, msg);
-      }),
+      },
       turn: {
         order: {
           first: () => 0,
@@ -408,27 +412,6 @@ const MyGame: Game<MyGameState> = {
           playOrder: (context) => [...context.ctx.playOrder].reverse(),
         },
       },
-    },
-    legacy_card: {
-      moves: { pickLegacyCard: wrapMove("pickLegacyCard", pickLegacyCard) },
-      next: "events",
-      onBegin: withPhaseGuard("legacy_card", (context) => {
-        phaseLog.info("legacy_card", { round: context.G.round });
-        setStage(context.G, "setup", "legacy_card");
-        const { hands, remainder, log: legacyLog } = seedLegacyDeal(
-          LEGACY_CARDS,
-          context.ctx.playOrder,
-          Object.fromEntries(
-            context.ctx.playOrder.map((id) => [id, context.G.playerInfo[id].resources.advantageCard]),
-          ),
-          context.random.Shuffle,
-        );
-        for (const id of context.ctx.playOrder) {
-          context.G.playerInfo[id].legacyCardOptions = hands[id];
-        }
-        context.G.cardDecks.legacyDeck = remainder;
-        for (const msg of legacyLog) logEvent(context.G, msg);
-      }),
     },
     events: {
       turn: {
