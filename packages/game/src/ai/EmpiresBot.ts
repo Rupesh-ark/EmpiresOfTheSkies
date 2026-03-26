@@ -137,10 +137,10 @@ export class EmpiresBot {
     }
 
     // Special handling for card-picking phases
-    if (ctx.phase === "kingdom_advantage") {
+    if (G.stage.sub === "kingdom_advantage") {
       return this.chooseKACard(G, playerID);
     }
-    if (ctx.phase === "legacy_card") {
+    if (G.stage.sub === "legacy_card") {
       return this.chooseLegacyCard(G, playerID);
     }
 

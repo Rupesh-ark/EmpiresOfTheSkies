@@ -13,7 +13,6 @@ const GroundAttackOrPassDialog = (props: MyGameProps) => {
 
   const isOpen =
     props.ctx.currentPlayer === props.playerID &&
-    props.ctx.phase === "ground_battle" &&
     inCurrentBattle &&
     props.G.battleState === undefined &&
     props.G.stage.sub === "ground_attack_or_pass";

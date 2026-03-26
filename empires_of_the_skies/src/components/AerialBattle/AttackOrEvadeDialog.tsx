@@ -17,7 +17,6 @@ const AttackOrEvadeDialog = (props: AttackOrEvadeDialogProps) => {
   const isOpen =
     open &&
     props.ctx.currentPlayer === props.playerID &&
-    props.ctx.phase === "aerial_battle" &&
     inCurrentBattle &&
     props.G.battleState?.defender.id === props.playerID &&
     props.G.battleState.defender.decision === "undecided";

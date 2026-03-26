@@ -189,7 +189,6 @@ const OutpostOrColonyDialog = (props: MyGameProps) => {
 
   const isOpen =
     props.ctx.currentPlayer === props.playerID &&
-    props.ctx.phase === "conquest" &&
     inCurrentBattle &&
     props.G.conquestState === undefined &&
     props.G.stage.sub === "conquest";

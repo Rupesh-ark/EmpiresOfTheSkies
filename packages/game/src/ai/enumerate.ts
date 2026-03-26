@@ -64,18 +64,20 @@ export function enumerateLegalMoves(G: MyGameState, ctx: Ctx, playerID: string):
   const phase = ctx.phase;
 
   switch (phase) {
-    case "kingdom_advantage": {
-      return G.cardDecks.kingdomAdvantagePool.map((cardName) => ({
-        move: "pickKingdomAdvantageCard",
-        args: [cardName],
-      }));
-    }
-
-    case "legacy_card": {
-      return G.playerInfo[playerID].legacyCardOptions.map((cardInfo) => ({
-        move: "pickLegacyCard",
-        args: [cardInfo],
-      }));
+    case "setup": {
+      if (G.stage.sub === "kingdom_advantage") {
+        return G.cardDecks.kingdomAdvantagePool.map((cardName) => ({
+          move: "pickKingdomAdvantageCard",
+          args: [cardName],
+        }));
+      }
+      if (G.stage.sub === "legacy_card") {
+        return G.playerInfo[playerID].legacyCardOptions.map((cardInfo) => ({
+          move: "pickLegacyCard",
+          args: [cardInfo],
+        }));
+      }
+      return [];
     }
 
     case "events": {
@@ -515,7 +517,7 @@ export function enumerateLegalMoves(G: MyGameState, ctx: Ctx, playerID: string):
       return moves;
     }
 
-    case "aerial_battle": {
+    case "resolution": {
       const moves: AIMove[] = [];
 
       if (isStage(G, "resolution", "aerial_attack_or_pass")) {
@@ -523,12 +525,14 @@ export function enumerateLegalMoves(G: MyGameState, ctx: Ctx, playerID: string):
         for (const defenderID of G.possibleDefenders ?? []) {
           moves.push({ move: "attackOtherPlayersFleet", args: [defenderID] });
         }
+        return moves;
       } else if (isStage(G, "resolution", "aerial_attack_or_evade")) {
         // Only the defender decides to evade or fight
         if (G.battleState?.defender?.id === playerID) {
           moves.push({ move: "evadeAttackingFleet", args: [] });
           moves.push({ move: "drawCard", args: [] });
         }
+        return moves;
       } else if (isStage(G, "resolution", "aerial_resolve")) {
         // Only enumerate for the player who hasn't committed a FoW card yet
         const bs = G.battleState;
@@ -542,6 +546,97 @@ export function enumerateLegalMoves(G: MyGameState, ctx: Ctx, playerID: string):
           }
           moves.push({ move: "drawCard", args: [] });
         }
+        return moves;
+      } else if (isStage(G, "resolution", "plunder_legends")) {
+        return [
+          { move: "plunder", args: [] },
+          { move: "doNotPlunder", args: [] },
+        ];
+      } else if (isStage(G, "resolution", "ground_attack_or_pass")) {
+        moves.push({ move: "doNotGroundAttack", args: [] });
+        // Only list rivals who have a building at the current battle tile
+        const [gbx, gby] = G.mapState.currentBattle;
+        const tileBuilding = G.mapState.buildings[gby]?.[gbx];
+        if (tileBuilding?.player && tileBuilding.player.id !== playerID && tileBuilding.buildings) {
+          moves.push({ move: "attackPlayersBuilding", args: [tileBuilding.player.id] });
+        }
+        return moves;
+      } else if (isStage(G, "resolution", "ground_defend_or_yield")) {
+        // Only the defender decides to defend or yield
+        if (G.battleState?.defender?.id === playerID) {
+          moves.push({ move: "defendGroundAttack", args: [] });
+          moves.push({ move: "yieldToAttacker", args: [] });
+        }
+        return moves;
+      } else if (isStage(G, "resolution", "ground_resolve")) {
+        // Only enumerate for the player who hasn't committed a FoW card yet
+        const bs = G.battleState;
+        const needsCard =
+          (bs?.attacker?.id === playerID && !bs.attacker.fowCard) ||
+          (bs?.defender?.id === playerID && !bs.defender.fowCard);
+        if (needsCard) {
+          const cards = G.playerInfo[playerID].resources.fortuneCards;
+          for (let i = 0; i < cards.length; i++) {
+            moves.push({ move: "pickCard", args: [i] });
+          }
+          moves.push({ move: "drawCard", args: [] });
+        }
+        return moves;
+      } else if (isStage(G, "resolution", "ground_garrison")) {
+        const avail = G.troopsAvailableForGarrison;
+        // All available troops
+        moves.push({ move: "garrisonTroops", args: [[avail.regiments, avail.levies, avail.elites]] });
+        // Half available troops
+        moves.push({
+          move: "garrisonTroops",
+          args: [[
+            Math.ceil(avail.regiments / 2),
+            Math.ceil(avail.levies / 2),
+            Math.ceil(avail.elites / 2),
+          ]],
+        });
+        // Garrison none
+        moves.push({ move: "garrisonTroops", args: [[0, 0, 0]] });
+        return moves;
+      } else if (isStage(G, "resolution", "conquest_draw_or_pick")) {
+        const cards = G.playerInfo[playerID].resources.fortuneCards;
+        for (let i = 0; i < cards.length; i++) {
+          moves.push({ move: "pickCardConquest", args: [i] });
+        }
+        moves.push({ move: "drawCardConquest", args: [] });
+        return moves;
+      } else if (isStage(G, "resolution", "conquest_garrison")) {
+        const avail = G.troopsAvailableForGarrison;
+        return [
+          { move: "garrisonTroops", args: [[avail.regiments, avail.levies, avail.elites]] },
+          {
+            move: "garrisonTroops",
+            args: [[
+              Math.ceil(avail.regiments / 2),
+              Math.ceil(avail.levies / 2),
+              Math.ceil(avail.elites / 2),
+            ]],
+          },
+          { move: "garrisonTroops", args: [[0, 0, 0]] },
+        ];
+      } else if (isStage(G, "resolution", "conquest")) {
+        const conquestMoves: AIMove[] = [{ move: "doNothing", args: [] }];
+        conquestMoves.push({ move: "coloniseLand", args: [] });
+        const conquestPlayer = G.playerInfo[playerID];
+        for (const fleet of conquestPlayer.fleetInfo) {
+          const isAtHome =
+            fleet.location[0] === KINGDOM_LOCATION[0] &&
+            fleet.location[1] === KINGDOM_LOCATION[1];
+          if (!isAtHome && fleet.skyships > 0) {
+            conquestMoves.push({ move: "constructOutpost", args: [fleet.location] });
+          }
+        }
+        return conquestMoves;
+      } else if (isStage(G, "resolution", "election")) {
+        return ctx.playOrder.map((targetID) => ({
+          move: "vote",
+          args: [targetID],
+        }));
       } else if (isStage(G, "resolution", "relocate_loser")) {
         const battleState = G.battleState;
         if (battleState) {
@@ -562,155 +657,9 @@ export function enumerateLegalMoves(G: MyGameState, ctx: Ctx, playerID: string):
               moves.push({ move: "relocateDefeatedFleet", args: [[4, 0], defeatedPlayerID] });
             }
           }
-        } else {
-          // no battleState in relocate loser — skip
         }
-      } else if (isStage(G, "resolution", "conquest_draw_or_pick")) {
-        const cards = G.playerInfo[playerID].resources.fortuneCards;
-        for (let i = 0; i < cards.length; i++) {
-          moves.push({ move: "pickCard", args: [i] });
-        }
-        moves.push({ move: "drawCard", args: [] });
-      } else {
-        moves.push({ move: "doNotAttack", args: [] });
-      }
-
-      return moves;
-    }
-
-    case "plunder_legends": {
-      return [
-        { move: "plunder", args: [] },
-        { move: "doNotPlunder", args: [] },
-      ];
-    }
-
-    case "ground_battle": {
-      const moves: AIMove[] = [];
-
-      if (isStage(G, "resolution", "ground_attack_or_pass")) {
-        moves.push({ move: "doNotGroundAttack", args: [] });
-        // Only list rivals who have a building at the current battle tile
-        const [gbx, gby] = G.mapState.currentBattle;
-        const tileBuilding = G.mapState.buildings[gby]?.[gbx];
-        if (tileBuilding?.player && tileBuilding.player.id !== playerID && tileBuilding.buildings) {
-          moves.push({ move: "attackPlayersBuilding", args: [tileBuilding.player.id] });
-        }
-      } else if (isStage(G, "resolution", "ground_defend_or_yield")) {
-        // Only the defender decides to defend or yield
-        if (G.battleState?.defender?.id === playerID) {
-          moves.push({ move: "defendGroundAttack", args: [] });
-          moves.push({ move: "yieldToAttacker", args: [] });
-        }
-      } else if (isStage(G, "resolution", "ground_resolve")) {
-        // Only enumerate for the player who hasn't committed a FoW card yet
-        const bs = G.battleState;
-        const needsCard =
-          (bs?.attacker?.id === playerID && !bs.attacker.fowCard) ||
-          (bs?.defender?.id === playerID && !bs.defender.fowCard);
-        if (needsCard) {
-          const cards = G.playerInfo[playerID].resources.fortuneCards;
-          for (let i = 0; i < cards.length; i++) {
-            moves.push({ move: "pickCard", args: [i] });
-          }
-          moves.push({ move: "drawCard", args: [] });
-        }
-      } else if (isStage(G, "resolution", "ground_garrison")) {
-        const avail = G.troopsAvailableForGarrison;
-        // All available troops
-        moves.push({ move: "garrisonTroops", args: [[avail.regiments, avail.levies, avail.elites]] });
-        // Half available troops
-        moves.push({
-          move: "garrisonTroops",
-          args: [[
-            Math.ceil(avail.regiments / 2),
-            Math.ceil(avail.levies / 2),
-            Math.ceil(avail.elites / 2),
-          ]],
-        });
-        // Garrison none
-        moves.push({ move: "garrisonTroops", args: [[0, 0, 0]] });
-      } else if (isStage(G, "resolution", "relocate_loser")) {
-        const battleState = G.battleState;
-        if (battleState) {
-          const defeatedPlayerID =
-            battleState.attacker.id === playerID
-              ? battleState.defender.id
-              : battleState.attacker.id;
-          for (const tile of G.validRelocationTiles) {
-            moves.push({ move: "relocateDefeatedFleet", args: [tile, defeatedPlayerID] });
-          }
-          // Fallback: if no valid tiles, retreat home
-          if (G.validRelocationTiles.length === 0) {
-            moves.push({ move: "relocateDefeatedFleet", args: [[4, 0], defeatedPlayerID] });
-          }
-        }
-      } else if (isStage(G, "resolution", "conquest_draw_or_pick")) {
-        const cards = G.playerInfo[playerID].resources.fortuneCards;
-        for (let i = 0; i < cards.length; i++) {
-          moves.push({ move: "pickCard", args: [i] });
-        }
-      } else {
-        moves.push({ move: "doNotGroundAttack", args: [] });
-      }
-
-      return moves;
-    }
-
-    case "conquest": {
-      if (isStage(G, "resolution", "conquest_draw_or_pick")) {
-        const moves: AIMove[] = [];
-        const cards = G.playerInfo[playerID].resources.fortuneCards;
-        for (let i = 0; i < cards.length; i++) {
-          moves.push({ move: "pickCardConquest", args: [i] });
-        }
-        moves.push({ move: "drawCardConquest", args: [] });
         return moves;
-      }
-
-      if (isStage(G, "resolution", "conquest_garrison")) {
-        const avail = G.troopsAvailableForGarrison;
-        return [
-          { move: "garrisonTroops", args: [[avail.regiments, avail.levies, avail.elites]] },
-          {
-            move: "garrisonTroops",
-            args: [[
-              Math.ceil(avail.regiments / 2),
-              Math.ceil(avail.levies / 2),
-              Math.ceil(avail.elites / 2),
-            ]],
-          },
-          { move: "garrisonTroops", args: [[0, 0, 0]] },
-        ];
-      }
-
-      const moves: AIMove[] = [{ move: "doNothing", args: [] }];
-      moves.push({ move: "coloniseLand", args: [] });
-
-      const player = G.playerInfo[playerID];
-      for (const fleet of player.fleetInfo) {
-        const isAtHome =
-          fleet.location[0] === KINGDOM_LOCATION[0] &&
-          fleet.location[1] === KINGDOM_LOCATION[1];
-        if (!isAtHome && fleet.skyships > 0) {
-          moves.push({ move: "constructOutpost", args: [fleet.location] });
-        }
-      }
-
-      return moves;
-    }
-
-    case "election": {
-      return ctx.playOrder.map((targetID) => ({
-        move: "vote",
-        args: [targetID],
-      }));
-    }
-
-    case "resolution": {
-      const moves: AIMove[] = [];
-
-      if (isStage(G, "resolution", "retrieve_fleets")) {
+      } else if (isStage(G, "resolution", "retrieve_fleets")) {
         const fleets = G.playerInfo[playerID].fleetInfo;
         const deployedIndices: number[] = [];
         for (let i = 0; i < fleets.length; i++) {
