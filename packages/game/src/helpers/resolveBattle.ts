@@ -269,7 +269,7 @@ export const resolveBattleAndReturnWinner = (
 
   let defenderSwordValue = baseDefenderSword;
   let defenderShieldValue = baseDefenderShield;
-  if (ctx.phase === "ground_battle") {
+  if (G.stage.sub === "ground_resolve") {
     const currentBuilding = G.mapState.buildings[y][x];
     defenderSwordValue += (currentBuilding.garrisonedRegiments ?? 0) * 2;
     defenderSwordValue += currentBuilding.garrisonedLevies ?? 0;
@@ -294,7 +294,7 @@ export const resolveBattleAndReturnWinner = (
 
   const attackerName = G.playerInfo[attackerID].kingdomName;
   const defenderName = G.playerInfo[defenderID].kingdomName;
-  const battleType = ctx.phase === "ground_battle" ? "Ground battle" : "Aerial battle";
+  const battleType = G.stage.sub === "ground_resolve" ? "Ground battle" : "Aerial battle";
   logEvent(G, `${battleType}: ${attackerName} (${attackerSwordValue}S/${attackerShieldValue}Sh) vs ${defenderName} (${defenderSwordValue}S/${defenderShieldValue}Sh)`);
 
   const { hitsOnAttacker: attackerLosses, hitsOnDefender: defenderLosses } = calculateCombat(
@@ -305,15 +305,15 @@ export const resolveBattleAndReturnWinner = (
   // --- Snapshot unit counts before losses (for loss reporting) ---
   const attackerSnap = snapshotFleets(attackerFleets);
   const defenderFleetSnap = snapshotFleets(defenderFleets);
-  const garrisonSnapLevies = ctx.phase === "ground_battle" ? (G.mapState.buildings[y][x].garrisonedLevies ?? 0) : 0;
-  const garrisonSnapRegiments = ctx.phase === "ground_battle" ? (G.mapState.buildings[y][x].garrisonedRegiments ?? 0) : 0;
-  const garrisonSnapElite = ctx.phase === "ground_battle" ? (G.mapState.buildings[y][x].garrisonedEliteRegiments ?? 0) : 0;
+  const garrisonSnapLevies = G.stage.sub === "ground_resolve" ? (G.mapState.buildings[y][x].garrisonedLevies ?? 0) : 0;
+  const garrisonSnapRegiments = G.stage.sub === "ground_resolve" ? (G.mapState.buildings[y][x].garrisonedRegiments ?? 0) : 0;
+  const garrisonSnapElite = G.stage.sub === "ground_resolve" ? (G.mapState.buildings[y][x].garrisonedEliteRegiments ?? 0) : 0;
 
   // --- Apply losses ---
   // GAP-22: odd-hit rule applies to aerial/ground fleet combats
   applyFleetLosses(attackerFleets, attackerLosses, true);
 
-  if (ctx.phase === "ground_battle") {
+  if (G.stage.sub === "ground_resolve") {
     const currentBuilding = G.mapState.buildings[y][x];
     let defenderLossesCopy = defenderLosses;
     // GAP-22: odd hit rule for garrison defender — at least 1 Levy must absorb if hits are odd
@@ -354,7 +354,7 @@ export const resolveBattleAndReturnWinner = (
       skyships: attackerSnap.skyships - attackerAfter.skyships,
     });
 
-    if (ctx.phase === "ground_battle") {
+    if (G.stage.sub === "ground_resolve") {
       const currentBuilding = G.mapState.buildings[y][x];
       const defenderAfter = snapshotFleets(defenderFleets);
       defenderLossDetail = formatLosses({
@@ -391,7 +391,7 @@ export const resolveBattleAndReturnWinner = (
   );
 
   let remainingDefenders = 0;
-  if (ctx.phase === "ground_battle") {
+  if (G.stage.sub === "ground_resolve") {
     const currentBuilding = G.mapState.buildings[y][x];
     remainingDefenders +=
       (currentBuilding.garrisonedLevies ?? 0) +
@@ -414,7 +414,7 @@ export const resolveBattleAndReturnWinner = (
   } else if (remainingAttackers === 0 && remainingDefenders === 0) {
     winner = "total annihilation";
   }
-  if (remainingDefenders > 0 && ctx.phase === "ground_battle") {
+  if (remainingDefenders > 0 && G.stage.sub === "ground_resolve") {
     winner = G.battleState?.defender.id;
   }
   if (winner !== "total annihilation" && winner) {
@@ -458,7 +458,7 @@ export const resolveBattleAndReturnWinner = (
 
     if (remainingAttackers === 0 || remainingDefenders === 0) {
       if (
-        ctx.phase === "ground_battle" &&
+        G.stage.sub === "ground_resolve" &&
         remainingDefenders === 0 &&
         remainingAttackers > 0
       ) {
@@ -474,7 +474,7 @@ export const resolveBattleAndReturnWinner = (
         );
       }
     } else {
-      if (ctx.phase === "ground_battle") {
+      if (G.stage.sub === "ground_resolve") {
         findNextGroundBattle(G, events);
       } else {
         // Pre-compute valid relocation tiles for the frontend
@@ -498,7 +498,7 @@ export const resolveBattleAndReturnWinner = (
           // No valid relocation destinations — skip relocate stage, advance battle
           findNextPlayerInBattleSequence(winner, ctx, G, events);
         } else {
-          setStage(G, "resolution", "aerial_relocate");
+          setStage(G, "resolution", "relocate_loser");
           events.endTurn({ next: winner });
         }
       }
@@ -520,7 +520,7 @@ export const resolveBattleAndReturnWinner = (
       winner: winner === "total annihilation" ? "Total annihilation" : "Draw",
       outcome: winner === "total annihilation" ? "Both sides destroyed" : "Stalemate",
     };
-    if (ctx.phase === "ground_battle") {
+    if (G.stage.sub === "ground_resolve") {
       const currentBuilding = G.mapState.buildings[y][x];
       currentBuilding.player = undefined;
       findNextGroundBattle(G, events);

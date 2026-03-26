@@ -28,7 +28,7 @@ export class AerialBattleStrategy implements PhaseStrategy {
       case "conquest_draw_or_pick":
         return this.pickFoWCard(G, playerID, moves);
 
-      case "aerial_relocate":
+      case "relocate_loser":
         return this.relocate(G, playerID, moves);
 
       default:

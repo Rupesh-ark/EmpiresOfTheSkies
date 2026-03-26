@@ -98,7 +98,7 @@ describe("evadeAttackingFleet — defender chooses to evade", () => {
     const G = buildEvasionG();
     const ctx = buildCtxWithPhase("1");
     evadeAttackingFleet.fn({ G, ctx, playerID: "1", events: stubEvents, random: buildRandom() });
-    expect(G.stage).toEqual({ phase: "resolution", sub: "aerial_relocate" });
+    expect(G.stage).toEqual({ phase: "resolution", sub: "relocate_loser" });
   });
 });
 

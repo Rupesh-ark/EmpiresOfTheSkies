@@ -242,7 +242,7 @@ describe("aerial: defender evades → stage becomes 'relocate loser'", () => {
     );
 
     expect(G.battleState?.defender.decision).toBe("evade");
-    expect(G.stage).toEqual({ phase: "resolution", sub: "aerial_relocate" });
+    expect(G.stage).toEqual({ phase: "resolution", sub: "relocate_loser" });
   });
 
   it("evade calls endTurn with next=attacker (attacker directs relocation)", () => {

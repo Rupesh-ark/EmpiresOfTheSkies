@@ -33,9 +33,10 @@ export type GameStage =
   | { phase: "actions";    sub: "default" | "confirm_fow_draw" | "discard_fow" }
   | { phase: "resolution"; sub:
       | "rebellion" | "rebellion_rival_support"
-      | "aerial_attack_or_pass" | "aerial_attack_or_evade" | "aerial_resolve" | "aerial_relocate"
+      | "aerial_attack_or_pass" | "aerial_attack_or_evade" | "aerial_resolve"
       | "plunder_legends"
-      | "ground_attack_or_pass" | "ground_defend_or_yield" | "ground_resolve" | "ground_garrison" | "ground_relocate"
+      | "ground_attack_or_pass" | "ground_defend_or_yield" | "ground_resolve" | "ground_garrison"
+      | "relocate_loser"
       | "conquest" | "conquest_draw_or_pick" | "conquest_garrison"
       | "election"
       | "infidel_fleet_combat" | "deferred_battle"

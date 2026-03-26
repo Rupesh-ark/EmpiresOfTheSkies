@@ -34,7 +34,7 @@ const evadeAttackingFleet: MoveDefinition = {
         forceRetrieveFleets(G, playerID, bx, by);
         findNextPlayerInBattleSequence(attackerID, ctx, G, events);
       } else {
-        setStage(G, "resolution", "aerial_relocate");
+        setStage(G, "resolution", "relocate_loser");
         events.endTurn({ next: attackerID });
       }
     }

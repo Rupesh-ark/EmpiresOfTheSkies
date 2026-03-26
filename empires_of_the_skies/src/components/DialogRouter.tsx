@@ -74,7 +74,7 @@ export const DialogRouter = memo((props: MyGameProps) => {
       {/* DrawOrPickCardDialog manages its own open state internally */}
       <DrawOrPickCardDialog {...props} />
 
-      {(sub === "aerial_relocate" || sub === "ground_relocate") && (
+      {sub === "relocate_loser" && (
         <RelocateLoserDialog {...props} />
       )}
 

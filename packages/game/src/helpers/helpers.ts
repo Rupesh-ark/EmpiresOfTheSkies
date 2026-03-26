@@ -234,7 +234,12 @@ export const checkIfCurrentPlayerIsInCurrentBattle = (
     // Uses ctx.phase to disambiguate shared G.stage values, and
     // G.battleState to identify attacker/defender/victor.
     const bs = G.battleState;
-    if (bs && (ctx.phase === "aerial_battle" || ctx.phase === "ground_battle")) {
+    const sub = G.stage.sub;
+    const isBattleStage = sub === "aerial_attack_or_pass" || sub === "aerial_attack_or_evade"
+      || sub === "aerial_resolve" || sub === "ground_attack_or_pass"
+      || sub === "ground_defend_or_yield" || sub === "ground_resolve"
+      || sub === "ground_garrison" || sub === "relocate_loser";
+    if (bs && isBattleStage) {
       let target: string | undefined;
 
       switch (G.stage.sub) {
@@ -255,8 +260,7 @@ export const checkIfCurrentPlayerIsInCurrentBattle = (
           else if (!bs.defender?.fowCard) target = bs.defender?.id;
           break;
 
-        case "aerial_relocate":
-        case "ground_relocate":
+        case "relocate_loser":
           // After evasion: attacker relocates the evader
           // After battle: victor relocates the loser
           if (bs.defender?.decision === "evade") {

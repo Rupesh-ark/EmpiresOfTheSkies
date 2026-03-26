@@ -542,7 +542,7 @@ export function enumerateLegalMoves(G: MyGameState, ctx: Ctx, playerID: string):
           }
           moves.push({ move: "drawCard", args: [] });
         }
-      } else if (isStage(G, "resolution", "aerial_relocate")) {
+      } else if (isStage(G, "resolution", "relocate_loser")) {
         const battleState = G.battleState;
         if (battleState) {
           // Only the winner relocates the loser
@@ -630,7 +630,7 @@ export function enumerateLegalMoves(G: MyGameState, ctx: Ctx, playerID: string):
         });
         // Garrison none
         moves.push({ move: "garrisonTroops", args: [[0, 0, 0]] });
-      } else if (isStage(G, "resolution", "ground_relocate")) {
+      } else if (isStage(G, "resolution", "relocate_loser")) {
         const battleState = G.battleState;
         if (battleState) {
           const defeatedPlayerID =

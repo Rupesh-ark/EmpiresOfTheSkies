@@ -73,7 +73,7 @@ import vote from "./moves/election/vote";
 import retrieveFleets from "./moves/resolution/retrieveFleets";
 
 
-import { findNextBattle, findNextGroundBattle, findNextPlunder } from "./helpers/findNext";
+// findNext functions now called via resolutionFlow walker
 import { TurnOrder } from "boardgame.io/core";
 import resolveRound from "./helpers/resolveRound";
 import pickLegacyCard from "./moves/pickLegacyCard";
@@ -82,8 +82,8 @@ import chooseEventCard from "./moves/events/chooseEventCard";
 import resolveEventChoice from "./moves/events/resolveEventChoice";
 import immediateElectionVote from "./moves/events/immediateElectionVote";
 import { ALL_EVENT_CARD_NAMES } from "./helpers/eventCardDefinitions";
-import { prepareInfidelFleetCombat } from "./helpers/resolveInfidelFleet";
-import { continueResolution, getResolutionTarget } from "./helpers/resolutionFlow";
+// prepareInfidelFleetCombat now called via resolutionFlow walker
+import { beginResolution, getResolutionTarget } from "./helpers/resolutionFlow";
 import respondToInfidelFleet from "./moves/events/respondToInfidelFleet";
 import commitRebellionTroops from "./moves/events/commitRebellionTroops";
 import contributeToRebellion from "./moves/events/contributeToRebellion";
@@ -628,149 +628,29 @@ const MyGame: Game<MyGameState> = {
           playerInfo.passed = false;
         });
       },
-      next: "aerial_battle",
-    },
-    aerial_battle: {
-      onBegin: (context) => {
-        if (context.G._halted) return;
-        if (checkLoopGuard(context, "aerial_battle")) return;
-        phaseLog.info("aerial_battle", { round: context.G.round });
-        findNextBattle(context.G, context.events);
-      },
-      turn: {
-        onBegin: (context) => {
-          checkIfCurrentPlayerIsInCurrentBattle(
-            context.G,
-            context.ctx,
-            context.events
-          );
-        },
-      },
-      next: "plunder_legends",
-      moves: {
-        doNotAttack: wrapMove("doNotAttack", doNotAttack),
-        attackOtherPlayersFleet: wrapMove("attackOtherPlayersFleet", attackOtherPlayersFleet),
-        retaliate: wrapMove("retaliate", retaliate),
-        evadeAttackingFleet: wrapMove("evadeAttackingFleet", evadeAttackingFleet),
-        drawCard: wrapMove("drawCard", drawCard),
-        pickCard: wrapMove("pickCard", pickCard),
-        relocateDefeatedFleet: wrapMove("relocateDefeatedFleet", relocateDefeatedFleet),
-          },
-    },
-    ground_battle: {
-      onBegin: (context) => {
-        if (context.G._halted) return;
-        if (checkLoopGuard(context, "ground_battle")) return;
-        phaseLog.info("ground_battle", { round: context.G.round });
-        findNextGroundBattle(context.G, context.events);
-      },
-      turn: {
-        onBegin: (context) => {
-          checkIfCurrentPlayerIsInCurrentBattle(
-            context.G,
-            context.ctx,
-            context.events
-          );
-        },
-      },
-      next: "conquest",
-      moves: {
-        attackPlayersBuilding: wrapMove("attackPlayersBuilding", attackPlayersBuilding),
-        doNotGroundAttack: wrapMove("doNotGroundAttack", doNotGroundAttack),
-        defendGroundAttack: wrapMove("defendGroundAttack", defendGroundAttack),
-        garrisonTroops: wrapMove("garrisonTroops", garrisonTroops),
-        yieldToAttacker: wrapMove("yieldToAttacker", yieldToAttacker),
-        drawCard: wrapMove("drawCard", drawCard),
-        pickCard: wrapMove("pickCard", pickCard),
-          },
-    },
-    plunder_legends: {
-      onBegin: (context) => {
-        if (checkLoopGuard(context, "plunder_legends")) return;
-        phaseLog.info("plunder_legends", { round: context.G.round });
-        setStage(context.G, "resolution", "plunder_legends");
-        findNextPlunder(context.G, context.events);
-      },
-      moves: {
-        plunder: wrapMove("plunder", plunder),
-        doNotPlunder: wrapMove("doNotPlunder", doNotPlunder),
-          },
-      next: "ground_battle",
-      turn: {
-        onBegin: (context) => {
-          checkIfCurrentPlayerIsInCurrentBattle(
-            context.G,
-            context.ctx,
-            context.events
-          );
-        },
-      },
-    },
-    conquest: {
-      onBegin: (context) => {
-        if (checkLoopGuard(context, "conquest")) return;
-        phaseLog.info("conquest", { round: context.G.round });
-        setStage(context.G, "resolution", "conquest");
-      },
-      turn: {
-        onBegin: (context) => {
-          checkIfCurrentPlayerIsInCurrentBattle(
-            context.G,
-            context.ctx,
-            context.events
-          );
-        },
-      },
-      moves: {
-        coloniseLand: wrapMove("coloniseLand", coloniseLand),
-        constructOutpost: wrapMove("constructOutpost", constructOutpost),
-        doNothing: wrapMove("doNothing", doNothing),
-        drawCardConquest: wrapMove("drawCardConquest", drawCardConquest),
-        pickCardConquest: wrapMove("pickCardConquest", pickCardConquest),
-        garrisonTroops: wrapMove("garrisonTroops", garrisonTroops),
-          },
-      next: "election",
-    },
-    election: {
-      turn: {
-        activePlayers: { all: "voting", moveLimit: 1 },
-        stages: {
-          voting: {
-            moves: { vote: wrapMove("vote", vote) },
-          },
-        },
-      },
-      onBegin: (context) => {
-        if (checkLoopGuard(context, "election")) return;
-        phaseLog.info("election", { round: context.G.round });
-        context.G.electionResults = {};
-        context.G.hasVoted = [];
-        context.G.voteSubmitted = {};
-      },
       next: "resolution",
     },
     resolution: {
       turn: {
         order: TurnOrder.CUSTOM_FROM("turnOrder"),
         onBegin: (context) => {
-          // Stage/phase desync guard: if G.stage was advanced past this phase
-          // (because phase.onBegin's endPhase was discarded), skip to next phase.
-          if (context.G.stage.phase !== "resolution") {
-            context.events.endPhase();
-            return;
-          }
+          if (context.G._halted) return;
 
-          // Redirect turn to the correct player for the current stage.
-          // Phase onBegin sets up G.stage but cannot call endTurn (boardgame.io
-          // silently discards it — see docs/BOARDGAMEIO_ENDTURN_ONBEGIN.md).
-          // This hook runs AFTER the turn is initialized, so endTurn works here.
+          // Redirect turn to the correct player for the current stage
           const target = getResolutionTarget(context.G);
           if (target && target !== context.ctx.currentPlayer) {
             context.events.endTurn({ next: target });
             return;
           }
 
-          // Auto-skip players with no retrievable fleets during retrieve fleets stage
+          // Battle sub-stage routing
+          checkIfCurrentPlayerIsInCurrentBattle(
+            context.G,
+            context.ctx,
+            context.events
+          );
+
+          // Auto-skip players with no retrievable fleets
           if (!isStage(context.G, "resolution", "retrieve_fleets")) return;
           const playerID = context.ctx.currentPlayer;
           const player = context.G.playerInfo[playerID];
@@ -788,25 +668,42 @@ const MyGame: Game<MyGameState> = {
         },
       },
       onBegin: (context) => {
+        if (context.G._halted) return;
         if (checkLoopGuard(context, "resolution")) return;
         phaseLog.info("resolution", { round: context.G.round });
-        // Step 1: Infidel Fleet targeting + movement
-        const hasCombat = prepareInfidelFleetCombat(context.G);
-
-        if (hasCombat) {
-          // State setup only — turn.onBegin handles the endTurn redirect
-          setStage(context.G, "resolution", "infidel_fleet_combat");
-        } else {
-          // No Fleet combat — set up deferred events, rebellions, invasion
-          // skipEndTurn=true: endTurn is discarded in phase onBegin (boardgame.io bug)
-          // turn.onBegin will redirect via getResolutionTarget()
-          continueResolution(context.G, context.events, true);
-        }
+        // Walk the full resolution sequence: aerial → plunder → ground → conquest → election → post-election → retrieve
+        beginResolution(context.G, context.events, true);
       },
       onEnd: (context) => {
         resolveRound(context.G, context.events, context.random);
       },
       moves: {
+        // Aerial battle
+        doNotAttack: wrapMove("doNotAttack", doNotAttack),
+        attackOtherPlayersFleet: wrapMove("attackOtherPlayersFleet", attackOtherPlayersFleet),
+        retaliate: wrapMove("retaliate", retaliate),
+        evadeAttackingFleet: wrapMove("evadeAttackingFleet", evadeAttackingFleet),
+        drawCard: wrapMove("drawCard", drawCard),
+        pickCard: wrapMove("pickCard", pickCard),
+        relocateDefeatedFleet: wrapMove("relocateDefeatedFleet", relocateDefeatedFleet),
+        // Plunder
+        plunder: wrapMove("plunder", plunder),
+        doNotPlunder: wrapMove("doNotPlunder", doNotPlunder),
+        // Ground battle
+        attackPlayersBuilding: wrapMove("attackPlayersBuilding", attackPlayersBuilding),
+        doNotGroundAttack: wrapMove("doNotGroundAttack", doNotGroundAttack),
+        defendGroundAttack: wrapMove("defendGroundAttack", defendGroundAttack),
+        yieldToAttacker: wrapMove("yieldToAttacker", yieldToAttacker),
+        // Conquest
+        coloniseLand: wrapMove("coloniseLand", coloniseLand),
+        constructOutpost: wrapMove("constructOutpost", constructOutpost),
+        doNothing: wrapMove("doNothing", doNothing),
+        drawCardConquest: wrapMove("drawCardConquest", drawCardConquest),
+        pickCardConquest: wrapMove("pickCardConquest", pickCardConquest),
+        garrisonTroops: wrapMove("garrisonTroops", garrisonTroops),
+        // Election
+        vote: wrapMove("vote", vote),
+        // Post-election resolution
         pass: wrapMove("pass", pass),
         retrieveFleets: wrapMove("retrieveFleets", retrieveFleets),
         commitRebellionTroops: wrapMove("commitRebellionTroops", commitRebellionTroops),
@@ -816,7 +713,7 @@ const MyGame: Game<MyGameState> = {
         respondToInfidelFleet: wrapMove("respondToInfidelFleet", respondToInfidelFleet),
         offerBuyoffGold: wrapMove("offerBuyoffGold", offerBuyoffGold),
         commitDeferredBattleCard: wrapMove("commitDeferredBattleCard", commitDeferredBattleCard),
-          },
+      },
       next: "reset",
     },
     reset: {
