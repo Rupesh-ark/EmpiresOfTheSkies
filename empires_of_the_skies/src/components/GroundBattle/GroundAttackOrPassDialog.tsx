@@ -16,7 +16,7 @@ const GroundAttackOrPassDialog = (props: MyGameProps) => {
     props.ctx.phase === "ground_battle" &&
     inCurrentBattle &&
     props.G.battleState === undefined &&
-    props.G.stage === "attack or pass";
+    props.G.stage.sub === "ground_attack_or_pass";
 
   return (
     <DialogShell

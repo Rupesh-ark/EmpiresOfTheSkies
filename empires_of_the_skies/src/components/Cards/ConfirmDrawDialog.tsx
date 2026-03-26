@@ -4,7 +4,7 @@ import { DialogShell } from "@/components/atoms/DialogShell";
 import { clearMoves } from "@/utils/gameHelpers";
 
 const ConfirmDrawDialog = (props: MyGameProps) => {
-  const isOpen = props.G.stage === "confirm_fow_draw" && props.ctx.currentPlayer === props.playerID;
+  const isOpen = props.G.stage.sub === "confirm_fow_draw" && props.ctx.currentPlayer === props.playerID;
 
   return (
     <DialogShell

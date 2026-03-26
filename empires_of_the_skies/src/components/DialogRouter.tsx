@@ -32,39 +32,39 @@ import GameOverView from "./GameOverView";
 /**
  * DialogRouter
  *
- * Renders all game-phase dialogs in one place, keyed off G.stage and ctx.phase.
- * Previously these 22+ conditional blocks lived inline in ActionBoardsAndMap.tsx.
- * Moving them here keeps ActionBoardsAndMap focused on layout while this component
- * owns the dialog routing logic.
+ * Renders all game-phase dialogs in one place, keyed off G.stage.phase and G.stage.sub.
+ * The discriminated union on G.stage makes every sub-stage unique — no ctx.phase needed.
  *
  * Rule: do NOT add layout, tabs, or non-dialog UI here.
  * Rule: do NOT modify the individual dialog components — only their mount conditions.
  */
 export const DialogRouter = memo((props: MyGameProps) => {
+  const { sub } = props.G.stage;
+
   return (
     <>
       <RoundSummaryDialog {...props} />
 
-      {props.ctx.phase === "kingdom_advantage" && (
+      {props.G.stage.sub === "kingdom_advantage" && (
         <PickKingdomAdvantageCardDialog {...props} />
       )}
 
-      {props.G.stage === "events" && (
+      {props.G.stage.phase === "events" && props.G.stage.sub === "default" && (
         <>
           <PickEventCardDialog {...props} />
           <EventChoiceDialog {...props} />
         </>
       )}
 
-      {props.G.stage === "pick legacy card" && (
+      {sub === "legacy_card" && (
         <PickLegacyCardDialog {...props} />
       )}
 
-      {props.G.stage === "attack or pass" && props.ctx.phase === "aerial_battle" && (
+      {sub === "aerial_attack_or_pass" && (
         <AttackOrPassDiaLog {...props} />
       )}
 
-      {props.G.stage === "attack or evade" && (
+      {sub === "aerial_attack_or_evade" && (
         <AttackOrEvadeDialog {...props} />
       )}
 
@@ -74,69 +74,69 @@ export const DialogRouter = memo((props: MyGameProps) => {
       {/* DrawOrPickCardDialog manages its own open state internally */}
       <DrawOrPickCardDialog {...props} />
 
-      {props.G.stage === "relocate loser" && (
+      {(sub === "aerial_relocate" || sub === "ground_relocate") && (
         <RelocateLoserDialog {...props} />
       )}
 
-      {props.G.stage === "plunder legends" && (
+      {sub === "plunder_legends" && (
         <PlunderLegendsDialog {...props} />
       )}
 
-      {props.G.stage === "attack or pass" && props.ctx.phase === "ground_battle" && (
+      {sub === "ground_attack_or_pass" && (
         <GroundAttackOrPassDialog {...props} />
       )}
 
-      {props.G.stage === "defend or yield" && (
+      {sub === "ground_defend_or_yield" && (
         <DefendOrYieldDialog {...props} />
       )}
 
-      {props.G.stage === "garrison troops" && (
+      {(sub === "ground_garrison" || sub === "conquest_garrison") && (
         <GarrisonTroopsDialog {...props} />
       )}
 
-      {props.G.stage === "conquest" && (
+      {sub === "conquest" && (
         <OutpostOrColonyDialog {...props} />
       )}
 
-      {props.G.stage === "infidel_fleet_combat" && (
+      {sub === "infidel_fleet_combat" && (
         <InfidelFleetCombatDialog {...props} />
       )}
 
-      {props.G.stage === "deferred_battle" && (
+      {sub === "deferred_battle" && (
         <DeferredBattleDialog {...props} />
       )}
 
-      {props.G.stage === "rebellion" && (
+      {sub === "rebellion" && (
         <RebellionDialog {...props} />
       )}
 
-      {props.G.stage === "rebellion_rival_support" && (
+      {sub === "rebellion_rival_support" && (
         <RebellionRivalSupportDialog {...props} />
       )}
 
-      {props.G.stage === "invasion_nominate" && (
+      {sub === "invasion_nominate" && (
         <InvasionNominateDialog {...props} />
       )}
 
-      {props.G.stage === "invasion_contribute" && (
+      {sub === "invasion_contribute" && (
         <InvasionContributeDialog {...props} />
       )}
 
-      {props.G.stage === "invasion_buyoff" && (
+      {sub === "invasion_buyoff" && (
         <InvasionBuyoffDialog {...props} />
       )}
 
-      {props.G.stage === "retrieve fleets" && (
+      {sub === "retrieve_fleets" && (
         <RetrieveFleetsDialog {...props} />
       )}
 
-      {props.ctx.phase === "election" && <ElectionDialog {...props} />}
+      {sub === "election" && <ElectionDialog {...props} />}
 
-      {props.G.stage === "immediate_election" && <ElectionDialog {...props} immediate />}
+      {sub === "immediate_election" && <ElectionDialog {...props} immediate />}
 
-      {props.G.stage === "confirm_fow_draw" && <ConfirmDrawDialog {...props} />}
+      {sub === "confirm_fow_draw" && <ConfirmDrawDialog {...props} />}
 
-      {props.G.stage === "discard_fow" && <DiscardFoWCardDialog {...props} />}
+      {sub === "discard_fow" && <DiscardFoWCardDialog {...props} />}
 
       <GameOverView {...props} />
     </>

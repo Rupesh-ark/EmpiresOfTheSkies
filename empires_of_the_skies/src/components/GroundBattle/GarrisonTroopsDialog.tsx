@@ -198,7 +198,7 @@ const GarrisonTroopsDialog = (props: MyGameProps) => {
 
   // Auto-skip if no troops to garrison
   if (
-    props.G.stage === "garrison troops" &&
+    (props.G.stage.sub === "ground_garrison" || props.G.stage.sub === "conquest_garrison") &&
     props.ctx.currentPlayer === props.playerID &&
     !(
       props.ctx.phase === "ground_battle" &&
@@ -278,7 +278,7 @@ const GarrisonTroopsDialog = (props: MyGameProps) => {
 
   const isOpen =
     props.ctx.currentPlayer === props.playerID &&
-    props.G.stage === "garrison troops" &&
+    (props.G.stage.sub === "ground_garrison" || props.G.stage.sub === "conquest_garrison") &&
     ((props.ctx.phase === "ground_battle" &&
       inCurrentBattle &&
       props.G.battleState?.attacker.id === props.playerID &&

@@ -15,7 +15,7 @@ const ElectionDialog = (props: ElectionDialogProps) => {
   const { immediate = false } = props;
 
   const isVoting = immediate
-    ? props.G.stage === "immediate_election" &&
+    ? props.G.stage.sub === "immediate_election" &&
       props.playerID != null &&
       props.ctx.currentPlayer === props.playerID &&
       !props.G.hasVoted.includes(props.playerID)

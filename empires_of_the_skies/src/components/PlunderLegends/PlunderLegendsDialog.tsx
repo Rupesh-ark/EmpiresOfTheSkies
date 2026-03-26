@@ -11,8 +11,7 @@ const PlunderLegendsDialog = (props: MyGameProps) => {
       open={
         open &&
         props.playerID === props.ctx.currentPlayer &&
-        props.G.stage === "plunder legends" &&
-        props.ctx.phase === "plunder_legends"
+        props.G.stage.sub === "plunder_legends"
       }
       title="Would you like to plunder this legend?"
       mood="discovery"
