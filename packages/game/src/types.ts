@@ -202,7 +202,7 @@ export type GoodsPriceMarkers = {
 export type MapBuildingInfo = {
   player?: PlayerInfo;
   buildings?: "outpost" | "colony";
-  fort: boolean;
+  fort: string[];
   garrisonedRegiments: number;
   garrisonedLevies: number;
   garrisonedEliteRegiments: number;

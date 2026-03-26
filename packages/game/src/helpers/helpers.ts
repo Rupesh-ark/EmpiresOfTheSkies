@@ -170,8 +170,8 @@ export const hasFortAt = (
   playerID?: string
 ): boolean => {
   const tile = G.mapState.buildings[y]?.[x];
-  if (!tile?.fort) return false;
-  if (playerID && tile.player?.id !== playerID) return false;
+  if (!tile?.fort?.length) return false;
+  if (playerID) return tile.fort.includes(playerID);
   return true;
 };
 

@@ -274,7 +274,7 @@ export const resolveBattleAndReturnWinner = (
     defenderSwordValue += (currentBuilding.garrisonedRegiments ?? 0) * 2;
     defenderSwordValue += currentBuilding.garrisonedLevies ?? 0;
     defenderSwordValue += (currentBuilding.garrisonedEliteRegiments ?? 0) * 3;
-    if (currentBuilding.fort) {
+    if (currentBuilding.fort.length > 0) {
       defenderShieldValue +=
         (currentBuilding.garrisonedRegiments ?? 0) +
         (currentBuilding.garrisonedLevies ?? 0) +
@@ -684,7 +684,7 @@ export const resolveConquest = (
     }
 
     currentBuilding.player = undefined;
-    currentBuilding.fort = false;
+    currentBuilding.fort = [];
     currentBuilding.garrisonedLevies = 0;
     currentBuilding.garrisonedRegiments = 0;
     currentBuilding.garrisonedEliteRegiments = 0;

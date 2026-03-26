@@ -44,7 +44,7 @@ export const getInitialOutpostsAndColoniesInfo = (): MapBuildingInfo[][] => {
     garrisonedLevies: 0,
     garrisonedRegiments: 0,
     garrisonedEliteRegiments: 0,
-    fort: false,
+    fort: [],
   };
   const emptyRow: MapBuildingInfo[] = Array(8).fill(emptyBuilding);
   return [

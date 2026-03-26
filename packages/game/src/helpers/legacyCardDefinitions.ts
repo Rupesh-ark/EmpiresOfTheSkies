@@ -43,7 +43,7 @@ export const CARD_RESOLVERS: Record<LegacyCardName, CardResolver> = {
     let vp = (player.cathedrals + player.palaces + player.shipyards) * 2;
     G.mapState.buildings.forEach((row) =>
       row.forEach((tile) => {
-        if (tile.fort && tile.player?.id === player.id) vp += 2;
+        if (tile.fort.includes(player.id)) vp += 2;
       })
     );
     return vp;
@@ -91,7 +91,7 @@ export const CARD_RESOLVERS: Record<LegacyCardName, CardResolver> = {
       G.mapState.buildings.forEach((row) =>
         row.forEach((tile) => {
           if (tile.player?.id !== p.id) return;
-          if (type === "fort" ? tile.fort : tile.buildings === type) n++;
+          if (type === "fort" ? tile.fort.includes(p.id) : tile.buildings === type) n++;
         })
       );
       return n;
@@ -137,7 +137,7 @@ export const CARD_RESOLVERS: Record<LegacyCardName, CardResolver> = {
     let vp = 0;
     G.mapState.buildings.forEach((row) =>
       row.forEach((tile) => {
-        if (tile.fort && tile.player?.id === player.id) vp += 1;
+        if (tile.fort.includes(player.id)) vp += 1;
       })
     );
     let totalRegiments = player.resources.regiments;

@@ -38,7 +38,7 @@ export class ConquestStrategy implements PhaseStrategy {
         if (cell.player?.id !== playerID) return;
         if (cell.buildings !== "outpost") return;
         const hasDefense =
-          (cell.garrisonedRegiments ?? 0) + (cell.garrisonedLevies ?? 0) > 0 || cell.fort;
+          (cell.garrisonedRegiments ?? 0) + (cell.garrisonedLevies ?? 0) > 0 || cell.fort.length > 0;
         if (!hasDefense) undefendedOutposts++;
       })
     );

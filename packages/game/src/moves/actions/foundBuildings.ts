@@ -67,7 +67,7 @@ const validateFoundBuildings = (
               f.location[1] === y &&
               (f.regiments > 0 || f.levies > 0)
           );
-        return hasBuilding && !tile.fort && hasTroops;
+        return hasBuilding && !(tile.fort ?? []).includes(playerID) && hasTroops;
       })
     );
     if (!hasValidTile) {
@@ -208,7 +208,7 @@ const foundFort = (
         G.playerInfo[playerID].fleetInfo.some(
           (f) => f.location[0] === x && f.location[1] === y && (f.regiments > 0 || f.levies > 0)
         );
-      if (hasBuilding && !tile.fort && hasTroops) {
+      if (hasBuilding && !(tile.fort ?? []).includes(playerID) && hasTroops) {
         locations.push([x, y]);
       }
     });

@@ -59,7 +59,7 @@ const resolveFaerieUprising = (
   } else {
     tile.buildings = undefined;
     tile.player = undefined;
-    tile.fort = false;
+    tile.fort = [];
     tile.garrisonedRegiments = 0;
     tile.garrisonedLevies = 0;
     logEvent(G, `${kingdom} loses the colony at ${land.name}!`);
@@ -130,7 +130,7 @@ const resolveHeadstrongCommander = (
   } else {
     tile.buildings = undefined;
     tile.player = undefined;
-    tile.fort = false;
+    tile.fort = [];
     tile.garrisonedRegiments = 0;
     tile.garrisonedLevies = 0;
     logEvent(G, `Conquest fails! ${kingdom} loses the outpost at ${land.name}`);

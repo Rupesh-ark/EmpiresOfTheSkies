@@ -558,7 +558,7 @@ function setupMapTile(
   while (G.mapState.buildings.length <= y) G.mapState.buildings.push([]);
   while (G.mapState.buildings[y].length <= x)
     G.mapState.buildings[y].push({
-      fort: false,
+      fort: [],
       garrisonedRegiments: 0,
       garrisonedLevies: 0,
       garrisonedEliteRegiments: 0,
@@ -576,7 +576,7 @@ function setupMapTile(
   G.mapState.buildings[y][x] = {
     player: G.playerInfo["0"],
     buildings: "colony",
-    fort: false,
+    fort: [],
     garrisonedRegiments: 2,
     garrisonedLevies: 1,
     garrisonedEliteRegiments: 0,

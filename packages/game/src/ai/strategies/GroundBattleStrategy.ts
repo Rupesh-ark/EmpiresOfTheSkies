@@ -62,7 +62,7 @@ export class GroundBattleStrategy implements PhaseStrategy {
         (building?.garrisonedRegiments ?? 0) +
         (building?.garrisonedLevies ?? 0) * 0.5 +
         (building?.garrisonedEliteRegiments ?? 0) * 1.5;
-      const hasFort = building?.fort ? 2 : 0; // fort adds defensive bonus
+      const hasFort = (building?.fort?.length ?? 0) > 0 ? 2 : 0; // fort adds defensive bonus
 
       const defenseStrength = garrisonStrength + hasFort;
       if (defenseStrength === 0) return m; // undefended — free capture
@@ -109,7 +109,7 @@ export class GroundBattleStrategy implements PhaseStrategy {
       (building?.garrisonedRegiments ?? 0) +
       (building?.garrisonedLevies ?? 0) * 0.5 +
       (building?.garrisonedEliteRegiments ?? 0) * 1.5;
-    const fortBonus = building?.fort ? 2 : 0;
+    const fortBonus = (building?.fort?.length ?? 0) > 0 ? 2 : 0;
     const defenseTotal = garrisonStrength + fortBonus;
 
     // Attacker strength: their troops at this tile

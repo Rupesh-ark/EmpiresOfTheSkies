@@ -9,7 +9,7 @@ const validateCheckAndPlaceFort = (G: MyGameState, playerID: string, coords: [nu
   const hasBuilding =
     tileInfo.player?.id === playerID &&
     (tileInfo.buildings === "colony" || tileInfo.buildings === "outpost");
-  const noFortYet = !tileInfo.fort;
+  const noFortYet = !tileInfo.fort.includes(playerID);
   const hasGarrisonedTroops =
     tileInfo.garrisonedRegiments > 0 || tileInfo.garrisonedLevies > 0;
   const hasFleetTroops = G.playerInfo[playerID].fleetInfo.some(
@@ -27,7 +27,7 @@ const checkAndPlaceFort: MoveDefinition = {
     const [x, y] = coords;
     const tileInfo = G.mapState.buildings[y][x];
 
-    tileInfo.fort = true;
+    tileInfo.fort.push(playerID);
     G.validFortLocations = [];
     G.playerInfo[playerID].turnComplete = true;
   },

@@ -153,7 +153,7 @@ function addValidFortTile(G: ReturnType<typeof buildInitialG>, playerID: string)
   G.mapState.buildings[0][0] = {
     player: G.playerInfo[playerID],
     buildings: "outpost",
-    fort: false,
+    fort: [],
     garrisonedRegiments: 1,
     garrisonedLevies: 0,
   } as any;

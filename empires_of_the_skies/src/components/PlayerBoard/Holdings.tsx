@@ -32,7 +32,7 @@ function countTerritories(props: MyGameProps, playerColour: string) {
           colonies++;
           locations.push({ type: "Colony", name: loc.name, ref: loc.reference });
         }
-        if (tile.fort) {
+        if (tile.fort.length > 0) {
           forts++;
         }
       }

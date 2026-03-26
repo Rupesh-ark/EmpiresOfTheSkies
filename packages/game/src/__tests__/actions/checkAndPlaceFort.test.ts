@@ -19,7 +19,7 @@ import type { MapBuildingInfo } from "../../types";
 
 function buildMap(): MapBuildingInfo[][] {
   const emptyTile: MapBuildingInfo = {
-    fort: false,
+    fort: [],
     garrisonedRegiments: 0,
     garrisonedLevies: 0,
     garrisonedEliteRegiments: 0,
@@ -36,7 +36,7 @@ describe("checkAndPlaceFort — success", () => {
     buildings[0][0] = {
       player: G.playerInfo["0"],
       buildings: "colony",
-      fort: false,
+      fort: [],
       garrisonedRegiments: 2,
       garrisonedLevies: 0,
       garrisonedEliteRegiments: 0,
@@ -45,7 +45,7 @@ describe("checkAndPlaceFort — success", () => {
 
     callMoveDef(checkAndPlaceFort, G, "0", [0, 0]);
 
-    expect(G.mapState.buildings[0][0].fort).toBe(true);
+    expect(G.mapState.buildings[0][0].fort).toContain("0");
     expect(G.playerInfo["0"].turnComplete).toBe(true);
   });
 
@@ -55,7 +55,7 @@ describe("checkAndPlaceFort — success", () => {
     buildings[1][2] = {
       player: G.playerInfo["0"],
       buildings: "outpost",
-      fort: false,
+      fort: [],
       garrisonedRegiments: 1,
       garrisonedLevies: 0,
       garrisonedEliteRegiments: 0,
@@ -64,7 +64,7 @@ describe("checkAndPlaceFort — success", () => {
 
     callMoveDef(checkAndPlaceFort, G, "0", [2, 1]);
 
-    expect(G.mapState.buildings[1][2].fort).toBe(true);
+    expect(G.mapState.buildings[1][2].fort).toContain("0");
   });
 });
 
@@ -96,7 +96,7 @@ describe("checkAndPlaceFort — INVALID_MOVE conditions", () => {
     buildings[0][0] = {
       player: G.playerInfo["1"],
       buildings: "colony",
-      fort: false,
+      fort: [],
       garrisonedRegiments: 2,
       garrisonedLevies: 0,
       garrisonedEliteRegiments: 0,
@@ -114,7 +114,7 @@ describe("checkAndPlaceFort — INVALID_MOVE conditions", () => {
     buildings[0][0] = {
       player: G.playerInfo["0"],
       buildings: "colony",
-      fort: true, // already fortified
+      fort: ["0"], // already fortified
       garrisonedRegiments: 2,
       garrisonedLevies: 0,
       garrisonedEliteRegiments: 0,
@@ -132,7 +132,7 @@ describe("checkAndPlaceFort — INVALID_MOVE conditions", () => {
     buildings[0][0] = {
       player: G.playerInfo["0"],
       buildings: "colony",
-      fort: false,
+      fort: [],
       garrisonedRegiments: 0, // no troops
       garrisonedLevies: 0,
       garrisonedEliteRegiments: 0,

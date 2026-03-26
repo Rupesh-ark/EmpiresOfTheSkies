@@ -80,7 +80,7 @@ const TilePresence = ({ G, x, y }: { G: MyGameState; x: number; y: number }) => 
   );
   const infidelFleetHere = G.infidelFleet?.active && !G.infidelFleet.destroyed &&
     G.infidelFleet.location[0] === x && G.infidelFleet.location[1] === y;
-  const hasBuildingOrFleets = building?.buildings || building?.fort || fleetsHere.length > 0 || infidelFleetHere;
+  const hasBuildingOrFleets = building?.buildings || (building?.fort?.length ?? 0) > 0 || fleetsHere.length > 0 || infidelFleetHere;
   if (!hasBuildingOrFleets) return null;
 
   return (
@@ -148,7 +148,7 @@ const TilePresence = ({ G, x, y }: { G: MyGameState; x: number; y: number }) => 
         )}
 
         {/* Fort */}
-        {building?.fort && (
+        {(building?.fort?.length ?? 0) > 0 && (
           <Box sx={{
             display: "flex", alignItems: "center", gap: 0.75,
             px: 1.5, py: 0.5, borderRadius: "4px",
@@ -560,7 +560,7 @@ const TileDetailContent = ({
         ? (bld.garrisonedRegiments ?? 0) * 2 + (bld.garrisonedLevies ?? 0) + (bld.garrisonedEliteRegiments ?? 0) * 3
         : tile.sword;
       const garShields = isColony
-        ? (bld.fort ? (bld.garrisonedRegiments ?? 0) + (bld.garrisonedLevies ?? 0) + (bld.garrisonedEliteRegiments ?? 0) : 0)
+        ? (bld.fort.length > 0 ? (bld.garrisonedRegiments ?? 0) + (bld.garrisonedLevies ?? 0) + (bld.garrisonedEliteRegiments ?? 0) : 0)
         : tile.shield;
 
       return (
