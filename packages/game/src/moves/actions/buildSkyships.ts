@@ -1,12 +1,12 @@
 import { Move } from "boardgame.io";
 import { MyGameState } from "../../types";
-import { checkCounsellorsNotZero } from "../moveValidation";
+import { validateMove } from "../moveValidation";
 import { INVALID_MOVE } from "boardgame.io/core";
 import {
   addSkyship,
   removeGoldAmount,
   removeOneCounsellor,
-} from "../resourceUpdates";
+} from "../../helpers/stateUtils";
 import { Ctx } from "boardgame.io/dist/types/src/types.js";
 import { EventsAPI } from "boardgame.io/dist/types/src/plugins/plugin-events.js";
 import { RandomAPI } from "boardgame.io/dist/types/src/plugins/random/random.js";
@@ -27,9 +27,7 @@ const buildSkyships: Move<MyGameState> = (
   },
   ...args: any[]
 ) => {
-  if (checkCounsellorsNotZero(playerID, G) !== undefined) {
-    return INVALID_MOVE;
-  }
+  if (validateMove(playerID, G, { costsCounsellor: true, costsGold: true })) return INVALID_MOVE;
 
   if (G.playerInfo[playerID].shipyards === 0) {
     console.log("Player tried to build skyships without having any shipyards");
@@ -45,11 +43,20 @@ const buildSkyships: Move<MyGameState> = (
     return INVALID_MOVE;
   }
 
-  const cost = 2 * G.playerInfo[playerID].shipyards;
+  // GAP-20: player chooses 1 or 2 skyships per shipyard, pays 1 Gold each
+  const perShipyard: number = args[0];
+  if (perShipyard !== 1 && perShipyard !== 2) {
+    return INVALID_MOVE;
+  }
+  const total = perShipyard * G.playerInfo[playerID].shipyards;
+
+  if (G.playerInfo[playerID].resources.gold < total) {
+    return INVALID_MOVE;
+  }
 
   removeOneCounsellor(G, playerID);
-  removeGoldAmount(G, playerID, cost);
-  for (let i = 0; i < cost; i++) {
+  removeGoldAmount(G, playerID, total);
+  for (let i = 0; i < total; i++) {
     addSkyship(G, playerID);
   }
   G.playerInfo[playerID].playerBoardCounsellorLocations.buildSkyships = true;

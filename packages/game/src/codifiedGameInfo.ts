@@ -1,4 +1,4 @@
-import { FortuneOfWarCardInfo, KingdomName, LegacyCard, TileInfoProps } from "./types";
+import { EventCardName, FortuneOfWarCardInfo, InfidelHostCounter, KingdomAdvantageCard, KingdomName, LegacyCardInfo, TileInfoProps } from "./types";
 
 // ── Game configuration ────────────────────────────────────────────────────────
 
@@ -10,6 +10,98 @@ export const MAX_COUNSELLORS = 7;
 export const MAX_FACTORIES = 6;
 export const MAX_HERESY = 19;
 export const MAX_LEVIES = 12;
+
+// ── Building limits ──────────────────────────────────────────────────────────
+export const MAX_CATHEDRALS = 6;
+export const MAX_PALACES = 6;
+export const MAX_SHIPYARDS = 3;
+
+// ── Building sell prices ─────────────────────────────────────────────────────
+export const BUILDING_SELL_PRICE = 3;
+export const SKYSHIP_SELL_PRICE = 1;
+
+// ── Building VP rewards ──────────────────────────────────────────────────────
+export const CATHEDRAL_VP = 2;
+export const PALACE_VP_HERETIC = 2;
+export const PALACE_VP_ORTHODOX = 1;
+
+// ── Fleet & troop caps ──────────────────────────────────────────────────────
+export const MAX_SKYSHIPS_PER_FLEET = 5;
+export const MAX_SKYSHIPS = 24;
+export const MAX_REGIMENTS = 30;
+
+// ── Kingdom location (home base) ─────────────────────────────────────────────
+export const KINGDOM_LOCATION: [number, number] = [4, 0];
+
+// ── Punish Dissenters ────────────────────────────────────────────────────────
+export const BASE_PRISONERS = 3;
+export const MORE_PRISONS_BONUS = 1;
+export const PUNISH_GOLD_COST = 2;
+export const PUNISH_EXECUTE_VP_COST = 1;
+
+// ── Infidel Host counters ────────────────────────────────────────────────────
+export const INFIDEL_EMPIRE_LOCATION: [number, number] = [4, 1];
+
+// Config-driven: change count to adjust pool size
+export const INFIDEL_HOST_CONFIG: (InfidelHostCounter & { count: number })[] = [
+  { swords: 30, shields: 0, isFleet: false, isInvasionTrigger: true, count: 2 },
+  { swords: 20, shields: 0, isFleet: false, isInvasionTrigger: false, count: 3 },
+  { swords: 15, shields: 0, isFleet: false, isInvasionTrigger: false, count: 3 },
+  { swords: 10, shields: 0, isFleet: false, isInvasionTrigger: false, count: 3 },
+  { swords: 15, shields: 5, isFleet: true, isInvasionTrigger: false, count: 1 },
+];
+export const INFIDEL_HOST_COUNTERS: InfidelHostCounter[] =
+  INFIDEL_HOST_CONFIG.flatMap(({ count, ...counter }) =>
+    Array.from({ length: count }, () => ({ ...counter }))
+  );
+
+// Grand Army VP rewards/penalties
+export const CAPTAIN_GENERAL_VP = 3;
+export const LARGEST_FORCE_VP = 5;
+export const SECOND_LARGEST_VP = 2;
+export const TIED_LARGEST_VP = 4;
+
+// Number of kingdoms (for Grand Army contingent draws)
+export const TOTAL_KINGDOMS = 6;
+
+// ── Event cards ──────────────────────────────────────────────────────────────
+export const EVENT_HAND_SIZE = 3;
+
+// ── Contingent counters (Rebels / Grand Army) ────────────────────────────────
+// Config-driven: change count to adjust pool size
+export const CONTINGENT_CONFIG: { swords: number; count: number }[] = [
+  { swords: 15, count: 1 },
+  { swords: 12, count: 5 },
+  { swords: 10, count: 7 },
+  { swords: 7, count: 7 },
+];
+export const CONTINGENT_COUNTERS: number[] =
+  CONTINGENT_CONFIG.flatMap(({ swords, count }) =>
+    Array(count).fill(swords)
+  );
+
+// ── Fortune of War ───────────────────────────────────────────────────────────
+export const FOW_CARDS_DRAWN = 2;
+export const FOW_HAND_MAX = 4;
+
+// ── Conscript Levies ─────────────────────────────────────────────────────────
+export const LEVY_GROUP_SIZE = 3;
+
+// ── Kingdom Advantage ────────────────────────────────────────────────────────
+export const ELITE_REGIMENTS_COUNT = 3;
+
+// ── Recruit Regiments ────────────────────────────────────────────────────────
+export const RECRUIT_REGIMENTS_REWARD = 4;
+
+// ── Resolution / scoring ─────────────────────────────────────────────────────
+export const FINAL_ROUND_GOLD_PER_VP = 5;
+export const DEBT_PENALTY_DIVISOR = 2;
+export const TRADE_VP_SCHEDULE: Record<number, [number, number, number]> = {
+  1: [3, 2, 1],
+  2: [6, 4, 2],
+  4: [9, 6, 3],
+  6: [12, 8, 4],
+};
 
 export const CounsellorSlot = {
   First:  1,
@@ -24,6 +116,13 @@ export const BuildingSlot = {
   Fort:      4,
 } as const;
 
+export const BUILDING_BASE_COST = {
+  cathedral: 5,
+  palace: 5,
+  shipyard: 3,
+  fort: 2,
+} as const;
+
 export const STARTING_RESOURCES = {
   gold: 6,
   victoryPoints: 10,
@@ -34,30 +133,42 @@ export const STARTING_RESOURCES = {
   factories: 1,
 } as const;
 
-export const LEGACY_CARDS: LegacyCard[] = [
-  "the builder",
-  "the conqueror",
-  "the navigator",
-  "the great",
-  "the magnificent",
-  "the merchant",
-  "the mighty",
-  "the aviator",
-  "the pious",
-  "the builder",
-  "the conqueror",
-  "the navigator",
-  "the great",
-  "the magnificent",
-  "the merchant",
-  "the mighty",
-  "the aviator",
-  "the pious",
+export const ALL_KA_CARDS: KingdomAdvantageCard[] = [
+  "elite_regiments",
+  "improved_training",
+  "licenced_smugglers",
+  "more_efficient_taxation",
+  "more_prisons",
+  "patriarch_of_the_church",
+  "sanctioned_piracy",
+];
+
+export const LEGACY_CARDS: LegacyCardInfo[] = [
+  { name: "the builder",     colour: "purple" },
+  { name: "the conqueror",   colour: "purple" },
+  { name: "the navigator",   colour: "purple" },
+  { name: "the great",       colour: "purple" },
+  { name: "the magnificent", colour: "purple" },
+  { name: "the merchant",    colour: "purple" },
+  { name: "the mighty",      colour: "purple" },
+  { name: "the aviator",     colour: "purple" },
+  { name: "the pious",       colour: "purple" },
+  { name: "the builder",     colour: "orange" },
+  { name: "the conqueror",   colour: "orange" },
+  { name: "the navigator",   colour: "orange" },
+  { name: "the great",       colour: "orange" },
+  { name: "the magnificent", colour: "orange" },
+  { name: "the merchant",    colour: "orange" },
+  { name: "the mighty",      colour: "orange" },
+  { name: "the aviator",     colour: "orange" },
+  { name: "the pious",       colour: "orange" },
 ];
 
 export const GAME_PHASES: { key: string; label: string }[] = [
   { key: "legacy_card",     label: "Legacy Card" },
+  { key: "events",          label: "Events" },
   { key: "discovery",       label: "Discovery" },
+  { key: "taxes",           label: "Taxes" },
   { key: "actions",         label: "Actions" },
   { key: "battle",          label: "Battle" },
   { key: "plunder_legends", label: "Plunder Legends" },
@@ -1016,37 +1127,28 @@ export const knownWorldTiles: TileInfoProps[] = [
   },
 ];
 
-export const fortuneOfWarCards: FortuneOfWarCardInfo[] = [
-  { name: "SwordOne_1", sword: 1, shield: 0 },
-  { name: "SwordOne_2", sword: 1, shield: 0 },
-  { name: "SwordOne_3", sword: 1, shield: 0 },
-  { name: "SwordTwo_1", sword: 2, shield: 0 },
-  { name: "SwordTwo_2", sword: 2, shield: 0 },
-  { name: "SwordTwo_3", sword: 2, shield: 0 },
-  { name: "SwordThree_1", sword: 3, shield: 0 },
-  { name: "SwordThree_2", sword: 3, shield: 0 },
-  { name: "SwordThree_3", sword: 3, shield: 0 },
-  { name: "SwordFour_1", sword: 4, shield: 0 },
-  { name: "SwordFour_2", sword: 4, shield: 0 },
-  { name: "SwordFour_3", sword: 4, shield: 0 },
-  { name: "SwordFive_1", sword: 5, shield: 0 },
-  { name: "SwordFive_2", sword: 5, shield: 0 },
-  { name: "SwordFive_3", sword: 5, shield: 0 },
-  { name: "ShieldOne_1", sword: 0, shield: 1 },
-  { name: "ShieldOne_2", sword: 0, shield: 1 },
-  { name: "ShieldOne_3", sword: 0, shield: 1 },
-  { name: "ShieldTwo_1", sword: 0, shield: 2 },
-  { name: "ShieldTwo_2", sword: 0, shield: 2 },
-  { name: "ShieldTwo_3", sword: 0, shield: 2 },
-  { name: "ShieldThree_1", sword: 0, shield: 3 },
-  { name: "ShieldThree_2", sword: 0, shield: 3 },
-  { name: "ShieldThree_3", sword: 0, shield: 3 },
-  { name: "ShieldFour_1", sword: 0, shield: 4 },
-  { name: "ShieldFour_2", sword: 0, shield: 4 },
-  { name: "ShieldFour_3", sword: 0, shield: 4 },
-  { name: "ShieldFive_1", sword: 0, shield: 5 },
-  { name: "ShieldFive_2", sword: 0, shield: 5 },
-  { name: "ShieldFive_3", sword: 0, shield: 5 },
-  { name: "NoEffect_1", sword: 0, shield: 0 },
-  { name: "NoEffect_2", sword: 0, shield: 0 },
+// ── Fortune of War cards ─────────────────────────────────────────────────────
+// Config-driven: change count to adjust deck size, adjust sword/shield values
+export const FOW_CARD_CONFIG: { sword: number; shield: number; count: number }[] = [
+  { sword: 1, shield: 0, count: 3 },
+  { sword: 2, shield: 0, count: 3 },
+  { sword: 3, shield: 0, count: 3 },
+  { sword: 4, shield: 0, count: 3 },
+  { sword: 5, shield: 0, count: 3 },
+  { sword: 0, shield: 1, count: 3 },
+  { sword: 0, shield: 2, count: 3 },
+  { sword: 0, shield: 3, count: 3 },
+  { sword: 0, shield: 4, count: 3 },
+  { sword: 0, shield: 5, count: 3 },
+  { sword: 0, shield: 0, count: 2 }, // No Effect
 ];
+
+export const fortuneOfWarCards: FortuneOfWarCardInfo[] =
+  FOW_CARD_CONFIG.flatMap(({ sword, shield, count }) => {
+    const label = sword > 0 ? `Sword${sword}` : shield > 0 ? `Shield${shield}` : "NoEffect";
+    return Array.from({ length: count }, (_, i) => ({
+      name: `${label}_${i + 1}`,
+      sword,
+      shield,
+    }));
+  });

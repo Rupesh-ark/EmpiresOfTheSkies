@@ -7,30 +7,28 @@ import {
   DialogTitle,
   Button,
 } from "@mui/material";
-import { MyGameProps, LegacyCard } from "@eots/game";
+import { MyGameProps, LegacyCardInfo } from "@eots/game";
 import svgNameToElementMap from "./WorldMap/nameToElementMap";
 
 const PickLegacyCardDialog = (props: DrawOrPickCardDialogProps) => {
   const [x, y] = props.G.mapState.currentBattle;
-  const [currentCard, setCurrentCard] = useState<LegacyCard>(undefined);
+  const [currentCard, setCurrentCard] = useState<LegacyCardInfo | undefined>(undefined);
   const [open, setOpen] = useState(true);
 
-  const cards = (
-    props.G.playerInfo[props.playerID ?? props.ctx.currentPlayer]
-      .legacyCardOptions as Array<LegacyCard>
-  ).map((card) => {
+  const cards = props.G.playerInfo[props.playerID ?? props.ctx.currentPlayer]
+    .legacyCardOptions.map((card) => {
     if (card) {
-      const displayImage = svgNameToElementMap[card];
+      const displayImage = svgNameToElementMap[card.name];
 
       return (
         <div
-          key={card}
+          key={card.name}
           onClick={() => setCurrentCard(card)}
           style={{
             cursor: "pointer",
             height: "fit-content",
             width: "fit-content",
-            border: card === currentCard ? "2px solid black" : "none",
+            border: card.name === currentCard?.name ? "2px solid black" : "none",
           }}
         >
           <svg

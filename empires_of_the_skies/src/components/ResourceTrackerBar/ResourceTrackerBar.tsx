@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { MyGameProps, GAME_PHASES } from "@eots/game";
 import {
   AppBar,
@@ -17,17 +17,16 @@ import {
 } from "@mui/material";
 import { IoMdCube } from "react-icons/io";
 import { GiTrumpetFlag } from "react-icons/gi";
-import {
-  checkPlayerIDAndReturnPlayerInfo,
-  clearMoves,
-} from "@eots/game";
-import { Person4Sharp } from "@mui/icons-material";
+import { checkPlayerIDAndReturnPlayerInfo, clearMoves } from "@/utils/gameHelpers";
+import { Factory, Person4Sharp } from "@mui/icons-material";
+import { PRISON_ICON as prisonSvg } from "@/assets/icons";
 import ArchprelateIcon from "../Icons/ArchprelateIcon";
 import CounsellorIcon from "../Icons/CounsellorIcon";
-import SkyshipIcon from "../Icons/SkyshipIcon";
-import RegimentIcon from "../Icons/RegimentIcon";
-import LevyIcon from "../Icons/LevyIcon";
 import VictoryPointIcon from "../Icons/VictoryPointIcon";
+import {
+  CardHoldingsInlineControls,
+  CardHoldingsPanels,
+} from "./CardHoldingsBarTabs";
 
 const chipSx = {
   backgroundColor: "rgba(255,255,255,1)",
@@ -41,17 +40,21 @@ const chipSx = {
 const ResourceTrackerBar = (props: ResourceTrackerBarProps) => {
   const [passDialogOpen, setPassDialogOpen] = useState(false);
   const [phaseDialogOpen, setPhaseDialogOpen] = useState(false);
+  const [legacyCardOpen, setLegacyCardOpen] = useState(false);
+  const [advantageCardOpen, setAdvantageCardOpen] = useState(false);
+  const cardHoldingsAnchorRef = useRef<HTMLDivElement | null>(null);
   if (!props.playerID) {
     return <></>;
   }
   const currentPlayer = checkPlayerIDAndReturnPlayerInfo(props);
   const counsellors = currentPlayer.resources.counsellors;
   const gold = currentPlayer.resources.gold;
-  const skyships = currentPlayer.resources.skyships;
-  const regiments = currentPlayer.resources.regiments;
+  const prisoners = currentPlayer.prisoners;
   const colour = currentPlayer.colour;
   const victoryPoints = currentPlayer.resources.victoryPoints;
-  const levies = currentPlayer.resources.levies;
+  const factories = currentPlayer.factories;
+  const legacyCardName = currentPlayer.resources.legacyCard?.name ?? "the builder";
+  const advantageCard = currentPlayer.resources.advantageCard;
   const turnComplete =
     props.G.playerInfo[props.playerID ?? props.ctx.currentPlayer].turnComplete;
 
@@ -65,32 +68,67 @@ const ResourceTrackerBar = (props: ResourceTrackerBarProps) => {
     }
   };
   return (
-    <AppBar position={"sticky"} sx={{ background: "linear-gradient(90deg, #1a0a14 0%, #0d0d0d 50%, #1a0a00 100%)", boxShadow: "0 2px 12px rgba(0,0,0,0.6)" }}>
-      <Toolbar sx={{ justifyContent: "space-between", flexWrap: "wrap", gap: 1, py: 0.5 }}>
+    <AppBar
+      position={"sticky"}
+      sx={{
+        background: "linear-gradient(90deg, #1a0a14 0%, #0d0d0d 50%, #1a0a00 100%)",
+        boxShadow: "0 2px 12px rgba(0,0,0,0.6)",
+        overflow: "visible",
+      }}
+    >
+      <Toolbar
+        sx={{
+          justifyContent: "space-between",
+          flexWrap: "nowrap",
+          gap: 1,
+          py: 0.5,
+          overflowX: "auto",
+          scrollbarWidth: "none",
+          "&::-webkit-scrollbar": { display: "none" },
+        }}
+      >
         <div style={{ display: "flex", alignItems: "center", gap: "24px" }}>
-          <Tooltip title="Click to see all phases" disableInteractive>
-            <span
-              onClick={() => setPhaseDialogOpen(true)}
-              style={{ display: "flex", alignItems: "center", gap: "6px", cursor: "pointer" }}
-            >
-              <GiTrumpetFlag style={{ fontSize: "28px" }} />
-              <span style={{ textTransform: "capitalize" }}>{props.G.stage}</span>
-            </span>
-          </Tooltip>
-          <Tooltip title="Kingdom to Play" disableInteractive>
-            <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-              <Person4Sharp
-                sx={{ color: props.G.playerInfo[props.ctx.currentPlayer].colour }}
-              />
-              {(() => {
-                const currentPlayerData = props.G.playerInfo[props.ctx.currentPlayer];
-                const playerName = props.matchData?.find(
-                  (p) => String(p.id) === props.ctx.currentPlayer
-                )?.name;
-                return playerName
-                  ? `${playerName} (${currentPlayerData.kingdomName})'s turn`
-                  : `${currentPlayerData.kingdomName}'s turn`;
+          <Tooltip title="Click for game status" disableInteractive>
+            <Chip
+              icon={<GiTrumpetFlag style={{ fontSize: 18 }} />}
+              label={(() => {
+                const phase = GAME_PHASES.find((p) => p.key === props.ctx.phase);
+                const phaseName = phase?.label ?? props.G.stage;
+                if (props.G.stage === "events") return `${phaseName} \u2014 Choose a Card`;
+                return `Round ${props.G.round} \u2014 ${phaseName}`;
               })()}
+              onClick={() => setPhaseDialogOpen(true)}
+              sx={{
+                ...chipSx,
+                cursor: "pointer",
+                backgroundColor: "rgba(255,255,255,0.1)",
+                color: "white",
+                border: "1px solid rgba(255,255,255,0.2)",
+                "& .MuiChip-label": { fontWeight: 600, fontSize: "0.8rem" },
+              }}
+            />
+          </Tooltip>
+          <Tooltip title="Current turn" disableInteractive>
+            <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <Person4Sharp
+                sx={{ color: props.G.playerInfo[props.ctx.currentPlayer].colour, fontSize: 22 }}
+              />
+              <span style={{ fontSize: "0.85rem" }}>
+                {props.matchData?.find(
+                  (p) => String(p.id) === props.ctx.currentPlayer
+                )?.name ?? "Player"}
+              </span>
+              <Chip
+                label={props.G.playerInfo[props.ctx.currentPlayer].kingdomName}
+                size="small"
+                sx={{
+                  backgroundColor: props.G.playerInfo[props.ctx.currentPlayer].colour,
+                  color: props.G.playerInfo[props.ctx.currentPlayer].colour === "#F5DE48" ? "#333" : "white",
+                  height: 22,
+                  fontSize: "0.7rem",
+                  fontWeight: "bold",
+                }}
+              />
             </span>
           </Tooltip>
           {props.G.playerInfo[props.playerID ?? props.ctx.currentPlayer]
@@ -102,12 +140,24 @@ const ResourceTrackerBar = (props: ResourceTrackerBarProps) => {
             </Tooltip>
           )}
         </div>
+        <Box
+          ref={cardHoldingsAnchorRef}
+          sx={{ display: "inline-flex", alignItems: "center", flexShrink: 0 }}
+        >
+          <CardHoldingsInlineControls
+            colour={colour}
+            legacyCardOpen={legacyCardOpen}
+            advantageCardOpen={advantageCardOpen}
+            onToggleLegacy={() => setLegacyCardOpen((open) => !open)}
+            onToggleAdvantage={() => setAdvantageCardOpen((open) => !open)}
+          />
+        </Box>
         <div
           style={{
             display: "flex",
             alignItems: "center",
             gap: "6px",
-            flexWrap: "wrap",
+            flexWrap: "nowrap",
           }}
         >
           <Tooltip title="Counsellors" disableInteractive>
@@ -124,24 +174,24 @@ const ResourceTrackerBar = (props: ResourceTrackerBarProps) => {
               sx={chipSx}
             />
           </Tooltip>
-          <Tooltip title="Skyships" disableInteractive>
+          <Tooltip title="Imprisoned Dissenters" disableInteractive>
             <Chip
-              icon={<SkyshipIcon colour={colour} />}
-              label={skyships}
+              icon={
+                <Box
+                  component="img"
+                  src={prisonSvg}
+                  alt=""
+                  sx={{ width: 22, height: 22, objectFit: "contain" }}
+                />
+              }
+              label={prisoners}
               sx={chipSx}
             />
           </Tooltip>
-          <Tooltip title="Regiments" disableInteractive>
+          <Tooltip title="Factories" disableInteractive>
             <Chip
-              icon={<RegimentIcon colour={colour} />}
-              label={regiments}
-              sx={chipSx}
-            />
-          </Tooltip>
-          <Tooltip title="Levies" disableInteractive>
-            <Chip
-              icon={<LevyIcon colour={colour} />}
-              label={levies}
+              icon={<Factory sx={{ color: "#8B6914" }} />}
+              label={factories ?? 0}
               sx={chipSx}
             />
           </Tooltip>
@@ -193,6 +243,14 @@ const ResourceTrackerBar = (props: ResourceTrackerBarProps) => {
           )}
         </div>
       </Toolbar>
+      <CardHoldingsPanels
+        anchorEl={cardHoldingsAnchorRef.current}
+        colour={colour}
+        legacyCardName={legacyCardName}
+        advantageCard={advantageCard}
+        legacyCardOpen={legacyCardOpen}
+        advantageCardOpen={advantageCardOpen}
+      />
       <Box
         sx={{
           height: 3,
@@ -207,16 +265,24 @@ const ResourceTrackerBar = (props: ResourceTrackerBarProps) => {
           },
         }}
       />
-      <Dialog open={phaseDialogOpen} onClose={() => setPhaseDialogOpen(false)}>
-        <DialogTitle>Game Phases</DialogTitle>
+      <Dialog open={phaseDialogOpen} onClose={() => setPhaseDialogOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>Game Status</DialogTitle>
         <DialogContent sx={{ p: 0 }}>
+          <List dense>
+            <ListItem sx={{ backgroundColor: "rgba(0,0,0,0.06)" }}>
+              <ListItemText primary={`Round ${props.G.round} of ${props.G.finalRound}`} slotProps={{ primary: { fontWeight: "bold" } }} />
+            </ListItem>
+          </List>
+          <Box sx={{ px: 2, pt: 1, pb: 0.5 }}>
+            <span style={{ fontWeight: 600, fontSize: "0.8rem", textTransform: "uppercase", color: "#888" }}>Phases</span>
+          </Box>
           <List dense>
             {GAME_PHASES.map((phase) => (
               <ListItem
                 key={phase.key}
                 sx={
                   props.ctx.phase === phase.key
-                    ? { backgroundColor: "action.selected", fontWeight: "bold" }
+                    ? { backgroundColor: "action.selected" }
                     : {}
                 }
               >

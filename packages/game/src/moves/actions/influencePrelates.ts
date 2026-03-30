@@ -1,12 +1,12 @@
 import { Move } from "boardgame.io";
 import { MyGameState, PlayerColour } from "../../types";
-import { checkCounsellorsNotZero } from "../moveValidation";
+import { validateMove } from "../moveValidation";
 import { INVALID_MOVE } from "boardgame.io/core";
 import {
   addGoldAmount,
   removeGoldAmount,
   removeOneCounsellor,
-} from "../resourceUpdates";
+} from "../../helpers/stateUtils";
 import { EventsAPI } from "boardgame.io/dist/types/src/plugins/plugin-events";
 import { RandomAPI } from "boardgame.io/dist/types/src/plugins/random/random";
 import { Ctx } from "boardgame.io/dist/types/src/types";
@@ -29,9 +29,7 @@ export const influencePrelates: Move<MyGameState> = (
 ) => {
   const value: keyof typeof G.boardState.influencePrelates = args[0] + 1;
 
-  if (checkCounsellorsNotZero(playerID, G) !== undefined) {
-    return INVALID_MOVE;
-  }
+  if (validateMove(playerID, G, { costsCounsellor: true, costsGold: true })) return INVALID_MOVE;
 
   if (G.boardState.influencePrelates[value] !== undefined) {
     console.log("Player has selected a move which has already been taken");
@@ -51,12 +49,19 @@ export const influencePrelates: Move<MyGameState> = (
     8: PlayerColour.green,
   };
 
-  Object.entries(G.playerInfo).forEach(([id, playerInfo]) => {
-    if (playerInfo.colour === kingdomToIDMap[value]) {
-      recipientOfPayment = id;
-      cost = playerInfo.cathedrals;
-    }
-  });
+  // GAP-5: placing in your own kingdom's slot is free
+  const slotColour = kingdomToIDMap[value];
+  const actingPlayerColour = G.playerInfo[playerID].colour;
+  if (slotColour !== null && slotColour === actingPlayerColour) {
+    cost = 0;
+  } else {
+    Object.entries(G.playerInfo).forEach(([id, playerInfo]) => {
+      if (playerInfo.colour === slotColour) {
+        recipientOfPayment = id;
+        cost = playerInfo.cathedrals;
+      }
+    });
+  }
 
   if (recipientOfPayment) {
     addGoldAmount(G, recipientOfPayment, cost);

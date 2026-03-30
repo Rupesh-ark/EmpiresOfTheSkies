@@ -8,7 +8,7 @@ import {
   DialogContent,
   DialogTitle,
 } from "@mui/material";
-import { ButtonRow } from "../ActionBoard/ActionBoardButtonRow";
+import { ButtonRow } from "../ActionBoard/components/ActionBoardButtonRow";
 
 const ElectionDialog = (props: ElectionDialogProps) => {
   const [currentVote, setCurrentVote] = useState(props.ctx.playOrder[0]);

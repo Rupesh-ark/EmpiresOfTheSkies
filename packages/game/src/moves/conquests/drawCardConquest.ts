@@ -3,7 +3,7 @@ import { MyGameState } from "../../types";
 import { drawFortuneOfWarCard } from "../../helpers/helpers";
 import { resolveConquest } from "../../helpers/resolveBattle";
 
-//TODO: add possibility to draw a no effect card from the deck
+// No-effect cards are handled by drawFortuneOfWarCard (reshuffle + redraw).
 const drawCardConquest: Move<MyGameState> = (
   { G, ctx, playerID, events, random },
   ...args

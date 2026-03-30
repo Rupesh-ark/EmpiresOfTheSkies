@@ -22,13 +22,16 @@
     "build:types": "tsc -p tsconfig.types.json",
     "build:esm": "tsc -p tsconfig.esm.json",
     "build:cjs": "tsc -p tsconfig.cjs.json && node write-cjs-package.cjs",
-    "build": "pnpm run build:types && pnpm run build:esm && pnpm run build:cjs"
+    "build": "pnpm run build:types && pnpm run build:esm && pnpm run build:cjs",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
 
   "dependencies": {
     "boardgame.io": "^0.50.2"
   },
   "devDependencies": {
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.3"
   }
 }

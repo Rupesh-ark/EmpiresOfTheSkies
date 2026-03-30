@@ -1,6 +1,6 @@
 import { Ctx } from "boardgame.io";
 import { EventsAPI } from "boardgame.io/dist/types/src/plugins/plugin-events";
-import { FleetInfo, MyGameState } from "../types";
+import { FleetInfo, GoodKey, MyGameState } from "../types";
 import {
   findNextConquest,
   findNextGroundBattle,
@@ -8,6 +8,9 @@ import {
 } from "./findNext";
 import { drawFortuneOfWarCard } from "./helpers";
 import { RandomAPI } from "boardgame.io/dist/types/src/plugins/random/random";
+import { increaseHeresyWithinMove, increaseOrthodoxyWithinMove, logEvent } from "./stateUtils";
+
+const GOODS: GoodKey[] = ["mithril", "dragonScales", "krakenSkin", "magicDust", "stickyIchor", "pipeweed"];
 
 export const resolveBattleAndReturnWinner = (
   G: MyGameState,
@@ -33,6 +36,14 @@ export const resolveBattleAndReturnWinner = (
   });
   attackerSwordValue += G.battleState?.attacker.fowCard?.sword ?? 0;
   attackerShieldValue += G.battleState?.attacker.fowCard?.shield ?? 0;
+  // GAP-8: improved_training KA — +1 sword/shield per FoW card played, matching the card's stats
+  if (
+    G.battleState?.attacker.fowCard &&
+    G.playerInfo[G.battleState.attacker.id].resources.advantageCard === "improved_training"
+  ) {
+    if (G.battleState.attacker.fowCard.sword > 0) attackerSwordValue += 1;
+    if (G.battleState.attacker.fowCard.shield > 0) attackerShieldValue += 1;
+  }
 
   let defenderSwordValue = 0;
   let defenderShieldValue = 0;
@@ -61,16 +72,40 @@ export const resolveBattleAndReturnWinner = (
   }
   defenderSwordValue += G.battleState?.defender.fowCard?.sword ?? 0;
   defenderShieldValue += G.battleState?.defender.fowCard?.shield ?? 0;
+  // GAP-8: improved_training KA for defender
+  if (
+    G.battleState?.defender.fowCard &&
+    G.playerInfo[G.battleState.defender.id].resources.advantageCard === "improved_training"
+  ) {
+    if (G.battleState.defender.fowCard.sword > 0) defenderSwordValue += 1;
+    if (G.battleState.defender.fowCard.shield > 0) defenderShieldValue += 1;
+  }
+
+  const attackerName = G.playerInfo[G.battleState?.attacker.id ?? ctx.currentPlayer].kingdomName;
+  const defenderName = G.playerInfo[G.battleState?.defender.id ?? ctx.currentPlayer].kingdomName;
+  const battleType = ctx.phase === "ground_battle" ? "Ground battle" : "Aerial battle";
+  logEvent(G, `${battleType}: ${attackerName} (${attackerSwordValue}S/${attackerShieldValue}Sh) vs ${defenderName} (${defenderSwordValue}S/${defenderShieldValue}Sh)`);
 
   const attackerLosses = defenderSwordValue - attackerShieldValue;
   let attackerLossesCopy = attackerLosses.valueOf();
-  console.log(`attacker losses = ${attackerLossesCopy}`);
 
   const defenderLosses = attackerSwordValue - defenderShieldValue;
   let defenderLossesCopy = defenderLosses.valueOf();
-  console.log(`defender losses = ${defenderLossesCopy}`);
 
+  // GAP-22: odd hit rule — if total attacker hits are odd, at least 1 Skyship or Levy must absorb a hit
+  let attackerOddHitSatisfied = attackerLosses % 2 !== 1;
   attackerFleets.forEach((fleet) => {
+    if (!attackerOddHitSatisfied && attackerLossesCopy > 0) {
+      if (fleet.levies > 0) {
+        fleet.levies -= 1;
+        attackerLossesCopy -= 1;
+        attackerOddHitSatisfied = true;
+      } else if (fleet.skyships > 0) {
+        fleet.skyships -= 1;
+        attackerLossesCopy -= 1;
+        attackerOddHitSatisfied = true;
+      }
+    }
     while (
       attackerLossesCopy > 0 &&
       (fleet.regiments > 0 || fleet.skyships > 0 || fleet.levies > 0)
@@ -89,9 +124,24 @@ export const resolveBattleAndReturnWinner = (
         attackerLossesCopy -= 2;
       }
     }
+    // GAP-23 / GAP-14: troops aboard destroyed Skyships are lost — trim to Skyship capacity
+    while (fleet.regiments + fleet.levies > fleet.skyships) {
+      if (fleet.levies > 0) {
+        fleet.levies -= 1;
+      } else if (fleet.regiments > 0) {
+        fleet.regiments -= 1;
+      } else {
+        break;
+      }
+    }
   });
   if (ctx.phase === "ground_battle") {
     const currentBuilding = G.mapState.buildings[y][x];
+    // GAP-22: odd hit rule for garrison defender — at least 1 Levy must absorb if hits are odd
+    if (defenderLosses % 2 === 1 && (currentBuilding.garrisonedLevies ?? 0) > 0) {
+      currentBuilding.garrisonedLevies! -= 1;
+      defenderLossesCopy -= 1;
+    }
     while (
       defenderLossesCopy > 0 &&
       currentBuilding.garrisonedLevies &&
@@ -108,7 +158,20 @@ export const resolveBattleAndReturnWinner = (
       }
     }
   } else {
+    // GAP-22: odd hit rule — if total defender hits are odd, at least 1 Skyship or Levy must absorb a hit
+    let defenderOddHitSatisfied = defenderLosses % 2 !== 1;
     defenderFleets.forEach((fleet) => {
+      if (!defenderOddHitSatisfied && defenderLossesCopy > 0) {
+        if (fleet.levies > 0) {
+          fleet.levies -= 1;
+          defenderLossesCopy -= 1;
+          defenderOddHitSatisfied = true;
+        } else if (fleet.skyships > 0) {
+          fleet.skyships -= 1;
+          defenderLossesCopy -= 1;
+          defenderOddHitSatisfied = true;
+        }
+      }
       while (
         defenderLossesCopy > 0 &&
         (fleet.regiments > 0 || fleet.skyships > 0 || fleet.levies > 0)
@@ -125,6 +188,16 @@ export const resolveBattleAndReturnWinner = (
         } else if (fleet.regiments > 0) {
           fleet.regiments -= 1;
           defenderLossesCopy -= 2;
+        }
+      }
+      // GAP-23: troops aboard destroyed Skyships are lost — trim to Skyship capacity
+      while (fleet.regiments + fleet.levies > fleet.skyships) {
+        if (fleet.levies > 0) {
+          fleet.levies -= 1;
+        } else if (fleet.regiments > 0) {
+          fleet.regiments -= 1;
+        } else {
+          break;
         }
       }
     });
@@ -184,14 +257,20 @@ export const resolveBattleAndReturnWinner = (
     winner = G.battleState?.defender.id;
   }
   if (winner !== "total annihilation" && winner) {
+    const winnerName = G.playerInfo[winner]?.kingdomName ?? "Unknown";
+    logEvent(G, `${battleType} won by ${winnerName} (+1 VP)`);
     G.battleState &&
       Object.values(G.battleState).forEach((player) => {
         if (player.id === winner) {
-          if (ctx.phase !== "ground_battle") {
+          // DEV-8: heresy shift applies to both aerial and ground battles,
+          // but only when the two sides have opposing alignments
+          const loserId = Object.values(G.battleState!).find(p => p.id !== winner)?.id;
+          const loserAlignment = loserId ? G.playerInfo[loserId].hereticOrOrthodox : undefined;
+          if (loserAlignment && loserAlignment !== player.hereticOrOrthodox) {
             if (player.hereticOrOrthodox === "heretic") {
-              G.playerInfo[player.id].heresyTracker += 1;
+              increaseHeresyWithinMove(G, player.id);
             } else {
-              G.playerInfo[player.id].heresyTracker -= 1;
+              increaseOrthodoxyWithinMove(G, player.id);
             }
           }
           player.victorious = true;
@@ -273,8 +352,8 @@ export const resolveConquest = (
 
   attackerSwordValue += attackerGarrisonedLevies;
 
-  attackerSwordValue += G.battleState?.attacker.fowCard?.sword ?? 0;
-  attackerShieldValue += G.battleState?.attacker.fowCard?.shield ?? 0;
+  attackerSwordValue += G.conquestState?.fowCard?.sword ?? 0;
+  attackerShieldValue += G.conquestState?.fowCard?.shield ?? 0;
 
   const defenderCard = drawFortuneOfWarCard(G);
 
@@ -283,9 +362,12 @@ export const resolveConquest = (
   const defenderShieldValue =
     G.mapState.currentTileArray[y][x].shield + defenderCard.shield;
 
+  const conquestPlayerName = G.playerInfo[G.battleState?.attacker.id ?? ctx.currentPlayer].kingdomName;
+  const landName = G.mapState.currentTileArray[y][x]?.name ?? "unknown land";
+  logEvent(G, `Conquest: ${conquestPlayerName} attacks ${landName} (${attackerSwordValue}S vs ${defenderSwordValue}S/${defenderShieldValue}Sh)`);
+
   const attackerLosses = defenderSwordValue - attackerShieldValue;
   let attackerLossesCopy = attackerLosses.valueOf();
-  console.log(`attacker losses = ${attackerLossesCopy}`);
 
   if (attackerLossesCopy > attackerGarrisonedLevies) {
     attackerLossesCopy -= attackerGarrisonedLevies;
@@ -342,18 +424,11 @@ export const resolveConquest = (
     }
   });
 
-  console.log(
-    `Remaining attackers in colonisation attempt: ${remainingAttackers}`
-  );
   const remainingDefenders =
-    attackerSwordValue - (defenderShieldValue + defenderSwordValue);
-
-  console.log(
-    `Remaining defenders in colonisation attempt: ${remainingDefenders}`
-  );
+    (defenderShieldValue + defenderSwordValue) - attackerSwordValue;
 
   if (remainingDefenders > 0 || remainingAttackers < 1) {
-    console.log("Attacker has failed their conquest attempt");
+    logEvent(G, `Conquest failed: ${conquestPlayerName} loses outpost at ${landName}`);
     const currentBuilding = G.mapState.buildings[y][x];
     if (currentBuilding.garrisonedRegiments > 0) {
       attackerFleets.forEach((fleet) => {
@@ -386,10 +461,15 @@ export const resolveConquest = (
     currentBuilding.fort = false;
     currentBuilding.garrisonedLevies = 0;
     currentBuilding.garrisonedRegiments = 0;
+    // GAP-15 sub-rule 3: record that this player failed conquest here this round
+    G.failedConquests.push({
+      playerId: G.battleState?.attacker.id ?? ctx.currentPlayer,
+      tile: [x, y],
+    });
     G.conquestState = undefined;
     findNextConquest(G, events);
   } else if (remainingDefenders <= 0 && remainingAttackers > 0) {
-    console.log("Attacker has successfully colonised a region");
+    logEvent(G, `Conquest succeeded: ${conquestPlayerName} colonises ${landName} (+1 VP)`);
     const currentPlayer =
       G.playerInfo[G.battleState?.attacker.id ?? ctx.currentPlayer];
     const currentBuilding = G.mapState.buildings[y][x];
@@ -401,11 +481,19 @@ export const resolveConquest = (
       currentPlayer.resources[lootNameAsResource] += value;
     });
     currentPlayer.resources.victoryPoints += 1;
-    currentPlayer.heresyTracker += 1;
+    increaseHeresyWithinMove(G, currentPlayer.id);
+
+    // GAP-15 sub-rule 2: move price markers left for each additional colony good
+    // (the broken-line rectangle goods on the tile, per "Resolve Conquest Attempt" rule)
+    GOODS.forEach((good) => {
+      const qty = currentTile.loot.colony[good];
+      if (qty > 0) {
+        G.mapState.goodsPriceMarkers[good] = Math.max(1, G.mapState.goodsPriceMarkers[good] - qty);
+      }
+    });
 
     currentBuilding.player = currentPlayer;
     currentBuilding.buildings = "colony";
-    console.log("Setting stage for the garrison of troops");
     G.conquestState = undefined;
     G.stage = "garrison troops";
   }

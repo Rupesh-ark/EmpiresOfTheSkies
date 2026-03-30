@@ -9,7 +9,7 @@ import {
 } from "@mui/material";
 
 import WorldMap from "../WorldMap/WorldMap";
-import { ButtonRow } from "../ActionBoard/ActionBoardButtonRow";
+import { ButtonRow } from "../ActionBoard/components/ActionBoardButtonRow";
 
 const GarrisonTroopsDialog = (props: GarrisonTroopsDialogProps) => {
   const [open, setOpen] = useState(true);

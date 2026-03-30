@@ -1,6 +1,20 @@
 import { createTheme } from "@mui/material/styles";
 import { colors, fonts, sizes } from "../designTokens";
 
+const tooltipStyle = {
+  whiteSpace: "pre-line" as const,
+  fontFamily: fonts.system,
+  fontSize: sizes.fontSize.small,
+  lineHeight: 1.35,
+  maxWidth: 280,
+  padding: "8px 12px",
+  borderRadius: "8px",
+  backgroundColor: "rgba(18, 18, 18, 0.95)",
+  color: colors.white,
+  border: "1px solid rgba(255,255,255,0.2)",
+  boxShadow: "0 8px 20px rgba(0, 0, 0, 0.35)",
+};
+
 export const generalTheme = createTheme({
   typography: {
     fontFamily: fonts.primary,
@@ -18,10 +32,13 @@ export const generalTheme = createTheme({
   },
   components: {
     MuiTooltip: {
+      defaultProps: {
+        arrow: true,
+      },
       styleOverrides: {
-        tooltip: {
-          whiteSpace: "pre",
-          fontSize: sizes.fontSize.tooltip,
+        tooltip: tooltipStyle,
+        arrow: {
+          color: "rgba(18, 18, 18, 0.95)",
         },
       },
     },
@@ -55,6 +72,19 @@ export const influencePrelatesTheme = createTheme({
       border: `1px solid ${colors.black}`,
       width: "fit-content",
       justifyContent: "center",
+    },
+  },
+  components: {
+    MuiTooltip: {
+      defaultProps: {
+        arrow: true,
+      },
+      styleOverrides: {
+        tooltip: tooltipStyle,
+        arrow: {
+          color: "rgba(18, 18, 18, 0.95)",
+        },
+      },
     },
   },
 });

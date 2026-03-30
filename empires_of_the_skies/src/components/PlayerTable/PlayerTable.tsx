@@ -51,6 +51,7 @@ const PlayerTable = (props: PlayerTableProps) => {
               <TableCell align="right" sx={colHeaderCellSx}>Cathedrals</TableCell>
               <TableCell align="right" sx={colHeaderCellSx}>Palaces</TableCell>
               <TableCell align="right" sx={colHeaderCellSx}>Shipyards</TableCell>
+              <TableCell align="right" sx={colHeaderCellSx}>Factories</TableCell>
               <TableCell align="right" sx={colHeaderCellSx}>Victory Points</TableCell>
             </TableRow>
           </TableHead>
@@ -89,6 +90,59 @@ const PlayerTable = (props: PlayerTableProps) => {
                         }}
                       />
                     )}
+                    {value.isCaptainGeneral && (
+                      <Chip
+                        label="Captain-General"
+                        size="small"
+                        variant="outlined"
+                        sx={{
+                          borderColor: "#2E7D32",
+                          color: "#2E7D32",
+                          height: 20,
+                          fontSize: "0.65rem",
+                          fontWeight: "bold",
+                        }}
+                      />
+                    )}
+                    {props.G.eventState.peaceAccordActive && (
+                      <Chip
+                        label="Peace Accord"
+                        size="small"
+                        variant="outlined"
+                        sx={{ borderColor: "#D4A017", color: "#D4A017", height: 20, fontSize: "0.65rem", fontWeight: "bold" }}
+                      />
+                    )}
+                    {props.G.eventState.dynasticMarriage?.includes(key) && (
+                      <Chip
+                        label={`Allied: ${
+                          props.G.playerInfo[
+                            props.G.eventState.dynasticMarriage[0] === key
+                              ? props.G.eventState.dynasticMarriage[1]
+                              : props.G.eventState.dynasticMarriage[0]
+                          ].kingdomName
+                        }`}
+                        size="small"
+                        variant="outlined"
+                        sx={{ borderColor: "#C06090", color: "#C06090", height: 20, fontSize: "0.65rem", fontWeight: "bold" }}
+                      />
+                    )}
+                    {props.G.eventState.schismAffected.includes(key) && (
+                      <Chip
+                        label="Schism"
+                        size="small"
+                        variant="outlined"
+                        sx={{ borderColor: "#E77B00", color: "#E77B00", height: 20, fontSize: "0.65rem", fontWeight: "bold" }}
+                      />
+                    )}
+                    {props.G.eventState.lendersRefuseCredit.includes(key) &&
+                      value.resources.gold < 0 && (
+                      <Chip
+                        label="Credit Blocked"
+                        size="small"
+                        variant="outlined"
+                        sx={{ borderColor: "#D32F2F", color: "#D32F2F", height: 20, fontSize: "0.65rem", fontWeight: "bold" }}
+                      />
+                    )}
                   </Box>
                 </TableCell>
                 <TableCell align="right">{value.resources.counsellors}</TableCell>
@@ -101,6 +155,7 @@ const PlayerTable = (props: PlayerTableProps) => {
                 <TableCell align="right">{value.cathedrals}</TableCell>
                 <TableCell align="right">{value.palaces}</TableCell>
                 <TableCell align="right">{value.shipyards}</TableCell>
+                <TableCell align="right">{value.factories}</TableCell>
                 <TableCell align="right">
                   <Typography variant="body2" fontWeight="bold">
                     {value.resources.victoryPoints}

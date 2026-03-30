@@ -12,10 +12,7 @@ import {
 import { LobbyClient } from "boardgame.io/dist/types/packages/client";
 import { useState } from "react";
 import React from "react";
-import bgDesktop from "../boards_and_assets/box_art_desktop.png";
-import bgTablet from "../boards_and_assets/box_art_tablet.png";
-import bgMobile from "../boards_and_assets/box_art_mobile.png";
-import logo from "../boards_and_assets/box_art_logo.png";
+import { BG_DESKTOP as bgDesktop, BG_TABLET as bgTablet, BG_MOBILE as bgMobile, LOGO as logo } from "../assets/homePage";
 import { colors, fonts } from "../designTokens";
 
 const createMatch = async (

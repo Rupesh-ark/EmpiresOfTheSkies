@@ -4,6 +4,7 @@ import { MyGameProps } from "@eots/game";
 const ActionBoard = lazy(() => import("./ActionBoard/ActionBoard").then(m => ({ default: m.ActionBoard })));
 const WorldMap = lazy(() => import("./WorldMap/WorldMap"));
 const PlayerBoard = lazy(() => import("./PlayerBoard/PlayerBoard").then(m => ({ default: m.PlayerBoard })));
+const RulesReference = lazy(() => import("./RulesReference"));
 const Chat = lazy(() => import("./Chat/Chat"));
 
 import {
@@ -34,8 +35,21 @@ import RetrieveFleetsDialog from "./Resolution/RetrieveFleetsDialog";
 import PlayerTable from "./PlayerTable/PlayerTable";
 import HeresyTracker from "./PlayerTable/HeresyTracker";
 import { generalTheme } from "./themes";
-import { Campaign, ChatBubble, Close, Dashboard, Map, Person, TableChart } from "@mui/icons-material";
+import { Campaign, ChatBubble, Close, Dashboard, Map, MenuBook, Person, TableChart, Timeline } from "@mui/icons-material";
 import PickLegacyCardDialog from "./PickLegacyCardDialog";
+import PickKingdomAdvantageCardDialog from "./PickKingdomAdvantageCardDialog";
+import PickEventCardDialog from "./PickEventCardDialog";
+import EventChoiceDialog from "./EventChoiceDialog";
+import RebellionDialog from "./RebellionDialog";
+import RebellionRivalSupportDialog from "./RebellionRivalSupportDialog";
+import InvasionNominateDialog from "./InvasionNominateDialog";
+import InvasionContributeDialog from "./InvasionContributeDialog";
+import InvasionBuyoffDialog from "./InvasionBuyoffDialog";
+import InfidelFleetCombatDialog from "./InfidelFleetCombatDialog";
+import DeferredBattleDialog from "./DeferredBattleDialog";
+import RoundSummaryDialog from "./RoundSummaryDialog";
+import NprKingdomTable from "./PlayerTable/NprKingdomTable";
+import GameLog from "./GameLog";
 import GameOverView from "./GameOverView";
 import LootValueTable from "./PlayerTable/LootValueTable";
 
@@ -52,11 +66,16 @@ const tabSx = {
   },
   "&.Mui-selected": {
     backgroundColor: "rgba(255,255,255,0.12)",
+    transform: "scale(1.08)",
   },
 };
 
 export const ActionBoardsAndMap = (props: MyGameProps) => {
   const [value, setValue] = useState("0");
+  const [mapDetailRequest, setMapDetailRequest] = useState<{
+    location: number[];
+    key: number;
+  } | null>(null);
   const handleChange = (event: React.SyntheticEvent, newValue: string) => {
     setValue(newValue);
   };
@@ -69,6 +88,101 @@ export const ActionBoardsAndMap = (props: MyGameProps) => {
 
   const isElectionTurn =
     props.ctx.phase === "election" && props.playerID === props.ctx.currentPlayer;
+
+  const openMapAtLocation = (location: number[]) => {
+    setMapDetailRequest((previousRequest) => ({
+      location: [...location],
+      key: (previousRequest?.key ?? 0) + 1,
+    }));
+    const mapIdx = tabs.findIndex((t) => t.key === "map");
+    if (mapIdx >= 0) setValue(String(mapIdx));
+  };
+
+  // ── Tab definitions — reorder here to rearrange the sidebar ──
+  const tabs: {
+    key: string;
+    label: string;
+    icon: React.ReactNode;
+    panel: React.ReactNode;
+    panelSx?: object;
+  }[] = [
+    {
+      key: "log",
+      label: "Game Log",
+      icon: <Timeline sx={{ color: kingdomColour }} />,
+      panel: <GameLog {...props} />,
+      panelSx: { p: 0 },
+    },
+    {
+      key: "map",
+      label: "World Map",
+      icon: <Map sx={{ color: kingdomColour }} />,
+      panel: (
+        <WorldMap
+          {...props}
+          detailRequest={mapDetailRequest}
+          onDetailRequestHandled={(requestKey) => {
+            setMapDetailRequest((currentRequest) =>
+              currentRequest?.key === requestKey ? null : currentRequest
+            );
+          }}
+        />
+      ),
+    },
+    {
+      key: "action",
+      label: "Action Board",
+      icon: <Dashboard sx={{ color: kingdomColour }} />,
+      panel: <ActionBoard {...props} />,
+    },
+    {
+      key: "player",
+      label: "Player Board",
+      icon: <Person sx={{ color: kingdomColour }} />,
+      panel: (
+        <PlayerBoard {...props} onOpenFleetLocation={openMapAtLocation} />
+      ),
+    },
+    {
+      key: "stats",
+      label: "Player Table",
+      icon: <TableChart sx={{ color: kingdomColour }} />,
+      panel: (
+        <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%", gap: 0, px: 2, pt: 1 }}>
+          <Box sx={{ maxWidth: 1230, width: "100%", mb: 2 }}>
+            <Box
+              sx={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 1,
+                background: "linear-gradient(90deg, #1a0a14 0%, #0d0d0d 50%, #1a0a00 100%)",
+                px: 2,
+                py: 0.75,
+                borderRadius: 2,
+              }}
+            >
+              <Campaign sx={{ color: "#E77B00", fontSize: 18 }} />
+              <Box component="span" sx={{ color: "rgba(255,255,255,0.6)", fontSize: "0.8rem" }}>Round</Box>
+              <Box component="span" sx={{ color: "white", fontWeight: 700, fontSize: "1rem" }}>{props.G.round}</Box>
+              <Box component="span" sx={{ color: "rgba(255,255,255,0.4)", fontSize: "0.8rem" }}>/ {props.G.finalRound}</Box>
+            </Box>
+          </Box>
+          <HeresyTracker {...props} />
+          <PlayerTable {...props} />
+          <NprKingdomTable {...props} />
+          <LootValueTable {...props} />
+        </Box>
+      ),
+      panelSx: { p: 0 },
+    },
+    {
+      key: "rules",
+      label: "Rules",
+      icon: <MenuBook sx={{ color: kingdomColour }} />,
+      panel: <RulesReference />,
+      panelSx: { p: 0 },
+    },
+  ];
 
   return (
     <div>
@@ -84,48 +198,23 @@ export const ActionBoardsAndMap = (props: MyGameProps) => {
                 orientation="vertical"
                 sx={{ borderLeft: 1, borderColor: "divider", width: 48, minWidth: 48 }}
               >
-                <Tab icon={<Tooltip title="Action Board" placement="left"><Dashboard sx={{ color: kingdomColour }} /></Tooltip>} value={"0"} sx={tabSx} />
-                <Tab icon={<Tooltip title="Player Board" placement="left"><Person sx={{ color: kingdomColour }} /></Tooltip>} value={"1"} sx={tabSx} />
-                <Tab icon={<Tooltip title="World Map" placement="left"><Map sx={{ color: kingdomColour }} /></Tooltip>} value={"2"} sx={tabSx} />
-                <Tab icon={<Tooltip title="Player Table" placement="left"><TableChart sx={{ color: kingdomColour }} /></Tooltip>} value={"3"} sx={tabSx} />
+                {tabs.map((tab, i) => (
+                  <Tab
+                    key={tab.key}
+                    icon={<Tooltip title={tab.label} placement="left"><span>{tab.icon}</span></Tooltip>}
+                    value={String(i)}
+                    sx={tabSx}
+                  />
+                ))}
               </Tabs>
               </Box>
               <Box sx={{ flexGrow: 1 }}>
                 <Suspense fallback={null}>
-                  <TabPanel value={"0"} tabIndex={0}>
-                    <ActionBoard {...props} />
-                  </TabPanel>
-                  <TabPanel value={"1"} tabIndex={1}>
-                    <PlayerBoard {...props} />
-                  </TabPanel>
-                  <TabPanel value={"2"} tabIndex={2}>
-                    <WorldMap {...props} />
-                  </TabPanel>
-                  <TabPanel value={"3"} tabIndex={3} sx={{ p: 0 }}>
-                    <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%", gap: 0, px: 2, pt: 1 }}>
-                      <Box sx={{ maxWidth: 1230, width: "100%", mb: 2 }}>
-                        <Box
-                          sx={{
-                            display: "inline-flex",
-                            alignItems: "center",
-                            gap: 1,
-                            background: "linear-gradient(90deg, #1a0a14 0%, #0d0d0d 50%, #1a0a00 100%)",
-                            px: 2,
-                            py: 0.75,
-                            borderRadius: 2,
-                          }}
-                        >
-                          <Campaign sx={{ color: "#E77B00", fontSize: 18 }} />
-                          <Box component="span" sx={{ color: "rgba(255,255,255,0.6)", fontSize: "0.8rem" }}>Round</Box>
-                          <Box component="span" sx={{ color: "white", fontWeight: 700, fontSize: "1rem" }}>{props.G.round}</Box>
-                          <Box component="span" sx={{ color: "rgba(255,255,255,0.4)", fontSize: "0.8rem" }}>/ {props.G.finalRound}</Box>
-                        </Box>
-                      </Box>
-                      <HeresyTracker {...props} />
-                      <PlayerTable {...props} />
-                      <LootValueTable {...props} />
-                    </Box>
-                  </TabPanel>
+                  {tabs.map((tab, i) => (
+                    <TabPanel key={tab.key} value={String(i)} tabIndex={i} sx={tab.panelSx}>
+                      {tab.panel}
+                    </TabPanel>
+                  ))}
                 </Suspense>
               </Box>
             </Box>
@@ -174,6 +263,16 @@ export const ActionBoardsAndMap = (props: MyGameProps) => {
             </Box>
           </Box>
 
+          <RoundSummaryDialog {...props} />
+          {props.ctx.phase === "kingdom_advantage" && (
+            <PickKingdomAdvantageCardDialog {...props} />
+          )}
+          {props.G.stage === "events" && (
+            <>
+              <PickEventCardDialog {...props} />
+              <EventChoiceDialog {...props} />
+            </>
+          )}
           {props.G.stage === "pick legacy card" && (
             <PickLegacyCardDialog {...props} />
           )}
@@ -200,6 +299,27 @@ export const ActionBoardsAndMap = (props: MyGameProps) => {
             <GarrisonTroopsDialog {...props} />
           )}
           {props.G.stage === "conquest" && <OutpostOrColonyDialog {...props} />}
+          {props.G.stage === "infidel_fleet_combat" && (
+            <InfidelFleetCombatDialog {...props} />
+          )}
+          {props.G.stage === "deferred_battle" && (
+            <DeferredBattleDialog {...props} />
+          )}
+          {props.G.stage === "rebellion" && (
+            <RebellionDialog {...props} />
+          )}
+          {props.G.stage === "rebellion_rival_support" && (
+            <RebellionRivalSupportDialog {...props} />
+          )}
+          {props.G.stage === "invasion_nominate" && (
+            <InvasionNominateDialog {...props} />
+          )}
+          {props.G.stage === "invasion_contribute" && (
+            <InvasionContributeDialog {...props} />
+          )}
+          {props.G.stage === "invasion_buyoff" && (
+            <InvasionBuyoffDialog {...props} />
+          )}
           {props.G.stage === "retrieve fleets" && (
             <RetrieveFleetsDialog {...props} />
           )}

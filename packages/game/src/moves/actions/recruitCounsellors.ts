@@ -1,32 +1,15 @@
 import { MyGameState } from "../../types";
 import { Move } from "boardgame.io";
-import { checkCounsellorsNotZero } from "../moveValidation";
-import { addOneCounsellor, removeGoldAmount } from "../resourceUpdates";
+import { validateMove } from "../moveValidation";
+import { addOneCounsellor, removeGoldAmount } from "../../helpers/stateUtils";
 import { INVALID_MOVE } from "boardgame.io/core";
 import { CounsellorSlot, MAX_COUNSELLORS } from "../../codifiedGameInfo";
-import { EventsAPI } from "boardgame.io/dist/types/src/plugins/plugin-events";
-import { RandomAPI } from "boardgame.io/dist/types/src/plugins/random/random";
-import { Ctx } from "boardgame.io/dist/types/src/types";
 
 export const recruitCounsellors: Move<MyGameState> = (
-  {
-    G,
-    ctx,
-    playerID,
-    events,
-    random,
-  }: {
-    G: MyGameState;
-    ctx: Ctx;
-    playerID: string;
-    events: EventsAPI;
-    random: RandomAPI;
-  },
+  { G, playerID },
   ...args: any[]
 ) => {
-  if (checkCounsellorsNotZero(playerID, G)) {
-    return INVALID_MOVE;
-  }
+  if (validateMove(playerID, G, { costsCounsellor: true, costsGold: true })) return INVALID_MOVE;
 
   const value: keyof typeof G.boardState.recruitCounsellors = args[0] + 1;
   if (G.boardState.recruitCounsellors[value] !== undefined) {
@@ -38,12 +21,11 @@ export const recruitCounsellors: Move<MyGameState> = (
     [CounsellorSlot.Second]: 1,
     [CounsellorSlot.Third]:  2,
   };
-  if (value === CounsellorSlot.Third) {
-    if (G.playerInfo[playerID].resources.counsellors >= MAX_COUNSELLORS) {
-      return INVALID_MOVE;
-    }
-    addOneCounsellor(G, playerID);
+  if (G.playerInfo[playerID].resources.counsellors >= MAX_COUNSELLORS) {
+    return INVALID_MOVE;
   }
+
+  addOneCounsellor(G, playerID);
   G.boardState.recruitCounsellors[value] = playerID;
   removeGoldAmount(G, playerID, costs[value]);
   G.playerInfo[playerID].turnComplete = true;

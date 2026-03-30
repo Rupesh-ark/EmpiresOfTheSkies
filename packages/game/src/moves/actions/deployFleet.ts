@@ -2,8 +2,9 @@ import { Move } from "boardgame.io";
 import { MyGameState } from "../../types";
 import { findPossibleDestinations } from "../../helpers/helpers";
 import { INVALID_MOVE } from "boardgame.io/core";
-import { removeGoldAmount, removeOneCounsellor } from "../resourceUpdates";
-import { checkCounsellorsNotZero } from "../moveValidation";
+import { removeGoldAmount, removeOneCounsellor } from "../../helpers/stateUtils";
+import { validateMove } from "../moveValidation";
+import { MAX_SKYSHIPS_PER_FLEET, KINGDOM_LOCATION } from "../../codifiedGameInfo";
 import { EventsAPI } from "boardgame.io/dist/types/src/plugins/events/events";
 import { RandomAPI } from "boardgame.io/dist/types/src/plugins/random/random";
 import { Ctx } from "boardgame.io/dist/types/src/types";
@@ -24,9 +25,7 @@ const deployFleet: Move<MyGameState> = (
   },
   ...args: any[]
 ) => {
-  if (checkCounsellorsNotZero(playerID, G) !== undefined) {
-    return INVALID_MOVE;
-  }
+  if (validateMove(playerID, G, { costsCounsellor: true, costsGold: true })) return INVALID_MOVE;
   const selectedFleetIndex = args[0];
 
   const currentPlayer = G.playerInfo[playerID];
@@ -40,9 +39,9 @@ const deployFleet: Move<MyGameState> = (
   const regimentCount = args[3];
   const levyCount = args[4];
 
-  const unladen = fleet.regiments === 0 && fleet.levies === 0;
+  const unladen = regimentCount === 0 && levyCount === 0;
 
-  if (fleet.location[0] === 4 && fleet.location[1] === 0) {
+  if (fleet.location[0] === KINGDOM_LOCATION[0] && fleet.location[1] === KINGDOM_LOCATION[1]) {
     if (
       currentPlayer.resources.skyships < skyshipCount ||
       currentPlayer.resources.regiments < regimentCount ||
@@ -56,6 +55,16 @@ const deployFleet: Move<MyGameState> = (
   }
   if (skyshipCount === 0) {
     console.log("Player has attempted to deploy a fleet with no skyships");
+    return INVALID_MOVE;
+  }
+  // GAP-13: max 5 skyships per fleet
+  if (skyshipCount > MAX_SKYSHIPS_PER_FLEET) {
+    console.log("Player has attempted to deploy more than 5 skyships in one fleet");
+    return INVALID_MOVE;
+  }
+  // K10: 1 troop (regiment or levy) per skyship
+  if (regimentCount + levyCount > skyshipCount) {
+    console.log("Fleet cannot carry more troops than skyships (1 troop per skyship)");
     return INVALID_MOVE;
   }
 
@@ -127,7 +136,7 @@ const deployFleet: Move<MyGameState> = (
 
   removeOneCounsellor(G, playerID);
   G.playerInfo[playerID].playerBoardCounsellorLocations.dispatchDisabled =
-    args[0];
+    true;
 
   G.playerInfo[playerID].turnComplete = true;
 };

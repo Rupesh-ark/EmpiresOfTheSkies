@@ -1,8 +1,8 @@
 import type { Game, Ctx } from "boardgame.io";
 
-import { LegacyCard, MyGameState, MapState } from "./types";
+import { LegacyCardInfo, MyGameState, MapState } from "./types";
 
-import { FINAL_ROUND, LEGACY_CARDS } from "./codifiedGameInfo";
+import { ALL_KA_CARDS, CONTINGENT_COUNTERS, EVENT_HAND_SIZE, FINAL_ROUND, INFIDEL_HOST_COUNTERS, LEGACY_CARDS } from "./codifiedGameInfo";
 import { initialBoardState, initialBattleMapState } from "./setup/boardSetup";
 import {
   getRandomisedMapTileArray,
@@ -17,12 +17,9 @@ import recruitRegiments from "./moves/actions/recruitRegiments";
 import purchaseSkyships from "./moves/actions/purchaseSkyships";
 import foundBuildings from "./moves/actions/foundBuildings";
 import foundFactory from "./moves/actions/foundFactory";
-import {
-  checkAndPlaceFort,
-  flipCards,
-  increaseHeresy,
-  increaseOrthodoxy,
-} from "./moves/resourceUpdates";
+import checkAndPlaceFort from "./moves/actions/checkAndPlaceFort";
+import flipCards from "./moves/actions/flipCards";
+import { increaseHeresy, increaseOrthodoxy } from "./moves/actions/heresyMoves";
 import punishDissenters from "./moves/actions/punishDissenters";
 import convertMonarch from "./moves/actions/convertMonarch";
 import influencePrelates from "./moves/actions/influencePrelates";
@@ -35,8 +32,16 @@ import buildSkyships from "./moves/actions/buildSkyships";
 import conscriptLevies from "./moves/actions/conscriptLevies";
 import passFleetInfoToPlayerInfo from "./moves/actions/passFleetInfoToPlayerInfo";
 import deployFleet from "./moves/actions/deployFleet";
+import transferBetweenFleets from "./moves/actions/transferBetweenFleets";
+import sellSkyships from "./moves/actions/sellSkyships";
+import sellBuilding from "./moves/actions/sellBuilding";
+import transferOutpost from "./moves/actions/transferOutpost";
+import proposeDeal from "./moves/actions/proposeDeal";
+import acceptDeal from "./moves/actions/acceptDeal";
+import rejectDeal from "./moves/actions/rejectDeal";
 import enableDispatchButtons from "./moves/actions/enableDispatchButtons";
 import issueHolyDecree from "./moves/actions/issueHolyDecree";
+import declareSmugglerGood from "./moves/actions/declareSmugglerGood";
 import pass from "./moves/pass";
 import attackOtherPlayersFleet from "./moves/aerialBattle/attackOtherPlayersFleet";
 import evadeAttackingFleet from "./moves/aerialBattle/evadeAttackingFleet";
@@ -65,6 +70,20 @@ import { findNextBattle, findNextGroundBattle, findNextPlunder } from "./helpers
 import { TurnOrder } from "boardgame.io/core";
 import resolveRound from "./helpers/resolveRound";
 import pickLegacyCard from "./moves/pickLegacyCard";
+import pickKingdomAdvantageCard from "./moves/kingdomAdvantage/pickKingdomAdvantageCard";
+import chooseEventCard from "./moves/events/chooseEventCard";
+import resolveEventChoice from "./moves/events/resolveEventChoice";
+import { ALL_EVENT_CARD_NAMES } from "./helpers/eventCardDefinitions";
+import { prepareInfidelFleetCombat } from "./helpers/resolveInfidelFleet";
+import { continueResolution } from "./helpers/resolutionFlow";
+import respondToInfidelFleet from "./moves/events/respondToInfidelFleet";
+import commitRebellionTroops from "./moves/events/commitRebellionTroops";
+import contributeToRebellion from "./moves/events/contributeToRebellion";
+import offerBuyoffGold from "./moves/events/offerBuyoffGold";
+import nominateCaptainGeneral from "./moves/events/nominateCaptainGeneral";
+import commitDeferredBattleCard from "./moves/events/commitDeferredBattleCard";
+import contributeToGrandArmy from "./moves/events/contributeToGrandArmy";
+import { logEvent } from "./helpers/stateUtils";
 
 const MyGame: Game<MyGameState> = {
   turn: { minMoves: 1 },
@@ -88,21 +107,58 @@ const MyGame: Game<MyGameState> = {
       },
     };
 
+    const playerInfoMap = buildPlayerInfoMap(ctx);
+
+    // GAP-18: compute which player-type kingdoms are NPRs this session (1 cathedral each to start)
+    const assignedKingdoms = new Set(
+      Object.values(playerInfoMap).map((p) => p.kingdomName)
+    );
+    const ALL_PLAYER_KINGDOMS = [
+      "Angland", "Gallois", "Castillia", "Nordmark", "Ostreich", "Constantium",
+    ];
+    const nprCathedrals: Record<string, number> = {};
+    ALL_PLAYER_KINGDOMS.forEach((k) => {
+      if (!assignedKingdoms.has(k as any)) {
+        nprCathedrals[k] = 1;
+      }
+    });
+
+    // Shuffle contingent counter pool (used for rebellions and Grand Army)
+    const contingentPool = [...CONTINGENT_COUNTERS];
+    for (let i = contingentPool.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [contingentPool[i], contingentPool[j]] = [contingentPool[j], contingentPool[i]];
+    }
+
+    // Shuffle Infidel Host counter pool
+    const infidelHostPool = INFIDEL_HOST_COUNTERS.map((c) => ({ ...c }));
+    for (let i = infidelHostPool.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [infidelHostPool[i], infidelHostPool[j]] = [infidelHostPool[j], infidelHostPool[i]];
+    }
+
+    // Shuffle event deck and deal EVENT_HAND_SIZE cards to each player
+    const eventDeck = [...ALL_EVENT_CARD_NAMES];
+    for (let i = eventDeck.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [eventDeck[i], eventDeck[j]] = [eventDeck[j], eventDeck[i]];
+    }
+    for (const id of ctx.playOrder) {
+      playerInfoMap[id].resources.eventCards = eventDeck.splice(
+        0,
+        EVENT_HAND_SIZE
+      );
+    }
+
     return {
-      playerInfo: buildPlayerInfoMap(ctx),
+      playerInfo: playerInfoMap,
       mapState: mapState,
       boardState: { ...initialBoardState },
-      playerOrder: {
-        1: undefined,
-        2: undefined,
-        3: undefined,
-        4: undefined,
-        5: undefined,
-        6: undefined,
-      },
       cardDecks: {
         fortuneOfWarCards: fullResetFortuneOfWarCardDeck(),
         discardedFortuneOfWarCards: [],
+        kingdomAdvantagePool: [...ALL_KA_CARDS],
+        legacyDeck: [],
       },
       stage: "discovery",
       electionResults: {},
@@ -110,7 +166,37 @@ const MyGame: Game<MyGameState> = {
       round: 0,
       finalRound: FINAL_ROUND,
       firstTurnOfRound: true,
+      mustContinueDiscovery: false,
+      nprCathedrals,
       turnOrder: ctx.playOrder,
+      failedConquests: [],
+      contingentPool,
+      infidelHostPool,
+      accumulatedHosts: [],
+      infidelFleet: null,
+      gameLog: [],
+      currentRebellion: null,
+      currentInvasion: null,
+      infidelFleetCombat: null,
+      currentDeferredBattle: null,
+      pendingDeal: undefined,
+      eventState: {
+        deck: eventDeck,
+        chosenCards: [],
+        resolvedEvent: null,
+        deferredEvents: [],
+        pendingChoice: null,
+        taxModifier: 0,
+        peaceAccordActive: false,
+        schismAffected: [],
+        colonialPrelatesActive: false,
+        dynasticMarriage: null,
+        lendersRefuseCredit: [],
+        nprHeretic: [],
+        skipTaxesNextRound: false,
+        cannotConvertThisRound: [],
+        grandInfidelDies: false,
+      },
     };
   },
   moves: {
@@ -150,15 +236,42 @@ const MyGame: Game<MyGameState> = {
     garrisonTroops,
     yieldToAttacker,
     setTurnCompleteFalse,
+    chooseEventCard,
+    resolveEventChoice,
+    commitRebellionTroops,
+    nominateCaptainGeneral,
+    contributeToGrandArmy,
+    respondToInfidelFleet,
+    contributeToRebellion,
+    offerBuyoffGold,
   },
   phases: {
-    legacy_card: {
+    kingdom_advantage: {
       start: true,
+      moves: { pickKingdomAdvantageCard },
+      next: "legacy_card",
+      onBegin: (context) => {
+        context.G.cardDecks.kingdomAdvantagePool = context.random.Shuffle(
+          context.G.cardDecks.kingdomAdvantagePool
+        );
+      },
+      turn: {
+        order: {
+          first: () => 0,
+          next: (context) =>
+            context.ctx.playOrderPos + 1 < context.ctx.playOrder.length
+              ? context.ctx.playOrderPos + 1
+              : undefined,
+          playOrder: (context) => [...context.ctx.playOrder].reverse(),
+        },
+      },
+    },
+    legacy_card: {
       moves: { pickLegacyCard },
-      next: "discovery",
+      next: "events",
       onBegin: (context) => {
         context.G.stage = "pick legacy card";
-        const cards: LegacyCard[] = [...LEGACY_CARDS];
+        const cards: LegacyCardInfo[] = [...LEGACY_CARDS];
         Object.values(context.G.playerInfo).forEach((player) => {
           for (let i = 0; i < 3; i++) {
             let randomIndex = Math.floor(Math.random() * cards.length);
@@ -166,7 +279,24 @@ const MyGame: Game<MyGameState> = {
             player.legacyCardOptions.push(card[0]);
           }
         });
+        // Store remaining cards for Royal Succession event
+        context.G.cardDecks.legacyDeck = cards;
       },
+    },
+    events: {
+      turn: {
+        order: TurnOrder.CUSTOM_FROM("turnOrder"),
+      },
+      onBegin: (context) => {
+        context.G.stage = "events";
+        context.G.eventState.taxModifier = 0;
+        context.G.eventState.chosenCards = [];
+        context.G.eventState.resolvedEvent = null;
+        context.G.eventState.cannotConvertThisRound = [];
+        console.log("Events phase has begun");
+      },
+      moves: { chooseEventCard, resolveEventChoice },
+      next: "discovery",
     },
     discovery: {
       onBegin: (context) => {
@@ -180,74 +310,6 @@ const MyGame: Game<MyGameState> = {
 
         Object.values(context.G.playerInfo).forEach((playerInfo: any) => {
           playerInfo.passed = false;
-        });
-        const currentTurnOrder = [...context.ctx.playOrder];
-        let newTurnOrder: string[] = [];
-        Object.values(context.G.boardState.alterPlayerOrder).forEach(
-          (id, index) => {
-            if (index < context.ctx.playOrder.length) {
-              if (id) {
-                newTurnOrder.splice(currentTurnOrder.indexOf(id), 1);
-                newTurnOrder.push(id);
-              } else {
-                newTurnOrder.push(currentTurnOrder.splice(0, 1)[0]);
-              }
-            }
-          }
-        );
-        newTurnOrder.push(...currentTurnOrder);
-        if (newTurnOrder.length !== context.ctx.playOrder.length) {
-          throw Error(`Something has gone wrong when updating the player order.
-          old order: ${context.ctx.playOrder}
-          new order: ${newTurnOrder}`);
-        } else {
-          context.G.turnOrder = newTurnOrder;
-        }
-
-        Object.entries(context.G.boardState).forEach(
-          ([key, gameStateObject]: [string, any]) => {
-            if (key === "foundBuildings") {
-              Object.values(gameStateObject).forEach((idArray: any) => {
-                idArray.forEach((id: string) => {
-                  console.log(
-                    `adding counsellor to player ${id} info for a founded ${key}`
-                  );
-                  context.G.playerInfo[id].resources.counsellors += 1;
-                });
-              });
-            } else if (key === "issueHolyDecree") {
-              context.G.boardState[key] = false;
-            } else {
-              Object.values(gameStateObject).forEach((id: any) => {
-                if (id) {
-                  console.log(
-                    `adding counsellor to player ${id} info for a ${key} button`
-                  );
-                  context.G.playerInfo[id].resources.counsellors += 1;
-                }
-              });
-            }
-          }
-        );
-
-        context.G.boardState = { ...initialBoardState };
-
-        Object.values(context.G.playerInfo).forEach((player: any) => {
-          Object.values(player.playerBoardCounsellorLocations).forEach(
-            (counsellor, index) => {
-              if (counsellor && index !== 3) {
-                console.log(
-                  "adding counsellor to player info for a player board button"
-                );
-                player.resources.counsellors += 1;
-                counsellor = false;
-              }
-            }
-          );
-          player.playerBoardCounsellorLocations.buildSkyships = false;
-          player.playerBoardCounsellorLocations.conscriptLevies = false;
-          player.playerBoardCounsellorLocations.dispatchSkyshipFleet = false;
-          player.playerBoardCounsellorLocations.dispatchDisabled = false;
         });
         context.events.endTurn({ next: context.ctx.playOrder[0] });
         context.events.pass();
@@ -276,10 +338,24 @@ const MyGame: Game<MyGameState> = {
       onBegin: (context) => {
         context.G.stage = "taxes";
         console.log("Taxes phase has begun");
+
+        // Peasant REBELLION loss: skip taxes this round
+        if (context.G.eventState.skipTaxesNextRound) {
+          logEvent(context.G, "Taxes skipped due to Peasant Rebellion");
+          context.G.eventState.skipTaxesNextRound = false;
+          context.events.endPhase();
+          return;
+        }
+
+        const taxMod = context.G.eventState.taxModifier;
         context.ctx.playOrder.forEach((id, index) => {
-          context.G.playerInfo[id].resources.gold += getGoldIncomeForPlayer(index);
-          // TODO C1: add +2 Gold for the player holding the `more_efficient_taxation` KA card (Track A2/B12)
+          let income = getGoldIncomeForPlayer(index) + taxMod;
+          if (context.G.playerInfo[id].resources.advantageCard === "more_efficient_taxation") {
+            income += 2;
+          }
+          context.G.playerInfo[id].resources.gold += Math.max(0, income);
         });
+        logEvent(context.G, `Taxes collected${taxMod !== 0 ? ` (modifier: ${taxMod > 0 ? "+" : ""}${taxMod})` : ""}`);
         context.events.endPhase();
       },
       moves: {},
@@ -324,8 +400,16 @@ const MyGame: Game<MyGameState> = {
         conscriptLevies,
         passFleetInfoToPlayerInfo,
         deployFleet,
+        transferBetweenFleets,
+        sellSkyships,
+        sellBuilding,
+        transferOutpost,
+        proposeDeal,
+        acceptDeal,
+        rejectDeal,
         enableDispatchButtons,
         issueHolyDecree,
+        declareSmugglerGood,
         pass,
         setTurnCompleteFalse,
       },
@@ -449,17 +533,113 @@ const MyGame: Game<MyGameState> = {
       next: "resolution",
     },
     resolution: {
-      turn: { order: TurnOrder.ONCE },
+      turn: { order: TurnOrder.CUSTOM_FROM("turnOrder") },
       onBegin: (context) => {
         console.log("resolution phase has begun");
-        context.G.stage = "retrieve fleets";
+
+        // Step 1: Infidel Fleet targeting + movement
+        const hasCombat = prepareInfidelFleetCombat(context.G);
+
+        if (hasCombat) {
+          // Interactive: target player chooses fight or evade
+          context.G.stage = "infidel_fleet_combat";
+          context.events.endTurn({
+            next: context.G.infidelFleetCombat!.targetPlayerID,
+          });
+        } else {
+          // No Fleet combat — continue to deferred events, rebellions, invasion
+          continueResolution(context.G, context.events);
+        }
       },
       onEnd: (context) => {
-        resolveRound(context.G, context.events);
+        resolveRound(context.G, context.events, context.random);
         console.log(`Round number:${context.G.round}`);
       },
-      moves: { retrieveFleets },
-      next: "discovery",
+      moves: { retrieveFleets, commitRebellionTroops, contributeToRebellion, nominateCaptainGeneral, contributeToGrandArmy, respondToInfidelFleet, offerBuyoffGold, commitDeferredBattleCard },
+      next: "reset",
+    },
+    reset: {
+      turn: { order: TurnOrder.ONCE },
+      onBegin: (context) => {
+        console.log("Reset phase has begun");
+
+        // Recompute turn order from alterPlayerOrder choices
+        const currentTurnOrder = [...context.ctx.playOrder];
+        let newTurnOrder: string[] = [];
+        Object.values(context.G.boardState.pendingPlayerOrder).forEach(
+          (id, index) => {
+            if (index < context.ctx.playOrder.length) {
+              if (id) {
+                newTurnOrder.splice(currentTurnOrder.indexOf(id), 1);
+                newTurnOrder.push(id);
+              } else {
+                newTurnOrder.push(currentTurnOrder.splice(0, 1)[0]);
+              }
+            }
+          }
+        );
+        newTurnOrder.push(...currentTurnOrder);
+        if (newTurnOrder.length !== context.ctx.playOrder.length) {
+          throw Error(`Something has gone wrong when updating the player order.
+          old order: ${context.ctx.playOrder}
+          new order: ${newTurnOrder}`);
+        } else {
+          context.G.turnOrder = newTurnOrder;
+        }
+
+        // Return counsellors from action board slots
+        Object.entries(context.G.boardState).forEach(
+          ([key, gameStateObject]: [string, any]) => {
+            if (key === "foundBuildings") {
+              Object.values(gameStateObject).forEach((idArray: any) => {
+                idArray.forEach((id: string) => {
+                  console.log(
+                    `adding counsellor to player ${id} info for a founded ${key}`
+                  );
+                  context.G.playerInfo[id].resources.counsellors += 1;
+                });
+              });
+            } else if (key === "issueHolyDecree") {
+              context.G.boardState[key] = false;
+            } else {
+              Object.values(gameStateObject).forEach((id: any) => {
+                if (id) {
+                  console.log(
+                    `adding counsellor to player ${id} info for a ${key} button`
+                  );
+                  context.G.playerInfo[id].resources.counsellors += 1;
+                }
+              });
+            }
+          }
+        );
+
+        // Reset action board
+        context.G.boardState = { ...initialBoardState };
+
+        // Return counsellors from player board slots
+        Object.values(context.G.playerInfo).forEach((player: any) => {
+          Object.values(player.playerBoardCounsellorLocations).forEach(
+            (counsellor, index) => {
+              if (counsellor && index !== 3) {
+                console.log(
+                  "adding counsellor to player info for a player board button"
+                );
+                player.resources.counsellors += 1;
+                counsellor = false;
+              }
+            }
+          );
+          player.playerBoardCounsellorLocations.buildSkyships = false;
+          player.playerBoardCounsellorLocations.conscriptLevies = false;
+          player.playerBoardCounsellorLocations.dispatchSkyshipFleet = false;
+          player.playerBoardCounsellorLocations.dispatchDisabled = false;
+        });
+
+        context.events.endPhase();
+      },
+      moves: {},
+      next: "events",
     },
   },
   maxPlayers: 6,

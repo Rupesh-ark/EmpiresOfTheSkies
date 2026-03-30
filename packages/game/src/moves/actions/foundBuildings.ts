@@ -1,9 +1,18 @@
 import { Move } from "boardgame.io";
 import { MyGameState } from "../../types";
 import { INVALID_MOVE } from "boardgame.io/core";
-import { checkCounsellorsNotZero } from "../moveValidation";
-import { removeOneCounsellor } from "../resourceUpdates";
-import { BuildingSlot } from "../../codifiedGameInfo";
+import { validateMove } from "../moveValidation";
+import { removeOneCounsellor, HERESY_MAX, HERESY_MIN } from "../../helpers/stateUtils";
+import {
+  BuildingSlot,
+  BUILDING_BASE_COST,
+  MAX_CATHEDRALS,
+  MAX_PALACES,
+  MAX_SHIPYARDS,
+  CATHEDRAL_VP,
+  PALACE_VP_HERETIC,
+  PALACE_VP_ORTHODOX,
+} from "../../codifiedGameInfo";
 import { EventsAPI } from "boardgame.io/dist/types/src/plugins/plugin-events";
 import { RandomAPI } from "boardgame.io/dist/types/src/plugins/random/random";
 import { Ctx } from "boardgame.io/dist/types/src/types";
@@ -25,9 +34,7 @@ const foundBuildings: Move<MyGameState> = (
   },
   ...args: any[]
 ) => {
-  if (checkCounsellorsNotZero(playerID, G)) {
-    return INVALID_MOVE;
-  }
+  if (validateMove(playerID, G, { costsCounsellor: true, costsGold: true })) return INVALID_MOVE;
   const value: keyof typeof G.boardState.foundBuildings = args[0] + 1;
 
   const specialisedBuildingFunctions = {
@@ -46,43 +53,57 @@ const foundCathedral = (
   events: EventsAPI,
   args: any[]
 ): void | typeof INVALID_MOVE => {
-  if (G.playerInfo[playerID].cathedrals === 6) {
+  if (G.playerInfo[playerID].cathedrals === MAX_CATHEDRALS) {
     return INVALID_MOVE;
   }
   if (G.playerInfo[playerID].hereticOrOrthodox === "heretic") {
     return INVALID_MOVE;
   }
-  const cost = 5 + G.boardState.foundBuildings[BuildingSlot.Cathedral].length;
+  const cost = BUILDING_BASE_COST.cathedral + G.boardState.foundBuildings[BuildingSlot.Cathedral].length;
   G.playerInfo[playerID].resources.gold -= cost;
   G.playerInfo[playerID].cathedrals += 1;
-  G.playerInfo[playerID].resources.victoryPoints += 2;
-  if (G.playerInfo[playerID].heresyTracker > -11) {
+  G.playerInfo[playerID].resources.victoryPoints += CATHEDRAL_VP;
+  if (G.playerInfo[playerID].heresyTracker > HERESY_MIN) {
     G.playerInfo[playerID].heresyTracker -= 1;
   }
   G.boardState.foundBuildings[BuildingSlot.Cathedral].push(playerID);
   removeOneCounsellor(G, playerID);
   G.playerInfo[playerID].turnComplete = true;
 };
-//TODO: add a input for the user to select the heresy tracker movement direction
 const foundPalace = (
   G: MyGameState,
   playerID: string,
   events: EventsAPI,
   args: any[]
 ): void | typeof INVALID_MOVE => {
-  if (G.playerInfo[playerID].palaces === 6) {
+  if (G.playerInfo[playerID].palaces === MAX_PALACES) {
     return INVALID_MOVE;
   }
 
-  const cost = 5 + G.boardState.foundBuildings[BuildingSlot.Palace].length;
+  // args[1] is the heresy direction chosen by the player ("advance" or "retreat")
+  const heresyDirection: "advance" | "retreat" = args[1];
+  if (heresyDirection !== "advance" && heresyDirection !== "retreat") {
+    return INVALID_MOVE;
+  }
+
+  const cost = BUILDING_BASE_COST.palace + G.boardState.foundBuildings[BuildingSlot.Palace].length;
 
   G.playerInfo[playerID].resources.gold -= cost;
   G.playerInfo[playerID].palaces += 1;
   if (G.playerInfo[playerID].hereticOrOrthodox === "heretic") {
-    G.playerInfo[playerID].resources.victoryPoints += 2;
+    G.playerInfo[playerID].resources.victoryPoints += PALACE_VP_HERETIC;
   } else {
-    G.playerInfo[playerID].resources.victoryPoints += 1;
+    G.playerInfo[playerID].resources.victoryPoints += PALACE_VP_ORTHODOX;
   }
+
+  // Rule: founding a Palace moves the heresy tracker one space in the player's chosen direction
+  const tracker = G.playerInfo[playerID].heresyTracker;
+  if (heresyDirection === "advance" && tracker < HERESY_MAX) {
+    G.playerInfo[playerID].heresyTracker += 1;
+  } else if (heresyDirection === "retreat" && tracker > HERESY_MIN) {
+    G.playerInfo[playerID].heresyTracker -= 1;
+  }
+
   G.boardState.foundBuildings[BuildingSlot.Palace].push(playerID);
   removeOneCounsellor(G, playerID);
 
@@ -95,10 +116,10 @@ const foundShipyard = (
   events: EventsAPI,
   args: any[]
 ): void | typeof INVALID_MOVE => {
-  if (G.playerInfo[playerID].shipyards === 3) {
+  if (G.playerInfo[playerID].shipyards === MAX_SHIPYARDS) {
     return INVALID_MOVE;
   }
-  const cost = 3 + G.boardState.foundBuildings[BuildingSlot.Shipyard].length;
+  const cost = BUILDING_BASE_COST.shipyard + G.boardState.foundBuildings[BuildingSlot.Shipyard].length;
 
   G.playerInfo[playerID].resources.gold -= cost;
   G.playerInfo[playerID].shipyards += 1;
@@ -107,15 +128,29 @@ const foundShipyard = (
 
   G.playerInfo[playerID].turnComplete = true;
 };
-//TODO: add capability for the user to select the map tile to build the fort on
-// and validate that they have either an outpost or colony on that tile as well as regiments
+// Fort placement: pays cost here, then player picks a tile via checkAndPlaceFort move.
+// Frontend shows valid tiles in a dialog (ActionBoardButton handles this).
 const foundFort = (
   G: MyGameState,
   playerID: string,
   events: EventsAPI,
   args: any[]
 ): void | typeof INVALID_MOVE => {
-  const cost = 2 + G.boardState.foundBuildings[BuildingSlot.Fort].length;
+  // Validate that at least one valid tile exists before charging
+  const hasValidTile = G.mapState.buildings.some((row, y) =>
+    row.some((tile, x) => {
+      const hasBuilding = tile.player?.id === playerID &&
+        (tile.buildings === "colony" || tile.buildings === "outpost");
+      const hasTroops = tile.garrisonedRegiments > 0 || tile.garrisonedLevies > 0 ||
+        G.playerInfo[playerID].fleetInfo.some(
+          (f) => f.location[0] === x && f.location[1] === y && (f.regiments > 0 || f.levies > 0)
+        );
+      return hasBuilding && !tile.fort && hasTroops;
+    })
+  );
+  if (!hasValidTile) return INVALID_MOVE;
+
+  const cost = BUILDING_BASE_COST.fort + G.boardState.foundBuildings[BuildingSlot.Fort].length;
 
   G.playerInfo[playerID].resources.gold -= cost;
   G.boardState.foundBuildings[BuildingSlot.Fort].push(playerID);

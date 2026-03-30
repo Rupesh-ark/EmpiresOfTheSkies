@@ -1,51 +1,32 @@
 import { Move } from "boardgame.io";
 import { MyGameState } from "../../types";
-import { checkCounsellorsNotZero } from "../moveValidation";
+import { validateMove } from "../moveValidation";
 import { INVALID_MOVE } from "boardgame.io/core";
 import { drawFortuneOfWarCard } from "../../helpers/helpers";
-import { removeGoldAmount, removeOneCounsellor } from "../resourceUpdates";
-import { EventsAPI } from "boardgame.io/dist/types/src/plugins/plugin-events";
-import { RandomAPI } from "boardgame.io/dist/types/src/plugins/random/random";
-import { Ctx } from "boardgame.io/dist/types/src/types";
+import { removeOneCounsellor } from "../../helpers/stateUtils";
+import { FOW_CARDS_DRAWN, FOW_HAND_MAX } from "../../codifiedGameInfo";
 
-const trainTroops: Move<MyGameState> = (
-  {
-    G,
-    ctx,
-    playerID,
-    events,
-    random,
-  }: {
-    G: MyGameState;
-    ctx: Ctx;
-    playerID: string;
-    events: EventsAPI;
-    random: RandomAPI;
-  },
-  ...args: any[]
-) => {
-  if (checkCounsellorsNotZero(playerID, G) !== undefined) {
-    return INVALID_MOVE;
-  }
-  const value = (args[0] + 1) as 1 | 2;
+const trainTroops: Move<MyGameState> = ({ G, playerID }) => {
+  if (validateMove(playerID, G, { costsCounsellor: true })) return INVALID_MOVE;
   const playerBoard = G.playerInfo[playerID].playerBoardCounsellorLocations;
 
   if (playerBoard.trainTroops) {
     console.log("Player has selected a move which has already been taken.");
     return INVALID_MOVE;
   }
-  for (let i = 0; i < value; i++) {
+  for (let i = 0; i < FOW_CARDS_DRAWN; i++) {
     const card = drawFortuneOfWarCard(G);
-
     G.playerInfo[playerID].resources.fortuneCards.push({
       ...card,
       flipped: false,
     });
   }
-  removeOneCounsellor(G, playerID);
-  if (value === 2) {
-    removeGoldAmount(G, playerID, 1);
+  // GAP-13: FoW hand max 4 — discard oldest cards if over the limit
+  const hand = G.playerInfo[playerID].resources.fortuneCards;
+  if (hand.length > FOW_HAND_MAX) {
+    hand.splice(0, hand.length - FOW_HAND_MAX);
   }
+  removeOneCounsellor(G, playerID);
   playerBoard.trainTroops = true;
   G.playerInfo[playerID].turnComplete = true;
 };

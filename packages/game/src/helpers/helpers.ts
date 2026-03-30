@@ -139,21 +139,88 @@ export const sortPlayersInPlayerOrder = (
 };
 
 export const drawFortuneOfWarCard = (G: MyGameState): FortuneOfWarCardInfo => {
-  const cardDeck = G.cardDecks.fortuneOfWarCards;
-  let randomIndex = Math.floor(Math.random() * cardDeck.length);
-
-  //checking if the card is a no effect card
-  while (
-    cardDeck[randomIndex].shield === 0 &&
-    cardDeck[randomIndex].sword === 0
-  ) {
+  if (G.cardDecks.fortuneOfWarCards.length === 0) {
     resetFortuneOfWarCardDeck(G);
-    randomIndex = Math.floor(Math.random() * cardDeck.length);
   }
-  const card = cardDeck[randomIndex];
-  G.cardDecks.discardedFortuneOfWarCards.push(cardDeck[randomIndex]);
-  G.cardDecks.fortuneOfWarCards.splice(randomIndex, 1);
+  const card = G.cardDecks.fortuneOfWarCards.splice(0, 1)[0];
+  G.cardDecks.discardedFortuneOfWarCards.push(card);
+
+  // v4.2: No Effect → discard, reshuffle discard into deck, draw again
+  const isNoEffect = card.sword === 0 && card.shield === 0;
+  if (isNoEffect) {
+    resetFortuneOfWarCardDeck(G);
+    // Guard against infinite loop if all remaining cards are No Effect
+    const hasRealCard = G.cardDecks.fortuneOfWarCards.some(
+      (c) => c.sword !== 0 || c.shield !== 0
+    );
+    if (hasRealCard) {
+      return drawFortuneOfWarCard(G);
+    }
+  }
   return card;
+};
+
+// ── Tile query helpers ────────────────────────────────────────────────────────
+// Reusable functions for checking tile state. All accept optional playerID
+// to scope the check to a specific player.
+
+/** Check if a tile has a fort (optionally owned by a specific player) */
+export const hasFortAt = (
+  G: MyGameState,
+  x: number,
+  y: number,
+  playerID?: string
+): boolean => {
+  const tile = G.mapState.buildings[y]?.[x];
+  if (!tile?.fort) return false;
+  if (playerID && tile.player?.id !== playerID) return false;
+  return true;
+};
+
+/** Check if a tile has an outpost (optionally owned by a specific player) */
+export const hasOutpostAt = (
+  G: MyGameState,
+  x: number,
+  y: number,
+  playerID?: string
+): boolean => {
+  const tile = G.mapState.buildings[y]?.[x];
+  if (tile?.buildings !== "outpost") return false;
+  if (playerID && tile.player?.id !== playerID) return false;
+  return true;
+};
+
+/** Check if a tile has a colony (optionally owned by a specific player) */
+export const hasColonyAt = (
+  G: MyGameState,
+  x: number,
+  y: number,
+  playerID?: string
+): boolean => {
+  const tile = G.mapState.buildings[y]?.[x];
+  if (tile?.buildings !== "colony") return false;
+  if (playerID && tile.player?.id !== playerID) return false;
+  return true;
+};
+
+/** Check if any outpost exists on the map (optionally owned by a specific player) */
+export const hasAnyOutpost = (G: MyGameState, playerID?: string): boolean => {
+  for (let y = 0; y < G.mapState.buildings.length; y++) {
+    for (let x = 0; x < G.mapState.buildings[y].length; x++) {
+      if (hasOutpostAt(G, x, y, playerID)) return true;
+    }
+  }
+  return false;
+};
+
+/** Check if any colony exists on the map (optionally owned by a specific player) */
+export const hasAnyColony = (G: MyGameState, playerID?: string): boolean => {
+  for (let y = 0; y < G.mapState.buildings.length; y++) {
+    for (let x = 0; x < G.mapState.buildings[y].length; x++) {
+      if (hasColonyAt(G, x, y, playerID)) return true;
+    }
+  }
+  return false;
 };
 
 export const checkIfCurrentPlayerIsInCurrentBattle = (

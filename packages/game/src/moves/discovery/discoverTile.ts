@@ -1,7 +1,7 @@
 import { INVALID_MOVE } from "boardgame.io/core/";
 import { MyGameState } from "../../types";
 import { Move } from "boardgame.io";
-import { advanceAllHeresyTrackers } from "../resourceUpdates";
+import { advanceAllHeresyTrackers, logEvent } from "../../helpers/stateUtils";
 import { EventsAPI } from "boardgame.io/dist/types/src/plugins/plugin-events";
 import { RandomAPI } from "boardgame.io/dist/types/src/plugins/random/random";
 import { Ctx } from "boardgame.io/dist/types/src/types";
@@ -55,9 +55,15 @@ export const discoverTile: Move<MyGameState> = (
   // splits the tile name on any number
   const tileRace = currentTile.name.split(/(\d+)/)[0].toLowerCase();
 
-  if (tileRace !== "ocean" && !G.mapState.discoveredRaces.includes(tileRace)) {
+  if (currentTile.type === "legend") {
+    advanceAllHeresyTrackers(G);
+    logEvent(G, `Legend discovered: ${currentTile.name} \u2014 all heresy advances`);
+  } else if (tileRace !== "ocean" && !G.mapState.discoveredRaces.includes(tileRace)) {
     advanceAllHeresyTrackers(G);
     G.mapState.discoveredRaces.push(tileRace);
+    logEvent(G, `New race discovered: ${tileRace} \u2014 all heresy advances`);
+  } else if (currentTile.type !== "ocean") {
+    logEvent(G, `Tile discovered: ${currentTile.name}`);
   }
   G.mapState.discoveredTiles[y][x] = true;
   G.mapState.mostRecentlyDiscoveredTile = [x, y];
@@ -72,13 +78,26 @@ export const discoverTile: Move<MyGameState> = (
     });
   });
 
-  if (allDiscovered) events.endPhase();
+  if (allDiscovered) {
+    G.mustContinueDiscovery = false;
+    events.endPhase();
+    return;
+  }
 
-  if (currentTile.shield !== 0 || currentTile.sword !== 0) {
-    if (ctx.currentPlayer === ctx.playOrder[ctx.playOrder.length - 1]) {
-      events.endPhase();
-    } else {
-      events.endTurn();
+  // GAP-24: Discovery cascade — Ocean/Legend tiles don't count as Land; player must flip again
+  if (currentTile.type === "ocean" || currentTile.type === "legend") {
+    G.mustContinueDiscovery = true;
+    // Do NOT end turn — player must flip an adjacent tile
+  } else {
+    // Land (or home/infidel_empire) tile found — cascade satisfied
+    G.mustContinueDiscovery = false;
+    // End turn on combat tile (native creature guards the land)
+    if (currentTile.shield !== 0 || currentTile.sword !== 0) {
+      if (ctx.currentPlayer === ctx.playOrder[ctx.playOrder.length - 1]) {
+        events.endPhase();
+      } else {
+        events.endTurn();
+      }
     }
   }
 };

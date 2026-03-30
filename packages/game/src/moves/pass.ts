@@ -3,6 +3,7 @@ import { MyGameState } from "../types";
 import { Ctx } from "boardgame.io/dist/types/src/types";
 import { EventsAPI } from "boardgame.io/dist/types/src/plugins/plugin-events";
 import { RandomAPI } from "boardgame.io/dist/types/src/plugins/random/random";
+import { INVALID_MOVE } from "boardgame.io/core";
 
 const pass: Move<MyGameState> = (
   {
@@ -20,6 +21,10 @@ const pass: Move<MyGameState> = (
   },
   ...args: any[]
 ) => {
+  // GAP-24: cascade flip — must keep discovering after Ocean/Legend; Land clears the flag
+  if (ctx.phase === "discovery" && G.mustContinueDiscovery) {
+    return INVALID_MOVE;
+  }
   G.playerInfo[playerID].passed = true;
   if (ctx.phase === "discovery") {
     G.firstTurnOfRound = false;
