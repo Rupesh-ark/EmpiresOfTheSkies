@@ -18,7 +18,7 @@ import { buildInitialG, buildPlayer, buildCtx, buildResources } from "../testHel
 
 function callMove(G: ReturnType<typeof buildInitialG>, playerID: string, slotIndex: number, numPlayers = 2) {
   const ctx = buildCtx(playerID, numPlayers);
-  return (convertMonarch as Function)({ G, ctx, playerID }, slotIndex);
+  return convertMonarch.fn({ G, ctx, playerID }, slotIndex);
 }
 
 describe("convertMonarch — cost (v4.2: 2 Gold + 2 counsellors)", () => {
@@ -116,12 +116,12 @@ describe("convertMonarch — INVALID_MOVE conditions", () => {
     expect(result).toBe(INVALID_MOVE);
   });
 
-  it("returns INVALID_MOVE when player has fewer than 2 Gold", () => {
+  it("allows conversion with insufficient gold (goes into debt)", () => {
     const G = buildInitialG([
       buildPlayer("0", { resources: buildResources({ gold: 1 }) }),
       buildPlayer("1"),
     ]);
-    const result = callMove(G, "0", 0);
-    expect(result).toBe(INVALID_MOVE);
+    callMove(G, "0", 0);
+    expect(G.playerInfo["0"].resources.gold).toBe(-1);
   });
 });

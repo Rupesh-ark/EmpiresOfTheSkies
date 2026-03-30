@@ -4,8 +4,8 @@
  * Tests for the foundFactory move (v4.2).
  *
  * Rules:
- *   - Cost = 1 Gold + 1 per slot already taken on foundFactories board
- *     → slot 1 = 1G, slot 2 = 2G, slot 3 = 3G, slot 4 = 4G
+ *   - Cost = 1 Gold + 1 per counsellor in slot (including self)
+ *     → slot 1 = 2G, slot 2 = 3G, slot 3 = 4G, slot 4 = 5G
  *   - Player gains 1 factory
  *   - Consumes 1 counsellor
  *   - Marks turnComplete = true
@@ -16,46 +16,46 @@ import { describe, it, expect } from "vitest";
 import { INVALID_MOVE } from "boardgame.io/core";
 import foundFactory from "../../moves/actions/foundFactory";
 import { buildInitialG, buildPlayer, buildCtx } from "../testHelpers";
-import { MAX_FACTORIES } from "../../codifiedGameInfo";
+import { MAX_FACTORIES } from "../../data/gameData";
 
 function callMove(G: ReturnType<typeof buildInitialG>, playerID: string, slotIndex: number) {
   const ctx = buildCtx(playerID);
-  return (foundFactory as Function)({ G, ctx, playerID }, slotIndex);
+  return foundFactory.fn({ G, ctx, playerID }, slotIndex);
 }
 
 describe("foundFactory — cost formula (v4.2)", () => {
-  it("first slot (0) costs 1 Gold", () => {
+  it("first slot (0) costs 2 Gold (1 base + 1 for self)", () => {
     const G = buildInitialG();
     const before = G.playerInfo["0"].resources.gold; // 6
     callMove(G, "0", 0);
-    expect(G.playerInfo["0"].resources.gold).toBe(before - 1);
+    expect(G.playerInfo["0"].resources.gold).toBe(before - 2);
   });
 
-  it("second slot costs 2 Gold when first slot is already taken", () => {
+  it("second slot costs 3 Gold when first slot is already taken", () => {
     const G = buildInitialG([buildPlayer("0"), buildPlayer("1")]);
     G.boardState.foundFactories[1] = "0"; // simulate slot 0 taken
     const before = G.playerInfo["1"].resources.gold; // 6
     callMove(G, "1", 1);
-    expect(G.playerInfo["1"].resources.gold).toBe(before - 2);
+    expect(G.playerInfo["1"].resources.gold).toBe(before - 3);
   });
 
-  it("third slot costs 3 Gold when first two slots taken", () => {
+  it("third slot costs 4 Gold when first two slots taken", () => {
     const G = buildInitialG([buildPlayer("0"), buildPlayer("1")]);
     G.boardState.foundFactories[1] = "0";
     G.boardState.foundFactories[2] = "1";
     const before = G.playerInfo["0"].resources.gold; // 6
     callMove(G, "0", 2);
-    expect(G.playerInfo["0"].resources.gold).toBe(before - 3);
+    expect(G.playerInfo["0"].resources.gold).toBe(before - 4);
   });
 
-  it("fourth slot costs 4 Gold when first three slots taken", () => {
+  it("fourth slot costs 5 Gold when first three slots taken", () => {
     const G = buildInitialG([buildPlayer("0"), buildPlayer("1")]);
     G.boardState.foundFactories[1] = "0";
     G.boardState.foundFactories[2] = "1";
     G.boardState.foundFactories[3] = "0";
     const before = G.playerInfo["1"].resources.gold; // 6
     callMove(G, "1", 3);
-    expect(G.playerInfo["1"].resources.gold).toBe(before - 4);
+    expect(G.playerInfo["1"].resources.gold).toBe(before - 5);
   });
 });
 

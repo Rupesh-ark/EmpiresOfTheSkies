@@ -28,8 +28,8 @@ export const grantTradeRouteGoods = (G: MyGameState): void => {
         const network = new Set(playerNetwork);
         network.add(tileKey(x, y));
 
-        // Check if this tile is reachable from Faithdom
-        const reachable = bfsReachable(FAITHDOM_TILES, network);
+        // Check if this tile is reachable from Faithdom (respecting mountains)
+        const reachable = bfsReachable(FAITHDOM_TILES, network, G.mapState.currentTileArray);
         if (!reachable.has(tileKey(x, y))) continue;
 
         // Grant goods and gold based on building type

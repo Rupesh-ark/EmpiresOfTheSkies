@@ -10,6 +10,7 @@ import {
   Typography,
   Chip,
 } from "@mui/material";
+import { tokens } from "@/theme";
 
 const KINGDOM_SLOT_MAP: Record<string, number> = {
   Angland: 1,
@@ -25,7 +26,7 @@ const KINGDOM_SLOT_MAP: Record<string, number> = {
 const colHeaderCellSx = {
   fontWeight: 700,
   whiteSpace: "nowrap",
-  color: "text.secondary",
+  color: tokens.ui.textMuted,
   fontSize: "0.7rem",
   textTransform: "uppercase",
   letterSpacing: 0.5,
@@ -44,13 +45,15 @@ const NprKingdomTable = (props: MyGameProps) => {
 
   return (
     <Paper
-      elevation={2}
+      elevation={0}
       sx={{
         maxWidth: 1230,
         mb: 3,
         width: "100%",
         borderRadius: 2,
         overflow: "hidden",
+        backgroundColor: tokens.ui.surface,
+        border: `1px solid ${tokens.ui.border}`,
       }}
     >
       <Box
@@ -82,7 +85,7 @@ const NprKingdomTable = (props: MyGameProps) => {
           sx={{ mb: 2, "& td, & th": { fontSize: "0.875rem" } }}
         >
           <TableHead>
-            <TableRow sx={{ backgroundColor: "rgba(0,0,0,0.04)" }}>
+            <TableRow sx={{ backgroundColor: tokens.ui.surfaceRaised }}>
               <TableCell sx={colHeaderCellSx}>Kingdom</TableCell>
               <TableCell align="right" sx={colHeaderCellSx}>
                 Cathedrals
@@ -113,6 +116,7 @@ const NprKingdomTable = (props: MyGameProps) => {
                   hover
                   sx={{
                     "&:last-child td, &:last-child th": { border: 0 },
+                    "&:hover": { backgroundColor: tokens.ui.surfaceHover },
                   }}
                 >
                   <TableCell>
@@ -125,7 +129,7 @@ const NprKingdomTable = (props: MyGameProps) => {
                     >
                       <Typography
                         variant="body2"
-                        sx={{ fontWeight: "medium" }}
+                        sx={{ fontWeight: "medium", color: tokens.ui.text }}
                       >
                         {kingdom}
                       </Typography>
@@ -172,7 +176,7 @@ const NprKingdomTable = (props: MyGameProps) => {
                     />
                   </TableCell>
                   <TableCell>
-                    <Typography variant="body2" sx={{ color: controllerName ? "text.primary" : "text.disabled" }}>
+                    <Typography variant="body2" sx={{ color: controllerName ? tokens.ui.text : tokens.ui.textMuted }}>
                       {controllerName ?? "Uninfluenced"}
                     </Typography>
                   </TableCell>

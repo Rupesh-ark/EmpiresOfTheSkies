@@ -1,33 +1,202 @@
-import React, { useState } from "react";
-import { MyGameProps } from "@eots/game";
+import { useState, useCallback } from "react";
+import { MyGameProps, createLogger } from "@eots/game";
 import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-} from "@mui/material";
+  DndContext,
+  DragOverlay,
+  DragEndEvent,
+  DragStartEvent,
+  useDraggable,
+  useDroppable,
+} from "@dnd-kit/core";
+import { Box, Typography } from "@mui/material";
+import { DialogShell } from "@/components/atoms/DialogShell";
+import { tokens } from "@/theme";
+import { IconRegiment, IconElite, IconLevy } from "@/theme";
 
-import WorldMap from "../WorldMap/WorldMap";
-import { ButtonRow } from "../ActionBoard/components/ActionBoardButtonRow";
+const log = createLogger("battle");
 
-const GarrisonTroopsDialog = (props: GarrisonTroopsDialogProps) => {
-  const [open, setOpen] = useState(true);
+// ── Troop types & icons (same pattern as FleetTransferDialog) ──────────────
+
+type TroopKind = "regiment" | "elite" | "levy";
+
+function TroopIcon({ kind, size = 16 }: { kind: TroopKind; size?: number }) {
+  const style = { color: tokens.ui.text };
+  if (kind === "regiment") return <IconRegiment size={size} style={style} />;
+  if (kind === "elite") return <IconElite size={size} style={style} />;
+  return <IconLevy size={size} style={style} />;
+}
+
+function TroopChip({ kind, overlay = false }: { kind: TroopKind; overlay?: boolean }) {
+  return (
+    <Box
+      sx={{
+        width: 32,
+        height: 32,
+        borderRadius: "50%",
+        border: `2px solid ${tokens.ui.borderMedium}`,
+        backgroundColor: tokens.ui.surfaceRaised,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        cursor: "grab",
+        boxShadow: overlay
+          ? `0 6px 16px rgba(0,0,0,0.30)`
+          : tokens.shadow.sm,
+        userSelect: "none",
+      }}
+    >
+      <TroopIcon kind={kind} size={16} />
+    </Box>
+  );
+}
+
+function DraggableTroop({ id, kind }: { id: string; kind: TroopKind }) {
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id });
+  return (
+    <Box
+      ref={setNodeRef}
+      {...listeners}
+      {...attributes}
+      sx={{ opacity: isDragging ? 0.3 : 1, transition: `opacity ${tokens.transition.fast}` }}
+    >
+      <TroopChip kind={kind} />
+    </Box>
+  );
+}
+
+// ── Drag ID parsing ────────────────────────────────────────────────────────
+
+type DragSource =
+  | { zone: "fleet"; kind: TroopKind }
+  | { zone: "garrison"; kind: TroopKind };
+
+function parseDragId(id: string): DragSource | null {
+  if (id.startsWith("fleet-regiment-")) return { zone: "fleet", kind: "regiment" };
+  if (id.startsWith("fleet-elite-")) return { zone: "fleet", kind: "elite" };
+  if (id.startsWith("fleet-levy-")) return { zone: "fleet", kind: "levy" };
+  if (id.startsWith("garrison-regiment-")) return { zone: "garrison", kind: "regiment" };
+  if (id.startsWith("garrison-elite-")) return { zone: "garrison", kind: "elite" };
+  if (id.startsWith("garrison-levy-")) return { zone: "garrison", kind: "levy" };
+  return null;
+}
+
+// ── Drop zones ─────────────────────────────────────────────────────────────
+
+const sectionHeader = {
+  fontFamily: tokens.font.body,
+  fontSize: tokens.fontSize.xs,
+  color: tokens.ui.textMuted,
+  textTransform: "uppercase" as const,
+  letterSpacing: "0.08em",
+  mb: 0.75,
+};
+
+function TroopRow({ label, prefix, kind, count }: { label: string; prefix: string; kind: TroopKind; count: number }) {
+  if (count === 0) return null;
+  return (
+    <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.75, alignItems: "center" }}>
+      <Typography sx={{ fontFamily: tokens.font.body, fontSize: tokens.fontSize.xs, color: tokens.ui.textMuted, mr: 0.5, flexShrink: 0, minWidth: 65 }}>
+        {label}
+      </Typography>
+      {Array.from({ length: count }, (_, i) => (
+        <DraggableTroop key={`${prefix}-${i}`} id={`${prefix}-${i}`} kind={kind} />
+      ))}
+    </Box>
+  );
+}
+
+function FleetZone({ regiments, elites, levies }: { regiments: number; elites: number; levies: number }) {
+  const { setNodeRef, isOver } = useDroppable({ id: "fleet-zone" });
+  return (
+    <Box sx={{ mb: 2 }}>
+      <Typography sx={sectionHeader}>Fleet Troops</Typography>
+      <Box
+        ref={setNodeRef}
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          gap: 0.5,
+          p: 1.5,
+          borderRadius: `${tokens.radius.md}px`,
+          border: `1.5px dashed ${isOver ? tokens.ui.gold : tokens.ui.borderMedium}`,
+          backgroundColor: isOver ? `${tokens.ui.gold}10` : tokens.ui.surface,
+          minHeight: 40,
+          transition: `all ${tokens.transition.fast}`,
+        }}
+      >
+        <TroopRow label="Regiments" prefix="fleet-regiment" kind="regiment" count={regiments} />
+        <TroopRow label="Elites" prefix="fleet-elite" kind="elite" count={elites} />
+        <TroopRow label="Levies" prefix="fleet-levy" kind="levy" count={levies} />
+        {regiments === 0 && elites === 0 && levies === 0 && (
+          <Typography sx={{ fontFamily: tokens.font.body, fontSize: tokens.fontSize.xs, color: tokens.ui.textMuted, fontStyle: "italic", textAlign: "center", py: 1 }}>
+            All troops garrisoned
+          </Typography>
+        )}
+      </Box>
+    </Box>
+  );
+}
+
+function GarrisonZone({ regiments, elites, levies }: { regiments: number; elites: number; levies: number }) {
+  const { setNodeRef, isOver } = useDroppable({ id: "garrison-zone" });
+  const isEmpty = regiments === 0 && elites === 0 && levies === 0;
+  return (
+    <Box>
+      <Typography sx={sectionHeader}>Garrison</Typography>
+      <Box
+        ref={setNodeRef}
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          gap: 0.5,
+          p: 1.5,
+          borderRadius: `${tokens.radius.md}px`,
+          border: `1.5px dashed ${isOver ? tokens.ui.gold : tokens.ui.borderMedium}`,
+          backgroundColor: isOver ? `${tokens.ui.gold}10` : tokens.ui.surface,
+          minHeight: 40,
+          transition: `all ${tokens.transition.fast}`,
+        }}
+      >
+        <TroopRow label="Regiments" prefix="garrison-regiment" kind="regiment" count={regiments} />
+        <TroopRow label="Elites" prefix="garrison-elite" kind="elite" count={elites} />
+        <TroopRow label="Levies" prefix="garrison-levy" kind="levy" count={levies} />
+        {isEmpty && (
+          <Typography sx={{ fontFamily: tokens.font.body, fontSize: tokens.fontSize.xs, color: tokens.ui.textMuted, fontStyle: "italic", textAlign: "center", py: 1 }}>
+            Drag troops here to garrison
+          </Typography>
+        )}
+      </Box>
+    </Box>
+  );
+}
+
+// ── Local state ────────────────────────────────────────────────────────────
+
+interface GarrisonState {
+  fleet: { regiments: number; elites: number; levies: number };
+  garrison: { regiments: number; elites: number; levies: number };
+}
+
+// ── Main dialog ────────────────────────────────────────────────────────────
+
+const GarrisonTroopsDialog = (props: MyGameProps) => {
   const [x, y] = props.G.mapState.currentBattle;
+
   const inCurrentBattle =
     props.G.mapState.battleMap[y] &&
     props.G.mapState.battleMap[y][x].includes(
       props.playerID ?? props.ctx.currentPlayer
     );
 
-  let hasTroopsToGarrison = false;
-  props.G.playerInfo[props.ctx.currentPlayer].fleetInfo.forEach((fleet) => {
-    const [fleetX, fleetY] = fleet.location;
-    if (!hasTroopsToGarrison && fleetX === x && fleetY === y) {
-      hasTroopsToGarrison = fleet.levies > 0 || fleet.regiments > 0;
-    }
-  });
+  // Troops available for garrisoning are pre-computed by the backend
+  const troops = props.G.troopsAvailableForGarrison ?? { regiments: 0, elites: 0, levies: 0 };
+  const playerRegiments = troops.regiments;
+  const playerElites = troops.elites;
+  const playerLevies = troops.levies;
 
+  const hasTroopsToGarrison = playerRegiments > 0 || playerElites > 0 || playerLevies > 0;
+
+  // Auto-skip if no troops to garrison
   if (
     props.G.stage === "garrison troops" &&
     props.ctx.currentPlayer === props.playerID &&
@@ -40,247 +209,132 @@ const GarrisonTroopsDialog = (props: GarrisonTroopsDialogProps) => {
     ) &&
     !(props.ctx.phase === "conquest" && inCurrentBattle && hasTroopsToGarrison)
   ) {
-    console.log("Hold onto your hats!! We are entering the loop!!!");
-    console.log(props.ctx.phase);
+    log.info("garrison dialog", { phase: props.ctx.phase });
     props.ctx.phase === "ground_battle"
       ? props.moves.doNotGroundAttack()
       : props.moves.doNothing();
   }
 
-  const [levyCountForDispatch, setLevyCountForDispatch] = useState(
-    props.G.mapState.buildings[y][x].garrisonedLevies
-  );
-  const [regimentCount, setRegimentCount] = useState(
-    props.G.mapState.buildings[y][x].garrisonedRegiments
-  );
-
-  const playerInfo =
-    props.G.playerInfo[props.playerID ?? props.ctx.currentPlayer];
-  const colour = playerInfo.colour;
-  let playerRegiments = 0;
-  let playerLevies = 0;
-  props.G.playerInfo[
-    props.playerID ?? props.ctx.currentPlayer
-  ].fleetInfo.forEach((fleet) => {
-    const [fleetX, fleetY] = fleet.location;
-    if (fleetX === x && fleetY === y) {
-      playerRegiments += fleet.regiments;
-      playerLevies += fleet.levies;
-    }
+  const [state, setState] = useState<GarrisonState>({
+    fleet: { regiments: playerRegiments, elites: playerElites, levies: playerLevies },
+    garrison: { regiments: 0, elites: 0, levies: 0 },
   });
-  const regimentsDisabled = regimentCount >= playerRegiments;
-  const leviesDisabled = levyCountForDispatch >= playerLevies;
+
+  const [activeDrag, setActiveDrag] = useState<TroopKind | null>(null);
+
+  const handleDragStart = useCallback((event: DragStartEvent) => {
+    const parsed = parseDragId(String(event.active.id));
+    if (parsed) setActiveDrag(parsed.kind);
+  }, []);
+
+  const handleDragEnd = useCallback((event: DragEndEvent) => {
+    setActiveDrag(null);
+    const { active, over } = event;
+    if (!over) return;
+
+    const drag = parseDragId(String(active.id));
+    const dropZone = String(over.id);
+    if (!drag) return;
+
+    setState((prev) => {
+      const next = {
+        fleet: { ...prev.fleet },
+        garrison: { ...prev.garrison },
+      };
+
+      // Fleet → Garrison
+      if (drag.zone === "fleet" && dropZone === "garrison-zone") {
+        if (drag.kind === "regiment" && next.fleet.regiments > 0) {
+          next.fleet.regiments--;
+          next.garrison.regiments++;
+        } else if (drag.kind === "elite" && next.fleet.elites > 0) {
+          next.fleet.elites--;
+          next.garrison.elites++;
+        } else if (drag.kind === "levy" && next.fleet.levies > 0) {
+          next.fleet.levies--;
+          next.garrison.levies++;
+        }
+        return next;
+      }
+
+      // Garrison → Fleet
+      if (drag.zone === "garrison" && dropZone === "fleet-zone") {
+        if (drag.kind === "regiment" && next.garrison.regiments > 0) {
+          next.garrison.regiments--;
+          next.fleet.regiments++;
+        } else if (drag.kind === "elite" && next.garrison.elites > 0) {
+          next.garrison.elites--;
+          next.fleet.elites++;
+        } else if (drag.kind === "levy" && next.garrison.levies > 0) {
+          next.garrison.levies--;
+          next.fleet.levies++;
+        }
+        return next;
+      }
+
+      return prev;
+    });
+  }, []);
+
+  const isOpen =
+    props.ctx.currentPlayer === props.playerID &&
+    props.G.stage === "garrison troops" &&
+    ((props.ctx.phase === "ground_battle" &&
+      inCurrentBattle &&
+      props.G.battleState?.attacker.id === props.playerID &&
+      props.G.battleState.attacker.victorious === true &&
+      hasTroopsToGarrison) ||
+      (props.ctx.phase === "conquest" &&
+        inCurrentBattle &&
+        hasTroopsToGarrison));
+
+  const hasGarrisoned =
+    state.garrison.regiments > 0 ||
+    state.garrison.elites > 0 ||
+    state.garrison.levies > 0;
 
   return (
-    <Dialog
-      maxWidth={"xl"}
-      open={
-        open &&
-        props.ctx.currentPlayer === props.playerID &&
-        props.G.stage === "garrison troops" &&
-        ((props.ctx.phase === "ground_battle" &&
-          inCurrentBattle &&
-          props.G.battleState?.attacker.id === props.playerID &&
-          props.G.battleState.attacker.victorious === true &&
-          hasTroopsToGarrison) ||
-          (props.ctx.phase === "conquest" &&
-            inCurrentBattle &&
-            hasTroopsToGarrison))
+    <DialogShell
+      open={isOpen}
+      title="Garrison Troops"
+      subtitle="Drag troops from your fleet into the garrison to defend this region."
+      mood="discovery"
+      size="sm"
+      confirmLabel="Garrison"
+      confirmColor="success"
+      confirmDisabled={!hasGarrisoned}
+      onConfirm={() =>
+        props.moves.garrisonTroops([
+          state.garrison.regiments,
+          state.garrison.levies,
+          state.garrison.elites,
+        ])
       }
+      cancelLabel="Pass"
+      cancelColor="error"
+      onCancel={() => {
+        props.ctx.phase === "ground_battle"
+          ? props.moves.doNotGroundAttack()
+          : props.moves.doNothing();
+      }}
     >
-      <DialogTitle>Who would you like to garrison?</DialogTitle>
-      <DialogContent>
-        {`You can choose yo garrison troops or leave the region undefended.`}
-
-        <ButtonRow>
-          <Button
-            onClick={() => {
-              setRegimentCount(regimentCount + 1);
-            }}
-            style={{
-              backgroundColor: "transparent",
-              border: "none",
-              width: "30px",
-              height: "100%",
-              fontSize: "30px",
-              cursor: regimentsDisabled ? "not-allowed" : "pointer",
-              color: regimentsDisabled ? "grey" : "#000000",
-            }}
-            disabled={regimentsDisabled}
-          >
-            +
-          </Button>
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              color: regimentsDisabled ? "grey" : "#000000",
-            }}
-          >
-            {regimentCount}
-            <svg
-              width="28"
-              height="100%"
-              viewBox="0 0 28 31"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M14.1211 1L20.6815 4.57861L27.2424 8.1569L20.6814 12.2358L14.1814 15.7358L7.56055 11.7358L1 8.00002L7.56055 4.57861L14.1211 1Z"
-                fill={colour}
-                stroke="#1A1A18"
-                strokeWidth="0.288"
-                strokeMiterlimit="22.9256"
-              />
-              <path
-                d="M1.54036 22.6996L1.36064 15.468L1.1814 8.23584L7.6814 11.7358L14.1812 15.7358V22.7358V30.2358L7.86088 26.4677L1.54036 22.6996Z"
-                fill={colour}
-                stroke="#1A1A18"
-                strokeWidth="0.288"
-                strokeMiterlimit="22.9256"
-              />
-              <path
-                d="M14.1814 15.7358L20.8609 12.0039L27.1814 8.23584L27.0018 15.4681L26.8224 22.7001L20.5019 26.4677L14.1814 30.2358V23.2358V15.7358Z"
-                fill={colour}
-                stroke="#1A1A18"
-                strokeWidth="0.288"
-                strokeMiterlimit="22.9256"
-              />
-            </svg>
-          </div>
-          <Button
-            onClick={() => {
-              setRegimentCount(regimentCount - 1);
-            }}
-            style={{
-              backgroundColor: "transparent",
-              border: "none",
-              width: "30px",
-              height: "100%",
-              fontSize: "30px",
-              cursor: regimentCount <= 0 ? "not-allowed" : "pointer",
-              color: regimentCount <= 0 ? "grey" : "#000000",
-            }}
-            disabled={regimentCount <= 0}
-          >
-            -
-          </Button>
-          <Button
-            onClick={() => {
-              setLevyCountForDispatch(levyCountForDispatch + 1);
-            }}
-            style={{
-              backgroundColor: "transparent",
-              border: "none",
-              width: "30px",
-              height: "100%",
-              fontSize: "30px",
-              cursor: leviesDisabled ? "not-allowed" : "pointer",
-              color: leviesDisabled ? "grey" : "#000000",
-            }}
-            disabled={leviesDisabled}
-          >
-            +
-          </Button>
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              color: leviesDisabled ? "grey" : "#000000",
-            }}
-          >
-            {levyCountForDispatch}
-            <svg
-              width="28"
-              height="100%"
-              viewBox="0 0 28 31"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M14.1211 1L20.6815 4.57861L27.2424 8.1569L20.6814 12.2358L14.1814 15.7358L7.56055 11.7358L1 8.00002L7.56055 4.57861L14.1211 1Z"
-                fill="#B1B2B2"
-                stroke="#1A1A18"
-                strokeWidth="0.288"
-                strokeMiterlimit="22.9256"
-              />
-              <path
-                d="M1.54036 22.6996L1.36064 15.468L1.1814 8.23584L7.6814 11.7358L14.1812 15.7358V22.7358V30.2358L7.86088 26.4677L1.54036 22.6996Z"
-                fill="#B1B2B2"
-                stroke="#1A1A18"
-                strokeWidth="0.288"
-                strokeMiterlimit="22.9256"
-              />
-              <path
-                d="M14.1814 15.7358L20.8609 12.0039L27.1814 8.23584L27.0018 15.4681L26.8224 22.7001L20.5019 26.4677L14.1814 30.2358V23.2358V15.7358Z"
-                fill="#B1B2B2"
-                stroke="#1A1A18"
-                strokeWidth="0.288"
-                strokeMiterlimit="22.9256"
-              />
-            </svg>
-          </div>
-          <Button
-            onClick={() => {
-              setLevyCountForDispatch(levyCountForDispatch - 1);
-            }}
-            style={{
-              backgroundColor: "transparent",
-              border: "none",
-              width: "30px",
-              height: "100%",
-              fontSize: "30px",
-              cursor: levyCountForDispatch <= 0 ? "not-allowed" : "pointer",
-              color: levyCountForDispatch <= 0 ? "grey" : "#000000",
-            }}
-            disabled={levyCountForDispatch <= 0}
-          >
-            -
-          </Button>
-        </ButtonRow>
-
-        <WorldMap
-          {...props}
-          selectableTiles={[props.G.mapState.currentBattle]}
-        ></WorldMap>
-      </DialogContent>
-      <DialogActions>
-        <Button
-          color="warning"
-          variant="contained"
-          onClick={() => {
-            props.ctx.phase === "ground_attack"
-              ? props.moves.doNotGroundAttack()
-              : props.moves.doNothing();
-
-            setOpen(false);
-          }}
-        >
-          Pass
-        </Button>
-        <Button
-          color="success"
-          variant="contained"
-          onClick={() => {
-            // props.G.playerInfo[
-            //   props.playerID ?? props.ctx.currentPlayer
-            // ].troopsToGarrison = {
-            //   regiments: regimentCount,
-            //   levies: levyCountForDispatch,
-            // };
-            props.moves.garrisonTroops([regimentCount, levyCountForDispatch]);
-            setOpen(false);
-          }}
-        >
-          Garrison
-        </Button>
-      </DialogActions>
-    </Dialog>
+      <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+        <FleetZone
+          regiments={state.fleet.regiments}
+          elites={state.fleet.elites}
+          levies={state.fleet.levies}
+        />
+        <GarrisonZone
+          regiments={state.garrison.regiments}
+          elites={state.garrison.elites}
+          levies={state.garrison.levies}
+        />
+        <DragOverlay>
+          {activeDrag && <TroopChip kind={activeDrag} overlay />}
+        </DragOverlay>
+      </DndContext>
+    </DialogShell>
   );
 };
-
-interface GarrisonTroopsDialogProps extends MyGameProps {}
 
 export default GarrisonTroopsDialog;

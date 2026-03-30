@@ -61,6 +61,22 @@ const resolveFaerieUprising = (
     tile.garrisonedLevies = 0;
     logEvent(G, `${kingdom} loses the colony at ${land.name}!`);
   }
+
+  G.battleResult = {
+    battleType: "Faerie Uprising",
+    attackerName: land.name,
+    defenderName: kingdom,
+    attackerSwords: landSwords,
+    attackerShields: landShields,
+    defenderSwords: defSwords,
+    defenderShields: defShields,
+    attackerFoW: fowLand,
+    defenderFoW: fowDefender,
+    attackerLosses: "—",
+    defenderLosses: hitsOnDefender > 0 ? `${hitsOnDefender} hits absorbed` : "none",
+    winner: defenderWins ? kingdom : land.name,
+    outcome: defenderWins ? `${kingdom} defends the colony! (+1 VP)` : `${kingdom} loses the colony!`,
+  };
 };
 
 // ── Headstrong Commander ────────────────────────────────────────────────────
@@ -113,6 +129,24 @@ const resolveHeadstrongCommander = (
     tile.garrisonedLevies = 0;
     logEvent(G, `Conquest fails! ${kingdom} loses the outpost at ${land.name}`);
   }
+
+  G.battleResult = {
+    battleType: "Headstrong Commander",
+    attackerName: kingdom,
+    defenderName: land.name,
+    attackerSwords: atkSwords,
+    attackerShields: 0,
+    defenderSwords: landSwords,
+    defenderShields: landShields,
+    attackerFoW: fowAttacker,
+    defenderFoW: fowLand,
+    attackerLosses: hitsOnAttacker > 0 ? `${hitsOnAttacker} hits absorbed` : "none",
+    defenderLosses: "—",
+    winner: conquestSuccess && attackerSurvives ? kingdom : land.name,
+    outcome: conquestSuccess && attackerSurvives
+      ? `${kingdom} conquers ${land.name}! (+1 VP)`
+      : `Conquest fails — outpost lost`,
+  };
 };
 
 // ── Infidels Invade Faerie ──────────────────────────────────────────────────
@@ -161,6 +195,22 @@ const resolveInfidelsInvadeFaerie = (
     tile.rebelCounter = host.swords;
     logEvent(G, `Infidels seize ${kingdom}'s ${tile.buildings} at ${land.name}! Trade gains lost`);
   }
+
+  G.battleResult = {
+    battleType: "Infidels Invade Faerie",
+    attackerName: "Infidel Host",
+    defenderName: kingdom,
+    attackerSwords: host.swords,
+    attackerShields: host.shields,
+    defenderSwords: defSwords,
+    defenderShields: defShields,
+    attackerFoW: fowHost,
+    defenderFoW: fowDefender,
+    attackerLosses: "—",
+    defenderLosses: hitsOnDefender > 0 ? `${hitsOnDefender} hits absorbed` : "none",
+    winner: defenderWins ? kingdom : "Infidel Host",
+    outcome: defenderWins ? `${kingdom} repels the Infidels! (+1 VP)` : `Infidels seize ${land.name}!`,
+  };
 };
 
 // ── Dispatchers ─────────────────────────────────────────────────────────────

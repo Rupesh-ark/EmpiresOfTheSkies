@@ -1,4 +1,7 @@
 import { BoardProps } from "boardgame.io/dist/types/packages/react";
+import type { Ctx } from "boardgame.io";
+import type { EventsAPI } from "boardgame.io/dist/types/src/plugins/events/events";
+import type { RandomAPI } from "boardgame.io/dist/types/src/plugins/random/random";
 
 export interface MyGameProps extends BoardProps<MyGameState> {}
 
@@ -27,8 +30,14 @@ export interface MyGameState {
   boardState: ActionBoardInfo;
   cardDecks: CardDeckInfo;
   battleState?: BattleState;
+  /** Last resolved battle summary — shown by BattleResultDialog, cleared on dismiss */
+  battleResult: BattleResult | null;
   conquestState?: BattlePlayerInfo;
   pendingDeal?: DealProposal;
+  /** Pre-computed by backend for frontend display — avoids duplicating game logic */
+  possibleDefenders: string[];
+  validRelocationTiles: number[][];
+  troopsAvailableForGarrison: { regiments: number; elites: number; levies: number };
   stage:
     | "discovery"
     | "actions"
@@ -55,16 +64,22 @@ export interface MyGameState {
     | "pick legacy card"
     | "taxes"
     | "events"
+    | "discard_fow"
+    | "confirm_fow_draw"
+    | "immediate_election"
     | "reset";
   electionResults: Record<string, number>;
   hasVoted: string[];
   voteSubmitted: Record<string, string>;
+  /** Archprelate Fatigue: consecutive wins by the same player */
+  consecutiveArchprelateWins: number;
   round: number;
   finalRound: number;
   firstTurnOfRound: boolean;
   mustContinueDiscovery: boolean;
   nprCathedrals: Record<string, number>;
   turnOrder: string[];
+  validFortLocations: [number, number][];
   failedConquests: { playerId: string; tile: [number, number] }[];
   contingentPool: number[];
   infidelHostPool: InfidelHostCounter[];
@@ -97,6 +112,7 @@ export interface MyGameState {
     phase: "nominate" | "contribute" | "buyoff";
     buyoffCost?: number;
     buyoffOffered?: Record<string, number>;
+    eligibleCaptainGenerals: string[];
   } | null;
   /** Infidel Fleet combat: targeted player must choose fight or evade */
   infidelFleetCombat: {
@@ -108,7 +124,26 @@ export interface MyGameState {
     event: DeferredEvent;
     description: string;
   } | null;
+  _loopGuard: number;
+  _halted: boolean;
 }
+
+/** Frontend-readable summary of the most recent battle resolution */
+export type BattleResult = {
+  battleType: string;
+  attackerName: string;
+  defenderName: string;
+  attackerSwords: number;
+  attackerShields: number;
+  defenderSwords: number;
+  defenderShields: number;
+  attackerFoW: { sword: number; shield: number } | null;
+  defenderFoW: { sword: number; shield: number } | null;
+  attackerLosses: string;
+  defenderLosses: string;
+  winner: string;
+  outcome: string;
+};
 
 export type BattleState = {
   attacker: BattlePlayerInfo;
@@ -193,6 +228,10 @@ export type PlayerInfo = {
   palaces: number;
   heresyTracker: number;
   prisoners: number;
+  /** Agitator dissenters not yet imprisoned — shift heresy at end of round if unhandled */
+  freeDissenters: number;
+  /** Piracy intent for this round: "tax" (default) or "cut" (remove a skyship instead) */
+  piracyIntent: "tax" | "cut";
   shipyards: number;
   factories: number;
   troopsToGarrison?: TroopInfo;
@@ -267,6 +306,8 @@ export type EventCardName =
   | "the_faerie_plague"
   | "schism"
   | "royal_succession"
+  | "race_to_discovery"
+  | "royal_patronage"
   | "pretender_rebellion"
   | "prelacy_condemned"
   | "peace_accord_reached"
@@ -280,11 +321,14 @@ export type EventCardName =
   | "infidel_corsairs_raid"
   | "heretic_rebellion"
   | "headstrong_commander"
+  | "guild_revolt"
   | "grand_infidel_dies"
+  | "foreign_agitators"
   | "faerie_uprising"
   | "dynastic_marriage"
   | "defence_of_the_faith"
   | "crops_fail"
+  | "corruption_scandal"
   | "colonial_rebellion"
   | "colonial_prelates"
   | "bumper_crops"
@@ -316,13 +360,18 @@ export type EventChoice = {
   buildingOptions?: ("cathedral" | "palace" | "shipyard")[];
   /** Dynastic Marriage: eligible ally player IDs */
   allyOptions?: string[];
+  /** Guild Revolt / Corruption Scandal: binary choice options */
+  binaryOptions?: [string, string];
   /** Colonial Rebellion: eligible colony tile coordinates */
   colonyOptions?: [number, number][];
 };
 
 export type EventState = {
   deck: EventCardName[];
+  lateDeck: EventCardName[];
   chosenCards: EventCardName[];
+  /** Who chose what: playerID → card chosen this round (persists after resolution) */
+  eventContributions: Record<string, EventCardName>;
   resolvedEvent: EventCardName | null;
   deferredEvents: DeferredEvent[];
   pendingChoice: EventChoice | null;
@@ -336,6 +385,12 @@ export type EventState = {
   skipTaxesNextRound: boolean;
   cannotConvertThisRound: string[];
   grandInfidelDies: boolean;
+  /** Royal Patronage: first player to claim land this round gets +2 VP and 2g */
+  royalPatronageActive: boolean;
+  /** Race to Discovery: per-player tile discovery count (keys = playerIDs) */
+  raceToDiscoveryCounters: Record<string, number> | null;
+  /** Archprelate Dies: deferred interactive election within events phase */
+  immediateElectionPending: boolean;
 };
 
 export type LegacyCardName =
@@ -448,4 +503,19 @@ export type ActionBoardInfo = {
     6: string | undefined;
   };
   issueHolyDecree: boolean;
+};
+
+export type MoveContext = {
+  G: MyGameState;
+  playerID: string;
+  ctx?: Ctx;
+  events?: EventsAPI;
+  random?: RandomAPI;
+};
+
+export type MoveDefinition = {
+  fn: (context: MoveContext, ...args: any[]) => any;
+  errorMessage: string;
+  successLog?: (G: MyGameState, playerID: string, ...args: any[]) => string | null;
+  validate?: (G: MyGameState, playerID: string, ...args: any[]) => MoveError | null;
 };

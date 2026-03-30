@@ -1,34 +1,105 @@
-import { Move } from "boardgame.io";
-import { MyGameState } from "../../types";
+import { MyGameState, MoveError, MoveDefinition } from "../../types";
 import { INVALID_MOVE } from "boardgame.io/core";
-import { validatePassFleetInfo } from "../moveValidation";
-import { KINGDOM_LOCATION } from "../../codifiedGameInfo";
-const passFleetInfoToPlayerInfo: Move<MyGameState> = (
-  { G, playerID },
-  ...args: any[]
-) => {
-  const fleetId = args[0];
-  const skyshipCount = args[1];
-  const regimentCount = args[2];
-  const levyCount = args[3];
-  const eliteRegimentCount = args[4] ?? 0;  // backwards compatible — older callers omit this
+import { KINGDOM_LOCATION } from "../../data/gameData";
 
-  if (validatePassFleetInfo(G, playerID, fleetId, skyshipCount, regimentCount, levyCount, eliteRegimentCount)) return INVALID_MOVE;
-
+const validatePassFleetInfo = (
+  G: MyGameState,
+  playerID: string,
+  fleetId: number,
+  skyshipCount: number,
+  regimentCount: number,
+  levyCount: number,
+  eliteRegimentCount: number
+): MoveError | null => {
   const currentPlayer = G.playerInfo[playerID];
   const currentFleet = currentPlayer.fleetInfo[fleetId];
-  if (currentFleet.location[0] === KINGDOM_LOCATION[0] && currentFleet.location[1] === KINGDOM_LOCATION[1]) {
-    currentFleet.skyships = skyshipCount;
-    currentFleet.regiments = regimentCount;
-    currentFleet.levies = levyCount;
-    currentFleet.eliteRegiments = eliteRegimentCount;
 
-    currentPlayer.resources.skyships -= skyshipCount;
-    currentPlayer.resources.regiments -= regimentCount;
-    currentPlayer.resources.levies -= levyCount;
-    currentPlayer.resources.eliteRegiments -= eliteRegimentCount;
-    // v4.2: Kingdom↔Fleet transfers are a free Anytime action — do NOT set turnComplete
+  if (!currentFleet || fleetId !== currentFleet.fleetId) {
+    return { code: "INVALID_FLEET", message: "No fleet found with that ID" };
   }
+
+  const atHome =
+    currentFleet.location[0] === KINGDOM_LOCATION[0] &&
+    currentFleet.location[1] === KINGDOM_LOCATION[1];
+
+  if (skyshipCount < 0 || regimentCount < 0 || levyCount < 0 || eliteRegimentCount < 0) {
+    return { code: "NEGATIVE_VALUE", message: "Fleet values cannot be negative" };
+  }
+
+  if (skyshipCount < regimentCount + levyCount + eliteRegimentCount) {
+    return {
+      code: "TROOP_CAPACITY_EXCEEDED",
+      message: "Cannot carry more troops than Skyships (1 troop per Skyship)",
+    };
+  }
+
+  if (atHome) {
+    const deltaSkyships = skyshipCount - currentFleet.skyships;
+    const deltaRegiments = regimentCount - currentFleet.regiments;
+    const deltaLevies = levyCount - currentFleet.levies;
+    const deltaElite = eliteRegimentCount - currentFleet.eliteRegiments;
+
+    if (deltaSkyships > 0 && currentPlayer.resources.skyships < deltaSkyships) {
+      return {
+        code: "INSUFFICIENT_SKYSHIPS",
+        message: `Not enough Skyships — need ${deltaSkyships} more, have ${currentPlayer.resources.skyships}`,
+      };
+    }
+    if (deltaRegiments > 0 && currentPlayer.resources.regiments < deltaRegiments) {
+      return {
+        code: "INSUFFICIENT_REGIMENTS",
+        message: `Not enough Regiments — need ${deltaRegiments} more, have ${currentPlayer.resources.regiments}`,
+      };
+    }
+    if (deltaLevies > 0 && currentPlayer.resources.levies < deltaLevies) {
+      return {
+        code: "INSUFFICIENT_LEVIES",
+        message: `Not enough Levies — need ${deltaLevies} more, have ${currentPlayer.resources.levies}`,
+      };
+    }
+    if (deltaElite > 0 && currentPlayer.resources.eliteRegiments < deltaElite) {
+      return {
+        code: "INSUFFICIENT_ELITE_REGIMENTS",
+        message: `Not enough Elite Regiments — need ${deltaElite} more, have ${currentPlayer.resources.eliteRegiments}`,
+      };
+    }
+  }
+
+  return null;
+};
+
+const passFleetInfoToPlayerInfo: MoveDefinition = {
+  fn: ({ G, playerID }, ...args: any[]) => {
+    const fleetId = args[0];
+    const skyshipCount = args[1];
+    const regimentCount = args[2];
+    const levyCount = args[3];
+    const eliteRegimentCount = args[4] ?? 0;  // backwards compatible — older callers omit this
+
+    if (validatePassFleetInfo(G, playerID, fleetId, skyshipCount, regimentCount, levyCount, eliteRegimentCount)) return INVALID_MOVE;
+
+    const currentPlayer = G.playerInfo[playerID];
+    const currentFleet = currentPlayer.fleetInfo[fleetId];
+    if (currentFleet.location[0] === KINGDOM_LOCATION[0] && currentFleet.location[1] === KINGDOM_LOCATION[1]) {
+      const deltaSkyships = skyshipCount - currentFleet.skyships;
+      const deltaRegiments = regimentCount - currentFleet.regiments;
+      const deltaLevies = levyCount - currentFleet.levies;
+      const deltaElite = eliteRegimentCount - currentFleet.eliteRegiments;
+
+      currentFleet.skyships = skyshipCount;
+      currentFleet.regiments = regimentCount;
+      currentFleet.levies = levyCount;
+      currentFleet.eliteRegiments = eliteRegimentCount;
+
+      currentPlayer.resources.skyships -= deltaSkyships;
+      currentPlayer.resources.regiments -= deltaRegiments;
+      currentPlayer.resources.levies -= deltaLevies;
+      currentPlayer.resources.eliteRegiments -= deltaElite;
+      // v4.2: Kingdom↔Fleet transfers are a free Anytime action — do NOT set turnComplete
+    }
+  },
+  errorMessage: "Cannot transfer resources to fleet",
+  validate: validatePassFleetInfo,
 };
 
 export default passFleetInfoToPlayerInfo;

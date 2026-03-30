@@ -9,6 +9,7 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
+import { tokens } from "@/theme";
 
 const LootIcon = ({ colour }: { colour: string }) => (
   <svg width="18" height="20" viewBox="0 0 28 31" fill="none" style={{ display: "block" }}>
@@ -50,7 +51,7 @@ const LootValueTable = (props: MyGameProps) => {
   }
 
   return (
-    <Paper elevation={2} sx={{ maxWidth: 1230, mb: 3, width: "100%", borderRadius: 2, overflow: "hidden" }}>
+    <Paper elevation={0} sx={{ maxWidth: 1230, mb: 3, width: "100%", borderRadius: 2, overflow: "hidden", backgroundColor: tokens.ui.surface, border: `1px solid ${tokens.ui.border}` }}>
       <Box
         sx={{
           background: "linear-gradient(90deg, #1a0a14 0%, #0d0d0d 50%, #1a0a00 100%)",
@@ -72,12 +73,12 @@ const LootValueTable = (props: MyGameProps) => {
       <Box sx={{ overflowX: "auto" }}>
         <Table size="small" sx={{ "& td, & th": { fontSize: "0.875rem" } }}>
           <TableHead>
-            <TableRow sx={{ backgroundColor: "rgba(0,0,0,0.04)" }}>
-              <TableCell sx={{ fontWeight: "bold", color: "text.secondary", whiteSpace: "nowrap", minWidth: 150 }}>
+            <TableRow sx={{ backgroundColor: tokens.ui.surfaceRaised }}>
+              <TableCell sx={{ fontWeight: "bold", color: tokens.ui.textMuted, whiteSpace: "nowrap", minWidth: 150 }}>
                 Good
               </TableCell>
               {Array.from({ length: maxCols }, (_, i) => (
-                <TableCell key={i} align="center" sx={{ fontWeight: "bold", color: "text.secondary", width: 48 }}>
+                <TableCell key={i} align="center" sx={{ fontWeight: "bold", color: tokens.ui.textMuted, width: 48 }}>
                   {i}
                 </TableCell>
               ))}
@@ -87,7 +88,7 @@ const LootValueTable = (props: MyGameProps) => {
             {GOODS.map((good, goodIdx) => {
               const current = amounts[goodIdx];
               return (
-                <TableRow key={good.name} hover sx={{ "&:last-child td": { border: 0 } }}>
+                <TableRow key={good.name} hover sx={{ "&:last-child td": { border: 0 }, "&:hover": { backgroundColor: tokens.ui.surfaceHover } }}>
                   <TableCell>
                     <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                       <LootIcon colour={good.colour} />

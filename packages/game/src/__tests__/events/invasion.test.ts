@@ -18,8 +18,9 @@ import { setupNextDeferredBattle } from "../../helpers/resolutionFlow";
 import { buildInitialG, buildPlayer, buildCtx, buildResources, buildFleet, buildRandom } from "../testHelpers";
 import { INVALID_MOVE } from "boardgame.io/core";
 import { MyGameState, DeferredEvent, MapBuildingInfo, TileInfoProps } from "../../types";
+import type { EventsAPI } from "boardgame.io/dist/types/src/plugins/events/events";
 
-const stubEvents = () => ({ endTurn: vi.fn(), endPhase: vi.fn() });
+const stubEvents = () => ({ endTurn: vi.fn(), endPhase: vi.fn() } as unknown as EventsAPI & { endTurn: ReturnType<typeof vi.fn>; endPhase: ReturnType<typeof vi.fn> });
 
 function callNominate(
   G: ReturnType<typeof buildInitialG>,
@@ -32,7 +33,7 @@ function callNominate(
     ...buildCtx(playerID, Object.keys(G.playerInfo).length),
     playOrder: playOrder ?? Object.keys(G.playerInfo),
   };
-  const result = (nominateCaptainGeneral as Function)(
+  const result = nominateCaptainGeneral.fn(
     { G, ctx, playerID, events },
     nomineeID
   );
@@ -51,7 +52,7 @@ function callContribute(
     ...buildCtx(playerID, Object.keys(G.playerInfo).length),
     playOrder: playOrder ?? Object.keys(G.playerInfo),
   };
-  const result = (contributeToGrandArmy as Function)(
+  const result = contributeToGrandArmy.fn(
     { G, ctx, playerID, events },
     regiments,
     levies
@@ -70,7 +71,7 @@ function callBuyoff(
     ...buildCtx(playerID, Object.keys(G.playerInfo).length),
     playOrder: playOrder ?? Object.keys(G.playerInfo),
   };
-  const result = (offerBuyoffGold as Function)(
+  const result = offerBuyoffGold.fn(
     { G, ctx, playerID, events },
     amount
   );
@@ -90,7 +91,7 @@ function callRespondFleet(
     playOrder: playOrder ?? Object.keys(G.playerInfo),
   };
   const random = buildRandom();
-  const result = (respondToInfidelFleet as Function)(
+  const result = respondToInfidelFleet.fn(
     { G, ctx, playerID, events, random },
     response,
     fowCardIndex
@@ -114,6 +115,7 @@ describe("nominateCaptainGeneral — validation", () => {
       totalHostSwords: 10,
       contributions: {},
       phase: "contribute",
+      eligibleCaptainGenerals: ["0", "1"],
     };
     const { result } = callNominate(G, "0", "1");
     expect(result).toBe(INVALID_MOVE);
@@ -128,6 +130,7 @@ describe("nominateCaptainGeneral — validation", () => {
       totalHostSwords: 10,
       contributions: {},
       phase: "nominate",
+      eligibleCaptainGenerals: ["0", "1"],
     };
     const { result } = callNominate(G, "0", "1");
     expect(result).toBe(INVALID_MOVE);
@@ -142,6 +145,7 @@ describe("nominateCaptainGeneral — validation", () => {
       totalHostSwords: 10,
       contributions: {},
       phase: "nominate",
+      eligibleCaptainGenerals: ["0", "1"],
     };
     const { result } = callNominate(G, "0", "99");
     expect(result).toBe(INVALID_MOVE);
@@ -156,6 +160,7 @@ describe("nominateCaptainGeneral — validation", () => {
       totalHostSwords: 10,
       contributions: {},
       phase: "nominate",
+      eligibleCaptainGenerals: ["0", "1"],
     };
     const { result } = callNominate(G, "0", "1", ["0", "1"]);
     expect(result).toBe(INVALID_MOVE);
@@ -172,6 +177,7 @@ describe("nominateCaptainGeneral — state mutations", () => {
       totalHostSwords: 10,
       contributions: {},
       phase: "nominate",
+      eligibleCaptainGenerals: ["0", "1"],
     };
     callNominate(G, "0", "1", ["0", "1"]);
     expect(G.playerInfo["0"].isCaptainGeneral).toBe(false);
@@ -187,6 +193,7 @@ describe("nominateCaptainGeneral — state mutations", () => {
       totalHostSwords: 10,
       contributions: {},
       phase: "nominate",
+      eligibleCaptainGenerals: ["0", "1"],
     };
     callNominate(G, "0", "1", ["0", "1"]);
     expect(G.currentInvasion!.phase).toBe("contribute");
@@ -202,6 +209,7 @@ describe("nominateCaptainGeneral — state mutations", () => {
       totalHostSwords: 10,
       contributions: {},
       phase: "nominate",
+      eligibleCaptainGenerals: ["0", "1"],
     };
     const { result } = callNominate(G, "0", "1", ["0", "1"]);
     expect(result).not.toBe(INVALID_MOVE);
@@ -217,6 +225,7 @@ describe("nominateCaptainGeneral — state mutations", () => {
       totalHostSwords: 10,
       contributions: {},
       phase: "nominate",
+      eligibleCaptainGenerals: ["0", "1"],
     };
     const { events } = callNominate(G, "0", "1", ["0", "1"]);
     expect(events.endTurn).toHaveBeenCalledWith({ next: "0" });
@@ -239,6 +248,7 @@ describe("contributeToGrandArmy — validation", () => {
       totalHostSwords: 10,
       contributions: {},
       phase: "nominate",
+      eligibleCaptainGenerals: ["0", "1"],
     };
     const { result } = callContribute(G, "0", 2, 0);
     expect(result).toBe(INVALID_MOVE);
@@ -253,6 +263,7 @@ describe("contributeToGrandArmy — validation", () => {
       totalHostSwords: 10,
       contributions: {},
       phase: "contribute",
+      eligibleCaptainGenerals: ["0", "1"],
     };
     const { result } = callContribute(G, "0", 5, 0);
     expect(result).toBe(INVALID_MOVE);
@@ -264,6 +275,7 @@ describe("contributeToGrandArmy — validation", () => {
       totalHostSwords: 10,
       contributions: {},
       phase: "contribute",
+      eligibleCaptainGenerals: ["0", "1"],
     };
     const { result } = callContribute(G, "0", -1, 0);
     expect(result).toBe(INVALID_MOVE);
@@ -280,6 +292,7 @@ describe("contributeToGrandArmy — state mutations", () => {
       totalHostSwords: 10,
       contributions: {},
       phase: "contribute",
+      eligibleCaptainGenerals: ["0", "1"],
     };
     callContribute(G, "0", 4, 2, ["0", "1"]);
     expect(G.currentInvasion!.contributions["0"]).toEqual({
@@ -298,6 +311,7 @@ describe("contributeToGrandArmy — state mutations", () => {
       totalHostSwords: 10,
       contributions: {},
       phase: "contribute",
+      eligibleCaptainGenerals: ["0", "1"],
     };
     const { result } = callContribute(G, "0", 0, 0, ["0", "1"]);
     expect(result).not.toBe(INVALID_MOVE);
@@ -317,6 +331,7 @@ describe("contributeToGrandArmy — state mutations", () => {
       totalHostSwords: 10,
       contributions: {},
       phase: "contribute",
+      eligibleCaptainGenerals: ["0", "1"],
     };
     const { events } = callContribute(G, "0", 3, 0, ["0", "1"]);
     expect(events.endTurn).toHaveBeenCalledWith({ next: "1" });
@@ -339,6 +354,7 @@ describe("offerBuyoffGold — validation", () => {
       totalHostSwords: 10,
       contributions: {},
       phase: "contribute",
+      eligibleCaptainGenerals: ["0", "1"],
     };
     const { result } = callBuyoff(G, "0", 3);
     expect(result).toBe(INVALID_MOVE);
@@ -350,6 +366,7 @@ describe("offerBuyoffGold — validation", () => {
       totalHostSwords: 10,
       contributions: {},
       phase: "buyoff",
+      eligibleCaptainGenerals: ["0", "1"],
       // buyoffOffered not set
     };
     const { result } = callBuyoff(G, "0", 3);
@@ -364,6 +381,7 @@ describe("offerBuyoffGold — validation", () => {
       phase: "buyoff",
       buyoffCost: 8,
       buyoffOffered: {},
+      eligibleCaptainGenerals: ["0", "1"],
     };
     const { result } = callBuyoff(G, "0", -1);
     expect(result).toBe(INVALID_MOVE);
@@ -380,6 +398,7 @@ describe("offerBuyoffGold — validation", () => {
       phase: "buyoff",
       buyoffCost: 8,
       buyoffOffered: {},
+      eligibleCaptainGenerals: ["0", "1"],
     };
     const { result } = callBuyoff(G, "0", 5);
     expect(result).toBe(INVALID_MOVE);
@@ -398,6 +417,7 @@ describe("offerBuyoffGold — state mutations", () => {
       phase: "buyoff",
       buyoffCost: 8,
       buyoffOffered: {},
+      eligibleCaptainGenerals: ["0", "1"],
     };
     callBuyoff(G, "0", 5, ["0", "1"]);
     expect(G.currentInvasion!.buyoffOffered!["0"]).toBe(5);
@@ -414,6 +434,7 @@ describe("offerBuyoffGold — state mutations", () => {
       phase: "buyoff",
       buyoffCost: 8,
       buyoffOffered: {},
+      eligibleCaptainGenerals: ["0", "1"],
     };
     const { result } = callBuyoff(G, "0", 0, ["0", "1"]);
     expect(result).not.toBe(INVALID_MOVE);
@@ -430,6 +451,7 @@ describe("offerBuyoffGold — state mutations", () => {
       phase: "buyoff",
       buyoffCost: 8,
       buyoffOffered: {},
+      eligibleCaptainGenerals: ["0", "1"],
     };
     const { events } = callBuyoff(G, "0", 5, ["0", "1"]);
     expect(events.endTurn).toHaveBeenCalledWith({ next: "1" });
@@ -446,6 +468,7 @@ describe("offerBuyoffGold — state mutations", () => {
       phase: "buyoff",
       buyoffCost: 8,
       buyoffOffered: {},
+      eligibleCaptainGenerals: ["0", "1"],
     };
     callBuyoff(G, "0", 4, ["0", "1"]);
     callBuyoff(G, "1", 4, ["0", "1"]);
@@ -573,7 +596,7 @@ function callCommitDeferredBattle(
     playOrder: playOrder ?? Object.keys(G.playerInfo),
   };
   const random = buildRandom();
-  const result = (commitDeferredBattleCard as Function)(
+  const result = commitDeferredBattleCard.fn(
     { G, ctx, playerID, events, random },
     fowCardIndex
   );

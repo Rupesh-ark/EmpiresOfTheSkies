@@ -1,27 +1,32 @@
+import { memo } from "react";
 import { MyGameProps } from "@eots/game";
 
-import RoundSummaryDialog from "./RoundSummaryDialog";
-import PickKingdomAdvantageCardDialog from "./PickKingdomAdvantageCardDialog";
-import PickEventCardDialog from "./PickEventCardDialog";
-import EventChoiceDialog from "./EventChoiceDialog";
-import PickLegacyCardDialog from "./PickLegacyCardDialog";
+import RoundSummaryDialog from "./Resolution/RoundSummaryDialog";
+import PickKingdomAdvantageCardDialog from "./Cards/PickKingdomAdvantageCardDialog";
+import PickEventCardDialog from "./Events/PickEventCardDialog";
+import EventChoiceDialog from "./Events/EventChoiceDialog";
+import PickLegacyCardDialog from "./Cards/PickLegacyCardDialog";
 import AttackOrPassDiaLog from "./AerialBattle/AttackOrPassDialog";
 import AttackOrEvadeDialog from "./AerialBattle/AttackOrEvadeDialog";
 import DrawOrPickCardDialog from "./AerialBattle/DrawOrPickCardDialog";
+import BattleResultDialog from "./AerialBattle/BattleResultDialog";
 import RelocateLoserDialog from "./AerialBattle/RelocateLoserDialog";
 import PlunderLegendsDialog from "./PlunderLegends/PlunderLegendsDialog";
 import GroundAttackOrPassDialog from "./GroundBattle/GroundAttackOrPassDialog";
 import DefendOrYieldDialog from "./GroundBattle/DefendOrYieldDialog";
 import GarrisonTroopsDialog from "./GroundBattle/GarrisonTroopsDialog";
 import OutpostOrColonyDialog from "./Conquests/OutpostOrColonyDialog";
-import InfidelFleetCombatDialog from "./InfidelFleetCombatDialog";
-import DeferredBattleDialog from "./DeferredBattleDialog";
-import RebellionDialog from "./RebellionDialog";
-import RebellionRivalSupportDialog from "./RebellionRivalSupportDialog";
-import InvasionNominateDialog from "./InvasionNominateDialog";
-import InvasionContributeDialog from "./InvasionContributeDialog";
-import InvasionBuyoffDialog from "./InvasionBuyoffDialog";
+import InfidelFleetCombatDialog from "./Events/InfidelFleetCombatDialog";
+import DeferredBattleDialog from "./Events/DeferredBattleDialog";
+import RebellionDialog from "./Events/RebellionDialog";
+import RebellionRivalSupportDialog from "./Events/RebellionRivalSupportDialog";
+import InvasionNominateDialog from "./Events/InvasionNominateDialog";
+import InvasionContributeDialog from "./Events/InvasionContributeDialog";
+import InvasionBuyoffDialog from "./Events/InvasionBuyoffDialog";
 import RetrieveFleetsDialog from "./Resolution/RetrieveFleetsDialog";
+import ElectionDialog from "./Election/ElectionDialog";
+import DiscardFoWCardDialog from "./Cards/DiscardFoWCardDialog";
+import ConfirmDrawDialog from "./Cards/ConfirmDrawDialog";
 import GameOverView from "./GameOverView";
 
 /**
@@ -34,11 +39,8 @@ import GameOverView from "./GameOverView";
  *
  * Rule: do NOT add layout, tabs, or non-dialog UI here.
  * Rule: do NOT modify the individual dialog components — only their mount conditions.
- *
- * The election "It is your turn to vote" notification dialog is intentionally left
- * in ActionBoardsAndMap because it relies on local `dialogOpen` state there.
  */
-export const DialogRouter = (props: MyGameProps) => {
+export const DialogRouter = memo((props: MyGameProps) => {
   return (
     <>
       <RoundSummaryDialog {...props} />
@@ -58,13 +60,16 @@ export const DialogRouter = (props: MyGameProps) => {
         <PickLegacyCardDialog {...props} />
       )}
 
-      {props.G.stage === "attack or pass" && (
+      {props.G.stage === "attack or pass" && props.ctx.phase === "aerial_battle" && (
         <AttackOrPassDiaLog {...props} />
       )}
 
       {props.G.stage === "attack or evade" && (
         <AttackOrEvadeDialog {...props} />
       )}
+
+      {/* BattleResultDialog manages its own open state — shows after any battle resolves */}
+      <BattleResultDialog {...props} />
 
       {/* DrawOrPickCardDialog manages its own open state internally */}
       <DrawOrPickCardDialog {...props} />
@@ -77,7 +82,7 @@ export const DialogRouter = (props: MyGameProps) => {
         <PlunderLegendsDialog {...props} />
       )}
 
-      {props.G.stage === "attack or pass" && (
+      {props.G.stage === "attack or pass" && props.ctx.phase === "ground_battle" && (
         <GroundAttackOrPassDialog {...props} />
       )}
 
@@ -125,7 +130,15 @@ export const DialogRouter = (props: MyGameProps) => {
         <RetrieveFleetsDialog {...props} />
       )}
 
+      {props.ctx.phase === "election" && <ElectionDialog {...props} />}
+
+      {props.G.stage === "immediate_election" && <ElectionDialog {...props} immediate />}
+
+      {props.G.stage === "confirm_fow_draw" && <ConfirmDrawDialog {...props} />}
+
+      {props.G.stage === "discard_fow" && <DiscardFoWCardDialog {...props} />}
+
       <GameOverView {...props} />
     </>
   );
-};
+});

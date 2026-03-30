@@ -7,16 +7,19 @@ import {
   addVPAmount,
   removeVPAmount,
   addRegiments,
+  logEvent,
   HERESY_MIN,
 } from "./stateUtils";
 import { CARD_RESOLVERS, resolveCardWithAlignmentPenalty } from "./legacyCardDefinitions";
 import { hasAnyOutpost, hasAnyColony } from "./helpers";
+import { BUILDING_SELL_PRICE } from "../data/gameData";
 
 // ── Card metadata ────────────────────────────────────────────────────────────
 
 export type EventCardDef = {
   displayName: string;
   description: string;
+  effect: string;
   isBattle: boolean;
 };
 
@@ -24,161 +27,223 @@ export const EVENT_CARD_DEFS: Record<EventCardName, EventCardDef> = {
   zeeland_turns_heretic: {
     displayName: "Zeeland Turns Heretic",
     description: "Ruling Council Opts For Religious Reform",
+    effect: "Zeeland becomes a heretic NPR kingdom, affecting election vote counts.",
     isBattle: false,
   },
   venoa_turns_heretic: {
     displayName: "Venoa Turns Heretic",
     description: "Ruling Council Opts For Religious Reform",
+    effect: "Venoa becomes a heretic NPR kingdom, affecting election vote counts.",
     isBattle: false,
   },
   treacherous_creatures: {
     displayName: "Treacherous Creatures",
     description: "Merfolk & Sea Elves Attack",
+    effect: "Each fleet on Merfolk or Sea Elf legend tiles loses 1 skyship and 1 troop.",
     isBattle: false,
   },
   the_great_fire: {
     displayName: "The Great Fire",
     description: "Colossal Conflagration Destroys Grand Building",
+    effect: "The player with the most buildings loses one building (highest-count type chosen automatically).",
     isBattle: false,
   },
   the_faerie_plague: {
     displayName: "The Faerie Plague",
     description: "A New and Deadly Pestilence Strikes",
+    effect: "All players lose half their regiments and levies everywhere — kingdom, fleets, and garrisons.",
     isBattle: false,
   },
   schism: {
     displayName: "Schism",
     description: "Heretic Clergy Break with the Prelacy",
+    effect: "All heretic players: heresy advances 3, excluded from this round's election. Annuls Colonial Prelates.",
+    isBattle: false,
+  },
+  royal_patronage: {
+    displayName: "Royal Patronage",
+    description: "The Crown Rewards Swift Exploration",
+    effect: "The first player to claim a land tile this round gains +2 VP and 2 gold.",
+    isBattle: false,
+  },
+  race_to_discovery: {
+    displayName: "Race to Discovery",
+    description: "Rival Courts Compete for Prestige",
+    effect: "The player who discovers the most tiles this round gains bonus VP.",
     isBattle: false,
   },
   royal_succession: {
     displayName: "Royal Succession",
     description: "Heir Apparent Takes The Throne",
+    effect: "Fewest-VP player scores their legacy card early, returns it, then draws 2 new cards and keeps the best.",
     isBattle: false,
   },
   pretender_rebellion: {
     displayName: "Pretender REBELLION",
     description: "Scion Of A Rival Dynasty Raises Their Banner",
+    effect: "Rebellion targets the player with fewest VP. Commit troops to defend or surrender.",
     isBattle: true,
   },
   prelacy_condemned: {
     displayName: "Prelacy Condemned",
     description: "Radical Cleric Publishes Critical Theses",
+    effect: "All players' heresy trackers advance 4 steps toward heresy.",
     isBattle: false,
   },
   peace_accord_reached: {
     displayName: "Peace Accord Reached",
     description: "Peace Of The Faith Extended To Whole Globe",
+    effect: "No aerial battles may be declared this round.",
     isBattle: false,
   },
   peasant_rebellion: {
     displayName: "Peasant REBELLION",
     description: "Common People Rise Up Against Heavy Taxation",
+    effect: "Rebellion targets the player with the most gold. Commit troops to defend or surrender.",
     isBattle: true,
   },
   patrons_of_the_arts: {
     displayName: "Patrons Of The Arts",
     description: "Architecture, Music & Painting Flourish",
+    effect: "Each player gains VP equal to the number of cathedrals + palaces they own.",
     isBattle: false,
   },
   orthodox_rebellion: {
     displayName: "Orthodox REBELLION",
     description: "Believers Rise Up Against A Heretic Monarch",
+    effect: "Rebellion targets a heretic player. Commit troops to defend or surrender. Void if no heretic players.",
     isBattle: true,
   },
   mysterious_disappearances: {
     displayName: "Mysterious Disappearances",
     description: "Vanishings at City of Gold & Fountain of Youth",
+    effect: "Each fleet on City of Gold or Fountain of Youth tiles loses 1 skyship and 1 troop.",
     isBattle: false,
   },
   monsters_awake: {
     displayName: "Monsters Awake",
     description: "Dragons & Krakens Claim Victims",
+    effect: "Each fleet on Dragon or Kraken legend tiles loses 1 skyship and 1 troop.",
     isBattle: false,
   },
   lenders_refuse_credit: {
     displayName: "Lenders Refuse Credit",
     description: "The Banking Guilds Stop Further Loans",
+    effect: "Players currently in debt may not borrow gold this round.",
     isBattle: false,
   },
   infidels_invade_faerie: {
     displayName: "Infidels Invade Faerie",
     description: "An Infidel Host Attacks a Colony or Outpost",
+    effect: "An infidel host attacks. Archprelate nominates a Captain-General; all players contribute troops.",
     isBattle: true,
   },
   infidel_corsairs_raid: {
     displayName: "Infidel Corsairs Raid",
     description: "Aerial Pirates Descend on Faithdom",
+    effect: "The richest player without a defending fleet at home loses half their gold (or a building if broke).",
     isBattle: false,
   },
   heretic_rebellion: {
     displayName: "Heretic REBELLION",
     description: "Heretics Rise Up Against An Orthodox Monarch",
+    effect: "Rebellion targets an orthodox player. Commit troops to defend or surrender. Void if no orthodox players.",
     isBattle: true,
   },
   headstrong_commander: {
     displayName: "Headstrong Commander",
     description: "Ambitious Outpost Governor Attempts Conquest",
+    effect: "A garrisoned outpost commander forces a battle. Void if no outposts have garrisons.",
     isBattle: true,
+  },
+  guild_revolt: {
+    displayName: "Guild Revolt",
+    description: "Factory Workers Demand Better Conditions",
+    effect: "Targeted player must choose: lose a building or pay gold to settle the dispute.",
+    isBattle: false,
   },
   grand_infidel_dies: {
     displayName: "Grand Infidel Dies",
     description: "Succession Struggle Delays Invasion Preparations",
+    effect: "The infidel invasion is delayed — no invasion event this round.",
+    isBattle: false,
+  },
+  foreign_agitators: {
+    displayName: "Foreign Agitators",
+    description: "Neighbouring Realms Send Troublemakers",
+    effect: "All players' heresy trackers advance 1 step.",
     isBattle: false,
   },
   faerie_uprising: {
     displayName: "Faerie Uprising",
     description: "Faerie Folk Rise Up Against Colonial Oppression",
+    effect: "A colony faces rebellion from the local faerie folk. Commit troops or lose the colony.",
     isBattle: true,
   },
   dynastic_marriage: {
     displayName: "Dynastic Marriage",
     description: "Two Monarchies Make A Lasting Alliance",
+    effect: "Two players form a marriage alliance. Void if fewer than 4 players.",
+    isBattle: false,
+  },
+  corruption_scandal: {
+    displayName: "Corruption Scandal",
+    description: "Cathedral Prelates Caught in Embezzlement",
+    effect: "Targeted player must choose: lose a cathedral or pay gold to cover the scandal.",
     isBattle: false,
   },
   defence_of_the_faith: {
     displayName: "Defence of the Faith",
     description: "Devout Cleric Publishes Counter to Criticism",
+    effect: "All players' heresy trackers retreat 4 steps toward orthodoxy.",
     isBattle: false,
   },
   crops_fail: {
     displayName: "Crops Fail",
     description: "Poor Harvests Reduce Tax Take",
+    effect: "All players collect 3 less gold during taxes this round.",
     isBattle: false,
   },
   colonial_rebellion: {
     displayName: "Colonial REBELLION",
     description: "Colonists Rise Up Against Royal Authority",
+    effect: "A colony rebels. Its owner must commit troops to defend or lose the colony. Void if no colonies.",
     isBattle: true,
   },
   colonial_prelates: {
     displayName: "Colonial Prelates",
     description: "The Church Expands to Minister to Faerie",
+    effect: "Each colony now counts as +1 vote in Archprelate elections (persistent). Void if no colonies.",
     isBattle: false,
   },
   bumper_crops: {
     displayName: "Bumper Crops",
     description: "Good Harvests Increase Tax Take",
+    effect: "All players collect 3 extra gold during taxes this round.",
     isBattle: false,
   },
   archprelate_dies: {
     displayName: "Archprelate Dies",
     description: "Council of Prelates Enters Emergency Session",
+    effect: "An immediate emergency election is held (no bribes, own kingdom votes only).",
     isBattle: false,
   },
   allies_in_faerie: {
     displayName: "Allies in Faerie",
     description: "Outpost Governors Obtain Local Recruits",
+    effect: "Each outpost owner gains free regiments equal to that outpost's trade goods value. Void if no outposts.",
     isBattle: false,
   },
   a_kingdom_turns_heretic: {
     displayName: "A Kingdom Turns Heretic",
     description: "Monarch Opts For Religious Reform",
+    effect: "An NPR kingdom converts to heresy, affecting election vote counts. Void if no eligible orthodox NPR.",
     isBattle: false,
   },
   return_to_orthodoxy: {
     displayName: "Return to Orthodoxy",
     description: "Monarch Reverses Religious Reform",
+    effect: "A heretic NPR kingdom returns to orthodoxy. Void if no heretic NPR kingdoms.",
     isBattle: false,
   },
 };
@@ -357,46 +422,57 @@ const resolveImmediateElection = (
 
 // ── Void condition checks ────────────────────────────────────────────────────
 
-/** Returns true if the card would have no effect and should be skipped */
+/** Returns a reason string if the card would have no effect and should be skipped, or false if it should play */
 export const isEventVoid = (
   card: EventCardName,
   G: MyGameState,
   turnOrder: string[]
-): boolean => {
+): string | false => {
   switch (card) {
     case "the_faerie_plague":
-      return !hasDiscoveredLand(G);
+      if (!hasDiscoveredLand(G)) return "no discovered land tiles";
+      return false;
 
     case "schism":
     case "orthodox_rebellion":
-      return !turnOrder.some(
-        (id) => G.playerInfo[id].hereticOrOrthodox === "heretic"
-      );
+      if (!turnOrder.some((id) => G.playerInfo[id].hereticOrOrthodox === "heretic"))
+        return "no heretic players";
+      return false;
 
     case "heretic_rebellion":
-      return !turnOrder.some(
-        (id) => G.playerInfo[id].hereticOrOrthodox === "orthodox"
-      );
+      if (!turnOrder.some((id) => G.playerInfo[id].hereticOrOrthodox === "orthodox"))
+        return "no orthodox players";
+      return false;
 
     case "treacherous_creatures":
-      return !hasPlayerFleetsOnTiles(G, findLegendTileCoords(G, MERFOLK_SEA_ELVES));
+      if (!hasPlayerFleetsOnTiles(G, findLegendTileCoords(G, MERFOLK_SEA_ELVES)))
+        return "no fleets on Merfolk/Sea Elf tiles";
+      return false;
 
     case "mysterious_disappearances":
-      return !hasPlayerFleetsOnTiles(G, findLegendTileCoords(G, CITY_FOUNTAIN));
+      if (!hasPlayerFleetsOnTiles(G, findLegendTileCoords(G, CITY_FOUNTAIN)))
+        return "no fleets on City/Fountain tiles";
+      return false;
 
     case "monsters_awake":
-      return !hasPlayerFleetsOnTiles(G, findLegendTileCoords(G, DRAGONS_KRAKENS));
+      if (!hasPlayerFleetsOnTiles(G, findLegendTileCoords(G, DRAGONS_KRAKENS)))
+        return "no fleets on Dragon/Kraken tiles";
+      return false;
 
     case "infidel_corsairs_raid":
       // Void if ALL players have a defending fleet (skyships > 0 at Kingdom)
-      return turnOrder.every((id) =>
-        G.playerInfo[id].fleetInfo.some(
-          (f) =>
-            f.skyships > 0 &&
-            f.location[0] === KINGDOM_X &&
-            f.location[1] === KINGDOM_Y
+      if (
+        turnOrder.every((id) =>
+          G.playerInfo[id].fleetInfo.some(
+            (f) =>
+              f.skyships > 0 &&
+              f.location[0] === KINGDOM_X &&
+              f.location[1] === KINGDOM_Y
+          )
         )
-      );
+      )
+        return "all players have defending fleets at home";
+      return false;
 
     case "headstrong_commander":
       // Void if no outpost has garrisoned troops
@@ -411,36 +487,45 @@ export const isEventVoid = (
           }
         }
       }
-      return true;
+      return "no garrisoned outposts";
 
     case "faerie_uprising":
     case "colonial_rebellion":
     case "colonial_prelates":
-      return !hasAnyColony(G);
+      if (!hasAnyColony(G)) return "no colonies exist";
+      return false;
 
     case "dynastic_marriage":
-      return turnOrder.length < 4;
+      if (turnOrder.length < 4) return "fewer than 4 players";
+      return false;
 
     case "infidels_invade_faerie":
-      return !hasAnyOutpost(G) && !hasAnyColony(G);
+      if (!hasAnyOutpost(G) && !hasAnyColony(G)) return "no outposts or colonies exist";
+      return false;
 
     case "allies_in_faerie":
-      return !hasAnyOutpost(G);
+      if (!hasAnyOutpost(G)) return "no outposts exist";
+      return false;
 
     case "a_kingdom_turns_heretic": {
       const assignedKingdoms = new Set(
         Object.values(G.playerInfo).map((p) => p.kingdomName)
       );
-      return !ALL_PLAYER_KINGDOMS.some(
-        (k) =>
-          !assignedKingdoms.has(k as any) &&
-          !G.eventState.nprHeretic.includes(k)
-      );
+      if (
+        !ALL_PLAYER_KINGDOMS.some(
+          (k) =>
+            !assignedKingdoms.has(k as any) &&
+            !G.eventState.nprHeretic.includes(k)
+        )
+      )
+        return "no eligible orthodox NPR kingdoms";
+      return false;
     }
 
     case "return_to_orthodoxy":
       // Void if no heretic NPR kingdom exists
-      return G.eventState.nprHeretic.length === 0;
+      if (G.eventState.nprHeretic.length === 0) return "no heretic NPR kingdoms";
+      return false;
 
     default:
       return false;
@@ -463,28 +548,50 @@ export const resolveEventCard = (
     // ── Heresy shifts ──────────────────────────────────────────────────────
     case "prelacy_condemned":
       for (let i = 0; i < 4; i++) advanceAllHeresyTrackers(G);
+      logEvent(G, "Prelacy Condemned: all heresy trackers advance 4 steps");
       break;
 
     case "defence_of_the_faith":
       for (let i = 0; i < 4; i++) retreatAllHeresyTrackers(G);
+      logEvent(G, "Defence of the Faith: all heresy trackers retreat 4 steps");
       break;
 
     // ── Tax modifiers (applied during taxes phase) ─────────────────────────
     case "crops_fail":
       G.eventState.taxModifier = -3;
+      logEvent(G, "Crops Fail: tax income reduced by 3 this round");
       break;
 
     case "bumper_crops":
       G.eventState.taxModifier = 3;
+      logEvent(G, "Bumper Crops: tax income increased by 3 this round");
       break;
 
     // ── VP awards ──────────────────────────────────────────────────────────
     case "patrons_of_the_arts":
       for (const id of turnOrder) {
         const p = G.playerInfo[id];
-        addVPAmount(G, id, p.cathedrals + p.palaces);
+        const vp = p.cathedrals + p.palaces;
+        addVPAmount(G, id, vp);
+        if (vp > 0) {
+          logEvent(G, `Patrons of the Arts: ${p.kingdomName} gains ${vp} VP (${p.cathedrals} cathedrals + ${p.palaces} palaces)`);
+        }
       }
       break;
+
+    // ── Round-tracking events (flags set here, scored in moves/phases) ──
+    case "royal_patronage":
+      G.eventState.royalPatronageActive = true;
+      logEvent(G, "Royal Patronage: the first player to claim a Land this round gains +2 VP and 2 gold");
+      break;
+
+    case "race_to_discovery": {
+      const counters: Record<string, number> = {};
+      for (const id of turnOrder) counters[id] = 0;
+      G.eventState.raceToDiscoveryCounters = counters;
+      logEvent(G, "Race to Discovery: the player who discovers the most tiles this round gains bonus VP");
+      break;
+    }
 
     // ── Disasters ──────────────────────────────────────────────────────────
     case "the_faerie_plague":
@@ -506,6 +613,7 @@ export const resolveEventCard = (
           tile.garrisonedLevies -= Math.floor(tile.garrisonedLevies / 2);
         }
       }
+      logEvent(G, "The Faerie Plague: all players lose half their troops (rounded down) everywhere");
       break;
 
     case "the_great_fire": {
@@ -531,6 +639,32 @@ export const resolveEventCard = (
         if (counts[0].type === "cathedral") p.cathedrals--;
         else if (counts[0].type === "palace") p.palaces--;
         else p.shipyards--;
+        logEvent(G, `The Great Fire: ${p.kingdomName} loses a ${counts[0].type}`);
+      }
+      break;
+    }
+
+    // ── Gap-fix events ─────────────────────────────────────────────────
+
+    case "guild_revolt":
+      // Resolved via interactive choice (prepareEventChoice → resolveEventChoice)
+      break;
+
+    case "corruption_scandal":
+      // Resolved via interactive choice (prepareEventChoice → resolveEventChoice)
+      break;
+
+    case "foreign_agitators": {
+      // Each player advances heresy by 1 (circular: each player "sends" to the next in IPO)
+      // Mechanically equivalent to advancing all trackers by 1, but logged with circular targeting
+      for (let i = 0; i < turnOrder.length; i++) {
+        const senderID = turnOrder[i];
+        const targetID = turnOrder[(i + 1) % turnOrder.length];
+        increaseHeresyWithinMove(G, targetID);
+        logEvent(
+          G,
+          `Foreign Agitators: ${G.playerInfo[senderID].kingdomName} sends agitators to ${G.playerInfo[targetID].kingdomName} (heresy +1)`,
+        );
       }
       break;
     }
@@ -554,14 +688,24 @@ export const resolveEventCard = (
       }
       if (target) {
         const gold = G.playerInfo[target].resources.gold;
+        const kingdomName = G.playerInfo[target].kingdomName;
         if (gold > 0) {
-          G.playerInfo[target].resources.gold -= Math.ceil(gold / 2);
+          const lost = Math.ceil(gold / 2);
+          G.playerInfo[target].resources.gold -= lost;
+          logEvent(G, `Infidel Corsairs Raid: ${kingdomName} loses ${lost} gold`);
         } else {
           // No gold — lose a building (auto-pick)
           const p = G.playerInfo[target];
-          if (p.cathedrals > 0) p.cathedrals--;
-          else if (p.palaces > 0) p.palaces--;
-          else if (p.shipyards > 0) p.shipyards--;
+          if (p.cathedrals > 0) {
+            p.cathedrals--;
+            logEvent(G, `Infidel Corsairs Raid: ${kingdomName} loses a cathedral (no gold to plunder)`);
+          } else if (p.palaces > 0) {
+            p.palaces--;
+            logEvent(G, `Infidel Corsairs Raid: ${kingdomName} loses a palace (no gold to plunder)`);
+          } else if (p.shipyards > 0) {
+            p.shipyards--;
+            logEvent(G, `Infidel Corsairs Raid: ${kingdomName} loses a shipyard (no gold to plunder)`);
+          }
         }
       }
       break;
@@ -577,6 +721,12 @@ export const resolveEventCard = (
           : card === "mysterious_disappearances"
             ? CITY_FOUNTAIN
             : DRAGONS_KRAKENS;
+      const cardLabel =
+        card === "treacherous_creatures"
+          ? "Treacherous Creatures"
+          : card === "mysterious_disappearances"
+            ? "Mysterious Disappearances"
+            : "Monsters Awake";
       const coords = findLegendTileCoords(G, tileNames);
       // One Skyship from each Fleet lost (& any troop it was carrying)
       for (const player of Object.values(G.playerInfo)) {
@@ -589,8 +739,15 @@ export const resolveEventCard = (
             )
           ) {
             fleet.skyships -= 1;
-            if (fleet.regiments > 0) fleet.regiments -= 1;
-            else if (fleet.levies > 0) fleet.levies -= 1;
+            if (fleet.regiments > 0) {
+              fleet.regiments -= 1;
+              logEvent(G, `${cardLabel}: ${player.kingdomName} loses 1 skyship and 1 regiment at a legend tile`);
+            } else if (fleet.levies > 0) {
+              fleet.levies -= 1;
+              logEvent(G, `${cardLabel}: ${player.kingdomName} loses 1 skyship and 1 levy at a legend tile`);
+            } else {
+              logEvent(G, `${cardLabel}: ${player.kingdomName} loses 1 skyship at a legend tile`);
+            }
           }
         }
       }
@@ -601,12 +758,14 @@ export const resolveEventCard = (
     case "zeeland_turns_heretic":
       if (!G.eventState.nprHeretic.includes("Zeeland")) {
         G.eventState.nprHeretic.push("Zeeland");
+        logEvent(G, "Zeeland Turns Heretic: Zeeland joins the heretic nations");
       }
       break;
 
     case "venoa_turns_heretic":
       if (!G.eventState.nprHeretic.includes("Venoa")) {
         G.eventState.nprHeretic.push("Venoa");
+        logEvent(G, "Venoa Turns Heretic: Venoa joins the heretic nations");
       }
       break;
 
@@ -621,6 +780,7 @@ export const resolveEventCard = (
       );
       if (orthodoxNPR.length > 0) {
         G.eventState.nprHeretic.push(orthodoxNPR[0]);
+        logEvent(G, `A Kingdom Turns Heretic: ${orthodoxNPR[0]} converts to heresy`);
       }
       break;
     }
@@ -628,7 +788,8 @@ export const resolveEventCard = (
     case "return_to_orthodoxy": {
       // Remove one heretic NPR kingdom (restore to orthodox)
       if (G.eventState.nprHeretic.length > 0) {
-        G.eventState.nprHeretic.pop();
+        const restored = G.eventState.nprHeretic.pop();
+        logEvent(G, `Return to Orthodoxy: ${restored} returns to the faith`);
       }
       break;
     }
@@ -636,35 +797,54 @@ export const resolveEventCard = (
     // ── Persistent effects (set flag, enforcement in other phases) ────────
     case "peace_accord_reached":
       G.eventState.peaceAccordActive = true;
+      logEvent(G, "Peace Accord Reached: no aerial battles may be declared this round");
       break;
 
-    case "schism":
+    case "schism": {
       // Advance all Heretic players' heresy by 3; mark for election exclusion
+      const schismAffectedNames: string[] = [];
       for (const id of turnOrder) {
         if (G.playerInfo[id].hereticOrOrthodox === "heretic") {
           for (let i = 0; i < 3; i++) increaseHeresyWithinMove(G, id);
           if (!G.eventState.schismAffected.includes(id)) {
             G.eventState.schismAffected.push(id);
           }
+          schismAffectedNames.push(G.playerInfo[id].kingdomName);
         }
       }
       // Schism annuls Colonial Prelates
       G.eventState.colonialPrelatesActive = false;
+      if (schismAffectedNames.length > 0) {
+        logEvent(G, `Schism: heresy advances 3 for ${schismAffectedNames.join(", ")}; they are excluded from the election`);
+      } else {
+        logEvent(G, "Schism: no heretic players affected");
+      }
       break;
+    }
 
-    case "lenders_refuse_credit":
-      G.eventState.lendersRefuseCredit = turnOrder.filter(
+    case "lenders_refuse_credit": {
+      const debtors = turnOrder.filter(
         (id) => G.playerInfo[id].resources.gold < 0
       );
+      G.eventState.lendersRefuseCredit = debtors;
+      if (debtors.length > 0) {
+        const debtorNames = debtors.map((id) => G.playerInfo[id].kingdomName).join(", ");
+        logEvent(G, `Lenders Refuse Credit: ${debtorNames} may not borrow gold this round`);
+      } else {
+        logEvent(G, "Lenders Refuse Credit: no players are in debt, no effect");
+      }
       break;
+    }
 
     case "colonial_prelates":
       G.eventState.colonialPrelatesActive = true;
+      logEvent(G, "Colonial Prelates: each colony now counts as +1 vote in elections");
       break;
 
     // ── Allies in Faerie — free regiments at outposts ──────────────────────
     case "allies_in_faerie":
       for (const id of turnOrder) {
+        let totalGained = 0;
         for (let y = 0; y < G.mapState.buildings.length; y++) {
           for (let x = 0; x < G.mapState.buildings[y].length; x++) {
             const tile = G.mapState.buildings[y][x];
@@ -678,8 +858,12 @@ export const resolveEventCard = (
                 loot.stickyIchor +
                 loot.pipeweed;
               addRegiments(G, id, tradeGains);
+              totalGained += tradeGains;
             }
           }
+        }
+        if (totalGained > 0) {
+          logEvent(G, `Allies in Faerie: ${G.playerInfo[id].kingdomName} gains ${totalGained} regiment(s) from outpost trade goods`);
         }
       }
       break;
@@ -687,6 +871,7 @@ export const resolveEventCard = (
     // ── No-op (infidel invasion not implemented) ───────────────────────────
     case "grand_infidel_dies":
       G.eventState.grandInfidelDies = true;
+      logEvent(G, "Grand Infidel Dies: the infidel invasion is delayed this round");
       break;
 
     // ── Royal Succession ─────────────────────────────────────────────────
@@ -727,13 +912,17 @@ export const resolveEventCard = (
         for (const card of drawn) {
           if (card !== bestCard) G.cardDecks.legacyDeck.push(card);
         }
+        logEvent(G, `Royal Succession: ${rsPlayer.kingdomName} scores their legacy card and receives a new one (${bestCard.name})`);
+      } else {
+        logEvent(G, `Royal Succession: ${rsPlayer.kingdomName} scores their legacy card; no new cards available`);
       }
       break;
     }
 
-    // ── Archprelate Dies — immediate election without bribes ─────────────
+    // ── Archprelate Dies — deferred to interactive election within events phase
     case "archprelate_dies":
-      resolveImmediateElection(G, turnOrder);
+      G.eventState.immediateElectionPending = true;
+      logEvent(G, "Archprelate Dies: an emergency election will now be held");
       break;
 
     // ── Dynastic Marriage — auto-pick: fewest + second-fewest VP ─────────
@@ -1020,6 +1209,43 @@ export const prepareEventChoice = (
         card,
         targetPlayerID: targetID,
         colonyOptions: colonies,
+      };
+    }
+
+    case "guild_revolt": {
+      // Target: player with most factories (break ties IPO)
+      let maxFactories = 0;
+      let grTargetID = turnOrder[0];
+      for (const id of turnOrder) {
+        if (G.playerInfo[id].factories > maxFactories) {
+          maxFactories = G.playerInfo[id].factories;
+          grTargetID = id;
+        }
+      }
+      if (maxFactories <= 0) return null;
+      const payCost = 2 * G.playerInfo[grTargetID].factories;
+      return {
+        card,
+        targetPlayerID: grTargetID,
+        binaryOptions: [`pay_gold:${payCost}`, "sell_factory"],
+      };
+    }
+
+    case "corruption_scandal": {
+      // Target: player with most cathedrals (break ties IPO)
+      let maxCath = 0;
+      let csTargetID = turnOrder[0];
+      for (const id of turnOrder) {
+        if (G.playerInfo[id].cathedrals > maxCath) {
+          maxCath = G.playerInfo[id].cathedrals;
+          csTargetID = id;
+        }
+      }
+      if (maxCath <= 0) return null;
+      return {
+        card,
+        targetPlayerID: csTargetID,
+        binaryOptions: ["lose_cathedral", "lose_vp"],
       };
     }
 

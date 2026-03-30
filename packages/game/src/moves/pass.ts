@@ -1,53 +1,40 @@
-import { Move } from "boardgame.io";
-import { MyGameState } from "../types";
-import { Ctx } from "boardgame.io/dist/types/src/types";
-import { EventsAPI } from "boardgame.io/dist/types/src/plugins/plugin-events";
-import { RandomAPI } from "boardgame.io/dist/types/src/plugins/random/random";
+import { MoveDefinition, MyGameState, MoveError } from "../types";
 import { INVALID_MOVE } from "boardgame.io/core";
+import { allPlayersPassed } from "../helpers/stateUtils";
 
-const pass: Move<MyGameState> = (
-  {
-    G,
-    ctx,
-    playerID,
-    events,
-    random,
-  }: {
-    G: MyGameState;
-    ctx: Ctx;
-    playerID: string;
-    events: EventsAPI;
-    random: RandomAPI;
-  },
-  ...args: any[]
-) => {
+const validatePass = (G: MyGameState, _playerID: string): MoveError | null => {
   // GAP-24: cascade flip — must keep discovering after Ocean/Legend; Land clears the flag
-  if (ctx.phase === "discovery" && G.mustContinueDiscovery) {
-    return INVALID_MOVE;
+  // ctx isn't available in validate, but we can check the flag on G
+  if (G.mustContinueDiscovery) {
+    return { code: "MUST_CONTINUE", message: "You must continue discovering (Ocean/Legend tile flipped)" };
   }
-  G.playerInfo[playerID].passed = true;
-  if (ctx.phase === "discovery") {
-    G.firstTurnOfRound = false;
-    if (ctx.playOrderPos === ctx.numPlayers - 1) {
-      G.stage = "actions";
+  return null;
+};
+
+const pass: MoveDefinition = {
+  fn: ({ G, ctx, playerID, events }, ...args: any[]) => {
+    const piracyIntent = args[0] as "tax" | "cut" | undefined;
+    if (piracyIntent === "tax" || piracyIntent === "cut") {
+      G.playerInfo[playerID].piracyIntent = piracyIntent;
+    }
+    G.playerInfo[playerID].passed = true;
+    if (ctx.phase === "discovery") {
+      G.firstTurnOfRound = false;
+    }
+
+    if (allPlayersPassed(G)) {
+      G.stage = ctx.phase === "actions" ? "attack or pass" : "actions";
       events.endPhase();
     } else {
       events.endTurn();
     }
-  } else if (ctx.phase === "actions") {
-    let readyToEndPhase = true;
-    Object.values(G.playerInfo).forEach((info) => {
-      if (info.passed === false) {
-        readyToEndPhase = false;
-      }
-    });
-    if (readyToEndPhase && ctx.phase === "actions") {
-      G.stage = "attack or pass";
-      events.endPhase();
-    } else {
-      events.endTurn();
-    }
-  }
+  },
+  errorMessage: "Cannot pass right now",
+  validate: validatePass,
+  successLog: (G, pid) => {
+    const k = G.playerInfo[pid].kingdomName;
+    return `${k} passes`;
+  },
 };
 
 export default pass;

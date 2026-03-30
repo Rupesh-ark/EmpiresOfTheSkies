@@ -11,11 +11,11 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { buildInitialG, buildPlayer, buildCtx, buildResources } from "../testHelpers";
+import { buildInitialG, buildPlayer, buildCtx, buildResources, buildEvents, buildRandom } from "../testHelpers";
 import plunder from "../../moves/plunderLegends/plunder";
 import type { TileInfoProps } from "../../types";
 
-const stubEvents = { endTurn: (_args?: any) => {}, endPhase: () => {} } as any;
+const stubEvents = buildEvents();
 
 // ── Map helpers ───────────────────────────────────────────────────────────────
 
@@ -94,8 +94,8 @@ describe("plunder — colony loot transfer", () => {
       }
     );
 
-    (plunder as Function)(
-      { G, ctx: buildCtx(playerID), playerID, events: stubEvents, random: {} }
+    plunder.fn(
+      { G, ctx: buildCtx(playerID), playerID, events: stubEvents, random: buildRandom() }
     );
 
     expect(G.playerInfo[playerID].resources.gold).toBe(8);    // 5 + 3
@@ -126,8 +126,8 @@ describe("plunder — colony loot transfer", () => {
       }
     );
 
-    (plunder as Function)(
-      { G, ctx: buildCtx(playerID), playerID, events: stubEvents, random: {} }
+    plunder.fn(
+      { G, ctx: buildCtx(playerID), playerID, events: stubEvents, random: buildRandom() }
     );
 
     expect(G.playerInfo[playerID].resources.gold).toBe(5);    // unchanged

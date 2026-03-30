@@ -5,8 +5,11 @@
  * All defaults match v4.2 starting values from STARTING_RESOURCES and codifiedGameInfo.ts.
  */
 
-import { MyGameState, PlayerInfo, ActionBoardInfo, Resources, FleetInfo, PlayerBoardInfo } from "../types";
-import { fortuneOfWarCards } from "../codifiedGameInfo";
+import { MyGameState, PlayerInfo, ActionBoardInfo, Resources, FleetInfo, PlayerBoardInfo, MoveDefinition, MoveContext } from "../types";
+import type { Ctx } from "boardgame.io";
+import type { EventsAPI } from "boardgame.io/dist/types/src/plugins/events/events";
+import type { RandomAPI } from "boardgame.io/dist/types/src/plugins/random/random";
+import { fortuneOfWarCards } from "../data/gameData";
 
 // ── Player builder ────────────────────────────────────────────────────────────
 
@@ -22,6 +25,8 @@ export function buildPlayer(id: string, overrides: Partial<PlayerInfo> = {}): Pl
     hereticOrOrthodox: "orthodox",
     heresyTracker: 0, // actual game starting value (playerSetup.ts)
     prisoners: 0,
+    freeDissenters: 0,
+    piracyIntent: "tax" as const,
     shipyards: 0,
     factories: 1,      // v4.2: all players start with 1 factory
     cathedrals: 1,
@@ -127,6 +132,7 @@ export function buildInitialG(
     electionResults: {},
     hasVoted: [],
     voteSubmitted: {},
+    consecutiveArchprelateWins: 0,
     turnOrder: players.map((p) => p.id),
     playerInfo,
     boardState: buildActionBoard(),
@@ -153,6 +159,11 @@ export function buildInitialG(
         pipeweed: 2,
       },
     },
+    validFortLocations: [],
+    possibleDefenders: [],
+    validRelocationTiles: [],
+    troopsAvailableForGarrison: { regiments: 0, elites: 0, levies: 0 },
+    battleResult: null,
     failedConquests: [],
     contingentPool: [10, 10, 7, 7],
     infidelHostPool: [],
@@ -164,9 +175,13 @@ export function buildInitialG(
     infidelFleetCombat: null,
     pendingDeal: undefined,
     currentDeferredBattle: null,
+    _loopGuard: 0,
+    _halted: false,
     eventState: {
       deck: [],
+      lateDeck: [],
       chosenCards: [],
+      eventContributions: {},
       resolvedEvent: null,
       deferredEvents: [],
       pendingChoice: null,
@@ -180,6 +195,9 @@ export function buildInitialG(
       skipTaxesNextRound: false,
       cannotConvertThisRound: [],
       grandInfidelDies: false,
+      royalPatronageActive: false,
+      raceToDiscoveryCounters: null,
+      immediateElectionPending: false,
     },
     ...overrides,
   };
@@ -196,7 +214,7 @@ export function buildInitialG(
  * we pass G directly so mutations apply in place.
  */
 export function callMove<TArgs extends unknown[]>(
-  moveFn: (params: { G: MyGameState; ctx: MockCtx; playerID: string }, ...args: TArgs) => unknown,
+  moveFn: (params: { G: MyGameState; ctx: Ctx; playerID: string }, ...args: TArgs) => unknown,
   G: MyGameState,
   playerID: string,
   ...args: TArgs
@@ -206,28 +224,52 @@ export function callMove<TArgs extends unknown[]>(
   return { G, result };
 }
 
-export type MockCtx = {
-  currentPlayer: string;
-  playOrderPos: number;
-  numPlayers: number;
-  events: { endTurn: () => void; endPhase: () => void };
-};
+/**
+ * Simulates the wrapMove pipeline: validate → fn.
+ * Use this for MoveDefinition objects instead of calling .fn() directly.
+ */
+export function callMoveDef(
+  def: MoveDefinition,
+  G: MyGameState,
+  playerID: string,
+  ...args: unknown[]
+): { G: MyGameState; result: unknown } {
+  const ctx = buildCtx(playerID);
+  const events = buildEvents();
+  if (def.validate) {
+    const error = def.validate(G, playerID, ...args);
+    if (error) return { G, result: "INVALID_MOVE" };
+  }
+  const result = def.fn({ G, ctx, playerID, events }, ...args);
+  return { G, result };
+}
 
-export function buildCtx(currentPlayer: string, numPlayers = 2): MockCtx {
+/** @deprecated Use Ctx directly — kept for back-compat with existing test imports */
+export type MockCtx = Ctx;
+
+export function buildCtx(currentPlayer: string, numPlayers = 2): Ctx {
   return {
     currentPlayer,
     playOrderPos: 0,
     numPlayers,
-    events: {
-      endTurn: () => {},
-      endPhase: () => {},
-    },
-  };
+    playOrder: Array.from({ length: numPlayers }, (_, i) => String(i)),
+    activePlayers: null,
+    turn: 1,
+    phase: "actions",
+  } as Ctx;
+}
+
+/** Mock events — only stubs endTurn/endPhase (the ones tests actually call). */
+export function buildEvents(): EventsAPI {
+  return {
+    endTurn: () => {},
+    endPhase: () => {},
+  } as unknown as EventsAPI;
 }
 
 /** Mock boardgame.io random plugin — Shuffle returns array as-is (deterministic for tests). */
-export function buildRandom() {
+export function buildRandom(): RandomAPI {
   return {
     Shuffle: <T>(arr: T[]): T[] => [...arr],
-  };
+  } as unknown as RandomAPI;
 }

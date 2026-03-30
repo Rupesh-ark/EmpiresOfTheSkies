@@ -1,6 +1,6 @@
 import { FleetInfo } from "@eots/game";
 import { Box, Button, Typography } from "@mui/material";
-import { fonts } from "@/designTokens";
+import { tokens } from "@/theme";
 
 const FleetDisplay = (props: FleetDisplayProps) => {
   const isSelected = props.selected === props.fleetId;
@@ -33,13 +33,13 @@ const FleetDisplay = (props: FleetDisplayProps) => {
       onClick={() => props.onClickFunction(props.fleetId)}
     >
       <Typography
-        sx={{ fontFamily: fonts.system, fontWeight: 800, fontSize: "0.95rem" }}
+        sx={{ fontFamily: tokens.font.body, fontWeight: 800, fontSize: "0.95rem" }}
       >
         {`Fleet ${props.fleetId + 1}`}
       </Typography>
       <Typography
         sx={{
-          fontFamily: fonts.system,
+          fontFamily: tokens.font.body,
           fontSize: "0.68rem",
           fontWeight: 800,
           letterSpacing: "0.08em",
@@ -52,7 +52,7 @@ const FleetDisplay = (props: FleetDisplayProps) => {
       <Box sx={{ display: "flex", alignItems: "center", gap: 0.55, flexWrap: "wrap" }}>
         <Typography
           sx={{
-            fontFamily: fonts.system,
+            fontFamily: tokens.font.body,
             fontSize: "0.88rem",
             fontWeight: 700,
             lineHeight: 1.2,
@@ -69,7 +69,7 @@ const FleetDisplay = (props: FleetDisplayProps) => {
             borderRadius: 999,
             backgroundColor: "rgba(19,38,58,0.08)",
             border: "1px solid rgba(19,38,58,0.15)",
-            fontFamily: fonts.system,
+            fontFamily: tokens.font.body,
             fontSize: "0.68rem",
             fontWeight: 800,
             letterSpacing: "0.08em",
@@ -81,7 +81,7 @@ const FleetDisplay = (props: FleetDisplayProps) => {
       </Box>
       <Box
         sx={{
-          fontFamily: fonts.system,
+          fontFamily: tokens.font.body,
           fontSize: "0.84rem",
           lineHeight: 1.3,
           color: "rgba(0,0,0,0.76)",

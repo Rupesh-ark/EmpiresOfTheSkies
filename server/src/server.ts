@@ -1,7 +1,9 @@
 import "dotenv/config";
-import { Server } from "boardgame.io/server";
+import { Server, FlatFile } from "boardgame.io/server";
 import cors from "@koa/cors";
-import { MyGame } from "@eots/game";
+import { MyGame, createLogger } from "@eots/game";
+
+const log = createLogger("server");
 
 const PORT = Number(process.env.PORT) || 8000;
 
@@ -16,6 +18,7 @@ const allowOrigin = (origin?: string) => {
 const server = Server({
   games: [MyGame],
   origins: (origin) => !!allowOrigin(origin),
+  db: new FlatFile({ dir: "./storage" }),
 });
 
 server.app.use(
@@ -26,4 +29,4 @@ server.app.use(
   })
 );
 
-server.run(PORT, () => console.log(`Server running on port ${PORT}`));
+server.run(PORT, () => log.info(`Server running on port ${PORT}`));

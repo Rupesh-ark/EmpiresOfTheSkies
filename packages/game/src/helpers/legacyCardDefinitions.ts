@@ -23,7 +23,7 @@ const tradeRouteGoods = (player: PlayerInfo, G: MyGameState): number => {
 
       const routeNetwork = new Set(network);
       routeNetwork.add(tileKey(x, y));
-      if (!bfsReachable(FAITHDOM_TILES, routeNetwork).has(tileKey(x, y))) continue;
+      if (!bfsReachable(FAITHDOM_TILES, routeNetwork, G.mapState.currentTileArray).has(tileKey(x, y))) continue;
 
       const loot = G.mapState.currentTileArray[y][x].loot[building.buildings];
       total +=

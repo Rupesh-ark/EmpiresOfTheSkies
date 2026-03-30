@@ -1,73 +1,84 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { MyGameProps } from "@eots/game";
-import {
-  Box,
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-} from "@mui/material";
+import { Button, Typography } from "@mui/material";
+import { tokens } from "@/theme";
 import { ButtonRow } from "../ActionBoard/components/ActionBoardButtonRow";
+import { DialogShell } from "@/components/atoms/DialogShell";
+import { GameButton } from "@/components/atoms/GameButton";
+
+interface ElectionDialogProps extends MyGameProps {
+  immediate?: boolean;
+}
 
 const ElectionDialog = (props: ElectionDialogProps) => {
-  const [currentVote, setCurrentVote] = useState(props.ctx.playOrder[0]);
-  const [hidden, setHidden] = useState(true);
+  const [currentVote, setCurrentVote] = useState<string | null>(null);
+  const { immediate = false } = props;
+
+  const isVoting = immediate
+    ? props.G.stage === "immediate_election" &&
+      props.playerID != null &&
+      props.ctx.currentPlayer === props.playerID &&
+      !props.G.hasVoted.includes(props.playerID)
+    : props.ctx.phase === "election" &&
+      props.playerID != null &&
+      props.ctx.activePlayers?.[props.playerID] === "voting" &&
+      !props.G.hasVoted.includes(props.playerID);
 
   const buttons = props.ctx.playOrder.map((id) => {
-    const buttonLabel = props.G.playerInfo[id].kingdomName;
-    const buttonColour = props.G.playerInfo[id].colour;
-
+    const kingdom = props.G.playerInfo[id];
     return (
       <Button
         key={id}
         sx={{
-          backgroundColor: buttonColour,
+          backgroundColor: kingdom.colour,
           border: currentVote === id ? "4px solid black" : undefined,
           color: "black",
+          fontFamily: tokens.font.display,
+          "&:hover": { filter: "brightness(0.9)" },
         }}
-        onClick={() => {
-          setCurrentVote(id);
-        }}
+        onClick={() => setCurrentVote(id)}
       >
-        {buttonLabel}
+        {kingdom.kingdomName}
       </Button>
     );
   });
 
   return (
-    <Box
-      visibility={
-        props.ctx.phase === "election" &&
-        props.playerID === props.ctx.currentPlayer
-          ? "visible"
-          : "hidden"
-      }
-      display={"flex"}
-      flexDirection={"column"}
-      bgcolor={"grey.200"} //based on house of commons green
-      alignItems={"center"}
+    <DialogShell
+      open={!!isVoting}
+      title={immediate ? "Emergency Archprelate Election" : "Archprelate Election"}
+      subtitle={immediate ? "The Archprelate has died. An emergency election is held immediately — no bribes." : undefined}
+      mood="election"
+      size="sm"
+      hideActions
     >
-      <span style={{ padding: 20 }}>
-        Please cast your vote for the next Archprelate
-      </span>
+      <Typography sx={{ fontFamily: tokens.font.display, mb: 2 }}>
+        Cast your vote for the next Archprelate. The kingdom with the most
+        cathedral votes wins.
+      </Typography>
       <ButtonRow>{buttons}</ButtonRow>
-      <div hidden={hidden}>Vote received, awaiting other player votes.</div>
-      <Button
-        color="success"
-        variant="contained"
-        onClick={() => {
-          setHidden(false);
-          props.moves.vote(currentVote);
-        }}
-        sx={{ margin: 2, color: "black" }}
-      >
-        Confirm Vote
-      </Button>
-    </Box>
+      {currentVote && (
+        <Typography sx={{ fontFamily: tokens.font.display, mt: 2, fontStyle: "italic" }}>
+          Voting for: {props.G.playerInfo[currentVote].kingdomName}
+        </Typography>
+      )}
+      <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 16 }}>
+        <GameButton
+          variant="primary"
+          disabled={currentVote === null}
+          onClick={() => {
+            if (immediate) {
+              props.moves.immediateElectionVote(currentVote);
+            } else {
+              props.moves.vote(currentVote);
+            }
+          }}
+        >
+          Confirm Vote
+        </GameButton>
+      </div>
+    </DialogShell>
   );
 };
-
-interface ElectionDialogProps extends MyGameProps {}
 
 export default ElectionDialog;

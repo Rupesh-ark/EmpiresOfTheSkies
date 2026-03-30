@@ -1,5 +1,6 @@
 import { MyGameState } from "../types";
 import { FAITHDOM_TILES, tileKey, bfsReachable, bfsWithDistance, buildPlayerNetwork } from "./mapUtils";
+import { logEvent } from "./stateUtils";
 
 // Gold value of a route: tile loot goods × current price markers + flat gold
 const getTileRouteValue = (
@@ -54,14 +55,14 @@ export const enactPiracy = (G: MyGameState): void => {
         network.add(outpostKey);
 
         // Only routes connected to Faithdom are vulnerable to piracy
-        const reachable = bfsReachable(FAITHDOM_TILES, network);
+        const reachable = bfsReachable(FAITHDOM_TILES, network, G.mapState.currentTileArray);
         if (!reachable.has(outpostKey)) return;
 
         const routeValue = getTileRouteValue(G, x, y, cell.buildings);
         let goldRemainingToLose = routeValue;
 
         // BFS from outpost to get distance of each tile on the route
-        const distFromOutpost = bfsWithDistance([[x, y]], network);
+        const distFromOutpost = bfsWithDistance([[x, y]], network, G.mapState.currentTileArray);
 
         // Collect all rival blocking fleets with their distance from the outpost
         const blockingPirates: { rivalID: string; distance: number }[] = [];
@@ -88,7 +89,8 @@ export const enactPiracy = (G: MyGameState): void => {
             reducedNetwork.delete(rivalKey);
             const reachableWithout = bfsReachable(
               FAITHDOM_TILES,
-              reducedNetwork
+              reducedNetwork,
+              G.mapState.currentTileArray
             );
             if (!reachableWithout.has(outpostKey)) {
               blockingPirates.push({
@@ -114,7 +116,8 @@ export const enactPiracy = (G: MyGameState): void => {
             reducedNetwork.delete(fleetKey);
             const reachableWithout = bfsReachable(
               FAITHDOM_TILES,
-              reducedNetwork
+              reducedNetwork,
+              G.mapState.currentTileArray
             );
             if (!reachableWithout.has(outpostKey)) {
               const goldLost = Math.min(1, goldRemainingToLose);
@@ -129,17 +132,46 @@ export const enactPiracy = (G: MyGameState): void => {
         blockingPirates.sort((a, b) => a.distance - b.distance);
 
         blockingPirates.forEach(({ rivalID }) => {
-          if (goldRemainingToLose <= 0) return;
-          const goldLost = Math.min(1, goldRemainingToLose);
-          G.playerInfo[playerID].resources.gold -= goldLost;
-          G.playerInfo[rivalID].resources.gold += goldLost;
-          goldRemainingToLose -= goldLost;
+          const hasSanctionedPiracy =
+            G.playerInfo[rivalID].resources.advantageCard === "sanctioned_piracy";
 
-          if (
-            G.playerInfo[rivalID].resources.advantageCard ===
-            "sanctioned_piracy"
-          ) {
-            G.playerInfo[rivalID].resources.victoryPoints += 1;
+          // Cut the Route: pirate declared "cut" intent during actions phase
+          const shouldCut = G.playerInfo[rivalID].piracyIntent === "cut";
+
+          if (shouldCut) {
+            // Find route owner's nearest fleet on the route to cut from
+            let bestFleet: (typeof G.playerInfo)[string]["fleetInfo"][number] | null = null;
+            let bestDist = Infinity;
+            for (const fleet of G.playerInfo[playerID].fleetInfo) {
+              if (fleet.skyships <= 0) continue;
+              const fk = tileKey(fleet.location[0], fleet.location[1]);
+              if (!network.has(fk)) continue;
+              const dist = distFromOutpost.get(fk) ?? Infinity;
+              if (dist < bestDist) {
+                bestDist = dist;
+                bestFleet = fleet;
+              }
+            }
+
+            if (bestFleet && bestFleet.skyships > 0) {
+              bestFleet.skyships -= 1;
+              G.playerInfo[playerID].resources.skyships += 1;
+              logEvent(
+                G,
+                `Piracy: ${G.playerInfo[rivalID].kingdomName} cuts ${G.playerInfo[playerID].kingdomName}'s trade route — 1 skyship returned to kingdom`,
+              );
+            }
+          } else {
+            // Standard piracy: tax gold
+            if (goldRemainingToLose <= 0) return;
+            const goldLost = Math.min(1, goldRemainingToLose);
+            G.playerInfo[playerID].resources.gold -= goldLost;
+            G.playerInfo[rivalID].resources.gold += goldLost;
+            goldRemainingToLose -= goldLost;
+
+            if (hasSanctionedPiracy) {
+              G.playerInfo[rivalID].resources.victoryPoints += 1;
+            }
           }
         });
       });

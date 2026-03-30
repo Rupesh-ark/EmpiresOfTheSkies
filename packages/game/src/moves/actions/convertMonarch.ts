@@ -1,5 +1,4 @@
-import { Move } from "boardgame.io";
-import { MyGameState } from "../../types";
+import { MyGameState, MoveError, MoveDefinition } from "../../types";
 import {
   removeGoldAmount,
   removeOneCounsellor,
@@ -8,62 +7,80 @@ import {
 } from "../../helpers/stateUtils";
 import { INVALID_MOVE } from "boardgame.io/core";
 import { validateMove } from "../moveValidation";
-import { Ctx } from "boardgame.io/dist/types/src/types";
 
-const convertMonarch: Move<MyGameState> = (
-  { G, ctx, playerID }: { G: MyGameState; ctx: Ctx; playerID: string },
-  ...args: any[]
-) => {
-  const value: keyof typeof G.boardState.convertMonarch = args[0] + 1;
-  const playerInfo = G.playerInfo[playerID];
+const validateConvertMonarch = (
+  G: MyGameState,
+  playerID: string,
+  slotIndex: number,
+  numPlayers: number
+): MoveError | null => {
+  const base = validateMove(playerID, G, { costsGold: true });
+  if (base) return base;
 
-  if (validateMove(playerID, G, { costsGold: true })) return INVALID_MOVE;
+  const value: keyof typeof G.boardState.convertMonarch = (slotIndex + 1) as
+    | 1 | 2 | 3 | 4 | 5 | 6;
 
-  // Orthodox/Heretic REBELLION: cannot convert back this round
-  if (G.eventState.cannotConvertThisRound.includes(playerID)) return INVALID_MOVE;
+  if (G.eventState.cannotConvertThisRound.includes(playerID)) {
+    return { code: "CONVERSION_BLOCKED", message: "Your Monarch cannot convert again this round" };
+  }
 
   if (G.boardState.convertMonarch[value] !== undefined) {
-    return INVALID_MOVE;
+    return { code: "SLOT_TAKEN", message: "That conversion slot is already taken" };
   }
-  if (value > ctx.numPlayers) {
-    return INVALID_MOVE;
+
+  if (value > numPlayers) {
+    return { code: "SLOT_OUT_OF_RANGE", message: "That conversion slot does not exist in this game" };
   }
 
   const alreadyConverting = Object.values(G.boardState.convertMonarch).some(
     (id) => id === playerID
   );
   if (alreadyConverting) {
-    return INVALID_MOVE;
+    return { code: "ALREADY_CONVERTING", message: "Your Monarch is already converting this round" };
   }
 
-  // B5: cost = 2 Gold AND 1 extra counsellor (plus the placed counsellor = 2 total)
-  if (playerInfo.resources.counsellors < 2) {
-    return INVALID_MOVE;
-  }
-  if (playerInfo.resources.gold < 2) {
-    return INVALID_MOVE;
+  if (G.playerInfo[playerID].resources.counsellors < 2) {
+    return { code: "INSUFFICIENT_COUNSELLORS", message: "Converting requires 2 Counsellors" };
   }
 
-  removeGoldAmount(G, playerID, 2);
-  removeOneCounsellor(G, playerID); // extra counsellor payment
-  removeOneCounsellor(G, playerID); // counsellor placed on board
+  return null;
+};
 
-  if (playerInfo.hereticOrOrthodox === "heretic") {
-    playerInfo.hereticOrOrthodox = "orthodox";
-    for (let i = 0; i < playerInfo.prisoners; i++) {
-      increaseOrthodoxyWithinMove(G, playerID);
+const convertMonarch: MoveDefinition = {
+  fn: ({ G, ctx, playerID }, ...args: any[]) => {
+    const value: keyof typeof G.boardState.convertMonarch = args[0] + 1;
+    const playerInfo = G.playerInfo[playerID];
+
+    if (validateConvertMonarch(G, playerID, args[0], ctx.numPlayers)) return INVALID_MOVE;
+
+    removeGoldAmount(G, playerID, 2);
+    removeOneCounsellor(G, playerID); // extra counsellor payment
+    removeOneCounsellor(G, playerID); // counsellor placed on board
+
+    if (playerInfo.hereticOrOrthodox === "heretic") {
+      playerInfo.hereticOrOrthodox = "orthodox";
+      for (let i = 0; i < playerInfo.prisoners; i++) {
+        increaseOrthodoxyWithinMove(G, playerID);
+      }
+      playerInfo.prisoners = 0;
+    } else {
+      playerInfo.hereticOrOrthodox = "heretic";
+      for (let i = 0; i < playerInfo.prisoners; i++) {
+        increaseHeresyWithinMove(G, playerID);
+      }
+      playerInfo.prisoners = 0;
     }
-    playerInfo.prisoners = 0;
-  } else {
-    playerInfo.hereticOrOrthodox = "heretic";
-    for (let i = 0; i < playerInfo.prisoners; i++) {
-      increaseHeresyWithinMove(G, playerID);
-    }
-    playerInfo.prisoners = 0;
-  }
 
-  G.boardState.convertMonarch[value] = playerID;
-  G.playerInfo[playerID].turnComplete = true;
+    G.boardState.convertMonarch[value] = playerID;
+    G.playerInfo[playerID].turnComplete = true;
+  },
+  errorMessage: "Cannot convert your Monarch right now",
+  validate: (G, playerID, slotIndex) => validateConvertMonarch(G, playerID, slotIndex, Object.keys(G.playerInfo).length),
+  successLog: (G, pid) => {
+    const k = G.playerInfo[pid].kingdomName;
+    const alignment = G.playerInfo[pid].hereticOrOrthodox;
+    return `${k} converts Monarch (now ${alignment})`;
+  },
 };
 
 export default convertMonarch;

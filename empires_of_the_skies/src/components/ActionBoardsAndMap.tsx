@@ -1,266 +1,306 @@
-import React, { lazy, Suspense, useState } from "react";
+import React, { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react";
 
-import { MyGameProps } from "@eots/game";
+import { MyGameProps, EVENT_CARD_DEFS, PlayerInfo } from "@eots/game";
 const ActionBoard = lazy(() => import("./ActionBoard/ActionBoard").then(m => ({ default: m.ActionBoard })));
 const WorldMap = lazy(() => import("./WorldMap/WorldMap"));
 const PlayerBoard = lazy(() => import("./PlayerBoard/PlayerBoard").then(m => ({ default: m.PlayerBoard })));
-const RulesReference = lazy(() => import("./RulesReference"));
 const Chat = lazy(() => import("./Chat/Chat"));
+const Trade = lazy(() => import("./Trade/Trade"));
 
-import {
-  Box,
-  Button,
-  Collapse,
-  Dialog,
-  DialogActions,
-  DialogTitle,
-  Tab,
-  Tabs,
-  ThemeProvider,
-  Tooltip,
-} from "@mui/material";
-import { TabPanel, TabContext } from "@mui/lab";
-import ResourceTrackerBar from "./ResourceTrackerBar/ResourceTrackerBar";
+import { Box, ThemeProvider, Typography, Tooltip } from "@mui/material";
 import { DialogRouter } from "./DialogRouter";
+import { MapOverlay } from "./layout/MapOverlay";
 
-import PlayerTable from "./PlayerTable/PlayerTable";
-import HeresyTracker from "./PlayerTable/HeresyTracker";
-import { useGameTheme } from "@/theme";
-import { Campaign, ChatBubble, Close, Dashboard, Map, MenuBook, Person, TableChart, Timeline } from "@mui/icons-material";
-import NprKingdomTable from "./PlayerTable/NprKingdomTable";
+import { useGameTheme, tokens } from "@/theme";
 import GameLog from "./GameLog";
-import LootValueTable from "./PlayerTable/LootValueTable";
+import { StatsPanel } from "./Stats/StatsPanel";
+import { ToastProvider, useToast } from "@/hooks/useToast";
+import { useValidatedMoves } from "@/hooks/useValidatedMoves";
+import { ActionHoverProvider } from "./ActionBoard/ActionHoverContext";
+import { PiracyIntentProvider } from "@/contexts/PiracyIntentContext";
 
-const tabSx = {
-  minWidth: 48,
-  p: 0,
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  transition: "background-color 0.2s, transform 0.15s",
-  "&:hover": {
-    backgroundColor: "rgba(255,255,255,0.08)",
-    transform: "scale(1.2)",
-  },
-  "&.Mui-selected": {
-    backgroundColor: "rgba(255,255,255,0.12)",
-    transform: "scale(1.08)",
-  },
+import { GameLayout } from "./layout";
+import type { PanelSlot, MapSize } from "./layout";
+
+// ── Compact heresy tracker bar (below map, always visible) ──────────────
+
+const HERESY_POSITIONS = Array.from({ length: 19 }, (_, i) => i - 9);
+
+const HeresyBar = ({ playerInfo }: { playerInfo: Record<string, PlayerInfo> }) => {
+  const players = Object.entries(playerInfo) as [string, PlayerInfo][];
+
+  return (
+    <Box sx={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+      {/* Row 1: Track with labels */}
+      <Box sx={{ display: "flex", alignItems: "center", gap: `${tokens.spacing.sm}px` }}>
+        {/* Orthodox label */}
+        <Typography sx={{ fontSize: 9, fontFamily: tokens.font.body, fontWeight: 700, color: tokens.allegiance.orthodox, flexShrink: 0, letterSpacing: "0.04em", minWidth: 42 }}>
+          Orthodox
+        </Typography>
+
+        {/* Track */}
+        <Box
+          sx={{
+            display: "flex",
+            flex: 1,
+            borderRadius: "3px",
+            overflow: "hidden",
+            border: `1px solid ${tokens.ui.borderMedium}`,
+            height: 18,
+          }}
+        >
+          {HERESY_POSITIONS.map((pos) => {
+            const isCenter = pos === 0;
+            const isOrthodox = pos < 0;
+            const playersHere = players.filter(([, p]) => p.heresyTracker === pos);
+
+            return (
+              <Tooltip
+                key={pos}
+                title={
+                  playersHere.length > 0
+                    ? playersHere.map(([, p]) => `${p.kingdomName} (${p.hereticOrOrthodox})`).join(", ")
+                    : `Position ${pos > 0 ? "+" : ""}${pos}`
+                }
+                placement="top"
+                arrow
+              >
+                <Box
+                  sx={{
+                    flex: 1,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    backgroundColor: isCenter
+                      ? tokens.ui.surfaceHover
+                      : isOrthodox
+                        ? `${tokens.allegiance.orthodox}${Math.round(8 + Math.abs(pos) * 2).toString(16).padStart(2, "0")}`
+                        : `${tokens.allegiance.heresy}${Math.round(8 + Math.abs(pos) * 2).toString(16).padStart(2, "0")}`,
+                    borderRight: `1px solid ${tokens.ui.border}`,
+                    "&:last-child": { borderRight: "none" },
+                  }}
+                >
+                  {playersHere.map(([id, p], i) => (
+                    <Box
+                      key={id}
+                      sx={{
+                        width: 10,
+                        height: 10,
+                        borderRadius: "50%",
+                        backgroundColor: p.colour,
+                        border: "1.5px solid rgba(255,255,255,0.5)",
+                        boxShadow: "0 1px 2px rgba(0,0,0,0.3)",
+                        flexShrink: 0,
+                        ml: i > 0 ? "-4px" : 0,
+                        zIndex: i,
+                        position: "relative",
+                      }}
+                    />
+                  ))}
+                </Box>
+              </Tooltip>
+            );
+          })}
+        </Box>
+
+        {/* Heretic label */}
+        <Typography sx={{ fontSize: 9, fontFamily: tokens.font.body, fontWeight: 700, color: tokens.allegiance.heresy, flexShrink: 0, letterSpacing: "0.04em", minWidth: 36, textAlign: "right" }}>
+          Heretic
+        </Typography>
+      </Box>
+
+      {/* Row 2: VP scale labels */}
+      <Box sx={{ display: "flex", alignItems: "center", gap: `${tokens.spacing.sm}px` }}>
+        <Box sx={{ minWidth: 42 }} />
+        <Box sx={{ display: "flex", flex: 1 }}>
+          {HERESY_POSITIONS.map((pos) => (
+            <Box key={pos} sx={{ flex: 1, textAlign: "center" }}>
+              <Typography sx={{ fontSize: 7, fontFamily: tokens.font.body, color: tokens.ui.textMuted, lineHeight: 1 }}>
+                {pos === 0 ? "0" : pos < 0 ? `+${-pos}` : `+${pos}`}
+              </Typography>
+            </Box>
+          ))}
+        </Box>
+        <Box sx={{ minWidth: 36 }} />
+      </Box>
+
+      {/* Row 3: Player legend */}
+      <Box sx={{ display: "flex", flexWrap: "wrap", gap: `${tokens.spacing.sm}px`, pl: "50px" }}>
+        {players.map(([id, p]) => (
+          <Box key={id} sx={{ display: "flex", alignItems: "center", gap: "3px" }}>
+            <Box
+              sx={{
+                width: 8,
+                height: 8,
+                borderRadius: "50%",
+                backgroundColor: p.colour,
+                border: "1px solid rgba(0,0,0,0.15)",
+                flexShrink: 0,
+              }}
+            />
+            <Typography sx={{ fontSize: 9, fontFamily: tokens.font.body, color: tokens.ui.textMuted, lineHeight: 1 }}>
+              {p.kingdomName}
+            </Typography>
+            <Typography sx={{ fontSize: 8, fontFamily: tokens.font.body, color: p.hereticOrOrthodox === "heretic" ? tokens.allegiance.heresy : tokens.allegiance.orthodox, lineHeight: 1, fontWeight: 600 }}>
+              {p.hereticOrOrthodox === "heretic" ? "H" : "O"}
+            </Typography>
+          </Box>
+        ))}
+      </Box>
+    </Box>
+  );
 };
 
 export const ActionBoardsAndMap = (props: MyGameProps) => {
+  return (
+    <ToastProvider>
+      <ActionBoardsAndMapInner {...props} />
+    </ToastProvider>
+  );
+};
+
+const ActionBoardsAndMapInner = (props: MyGameProps) => {
+  const validatedMoves = useValidatedMoves(props);
+  const validatedProps = { ...props, moves: validatedMoves };
   const theme = useGameTheme(props.G.stage);
-  const [value, setValue] = useState("0");
+  const { showToast } = useToast();
+
+  // ── Discovery toast: show tile flips + heresy changes ────────
+  const prevLogLen = useRef(props.G.gameLog.length);
+  useEffect(() => {
+    const logLen = props.G.gameLog.length;
+    const isDiscovery = props.ctx.phase === "discovery";
+    const isMyTurn = props.ctx.currentPlayer === props.playerID;
+
+    if (isDiscovery && logLen > prevLogLen.current) {
+      const latest = props.G.gameLog[logLen - 1];
+      if (latest) {
+        const heresyAdvanced = latest.message.includes("heresy advances");
+        if (heresyAdvanced) {
+          // Show heresy summary to ALL players
+          const summary = Object.values(props.G.playerInfo)
+            .map(p => `${p.kingdomName}: ${p.heresyTracker}`)
+            .join(" · ");
+          showToast(`${latest.message}\nHeresy: ${summary}`, "warning");
+        } else if (!isMyTurn) {
+          // Normal tile flip — only show to non-active players
+          showToast(latest.message, "info");
+        }
+      }
+    }
+    prevLogLen.current = logLen;
+  }, [props.G.gameLog.length, props.ctx.phase, props.ctx.currentPlayer, props.playerID, props.G.playerInfo, showToast]);
+
+  // ── Event toast: notify all players when an event card is resolved ──
+  const prevResolvedEvent = useRef(props.G.eventState.resolvedEvent);
+  useEffect(() => {
+    const resolved = props.G.eventState.resolvedEvent;
+    if (resolved && resolved !== prevResolvedEvent.current) {
+      const def = EVENT_CARD_DEFS[resolved];
+      if (def) {
+        showToast(`Event: ${def.displayName} — ${def.description}`, "warning");
+      }
+    }
+    prevResolvedEvent.current = resolved;
+  }, [props.G.eventState.resolvedEvent, showToast]);
+
   const [mapDetailRequest, setMapDetailRequest] = useState<{
     location: number[];
     key: number;
   } | null>(null);
-  const handleChange = (event: React.SyntheticEvent, newValue: string) => {
-    setValue(newValue);
-  };
-  const [dialogOpen, setDialogOpen] = useState(true);
-  const [chatOpen, setChatOpen] = useState(false);
 
-  const kingdomColour = props.playerID
-    ? props.G.playerInfo[props.playerID].colour
-    : undefined;
-
-  const isElectionTurn =
-    props.ctx.phase === "election" && props.playerID === props.ctx.currentPlayer;
-
-  const openMapAtLocation = (location: number[]) => {
-    setMapDetailRequest((previousRequest) => ({
+  const openMapAtLocation = useCallback((location: number[]) => {
+    setMapDetailRequest((prev) => ({
       location: [...location],
-      key: (previousRequest?.key ?? 0) + 1,
+      key: (prev?.key ?? 0) + 1,
     }));
-    const mapIdx = tabs.findIndex((t) => t.key === "map");
-    if (mapIdx >= 0) setValue(String(mapIdx));
-  };
+  }, []);
 
-  // ── Tab definitions — reorder here to rearrange the sidebar ──
-  const tabs: {
-    key: string;
-    label: string;
-    icon: React.ReactNode;
-    panel: React.ReactNode;
-    panelSx?: object;
-  }[] = [
-    {
-      key: "log",
-      label: "Game Log",
-      icon: <Timeline sx={{ color: kingdomColour }} />,
-      panel: <GameLog {...props} />,
-      panelSx: { p: 0 },
-    },
-    {
-      key: "map",
-      label: "World Map",
-      icon: <Map sx={{ color: kingdomColour }} />,
-      panel: (
-        <WorldMap
-          {...props}
-          detailRequest={mapDetailRequest}
-          onDetailRequestHandled={(requestKey) => {
-            setMapDetailRequest((currentRequest) =>
-              currentRequest?.key === requestKey ? null : currentRequest
-            );
-          }}
-        />
-      ),
-    },
-    {
-      key: "action",
-      label: "Action Board",
-      icon: <Dashboard sx={{ color: kingdomColour }} />,
-      panel: <ActionBoard {...props} />,
-    },
-    {
-      key: "player",
-      label: "Player Board",
-      icon: <Person sx={{ color: kingdomColour }} />,
-      panel: (
-        <PlayerBoard {...props} onOpenFleetLocation={openMapAtLocation} />
-      ),
-    },
-    {
-      key: "stats",
-      label: "Player Table",
-      icon: <TableChart sx={{ color: kingdomColour }} />,
-      panel: (
-        <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%", gap: 0, px: 2, pt: 1 }}>
-          <Box sx={{ maxWidth: 1230, width: "100%", mb: 2 }}>
-            <Box
-              sx={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 1,
-                background: "linear-gradient(90deg, #1a0a14 0%, #0d0d0d 50%, #1a0a00 100%)",
-                px: 2,
-                py: 0.75,
-                borderRadius: 2,
-              }}
-            >
-              <Campaign sx={{ color: "#E77B00", fontSize: 18 }} />
-              <Box component="span" sx={{ color: "rgba(255,255,255,0.6)", fontSize: "0.8rem" }}>Round</Box>
-              <Box component="span" sx={{ color: "white", fontWeight: 700, fontSize: "1rem" }}>{props.G.round}</Box>
-              <Box component="span" sx={{ color: "rgba(255,255,255,0.4)", fontSize: "0.8rem" }}>/ {props.G.finalRound}</Box>
-            </Box>
-          </Box>
-          <HeresyTracker {...props} />
-          <PlayerTable {...props} />
-          <NprKingdomTable {...props} />
-          <LootValueTable {...props} />
-        </Box>
-      ),
-      panelSx: { p: 0 },
-    },
-    {
-      key: "rules",
-      label: "Rules",
-      icon: <MenuBook sx={{ color: kingdomColour }} />,
-      panel: <RulesReference />,
-      panelSx: { p: 0 },
-    },
-  ];
+  // ── Slot renderer — maps slot names to components ──────────────
+
+  const renderSlot = useCallback((slot: PanelSlot): React.ReactNode => {
+    switch (slot) {
+      case "player-board":
+        return (
+          <Suspense fallback={null}>
+            <PlayerBoard {...validatedProps} onOpenFleetLocation={openMapAtLocation} />
+          </Suspense>
+        );
+
+      case "action-board":
+        return (
+          <Suspense fallback={null}>
+            <ActionBoard {...validatedProps} />
+          </Suspense>
+        );
+
+      case "game-log":
+        return <GameLog {...validatedProps} />;
+
+      case "stats":
+        return <StatsPanel {...validatedProps} />;
+
+      case "chat":
+        return (
+          <Suspense fallback={null}>
+            <Chat {...validatedProps} />
+          </Suspense>
+        );
+
+      case "trade":
+        return (
+          <Suspense fallback={null}>
+            <Trade {...validatedProps} />
+          </Suspense>
+        );
+
+      default:
+        return null;
+    }
+  }, [validatedProps, openMapAtLocation]);
+
+  // ── Map renderer ───────────────────────────────────────────────
+
+  const renderMap = useCallback((size: MapSize): React.ReactNode => {
+    return (
+      <>
+        <Suspense fallback={null}>
+          <WorldMap
+            {...validatedProps}
+            expanded={size === "large"}
+            detailRequest={mapDetailRequest}
+            onDetailRequestHandled={(requestKey) => {
+              setMapDetailRequest((current) =>
+                current?.key === requestKey ? null : current
+              );
+            }}
+          />
+        </Suspense>
+        <MapOverlay {...validatedProps} />
+      </>
+    );
+  }, [validatedProps, mapDetailRequest]);
+
+  // ── Render ─────────────────────────────────────────────────────
 
   return (
-    <div>
-      <ThemeProvider theme={theme}>
-        {<ResourceTrackerBar {...props} />}
-        <Box sx={{ flexGrow: 1 }}>
-          <TabContext value={value}>
-            <Box sx={{ display: "flex" }}>
-              <Box sx={{ position: "sticky", top: 64, alignSelf: "flex-start", height: "calc(100vh - 64px)", overflowY: "auto", display: "flex", flexDirection: "column", justifyContent: "center" }}>
-               <Tabs
-                value={value}
-                onChange={handleChange}
-                orientation="vertical"
-                sx={{ borderLeft: 1, borderColor: "divider", width: 48, minWidth: 48 }}
-              >
-                {tabs.map((tab, i) => (
-                  <Tab
-                    key={tab.key}
-                    icon={<Tooltip title={tab.label} placement="left"><span>{tab.icon}</span></Tooltip>}
-                    value={String(i)}
-                    sx={tabSx}
-                  />
-                ))}
-              </Tabs>
-              </Box>
-              <Box sx={{ flexGrow: 1 }}>
-                <Suspense fallback={null}>
-                  {tabs.map((tab, i) => (
-                    <TabPanel key={tab.key} value={String(i)} tabIndex={i} sx={tab.panelSx}>
-                      {tab.panel}
-                    </TabPanel>
-                  ))}
-                </Suspense>
-              </Box>
-            </Box>
-          </TabContext>
-
-          {/* Floating chat widget */}
-          <Box sx={{ position: "fixed", bottom: 0, right: 24, zIndex: 1300, width: 340, display: "flex", flexDirection: "column" }}>
-            {/* Messages panel — expands upward */}
-            <Collapse in={chatOpen} unmountOnExit>
-              <Box sx={{ height: 480, display: "flex", flexDirection: "column", overflow: "hidden", boxShadow: "0 -4px 24px rgba(0,0,0,0.25)", border: "1px solid rgba(0,0,0,0.12)", borderBottom: "none" }}>
-                <Suspense fallback={null}>
-                  <Chat {...props} />
-                </Suspense>
-              </Box>
-            </Collapse>
-
-            {/* Tab bar — always visible */}
-            <Box
-              onClick={() => setChatOpen(o => !o)}
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                gap: 1,
-                px: 2,
-                py: 1.25,
-                cursor: "pointer",
-                borderRadius: 0,
-                background: isElectionTurn
-                  ? "linear-gradient(90deg, #A74383, #E77B00)"
-                  : "linear-gradient(90deg, #1a0a14 0%, #0d0d0d 50%, #1a0a00 100%)",
-                color: "white",
-                userSelect: "none",
-                animation: isElectionTurn && !chatOpen ? "pulse 1.6s ease-in-out infinite" : "none",
-                "@keyframes pulse": {
-                  "0%, 100%": { boxShadow: "0 0 0 0 rgba(167,67,131,0.5)" },
-                  "50%": { boxShadow: "0 0 0 10px rgba(167,67,131,0)" },
-                },
-                "&:hover": { filter: "brightness(1.3)" },
-              }}
-            >
-              {isElectionTurn ? <Campaign fontSize="small" /> : <ChatBubble fontSize="small" />}
-              <Box sx={{ flexGrow: 1, fontWeight: 700, fontSize: "0.875rem", letterSpacing: 0.5 }}>
-                {isElectionTurn ? "Election — cast your vote!" : "Group Chat"}
-              </Box>
-              <Close sx={{ fontSize: 16, opacity: 0.7, transform: chatOpen ? "rotate(0deg)" : "rotate(45deg)", transition: "transform 0.2s" }} />
-            </Box>
-          </Box>
-
-          <DialogRouter {...props} />
-          <Dialog
-            open={isElectionTurn && dialogOpen}
+    <ThemeProvider theme={theme}>
+      <ActionHoverProvider>
+        <PiracyIntentProvider round={props.G.round}>
+        <Box sx={{ display: "flex", flexDirection: "column", height: "100vh" }}>
+          <GameLayout
+            phase={props.ctx.phase ?? ""}
+            stage={props.G.stage}
+            isMyTurn={props.ctx.currentPlayer === props.playerID}
+            renderSlot={renderSlot}
+            renderMap={renderMap}
+            heresyTracker={<HeresyBar playerInfo={props.G.playerInfo} />}
           >
-            <DialogTitle>
-              It is your turn to vote, head to the election tab.
-            </DialogTitle>
-            <DialogActions>
-              <Button
-                variant="contained"
-                color="error"
-                onClick={() => setDialogOpen(false)}
-              >
-                Dismiss
-              </Button>
-            </DialogActions>
-          </Dialog>
+            <DialogRouter {...validatedProps} />
+          </GameLayout>
         </Box>
-      </ThemeProvider>
-    </div>
+        </PiracyIntentProvider>
+      </ActionHoverProvider>
+    </ThemeProvider>
   );
 };

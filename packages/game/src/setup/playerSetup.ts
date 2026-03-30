@@ -1,6 +1,6 @@
 import type { Ctx } from "boardgame.io";
 import { PlayerInfo, PlayerColour } from "../types";
-import { colourToKingdomMap, STARTING_RESOURCES, BASE_GOLD_INCOME } from "../codifiedGameInfo";
+import { colourToKingdomMap, STARTING_RESOURCES, BASE_GOLD_INCOME } from "../data/gameData";
 import { initialBattleMapState } from "./boardSetup";
 
 export const getPlayerColours = (ctx: Ctx): string[] => {
@@ -68,6 +68,8 @@ export const buildPlayerInfoMap = (ctx: Ctx): { [id: string]: PlayerInfo } => {
       palaces: 1,
       heresyTracker: 0,
       prisoners: 0,
+      freeDissenters: 0,
+      piracyIntent: "tax",
       shipyards: 0,
       factories: STARTING_RESOURCES.factories,
     };

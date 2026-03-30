@@ -1,14 +1,41 @@
-import { ReactNode, useState } from "react";
-import { Box, Collapse, IconButton, Tab, Tabs, Tooltip } from "@mui/material";
+import { ReactNode, useEffect, useState } from "react";
+import React from "react";
+import { Box, Collapse, IconButton, Tooltip } from "@mui/material";
 import { CloseFullscreen, OpenInFull } from "@mui/icons-material";
-import { tokens } from "@/theme";
-import { GameMood } from "@/theme";
+import { tokens, backgrounds } from "@/theme";
+import { getMood } from "@/theme";
 import { PanelSlot, getPhaseLayout, MapSize } from "./phaseLayouts";
+import {
+  GiScrollUnfurled, GiBarracks, GiSwapBag, GiConversation,
+} from "react-icons/gi";
+import { MdQueryStats } from "react-icons/md";
+
+/**
+ * Parchment background tints per mood — derived from tokens so they
+ * respect the active preset. Each mood blends its accent into the base.
+ */
+const MOOD_BACKGROUNDS: Record<string, string> = {
+  peacetime:  tokens.ui.background,
+  discovery:  tokens.mood.discovery.bg,
+  battle:     tokens.mood.battle.bg,
+  election:   tokens.mood.election.bg,
+  crisis:     tokens.mood.crisis.bg,
+};
 
 interface GameLayoutProps {
-  mood: GameMood;
+  /** ctx.phase — authoritative for phase identity (checked first) */
+  phase: string;
+  /** G.stage — sub-phase granularity (checked second) */
+  stage: string;
+  /** Whether it's this player's turn */
+  isMyTurn: boolean;
+  /** Render function for named panel slots */
   renderSlot: (slot: PanelSlot) => ReactNode;
+  /** Render function for the center map area */
   renderMap: (size: MapSize) => ReactNode;
+  /** Heresy tracker rendered below the map, spanning its full width */
+  heresyTracker?: ReactNode;
+  /** Floating children (dialogs, overlays) */
   children?: ReactNode;
 }
 
@@ -16,21 +43,100 @@ const SLOT_LABELS: Record<PanelSlot, string> = {
   "action-board": "Actions",
   "game-log":     "Log",
   "stats":        "Stats",
-  "rules":        "Rules",
   "player-board": "Kingdom",
+  "chat":         "Chat",
+  "trade":        "Trade",
+  "action-info":  "Info",
   "map":          "Map",
   "empty":        "",
 };
 
+const SLOT_ICONS: Partial<Record<PanelSlot, React.ComponentType<{ size?: number }>>> = {
+  "game-log":     GiScrollUnfurled,
+  "stats":        MdQueryStats as React.ComponentType<{ size?: number }>,
+  "trade":        GiSwapBag,
+  "chat":         GiConversation,
+  "action-board": GiBarracks,
+};
+
+/** Compact icon tab strip */
+const IconTabStrip = ({
+  tabs,
+  activeTab,
+  onTabClick,
+}: {
+  tabs: PanelSlot[];
+  activeTab: PanelSlot | null;
+  onTabClick: (slot: PanelSlot) => void;
+}) => (
+  <Box
+    sx={{
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: "2px",
+      px: 1,
+      py: "3px",
+      backgroundColor: tokens.ui.surfaceRaised,
+      boxShadow: `0 1px 4px rgba(0,0,0,0.06)`,
+    }}
+  >
+    {tabs
+      .filter(slot => slot !== "empty")
+      .map(slot => {
+        const Icon = SLOT_ICONS[slot];
+        const isActive = activeTab === slot;
+        return (
+          <Tooltip key={slot} title={SLOT_LABELS[slot]} placement="top" arrow>
+            <Box
+              onClick={() => onTabClick(slot)}
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: 32,
+                height: 28,
+                borderRadius: `${tokens.radius.sm}px`,
+                cursor: "pointer",
+                color: isActive ? tokens.ui.gold : tokens.ui.textMuted,
+                backgroundColor: isActive ? `${tokens.ui.gold}15` : "transparent",
+                borderBottom: isActive ? `2px solid ${tokens.ui.gold}` : "2px solid transparent",
+                transition: `all ${tokens.transition.fast}`,
+                "&:hover": {
+                  color: isActive ? tokens.ui.gold : tokens.ui.text,
+                  backgroundColor: `${tokens.ui.gold}10`,
+                },
+              }}
+            >
+              {Icon ? <Icon size={16} /> : <span style={{ fontSize: 10 }}>{SLOT_LABELS[slot]?.[0]}</span>}
+            </Box>
+          </Tooltip>
+        );
+      })}
+  </Box>
+);
+
 export const GameLayout = ({
-  mood,
+  phase,
+  stage,
+  isMyTurn,
   renderSlot,
   renderMap,
+  heresyTracker,
   children,
 }: GameLayoutProps) => {
-  const config = getPhaseLayout(mood);
+  const config = getPhaseLayout(phase, stage, isMyTurn);
+  const mood = getMood(stage);
+  const moodBg = MOOD_BACKGROUNDS[mood] ?? MOOD_BACKGROUNDS.peacetime;
   const [mapExpanded, setMapExpanded] = useState(false);
-  const [extraTab, setExtraTab] = useState<PanelSlot | null>(null);
+  const [extraTab, setExtraTab] = useState<PanelSlot | null>("game-log");
+
+  // Reset tab selection when phase changes or selected tab is no longer available
+  useEffect(() => {
+    if (extraTab !== null && !config.tabExtras.includes(extraTab)) {
+      setExtraTab(null);
+    }
+  }, [config.tabExtras, extraTab]);
 
   const hasLeft = config.left.length > 0;
   const hasRight = config.right.length > 0;
@@ -38,184 +144,218 @@ export const GameLayout = ({
   const hasExtras = config.tabExtras.length > 0;
   const resolvedMapSize: MapSize = mapExpanded ? "large" : config.mapSize;
 
-  const handleExtraTab = (_: React.SyntheticEvent, slot: PanelSlot) => {
-    setExtraTab(prev => (prev === slot ? null : slot));
-  };
-
-  // Left panel width based on screen (using CSS clamp for fluid sizing)
-  const leftWidth = mapExpanded ? "0px" : "280px";
+  // Left panel width from config (phase-dependent), collapsed when map is expanded
+  const leftWidth = mapExpanded ? "0px" : config.leftWidth;
+  const leftMinWidth = mapExpanded ? 0 : undefined;
   const rightWidth = (hasRight && !mapExpanded) ? "300px" : "0px";
 
   return (
     <Box
+      className="game-layout-root"
       sx={{
         display: "flex",
-        flexDirection: "column",
         flex: 1,
         overflow: "hidden",
         minHeight: 0,
+        height: "100%",
+        backgroundColor: moodBg,
+        backgroundImage: `${backgrounds.riverTexture}`.replace("center / cover no-repeat", "center / cover"),
+        backgroundBlendMode: "soft-light",
+        transition: `background-color ${tokens.transition.slow}`,
       }}
     >
-      {/* ── Top row: left sidebar + map + right sidebar ──────────── */}
-      <Box
-        sx={{
-          display: "flex",
-          flex: hasBottom ? "1 1 55%" : "1 1 100%",
-          overflow: "hidden",
-          minHeight: 0,
-        }}
-      >
-        {/* Left sidebar */}
-        {hasLeft && (
-          <Box
-            sx={{
-              width: leftWidth,
-              minWidth: mapExpanded ? 0 : 240,
-              maxWidth: mapExpanded ? 0 : 360,
-              flexShrink: 0,
-              overflowY: "auto",
-              overflowX: "hidden",
-              borderRight: `1px solid ${tokens.ui.border}`,
-              backgroundColor: tokens.ui.surface,
-              transition: `width ${tokens.transition.slow}, min-width ${tokens.transition.slow}, max-width ${tokens.transition.slow}`,
-            }}
-          >
-            {config.left.map((slot, i) => (
-              <Box key={`left-${i}`}>{renderSlot(slot)}</Box>
-            ))}
-          </Box>
-        )}
-
-        {/* Center — map */}
+      {/* ── Left panel (full height — spans map + bottom + tabs) ── */}
+      {hasLeft && (
         <Box
           sx={{
-            flex: 1,
-            position: "relative",
-            overflow: "auto",
-            backgroundColor: tokens.ui.background,
-            minWidth: 0,
-          }}
-        >
-          {renderMap(resolvedMapSize)}
-
-          {/* Enlarge / restore toggle */}
-          <Tooltip title={mapExpanded ? "Restore layout" : "Enlarge map"}>
-            <IconButton
-              size="small"
-              onClick={() => setMapExpanded(v => !v)}
-              sx={{
-                position: "absolute",
-                top: 8,
-                right: 8,
-                zIndex: 10,
-                backgroundColor: "rgba(0,0,0,0.55)",
-                color: tokens.ui.textBright,
-                border: `1px solid ${tokens.ui.borderMedium}`,
-                "&:hover": {
-                  backgroundColor: "rgba(0,0,0,0.75)",
-                },
-              }}
-            >
-              {mapExpanded ? <CloseFullscreen fontSize="small" /> : <OpenInFull fontSize="small" />}
-            </IconButton>
-          </Tooltip>
-        </Box>
-
-        {/* Right sidebar */}
-        {hasRight && (
-          <Box
-            sx={{
-              width: rightWidth,
-              minWidth: mapExpanded ? 0 : 240,
-              maxWidth: mapExpanded ? 0 : 380,
-              flexShrink: 0,
-              overflowY: "auto",
-              overflowX: "hidden",
-              borderLeft: `1px solid ${tokens.ui.border}`,
-              backgroundColor: tokens.ui.surface,
-              transition: `width ${tokens.transition.slow}, min-width ${tokens.transition.slow}, max-width ${tokens.transition.slow}`,
-            }}
-          >
-            {config.right.map((slot, i) => (
-              <Box key={`right-${i}`}>{renderSlot(slot)}</Box>
-            ))}
-          </Box>
-        )}
-      </Box>
-
-      {/* ── Bottom panel (e.g., action board) ────────────────────── */}
-      {hasBottom && (
-        <Box
-          sx={{
-            height: config.bottomHeight,
-            minHeight: "200px",
+            width: leftWidth,
+            minWidth: leftMinWidth,
             flexShrink: 0,
             overflowY: "auto",
-            borderTop: `1px solid ${tokens.ui.border}`,
-            backgroundColor: tokens.ui.surface,
+            overflowX: "hidden",
+            background: backgrounds.parchmentPanelTinted,
+            backgroundColor: moodBg,
+            boxShadow: `2px 0 8px rgba(0,0,0,0.08)`,
+            transition: `width ${tokens.transition.slow}, min-width ${tokens.transition.slow}, background-color ${tokens.transition.slow}`,
           }}
         >
-          {renderSlot(config.bottom)}
+          {config.left.map((slot, i) => (
+            <Box key={`left-${i}`}>{renderSlot(slot)}</Box>
+          ))}
         </Box>
       )}
 
-      {/* ── Tab extras strip ─────────────────────────────────────── */}
-      {hasExtras && (
-        <Box sx={{ flexShrink: 0 }}>
-          {/* Expanded drawer */}
-          <Collapse in={extraTab !== null} unmountOnExit>
+      {/* ── Right column: map + bottom + tabs ──────────────────── */}
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          flex: 1,
+          overflow: "hidden",
+          minWidth: 0,
+        }}
+      >
+        {/* Map + right panel row */}
+        <Box
+          sx={{
+            display: "flex",
+            flex: hasBottom ? "1 1 55%" : "1 1 100%",
+            overflow: "hidden",
+            minHeight: "150px",
+          }}
+        >
+          {/* Center — map (always visible) */}
+          <Box
+            sx={{
+              flex: 1,
+              position: "relative",
+              overflow: "auto",
+              backgroundColor: `${tokens.ui.background}`,
+              minWidth: 0,
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
+            {/* Map top spacer */}
+            <Box sx={{ height: 8, flexShrink: 0 }} />
+            {renderMap(resolvedMapSize)}
+
+            {/* Enlarge / restore toggle */}
+            <Tooltip title={mapExpanded ? "Restore layout" : "Enlarge map"}>
+              <IconButton
+                size="small"
+                onClick={() => setMapExpanded(v => !v)}
+                sx={{
+                  position: "absolute",
+                  bottom: 8,
+                  left: 8,
+                  zIndex: 10,
+                  backgroundColor: "rgba(0,0,0,0.55)",
+                  color: tokens.ui.textBright,
+                  border: `1px solid ${tokens.ui.borderMedium}`,
+                  "&:hover": {
+                    backgroundColor: "rgba(0,0,0,0.75)",
+                  },
+                }}
+              >
+                {mapExpanded ? <CloseFullscreen fontSize="small" /> : <OpenInFull fontSize="small" />}
+              </IconButton>
+            </Tooltip>
+          </Box>
+
+          {/* Right panel */}
+          {hasRight && (
             <Box
               sx={{
-                height: "35vh",
+                width: rightWidth,
+                minWidth: mapExpanded ? 0 : 240,
+                maxWidth: mapExpanded ? 0 : 380,
+                flexShrink: 0,
                 overflowY: "auto",
-                borderTop: `1px solid ${tokens.ui.border}`,
-                backgroundColor: tokens.ui.surface,
+                overflowX: "hidden",
+                background: backgrounds.parchmentPanelTinted,
+                boxShadow: `-2px 0 8px rgba(0,0,0,0.08)`,
+                transition: `width ${tokens.transition.slow}, min-width ${tokens.transition.slow}, max-width ${tokens.transition.slow}`,
+              }}
+            >
+              {config.right.map((slot, i) => (
+                <Box key={`right-${i}`}>{renderSlot(slot)}</Box>
+              ))}
+            </Box>
+          )}
+        </Box>
+
+        {/* ── Heresy tracker — always visible below the map ── */}
+        {heresyTracker && (
+          <Box
+            sx={{
+              flexShrink: 0,
+              px: `${tokens.spacing.sm}px`,
+              py: "3px",
+              background: backgrounds.parchmentPanelTinted,
+              borderTop: `1px solid ${tokens.ui.border}`,
+              borderBottom: `1px solid ${tokens.ui.border}`,
+            }}
+          >
+            {heresyTracker}
+          </Box>
+        )}
+
+        {/* ── Bottom panel: split (action board + tabs) — slides in/out ── */}
+        <Box
+          sx={{
+            display: "flex",
+            height: mapExpanded ? "0px" : (hasBottom && hasExtras ? config.bottomHeight : "0px"),
+            minHeight: mapExpanded ? 0 : (hasBottom && hasExtras ? "200px" : 0),
+            flexShrink: 0,
+            overflow: "hidden",
+            boxShadow: !mapExpanded && hasBottom && hasExtras ? `0 -3px 10px rgba(0,0,0,0.1)` : "none",
+            transition: `height ${tokens.transition.slow}, min-height ${tokens.transition.slow}`,
+          }}
+        >
+          {/* Left: Action board (60%) */}
+          <Box
+            sx={{
+              flex: "0 0 60%",
+              overflowY: "auto",
+              background: backgrounds.parchmentPanelTinted,
+            }}
+          >
+            {renderSlot("action-board")}
+          </Box>
+
+          {/* Right: Tabbed panel (40%) */}
+          <Box
+            sx={{
+              flex: "0 0 40%",
+              display: "flex",
+              flexDirection: "column",
+              overflow: "hidden",
+              background: backgrounds.parchmentPanelTinted,
+              boxShadow: `-2px 0 8px rgba(0,0,0,0.06)`,
+            }}
+          >
+            <IconTabStrip
+              tabs={config.tabExtras.length > 0 ? config.tabExtras : ["game-log", "stats", "trade", "chat"]}
+              activeTab={extraTab}
+              onTabClick={(slot) => setExtraTab(prev => (prev === slot ? null : slot))}
+            />
+            <Box
+              sx={{
+                flex: 1,
+                overflowY: "auto",
+                minHeight: 0,
               }}
             >
               {extraTab !== null && renderSlot(extraTab)}
             </Box>
-          </Collapse>
-
-          {/* Tab strip */}
-          <Box
-            sx={{
-              borderTop: `1px solid ${tokens.ui.border}`,
-              backgroundColor: tokens.ui.surfaceRaised,
-            }}
-          >
-            <Tabs
-              value={extraTab ?? false}
-              onChange={handleExtraTab}
-              variant="scrollable"
-              scrollButtons="auto"
-              sx={{
-                minHeight: 32,
-                "& .MuiTabs-indicator": {
-                  backgroundColor: tokens.ui.gold,
-                  height: 2,
-                },
-                "& .MuiTab-root": {
-                  minHeight: 32,
-                  fontFamily: tokens.font.body,
-                  fontSize: tokens.fontSize.sm,
-                  textTransform: "none",
-                  color: tokens.ui.textMuted,
-                  padding: "4px 16px",
-                  "&.Mui-selected": {
-                    color: tokens.ui.gold,
-                  },
-                },
-              }}
-            >
-              {config.tabExtras
-                .filter(slot => slot !== "empty")
-                .map(slot => (
-                  <Tab key={slot} label={SLOT_LABELS[slot]} value={slot} />
-                ))}
-            </Tabs>
           </Box>
         </Box>
-      )}
+
+        {/* ── Tab extras strip (collapse drawer — non-actions phases) ── */}
+        {!hasBottom && hasExtras && (
+          <Box sx={{ flexShrink: 0 }}>
+            <Collapse in={extraTab !== null} unmountOnExit>
+              <Box
+                sx={{
+                  height: "35vh",
+                  overflowY: "auto",
+                  boxShadow: `0 -3px 10px rgba(0,0,0,0.1)`,
+                  background: backgrounds.parchmentPanelTinted,
+                }}
+              >
+                {extraTab !== null && renderSlot(extraTab)}
+              </Box>
+            </Collapse>
+
+            <IconTabStrip
+              tabs={config.tabExtras}
+              activeTab={extraTab}
+              onTabClick={(slot) => setExtraTab(prev => (prev === slot ? null : slot))}
+            />
+          </Box>
+        )}
+      </Box>
 
       {/* Floating / dialog children */}
       {children}

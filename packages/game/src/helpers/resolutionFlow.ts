@@ -71,7 +71,7 @@ const continueAfterDeferredBattles = (
 
   // Nothing interactive left — retrieve fleets
   G.stage = "retrieve fleets";
-  events.endTurn();
+  events.endTurn({ next: G.turnOrder[0] });
 };
 
 /**

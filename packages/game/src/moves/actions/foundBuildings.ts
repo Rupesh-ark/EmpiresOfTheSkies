@@ -1,7 +1,6 @@
-import { Move } from "boardgame.io";
-import { MyGameState } from "../../types";
+import { MyGameState, MoveError, MoveDefinition } from "../../types";
 import { INVALID_MOVE } from "boardgame.io/core";
-import { validateFoundBuildings } from "../moveValidation";
+import { validateMove } from "../moveValidation";
 import { removeOneCounsellor, HERESY_MAX, HERESY_MIN } from "../../helpers/stateUtils";
 import {
   BuildingSlot,
@@ -9,25 +8,113 @@ import {
   CATHEDRAL_VP,
   PALACE_VP_HERETIC,
   PALACE_VP_ORTHODOX,
-} from "../../codifiedGameInfo";
+  MAX_CATHEDRALS,
+  MAX_PALACES,
+  MAX_SHIPYARDS,
+} from "../../data/gameData";
 
-// needs a stage where the player selects a map tile to place the fort onto and that tile is verified to ensure they can build on it
-const foundBuildings: Move<MyGameState> = (
-  { G, playerID },
-  ...args: any[]
-) => {
-  const heresyDirection: "advance" | "retreat" | undefined = args[1];
-  if (validateFoundBuildings(G, playerID, args[0], heresyDirection)) return INVALID_MOVE;
-  const value: keyof typeof G.boardState.foundBuildings = args[0] + 1;
+const validateFoundBuildings = (
+  G: MyGameState,
+  playerID: string,
+  buildingSlotIndex: number,
+  heresyDirection?: "advance" | "retreat"
+): MoveError | null => {
+  const base = validateMove(playerID, G, { costsCounsellor: true, costsGold: true });
+  if (base) return base;
 
-  const specialisedBuildingFunctions = {
-    [BuildingSlot.Cathedral]: foundCathedral,
-    [BuildingSlot.Palace]:    foundPalace,
-    [BuildingSlot.Shipyard]:  foundShipyard,
-    [BuildingSlot.Fort]:      foundFort,
-  };
+  const value: keyof typeof G.boardState.foundBuildings = (buildingSlotIndex + 1) as
+    | typeof BuildingSlot.Cathedral
+    | typeof BuildingSlot.Palace
+    | typeof BuildingSlot.Shipyard
+    | typeof BuildingSlot.Fort;
 
-  return specialisedBuildingFunctions[value](G, playerID, args);
+  if (value === BuildingSlot.Cathedral) {
+    if (G.playerInfo[playerID].cathedrals >= MAX_CATHEDRALS) {
+      return { code: "CATHEDRAL_CAP_REACHED", message: `Already at maximum Cathedrals (${MAX_CATHEDRALS})` };
+    }
+    if (G.playerInfo[playerID].hereticOrOrthodox === "heretic") {
+      return { code: "HERETIC_CANNOT_BUILD_CATHEDRAL", message: "Heretic Kingdoms cannot build Cathedrals" };
+    }
+  }
+
+  if (value === BuildingSlot.Palace) {
+    if (G.playerInfo[playerID].palaces >= MAX_PALACES) {
+      return { code: "PALACE_CAP_REACHED", message: `Already at maximum Palaces (${MAX_PALACES})` };
+    }
+    if (heresyDirection !== "advance" && heresyDirection !== "retreat") {
+      return { code: "MISSING_HERESY_DIRECTION", message: "Choose a heresy direction for the Palace" };
+    }
+  }
+
+  if (value === BuildingSlot.Shipyard) {
+    if (G.playerInfo[playerID].shipyards >= MAX_SHIPYARDS) {
+      return { code: "SHIPYARD_CAP_REACHED", message: `Already at maximum Shipyards (${MAX_SHIPYARDS})` };
+    }
+  }
+
+  if (value === BuildingSlot.Fort) {
+    const hasValidTile = G.mapState.buildings.some((row, y) =>
+      row.some((tile, x) => {
+        const hasBuilding =
+          tile.player?.id === playerID &&
+          (tile.buildings === "colony" || tile.buildings === "outpost");
+        const hasTroops =
+          tile.garrisonedRegiments > 0 ||
+          tile.garrisonedLevies > 0 ||
+          G.playerInfo[playerID].fleetInfo.some(
+            (f) =>
+              f.location[0] === x &&
+              f.location[1] === y &&
+              (f.regiments > 0 || f.levies > 0)
+          );
+        return hasBuilding && !tile.fort && hasTroops;
+      })
+    );
+    if (!hasValidTile) {
+      return {
+        code: "NO_VALID_FORT_TILE",
+        message: "No eligible tile — need a colony or outpost with troops and no existing Fort",
+      };
+    }
+  }
+
+  return null;
+};
+
+const BUILDING_NAMES: Record<number, string> = {
+  [BuildingSlot.Cathedral]: "Cathedral",
+  [BuildingSlot.Palace]: "Palace",
+  [BuildingSlot.Shipyard]: "Shipyard",
+  [BuildingSlot.Fort]: "Fort",
+};
+
+// Each building type (cathedral, palace, shipyard, fort) has its own independent
+// cost track on the action board. Data: { 1: string[], 2: string[], ... } — each
+// array holds player IDs of everyone who built that type this round.
+// Cost = base + 1g per counsellor including your own (arrays are pushed AFTER cost).
+// This differs from foundFactory which uses a single shared row with slot-based data.
+const foundBuildings: MoveDefinition = {
+  fn: ({ G, playerID }, ...args: any[]) => {
+    const heresyDirection: "advance" | "retreat" | undefined = args[1];
+    if (validateFoundBuildings(G, playerID, args[0], heresyDirection)) return INVALID_MOVE;
+    const value: keyof typeof G.boardState.foundBuildings = args[0] + 1;
+
+    const specialisedBuildingFunctions = {
+      [BuildingSlot.Cathedral]: foundCathedral,
+      [BuildingSlot.Palace]:    foundPalace,
+      [BuildingSlot.Shipyard]:  foundShipyard,
+      [BuildingSlot.Fort]:      foundFort,
+    };
+
+    return specialisedBuildingFunctions[value](G, playerID, args);
+  },
+  errorMessage: "Cannot found this building right now",
+  validate: validateFoundBuildings,
+  successLog: (G, pid, slotIndex) => {
+    const k = G.playerInfo[pid].kingdomName;
+    const building = BUILDING_NAMES[slotIndex + 1] ?? "building";
+    return `${k} founds a ${building}`;
+  },
 };
 
 const foundCathedral = (
@@ -35,7 +122,7 @@ const foundCathedral = (
   playerID: string,
   _args: any[]
 ): void => {
-  const cost = BUILDING_BASE_COST.cathedral + G.boardState.foundBuildings[BuildingSlot.Cathedral].length;
+  const cost = BUILDING_BASE_COST.cathedral + G.boardState.foundBuildings[BuildingSlot.Cathedral].length + 1;
   G.playerInfo[playerID].resources.gold -= cost;
   G.playerInfo[playerID].cathedrals += 1;
   G.playerInfo[playerID].resources.victoryPoints += CATHEDRAL_VP;
@@ -55,7 +142,7 @@ const foundPalace = (
   // validateFoundBuildings already confirmed this is "advance" or "retreat"
   const heresyDirection: "advance" | "retreat" = args[1];
 
-  const cost = BUILDING_BASE_COST.palace + G.boardState.foundBuildings[BuildingSlot.Palace].length;
+  const cost = BUILDING_BASE_COST.palace + G.boardState.foundBuildings[BuildingSlot.Palace].length + 1;
 
   G.playerInfo[playerID].resources.gold -= cost;
   G.playerInfo[playerID].palaces += 1;
@@ -84,7 +171,7 @@ const foundShipyard = (
   playerID: string,
   _args: any[]
 ): void => {
-  const cost = BUILDING_BASE_COST.shipyard + G.boardState.foundBuildings[BuildingSlot.Shipyard].length;
+  const cost = BUILDING_BASE_COST.shipyard + G.boardState.foundBuildings[BuildingSlot.Shipyard].length + 1;
 
   G.playerInfo[playerID].resources.gold -= cost;
   G.playerInfo[playerID].shipyards += 1;
@@ -94,18 +181,39 @@ const foundShipyard = (
   G.playerInfo[playerID].turnComplete = true;
 };
 // Fort placement: pays cost here, then player picks a tile via checkAndPlaceFort move.
-// Frontend shows valid tiles in a dialog (ActionBoardButton handles this).
+// Valid locations are computed here and written to G.validFortLocations so the
+// frontend just reads them instead of duplicating the eligibility logic.
 const foundFort = (
   G: MyGameState,
   playerID: string,
   _args: any[]
 ): void => {
   // validateFoundBuildings already confirmed a valid tile exists before we charge.
-  const cost = BUILDING_BASE_COST.fort + G.boardState.foundBuildings[BuildingSlot.Fort].length;
+  const cost = BUILDING_BASE_COST.fort + G.boardState.foundBuildings[BuildingSlot.Fort].length + 1;
 
   G.playerInfo[playerID].resources.gold -= cost;
   G.boardState.foundBuildings[BuildingSlot.Fort].push(playerID);
   removeOneCounsellor(G, playerID);
+
+  // Compute valid fort locations for the frontend to display
+  const locations: [number, number][] = [];
+  G.mapState.buildings.forEach((row, y) => {
+    row.forEach((tile, x) => {
+      const hasBuilding =
+        tile.player?.id === playerID &&
+        (tile.buildings === "colony" || tile.buildings === "outpost");
+      const hasTroops =
+        tile.garrisonedRegiments > 0 ||
+        tile.garrisonedLevies > 0 ||
+        G.playerInfo[playerID].fleetInfo.some(
+          (f) => f.location[0] === x && f.location[1] === y && (f.regiments > 0 || f.levies > 0)
+        );
+      if (hasBuilding && !tile.fort && hasTroops) {
+        locations.push([x, y]);
+      }
+    });
+  });
+  G.validFortLocations = locations;
 
   G.playerInfo[playerID].turnComplete = false;
 };

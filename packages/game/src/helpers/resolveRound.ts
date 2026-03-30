@@ -4,12 +4,15 @@ import { MyGameState, GoodKey } from "../types";
 import legacyResolutions from "./legacyResolutions";
 import { enactPiracy } from "./piracy";
 import { grantTradeRouteGoods } from "./tradeRouteResolver";
-import { removeVPAmount, logEvent } from "./stateUtils";
-import { FINAL_ROUND_GOLD_PER_VP, DEBT_PENALTY_DIVISOR, TRADE_VP_SCHEDULE, PRICE_MARKER_MAX } from "../codifiedGameInfo";
+import { countActiveTradeRoutes } from "./mapUtils";
+import { removeVPAmount, increaseHeresyWithinMove, logEvent } from "./stateUtils";
+import { FINAL_ROUND_GOLD_PER_VP, DEBT_PENALTY_DIVISOR, TRADE_VP_SCHEDULE, PRICE_MARKER_MAX } from "../data/gameData";
 
 const ALL_GOODS: GoodKey[] = ["mithril", "dragonScales", "krakenSkin", "magicDust", "stickyIchor", "pipeweed"];
 
 // B2: factory income — pool = total outposts + colonies on map
+// Engaged Factories rule: each player's effective factory count is capped
+// at their number of active trade routes (connected outposts/colonies).
 const collectFactoryIncome = (G: MyGameState) => {
   let pool = 0;
   G.mapState.buildings.forEach((row) => {
@@ -20,8 +23,24 @@ const collectFactoryIncome = (G: MyGameState) => {
     });
   });
 
+  // Compute effective factories per player (capped at active trade routes)
+  const effectiveFactories: Record<string, number> = {};
+  for (const player of Object.values(G.playerInfo)) {
+    const routes = countActiveTradeRoutes(G, player.id);
+    const effective = Math.min(player.factories, routes);
+    effectiveFactories[player.id] = effective;
+    if (effective < player.factories) {
+      logEvent(
+        G,
+        `Engaged Factories: ${player.kingdomName} has ${player.factories} factories but only ${routes} active routes — capped at ${effective}`,
+      );
+    }
+  }
+
   const sortedPlayers = Object.values(G.playerInfo).sort((a, b) => {
-    if (b.factories !== a.factories) return b.factories - a.factories;
+    const aEff = effectiveFactories[a.id];
+    const bEff = effectiveFactories[b.id];
+    if (bEff !== aEff) return bEff - aEff;
     return G.turnOrder.indexOf(a.id) - G.turnOrder.indexOf(b.id);
   });
 
@@ -31,7 +50,7 @@ const collectFactoryIncome = (G: MyGameState) => {
     let distributed = 0;
     sortedPlayers.forEach((player) => {
       if (pool <= 0) return;
-      const income = Math.min(player.factories, pool);
+      const income = Math.min(effectiveFactories[player.id], pool);
       player.resources.gold += income;
       pool -= income;
       distributed += income;
@@ -156,6 +175,17 @@ const resolveRound = (G: MyGameState, events: EventsAPI, random: RandomAPI) => {
 
   // B2: factory income
   collectFactoryIncome(G);
+
+  // Free dissenters (from Send Agitators): advance heresy +1 each if unimprisoned
+  Object.values(G.playerInfo).forEach((player) => {
+    if (player.freeDissenters > 0) {
+      for (let i = 0; i < player.freeDissenters; i++) {
+        increaseHeresyWithinMove(G, player.id);
+      }
+      logEvent(G, `Free dissenters: ${player.kingdomName} heresy +${player.freeDissenters} (${player.freeDissenters} unimprisoned agitators)`);
+      player.freeDissenters = 0;
+    }
+  });
 
   // D8: debt penalty — gold < 0 only (not at exactly 0)
   // GAP-16: VP floor enforced inside removeVPAmount

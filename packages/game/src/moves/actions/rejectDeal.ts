@@ -1,17 +1,21 @@
-import { Move } from "boardgame.io";
-import { MyGameState } from "../../types";
-import { INVALID_MOVE } from "boardgame.io/core";
+import { MoveDefinition, MyGameState, MoveError } from "../../types";
 
-const rejectDeal: Move<MyGameState> = ({ G, playerID }) => {
+const validateRejectDeal = (G: MyGameState, playerID: string): MoveError | null => {
   if (!G.pendingDeal) {
-    return INVALID_MOVE;
+    return { code: "NO_DEAL", message: "No deal pending" };
   }
-
   if (G.pendingDeal.targetID !== playerID) {
-    return INVALID_MOVE;
+    return { code: "NOT_TARGET", message: "This deal is not for you" };
   }
+  return null;
+};
 
-  G.pendingDeal = undefined;
+const rejectDeal: MoveDefinition = {
+  fn: ({ G }) => {
+    G.pendingDeal = undefined;
+  },
+  errorMessage: "Cannot reject this deal",
+  validate: validateRejectDeal,
 };
 
 export default rejectDeal;

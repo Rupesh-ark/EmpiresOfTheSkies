@@ -16,8 +16,10 @@ import {
 import { buildInitialG, buildPlayer, buildCtx, buildResources, buildRandom } from "../testHelpers";
 import { INVALID_MOVE } from "boardgame.io/core";
 import { MyGameState, MapBuildingInfo } from "../../types";
+import type { EventsAPI } from "boardgame.io/dist/types/src/plugins/events/events";
+import type { RandomAPI } from "boardgame.io/dist/types/src/plugins/random/random";
 
-const stubEvents = () => ({ endTurn: vi.fn(), endPhase: vi.fn() });
+const stubEvents = () => ({ endTurn: vi.fn(), endPhase: vi.fn() } as unknown as EventsAPI & { endTurn: ReturnType<typeof vi.fn>; endPhase: ReturnType<typeof vi.fn> });
 
 function buildRebellion(targetPlayerID: string, counterSwords = 7) {
   return {
@@ -39,8 +41,8 @@ function callCommit(
     ...buildCtx(playerID, Object.keys(G.playerInfo).length),
     playOrder: playOrder ?? Object.keys(G.playerInfo),
   };
-  const result = (commitRebellionTroops as Function)(
-    { G, ctx, playerID, events, random: { Shuffle: <T>(a: T[]) => a } },
+  const result = commitRebellionTroops.fn(
+    { G, ctx, playerID, events, random: buildRandom() },
     regiments,
     levies,
     fowCardIndex
@@ -61,8 +63,8 @@ function callContribute(
     ...buildCtx(playerID, Object.keys(G.playerInfo).length),
     playOrder: playOrder ?? Object.keys(G.playerInfo),
   };
-  const result = (contributeToRebellion as Function)(
-    { G, ctx, playerID, events, random: { Shuffle: <T>(a: T[]) => a } },
+  const result = contributeToRebellion.fn(
+    { G, ctx, playerID, events, random: buildRandom() },
     side,
     regiments,
     levies

@@ -16,9 +16,10 @@
 import { describe, it, expect } from "vitest";
 import { INVALID_MOVE } from "boardgame.io/core";
 import relocateDefeatedFleet from "../../moves/aerialBattle/relocateDefeatedFleet";
-import { buildInitialG, buildPlayer, buildCtx, buildFleet } from "../testHelpers";
+import { buildInitialG, buildPlayer, buildCtx, buildFleet, buildRandom } from "../testHelpers";
+import type { EventsAPI } from "boardgame.io/dist/types/src/plugins/events/events";
 
-const stubEvents = { endTurn: (_args?: any) => {}, endPhase: () => {} } as any;
+const stubEvents = { endTurn: (_args?: any) => {}, endPhase: () => {} } as unknown as EventsAPI;
 
 // ── Map helper ─────────────────────────────────────────────────────────────────
 function buildBattleMap(rows = 4, cols = 8): string[][][] {
@@ -65,8 +66,8 @@ describe("relocateDefeatedFleet — fleet location", () => {
     };
     const ctx = { ...buildCtxWithPhase("0"), playOrder: ["0", "1"] };
 
-    (relocateDefeatedFleet as Function)(
-      { G, ctx, playerID: "0", events: stubEvents, random: {} },
+    relocateDefeatedFleet.fn(
+      { G, ctx, playerID: "0", events: stubEvents, random: buildRandom() },
       [2, 1],  // destination: adjacent to [1,1]
       "1"      // defeated player
     );
@@ -91,8 +92,8 @@ describe("relocateDefeatedFleet — battleMap update", () => {
     };
     const ctx = { ...buildCtxWithPhase("0"), playOrder: ["0", "1"] };
 
-    (relocateDefeatedFleet as Function)(
-      { G, ctx, playerID: "0", events: stubEvents, random: {} },
+    relocateDefeatedFleet.fn(
+      { G, ctx, playerID: "0", events: stubEvents, random: buildRandom() },
       [2, 1],
       "1"
     );
@@ -121,8 +122,8 @@ describe("relocateDefeatedFleet — evade branch", () => {
     };
     const ctx = { ...buildCtxWithPhase("0"), playOrder: ["0", "1", "2"] };
 
-    (relocateDefeatedFleet as Function)(
-      { G, ctx, playerID: "0", events: stubEvents, random: {} },
+    relocateDefeatedFleet.fn(
+      { G, ctx, playerID: "0", events: stubEvents, random: buildRandom() },
       [3, 0],  // Faithdom — always valid destination
       "1"
     );
@@ -154,8 +155,8 @@ describe("relocateDefeatedFleet — Faithdom destinations", () => {
     };
     const ctx = { ...buildCtxWithPhase("0"), playOrder: ["0", "1"] };
 
-    (relocateDefeatedFleet as Function)(
-      { G, ctx, playerID: "0", events: stubEvents, random: {} },
+    relocateDefeatedFleet.fn(
+      { G, ctx, playerID: "0", events: stubEvents, random: buildRandom() },
       [4, 0],  // Faithdom tile — non-adjacent, has enemy, but exempt
       "1"
     );
@@ -180,8 +181,8 @@ describe("relocateDefeatedFleet — same tile destination", () => {
     };
     const ctx = { ...buildCtxWithPhase("0"), playOrder: ["0", "1"] };
 
-    const result = (relocateDefeatedFleet as Function)(
-      { G, ctx, playerID: "0", events: stubEvents, random: {} },
+    const result = relocateDefeatedFleet.fn(
+      { G, ctx, playerID: "0", events: stubEvents, random: buildRandom() },
       [1, 1],  // same tile
       "1"
     );
@@ -208,8 +209,8 @@ describe("relocateDefeatedFleet — validation: undiscovered tile", () => {
     };
     const ctx = { ...buildCtxWithPhase("0"), playOrder: ["0", "1"] };
 
-    const result = (relocateDefeatedFleet as Function)(
-      { G, ctx, playerID: "0", events: stubEvents, random: {} },
+    const result = relocateDefeatedFleet.fn(
+      { G, ctx, playerID: "0", events: stubEvents, random: buildRandom() },
       [2, 1],  // adjacent but not discovered
       "1"
     );
@@ -234,8 +235,8 @@ describe("relocateDefeatedFleet — validation: non-adjacent tile", () => {
     };
     const ctx = { ...buildCtxWithPhase("0"), playOrder: ["0", "1"] };
 
-    const result = (relocateDefeatedFleet as Function)(
-      { G, ctx, playerID: "0", events: stubEvents, random: {} },
+    const result = relocateDefeatedFleet.fn(
+      { G, ctx, playerID: "0", events: stubEvents, random: buildRandom() },
       [5, 0],  // discovered but not adjacent to [0,0]
       "1"
     );
@@ -262,8 +263,8 @@ describe("relocateDefeatedFleet — validation: enemy fleet at destination", () 
     };
     const ctx = { ...buildCtxWithPhase("0"), playOrder: ["0", "1", "2"] };
 
-    const result = (relocateDefeatedFleet as Function)(
-      { G, ctx, playerID: "0", events: stubEvents, random: {} },
+    const result = relocateDefeatedFleet.fn(
+      { G, ctx, playerID: "0", events: stubEvents, random: buildRandom() },
       [2, 1],  // adjacent and discovered, but player "2" is there (not "1")
       "1"
     );

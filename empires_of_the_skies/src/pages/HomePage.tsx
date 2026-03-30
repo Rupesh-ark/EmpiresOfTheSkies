@@ -5,6 +5,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { LobbyClient } from "boardgame.io/client";
 import ClientComponent from "./Client";
 import HomePageComponent from "./HomePageComponent";
+import LobbyPage from "./LobbyPage";
 
 const HomePage = () => {
   const [startGame, setStartGame] = useState(false);
@@ -33,14 +34,11 @@ const HomePage = () => {
           />
           <Route
             path="/match/:matchID/:playerName"
-            element={
-              <ClientComponent
-                lobbyClient={lobbyClient}
-                setStartGame={setStartGame}
-                matchReady={matchReady}
-                server={server}
-              />
-            }
+            element={<LobbyPage lobbyClient={lobbyClient} />}
+          />
+          <Route
+            path="/game/:matchID/:playerName"
+            element={<ClientComponent server={server} />}
           />
         </Route>
       </Routes>

@@ -2,7 +2,7 @@ import { Box, Popper, Typography } from "@mui/material";
 import { Close, MenuBook, Style } from "@mui/icons-material";
 import { KingdomAdvantageCard } from "@eots/game";
 import { alpha, darken } from "@mui/material/styles";
-import { fonts } from "@/designTokens";
+import { tokens } from "@/theme";
 import svgNameToElementMap from "../WorldMap/nameToElementMap";
 import { KA_CARD_IMAGES } from "@/assets/kingdomAdvantage";
 
@@ -66,7 +66,7 @@ const HoldingControl = ({
     {icon}
     <Typography
       sx={{
-        fontFamily: fonts.system,
+        fontFamily: tokens.font.body,
         fontWeight: 800,
         fontSize: "0.82rem",
         lineHeight: 1,
@@ -213,7 +213,7 @@ export const CardHoldingsPanels = ({
                 >
                   <Typography
                     sx={{
-                      fontFamily: fonts.system,
+                      fontFamily: tokens.font.body,
                       fontWeight: 800,
                       fontSize: "1rem",
                       lineHeight: 1.2,
@@ -237,7 +237,7 @@ export const CardHoldingsPanels = ({
               >
                 <Typography
                   sx={{
-                    fontFamily: fonts.system,
+                    fontFamily: tokens.font.body,
                     fontSize: "0.86rem",
                     color: "rgba(0,0,0,0.6)",
                   }}

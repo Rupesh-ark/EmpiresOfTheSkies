@@ -3,6 +3,14 @@ import { MyGameState } from "../types";
 import { sortPlayersInPlayerOrder } from "./helpers";
 import { EventsAPI } from "boardgame.io/dist/types/src/plugins/events/events";
 
+/** Compute the list of other players at the current battle tile (possible defenders). */
+const computeDefendersAtBattle = (G: MyGameState, nextPlayer: string): void => {
+  const [x, y] = G.mapState.currentBattle;
+  G.possibleDefenders = (G.mapState.battleMap[y]?.[x] ?? []).filter(
+    (id) => id !== nextPlayer
+  );
+};
+
 export const findNextBattle = (G: MyGameState, events: EventsAPI) => {
   for (let y = G.mapState.currentBattle[1]; y < 4; y++) {
     for (let x = 0; x < 8; x++) {
@@ -18,6 +26,7 @@ export const findNextBattle = (G: MyGameState, events: EventsAPI) => {
         G.mapState.currentBattle = [x, y];
         G.battleState = undefined;
         G.stage = "attack or pass";
+        computeDefendersAtBattle(G, nextPlayer);
         events.endTurn({ next: nextPlayer });
         return;
       }
@@ -71,6 +80,7 @@ export const findNextGroundBattle = (
         const nextPlayer = G.mapState.battleMap[y][x][0];
         G.mapState.currentBattle = [x, y];
         G.stage = "attack or pass";
+        computeDefendersAtBattle(G, nextPlayer);
         events.endTurn({ next: nextPlayer });
         return;
       }
@@ -137,5 +147,6 @@ export const findNextPlayerInBattleSequence = (
   } else {
     events.endTurn({ next: nextPlayer });
     G.stage = "attack or pass";
+    computeDefendersAtBattle(G, nextPlayer);
   }
 };

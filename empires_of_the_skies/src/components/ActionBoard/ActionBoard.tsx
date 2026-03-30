@@ -1,57 +1,76 @@
+import { memo } from "react";
+import { Box } from "@mui/material";
 import { MyGameProps } from "@eots/game";
-import { ThemeProvider } from "@emotion/react";
-import { generalTheme } from "../themes";
+import { tokens } from "@/theme";
+export { ActionHoverProvider } from "./ActionHoverContext";
+export { ActionInfoPanel } from "./ActionInfoPanel";
 
 // ── Row components ───────────────────────────────────────────────────────────
 import PlayerOrderRow from "./components/rows/PlayerOrderRow";
-import RecruitCounsellorsRow from "./components/rows/RecruitCounsellorsRow";
-import RecruitRegimentsRow from "./components/rows/RecruitRegimentsRow";
 import {
+  RecruitCounsellorsRow,
+  RecruitRegimentsRow,
   PurchaseSkyshipsZeelandRow,
   PurchaseSkyshipsVenoaRow,
-} from "./components/rows/PurchaseSkyshipsRow";
+  FoundFactoriesRow,
+  ConvertMonarchRow,
+} from "./components/rows/SimpleActionRows";
 import FoundBuildingsRow from "./components/rows/FoundBuildingsRow";
-import FoundFactoriesRow from "./components/rows/FoundFactoriesRow";
 import InfluencePrelatesRow from "./components/rows/InfluencePrelatesRow";
 import PunishDissentersRow from "./components/rows/PunishDissentersRow";
-import ConvertMonarchRow from "./components/rows/ConvertMonarchRow";
 import IssueHolyDecree from "./components/IssueHolyDecree";
 
 // ── Main component ───────────────────────────────────────────────────────────
 
-export const ActionBoard = (props: ActionBoardProps) => (
-  <ThemeProvider theme={generalTheme}>
-    <div
-      style={{
+export const ActionBoard = memo((props: ActionBoardProps) => (
+    <Box
+      sx={{
         width: "100%",
-        display: "flex",
-        justifyContent: "center",
-        marginLeft: "20px",
-        marginRight: "20px",
+        px: `${tokens.spacing.sm}px`,
+        py: `${tokens.spacing.sm}px`,
       }}
     >
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          maxWidth: "1200px",
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
           width: "100%",
+          gap: "6px",
+          alignContent: "start",
         }}
       >
-        <PlayerOrderRow {...props} />
+        {/* Row 1: Player Order spans full width */}
+        <Box sx={{ gridColumn: "1 / -1" }}>
+          <PlayerOrderRow {...props} />
+        </Box>
+
+        {/* Slotted actions (numbered slots, stacking cost) */}
         <RecruitCounsellorsRow {...props} />
         <RecruitRegimentsRow {...props} />
         <PurchaseSkyshipsZeelandRow {...props} />
         <PurchaseSkyshipsVenoaRow {...props} />
-        <FoundBuildingsRow {...props} />
         <FoundFactoriesRow {...props} />
-        <InfluencePrelatesRow {...props} />
         <PunishDissentersRow {...props} />
-        <ConvertMonarchRow {...props} />
-        <IssueHolyDecree {...props} />
-      </div>
-    </div>
-  </ThemeProvider>
-);
+        <Box sx={{ gridColumn: "1 / -1" }}>
+          <ConvertMonarchRow {...props} />
+        </Box>
+
+        {/* Building actions — single row of 4 */}
+        <Box sx={{ gridColumn: "1 / -1" }}>
+          <FoundBuildingsRow {...props} />
+        </Box>
+
+        {/* Per-kingdom slots */}
+        <Box sx={{ gridColumn: "1 / -1" }}>
+          <InfluencePrelatesRow {...props} />
+        </Box>
+
+        {/* Holy Decree — full width (only if Archprelate) */}
+        <Box sx={{ gridColumn: "1 / -1" }}>
+          <IssueHolyDecree {...props} />
+        </Box>
+      </Box>
+    </Box>
+));
 
 interface ActionBoardProps extends MyGameProps {}

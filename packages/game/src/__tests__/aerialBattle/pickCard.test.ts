@@ -13,9 +13,10 @@
 
 import { describe, it, expect } from "vitest";
 import pickCard from "../../moves/aerialBattle/pickCard";
-import { buildInitialG, buildPlayer, buildCtx, buildFleet, buildResources } from "../testHelpers";
+import { buildInitialG, buildPlayer, buildCtx, buildFleet, buildResources, buildRandom } from "../testHelpers";
+import type { EventsAPI } from "boardgame.io/dist/types/src/plugins/events/events";
 
-const stubEvents = { endTurn: (_args?: any) => {}, endPhase: () => {} } as any;
+const stubEvents = { endTurn: (_args?: any) => {}, endPhase: () => {} } as unknown as EventsAPI;
 
 // ── ctx helper ─────────────────────────────────────────────────────────────────
 function buildBattleCtx(playerID: string, players: string[] = ["0", "1"]) {
@@ -72,8 +73,8 @@ describe("pickCard (aerialBattle) — card assignment", () => {
     const { G, testCard } = setupPickCardBattle(3, 3);
     const ctx = buildBattleCtx("0");
 
-    (pickCard as Function)(
-      { G, ctx, playerID: "0", events: stubEvents, random: {} },
+    pickCard.fn(
+      { G, ctx, playerID: "0", events: stubEvents, random: buildRandom() },
       0  // card index
     );
 
@@ -87,8 +88,8 @@ describe("pickCard (aerialBattle) — hand management", () => {
     const ctx = buildBattleCtx("0");
     expect(G.playerInfo["0"].resources.fortuneCards).toHaveLength(1);
 
-    (pickCard as Function)(
-      { G, ctx, playerID: "0", events: stubEvents, random: {} },
+    pickCard.fn(
+      { G, ctx, playerID: "0", events: stubEvents, random: buildRandom() },
       0
     );
 
@@ -114,8 +115,8 @@ describe("pickCard (aerialBattle) — battle resolution", () => {
     const vpBefore = G.playerInfo["0"].resources.victoryPoints;
     const ctx = buildBattleCtx("0");
 
-    (pickCard as Function)(
-      { G, ctx, playerID: "0", events: stubEvents, random: {} },
+    pickCard.fn(
+      { G, ctx, playerID: "0", events: stubEvents, random: buildRandom() },
       0
     );
 

@@ -1,21 +1,24 @@
-import { Move } from "boardgame.io";
-import { MyGameState } from "../../types";
-import { INVALID_MOVE } from "boardgame.io/core";
-import { SKYSHIP_SELL_PRICE } from "../../codifiedGameInfo";
+import { MoveDefinition, MyGameState, MoveError } from "../../types";
+import { SKYSHIP_SELL_PRICE } from "../../data/gameData";
 
-const sellSkyships: Move<MyGameState> = ({ G, playerID }, ...args: any[]) => {
-  const amount: number = args[0];
-
+const validateSellSkyships = (G: MyGameState, playerID: string, amount: number): MoveError | null => {
   if (!Number.isInteger(amount) || amount <= 0) {
-    return INVALID_MOVE;
+    return { code: "INVALID_AMOUNT", message: "Must sell at least 1 Skyship" };
   }
-
   if (G.playerInfo[playerID].resources.skyships < amount) {
-    return INVALID_MOVE;
+    return { code: "INSUFFICIENT_SKYSHIPS", message: `Not enough Skyships — have ${G.playerInfo[playerID].resources.skyships}` };
   }
+  return null;
+};
 
-  G.playerInfo[playerID].resources.skyships -= amount;
-  G.playerInfo[playerID].resources.gold += amount * SKYSHIP_SELL_PRICE;
+const sellSkyships: MoveDefinition = {
+  fn: ({ G, playerID }, ...args: any[]) => {
+    const amount: number = args[0];
+    G.playerInfo[playerID].resources.skyships -= amount;
+    G.playerInfo[playerID].resources.gold += amount * SKYSHIP_SELL_PRICE;
+  },
+  errorMessage: "Cannot sell Skyships",
+  validate: validateSellSkyships,
 };
 
 export default sellSkyships;

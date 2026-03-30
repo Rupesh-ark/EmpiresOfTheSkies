@@ -14,6 +14,7 @@
 import { describe, it, expect, vi } from "vitest";
 import pass from "../../moves/pass";
 import { buildInitialG, buildPlayer, buildCtx } from "../testHelpers";
+import type { EventsAPI } from "boardgame.io/dist/types/src/plugins/events/events";
 
 function buildPassCtx(
   playerID: string,
@@ -33,7 +34,7 @@ function buildEvents() {
   return {
     endTurn: vi.fn(),
     endPhase: vi.fn(),
-  };
+  } as unknown as EventsAPI & { endTurn: ReturnType<typeof vi.fn>; endPhase: ReturnType<typeof vi.fn> };
 }
 
 // ── discovery phase ────────────────────────────────────────────────────────────
@@ -45,7 +46,7 @@ describe("pass — discovery phase", () => {
     const ctx = buildPassCtx("0", "discovery", 0);
     const events = buildEvents();
 
-    (pass as Function)({ G, ctx, playerID: "0", events });
+    pass.fn({ G, ctx, playerID: "0", events });
 
     expect(G.playerInfo["0"].passed).toBe(true);
     expect(G.firstTurnOfRound).toBe(false);
@@ -56,19 +57,20 @@ describe("pass — discovery phase", () => {
     const ctx = buildPassCtx("0", "discovery", 0, 2); // pos 0 of 2 — not last
     const events = buildEvents();
 
-    (pass as Function)({ G, ctx, playerID: "0", events });
+    pass.fn({ G, ctx, playerID: "0", events });
 
     expect(events.endTurn).toHaveBeenCalled();
     expect(events.endPhase).not.toHaveBeenCalled();
     expect(G.stage).toBe("actions"); // stage unchanged from default? No — only set on endPhase branch
   });
 
-  it("sets stage='actions' and calls endPhase when last player passes", () => {
-    const G = buildInitialG();
-    const ctx = buildPassCtx("0", "discovery", 1, 2); // pos 1 of 2 — last
+  it("sets stage='actions' and calls endPhase when all players have passed", () => {
+    const G = buildInitialG([buildPlayer("0"), buildPlayer("1")]);
+    G.playerInfo["1"].passed = true; // player "1" already passed
+    const ctx = buildPassCtx("0", "discovery", 1, 2);
     const events = buildEvents();
 
-    (pass as Function)({ G, ctx, playerID: "0", events });
+    pass.fn({ G, ctx, playerID: "0", events });
 
     expect(G.stage).toBe("actions");
     expect(events.endPhase).toHaveBeenCalled();
@@ -85,7 +87,7 @@ describe("pass — actions phase", () => {
     const ctx = buildPassCtx("0", "actions", 0);
     const events = buildEvents();
 
-    (pass as Function)({ G, ctx, playerID: "0", events });
+    pass.fn({ G, ctx, playerID: "0", events });
 
     expect(G.playerInfo["0"].passed).toBe(true);
     expect(events.endTurn).toHaveBeenCalled();
@@ -98,7 +100,7 @@ describe("pass — actions phase", () => {
     const ctx = buildPassCtx("0", "actions", 0);
     const events = buildEvents();
 
-    (pass as Function)({ G, ctx, playerID: "0", events });
+    pass.fn({ G, ctx, playerID: "0", events });
 
     expect(G.playerInfo["0"].passed).toBe(true);
     expect(G.stage).toBe("attack or pass");

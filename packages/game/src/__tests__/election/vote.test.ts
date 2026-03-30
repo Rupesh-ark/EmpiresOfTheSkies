@@ -18,9 +18,10 @@
 
 import { describe, it, expect } from "vitest";
 import vote from "../../moves/election/vote";
-import { buildInitialG, buildPlayer, buildCtx, buildResources } from "../testHelpers";
+import { buildInitialG, buildPlayer, buildCtx, buildResources, buildRandom } from "../testHelpers";
+import type { EventsAPI } from "boardgame.io/dist/types/src/plugins/events/events";
 
-const stubEvents = { endTurn: () => {}, endPhase: () => {} } as any;
+const stubEvents = { endTurn: () => {}, endPhase: () => {} } as unknown as EventsAPI;
 
 function callMove(G: ReturnType<typeof buildInitialG>, playerID: string, kingdomVotedFor: string) {
   const ctx = {
@@ -29,7 +30,7 @@ function callMove(G: ReturnType<typeof buildInitialG>, playerID: string, kingdom
     playOrder: Object.keys(G.playerInfo),
     playOrderPos: Object.keys(G.playerInfo).indexOf(playerID),
   };
-  return (vote as Function)({ G, ctx, playerID, events: stubEvents, random: {} }, kingdomVotedFor);
+  return vote.fn({ G, ctx, playerID, events: stubEvents, random: buildRandom() }, kingdomVotedFor);
 }
 
 function callMoveWithPlayOrder(
@@ -44,7 +45,7 @@ function callMoveWithPlayOrder(
     playOrder,
     playOrderPos: playOrder.indexOf(playerID),
   };
-  return (vote as Function)({ G, ctx, playerID, events: stubEvents, random: {} }, kingdomVotedFor);
+  return vote.fn({ G, ctx, playerID, events: stubEvents, random: buildRandom() }, kingdomVotedFor);
 }
 
 describe("vote — ballot storage (before all players have voted)", () => {
@@ -54,10 +55,10 @@ describe("vote — ballot storage (before all players have voted)", () => {
       buildPlayer("1", { kingdomName: "Gallois", cathedrals: 1 }),
     ]);
     // Only player "0" votes — player "1" has not yet
-    callMoveWithPlayOrder(G, "0", "Angland", ["0", "1"]);
+    callMoveWithPlayOrder(G, "0", "0", ["0", "1"]);
     // Ballot is stored, but tally has NOT run yet
-    expect(G.voteSubmitted["0"]).toBe("Angland");
-    expect(G.electionResults["Angland"]).toBeUndefined();
+    expect(G.voteSubmitted["0"]).toBe("0");
+    expect(G.electionResults["0"]).toBeUndefined();
   });
 
   it("adds player to hasVoted after voting", () => {
@@ -65,32 +66,32 @@ describe("vote — ballot storage (before all players have voted)", () => {
       buildPlayer("0", { kingdomName: "Angland", cathedrals: 1 }),
       buildPlayer("1", { kingdomName: "Gallois", cathedrals: 1 }),
     ]);
-    callMoveWithPlayOrder(G, "0", "Angland", ["0", "1"]);
+    callMoveWithPlayOrder(G, "0", "0", ["0", "1"]);
     expect(G.hasVoted).toContain("0");
   });
 });
 
 describe("vote — tally fires only when all players have voted", () => {
-  it("accumulates votes across players voting for the same kingdom (2 players)", () => {
+  it("accumulates votes across players voting for the same player (2 players)", () => {
     const G = buildInitialG([
       buildPlayer("0", { kingdomName: "Angland", cathedrals: 2 }),
       buildPlayer("1", { kingdomName: "Gallois", cathedrals: 3 }),
     ]);
-    callMoveWithPlayOrder(G, "0", "Angland", ["0", "1"]);
-    callMoveWithPlayOrder(G, "1", "Angland", ["0", "1"]);
+    callMoveWithPlayOrder(G, "0", "0", ["0", "1"]);
+    callMoveWithPlayOrder(G, "1", "0", ["0", "1"]);
     // Both voted — tally fires: 2 + 3 = 5
-    expect(G.electionResults["Angland"]).toBe(5);
+    expect(G.electionResults["0"]).toBe(5);
   });
 });
 
 describe("vote — Archprelate assignment (all players voted)", () => {
-  it("assigns isArchprelate to the kingdom with the most votes", () => {
+  it("assigns isArchprelate to the player with the most votes", () => {
     const G = buildInitialG([
       buildPlayer("0", { kingdomName: "Angland", cathedrals: 4 }),
       buildPlayer("1", { kingdomName: "Gallois", cathedrals: 1 }),
     ]);
-    callMoveWithPlayOrder(G, "0", "Angland", ["0", "1"]);
-    callMoveWithPlayOrder(G, "1", "Gallois", ["0", "1"]);
+    callMoveWithPlayOrder(G, "0", "0", ["0", "1"]);
+    callMoveWithPlayOrder(G, "1", "1", ["0", "1"]);
     expect(G.playerInfo["0"].isArchprelate).toBe(true);
     expect(G.playerInfo["1"].isArchprelate).toBe(false);
   });
@@ -100,8 +101,8 @@ describe("vote — Archprelate assignment (all players voted)", () => {
       buildPlayer("0", { kingdomName: "Angland", cathedrals: 2, isArchprelate: true }),
       buildPlayer("1", { kingdomName: "Gallois", cathedrals: 2, isArchprelate: false }),
     ]);
-    callMoveWithPlayOrder(G, "0", "Angland", ["0", "1"]);
-    callMoveWithPlayOrder(G, "1", "Gallois", ["0", "1"]);
+    callMoveWithPlayOrder(G, "0", "0", ["0", "1"]);
+    callMoveWithPlayOrder(G, "1", "1", ["0", "1"]);
     // Tied at 2–2: current Archprelate (player "0") keeps title
     expect(G.playerInfo["0"].isArchprelate).toBe(true);
     expect(G.playerInfo["1"].isArchprelate).toBe(false);
@@ -114,9 +115,9 @@ describe("vote — Archprelate assignment (all players voted)", () => {
       buildPlayer("2", { kingdomName: "Castillia", cathedrals: 1, hereticOrOrthodox: "orthodox" }),
     ]);
     const vpBefore = G.playerInfo["0"].resources.victoryPoints;
-    callMoveWithPlayOrder(G, "0", "Angland", ["0", "1", "2"]);
-    callMoveWithPlayOrder(G, "1", "Gallois", ["0", "1", "2"]);
-    callMoveWithPlayOrder(G, "2", "Castillia", ["0", "1", "2"]);
+    callMoveWithPlayOrder(G, "0", "0", ["0", "1", "2"]);
+    callMoveWithPlayOrder(G, "1", "1", ["0", "1", "2"]);
+    callMoveWithPlayOrder(G, "2", "2", ["0", "1", "2"]);
     // Player "0" wins with 4 votes; 3 orthodox → floor(2*3/3) = 2 VP
     expect(G.playerInfo["0"].resources.victoryPoints).toBe(vpBefore + 2);
   });
@@ -130,9 +131,9 @@ describe("vote — influenced kingdoms give extra votes", () => {
     ]);
     // Player "0" has influenced prelate slot 2 (Gallois)
     G.boardState.influencePrelates[2] = "0";
-    callMoveWithPlayOrder(G, "0", "Angland", ["0", "1"]);
-    callMoveWithPlayOrder(G, "1", "Gallois", ["0", "1"]);
-    // At tally: player "0" gets own 2 + Gallois's 3 = 5 votes for Angland
-    expect(G.electionResults["Angland"]).toBe(5);
+    callMoveWithPlayOrder(G, "0", "0", ["0", "1"]);
+    callMoveWithPlayOrder(G, "1", "1", ["0", "1"]);
+    // At tally: player "0" gets own 2 + Gallois's 3 = 5 votes for player "0"
+    expect(G.electionResults["0"]).toBe(5);
   });
 });

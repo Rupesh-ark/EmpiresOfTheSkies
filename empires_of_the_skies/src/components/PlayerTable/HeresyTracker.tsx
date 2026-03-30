@@ -9,6 +9,7 @@ import {
   Typography,
 } from "@mui/material";
 import { MyGameProps, PlayerInfo } from "@eots/game";
+import { tokens } from "@/theme";
 
 
 // 19 spaces: h=-9 (most orthodox) to h=+9 (most heretic). orthodoxVP = -h, hereticVP = h.
@@ -19,7 +20,7 @@ const HeresyTracker = (props: HeresyTrackerProps) => {
   const trackIndices = Array.from({ length: 19 }, (_, index) => index - 9);
 
   return (
-    <Paper elevation={2} sx={{ maxWidth: 1230, mb: 3, width: "100%", borderRadius: 2, overflow: "hidden" }}>
+    <Paper elevation={0} sx={{ maxWidth: 1230, mb: 3, width: "100%", borderRadius: 2, overflow: "hidden", backgroundColor: tokens.ui.surface, border: `1px solid ${tokens.ui.border}` }}>
       <Box
         sx={{
           background: "linear-gradient(90deg, #1a0a14 0%, #0d0d0d 50%, #1a0a00 100%)",
@@ -72,14 +73,14 @@ const HeresyTracker = (props: HeresyTrackerProps) => {
 
           <TableBody>
             {(Object.entries(props.G.playerInfo) as [string, PlayerInfo][]).map(([playerId, player]) => (
-              <TableRow key={playerId} hover>
+              <TableRow key={playerId} hover sx={{ "&:hover": { backgroundColor: tokens.ui.surfaceHover } }}>
                 <TableCell
                   sx={{
                     position: "sticky",
                     left: 0,
                     zIndex: 1,
-                    backgroundColor: "background.paper",
-                    borderRight: "2px solid rgba(224, 224, 224, 0.6)",
+                    backgroundColor: tokens.ui.surface,
+                    borderRight: `2px solid ${tokens.ui.borderMedium}`,
                     minWidth: 120,
                     py: 0.5,
                     px: 1,
@@ -111,7 +112,7 @@ const HeresyTracker = (props: HeresyTrackerProps) => {
                     align="center"
                     sx={{
                       p: 1,
-                      borderRight: "1px solid rgba(224, 224, 224, 0.4)",
+                      borderRight: `1px solid ${tokens.ui.border}`,
                       "&:last-child": { borderRight: 0 },
                     }}
                   >
