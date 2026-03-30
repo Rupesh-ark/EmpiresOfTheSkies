@@ -24,6 +24,7 @@ const PickLegacyCardDialog = (props: DrawOrPickCardDialogProps) => {
 
       return (
         <div
+          key={card}
           onClick={() => setCurrentCard(card)}
           style={{
             cursor: "pointer",

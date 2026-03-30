@@ -7,12 +7,16 @@ import {
   ToggleButton,
   Button,
   Typography,
-  Box, 
+  Box,
 } from "@mui/material";
 import { LobbyClient } from "boardgame.io/dist/types/packages/client";
 import { useState } from "react";
 import React from "react";
-import background from "../boards_and_assets/box_art.png";
+import bgDesktop from "../boards_and_assets/box_art_desktop.png";
+import bgTablet from "../boards_and_assets/box_art_tablet.png";
+import bgMobile from "../boards_and_assets/box_art_mobile.png";
+import logo from "../boards_and_assets/box_art_logo.png";
+import { colors, fonts } from "../designTokens";
 
 const createMatch = async (
   lobbyClient: LobbyClient,
@@ -20,7 +24,7 @@ const createMatch = async (
   setMatchReady: React.Dispatch<React.SetStateAction<string | undefined>>
 ) => {
   const response = await lobbyClient.createMatch("empires-of-the-skies", {
-    numPlayers: numPlayers,
+    numPlayers,
   });
 
   if (!response.matchID) {
@@ -28,84 +32,196 @@ const createMatch = async (
     return;
   }
 
-  const enquiry = await lobbyClient.getMatch(
-    "empires-of-the-skies",
-    response.matchID
-  );
-
+  const enquiry = await lobbyClient.getMatch("empires-of-the-skies", response.matchID);
   console.log(enquiry);
   setMatchReady(response.matchID);
 };
+
+// Shared sx objects defined outside the component to avoid recreation on every render
+
+const labelSx = {
+  fontFamily: fonts.accent,
+  fontWeight: "bold",
+  fontSize: "0.95rem",
+  color: colors.home.text,
+  letterSpacing: "0.05em",
+} as const;
+
+const textFieldSx = {
+  "& .MuiInputBase-root": {
+    fontFamily: fonts.accent,
+    color: colors.home.text,
+    backgroundColor: colors.home.textFieldBg,
+    borderRadius: "2px",
+    border: `1px solid ${colors.home.border}`,
+    "&:hover": { borderColor: colors.home.hoverBronze },
+    "&.Mui-disabled": {
+      backgroundColor: colors.home.disabledBg,
+      borderColor: colors.home.disabledBorder,
+      color: colors.home.disabledText,
+    },
+  },
+  "& .MuiOutlinedInput-notchedOutline": { border: "none" },
+} as const;
 
 const HomePageComponent = (props: HomePageComponentProps) => {
   const [joinOrCreate, setJoinOrCreate] = useState<"join" | "create">("join");
   const [playerName, setName] = useState("");
   const [matchIDInput, setMatchIDInput] = useState("");
 
-  // Define thematic colors and fonts
-  const fontColorAgedInk = "#3e2723";
-  const bronzeBorderColor = "#a67c52";
-  const agedGreenGradient = "linear-gradient(to bottom, #2c6e49, #1b4d3e)";
-  const thematicFont = "'Cinzel', serif"; 
-
   return (
     <Box
+      sx={{
+        position: "relative",
+        minHeight: "100dvh",
+        width: "100%",
+        overflowY: "auto",
+        backgroundImage: {
+          xs: `url(${bgMobile})`,
+          sm: `url(${bgTablet})`,
+          md: `url(${bgDesktop})`,
+        },
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+        backgroundAttachment: { xs: "scroll", md: "fixed" },
+        display: "flex",
+        alignItems: { xs: "flex-end", md: "center" },
+        justifyContent: { xs: "center", md: "flex-end" },
+        px: { xs: "clamp(12px, 3vw, 24px)", md: "clamp(60px, 7vw, 140px)" },
+        py: { xs: "clamp(16px, 4vh, 40px)", md: "clamp(24px, 4vh, 64px)" },
+        pb: {
+          xs: "calc(env(safe-area-inset-bottom) + 32px)",
+          md: "clamp(24px, 10vh, 64px)",
+        },
+        boxSizing: "border-box",
+      }}
+    >
+  
+      <Box
         sx={{
-          minHeight: "100dvh",
-          width: "100%",
-          overflowY: "auto",
-          backgroundImage: `url(${background})`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundRepeat: "no-repeat",
-          backgroundAttachment: { xs: "scroll", md: "fixed" },
-
-          display: "flex",
-          alignItems: { xs: "flex-start", md: "center" },
-          justifyContent: { xs: "center", md: "flex-start" },
-
-          px: { xs: "clamp(12px, 3vw, 24px)", md: "clamp(24px, 4vw, 96px)" },
-          py: { xs: "clamp(16px, 4vh, 40px)", md: "clamp(24px, 4vh, 64px)" },
-          pb: { xs: "calc(env(safe-area-inset-bottom) + 16px)", md: "clamp(24px, 10vh, 64px)" },
-
-          boxSizing: "border-box",
+          position: "absolute",
+          top: { xs: 12, md: 24 },
+          left: { xs: "50%", md: 36 },
+          transform: { xs: "translateX(-50%)", md: "none" },
+          width: { xs: 150, sm: 190, md: 240 },
+          height: { xs: 150, sm: 190, md: 240 },
+          borderRadius: "50%",
+          overflow: "hidden",
+          boxShadow: "0 0 18px 6px rgba(200, 160, 60, 0.55)",
+          pointerEvents: "none",
+          zIndex: 1,
+          userSelect: "none",
+          flexShrink: 0,
         }}
       >
+        <Box
+          component="img"
+          src={logo}
+          alt="Empires of the Sky"
+          sx={{ width: "100%", height: "100%", display: "block", objectFit: "cover" }}
+        />
+      </Box>
+
       <Box
+        sx={{
+          position: "absolute",
+          bottom: { sm: 28, md: 36 },
+          left: { sm: 28, md: 44 },
+          maxWidth: { sm: 320, md: 400 },
+          display: { xs: "none", sm: "block" },
+          zIndex: 1,
+          pointerEvents: "none",
+        }}
+      >
+        {(
+          [
+            ["An Age of Faith turns into an Age of ", "Discovery", "#7ecfa0", "..."],
+            ["An Age of Scarcity to an Age of ", "Wealth", "#7ecfa0", "..."],
+            ["An Age of Peace to an Age of ", "War!", "#e05555", ""],
+          ] as const
+        ).map(([prefix, highlight, highlightColor, suffix]) => (
+          <Typography
+            key={highlight}
             sx={{
-              width: "100%",
-              maxWidth: { xs: 520, md: 520 }, 
-              display: "flex",
-              flexDirection: "column",
-              alignItems: { xs: "stretch", md: "flex-start" },
-              gap: { xs: 2, md: 2.5 },
+              fontFamily: fonts.accent,
+              fontSize: { sm: "1rem", md: "1.1rem" },
+              lineHeight: 2,
+              fontStyle: "italic",
+              color: "rgba(235, 215, 170, 1)",
+              textShadow: "0 0 8px rgba(0,0,0,1), 1px 1px 3px rgba(0,0,0,1)",
             }}
           >
+            {prefix}
+            <Box component="span" sx={{ color: highlightColor }}>
+              {highlight}
+            </Box>
+            {suffix}
+          </Typography>
+        ))}
+      </Box>
+
+
+      <Box
+        sx={{
+          width: "100%",
+          maxWidth: 520,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: { xs: "stretch", md: "flex-start" },
+          gap: { xs: 2, md: 2.5 },
+          zIndex: 2,
+        }}
+      >
+        <Box sx={{ display: { xs: "block", sm: "none" }, textAlign: "center" }}>
+          {(
+            [
+              ["An Age of Faith turns into an Age of ", "Discovery", "#7ecfa0", "..."],
+              ["An Age of Scarcity to an Age of ", "Wealth", "#7ecfa0", "..."],
+              ["An Age of Peace to an Age of ", "War!", "#e05555", ""],
+            ] as const
+          ).map(([prefix, highlight, highlightColor, suffix]) => (
+            <Typography
+              key={highlight}
+              sx={{
+                fontFamily: fonts.accent,
+                fontSize: "0.95rem",
+                lineHeight: 2,
+                fontStyle: "italic",
+                color: "rgba(235, 215, 170, 1)",
+                textShadow: "0 0 8px rgba(0,0,0,1), 1px 1px 3px rgba(0,0,0,1)",
+              }}
+            >
+              {prefix}
+              <Box component="span" sx={{ color: highlightColor }}>
+                {highlight}
+              </Box>
+              {suffix}
+            </Typography>
+          ))}
+        </Box>
+
         <Paper
           elevation={6}
           sx={{
+            width: "100%",
             display: "flex",
             flexDirection: "column",
-            
-            width: "100%",
-            maxWidth: "420px",
-            p: { xs: 2.5, sm: 3, md: 4 },
-            padding: { xs: 3, md: 4 }, 
-            backgroundSize: "cover",
-            backgroundColor: "rgba(240, 230, 210, 0.75)", 
+            p: { xs: 3, md: 4 },
+            backgroundColor: colors.home.parchmentBg,
             backgroundBlendMode: "lighten",
-            border: `2px solid ${bronzeBorderColor}`, 
-            boxShadow: "inset 0 0 10px rgba(0, 0, 0, 0.3)", 
-            borderRadius: 1, 
+            border: `2px solid ${colors.home.border}`,
+            boxShadow: "inset 0 0 10px rgba(0, 0, 0, 0.3)",
+            borderRadius: 1,
             gap: 1.5,
           }}
         >
           <Typography
-            variant="h5"
             sx={{
-              fontFamily: thematicFont,
-              fontWeight: "700",
-              color: fontColorAgedInk,
+              fontFamily: fonts.accent,
+              fontWeight: 700,
+              fontSize: { xs: "1.2rem", md: "1.5rem" },
+              color: colors.home.text,
               textAlign: "center",
               letterSpacing: "0.1em",
               mb: 1,
@@ -114,100 +230,39 @@ const HomePageComponent = (props: HomePageComponentProps) => {
             COMMAND CENTER
           </Typography>
 
-          <label
-            style={{
-              width: "100%",       
-              textAlign: "left",   
-              fontSize: "0.95rem",
-              fontWeight: "bold",
-              fontFamily: thematicFont,
-              color: fontColorAgedInk,
-              letterSpacing: "0.05em",
-            }}
-          >
-            Player Name
-          </label>
+          <Typography sx={labelSx}>Player Name</Typography>
           <TextField
             size="small"
             fullWidth
             placeholder="Enter username..."
             onChange={(e) => setName(e.target.value)}
-            sx={{
-              "& .MuiInputBase-root": {
-                fontFamily: thematicFont,
-                color: fontColorAgedInk,
-                backgroundColor: "rgba(255, 255, 255, 0.6)",
-                borderRadius: "2px",
-                border: `1px solid ${bronzeBorderColor}`,
-                "&:hover": { borderColor: "#d2b48c" },
-              },
-              "& .MuiOutlinedInput-notchedOutline": { border: "none" },
-            }}
+            sx={textFieldSx}
           />
 
-          <label
-           style={{
-              width: "100%",       
-              textAlign: "left", 
-              fontSize: "0.95rem",
-              fontWeight: "bold",
-              fontFamily: thematicFont,
-              color: fontColorAgedInk,
-              letterSpacing: "0.05em",
-            }}
-          >
-            Match ID
-          </label>
+          <Typography sx={labelSx}>Match ID</Typography>
           <TextField
             size="small"
             fullWidth
             disabled={joinOrCreate === "create"}
-            placeholder={
-              joinOrCreate === "create" ? "N/A (Creating New)" : "Enter ID..."
-            }
+            placeholder={joinOrCreate === "create" ? "N/A (Creating New)" : "Enter ID..."}
             onChange={(e) => setMatchIDInput(e.target.value)}
-            sx={{
-              "& .MuiInputBase-root": {
-                fontFamily: thematicFont,
-                color: fontColorAgedInk,
-                backgroundColor: "rgba(255, 255, 255, 0.6)",
-                borderRadius: "2px",
-                border: `1px solid ${bronzeBorderColor}`,
-                "&.Mui-disabled": {
-                  backgroundColor: "rgba(0, 0, 0, 0.05)",
-                  borderColor: "rgba(0, 0, 0, 0.2)",
-                  color: "rgba(0, 0, 0, 0.5)",
-                },
-              },
-              "& .MuiOutlinedInput-notchedOutline": { border: "none" },
-            }}
+            sx={textFieldSx}
           />
 
-          <label
-            style={{
-              width: "100%",       
-              textAlign: "left",   
-              fontSize: "0.95rem",
-              fontWeight: "bold",
-              fontFamily: thematicFont,
-              color: fontColorAgedInk,
-              letterSpacing: "0.05em",
-            }}
-          >
-            Number of Players
-          </label>
+          <Typography sx={labelSx}>Number of Players</Typography>
           <Select
             size="small"
+            fullWidth
             value={props.numPlayers}
             onChange={(event) => props.setNumPlayers(Number(event.target.value))}
             sx={{
-              fontFamily: thematicFont,
-              color: fontColorAgedInk,
-              backgroundColor: "rgba(255, 255, 255, 0.6)",
+              fontFamily: fonts.accent,
+              color: colors.home.text,
+              backgroundColor: colors.home.textFieldBg,
               borderRadius: "2px",
-              border: `1px solid ${bronzeBorderColor}`,
-              "&:hover": { borderColor: "#d2b48c" },
-              "& .MuiSelect-select": { color: fontColorAgedInk },
+              border: `1px solid ${colors.home.border}`,
+              "&:hover": { borderColor: colors.home.hoverBronze },
+              "& .MuiSelect-select": { color: colors.home.text },
               "& .MuiOutlinedInput-notchedOutline": { border: "none" },
             }}
           >
@@ -227,17 +282,17 @@ const HomePageComponent = (props: HomePageComponentProps) => {
             sx={{
               mt: 1,
               "& .MuiToggleButton-root": {
-                fontFamily: thematicFont,
-                color: fontColorAgedInk,
-                border: `1px solid ${bronzeBorderColor}`,
-                backgroundColor: "rgba(250, 245, 235, 0.9)",
+                fontFamily: fonts.accent,
+                color: colors.home.text,
+                border: `1px solid ${colors.home.border}`,
+                backgroundColor: colors.home.creamButton,
                 "&.Mui-selected": {
-                  backgroundColor: "#a67c52",
+                  backgroundColor: colors.home.border,
                   backgroundImage: "none",
                   color: "rgba(255, 255, 255, 0.9)",
                   "&:hover": { backgroundColor: "#b89062" },
                 },
-                "&:hover": { backgroundColor: "rgba(250, 245, 235, 1)" },
+                "&:hover": { backgroundColor: colors.home.creamButtonSolid },
               },
             }}
           >
@@ -252,26 +307,22 @@ const HomePageComponent = (props: HomePageComponentProps) => {
             variant="contained"
             sx={{
               mt: 1,
-              fontFamily: thematicFont,
+              fontFamily: fonts.accent,
               letterSpacing: "0.1em",
-              fontWeight: "700",
+              fontWeight: 700,
               textTransform: "uppercase",
-              background: agedGreenGradient,
-              border: `2px solid #5c4033`,
+              background: `linear-gradient(to bottom, ${colors.home.gradientTop}, ${colors.home.gradientBottom})`,
+              border: `2px solid ${colors.home.darkBrown}`,
               boxShadow: "0 2px 4px rgba(0, 0, 0, 0.3)",
               color: "rgba(255, 255, 255, 0.9)",
               "&:hover": {
-                background: "linear-gradient(to bottom, #1b5e20, #134e35)",
-                borderColor: "#4d3122",
+                background: `linear-gradient(to bottom, ${colors.home.gradientTopHover}, ${colors.home.gradientBottomHover})`,
+                borderColor: colors.home.darkerBrown,
               },
             }}
             onClick={() => {
               joinOrCreate === "create"
-                ? createMatch(
-                    props.lobbyClient,
-                    props.numPlayers,
-                    props.setMatchReady
-                  )
+                ? createMatch(props.lobbyClient, props.numPlayers, props.setMatchReady)
                 : window.open(`/match/${matchIDInput}/${playerName}`);
             }}
           >
@@ -283,33 +334,32 @@ const HomePageComponent = (props: HomePageComponentProps) => {
           <Paper
             sx={{
               width: "100%",
-              maxWidth: "420px",
               p: { xs: 2.5, sm: 3, md: 4 },
               textAlign: "center",
               backgroundColor: "rgba(240, 230, 210, 0.9)",
               backgroundBlendMode: "overlay",
-              border: `2px solid ${bronzeBorderColor}`,
+              border: `2px solid ${colors.home.border}`,
               borderRadius: 1,
-              fontFamily: thematicFont,
-              color: fontColorAgedInk,
+              fontFamily: fonts.accent,
+              color: colors.home.text,
             }}
           >
-            <Typography variant="h6" sx={{ fontFamily: thematicFont }}>
+            <Typography variant="h6" sx={{ fontFamily: fonts.accent }}>
               <strong>Match Created!</strong>
             </Typography>
-            <p style={{ margin: "10px 0" }}>
+            <Typography sx={{ my: 1.5, fontFamily: fonts.accent, fontSize: "0.95rem" }}>
               ID: <code>{props.matchReady}</code>
-            </p>
+            </Typography>
             <Button
               variant="outlined"
               href={`/match/${props.matchReady}/${playerName}`}
               target="_blank"
               sx={{
-                fontFamily: thematicFont,
-                color: fontColorAgedInk,
-                borderColor: bronzeBorderColor,
+                fontFamily: fonts.accent,
+                color: colors.home.text,
+                borderColor: colors.home.border,
                 "&:hover": {
-                  borderColor: "#b89062",
+                  borderColor: colors.home.hoverBronze,
                   backgroundColor: "rgba(0, 0, 0, 0.02)",
                 },
               }}

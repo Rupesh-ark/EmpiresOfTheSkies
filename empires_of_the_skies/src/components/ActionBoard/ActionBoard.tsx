@@ -1,5 +1,5 @@
 import { useState } from "react";
-import "../../game.css";
+import { fonts } from "../../designTokens";
 // import { ReactComponent as ActionBoardSvg } from "../boards_and_assets/action_board.svg";
 import { ActionBoardButton, ActionBoardButtonLarge } from "./ActionBoardButton";
 import { ButtonRow } from "./ActionBoardButtonRow";
@@ -73,7 +73,7 @@ export const ActionBoard = (props: ActionBoardProps) => {
           style={{
             display: "flex",
             flexDirection: "column",
-            maxWidth: 1225,
+            maxWidth: 1600,
             // minWidth: 1220,
           }}
         >
@@ -294,7 +294,7 @@ Taxation is awarded as follows:
                 backgroundImage: `url(${issueHolyDecree})`,
                 backgroundSize: "contain",
                 backgroundRepeat: "no-repeat",
-                fontFamily: "dauphinn",
+                fontFamily: fonts.primary,
                 fontSize: "18px",
                 cursor: "pointer",
                 justifyContent: "right",

@@ -26,8 +26,8 @@ This project uses a monorepo structure with shared game logic:
 ```
 packages/
   game/                  Shared game rules and core logic
-empires_of_the_skies/    React frontend (Vite)
-empires_of_the_skies/server/  boardgame.io backend server
+empires_of_the_skies/    React frontend (Vite) — deployed to Vercel
+server/                  boardgame.io backend server — deployed to Render
 ```
 
 The shared game package ensures:
@@ -124,7 +124,7 @@ http://localhost:8000
 In another terminal:
 
 ```
-pnpm dev:frontend
+pnpm dev:app
 ```
 
 Open:
@@ -167,7 +167,7 @@ Contains:
 * Battle dialogs
 * Client integration with boardgame.io
 
-empires_of_the_skies/server/
+server/
 Contains:
 
 * boardgame.io server

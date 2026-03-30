@@ -30,9 +30,9 @@ const purchaseSkyships: Move<MyGameState> = (
   if (checkCounsellorsNotZero(playerID, G)) {
     return INVALID_MOVE;
   }
-  const value: keyof typeof G.boardState.purchaseSkyships = args[0] + 1;
+  const value: keyof typeof G.boardState.purchaseSkyshipsZeeland = args[0] + 1;
 
-  if (G.boardState.purchaseSkyships[value] !== undefined) {
+  if (G.boardState.purchaseSkyshipsZeeland[value] !== undefined) {
     console.log("Player has chosen an action which has already been taken");
     return INVALID_MOVE;
   }
@@ -40,19 +40,11 @@ const purchaseSkyships: Move<MyGameState> = (
   const cost: { [key: number]: number } = {
     1: 1,
     2: 3,
-    3: 4,
-    4: 1,
-    5: 3,
-    6: 4,
   };
 
   const reward: { [key: number]: number } = {
     1: 1,
     2: 2,
-    3: 2,
-    4: 1,
-    5: 2,
-    6: 2,
   };
 
   removeOneCounsellor(G, playerID);
@@ -60,7 +52,7 @@ const purchaseSkyships: Move<MyGameState> = (
   for (let i = 0; i < reward[value]; i++) {
     addSkyship(G, playerID);
   }
-  G.boardState.purchaseSkyships[value] = playerID;
+  G.boardState.purchaseSkyshipsZeeland[value] = playerID;
   G.playerInfo[playerID].turnComplete = true;
 };
 

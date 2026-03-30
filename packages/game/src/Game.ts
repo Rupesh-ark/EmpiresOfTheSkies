@@ -1,27 +1,22 @@
 import type { Game, Ctx } from "boardgame.io";
 
-import { ActionBoardInfo, LegacyCard, MyGameState } from "./types";
+import { LegacyCard, MyGameState, MapState } from "./types";
 
+import { FINAL_ROUND, LEGACY_CARDS } from "./codifiedGameInfo";
+import { initialBoardState, initialBattleMapState } from "./setup/boardSetup";
 import {
-  TileInfoProps,
-  PlayerInfo,
-  MapState,
-  MapBuildingInfo,
-  PlayerColour,
-} from "./types";
-import {
-  unknownWorldTiles,
-  oceanTiles,
-  legendTiles,
-  knownWorldTiles,
-  colourToKingdomMap,
-} from "./codifiedGameInfo";
+  getRandomisedMapTileArray,
+  getInitialDiscoveredTiles,
+  getInitialOutpostsAndColoniesInfo,
+} from "./setup/mapSetup";
+import { buildPlayerInfoMap, getGoldIncomeForPlayer } from "./setup/playerSetup";
 import discoverTile from "./moves/discovery/discoverTile";
 import alterPlayerOrder from "./moves/actions/alterPlayerOrder";
 import recruitCounsellors from "./moves/actions/recruitCounsellors";
 import recruitRegiments from "./moves/actions/recruitRegiments";
 import purchaseSkyships from "./moves/actions/purchaseSkyships";
 import foundBuildings from "./moves/actions/foundBuildings";
+import foundFactory from "./moves/actions/foundFactory";
 import {
   checkAndPlaceFort,
   flipCards,
@@ -66,79 +61,10 @@ import vote from "./moves/election/vote";
 import retrieveFleets from "./moves/resolution/retrieveFleets";
 import setTurnCompleteFalse from "./moves/setTurnCompleteFalse";
 
-import { findNextBattle, findNextPlunder } from "./helpers/findNext";
+import { findNextBattle, findNextGroundBattle, findNextPlunder } from "./helpers/findNext";
 import { TurnOrder } from "boardgame.io/core";
 import resolveRound from "./helpers/resolveRound";
 import pickLegacyCard from "./moves/pickLegacyCard";
-
-const initialBoardState: ActionBoardInfo = {
-  alterPlayerOrder: {
-    1: undefined,
-    2: undefined,
-    3: undefined,
-    4: undefined,
-    5: undefined,
-    6: undefined,
-  },
-  recruitCounsellors: {
-    1: undefined,
-    2: undefined,
-    3: undefined,
-  },
-  recruitRegiments: {
-    1: undefined,
-    2: undefined,
-    3: undefined,
-    4: undefined,
-    5: undefined,
-    6: undefined,
-  },
-  trainTroops: {
-    1: undefined,
-    2: undefined,
-  },
-  purchaseSkyships: {
-    1: undefined,
-    2: undefined,
-    3: undefined,
-    4: undefined,
-    5: undefined,
-    6: undefined,
-  },
-  foundBuildings: {
-    1: [],
-    2: [],
-    3: [],
-    4: [],
-  },
-  influencePrelates: {
-    1: undefined,
-    2: undefined,
-    3: undefined,
-    4: undefined,
-    5: undefined,
-    6: undefined,
-    7: undefined,
-    8: undefined,
-  },
-  punishDissenters: {
-    1: undefined,
-    2: undefined,
-    3: undefined,
-    4: undefined,
-    5: undefined,
-    6: undefined,
-  },
-  convertMonarch: {
-    1: undefined,
-    2: undefined,
-    3: undefined,
-    4: undefined,
-    5: undefined,
-    6: undefined,
-  },
-  issueHolyDecree: false,
-};
 
 const MyGame: Game<MyGameState> = {
   turn: { minMoves: 1 },
@@ -147,86 +73,23 @@ const MyGame: Game<MyGameState> = {
     const mapState: MapState = {
       currentTileArray: getRandomisedMapTileArray(),
       discoveredTiles: getInitialDiscoveredTiles(),
-      buildings: getInitialOutpostsAndColonysInfo(),
+      buildings: getInitialOutpostsAndColoniesInfo(),
       mostRecentlyDiscoveredTile: [4, 0],
       discoveredRaces: [],
       battleMap: initialBattleMapState(),
       currentBattle: [0, 0],
-    };
-    const playerInfos = (ctx: Ctx): { [details: string]: PlayerInfo } => {
-      const colours = getPlayerColours(ctx);
-      const playerIDMap: { [details: string]: PlayerInfo } = {};
-      ctx.playOrder.forEach((playerID: string) => {
-        const playerColour = colours.pop();
-        playerIDMap[playerID] = {
-          id: playerID,
-          kingdomName: colourToKingdomMap[playerColour ?? PlayerColour.green],
-          colour: playerColour ?? PlayerColour.green,
-          legacyCardOptions: [],
-          ready: true, //look into what this should be
-          passed: false,
-          turnComplete: false,
-          resources: {
-            gold: 6,
-            mithril: 0,
-            dragonScales: 0,
-            krakenSkin: 0,
-            magicDust: 0,
-            stickyIchor: 0,
-            pipeweed: 0,
-            victoryPoints: 10,
-            counsellors: 6,
-            skyships: 3,
-            regiments: 6,
-            levies: 0,
-            fortuneCards: [],
-            advantageCard: "",
-            eventCards: [""],
-            legacyCard: undefined,
-          },
-          isArchprelate: playerID === ctx.playOrder[ctx.playOrder.length - 1],
-          playerBoardCounsellorLocations: {
-            buildSkyships: false,
-            conscriptLevies: false,
-            dispatchSkyshipFleet: false,
-            dispatchDisabled: true,
-          },
-          hereticOrOrthodox: "orthodox",
-          fleetInfo: [
-            {
-              fleetId: 0,
-              location: [4, 0],
-              skyships: 0,
-              regiments: 0,
-              levies: 0,
-            },
-            {
-              fleetId: 1,
-              location: [4, 0],
-              skyships: 0,
-              regiments: 0,
-              levies: 0,
-            },
-            {
-              fleetId: 2,
-              location: [4, 0],
-              skyships: 0,
-              regiments: 0,
-              levies: 0,
-            },
-          ],
-          cathedrals: 1,
-          palaces: 1,
-          heresyTracker: 0,
-          prisoners: 0,
-          shipyards: 0,
-        };
-      });
-      return playerIDMap;
+      goodsPriceMarkers: {
+        mithril: 4,
+        dragonScales: 3,
+        krakenSkin: 3,
+        magicDust: 4,
+        stickyIchor: 3,
+        pipeweed: 3,
+      },
     };
 
     return {
-      playerInfo: playerInfos(ctx),
+      playerInfo: buildPlayerInfoMap(ctx),
       mapState: mapState,
       boardState: { ...initialBoardState },
       playerOrder: {
@@ -245,7 +108,7 @@ const MyGame: Game<MyGameState> = {
       electionResults: {},
       hasVoted: [],
       round: 0,
-      finalRound: 4,
+      finalRound: FINAL_ROUND,
       firstTurnOfRound: true,
       turnOrder: ctx.playOrder,
     };
@@ -295,26 +158,7 @@ const MyGame: Game<MyGameState> = {
       next: "discovery",
       onBegin: (context) => {
         context.G.stage = "pick legacy card";
-        const cards: LegacyCard[] = [
-          "the builder",
-          "the conqueror",
-          "the explorer",
-          "the great",
-          "the magnificent",
-          "the merchant",
-          "the mighty",
-          "the navigator",
-          "the pious",
-          "the builder",
-          "the conqueror",
-          "the explorer",
-          "the great",
-          "the magnificent",
-          "the merchant",
-          "the mighty",
-          "the navigator",
-          "the pious",
-        ];
+        const cards: LegacyCard[] = [...LEGACY_CARDS];
         Object.values(context.G.playerInfo).forEach((player) => {
           for (let i = 0; i < 3; i++) {
             let randomIndex = Math.floor(Math.random() * cards.length);
@@ -420,21 +264,32 @@ const MyGame: Game<MyGameState> = {
         discoverTile,
         pass,
       },
-      next: "actions",
+      next: "taxes",
       onEnd: (context) => {
         Object.values(context.G.playerInfo).forEach((playerInfo: any) => {
           playerInfo.passed = false;
         });
       },
     },
+    taxes: {
+      turn: { order: TurnOrder.ONCE },
+      onBegin: (context) => {
+        context.G.stage = "taxes";
+        console.log("Taxes phase has begun");
+        context.ctx.playOrder.forEach((id, index) => {
+          context.G.playerInfo[id].resources.gold += getGoldIncomeForPlayer(index);
+          // TODO C1: add +2 Gold for the player holding the `more_efficient_taxation` KA card (Track A2/B12)
+        });
+        context.events.endPhase();
+      },
+      moves: {},
+      next: "actions",
+    },
     actions: {
       onBegin: (context) => {
         context.G.firstTurnOfRound = true;
         context.G.stage = "actions";
         console.log("Actions phase has begun");
-        context.ctx.playOrder.forEach((id, index) => {
-          context.G.playerInfo[id].resources.gold += 4 + index;
-        });
       },
       turn: {
         onBegin: (context) => {
@@ -456,6 +311,7 @@ const MyGame: Game<MyGameState> = {
         recruitRegiments,
         purchaseSkyships,
         foundBuildings,
+        foundFactory,
         increaseHeresy,
         increaseOrthodoxy,
         checkAndPlaceFort,
@@ -482,8 +338,8 @@ const MyGame: Game<MyGameState> = {
     },
     aerial_battle: {
       onBegin: (context) => {
-        findNextBattle(context.G, context.events);
         console.log("Aerial battle phase has begun");
+        findNextBattle(context.G, context.events);
       },
       turn: {
         onBegin: (context) => {
@@ -497,7 +353,7 @@ const MyGame: Game<MyGameState> = {
           );
         },
       },
-      next: "plunder_legends",
+      next: "ground_battle",
       moves: {
         doNotAttack,
         attackOtherPlayersFleet,
@@ -508,6 +364,32 @@ const MyGame: Game<MyGameState> = {
         relocateDefeatedFleet,
       },
     },
+    ground_battle: {
+      onBegin: (context) => {
+        console.log("Ground battle phase has begun");
+        findNextGroundBattle(context.G, context.events);
+      },
+      turn: {
+        onBegin: (context) => {
+          console.log(
+            `It is now player ${context.ctx.currentPlayer}'s turn in the ground battle phase`
+          );
+          checkIfCurrentPlayerIsInCurrentBattle(
+            context.G,
+            context.ctx,
+            context.events
+          );
+        },
+      },
+      next: "plunder_legends",
+      moves: {
+        attackPlayersBuilding,
+        doNotGroundAttack,
+        defendGroundAttack,
+        garrisonTroops,
+        yieldToAttacker,
+      },
+    },
     plunder_legends: {
       onBegin: (context) => {
         context.G.stage = "plunder legends";
@@ -516,7 +398,7 @@ const MyGame: Game<MyGameState> = {
         findNextPlunder(context.G, context.events);
       },
       moves: { plunder, doNotPlunder },
-      next: "ground_battle",
+      next: "conquest",
       turn: {
         onBegin: (context) => {
           console.log(
@@ -529,33 +411,6 @@ const MyGame: Game<MyGameState> = {
           );
         },
       },
-    },
-    ground_battle: {
-      onBegin: (context) => {
-        context.G.stage = "attack or pass";
-
-        console.log("Ground battles have begun");
-      },
-      turn: {
-        onBegin: (context) => {
-          console.log(
-            `it is now player ${context.ctx.currentPlayer}'s time to ground attack`
-          );
-          checkIfCurrentPlayerIsInCurrentBattle(
-            context.G,
-            context.ctx,
-            context.events
-          );
-        },
-      },
-      moves: {
-        attackPlayersBuilding,
-        doNotGroundAttack,
-        defendGroundAttack,
-        garrisonTroops,
-        yieldToAttacker,
-      },
-      next: "conquest",
     },
     conquest: {
       onBegin: (context) => {
@@ -609,95 +464,6 @@ const MyGame: Game<MyGameState> = {
   },
   maxPlayers: 6,
   minPlayers: 1,
-};
-
-const getRandomisedMapTileArray = () => {
-  let randomTiles = oceanTiles.concat(unknownWorldTiles, legendTiles);
-
-  let currentIndex = 28;
-  let randomIndex = 0;
-  while (currentIndex > 0) {
-    randomIndex = Math.floor(Math.random() * currentIndex);
-    currentIndex--;
-    [randomTiles[currentIndex], randomTiles[randomIndex]] = [
-      randomTiles[randomIndex],
-      randomTiles[currentIndex],
-    ];
-  }
-  randomTiles.splice(3, 0, knownWorldTiles[0]);
-  randomTiles.splice(4, 0, knownWorldTiles[1]);
-  randomTiles.splice(11, 0, knownWorldTiles[2]);
-  randomTiles.splice(12, 0, knownWorldTiles[3]);
-  const twoDimensionalMapArray: TileInfoProps[][] = [
-    randomTiles.slice(0, 8),
-    randomTiles.slice(8, 16),
-    randomTiles.slice(16, 24),
-    randomTiles.slice(24, 32),
-  ];
-  return twoDimensionalMapArray;
-};
-
-const getInitialDiscoveredTiles = () => {
-  const eightFalses = [false, false, false, false, false, false, false, false];
-  const twoDimensionalBooleanArray: boolean[][] = [
-    [...eightFalses],
-    [...eightFalses],
-    [...eightFalses],
-    [...eightFalses],
-  ];
-  twoDimensionalBooleanArray[0][3] = true;
-  twoDimensionalBooleanArray[0][4] = true;
-  twoDimensionalBooleanArray[1][3] = true;
-  twoDimensionalBooleanArray[1][4] = true;
-
-  return twoDimensionalBooleanArray;
-};
-
-const getInitialOutpostsAndColonysInfo = () => {
-  const buildingInfo: MapBuildingInfo = {
-    garrisonedLevies: 0,
-    garrisonedRegiments: 0,
-    fort: false,
-  };
-  const eightBuildingInfo: MapBuildingInfo[] = [
-    buildingInfo,
-    buildingInfo,
-    buildingInfo,
-    buildingInfo,
-    buildingInfo,
-    buildingInfo,
-    buildingInfo,
-    buildingInfo,
-  ];
-  return [
-    [...eightBuildingInfo],
-    [...eightBuildingInfo],
-    [...eightBuildingInfo],
-    [...eightBuildingInfo],
-  ];
-};
-
-const initialBattleMapState = (): string[][][] => {
-  const eightEmptySets: string[][] = [[], [], [], [], [], [], [], []];
-
-  return [
-    [...eightEmptySets],
-    [...eightEmptySets],
-    [...eightEmptySets],
-    [...eightEmptySets],
-  ];
-};
-
-const getPlayerColours = (ctx: Ctx) => {
-  const colours = [
-    PlayerColour.brown,
-    PlayerColour.blue,
-    PlayerColour.green,
-    PlayerColour.red,
-    PlayerColour.white,
-    PlayerColour.yellow,
-  ];
-  return colours.slice(0, ctx.numPlayers);
 };
 
 export { MyGame };

@@ -1,4 +1,5 @@
 import { ReactElement, useState } from "react";
+import { fonts } from "../../designTokens";
 import { MyGameProps, PlayerColour } from "@eots/game";
 import {
   Box,
@@ -111,7 +112,7 @@ export const ActionBoardButtonLarge = (props: ActionBoardButtonProps) => {
           backgroundImage: `url(${props.backgroundImage})`,
           backgroundSize: "contain",
           backgroundRepeat: "no-repeat",
-          fontFamily: "dauphinn",
+          fontFamily: fonts.primary,
           fontSize: "18px",
           cursor: "pointer",
           justifyContent: "center",
@@ -136,7 +137,7 @@ export const ActionBoardButtonLarge = (props: ActionBoardButtonProps) => {
         maxWidth={false}
         open={heresyOrOrthodoxyDialogOpen || worldMapDialogOpen}
       >
-        <DialogTitle sx={{ fontFamily: "dauphinn" }}>
+        <DialogTitle sx={{ fontFamily: fonts.primary }}>
           {props.value === 1
             ? "Select direction to move heresy tracker"
             : `Select location for your fort. Current selection: [${
@@ -147,7 +148,7 @@ export const ActionBoardButtonLarge = (props: ActionBoardButtonProps) => {
           {props.value === 1 ? (
             <DialogContentText
               sx={{
-                fontFamily: "dauphinn",
+                fontFamily: fonts.primary,
                 color: "black",
               }}
             >

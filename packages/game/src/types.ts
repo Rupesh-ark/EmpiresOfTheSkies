@@ -26,7 +26,10 @@ export interface MyGameState {
     | "resolve ground battle"
     | "garrison troops"
     | "retrieve fleets"
-    | "pick legacy card";
+    | "pick legacy card"
+    | "taxes"
+    | "events"
+    | "reset";
   electionResults: Record<string, number>;
   hasVoted: string[];
   round: number;
@@ -76,6 +79,15 @@ export type MapState = {
   discoveredRaces: string[];
   battleMap: string[][][];
   currentBattle: number[];
+  goodsPriceMarkers: GoodsPriceMarkers;
+};
+export type GoodsPriceMarkers = {
+  mithril: number;
+  dragonScales: number;
+  krakenSkin: number;
+  magicDust: number;
+  stickyIchor: number;
+  pipeweed: number;
 };
 export type MapBuildingInfo = {
   player?: PlayerInfo;
@@ -101,6 +113,7 @@ export type PlayerInfo = {
   heresyTracker: number;
   prisoners: number;
   shipyards: number;
+  factories: number;
   troopsToGarrison?: TroopInfo;
   turnComplete: boolean;
   legacyCardOptions: LegacyCard[];
@@ -128,6 +141,7 @@ export type PlayerBoardInfo = {
   buildSkyships: boolean;
   conscriptLevies: boolean;
   dispatchSkyshipFleet: boolean;
+  trainTroops: boolean;
   dispatchDisabled: boolean;
 };
 
@@ -148,20 +162,29 @@ export interface Resources extends TileLoot {
   regiments: number;
   levies: number;
   fortuneCards: PlayerFortuneOfWarCardInfo[];
-  advantageCard: string;
+  advantageCard: KingdomAdvantageCard | undefined;
+  eliteRegiments: number;
   eventCards: string[];
   legacyCard: LegacyCard;
 }
+export type KingdomAdvantageCard =
+  | "elite_regiments"
+  | "improved_training"
+  | "licenced_smugglers"
+  | "more_efficient_taxation"
+  | "more_prisons"
+  | "patriarch_of_the_church"
+  | "sanctioned_piracy";
 
 export type LegacyCard =
   | "the builder"
   | "the conqueror"
-  | "the explorer"
+  | "the navigator"
   | "the great"
   | "the magnificent"
   | "the merchant"
   | "the mighty"
-  | "the navigator"
+  | "the aviator"
   | "the pious"
   | undefined;
 
@@ -202,10 +225,6 @@ export type ActionBoardInfo = {
     2: string | undefined;
     3: string | undefined;
   };
-  trainTroops: {
-    1: string | undefined;
-    2: string | undefined;
-  };
   recruitRegiments: {
     1: string | undefined;
     2: string | undefined;
@@ -214,19 +233,25 @@ export type ActionBoardInfo = {
     5: string | undefined;
     6: string | undefined;
   };
-  purchaseSkyships: {
+  purchaseSkyshipsZeeland: {
     1: string | undefined;
     2: string | undefined;
-    3: string | undefined;
-    4: string | undefined;
-    5: string | undefined;
-    6: string | undefined;
+  };
+  purchaseSkyshipsVenoa: {
+    1: string | undefined;
+    2: string | undefined;
   };
   foundBuildings: {
     1: string[];
     2: string[];
     3: string[];
     4: string[];
+  };
+  foundFactories: {
+    1: string | undefined;
+    2: string | undefined;
+    3: string | undefined;
+    4: string | undefined;
   };
   influencePrelates: {
     1: string | undefined;

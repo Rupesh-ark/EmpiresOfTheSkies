@@ -187,14 +187,11 @@ export const resolveBattleAndReturnWinner = (
     G.battleState &&
       Object.values(G.battleState).forEach((player) => {
         if (player.id === winner) {
-          if (
-            G.battleState?.attacker.hereticOrOrthodox !==
-            G.battleState?.defender.hereticOrOrthodox
-          ) {
+          if (ctx.phase !== "ground_battle") {
             if (player.hereticOrOrthodox === "heretic") {
-              player.heresyTracker += 1;
+              G.playerInfo[player.id].heresyTracker += 1;
             } else {
-              player.heresyTracker -= 1;
+              G.playerInfo[player.id].heresyTracker -= 1;
             }
           }
           player.victorious = true;
@@ -220,7 +217,7 @@ export const resolveBattleAndReturnWinner = (
         );
       }
     } else {
-      if (ctx.phase === "ground battle") {
+      if (ctx.phase === "ground_battle") {
         findNextGroundBattle(G, events);
       } else {
         G.stage = "relocate loser";
@@ -228,7 +225,7 @@ export const resolveBattleAndReturnWinner = (
       }
     }
   } else {
-    if (ctx.phase === "ground battle") {
+    if (ctx.phase === "ground_battle") {
       const currentBuilding = G.mapState.buildings[y][x];
       currentBuilding.player = undefined;
       findNextGroundBattle(G, events);
