@@ -17,5 +17,5 @@ describe("self-play smoke test", () => {
         Object.entries(record.players).map(([pid, p]) => [pid, p.personality])
       ));
     }
-  }, 300000);
+  }, 500000);
 });

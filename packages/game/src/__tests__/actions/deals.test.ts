@@ -193,6 +193,7 @@ describe("acceptDeal — successful acceptance", () => {
         battleMap: [],
         currentBattle: [],
         goodsPriceMarkers: { mithril: 2, dragonScales: 2, krakenSkin: 2, magicDust: 2, stickyIchor: 2, pipeweed: 2 },
+        routeSkyships: {},
       },
     });
     G.pendingDeal = { proposerID: "0", targetID: "1", offering: { outposts: [[2, 1]] }, requesting: { gold: 3 } };

@@ -235,8 +235,6 @@ export function printBattleLog(record: GameRecord): void {
   console.log(SEP_DOUBLE);
 
   if (battleDecisions.length === 0) {
-    console.log("  (no battles recorded)");
-    console.log("\n" + SEP_DOUBLE + "\n");
     return;
   }
 

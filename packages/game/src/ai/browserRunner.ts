@@ -23,9 +23,9 @@ import {
   type PlayerSnapshot,
   type GameRecord,
 } from "./GameRecorder";
-import { AerialBattleStrategy } from "./strategies/AerialBattleStrategy";
-import { GroundBattleStrategy } from "./strategies/GroundBattleStrategy";
-import { AI_CONFIG } from "./weightsConfig";
+import { AerialBattleStrategy } from "./v1/strategies/AerialBattleStrategy";
+import { GroundBattleStrategy } from "./v1/strategies/GroundBattleStrategy";
+import { AI_CONFIG } from "./v1/weightsConfig";
 
 // ── Progress callback for UI updates ─────────────────────────────────────────
 
@@ -341,7 +341,7 @@ export function runGameInBrowser(
       });
     }
 
-    // Progress callback every 50 iterations for UI updates
+    // Progress callback every 50 iterations
     if (iterations % 50 === 0 && onProgress) {
       onProgress({
         iteration: iterations,
@@ -446,14 +446,14 @@ export function runGameInBrowser(
     for (const [pid, player] of Object.entries(G.playerInfo)) {
       const bot = bots[parseInt(pid)];
       const personality = bot.getPersonality();
-      const weights = personality?.weights ?? AI_CONFIG.defaultPersonality.weights;
+      const pName = personality ? `${personality.kaCard}+${personality.legacyCard}` : "Unknown";
       recorder.addPlayer(pid, {
         playerID: pid,
-        personality: personality?.name ?? "Unknown",
+        personality: pName,
         kaCard: player.resources.advantageCard ?? "none",
         legacyCard: player.resources.legacyCard?.name ?? "none",
         alignment: player.hereticOrOrthodox,
-        weights,
+        weights: {} as any,
         finalVP: player.resources.victoryPoints,
         finalRank: ranking.indexOf(pid) + 1,
       });
@@ -468,15 +468,16 @@ export function runGameInBrowser(
     const winnerBot = bots[parseInt(winnerID)];
     const rankingsArray = ranking.map((pid, idx) => ({
       playerID: pid,
-      personality: bots[parseInt(pid)]?.getPersonality()?.name ?? "Unknown",
+      personality: (() => { const p = bots[parseInt(pid)]?.getPersonality(); return p ? `${p.kaCard}+${p.legacyCard}` : "Unknown"; })(),
       vp: G.playerInfo[pid]?.resources.victoryPoints ?? 0,
       rank: idx + 1,
     }));
 
+    const winnerP = winnerBot?.getPersonality();
     if (finalState.ctx.gameover) {
       recorder.setResult({
         winner: winnerID,
-        winnerPersonality: winnerBot?.getPersonality()?.name ?? "Unknown",
+        winnerPersonality: winnerP ? `${winnerP.kaCard}+${winnerP.legacyCard}` : "Unknown",
         scores,
         rounds: G.round,
         rankings: rankingsArray,

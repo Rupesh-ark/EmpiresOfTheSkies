@@ -63,6 +63,7 @@ describe("transferOutpost — successful transfer", () => {
         battleMap: [],
         currentBattle: [],
         goodsPriceMarkers: { mithril: 2, dragonScales: 2, krakenSkin: 2, magicDust: 2, stickyIchor: 2, pipeweed: 2 },
+        routeSkyships: {},
       },
     });
 
@@ -85,6 +86,7 @@ describe("transferOutpost — successful transfer", () => {
         battleMap: [],
         currentBattle: [],
         goodsPriceMarkers: { mithril: 2, dragonScales: 2, krakenSkin: 2, magicDust: 2, stickyIchor: 2, pipeweed: 2 },
+        routeSkyships: {},
       },
     });
 
@@ -107,6 +109,7 @@ describe("transferOutpost — successful transfer", () => {
         battleMap: [],
         currentBattle: [],
         goodsPriceMarkers: { mithril: 2, dragonScales: 2, krakenSkin: 2, magicDust: 2, stickyIchor: 2, pipeweed: 2 },
+        routeSkyships: {},
       },
     });
 
@@ -128,6 +131,7 @@ describe("transferOutpost — INVALID_MOVE conditions", () => {
         battleMap: [],
         currentBattle: [],
         goodsPriceMarkers: { mithril: 2, dragonScales: 2, krakenSkin: 2, magicDust: 2, stickyIchor: 2, pipeweed: 2 },
+        routeSkyships: {},
       },
     });
     expect(callMove(G, "0", [2, 1], "0")).toBe(INVALID_MOVE);
@@ -145,6 +149,7 @@ describe("transferOutpost — INVALID_MOVE conditions", () => {
         battleMap: [],
         currentBattle: [],
         goodsPriceMarkers: { mithril: 2, dragonScales: 2, krakenSkin: 2, magicDust: 2, stickyIchor: 2, pipeweed: 2 },
+        routeSkyships: {},
       },
     });
     expect(callMove(G, "0", [2, 1], "99")).toBe(INVALID_MOVE);
@@ -166,6 +171,7 @@ describe("transferOutpost — INVALID_MOVE conditions", () => {
         battleMap: [],
         currentBattle: [],
         goodsPriceMarkers: { mithril: 2, dragonScales: 2, krakenSkin: 2, magicDust: 2, stickyIchor: 2, pipeweed: 2 },
+        routeSkyships: {},
       },
     });
     expect(callMove(G, "0", [2, 1], "1")).toBe(INVALID_MOVE);
@@ -186,6 +192,7 @@ describe("transferOutpost — INVALID_MOVE conditions", () => {
         battleMap: [],
         currentBattle: [],
         goodsPriceMarkers: { mithril: 2, dragonScales: 2, krakenSkin: 2, magicDust: 2, stickyIchor: 2, pipeweed: 2 },
+        routeSkyships: {},
       },
     });
     expect(callMove(G, "0", [2, 1], "1")).toBe(INVALID_MOVE);
@@ -206,6 +213,7 @@ describe("transferOutpost — INVALID_MOVE conditions", () => {
         battleMap: [],
         currentBattle: [],
         goodsPriceMarkers: { mithril: 2, dragonScales: 2, krakenSkin: 2, magicDust: 2, stickyIchor: 2, pipeweed: 2 },
+        routeSkyships: {},
       },
     });
     expect(callMove(G, "0", [2, 1], "1")).toBe(INVALID_MOVE);

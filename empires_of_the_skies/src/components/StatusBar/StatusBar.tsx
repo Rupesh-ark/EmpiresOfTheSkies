@@ -74,6 +74,9 @@ const StatusBar = (props: StatusBarProps) => {
   const turnComplete = playerInfo.turnComplete;
   const showConfirmEndTurn =
     turnComplete && props.G.stage.phase === "actions" && isMyTurn;
+  const showPassButton =
+    isMyTurn &&
+    (props.G.stage.phase === "discovery" || props.G.stage.phase === "actions");
 
   const mood = getMood(props.G.stage);
   const moodTokens = getMoodTokens(mood);
@@ -281,22 +284,20 @@ const StatusBar = (props: StatusBarProps) => {
             >
               Confirm & End Turn
             </GameButton>
-          ) : (
+          ) : showPassButton ? (
             <GameButton
               variant="ghost"
               size="sm"
               onClick={() => setPassDialogOpen(true)}
-              disabled={!isMyTurn}
               sx={{
                 color: "#E8C860",
                 borderColor: "rgba(200,170,120,0.30)",
                 "&:hover": { color: "#F5ECD8", borderColor: "#E8C860", background: "rgba(200,170,120,0.12)" },
-                "&.Mui-disabled": { color: "rgba(200,170,120,0.3)", borderColor: "rgba(200,170,120,0.15)" },
               }}
             >
               Pass
             </GameButton>
-          )}
+          ) : null}
 
           <Rivet />
         </Box>

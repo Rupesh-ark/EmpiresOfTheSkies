@@ -377,6 +377,31 @@ export const WorldMapTile = memo((props: worldMapTileProps) => {
             </Box>
           ))}
 
+          {/* Route skyship markers */}
+          {(() => {
+            const routePlayers = props.G.mapState.routeSkyships[tileKey] ?? [];
+            if (routePlayers.length === 0) return null;
+            return routePlayers.map((pid, i) => {
+              const colour = props.G.playerInfo[pid]?.colour ?? "#888";
+              return (
+                <Tooltip key={`route-${pid}`} title={`Trade Route — ${props.G.playerInfo[pid]?.kingdomName}`}>
+                  <Box sx={{
+                    position: "absolute",
+                    bottom: 4 + i * 14,
+                    right: 4,
+                    width: 12,
+                    height: 12,
+                    borderRadius: "50%",
+                    backgroundColor: `${colour}66`,
+                    border: `1.5px solid ${colour}`,
+                    zIndex: 10,
+                    pointerEvents: "auto",
+                  }} />
+                </Tooltip>
+              );
+            });
+          })()}
+
           {/* Invalid tile overlay */}
           {isInvalidTile && <Box sx={{ position: "absolute", inset: 0, backgroundColor: "rgba(0,0,0,0.3)", zIndex: 5, pointerEvents: "none" }} />}
 

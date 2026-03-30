@@ -1,29 +1,27 @@
 import type { Ctx } from "boardgame.io";
 import type { MyGameState } from "../types";
-import type { AIMove, AIPersonality, BotConfig, AIWeights } from "./types";
-import { AIStrategyRegistry } from "./AIStrategyRegistry";
-import { RandomFallbackStrategy } from "./strategies/RandomFallback";
-import { DiscoveryStrategy } from "./strategies/DiscoveryStrategy";
-import { EventsStrategy } from "./strategies/EventsStrategy";
-import { ActionsStrategy } from "./strategies/ActionsStrategy";
-import { ResolutionCoordinator } from "./strategies/ResolutionCoordinator";
-import { deriveWeightsFromCards } from "./personalities";
+import type { AIMove, BotConfig } from "./types";
 import { enumerateLegalMoves } from "./enumerate";
-import { estimateMoveValue } from "./evaluate";
 import { getAILogger } from "./AILogger";
-import { AI_CONFIG } from "./weightsConfig";
+import type { MCTSStats } from "./AILogger";
 import type { PlayerSnapshot } from "./GameRecorder";
+
+// Phase evaluators
+import { evaluateActions } from "./evaluators/ActionsEvaluator";
+import { evaluateDiscovery, pickDiscoveryMove } from "./evaluators/discovery/DiscoveryEvaluator";
+import { evaluateEvents, pickEventsMove } from "./evaluators/events/EventsEvaluator";
+import { evaluateResolution, pickResolutionMove } from "./evaluators/resolution/ResolutionEvaluator";
+import type { BotPersonality } from "./evaluators/types";
+import { mctsSearch } from "./mcts/MCTSSearch";
 
 export class EmpiresBot {
   private config: BotConfig;
-  private personality: AIPersonality | null = null;
-  private registry: AIStrategyRegistry;
+  private personality: BotPersonality | null = null;
   private _thinking: boolean = false;
   private lastSnapshot: PlayerSnapshot | null = null;
 
   constructor(config: BotConfig) {
     this.config = config;
-    this.registry = EmpiresBot.createRegistry();
   }
 
   // --- Public API ---
@@ -36,7 +34,7 @@ export class EmpiresBot {
     this._thinking = v;
   }
 
-  getPersonality(): AIPersonality | null {
+  getPersonality(): BotPersonality | null {
     return this.personality;
   }
 
@@ -54,80 +52,27 @@ export class EmpiresBot {
     return this.lastSnapshot;
   }
 
-  // --- Personality initialization ---
+  // --- Personality initialization (from cards, no v1 weights) ---
 
-  initializePersonality(G: MyGameState, playerID: string): void {
+  private initializePersonality(G: MyGameState, playerID: string): void {
     const player = G.playerInfo[playerID];
-    const kaCard = player.resources.advantageCard;
-    const legacyCard = player.resources.legacyCard;
-    const alignment = player.hereticOrOrthodox;
-    const mode = this.config.weightOverrideMode ?? "none";
-
-    let weights: AIWeights;
-    let name: string;
-
-    if (mode === "full_override" && this.config.weightOverride) {
-      // Use provided weights verbatim, normalize to sum 1.0
-      weights = { ...this.config.weightOverride };
-      const sum = Object.values(weights).reduce((a, b) => a + b, 0);
-      if (sum > 0) {
-        for (const key of Object.keys(weights) as (keyof AIWeights)[]) {
-          weights[key] /= sum;
-        }
-      }
-      name = this.config.nameOverride ?? "Custom";
-    } else if (mode === "modifier" && this.config.weightOverride) {
-      // Derive from cards, then add deltas
-      weights = deriveWeightsFromCards(kaCard, legacyCard, alignment);
-      const deltas = this.config.weightOverride;
-      for (const key of Object.keys(weights) as (keyof AIWeights)[]) {
-        weights[key] += deltas[key] ?? 0;
-      }
-      // Re-clamp and normalize
-      for (const key of Object.keys(weights) as (keyof AIWeights)[]) {
-        weights[key] = Math.max(AI_CONFIG.minWeight, weights[key]);
-      }
-      const sum = Object.values(weights).reduce((a, b) => a + b, 0);
-      for (const key of Object.keys(weights) as (keyof AIWeights)[]) {
-        weights[key] /= sum;
-      }
-      name = this.config.nameOverride ?? this.deriveName(weights);
-    } else {
-      // Normal mode: derive from cards
-      weights = deriveWeightsFromCards(kaCard, legacyCard, alignment);
-      name = this.deriveName(weights);
-    }
-
-    // Derive tactical preferences
-    const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v));
-    let tacticalPreferences = {
-      aggressionLevel: clamp(weights.military * AI_CONFIG.tacticalMultiplier, 0, 1),
-      tradePreference: clamp(weights.economy * AI_CONFIG.tacticalMultiplier, 0, 1),
-      expansionPreference: clamp(weights.territory * AI_CONFIG.tacticalMultiplier, 0, 1),
+    this.personality = {
+      kaCard: player.resources.advantageCard ?? "none",
+      legacyCard: player.resources.legacyCard?.name ?? "none",
+      alignment: player.hereticOrOrthodox ?? "orthodox",
+      legacyCardColour: player.resources.legacyCard?.colour ?? "none",
     };
 
-    // Apply tactical overrides if present
-    if (this.config.tacticalOverride) {
-      tacticalPreferences = {
-        ...tacticalPreferences,
-        ...this.config.tacticalOverride,
-      };
-    }
-
-    const description = `Derived from ${kaCard ?? "no KA card"} + ${
-      legacyCard ? `${legacyCard.name} (${legacyCard.colour})` : "no legacy card"
-    } [mode: ${mode}]`;
-
-    this.personality = { name, weights, description, tacticalPreferences };
-
-    // Log initialization
     const logger = getAILogger();
     if (logger.getVerbosity() !== "silent") {
       console.log(
-        `[AI] Bot P${playerID} initialized as ${name} [mode: ${mode}] (KA: ${kaCard ?? "none"}, Legacy: ${legacyCard?.name ?? "none"}, Alignment: ${alignment})`
+        `[AI-v2] Bot P${playerID} initialized (KA: ${this.personality.kaCard}, Legacy: ${this.personality.legacyCard}, Alignment: ${this.personality.alignment})`
       );
-      console.log(`[AI] Weights: ${JSON.stringify(weights, null, 0)}`);
     }
+  }
+
+  private defaultPersonality(): BotPersonality {
+    return { kaCard: "none", legacyCard: "none", alignment: "orthodox", legacyCardColour: "none" };
   }
 
   // --- Move selection ---
@@ -135,7 +80,7 @@ export class EmpiresBot {
   chooseMove(G: MyGameState, ctx: Ctx, playerID: string): AIMove | null {
     const startTime = Date.now();
 
-    // Lazy initialization: init personality when cards are known
+    // Lazy initialization
     if (!this.personality) {
       const player = G.playerInfo[playerID];
       if (player?.resources.advantageCard) {
@@ -143,7 +88,7 @@ export class EmpiresBot {
       }
     }
 
-    // Special handling for card-picking phases
+    // Card-picking phases (setup) — simple heuristics
     if (G.stage.sub === "kingdom_advantage") {
       return this.chooseKACard(G, playerID);
     }
@@ -152,123 +97,138 @@ export class EmpiresBot {
     }
 
     const personality = this.personality ?? this.defaultPersonality();
-
-    // ── Compute legal moves once and pass to strategy (avoids redundant enumeration) ──
     const availableMoves = enumerateLegalMoves(G, ctx, playerID);
 
-    // Check if a dedicated strategy is registered for this phase
-    const strategy = this.registry.getStrategy(ctx.phase ?? "");
-    const isRegisteredStrategy = !(strategy instanceof RandomFallbackStrategy);
-
-    if (isRegisteredStrategy) {
-      if (availableMoves.length === 0) return null;
-
-      const result = strategy.selectMove(G, ctx, playerID, personality, availableMoves);
-      this.logDecision(G, ctx, playerID, availableMoves, result.move, result.score, "best_score", startTime, result.topMoves);
-      return result.move;
-    }
-
-    // Default path: score with estimateMoveValue
     if (availableMoves.length === 0) return null;
-    if (availableMoves.length === 1) {
-      this.logDecision(G, ctx, playerID, availableMoves, availableMoves[0], 0, "forced", startTime);
-      return availableMoves[0];
+
+    // Route to phase-specific v2 evaluator
+    // (Don't early-return for single moves — some sub-stages need overrides)
+    const phase = G.stage.phase;
+    let chosen: AIMove | null = null;
+    let chosenScore = 0;
+    let topMoves: { move: string; args: any[]; score: number }[] | undefined;
+    let mctsStats: MCTSStats | undefined;
+
+    if (phase === "actions") {
+      // Sub-stage flow control — handle mechanical stages before evaluator
+      if (G.stage.sub === "confirm_fow_draw") {
+        // trainTroops sets this stage. The only valid move is drawFoWCards.
+        // Enumerate incorrectly returns confirmAction — override it.
+        chosen = { move: "drawFoWCards", args: [] };
+        chosenScore = 0;
+      } else if (G.stage.sub === "discard_fow") {
+        // Choose which FoW card to discard — use evaluator (simple decision)
+        const { viable } = evaluateActions(G, playerID, availableMoves, personality);
+        if (viable.length > 0) {
+          // Pick best quality for discard (not worth MCTS)
+          viable.sort((a, b) => b.quality - a.quality);
+          chosen = viable[0].move;
+          chosenScore = viable[0].quality;
+        }
+      } else if (G.playerInfo[playerID].turnComplete) {
+        chosen = { move: "confirmAction", args: [] };
+        chosenScore = 0;
+      } else {
+        // Normal actions — MCTS search over viable moves
+        const { viable } = evaluateActions(G, playerID, availableMoves, personality);
+        if (viable.length > 0) {
+          const allPersonalities = this.getAllPersonalities(G);
+          const result = mctsSearch(G, playerID, viable, allPersonalities, "fast");
+          chosen = result.chosenMove;
+          chosenScore = result.averageReward;
+          topMoves = result.children.slice(0, 5).map(c => ({
+            move: c.move, args: [], score: c.avgReward,
+          }));
+
+          // Build MCTS analytics
+          const evalTop = [...viable].sort((a, b) => b.quality - a.quality)[0];
+          mctsStats = {
+            simulations: result.simulations,
+            timeMs: result.timeMs,
+            children: result.children.map(c => {
+              const match = viable.find(v => v.move.move === c.move);
+              return { move: c.move, visits: c.visits, avgReward: c.avgReward, quality: match?.quality ?? 0 };
+            }),
+            overrodeEvaluator: evalTop.move.move !== result.chosenMove.move,
+            evaluatorTopMove: evalTop.move.move,
+          };
+        }
+      }
+    } else if (phase === "discovery") {
+      const { viable } = evaluateDiscovery(G, playerID, availableMoves, personality);
+      const pick = pickDiscoveryMove(viable);
+      if (pick) {
+        chosen = pick.move;
+        chosenScore = pick.quality;
+        topMoves = viable.slice(0, 5).map(v => ({ move: v.move.move, args: v.move.args, score: v.quality }));
+      }
+    } else if (phase === "events") {
+      const { viable } = evaluateEvents(G, playerID, availableMoves, personality);
+      const pick = pickEventsMove(viable);
+      if (pick) {
+        chosen = pick.move;
+        chosenScore = pick.quality;
+        topMoves = viable.slice(0, 5).map(v => ({ move: v.move.move, args: v.move.args, score: v.quality }));
+      }
+    } else if (phase === "resolution") {
+      const { viable } = evaluateResolution(G, playerID, availableMoves, personality);
+      const pick = pickResolutionMove(viable);
+      if (pick) {
+        chosen = pick.move;
+        chosenScore = pick.quality;
+        topMoves = viable.slice(0, 5).map(v => ({ move: v.move.move, args: v.move.args, score: v.quality }));
+      }
     }
 
-    const scored = availableMoves.map((m) => ({
-      move: m,
-      score: estimateMoveValue(G, playerID, m, personality.weights),
-    }));
-    scored.sort((a, b) => b.score - a.score);
+    // Fallback: random from available
+    if (!chosen) {
+      const idx = Math.floor(Math.random() * availableMoves.length);
+      chosen = availableMoves[idx];
+      chosenScore = 0;
+      this.logDecision(G, ctx, playerID, availableMoves, chosen, chosenScore, "fallback", startTime);
+      return chosen;
+    }
 
-    const chosen = scored[0];
-    this.logDecision(G, ctx, playerID, availableMoves, chosen.move, chosen.score, "best_score", startTime);
-    return chosen.move;
+    this.logDecision(G, ctx, playerID, availableMoves, chosen, chosenScore, "best_score", startTime, topMoves, mctsStats);
+    return chosen;
   }
 
-  // --- Card-picking phases ---
+  // --- Helpers ---
+
+  private getAllPersonalities(G: MyGameState): Record<string, BotPersonality> {
+    const result: Record<string, BotPersonality> = {};
+    for (const [pid, player] of Object.entries(G.playerInfo)) {
+      result[pid] = {
+        kaCard: player.resources.advantageCard ?? "none",
+        legacyCard: player.resources.legacyCard?.name ?? "none",
+        alignment: player.hereticOrOrthodox ?? "orthodox",
+        legacyCardColour: player.resources.legacyCard?.colour ?? "none",
+      };
+    }
+    return result;
+  }
+
+  // --- Card-picking (setup phase) ---
 
   private chooseKACard(G: MyGameState, playerID: string): AIMove | null {
     const pool = G.cardDecks.kingdomAdvantagePool;
     if (pool.length === 0) return null;
-
-    // Score each KA card: how strong of a strategic identity does it create?
-    // We don't have a legacy card yet, so derive weights with kaCard only.
-    const alignment = G.playerInfo[playerID].hereticOrOrthodox;
-    let bestCard = pool[0];
-    let bestMaxWeight = 0;
-
-    for (const card of pool) {
-      const weights = deriveWeightsFromCards(card, undefined, alignment);
-      // Pick the card with the highest single-dimension weight (strongest identity)
-      const maxWeight = Math.max(...Object.values(weights));
-      if (maxWeight > bestMaxWeight) {
-        bestMaxWeight = maxWeight;
-        bestCard = card;
-      }
-    }
-
-    return { move: "pickKingdomAdvantageCard", args: [bestCard] };
+    // Random pick for card selection
+    const idx = Math.floor(Math.random() * pool.length);
+    return { move: "pickKingdomAdvantageCard", args: [pool[idx]] };
   }
 
   private chooseLegacyCard(G: MyGameState, playerID: string): AIMove | null {
     const options = G.playerInfo[playerID].legacyCardOptions;
     if (!options || options.length === 0) return null;
-
-    const player = G.playerInfo[playerID];
-    const kaCard = player.resources.advantageCard;
-    const alignment = player.hereticOrOrthodox;
-
-    // Score each legacy card by synergy with current KA card
-    let bestCard = options[0];
-    let bestMaxWeight = 0;
-
-    for (const card of options) {
-      const weights = deriveWeightsFromCards(kaCard, card, alignment);
-      const maxWeight = Math.max(...Object.values(weights));
-      if (maxWeight > bestMaxWeight) {
-        bestMaxWeight = maxWeight;
-        bestCard = card;
-      }
-    }
-
-    const result: AIMove = { move: "pickLegacyCard", args: [bestCard] };
-
-    // After picking legacy card, re-derive personality with both cards known
-    // (This will happen on next chooseMove call via initializePersonality)
-    // Force re-initialization by nulling personality
+    // Random pick for card selection
+    const idx = Math.floor(Math.random() * options.length);
+    // Force personality re-init after picking
     this.personality = null;
-
-    return result;
+    return { move: "pickLegacyCard", args: [options[idx]] };
   }
 
-  // --- Helpers ---
-
-  private deriveName(weights: AIWeights): string {
-    const nameMap: Record<string, string> = {
-      military: "Conqueror",
-      economy: "Merchant",
-      religion: "Prelate",
-      territory: "Empire Builder",
-      legacy: "Legacy Hunter",
-      positioning: "Admiral",
-      threats: "Warden",
-      republicAccess: "Diplomat",
-    };
-    const dominantKey = (Object.keys(weights) as (keyof AIWeights)[]).reduce(
-      (a, b) => (weights[a] > weights[b] ? a : b)
-    );
-    return nameMap[dominantKey] ?? "Balanced";
-  }
-
-  private defaultPersonality(): AIPersonality {
-    return {
-      name: "Balanced",
-      weights: { ...AI_CONFIG.defaultPersonality.weights },
-      description: "Default balanced personality (no cards known yet)",
-      tacticalPreferences: { ...AI_CONFIG.defaultPersonality.tacticalDefaults },
-    };
-  }
+  // --- Logging ---
 
   private logDecision(
     G: MyGameState,
@@ -279,26 +239,21 @@ export class EmpiresBot {
     chosenScore: number,
     reason: "best_score" | "random_override" | "forced" | "fallback",
     startTime: number,
-    preScored?: { move: string; args: any[]; score: number }[]
+    preScored?: { move: string; args: any[]; score: number }[],
+    mctsStats?: MCTSStats,
   ): void {
     const personality = this.personality ?? this.defaultPersonality();
-    const weights = personality.weights;
 
     const scored = preScored ?? allMoves
-      .map((m) => ({
-        move: m.move,
-        args: m.args,
-        score: estimateMoveValue(G, playerID, m, weights),
-      }))
-      .sort((a, b) => b.score - a.score)
-      .slice(0, 5);
+      .slice(0, 5)
+      .map((m) => ({ move: m.move, args: m.args, score: 0 }));
 
     getAILogger().logDecision({
       round: G.round,
       phase: ctx.phase ?? "unknown",
       stage: G.stage ? `${G.stage.phase}/${G.stage.sub}` : "unknown",
       playerID,
-      personalityName: personality.name,
+      personalityName: `${personality.kaCard}+${personality.legacyCard}`,
       legalMoveCount: allMoves.length,
       legalMoveNames: [...new Set(allMoves.map((m) => m.move))],
       topScoredMoves: scored,
@@ -307,18 +262,7 @@ export class EmpiresBot {
       chosenScore,
       reason,
       decisionTimeMs: Date.now() - startTime,
+      mctsStats,
     });
-  }
-
-  // --- Static factory ---
-
-  static createRegistry(): AIStrategyRegistry {
-    const fallback = new RandomFallbackStrategy();
-    const registry = new AIStrategyRegistry(fallback);
-    registry.register("discovery", new DiscoveryStrategy());
-    registry.register("events", new EventsStrategy());
-    registry.register("actions", new ActionsStrategy());
-    registry.register("resolution", new ResolutionCoordinator());
-    return registry;
   }
 }

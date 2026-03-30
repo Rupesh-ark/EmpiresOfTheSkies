@@ -102,6 +102,11 @@ const vote: MoveDefinition = {
   fn: ({ G, ctx, playerID, events }, ...args) => {
     const voteTarget: string = args[0];
     if (!ctx.playOrder.includes(voteTarget)) return INVALID_MOVE;
+    if (G.hasVoted.includes(playerID)) {
+      // Already voted — skip to next player instead of stalling
+      events.endTurn();
+      return;
+    }
 
     // Store the ballot — hidden from other players until all have voted
     G.voteSubmitted[playerID] = voteTarget;

@@ -22,10 +22,12 @@ import {
   type EnrichedDecision,
   type PlayerSnapshot,
   type GameRecord,
+  type BattleContext,
 } from "./GameRecorder";
-import { AerialBattleStrategy } from "./strategies/AerialBattleStrategy";
-import { GroundBattleStrategy } from "./strategies/GroundBattleStrategy";
-import { AI_CONFIG } from "./weightsConfig";
+import { AerialBattleStrategy } from "./v1/strategies/AerialBattleStrategy";
+import { GroundBattleStrategy } from "./v1/strategies/GroundBattleStrategy";
+import { AI_CONFIG } from "./v1/weightsConfig";
+import { enumerateLegalMoves } from "./enumerate";
 
 // ── Default snapshot (used when bot has not yet set one) ─────────────────────
 
@@ -214,6 +216,7 @@ export function runGameLoop(
   maxIterations = 50000
 ): { finalState: any; iterations: number } {
   let iterations = 0;
+  let lastMove: { move: string; args: any[] } | null = null;
   let lastStateKey = "";
   let staleCount = 0;
   let lastRound = -1;
@@ -356,7 +359,8 @@ export function runGameLoop(
       // Set snapshot BEFORE chooseMove so the AILogger onEntry callback can read it
       bots[pIdx].setSnapshot(captureSnapshot(botG, currentPlayer));
 
-      const move = bots[pIdx].chooseMove(botG, botState.ctx, currentPlayer);
+      lastMove = bots[pIdx].chooseMove(botG, botState.ctx, currentPlayer);
+      const move = lastMove;
       if (move) {
         (clients[pIdx] as any).moves[move.move]?.(...move.args);
         // Check NaN AFTER move execution to find the culprit
@@ -390,23 +394,28 @@ export function runGameLoop(
       const s = clients[0].getState();
       if (s) {
         const diagG = s.G as MyGameState;
-        console.log(`[DIAG] iter=${iterations} R${diagG.round} phase=${s.ctx.phase} stage=${diagG.stage} turn=${s.ctx.turn} P${s.ctx.currentPlayer} halted=${diagG._halted}`);
+        const moveStr = lastMove ? `${lastMove.move}(${JSON.stringify(lastMove.args).slice(0, 60)})` : "null";
+        console.log(`[DIAG] iter=${iterations} R${diagG.round} phase=${s.ctx.phase} stage=${diagG.stage.phase}:${diagG.stage.sub} turn=${s.ctx.turn} P${s.ctx.currentPlayer} move=${moveStr}`);
       }
     }
 
     // Hard exit if way too many iterations
-    if (iterations >= 49000) {
+    if (iterations >= 5000) {
       const s = clients[0].getState();
       if (s) {
         const stuckG = s.G as MyGameState;
-        console.log(`[STUCK] iter=${iterations} R${stuckG.round} phase=${s.ctx.phase} stage=${stuckG.stage.phase}:${stuckG.stage.sub} turn=${s.ctx.turn} P${s.ctx.currentPlayer}`);
+        const pIdx = parseInt(s.ctx.currentPlayer);
+        const botState = clients[pIdx]?.getState();
+        const availableMoves = botState ? enumerateLegalMoves(botState.G as MyGameState, botState.ctx, s.ctx.currentPlayer) : [];
+        const lastMove = botState ? bots[pIdx].chooseMove(botState.G as MyGameState, botState.ctx, s.ctx.currentPlayer) : null;
+        console.log(`[STUCK] iter=${iterations} R${stuckG.round} phase=${s.ctx.phase} stage=${stuckG.stage.phase}:${stuckG.stage.sub} turn=${s.ctx.turn} P${s.ctx.currentPlayer} moves=${availableMoves.length} chosen=${lastMove ? lastMove.move : 'null'}`);
         recorder.addDiagnostic({
           type: "stall",
           iteration: iterations,
           round: stuckG.round,
           phase: `${stuckG.stage.phase}:${stuckG.stage.sub}`,
           playerID: s.ctx.currentPlayer,
-          details: "STUCK at iteration limit",
+          details: `STUCK at iter ${iterations}: available=${availableMoves.length}, chosen=${lastMove?.move ?? 'null'}`,
         });
       }
       break;
@@ -442,15 +451,36 @@ export function runSingleGame(gameNumber: number): GameRecord {
   const bots: EmpiresBot[] = [];
 
   // Wire AILogger to capture decisions into the recorder
+  const BATTLE_MOVES = new Set([
+    "attackOtherPlayersFleet", "doNotAttack", "evadeFleet", "retaliateFleet",
+    "groundAttack", "doNotGroundAttack", "defendGround", "yieldGround",
+  ]);
   const logger = new AILogger("silent", (entry) => {
     if (entry.type !== "decision") return;
     const decisionEntry = entry as DecisionLogEntry;
     const pIdx = parseInt(decisionEntry.playerID);
     const snapshot = bots[pIdx]?.getLastSnapshot();
-    // Consume any pending battle context — aerial and ground are mutually exclusive phases
-    const battleContext =
-      (AerialBattleStrategy.getLastBattleContext() ??
-        GroundBattleStrategy.getLastBattleContext()) ?? undefined;
+
+    // Build battle context from the decision if it's a battle move
+    let battleContext: BattleContext | undefined;
+    if (BATTLE_MOVES.has(decisionEntry.chosenMove)) {
+      const targetID = decisionEntry.chosenArgs?.[0] as string ?? "?";
+      const mySnap = snapshot ?? DEFAULT_SNAPSHOT;
+      const decision = decisionEntry.chosenMove === "attackOtherPlayersFleet" ? "attack" as const
+        : decisionEntry.chosenMove === "doNotAttack" ? "doNotAttack" as const
+        : decisionEntry.chosenMove === "evadeFleet" ? "evade" as const
+        : "fight" as const;
+      battleContext = {
+        myStrength: mySnap.fowCards.totalSwords + mySnap.fowCards.totalShields,
+        enemyStrength: 0,
+        ratio: 0,
+        threshold: 0,
+        fowCardCount: mySnap.fowCards.count,
+        targetID,
+        decision,
+      };
+    }
+
     const enriched: EnrichedDecision = {
       ...decisionEntry,
       snapshot: snapshot ?? DEFAULT_SNAPSHOT,
@@ -494,14 +524,14 @@ export function runSingleGame(gameNumber: number): GameRecord {
   for (const [pid, player] of Object.entries(G.playerInfo)) {
     const bot = bots[parseInt(pid)];
     const personality = bot.getPersonality();
-    const weights = personality?.weights ?? AI_CONFIG.defaultPersonality.weights;
+    const pName = personality ? `${personality.kaCard}+${personality.legacyCard}` : "Unknown";
     recorder.addPlayer(pid, {
       playerID: pid,
-      personality: personality?.name ?? "Unknown",
+      personality: pName,
       kaCard: player.resources.advantageCard ?? "none",
       legacyCard: player.resources.legacyCard?.name ?? "none",
       alignment: player.hereticOrOrthodox,
-      weights,
+      weights: {} as any,
       finalVP: player.resources.victoryPoints,
       finalRank: ranking.indexOf(pid) + 1,
     });
@@ -516,14 +546,15 @@ export function runSingleGame(gameNumber: number): GameRecord {
   const winnerBot = bots[parseInt(winnerID)];
   const rankingsArray = ranking.map((pid, idx) => ({
     playerID: pid,
-    personality: bots[parseInt(pid)]?.getPersonality()?.name ?? "Unknown",
+    personality: (() => { const p = bots[parseInt(pid)]?.getPersonality(); return p ? `${p.kaCard}+${p.legacyCard}` : "Unknown"; })(),
     vp: G.playerInfo[pid]?.resources.victoryPoints ?? 0,
     rank: idx + 1,
   }));
 
+  const winnerP = winnerBot?.getPersonality();
   recorder.setResult({
     winner: winnerID,
-    winnerPersonality: winnerBot?.getPersonality()?.name ?? "Unknown",
+    winnerPersonality: winnerP ? `${winnerP.kaCard}+${winnerP.legacyCard}` : "Unknown",
     scores,
     rounds: G.round,
     rankings: rankingsArray,

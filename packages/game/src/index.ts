@@ -4,6 +4,8 @@ export { createLogger } from "./helpers/logger";
 
 export * from "./helpers/helpers";
 
+export { tileKey, wouldPlacementConnectRoute, bfsShortestPath, FAITHDOM_TILES } from "./helpers/mapUtils";
+
 export * from "./helpers/eventCardDefinitions";
 
 export * from "./helpers/kaCardDefinitions";

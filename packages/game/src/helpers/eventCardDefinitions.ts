@@ -12,7 +12,12 @@ import {
 } from "./stateUtils";
 import { CARD_RESOLVERS, resolveCardWithAlignmentPenalty } from "./legacyCardDefinitions";
 import { hasAnyOutpost, hasAnyColony } from "./helpers";
+import { tileKey } from "./mapUtils";
 import { BUILDING_SELL_PRICE } from "../data/gameData";
+
+const HERESY_EVENT_STEPS = 4;
+const CROPS_TAX_MODIFIER = 3;
+const ARCHPRELATE_MAX_VP = 6;
 
 // ── Card metadata ────────────────────────────────────────────────────────────
 
@@ -295,16 +300,16 @@ const findLegendTileCoords = (
 const hasPlayerFleetsOnTiles = (
   G: MyGameState,
   coords: [number, number][]
-): boolean =>
-  Object.values(G.playerInfo).some((player) =>
+): boolean => {
+  const coordSet = new Set(coords.map(([x, y]) => tileKey(x, y)));
+  return Object.values(G.playerInfo).some((player) =>
     player.fleetInfo.some(
       (fleet) =>
         fleet.skyships > 0 &&
-        coords.some(
-          ([x, y]) => fleet.location[0] === x && fleet.location[1] === y
-        )
+        coordSet.has(tileKey(fleet.location[0], fleet.location[1]))
     )
   );
+};
 
 /** Check if any land tile has been discovered */
 const hasDiscoveredLand = (G: MyGameState): boolean => {
@@ -417,7 +422,7 @@ const resolveImmediateElection = (
   for (const id of turnOrder) {
     if (G.playerInfo[id].hereticOrOrthodox === "orthodox") orthodoxRealms++;
   }
-  addVPAmount(G, winnerId, Math.min(6, Math.floor((2 * orthodoxRealms) / 3)));
+  addVPAmount(G, winnerId, Math.min(ARCHPRELATE_MAX_VP, Math.floor((2 * orthodoxRealms) / 3)));
 };
 
 // ── Void condition checks ────────────────────────────────────────────────────
@@ -548,24 +553,24 @@ export const resolveEventCard = (
   switch (card) {
     // ── Heresy shifts ──────────────────────────────────────────────────────
     case "prelacy_condemned":
-      for (let i = 0; i < 4; i++) advanceAllHeresyTrackers(G);
-      logEvent(G, "Prelacy Condemned: all heresy trackers advance 4 steps");
+      advanceAllHeresyTrackers(G, HERESY_EVENT_STEPS);
+      logEvent(G, `Prelacy Condemned: all heresy trackers advance ${HERESY_EVENT_STEPS} steps`);
       break;
 
     case "defence_of_the_faith":
-      for (let i = 0; i < 4; i++) retreatAllHeresyTrackers(G);
-      logEvent(G, "Defence of the Faith: all heresy trackers retreat 4 steps");
+      retreatAllHeresyTrackers(G, HERESY_EVENT_STEPS);
+      logEvent(G, `Defence of the Faith: all heresy trackers retreat ${HERESY_EVENT_STEPS} steps`);
       break;
 
     // ── Tax modifiers (applied during taxes phase) ─────────────────────────
     case "crops_fail":
-      G.eventState.taxModifier = -3;
-      logEvent(G, "Crops Fail: tax income reduced by 3 this round");
+      G.eventState.taxModifier = -CROPS_TAX_MODIFIER;
+      logEvent(G, `Crops Fail: tax income reduced by ${CROPS_TAX_MODIFIER} this round`);
       break;
 
     case "bumper_crops":
-      G.eventState.taxModifier = 3;
-      logEvent(G, "Bumper Crops: tax income increased by 3 this round");
+      G.eventState.taxModifier = CROPS_TAX_MODIFIER;
+      logEvent(G, `Bumper Crops: tax income increased by ${CROPS_TAX_MODIFIER} this round`);
       break;
 
     // ── VP awards ──────────────────────────────────────────────────────────
@@ -619,6 +624,7 @@ export const resolveEventCard = (
 
     case "the_great_fire": {
       // Player with most buildings in Kingdom loses one (highest-count type)
+      const BUILDING_KEY = { cathedral: "cathedrals", palace: "palaces", shipyard: "shipyards" } as const;
       let maxBuildings = 0;
       let target = turnOrder[0];
       for (const id of turnOrder) {
@@ -630,16 +636,13 @@ export const resolveEventCard = (
         }
       }
       const p = G.playerInfo[target];
-      // Lose whichever there is most of — auto-pick highest count
       const counts = [
         { type: "cathedral" as const, count: p.cathedrals },
         { type: "palace" as const, count: p.palaces },
         { type: "shipyard" as const, count: p.shipyards },
       ].sort((a, b) => b.count - a.count);
       if (counts[0].count > 0) {
-        if (counts[0].type === "cathedral") p.cathedrals--;
-        else if (counts[0].type === "palace") p.palaces--;
-        else p.shipyards--;
+        p[BUILDING_KEY[counts[0].type]]--;
         logEvent(G, `The Great Fire: ${p.kingdomName} loses a ${counts[0].type}`);
       }
       break;
@@ -687,27 +690,26 @@ export const resolveEventCard = (
           target = id;
         }
       }
-      if (target) {
-        const gold = G.playerInfo[target].resources.gold;
-        const kingdomName = G.playerInfo[target].kingdomName;
-        if (gold > 0) {
-          const lost = Math.ceil(gold / 2);
-          G.playerInfo[target].resources.gold -= lost;
-          logEvent(G, `Infidel Corsairs Raid: ${kingdomName} loses ${lost} gold`);
-        } else {
-          // No gold — lose a building (auto-pick)
-          const p = G.playerInfo[target];
-          if (p.cathedrals > 0) {
-            p.cathedrals--;
-            logEvent(G, `Infidel Corsairs Raid: ${kingdomName} loses a cathedral (no gold to plunder)`);
-          } else if (p.palaces > 0) {
-            p.palaces--;
-            logEvent(G, `Infidel Corsairs Raid: ${kingdomName} loses a palace (no gold to plunder)`);
-          } else if (p.shipyards > 0) {
-            p.shipyards--;
-            logEvent(G, `Infidel Corsairs Raid: ${kingdomName} loses a shipyard (no gold to plunder)`);
-          }
-        }
+      if (!target) break;
+      const gold = G.playerInfo[target].resources.gold;
+      const kingdomName = G.playerInfo[target].kingdomName;
+      if (gold > 0) {
+        const lost = Math.ceil(gold / 2);
+        G.playerInfo[target].resources.gold -= lost;
+        logEvent(G, `Infidel Corsairs Raid: ${kingdomName} loses ${lost} gold`);
+        break;
+      }
+      // No gold — lose a building (auto-pick: cathedral > palace > shipyard)
+      const p = G.playerInfo[target];
+      if (p.cathedrals > 0) {
+        p.cathedrals--;
+        logEvent(G, `Infidel Corsairs Raid: ${kingdomName} loses a cathedral (no gold to plunder)`);
+      } else if (p.palaces > 0) {
+        p.palaces--;
+        logEvent(G, `Infidel Corsairs Raid: ${kingdomName} loses a palace (no gold to plunder)`);
+      } else if (p.shipyards > 0) {
+        p.shipyards--;
+        logEvent(G, `Infidel Corsairs Raid: ${kingdomName} loses a shipyard (no gold to plunder)`);
       }
       break;
     }
@@ -729,27 +731,33 @@ export const resolveEventCard = (
             ? "Mysterious Disappearances"
             : "Monsters Awake";
       const coords = findLegendTileCoords(G, tileNames);
+      const coordSet = new Set(coords.map(([x, y]) => tileKey(x, y)));
       // One Skyship from each Fleet lost (& any troop it was carrying)
       for (const player of Object.values(G.playerInfo)) {
         for (const fleet of player.fleetInfo) {
-          if (
-            fleet.skyships > 0 &&
-            coords.some(
-              ([x, y]) =>
-                fleet.location[0] === x && fleet.location[1] === y
-            )
-          ) {
-            fleet.skyships -= 1;
-            if (fleet.regiments > 0) {
-              fleet.regiments -= 1;
-              logEvent(G, `${cardLabel}: ${player.kingdomName} loses 1 skyship and 1 regiment at a legend tile`);
-            } else if (fleet.levies > 0) {
-              fleet.levies -= 1;
-              logEvent(G, `${cardLabel}: ${player.kingdomName} loses 1 skyship and 1 levy at a legend tile`);
-            } else {
-              logEvent(G, `${cardLabel}: ${player.kingdomName} loses 1 skyship at a legend tile`);
-            }
+          if (fleet.skyships <= 0) continue;
+          if (!coordSet.has(tileKey(fleet.location[0], fleet.location[1]))) continue;
+          fleet.skyships -= 1;
+          if (fleet.regiments > 0) {
+            fleet.regiments -= 1;
+            logEvent(G, `${cardLabel}: ${player.kingdomName} loses 1 skyship and 1 regiment at a legend tile`);
+          } else if (fleet.levies > 0) {
+            fleet.levies -= 1;
+            logEvent(G, `${cardLabel}: ${player.kingdomName} loses 1 skyship and 1 levy at a legend tile`);
+          } else {
+            logEvent(G, `${cardLabel}: ${player.kingdomName} loses 1 skyship at a legend tile`);
           }
+        }
+      }
+      // Destroy route skyships on affected legend tiles (not returned to reserve)
+      for (const [x, y] of coords) {
+        const key = tileKey(x, y);
+        const routeShips = G.mapState.routeSkyships[key];
+        if (routeShips && routeShips.length > 0) {
+          for (const pid of [...routeShips]) {
+            logEvent(G, `${cardLabel}: ${G.playerInfo[pid].kingdomName} loses a trade route skyship at [${x},${y}]`);
+          }
+          delete G.mapState.routeSkyships[key];
         }
       }
       break;

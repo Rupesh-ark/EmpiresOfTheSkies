@@ -5,7 +5,7 @@
  * All defaults match v4.2 starting values from STARTING_RESOURCES and codifiedGameInfo.ts.
  */
 
-import { MyGameState, PlayerInfo, ActionBoardInfo, Resources, FleetInfo, PlayerBoardInfo, MoveDefinition, MoveContext } from "../types";
+import { MyGameState, PlayerInfo, ActionBoardInfo, Resources, FleetInfo, PlayerBoardInfo, MoveDefinition, MoveContext, MapState, MapBuildingInfo, TileInfoProps } from "../types";
 import type { Ctx } from "boardgame.io";
 import type { EventsAPI } from "boardgame.io/dist/types/src/plugins/events/events";
 import type { RandomAPI } from "boardgame.io/dist/types/src/plugins/random/random";
@@ -89,6 +89,55 @@ export function buildFleet(fleetId: number, overrides: Partial<FleetInfo> = {}):
   };
 }
 
+// ── Map builder ──────────────────────────────────────────────────────────────
+
+const EMPTY_LOOT = { gold: 0, mithril: 0, dragonScales: 0, krakenSkin: 0, magicDust: 0, stickyIchor: 0, pipeweed: 0, victoryPoints: 0 };
+
+/** Default 4×8 ocean tile — findNext* scanners skip ocean, so this is a safe no-op. */
+function buildOceanTile(): TileInfoProps {
+  return {
+    name: "Ocean",
+    blocked: [],
+    sword: 0,
+    shield: 0,
+    loot: { outpost: { ...EMPTY_LOOT }, colony: { ...EMPTY_LOOT } },
+    type: "ocean",
+  };
+}
+
+/** Builds a proper 4×8 map state. All tiles are ocean by default. */
+export function buildMapState(overrides: Partial<MapState> = {}): MapState {
+  const rows = 4;
+  const cols = 8;
+  return {
+    currentTileArray: Array.from({ length: rows }, () =>
+      Array.from({ length: cols }, () => buildOceanTile())
+    ),
+    discoveredTiles: Array.from({ length: rows }, () =>
+      Array.from({ length: cols }, () => false)
+    ),
+    buildings: Array.from({ length: rows }, () =>
+      Array.from({ length: cols }, () => ({}) as MapBuildingInfo)
+    ),
+    battleMap: Array.from({ length: rows }, () =>
+      Array.from({ length: cols }, () => [] as string[])
+    ),
+    mostRecentlyDiscoveredTile: [],
+    discoveredRaces: [],
+    currentBattle: [0, 0],
+    goodsPriceMarkers: {
+      mithril: 2,
+      dragonScales: 2,
+      krakenSkin: 2,
+      magicDust: 2,
+      stickyIchor: 2,
+      pipeweed: 2,
+    },
+    routeSkyships: {},
+    ...overrides,
+  };
+}
+
 // ── ActionBoard builder ───────────────────────────────────────────────────────
 
 export function buildActionBoard(overrides: Partial<ActionBoardInfo> = {}): ActionBoardInfo {
@@ -143,23 +192,7 @@ export function buildInitialG(
       kingdomAdvantagePool: [],
       legacyDeck: [],
     },
-    mapState: {
-      currentTileArray: [],
-      discoveredTiles: [],
-      buildings: [],
-      mostRecentlyDiscoveredTile: [],
-      discoveredRaces: [],
-      battleMap: [],
-      currentBattle: [],
-      goodsPriceMarkers: {
-        mithril: 2,
-        dragonScales: 2,
-        krakenSkin: 2,
-        magicDust: 2,
-        stickyIchor: 2,
-        pipeweed: 2,
-      },
-    },
+    mapState: buildMapState(),
     validFortLocations: [],
     possibleDefenders: [],
     validRelocationTiles: [],

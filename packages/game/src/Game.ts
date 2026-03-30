@@ -91,7 +91,7 @@ import offerBuyoffGold from "./moves/events/offerBuyoffGold";
 import nominateCaptainGeneral from "./moves/events/nominateCaptainGeneral";
 import commitDeferredBattleCard from "./moves/events/commitDeferredBattleCard";
 import contributeToGrandArmy from "./moves/events/contributeToGrandArmy";
-import { logEvent, allPlayersPassed, calculateMercy } from "./helpers/stateUtils";
+import { logEvent, allPlayersPassed, calculateMercy, nextUnpassedPlayer } from "./helpers/stateUtils";
 import { wrapMove, withPhaseGuard, withPhaseReset, checkLoopGuard } from "./helpers/moveWrapper";
 
 import { setStage, isStage } from "./helpers/stageUtils";
@@ -238,6 +238,7 @@ const MyGame: Game<MyGameState> = {
         stickyIchor: 3,
         pipeweed: 3,
       },
+      routeSkyships: {},
     };
 
     const playerInfoMap = buildPlayerInfoMap(ctx);
@@ -406,9 +407,7 @@ const MyGame: Game<MyGameState> = {
         order: {
           first: () => 0,
           next: (context) =>
-            context.ctx.playOrderPos + 1 < context.ctx.playOrder.length
-              ? context.ctx.playOrderPos + 1
-              : undefined,
+            (context.ctx.playOrderPos + 1) % context.ctx.playOrder.length,
           playOrder: (context) => [...context.ctx.playOrder].reverse(),
         },
       },
@@ -458,7 +457,7 @@ const MyGame: Game<MyGameState> = {
 
         context.G.firstTurnOfRound = true;
 
-        Object.values(context.G.playerInfo).forEach((playerInfo: any) => {
+        Object.values(context.G.playerInfo).forEach((playerInfo) => {
           playerInfo.passed = false;
           playerInfo.piracyIntent = "tax"; // reset each round
         });
@@ -479,7 +478,8 @@ const MyGame: Game<MyGameState> = {
           },
       next: "taxes",
       onEnd: (context) => {
-        Object.values(context.G.playerInfo).forEach((playerInfo: any) => {
+        context.G.mustContinueDiscovery = false;
+        Object.values(context.G.playerInfo).forEach((playerInfo) => {
           playerInfo.passed = false;
         });
 
@@ -580,7 +580,8 @@ const MyGame: Game<MyGameState> = {
               setStage(context.G, "actions", "default");
               context.events.endPhase();
             } else {
-              context.events.endTurn();
+              const next = nextUnpassedPlayer(context.G, context.ctx.currentPlayer);
+              context.events.endTurn(next ? { next } : undefined);
             }
           }
         },
@@ -624,7 +625,7 @@ const MyGame: Game<MyGameState> = {
         pass: wrapMove("pass", pass),
           },
       onEnd: (context) => {
-        Object.values(context.G.playerInfo).forEach((playerInfo: any) => {
+        Object.values(context.G.playerInfo).forEach((playerInfo) => {
           playerInfo.passed = false;
         });
       },
@@ -637,22 +638,25 @@ const MyGame: Game<MyGameState> = {
           if (context.G._halted) return;
           const sub = context.G.stage.sub;
 
-          // Election + conquest — no turn routing needed, player just acts
-          if (sub === "election" || sub === "conquest") return;
+          // Election + conquest + multi-player contribution stages — no turn routing needed
+          if (sub === "election" || sub === "conquest"
+              || sub === "rebellion_rival_support"
+              || sub === "invasion_contribute" || sub === "invasion_buyoff") return;
 
           // Retrieve fleets — auto-skip players with nothing to retrieve
           if (sub === "retrieve_fleets") {
             const playerID = context.ctx.currentPlayer;
             const player = context.G.playerInfo[playerID];
             const hasRetrievableFleets = player.fleetInfo.some(
-              (f: any) => f.skyships > 0 && (f.location[0] !== 4 || f.location[1] !== 0)
+              (f) => f.skyships > 0 && (f.location[0] !== 4 || f.location[1] !== 0)
             );
             if (!hasRetrievableFleets || player.passed) {
               player.passed = true;
               if (allPlayersPassed(context.G)) {
                 context.events.endPhase();
               } else {
-                context.events.endTurn();
+                const next = nextUnpassedPlayer(context.G, context.ctx.currentPlayer);
+                context.events.endTurn(next ? { next } : undefined);
               }
             }
             return;
@@ -779,7 +783,7 @@ const MyGame: Game<MyGameState> = {
         context.G.boardState = { ...initialBoardState };
 
         // Return counsellors from player board slots and reset flags
-        Object.values(context.G.playerInfo).forEach((player: any) => {
+        Object.values(context.G.playerInfo).forEach((player) => {
           const pb = player.playerBoardCounsellorLocations;
           // Return 1 counsellor for each used slot (dispatchDisabled is not a counsellor slot)
           if (pb.buildSkyships) player.resources.counsellors += 1;

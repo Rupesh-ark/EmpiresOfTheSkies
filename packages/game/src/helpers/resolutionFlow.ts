@@ -87,6 +87,8 @@ const continueAfterDeferredBattles = (
   }
 
   // Nothing interactive left — retrieve fleets
+  // Reset passed flags (stale from earlier sub-stages like election/conquest)
+  Object.values(G.playerInfo).forEach((p) => { p.passed = false; });
   setStage(G, "resolution", "retrieve_fleets");
   if (!skipEndTurn) events.endTurn({ next: G.turnOrder[0] });
 };

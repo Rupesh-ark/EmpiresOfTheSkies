@@ -139,26 +139,23 @@ export const enactPiracy = (G: MyGameState): void => {
           const shouldCut = G.playerInfo[rivalID].piracyIntent === "cut";
 
           if (shouldCut) {
-            // Find route owner's nearest fleet on the route to cut from
-            let bestFleet: (typeof G.playerInfo)[string]["fleetInfo"][number] | null = null;
-            let bestDist = Infinity;
-            for (const fleet of G.playerInfo[playerID].fleetInfo) {
-              if (fleet.skyships <= 0) continue;
-              const fk = tileKey(fleet.location[0], fleet.location[1]);
-              if (!network.has(fk)) continue;
-              const dist = distFromOutpost.get(fk) ?? Infinity;
-              if (dist < bestDist) {
-                bestDist = dist;
-                bestFleet = fleet;
-              }
+            // v4.2 amendment: remove one route skyship from the pirate's tile,
+            // return it to the route owner's reserve.
+            // Find which tile this rival's blocking fleet is on:
+            let cutKey: string | null = null;
+            for (const rf of G.playerInfo[rivalID].fleetInfo) {
+              if (rf.skyships <= 0) continue;
+              const fk = tileKey(rf.location[0], rf.location[1]);
+              if (network.has(fk)) { cutKey = fk; break; }
             }
-
-            if (bestFleet && bestFleet.skyships > 0) {
-              bestFleet.skyships -= 1;
+            const routeShips = cutKey ? G.mapState.routeSkyships[cutKey] : undefined;
+            if (cutKey && routeShips?.includes(playerID)) {
+              routeShips.splice(routeShips.indexOf(playerID), 1);
+              if (routeShips.length === 0) delete G.mapState.routeSkyships[cutKey];
               G.playerInfo[playerID].resources.skyships += 1;
               logEvent(
                 G,
-                `Piracy: ${G.playerInfo[rivalID].kingdomName} cuts ${G.playerInfo[playerID].kingdomName}'s trade route — 1 skyship returned to kingdom`,
+                `Piracy: ${G.playerInfo[rivalID].kingdomName} cuts ${G.playerInfo[playerID].kingdomName}'s trade route at ${cutKey}`,
               );
             }
           } else {

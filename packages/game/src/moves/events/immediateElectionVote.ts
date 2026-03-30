@@ -11,7 +11,11 @@ import { HERESY_MIN, logEvent } from "../../helpers/stateUtils";
 const immediateElectionVote: MoveDefinition = {
   fn: ({ G, ctx, playerID, events }, ...args) => {
     if (!G.eventState.immediateElectionPending) return INVALID_MOVE;
-    if (G.hasVoted.includes(playerID)) return INVALID_MOVE;
+    if (G.hasVoted.includes(playerID)) {
+      // Already voted — skip to next player instead of stalling
+      events.endTurn();
+      return;
+    }
 
     const voteTarget: string = args[0];
     // Validate the vote target is a valid player ID

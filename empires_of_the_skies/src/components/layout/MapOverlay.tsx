@@ -33,6 +33,9 @@ export const MapOverlay = (props: MyGameProps) => {
   const turnComplete = playerInfo.turnComplete;
   const showConfirmEndTurn =
     turnComplete && props.G.stage.phase === "actions" && isMyTurn;
+  const showPassButton =
+    isMyTurn &&
+    (props.G.stage.phase === "discovery" || props.G.stage.phase === "actions");
 
   const mood = getMood(props.G.stage);
   const moodTokens = getMoodTokens(mood);
@@ -247,14 +250,13 @@ export const MapOverlay = (props: MyGameProps) => {
             >
               Confirm & End Turn
             </GameButton>
-          ) : (
+          ) : showPassButton ? (
             <GameButton
               variant="ghost"
               size="sm"
               onMouseEnter={() => setHoveredAction("pass-turn")}
               onMouseLeave={() => setHoveredAction(null)}
               onClick={() => setPassDialogOpen(true)}
-              disabled={!isMyTurn}
               sx={{
                 color: "#E8C860",
                 backgroundColor: "rgba(30,24,16,0.75)",
@@ -265,16 +267,11 @@ export const MapOverlay = (props: MyGameProps) => {
                   borderColor: "#E8C860",
                   backgroundColor: "rgba(30,24,16,0.88)",
                 },
-                "&.Mui-disabled": {
-                  color: "rgba(200,170,120,0.3)",
-                  borderColor: "rgba(200,170,120,0.15)",
-                  backgroundColor: "rgba(30,24,16,0.5)",
-                },
               }}
             >
               Pass
             </GameButton>
-          )}
+          ) : null}
         </Box>
       )}
 

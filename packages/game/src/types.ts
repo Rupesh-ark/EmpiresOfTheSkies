@@ -189,6 +189,8 @@ export type MapState = {
   battleMap: string[][][];
   currentBattle: number[];
   goodsPriceMarkers: GoodsPriceMarkers;
+  /** Trade route skyship discs placed on map tiles. Key = "x,y", value = playerID[] (one per player per tile). */
+  routeSkyships: Record<string, string[]>;
 };
 export type GoodKey = "mithril" | "dragonScales" | "krakenSkin" | "magicDust" | "stickyIchor" | "pipeweed";
 

@@ -59,11 +59,18 @@ export const addGoldAmount = (
 export const removeSkyship = (G: MyGameState, playerID: string) => {
   G.playerInfo[playerID].resources.skyships -= 1;
 };
+
+/** Count all skyships a player has placed as route markers on the map. */
+export const countRouteSkyships = (G: MyGameState, playerID: string): number =>
+  Object.values(G.mapState.routeSkyships)
+    .filter(players => players.includes(playerID)).length;
+
 export const addSkyship = (G: MyGameState, playerID: string) => {
-  // GAP-13: max MAX_SKYSHIPS skyships total (reserve + deployed in fleets)
+  // GAP-13: max MAX_SKYSHIPS skyships total (reserve + fleets + route discs)
   const player = G.playerInfo[playerID];
   const totalSkyships = player.resources.skyships +
-    player.fleetInfo.reduce((sum, f) => sum + f.skyships, 0);
+    player.fleetInfo.reduce((sum, f) => sum + f.skyships, 0) +
+    countRouteSkyships(G, playerID);
   if (totalSkyships < MAX_SKYSHIPS) {
     player.resources.skyships += 1;
   }
@@ -148,15 +155,28 @@ export const logEvent = (G: MyGameState, message: string) => {
 export const allPlayersPassed = (G: MyGameState): boolean =>
   Object.values(G.playerInfo).every((p) => p.passed);
 
-export const advanceAllHeresyTrackers = (G: MyGameState) => {
-  Object.values(G.playerInfo).forEach((player) => {
-    increaseHeresyWithinMove(G, player.id);
-  });
+export function nextUnpassedPlayer(G: MyGameState, currentID: string): string | null {
+  const idx = G.turnOrder.indexOf(currentID);
+  for (let i = 1; i <= G.turnOrder.length; i++) {
+    const nextID = G.turnOrder[(idx + i) % G.turnOrder.length];
+    if (!G.playerInfo[nextID].passed) return nextID;
+  }
+  return null;
+}
+
+export const advanceAllHeresyTrackers = (G: MyGameState, steps = 1) => {
+  for (let i = 0; i < steps; i++) {
+    Object.values(G.playerInfo).forEach((player) => {
+      increaseHeresyWithinMove(G, player.id);
+    });
+  }
 };
-export const retreatAllHeresyTrackers = (G: MyGameState) => {
-  Object.values(G.playerInfo).forEach((player) => {
-    increaseOrthodoxyWithinMove(G, player.id);
-  });
+export const retreatAllHeresyTrackers = (G: MyGameState, steps = 1) => {
+  for (let i = 0; i < steps; i++) {
+    Object.values(G.playerInfo).forEach((player) => {
+      increaseOrthodoxyWithinMove(G, player.id);
+    });
+  }
 };
 
 export const calculateMercy = (G: MyGameState) => {

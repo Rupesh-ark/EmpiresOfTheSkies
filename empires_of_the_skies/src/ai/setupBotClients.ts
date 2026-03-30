@@ -2,18 +2,6 @@ import { Client } from "boardgame.io/client";
 import { SocketIO } from "boardgame.io/multiplayer";
 import { MyGame, EmpiresBot } from "@eots/game";
 
-// TODO: Bot credentials integration
-// The lobby flow (HomePageComponent.tsx → LobbyPage.tsx) currently joins players one at a time
-// via lobbyClient.joinMatch(). For bots, the match creation flow needs to:
-// 1. Create the match with numPlayers slots
-// 2. Join the human player normally
-// 3. For each bot slot: call lobbyClient.joinMatch() with a bot name (e.g. "Bot 1")
-//    and store the returned credentials
-// 4. Pass those credentials to setupBotClients()
-//
-// Until this lobby integration is done, credentials must be obtained externally
-// (e.g. via the boardgame.io REST API: POST /games/empires-of-the-skies/:matchID/join)
-
 export type BotClientHandle = {
   client: ReturnType<typeof Client>;
   bot: EmpiresBot;
@@ -80,7 +68,8 @@ export function setupBotClients(
         setTimeout(() => {
           const move = bot.chooseMove(state.G, state.ctx, playerID);
           if (move) {
-            const personality = bot.getPersonality()?.name ?? "?";
+            const pers = bot.getPersonality();
+            const personality = pers ? `${pers.kaCard}+${pers.legacyCard}` : "?";
             const line = `[R${state.G.round}] P${playerID} (${personality}) ${state.G.stage.phase}/${state.G.stage.sub} → ${move.move}(${JSON.stringify(move.args)})`;
             sendLogLine(line);
             (botClient as any).moves[move.move]?.(...move.args);

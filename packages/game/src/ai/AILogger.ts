@@ -23,6 +23,14 @@ export type ScoredMove = {
 
 export type DecisionReason = "best_score" | "random_override" | "forced" | "fallback";
 
+export type MCTSStats = {
+  simulations: number;
+  timeMs: number;
+  children: { move: string; visits: number; avgReward: number; quality: number }[];
+  overrodeEvaluator: boolean;
+  evaluatorTopMove: string;
+};
+
 export type DecisionLogEntry = {
   type: "decision";
   round: number;
@@ -38,6 +46,7 @@ export type DecisionLogEntry = {
   chosenScore: number | undefined;
   reason: DecisionReason;
   decisionTimeMs: number;
+  mctsStats?: MCTSStats;
 };
 
 export type TurnSummaryEntry = {

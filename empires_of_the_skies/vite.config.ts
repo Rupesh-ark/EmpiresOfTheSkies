@@ -31,12 +31,15 @@ export default defineConfig({
   build: {
     rollupOptions: {
       output: {
-        manualChunks: {
-          'vendor-react': ['react', 'react-dom'],
-          'vendor-mui-core': ['@mui/material', '@emotion/react', '@emotion/styled'],
-          'vendor-mui-icons': ['@mui/icons-material'],
-          'vendor-mui-lab': ['@mui/lab'],
-          'vendor-game': ['boardgame.io'],
+        manualChunks(id) {
+          if (id.includes('@mui/x-charts'))       return 'vendor-charts';
+          if (id.includes('@mui/material'))        return 'vendor-mui-core';
+          if (id.includes('@emotion'))             return 'vendor-mui-core';
+          if (id.includes('@mui/icons-material'))  return 'vendor-mui-icons';
+          if (id.includes('@mui/lab'))             return 'vendor-mui-lab';
+          if (id.includes('node_modules/react-dom')) return 'vendor-react';
+          if (id.includes('node_modules/react/'))  return 'vendor-react';
+          if (id.includes('boardgame.io'))         return 'vendor-game';
         },
       },
     },

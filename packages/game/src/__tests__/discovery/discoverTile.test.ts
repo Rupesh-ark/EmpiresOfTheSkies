@@ -67,6 +67,7 @@ function buildMinimalMap(target: TileInfoProps) {
     battleMap: [] as string[][][],
     currentBattle: [],
     goodsPriceMarkers: { mithril: 2, dragonScales: 2, krakenSkin: 2, magicDust: 2, stickyIchor: 2, pipeweed: 2 },
+    routeSkyships: {},
   };
 }
 

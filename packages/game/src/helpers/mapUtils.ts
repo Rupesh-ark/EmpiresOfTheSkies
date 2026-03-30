@@ -124,6 +124,49 @@ export const bfsWithDistance = (
 };
 
 /**
+ * BFS shortest path from a single source to any target tile.
+ * Traverses ALL passable neighbors (not limited to a player network).
+ * Returns intermediate tiles only (excludes start and target).
+ * Returns [] if start IS a target or no path exists.
+ */
+export function bfsShortestPath(
+  start: [number, number],
+  targets: [number, number][],
+  tileArray: TileInfoProps[][],
+): [number, number][] {
+  const startKey = tileKey(start[0], start[1]);
+  const targetSet = new Set(targets.map(([x, y]) => tileKey(x, y)));
+  if (targetSet.has(startKey)) return [];
+
+  const visited = new Map<string, string | null>(); // key → parent key
+  const queue: [number, number][] = [start];
+  visited.set(startKey, null);
+
+  while (queue.length > 0) {
+    const [cx, cy] = queue.shift()!;
+    const curKey = tileKey(cx, cy);
+    for (const [nx, ny] of getPassableNeighbors(cx, cy, tileArray)) {
+      const nk = tileKey(nx, ny);
+      if (visited.has(nk)) continue;
+      visited.set(nk, curKey);
+      if (targetSet.has(nk)) {
+        // Backtrack to build path (exclude start and target)
+        const path: [number, number][] = [];
+        let cur: string | null = curKey; // parent of target
+        while (cur !== null && cur !== startKey) {
+          const [px, py] = cur.split(",").map(Number) as [number, number];
+          path.unshift([px, py]);
+          cur = visited.get(cur)!;
+        }
+        return path;
+      }
+      queue.push([nx, ny]);
+    }
+  }
+  return []; // no path found
+}
+
+/**
  * Validates a retreat/evasion destination.
  * v4.2 rules: destination must be discovered, adjacent (or same tile or Faithdom),
  * and free of unfriendly fleets (Faithdom is always safe).
@@ -161,15 +204,22 @@ export const isValidRetreatDestination = (
   return true;
 };
 
-// All tiles where a player has skyships, plus Faithdom as free waypoints
+// All tiles where a player has skyships (fleet or route disc), plus Faithdom as free waypoints
 export const buildPlayerNetwork = (G: MyGameState, playerID: string): Set<string> => {
   const network = new Set<string>();
   FAITHDOM_TILES.forEach(([x, y]) => network.add(tileKey(x, y)));
+  // Fleet positions
   G.playerInfo[playerID].fleetInfo.forEach((fleet) => {
     if (fleet.skyships > 0) {
       network.add(tileKey(fleet.location[0], fleet.location[1]));
     }
   });
+  // Route skyship discs on map
+  for (const [key, players] of Object.entries(G.mapState.routeSkyships)) {
+    if (players.includes(playerID)) {
+      network.add(key);
+    }
+  }
   return network;
 };
 
@@ -195,4 +245,38 @@ export const countActiveTradeRoutes = (G: MyGameState, playerID: string): number
   }
 
   return count;
+};
+
+/**
+ * Would placing a route skyship at the given tile connect any currently
+ * disconnected outpost/colony to Faithdom for this player?
+ */
+export const wouldPlacementConnectRoute = (
+  G: MyGameState, playerID: string, tile: string,
+): boolean => {
+  const baseNetwork = buildPlayerNetwork(G, playerID);
+  const extendedNetwork = new Set(baseNetwork);
+  extendedNetwork.add(tile);
+
+  for (let y = 0; y < G.mapState.buildings.length; y++) {
+    for (let x = 0; x < G.mapState.buildings[y].length; x++) {
+      const building = G.mapState.buildings[y][x];
+      if (building.player?.id !== playerID || !building.buildings) continue;
+      if (building.buildings !== "outpost" && building.buildings !== "colony") continue;
+
+      const bk = tileKey(x, y);
+      // Check if already connected WITHOUT the new tile
+      const oldNet = new Set(baseNetwork);
+      oldNet.add(bk);
+      const oldReachable = bfsReachable(FAITHDOM_TILES, oldNet, G.mapState.currentTileArray);
+      if (oldReachable.has(bk)) continue; // already connected, skip
+
+      // Check if connected WITH the new tile
+      const newNet = new Set(extendedNetwork);
+      newNet.add(bk);
+      const newReachable = bfsReachable(FAITHDOM_TILES, newNet, G.mapState.currentTileArray);
+      if (newReachable.has(bk)) return true; // this placement makes a difference
+    }
+  }
+  return false;
 };

@@ -2,7 +2,7 @@ import { MOVE_DEFINITIONS } from "../moveDefinitions";
 import type { MyGameState } from "../types";
 import type { Ctx } from "boardgame.io";
 import type { AIMove } from "./types";
-import { getNeighbors, isValidRetreatDestination } from "../helpers/mapUtils";
+import { getNeighbors, isValidRetreatDestination, tileKey, wouldPlacementConnectRoute } from "../helpers/mapUtils";
 import { MAP_WIDTH, MAP_HEIGHT, KINGDOM_LOCATION, MAX_SKYSHIPS_PER_FLEET } from "../data/gameData";
 import { findPossibleDestinations } from "../helpers/helpers";
 import { isStage } from "../helpers/stageUtils";
@@ -169,7 +169,10 @@ export function enumerateLegalMoves(G: MyGameState, ctx: Ctx, playerID: string):
         }
       }
 
-      moves.push({ move: "pass", args: [] });
+      // Pass is only valid on the first flip, not during cascade
+      if (!ctx.numMoves || ctx.numMoves === 0) {
+        moves.push({ move: "pass", args: [] });
+      }
       return moves;
     }
 
@@ -281,7 +284,7 @@ export function enumerateLegalMoves(G: MyGameState, ctx: Ctx, playerID: string):
       }
 
       // sendAgitators — costs 2 gold, no counsellor cost; at most once per rival per round
-      if (G.playerInfo[playerID].resources.gold >= 2) {
+      {
         const sentThisRound = G.playerInfo[playerID].agitatorsSentThisRound;
         for (const otherID of ctx.playOrder) {
           if (otherID !== playerID && !sentThisRound.includes(otherID)) {
@@ -294,7 +297,6 @@ export function enumerateLegalMoves(G: MyGameState, ctx: Ctx, playerID: string):
       const player = G.playerInfo[playerID];
       if (
         player.resources.counsellors >= 1 &&
-        player.resources.gold >= 1 &&
         !player.playerBoardCounsellorLocations.dispatchSkyshipFleet
       ) {
         for (let fi = 0; fi < player.fleetInfo.length; fi++) {
@@ -318,7 +320,6 @@ export function enumerateLegalMoves(G: MyGameState, ctx: Ctx, playerID: string):
       // deployFleet — deploy from home with sensible loadouts
       if (
         player.resources.counsellors >= 1 &&
-        player.resources.gold >= 1 &&
         player.resources.skyships >= 1 &&
         !player.playerBoardCounsellorLocations.dispatchSkyshipFleet
       ) {
@@ -374,62 +375,18 @@ export function enumerateLegalMoves(G: MyGameState, ctx: Ctx, playerID: string):
         }
       }
 
-      // garrisonTransfer — transfer troops between fleet and garrison at outposts/colonies
-      for (let fi = 0; fi < player.fleetInfo.length; fi++) {
-        const fleet = player.fleetInfo[fi];
-        const isAtHome =
-          fleet.location[0] === KINGDOM_LOCATION[0] &&
-          fleet.location[1] === KINGDOM_LOCATION[1];
-        if (isAtHome || fleet.skyships === 0) continue;
-
-        const [fx, fy] = fleet.location;
-        const building = G.mapState.buildings[fy]?.[fx];
-        if (
-          !building ||
-          (building.buildings !== "outpost" && building.buildings !== "colony") ||
-          building.player?.id !== playerID
-        ) continue;
-
-        // Fleet → garrison (positive = fleet to garrison)
-        const fleetTroops = fleet.regiments + fleet.levies + fleet.eliteRegiments;
-        if (fleetTroops > 0) {
-          moves.push({
-            move: "garrisonTransfer",
-            args: [fleet.fleetId, fleet.location, fleet.regiments, fleet.levies, fleet.eliteRegiments],
-          });
-        }
-
-        // Garrison → fleet (negative values)
-        const garrisonRegs = building.garrisonedRegiments ?? 0;
-        const garrisonLevs = building.garrisonedLevies ?? 0;
-        const garrisonElites = building.garrisonedEliteRegiments ?? 0;
-        const garrisonTotal = garrisonRegs + garrisonLevs + garrisonElites;
-        if (garrisonTotal > 0) {
-          const currentFleetTroops = fleet.regiments + fleet.levies + fleet.eliteRegiments;
-          const freeCapacity = fleet.skyships - currentFleetTroops;
-          if (freeCapacity > 0) {
-            const xferElites = Math.min(garrisonElites, freeCapacity);
-            const xferRegs = Math.min(garrisonRegs, freeCapacity - xferElites);
-            const xferLevs = Math.min(garrisonLevs, freeCapacity - xferElites - xferRegs);
-            if (xferElites + xferRegs + xferLevs > 0) {
-              moves.push({
-                move: "garrisonTransfer",
-                args: [fleet.fleetId, fleet.location, -xferRegs, -xferLevs, -xferElites],
-              });
-            }
-          }
-        }
-      }
+      // garrisonTransfer — skipped for bots (causes infinite load/unload loops
+      // and troops in garrisons don't contribute to bot VP strategy)
 
       // transferBetweenFleets — transfer troops between co-located fleets
+      // Only enumerate si < ti to prevent infinite A→B / B→A loops
       for (let si = 0; si < player.fleetInfo.length; si++) {
         const src = player.fleetInfo[si];
         const srcAtHome =
           src.location[0] === KINGDOM_LOCATION[0] &&
           src.location[1] === KINGDOM_LOCATION[1];
         if (src.skyships === 0 || srcAtHome) continue;
-        for (let ti = 0; ti < player.fleetInfo.length; ti++) {
-          if (si === ti) continue;
+        for (let ti = si + 1; ti < player.fleetInfo.length; ti++) {
           const tgt = player.fleetInfo[ti];
           if (
             src.location[0] !== tgt.location[0] ||
@@ -555,8 +512,6 @@ export function enumerateLegalMoves(G: MyGameState, ctx: Ctx, playerID: string):
             moves.push({ move: "pickCard", args: [i] });
           }
           moves.push({ move: "drawCard", args: [] });
-        } else {
-          moves.push({ move: "pass", args: [] });
         }
         return moves;
       } else if (isStage(G, "resolution", "plunder_legends")) {
@@ -593,8 +548,6 @@ export function enumerateLegalMoves(G: MyGameState, ctx: Ctx, playerID: string):
             moves.push({ move: "pickCard", args: [i] });
           }
           moves.push({ move: "drawCard", args: [] });
-        } else {
-          moves.push({ move: "pass", args: [] });
         }
         return moves;
       } else if (isStage(G, "resolution", "ground_garrison")) {
@@ -715,13 +668,38 @@ export function enumerateLegalMoves(G: MyGameState, ctx: Ctx, playerID: string):
           }
         }
         if (deployedIndices.length > 0) {
-          // Option: retrieve ALL deployed fleets
+          // Option: retrieve ALL deployed fleets (plain)
           moves.push({ move: "retrieveFleets", args: [deployedIndices] });
-          // Options: retrieve individual fleets (for selective retrieval)
-          if (deployedIndices.length > 1) {
-            for (const idx of deployedIndices) {
+          // Per-fleet options: placeAt vs trailFrom vs plain
+          for (const idx of deployedIndices) {
+            const fleet = fleets[idx];
+            const fleetTile = tileKey(fleet.location[0], fleet.location[1]);
+            if (wouldPlacementConnectRoute(G, playerID, fleetTile)) {
+              // Place a route skyship here — repairs a broken route
+              moves.push({ move: "retrieveFleets", args: [[idx], { placeAt: [idx] }] });
+            } else if (fleet.skyships > 1) {
+              // Leave a trail back to Faithdom
+              moves.push({ move: "retrieveFleets", args: [[idx], { trailFrom: [idx] }] });
+            }
+            // Plain individual retrieve (always available if >1 fleet deployed)
+            if (deployedIndices.length > 1) {
               moves.push({ move: "retrieveFleets", args: [[idx]] });
             }
+          }
+          // Retrieve all with route options where applicable
+          const placeAtIndices = deployedIndices.filter(idx => {
+            const f = fleets[idx];
+            return wouldPlacementConnectRoute(G, playerID, tileKey(f.location[0], f.location[1]));
+          });
+          const trailIndices = deployedIndices.filter(idx => {
+            const f = fleets[idx];
+            return !wouldPlacementConnectRoute(G, playerID, tileKey(f.location[0], f.location[1])) && f.skyships > 1;
+          });
+          if (placeAtIndices.length > 0 || trailIndices.length > 0) {
+            moves.push({ move: "retrieveFleets", args: [deployedIndices, {
+              ...(placeAtIndices.length > 0 ? { placeAt: placeAtIndices } : {}),
+              ...(trailIndices.length > 0 ? { trailFrom: trailIndices } : {}),
+            }] });
           }
         }
         moves.push({ move: "pass", args: [] });
@@ -738,8 +716,6 @@ export function enumerateLegalMoves(G: MyGameState, ctx: Ctx, playerID: string):
           }
           // Draw from deck (no card index = undefined)
           moves.push({ move: "commitDeferredBattleCard", args: [] });
-        } else {
-          moves.push({ move: "pass", args: [] });
         }
       } else if (isStage(G, "resolution", "rebellion")) {
         const rebellion = G.currentRebellion;
@@ -754,8 +730,6 @@ export function enumerateLegalMoves(G: MyGameState, ctx: Ctx, playerID: string):
           moves.push({ move: "commitRebellionTroops", args: [Math.ceil(regs / 2), Math.ceil(levs / 2)] });
           // Commit none
           moves.push({ move: "commitRebellionTroops", args: [0, 0] });
-        } else {
-          moves.push({ move: "pass", args: [] });
         }
       } else if (isStage(G, "resolution", "rebellion_rival_support")) {
         // Rivals choose to support defender or rebels
@@ -771,10 +745,9 @@ export function enumerateLegalMoves(G: MyGameState, ctx: Ctx, playerID: string):
           moves.push({ move: "contributeToRebellion", args: ["rebel", regs, 0] });
         }
       } else if (G.stage.sub === "invasion_nominate") {
-        // Only the Archprelate can nominate — others pass
+        // Only the Archprelate can nominate — others have no move
         if (!G.playerInfo[playerID].isArchprelate) {
-          moves.push({ move: "pass", args: [] });
-          return moves;
+          return [];
         }
         const eligible = G.currentInvasion?.eligibleCaptainGenerals ?? ctx.playOrder;
         for (const id of eligible) {
@@ -806,14 +779,11 @@ export function enumerateLegalMoves(G: MyGameState, ctx: Ctx, playerID: string):
         }
         // Offer nothing
         moves.push({ move: "offerBuyoffGold", args: [0] });
-      } else {
-        moves.push({ move: "pass", args: [] });
       }
 
       // DEBUG: catch empty resolution moves
       if (moves.length === 0) {
         console.log(`[ENUM-EMPTY] P${playerID} sub=${G.stage?.sub} att=${G.battleState?.attacker?.id} def=${G.battleState?.defender?.id}`);
-        moves.push({ move: "pass", args: [] }); // prevent stall
       }
       return moves;
     }
@@ -823,7 +793,7 @@ export function enumerateLegalMoves(G: MyGameState, ctx: Ctx, playerID: string):
     }
 
     default: {
-      return [{ move: "pass", args: [] }];
+      return [];
     }
   }
 }

@@ -4,12 +4,15 @@ import { allPlayersPassed } from "../helpers/stateUtils";
 import { setStage } from "../helpers/stageUtils";
 
 const validatePass = (G: MyGameState, _playerID: string): MoveError | null => {
-  // GAP-24: cascade flip — must keep discovering after Ocean/Legend; Land clears the flag
-  // ctx isn't available in validate, but we can check the flag on G
   if (G.mustContinueDiscovery) {
     return { code: "MUST_CONTINUE", message: "You must continue discovering (Ocean/Legend tile flipped)" };
   }
-  return null;
+  const phase = G.stage.phase;
+  const sub = G.stage.sub;
+  if (phase === "discovery" || phase === "actions" || sub === "retrieve_fleets") {
+    return null;
+  }
+  return { code: "INVALID_PHASE", message: "Cannot pass in this stage" };
 };
 
 const pass: MoveDefinition = {
@@ -22,6 +25,9 @@ const pass: MoveDefinition = {
     if (ctx.phase === "discovery") {
       G.firstTurnOfRound = false;
     }
+
+    const flags = Object.entries(G.playerInfo).map(([id, p]) => `${id}:${p.passed}`).join(" ");
+    process.stderr.write(`[PASS] P${playerID} phase=${ctx.phase} flags=[${flags}]\n`);
 
     if (allPlayersPassed(G)) {
       // Dead code — next phase's onBegin overwrites. Set valid value for current context.

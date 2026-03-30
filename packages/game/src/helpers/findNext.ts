@@ -1,4 +1,3 @@
-import { Ctx } from "boardgame.io";
 import { MyGameState } from "../types";
 import { sortPlayersInPlayerOrder } from "./helpers";
 import { EventsAPI } from "boardgame.io/dist/types/src/plugins/events/events";
@@ -149,35 +148,3 @@ export const findNextConquest = (
   }
 };
 
-export const findNextPlayerInBattleSequence = (
-  playerID: string,
-  ctx: Ctx,
-  G: MyGameState,
-  events: EventsAPI,
-  onExhausted?: (G: MyGameState, events: EventsAPI) => void
-): void => {
-  G.battleState = undefined;
-  const playerIDs: string[] = [
-    ...G.mapState.battleMap[G.mapState.currentBattle[1]][
-      G.mapState.currentBattle[0]
-    ],
-  ];
-  const sortedPlayerIDs = sortPlayersInPlayerOrder(playerIDs, G);
-  const currentPlayerIndex = sortPlayersInPlayerOrder(playerIDs, G).indexOf(
-    playerID
-  );
-  const nextPlayerIndex = currentPlayerIndex + 1;
-  const nextPlayer = sortedPlayerIDs[nextPlayerIndex];
-  if (
-    nextPlayerIndex >= sortedPlayerIDs.length ||
-    sortedPlayerIDs.length === 1
-  ) {
-    findNextBattle(G, events, false, onExhausted);
-  } else {
-    events.endTurn({ next: nextPlayer });
-    // Determine aerial vs ground from current stage context
-    const isGround = G.stage.sub.startsWith("ground_");
-    setStage(G, "resolution", isGround ? "ground_attack_or_pass" : "aerial_attack_or_pass");
-    computeDefendersAtBattle(G, nextPlayer);
-  }
-};
