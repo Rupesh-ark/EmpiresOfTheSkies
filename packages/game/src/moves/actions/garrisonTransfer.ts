@@ -134,6 +134,19 @@ const garrisonTransfer: MoveDefinition = {
   },
   errorMessage: "Cannot transfer troops to/from garrison right now",
   validate: validateGarrisonTransfer,
+  successLog: (G, pid, _fleetId, tileCoords, regiments, levies, eliteRegiments) => {
+    const k = G.playerInfo[pid].kingdomName;
+    const landName = G.mapState.currentTileArray[tileCoords[1]][tileCoords[0]]?.name ?? `[${tileCoords}]`;
+    const parts: string[] = [];
+    if (regiments > 0) parts.push(`${regiments}R`);
+    if (regiments < 0) parts.push(`${-regiments}R`);
+    if (levies > 0) parts.push(`${levies}L`);
+    if (levies < 0) parts.push(`${-levies}L`);
+    if (eliteRegiments > 0) parts.push(`${eliteRegiments}E`);
+    if (eliteRegiments < 0) parts.push(`${-eliteRegiments}E`);
+    const direction = (regiments + levies + eliteRegiments) > 0 ? "fleet → garrison" : "garrison → fleet";
+    return `${k} transfers troops at ${landName} (${parts.join(", ")} ${direction})`;
+  },
 };
 
 export default garrisonTransfer;

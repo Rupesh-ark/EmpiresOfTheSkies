@@ -77,6 +77,11 @@ const proposeDeal: MoveDefinition = {
   },
   errorMessage: "Cannot propose this deal",
   validate: validateProposeDeal,
+  successLog: (G, pid, targetID) => {
+    const k = G.playerInfo[pid].kingdomName;
+    const t = G.playerInfo[targetID].kingdomName;
+    return `${k} proposes a deal to ${t}`;
+  },
 };
 
 export default proposeDeal;

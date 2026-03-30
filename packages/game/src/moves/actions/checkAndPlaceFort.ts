@@ -33,6 +33,11 @@ const checkAndPlaceFort: MoveDefinition = {
   },
   errorMessage: "Cannot place a Fort here",
   validate: validateCheckAndPlaceFort,
+  successLog: (G, pid, coords) => {
+    const k = G.playerInfo[pid].kingdomName;
+    const landName = G.mapState.currentTileArray[coords[1]][coords[0]]?.name ?? `[${coords}]`;
+    return `${k} builds a Fort at ${landName}`;
+  },
 };
 
 export default checkAndPlaceFort;

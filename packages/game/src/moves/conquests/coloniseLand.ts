@@ -28,6 +28,12 @@ const coloniseLand: MoveDefinition = {
     setStage(G, "resolution", "conquest_draw_or_pick");
   },
   errorMessage: "Cannot colonise this land",
+  successLog: (G, pid) => {
+    const [x, y] = G.mapState.currentBattle;
+    const landName = G.mapState.currentTileArray[y][x]?.name ?? `[${x},${y}]`;
+    const k = G.playerInfo[pid].kingdomName;
+    return `${k} attempts to colonise ${landName}`;
+  },
 };
 
 export default coloniseLand;

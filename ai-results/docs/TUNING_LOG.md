@@ -2,7 +2,7 @@
 
 ## Session: 2026-03-27
 ### Context
-Tuning the AI bot behaviour after fixing critical resolution chain bugs (see `docs/AI_BOT_RESOLUTION_FIXES.md`). Bots now execute the full game loop — discovery, actions, aerial/ground battles, plunder, conquest, election, invasions, rebellions, and fleet retrieval. This session focuses on tuning weights and thresholds to produce realistic, competitive gameplay.
+Tuning the AI bot behaviour after fixing critical resolution chain bugs. Bots now execute the full game loop — discovery, actions, aerial/ground battles, plunder, conquest, election, invasions, rebellions, and fleet retrieval. This session focuses on tuning weights and thresholds to produce realistic, competitive gameplay.
 
 All data collected via `runGameInBrowser()` with unique `matchID` per game to prevent state caching. Each data point is a fresh 6-player game running the full ruleset (v4.2).
 

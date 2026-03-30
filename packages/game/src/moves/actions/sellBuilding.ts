@@ -31,6 +31,10 @@ const sellBuilding: MoveDefinition = {
   },
   errorMessage: "Cannot sell this building",
   validate: validateSellBuilding,
+  successLog: (G, pid, buildingType) => {
+    const k = G.playerInfo[pid].kingdomName;
+    return `${k} sells a ${buildingType}`;
+  },
 };
 
 export default sellBuilding;

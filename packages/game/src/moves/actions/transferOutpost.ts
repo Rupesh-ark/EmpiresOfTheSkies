@@ -24,6 +24,11 @@ const transferOutpost: MoveDefinition = {
   },
   errorMessage: "Cannot transfer this outpost",
   validate: validateTransferOutpost,
+  successLog: (G, pid, _coords, targetID) => {
+    const k = G.playerInfo[pid].kingdomName;
+    const t = G.playerInfo[targetID].kingdomName;
+    return `${k} transfers an outpost to ${t}`;
+  },
 };
 
 export default transferOutpost;

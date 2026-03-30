@@ -37,6 +37,12 @@ const constructOutpost: MoveDefinition = {
     setStage(G, "resolution", "conquest_garrison");
   },
   errorMessage: "Cannot construct an outpost here",
+  successLog: (G, pid) => {
+    const [x, y] = G.mapState.currentBattle;
+    const landName = G.mapState.currentTileArray[y][x]?.name ?? `[${x},${y}]`;
+    const k = G.playerInfo[pid].kingdomName;
+    return `${k} constructs an outpost at ${landName}`;
+  },
 };
 
 export default constructOutpost;

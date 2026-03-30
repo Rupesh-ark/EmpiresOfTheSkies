@@ -1,4 +1,5 @@
 import { MoveDefinition, MyGameState, MoveError } from "../../types";
+import { logEvent } from "../../helpers/stateUtils";
 
 const validateRejectDeal = (G: MyGameState, playerID: string): MoveError | null => {
   if (!G.pendingDeal) {
@@ -11,7 +12,11 @@ const validateRejectDeal = (G: MyGameState, playerID: string): MoveError | null 
 };
 
 const rejectDeal: MoveDefinition = {
-  fn: ({ G }) => {
+  fn: ({ G, playerID }) => {
+    const deal = G.pendingDeal!;
+    const k = G.playerInfo[playerID].kingdomName;
+    const proposer = G.playerInfo[deal.proposerID].kingdomName;
+    logEvent(G, `${k} rejects deal from ${proposer}`);
     G.pendingDeal = undefined;
   },
   errorMessage: "Cannot reject this deal",

@@ -39,6 +39,14 @@ const attackPlayersBuilding: MoveDefinition = {
     }
   },
   errorMessage: "Cannot attack this building",
+  successLog: (G, pid) => {
+    const [x, y] = G.mapState.currentBattle;
+    const defender = G.mapState.buildings[y][x].player;
+    if (!defender) return null;
+    const k = G.playerInfo[pid].kingdomName;
+    const d = G.playerInfo[defender.id].kingdomName;
+    return `${k} attacks ${d}'s ${G.mapState.buildings[y][x].buildings}`;
+  },
 };
 
 export default attackPlayersBuilding;

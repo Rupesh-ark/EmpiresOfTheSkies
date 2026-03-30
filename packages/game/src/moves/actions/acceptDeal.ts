@@ -1,4 +1,5 @@
 import { MyGameState, DealOffer, MoveError, MoveDefinition } from "../../types";
+import { logEvent } from "../../helpers/stateUtils";
 import { validateOffer } from "./proposeDeal";
 
 /**
@@ -51,15 +52,17 @@ const acceptDeal: MoveDefinition = {
     const offerError = validateOffer(G, proposerID, targetID, offering);
     const requestError = !offerError && validateOffer(G, targetID, proposerID, requesting);
     if (offerError || requestError) {
-      // Deal is stale — clear it without executing
       G.pendingDeal = undefined;
       return;
     }
 
-    // Execute both sides atomically
+    const proposerName = G.playerInfo[proposerID].kingdomName;
+    const targetName = G.playerInfo[targetID].kingdomName;
+
     executeSide(G, proposerID, targetID, offering);
     executeSide(G, targetID, proposerID, requesting);
 
+    logEvent(G, `${targetName} accepts deal from ${proposerName}`);
     G.pendingDeal = undefined;
   },
   errorMessage: "Cannot accept this deal",

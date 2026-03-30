@@ -19,6 +19,10 @@ const sellSkyships: MoveDefinition = {
   },
   errorMessage: "Cannot sell Skyships",
   validate: validateSellSkyships,
+  successLog: (G, pid, amount) => {
+    const k = G.playerInfo[pid].kingdomName;
+    return `${k} sells ${amount} Skyship${amount > 1 ? "s" : ""}`;
+  },
 };
 
 export default sellSkyships;

@@ -344,7 +344,7 @@ export const WorldMapTile = memo((props: worldMapTileProps) => {
           onClick={props.selectable ? altOnClick : canShowDetail ? () => setDetailOpen(true) : undefined}
         >
           {building()}
-          {fort ? <FortIcon colour={fortColour ?? "white"} /> : null}
+          {fort.length > 0 ? <Box sx={{ position: "absolute", bottom: 2, right: 2, width: 16, height: 8, zIndex: 10 }}><FortIcon colour={fortColour ?? "white"} /></Box> : null}
 
           {/* Infidel Fleet icon */}
           {props.G.infidelFleet?.active && !props.G.infidelFleet.destroyed &&

@@ -81,6 +81,15 @@ const transferBetweenFleets: MoveDefinition = {
   },
   errorMessage: "Cannot transfer between fleets",
   validate: validateTransferBetweenFleets,
+  successLog: (G, pid, srcIdx, tgtIdx, sky, reg, lev, elite) => {
+    const k = G.playerInfo[pid].kingdomName;
+    const parts: string[] = [];
+    if (sky) parts.push(`${sky}S`);
+    if (reg) parts.push(`${reg}R`);
+    if (lev) parts.push(`${lev}L`);
+    if (elite) parts.push(`${elite}E`);
+    return `${k} transfers ${parts.join(", ")} between fleets`;
+  },
 };
 
 export default transferBetweenFleets;

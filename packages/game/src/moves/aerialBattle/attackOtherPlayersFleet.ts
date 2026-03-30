@@ -48,6 +48,11 @@ const attackOtherPlayersFleet: MoveDefinition = {
     setStage(G, "resolution", "aerial_attack_or_evade");
   },
   errorMessage: "Cannot attack this fleet",
+  successLog: (G, pid, defenderID) => {
+    const k = G.playerInfo[pid].kingdomName;
+    const d = G.playerInfo[defenderID].kingdomName;
+    return `${k} attacks ${d}'s fleet`;
+  },
 };
 
 export default attackOtherPlayersFleet;
