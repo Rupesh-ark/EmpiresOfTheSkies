@@ -13,7 +13,7 @@ import { GameRecorder } from "../GameRecorder";
 import { runGameLoop } from "../selfPlay";
 import { setEvalWeights } from "./StateEvaluator";
 
-// ── Evaluator weight config (what we're tuning) ─────────────────────────────
+// Evaluator weight config (what we're tuning)
 
 export interface EvalWeights {
   name: string;
@@ -63,7 +63,7 @@ export const DEFAULT_EVAL_WEIGHTS: EvalWeights = {
   unconnectedPenalty: 0.3,
 };
 
-// ── Tournament result ────────────────────────────────────────────────────────
+// Tournament result
 
 export interface TournamentEntry {
   config: EvalWeights;
@@ -77,7 +77,7 @@ export interface TournamentResult {
   totalGames: number;
 }
 
-// ── Run tournament ───────────────────────────────────────────────────────────
+// Run tournament
 
 export function runEvalTournament(
   configs: EvalWeights[],
@@ -165,7 +165,7 @@ function runSingleTournamentGame(gameNumber: number): {
   return { winner: ranking[0] ?? "0", scores };
 }
 
-// ── Print tournament results ─────────────────────────────────────────────────
+// Print tournament results
 
 export function printTournamentResult(result: TournamentResult): void {
   console.log("\n" + "═".repeat(60));

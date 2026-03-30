@@ -34,7 +34,6 @@ const colHeaderCellSx = {
 
 const NprKingdomTable = (props: MyGameProps) => {
   const nprKingdoms = Object.keys(props.G.nprCathedrals);
-  // Also include Zeeland/Venoa (republics, always NPR) if not already listed
   const republics = ["Zeeland", "Venoa"];
   const allNpr = [
     ...nprKingdoms,

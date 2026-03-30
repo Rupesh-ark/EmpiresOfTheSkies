@@ -7,7 +7,7 @@
  * This replaces the scattered findNext* + advanceFrom* callback chains
  * that were in individual move files.
  *
- * Resolution order (v4.2):
+ * Resolution order:
  *   aerial battles → plunder → ground battles → conquest → election
  *   → post-election (infidel fleet, deferred battles, rebellions, invasion, retrieve)
  */
@@ -31,7 +31,7 @@ import {
 // Re-export for moves that need to start the resolution
 export { beginResolution } from "./resolutionFlow";
 
-// ── Sequence step callbacks (passed to findNext* as onExhausted) ────────────
+// Sequence step callbacks (passed to findNext* as onExhausted)
 
 const toPlunder = (G: MyGameState, events: EventsAPI): void => {
   G.mapState.currentBattle = [0, 0];
@@ -52,7 +52,7 @@ const toElection = (G: MyGameState, events: EventsAPI): void => {
   enterElection(G, events);
 };
 
-// ── Compute who's next at the current battle tile ───────────────────────────
+// Compute who's next at the current battle tile
 
 function computeDefendersAtBattle(G: MyGameState, nextPlayer: string): void {
   const [x, y] = G.mapState.currentBattle;
@@ -81,7 +81,7 @@ function getNextPlayerAtTile(
   return sorted[currentIndex + 1];
 }
 
-// ── Public API: called by resolution moves ──────────────────────────────────
+// Public API: called by resolution moves
 
 /**
  * Called after: doNotAttack, relocateDefeatedFleet, evadeAttackingFleet (force home),

@@ -18,7 +18,7 @@ const validateSendAgitators = (
   if (G.playerInfo[playerID].agitatorsSentThisRound.includes(targetID)) {
     return { code: "ALREADY_SENT", message: "Already sent agitators to this rival this round" };
   }
-  // Gold check removed — debt mechanics allow deficit spending (v4.2 rules).
+  // Gold check removed — debt mechanics allow deficit spending (rules).
   // Only Lenders Refuse Credit (checked in validateMove) blocks gold spending.
   return null;
 };

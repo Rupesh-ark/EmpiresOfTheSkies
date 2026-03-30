@@ -15,7 +15,7 @@ import { addVPAmount, logEvent } from "./stateUtils";
 import { drawFortuneOfWarCard, hasFortAt } from "./helpers";
 import { calculateCombat } from "./combatMath";
 
-// ── Faerie Uprising ─────────────────────────────────────────────────────────
+// Faerie Uprising
 
 const resolveFaerieUprising = (
   G: MyGameState,
@@ -82,7 +82,7 @@ const resolveFaerieUprising = (
   };
 };
 
-// ── Headstrong Commander ────────────────────────────────────────────────────
+// Headstrong Commander
 
 const resolveHeadstrongCommander = (
   G: MyGameState,
@@ -155,7 +155,7 @@ const resolveHeadstrongCommander = (
   };
 };
 
-// ── Infidels Invade Faerie ──────────────────────────────────────────────────
+// Infidels Invade Faerie
 
 const resolveInfidelsInvadeFaerie = (
   G: MyGameState,
@@ -221,7 +221,7 @@ const resolveInfidelsInvadeFaerie = (
   };
 };
 
-// ── Dispatchers ─────────────────────────────────────────────────────────────
+// Dispatchers
 
 /**
  * Resolve a deferred battle with an optional player FoW card.

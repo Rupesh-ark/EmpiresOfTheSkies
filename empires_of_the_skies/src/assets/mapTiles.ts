@@ -1,4 +1,4 @@
-// ── Map Tile images ──────────────────────────────────────────────────────────
+// Map Tile images
 
 import KnownWorld1 from "../map_tiles/known_world1.svg";
 import KnownWorld2 from "../map_tiles/known_world2.svg";

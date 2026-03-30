@@ -1,0 +1,5912 @@
+[
+  {
+    "generation": 1,
+    "candidates": [
+      {
+        "weights": {
+          "penaltyScale": 0.272243,
+          "qualityThreshold": 0.110608,
+          "goldPressure_0": 0.300266,
+          "goldPressure_1": 0.154399,
+          "goldPressure_2": 0.19665,
+          "goldPressure_3": 0.013374,
+          "diminishing_perUnit": 0.036749,
+          "diminishing_hardCapPenalty": 0.469876,
+          "round_tooEarlyPenalty": 0.052355,
+          "round_tooLatePenalty": 0.080825,
+          "round_mildPenalty": 0.029858,
+          "round_finalRoundBonus": 0.284967
+        },
+        "avgVP": 49.88
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.176825,
+          "qualityThreshold": 0.016898,
+          "goldPressure_0": 0.180447,
+          "goldPressure_1": 0.322999,
+          "goldPressure_2": 0.295884,
+          "goldPressure_3": 0.013863,
+          "diminishing_perUnit": 0.05205,
+          "diminishing_hardCapPenalty": 0.289293,
+          "round_tooEarlyPenalty": 0.165747,
+          "round_tooLatePenalty": 0.148478,
+          "round_mildPenalty": 0.115052,
+          "round_finalRoundBonus": 0.011481
+        },
+        "avgVP": 55.54
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.306664,
+          "qualityThreshold": 0.062335,
+          "goldPressure_0": 0.287074,
+          "goldPressure_1": 0.270099,
+          "goldPressure_2": 0.066684,
+          "goldPressure_3": 0.037606,
+          "diminishing_perUnit": 0.010042,
+          "diminishing_hardCapPenalty": 0.264606,
+          "round_tooEarlyPenalty": 0.170517,
+          "round_tooLatePenalty": 0.136207,
+          "round_mildPenalty": 0.034718,
+          "round_finalRoundBonus": 0.171839
+        },
+        "avgVP": 56.08
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.274486,
+          "qualityThreshold": 0.010058,
+          "goldPressure_0": 0.47622,
+          "goldPressure_1": 0.2424,
+          "goldPressure_2": 0.024414,
+          "goldPressure_3": 0.071467,
+          "diminishing_perUnit": 0.027111,
+          "diminishing_hardCapPenalty": 0.188633,
+          "round_tooEarlyPenalty": 0.08783,
+          "round_tooLatePenalty": 0.163453,
+          "round_mildPenalty": 0.099501,
+          "round_finalRoundBonus": 0.07273
+        },
+        "avgVP": 51.48
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.205767,
+          "qualityThreshold": 0.141559,
+          "goldPressure_0": 0.069657,
+          "goldPressure_1": 0.224428,
+          "goldPressure_2": 0.059734,
+          "goldPressure_3": 0.137274,
+          "diminishing_perUnit": 0.050274,
+          "diminishing_hardCapPenalty": 0.372719,
+          "round_tooEarlyPenalty": 0.201504,
+          "round_tooLatePenalty": 0.076945,
+          "round_mildPenalty": 0.156969,
+          "round_finalRoundBonus": 0.010019
+        },
+        "avgVP": 60.1
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.287482,
+          "qualityThreshold": 0.054734,
+          "goldPressure_0": 0.507222,
+          "goldPressure_1": 0.050002,
+          "goldPressure_2": 0.241618,
+          "goldPressure_3": 0.010079,
+          "diminishing_perUnit": 0.030654,
+          "diminishing_hardCapPenalty": 0.38633,
+          "round_tooEarlyPenalty": 0.16457,
+          "round_tooLatePenalty": 0.167556,
+          "round_mildPenalty": 0.14523,
+          "round_finalRoundBonus": 0.165656
+        },
+        "avgVP": 53.39
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.320171,
+          "qualityThreshold": 0.010236,
+          "goldPressure_0": 0.355829,
+          "goldPressure_1": 0.104415,
+          "goldPressure_2": 0.093926,
+          "goldPressure_3": 0.079538,
+          "diminishing_perUnit": 0.07336,
+          "diminishing_hardCapPenalty": 0.374781,
+          "round_tooEarlyPenalty": 0.21266,
+          "round_tooLatePenalty": 0.348125,
+          "round_mildPenalty": 0.079445,
+          "round_finalRoundBonus": 0.146297
+        },
+        "avgVP": 56.47
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.310186,
+          "qualityThreshold": 0.03798,
+          "goldPressure_0": 0.395735,
+          "goldPressure_1": 0.242407,
+          "goldPressure_2": 0.085203,
+          "goldPressure_3": 0.075771,
+          "diminishing_perUnit": 0.058011,
+          "diminishing_hardCapPenalty": 0.296094,
+          "round_tooEarlyPenalty": 0.122272,
+          "round_tooLatePenalty": 0.11759,
+          "round_mildPenalty": 0.057427,
+          "round_finalRoundBonus": 0.010324
+        },
+        "avgVP": 60.08
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.301256,
+          "qualityThreshold": 0.030003,
+          "goldPressure_0": 0.457827,
+          "goldPressure_1": 0.218289,
+          "goldPressure_2": 0.036667,
+          "goldPressure_3": 0.036321,
+          "diminishing_perUnit": 0.0906,
+          "diminishing_hardCapPenalty": 0.395854,
+          "round_tooEarlyPenalty": 0.278531,
+          "round_tooLatePenalty": 0.208233,
+          "round_mildPenalty": 0.104615,
+          "round_finalRoundBonus": 0.068506
+        },
+        "avgVP": 56.82
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.235845,
+          "qualityThreshold": 0.073876,
+          "goldPressure_0": 0.233538,
+          "goldPressure_1": 0.202015,
+          "goldPressure_2": 0.200768,
+          "goldPressure_3": 0.010244,
+          "diminishing_perUnit": 0.123003,
+          "diminishing_hardCapPenalty": 0.287138,
+          "round_tooEarlyPenalty": 0.133019,
+          "round_tooLatePenalty": 0.16482,
+          "round_mildPenalty": 0.011067,
+          "round_finalRoundBonus": 0.046516
+        },
+        "avgVP": 47.96
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.195716,
+          "qualityThreshold": 0.045252,
+          "goldPressure_0": 0.299301,
+          "goldPressure_1": 0.239744,
+          "goldPressure_2": 0.181785,
+          "goldPressure_3": 0.022202,
+          "diminishing_perUnit": 0.119499,
+          "diminishing_hardCapPenalty": 0.178633,
+          "round_tooEarlyPenalty": 0.278245,
+          "round_tooLatePenalty": 0.208094,
+          "round_mildPenalty": 0.03286,
+          "round_finalRoundBonus": 0.080722
+        },
+        "avgVP": 59.03
+      }
+    ],
+    "gen_best_avgVP": 60.1,
+    "gen_avg_vp": 55.17,
+    "alltime_best_avgVP": 60.1,
+    "sigma": 0.092879,
+    "elapsed_s": 75.0
+  },
+  {
+    "generation": 2,
+    "candidates": [
+      {
+        "weights": {
+          "penaltyScale": 0.237095,
+          "qualityThreshold": 0.115884,
+          "goldPressure_0": 0.19707,
+          "goldPressure_1": 0.050508,
+          "goldPressure_2": 0.073251,
+          "goldPressure_3": 0.03225,
+          "diminishing_perUnit": 0.035803,
+          "diminishing_hardCapPenalty": 0.328241,
+          "round_tooEarlyPenalty": 0.172498,
+          "round_tooLatePenalty": 0.11979,
+          "round_mildPenalty": 0.135967,
+          "round_finalRoundBonus": 0.012268
+        },
+        "avgVP": 55.48
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.324144,
+          "qualityThreshold": 0.040179,
+          "goldPressure_0": 0.201645,
+          "goldPressure_1": 0.296927,
+          "goldPressure_2": 0.054253,
+          "goldPressure_3": 0.065561,
+          "diminishing_perUnit": 0.020915,
+          "diminishing_hardCapPenalty": 0.426881,
+          "round_tooEarlyPenalty": 0.130619,
+          "round_tooLatePenalty": 0.141394,
+          "round_mildPenalty": 0.121826,
+          "round_finalRoundBonus": 0.124784
+        },
+        "avgVP": 57.69
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.336489,
+          "qualityThreshold": 0.047905,
+          "goldPressure_0": 0.085255,
+          "goldPressure_1": 0.124572,
+          "goldPressure_2": 0.055514,
+          "goldPressure_3": 0.032684,
+          "diminishing_perUnit": 0.081108,
+          "diminishing_hardCapPenalty": 0.216386,
+          "round_tooEarlyPenalty": 0.0952,
+          "round_tooLatePenalty": 0.133956,
+          "round_mildPenalty": 0.054509,
+          "round_finalRoundBonus": 0.198228
+        },
+        "avgVP": 55.83
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.237071,
+          "qualityThreshold": 0.087057,
+          "goldPressure_0": 0.247626,
+          "goldPressure_1": 0.21151,
+          "goldPressure_2": 0.224784,
+          "goldPressure_3": 0.115138,
+          "diminishing_perUnit": 0.101551,
+          "diminishing_hardCapPenalty": 0.118949,
+          "round_tooEarlyPenalty": 0.135615,
+          "round_tooLatePenalty": 0.189697,
+          "round_mildPenalty": 0.080534,
+          "round_finalRoundBonus": 0.077268
+        },
+        "avgVP": 50.02
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.26072,
+          "qualityThreshold": 0.117456,
+          "goldPressure_0": 0.171904,
+          "goldPressure_1": 0.157726,
+          "goldPressure_2": 0.025556,
+          "goldPressure_3": 0.050857,
+          "diminishing_perUnit": 0.042919,
+          "diminishing_hardCapPenalty": 0.283724,
+          "round_tooEarlyPenalty": 0.117223,
+          "round_tooLatePenalty": 0.059996,
+          "round_mildPenalty": 0.020584,
+          "round_finalRoundBonus": 0.248426
+        },
+        "avgVP": 53.03
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.155472,
+          "qualityThreshold": 0.081252,
+          "goldPressure_0": 0.32428,
+          "goldPressure_1": 0.124578,
+          "goldPressure_2": 0.03251,
+          "goldPressure_3": 0.022786,
+          "diminishing_perUnit": 0.121665,
+          "diminishing_hardCapPenalty": 0.33853,
+          "round_tooEarlyPenalty": 0.057577,
+          "round_tooLatePenalty": 0.088594,
+          "round_mildPenalty": 0.058553,
+          "round_finalRoundBonus": 0.012176
+        },
+        "avgVP": 48.62
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.367883,
+          "qualityThreshold": 0.133471,
+          "goldPressure_0": 0.220708,
+          "goldPressure_1": 0.098517,
+          "goldPressure_2": 0.091909,
+          "goldPressure_3": 0.099887,
+          "diminishing_perUnit": 0.164926,
+          "diminishing_hardCapPenalty": 0.479062,
+          "round_tooEarlyPenalty": 0.238404,
+          "round_tooLatePenalty": 0.06831,
+          "round_mildPenalty": 0.20481,
+          "round_finalRoundBonus": 0.050552
+        },
+        "avgVP": 56.63
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.158756,
+          "qualityThreshold": 0.099107,
+          "goldPressure_0": 0.159789,
+          "goldPressure_1": 0.249095,
+          "goldPressure_2": 0.031211,
+          "goldPressure_3": 0.078822,
+          "diminishing_perUnit": 0.148029,
+          "diminishing_hardCapPenalty": 0.269817,
+          "round_tooEarlyPenalty": 0.289722,
+          "round_tooLatePenalty": 0.18264,
+          "round_mildPenalty": 0.193656,
+          "round_finalRoundBonus": 0.070268
+        },
+        "avgVP": 55.38
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.286109,
+          "qualityThreshold": 0.102877,
+          "goldPressure_0": 0.310598,
+          "goldPressure_1": 0.26065,
+          "goldPressure_2": 0.020004,
+          "goldPressure_3": 0.165334,
+          "diminishing_perUnit": 0.016282,
+          "diminishing_hardCapPenalty": 0.377879,
+          "round_tooEarlyPenalty": 0.269829,
+          "round_tooLatePenalty": 0.111118,
+          "round_mildPenalty": 0.104495,
+          "round_finalRoundBonus": 0.020647
+        },
+        "avgVP": 54.34
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.346792,
+          "qualityThreshold": 0.060192,
+          "goldPressure_0": 0.331718,
+          "goldPressure_1": 0.228986,
+          "goldPressure_2": 0.158512,
+          "goldPressure_3": 0.102452,
+          "diminishing_perUnit": 0.044949,
+          "diminishing_hardCapPenalty": 0.314903,
+          "round_tooEarlyPenalty": 0.319363,
+          "round_tooLatePenalty": 0.325408,
+          "round_mildPenalty": 0.087934,
+          "round_finalRoundBonus": 0.013891
+        },
+        "avgVP": 50.91
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.192341,
+          "qualityThreshold": 0.11094,
+          "goldPressure_0": 0.523919,
+          "goldPressure_1": 0.145729,
+          "goldPressure_2": 0.057276,
+          "goldPressure_3": 0.106747,
+          "diminishing_perUnit": 0.071746,
+          "diminishing_hardCapPenalty": 0.236075,
+          "round_tooEarlyPenalty": 0.217374,
+          "round_tooLatePenalty": 0.16553,
+          "round_mildPenalty": 0.109848,
+          "round_finalRoundBonus": 0.01466
+        },
+        "avgVP": 58.13
+      }
+    ],
+    "gen_best_avgVP": 58.13,
+    "gen_avg_vp": 54.19,
+    "alltime_best_avgVP": 60.1,
+    "sigma": 0.083963,
+    "elapsed_s": 151.0
+  },
+  {
+    "generation": 3,
+    "candidates": [
+      {
+        "weights": {
+          "penaltyScale": 0.197695,
+          "qualityThreshold": 0.159734,
+          "goldPressure_0": 0.15902,
+          "goldPressure_1": 0.218391,
+          "goldPressure_2": 0.031163,
+          "goldPressure_3": 0.135083,
+          "diminishing_perUnit": 0.021024,
+          "diminishing_hardCapPenalty": 0.418889,
+          "round_tooEarlyPenalty": 0.259439,
+          "round_tooLatePenalty": 0.101494,
+          "round_mildPenalty": 0.130341,
+          "round_finalRoundBonus": 0.095463
+        },
+        "avgVP": 57.43
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.239583,
+          "qualityThreshold": 0.121001,
+          "goldPressure_0": 0.349366,
+          "goldPressure_1": 0.147845,
+          "goldPressure_2": 0.110408,
+          "goldPressure_3": 0.14603,
+          "diminishing_perUnit": 0.049995,
+          "diminishing_hardCapPenalty": 0.229782,
+          "round_tooEarlyPenalty": 0.038923,
+          "round_tooLatePenalty": 0.154028,
+          "round_mildPenalty": 0.11439,
+          "round_finalRoundBonus": 0.010225
+        },
+        "avgVP": 48.44
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.118814,
+          "qualityThreshold": 0.125043,
+          "goldPressure_0": 0.312689,
+          "goldPressure_1": 0.101543,
+          "goldPressure_2": 0.068302,
+          "goldPressure_3": 0.063596,
+          "diminishing_perUnit": 0.015918,
+          "diminishing_hardCapPenalty": 0.327156,
+          "round_tooEarlyPenalty": 0.218986,
+          "round_tooLatePenalty": 0.099618,
+          "round_mildPenalty": 0.010602,
+          "round_finalRoundBonus": 0.010236
+        },
+        "avgVP": 51.82
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.286669,
+          "qualityThreshold": 0.131308,
+          "goldPressure_0": 0.300404,
+          "goldPressure_1": 0.173362,
+          "goldPressure_2": 0.124994,
+          "goldPressure_3": 0.122342,
+          "diminishing_perUnit": 0.081139,
+          "diminishing_hardCapPenalty": 0.433241,
+          "round_tooEarlyPenalty": 0.382758,
+          "round_tooLatePenalty": 0.046764,
+          "round_mildPenalty": 0.013367,
+          "round_finalRoundBonus": 0.01403
+        },
+        "avgVP": 48.81
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.324686,
+          "qualityThreshold": 0.037111,
+          "goldPressure_0": 0.333147,
+          "goldPressure_1": 0.225367,
+          "goldPressure_2": 0.074076,
+          "goldPressure_3": 0.128428,
+          "diminishing_perUnit": 0.118679,
+          "diminishing_hardCapPenalty": 0.317508,
+          "round_tooEarlyPenalty": 0.315684,
+          "round_tooLatePenalty": 0.119462,
+          "round_mildPenalty": 0.233952,
+          "round_finalRoundBonus": 0.038487
+        },
+        "avgVP": 48.21
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.192525,
+          "qualityThreshold": 0.06399,
+          "goldPressure_0": 0.111884,
+          "goldPressure_1": 0.122188,
+          "goldPressure_2": 0.039507,
+          "goldPressure_3": 0.017163,
+          "diminishing_perUnit": 0.032182,
+          "diminishing_hardCapPenalty": 0.195341,
+          "round_tooEarlyPenalty": 0.27828,
+          "round_tooLatePenalty": 0.203311,
+          "round_mildPenalty": 0.204221,
+          "round_finalRoundBonus": 0.205319
+        },
+        "avgVP": 49.84
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.202136,
+          "qualityThreshold": 0.050888,
+          "goldPressure_0": 0.319134,
+          "goldPressure_1": 0.247322,
+          "goldPressure_2": 0.188728,
+          "goldPressure_3": 0.050634,
+          "diminishing_perUnit": 0.013456,
+          "diminishing_hardCapPenalty": 0.356861,
+          "round_tooEarlyPenalty": 0.217869,
+          "round_tooLatePenalty": 0.135317,
+          "round_mildPenalty": 0.134168,
+          "round_finalRoundBonus": 0.040934
+        },
+        "avgVP": 53.32
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.26343,
+          "qualityThreshold": 0.078229,
+          "goldPressure_0": 0.430121,
+          "goldPressure_1": 0.251631,
+          "goldPressure_2": 0.024186,
+          "goldPressure_3": 0.024568,
+          "diminishing_perUnit": 0.13999,
+          "diminishing_hardCapPenalty": 0.380153,
+          "round_tooEarlyPenalty": 0.279362,
+          "round_tooLatePenalty": 0.089095,
+          "round_mildPenalty": 0.181382,
+          "round_finalRoundBonus": 0.055681
+        },
+        "avgVP": 53.82
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.239412,
+          "qualityThreshold": 0.016874,
+          "goldPressure_0": 0.440014,
+          "goldPressure_1": 0.099985,
+          "goldPressure_2": 0.113528,
+          "goldPressure_3": 0.038543,
+          "diminishing_perUnit": 0.0113,
+          "diminishing_hardCapPenalty": 0.357788,
+          "round_tooEarlyPenalty": 0.255874,
+          "round_tooLatePenalty": 0.167334,
+          "round_mildPenalty": 0.108576,
+          "round_finalRoundBonus": 0.166492
+        },
+        "avgVP": 55.93
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.387072,
+          "qualityThreshold": 0.078181,
+          "goldPressure_0": 0.365325,
+          "goldPressure_1": 0.093305,
+          "goldPressure_2": 0.020593,
+          "goldPressure_3": 0.085657,
+          "diminishing_perUnit": 0.136062,
+          "diminishing_hardCapPenalty": 0.358501,
+          "round_tooEarlyPenalty": 0.209279,
+          "round_tooLatePenalty": 0.226033,
+          "round_mildPenalty": 0.231869,
+          "round_finalRoundBonus": 0.056888
+        },
+        "avgVP": 54.28
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.464441,
+          "qualityThreshold": 0.110822,
+          "goldPressure_0": 0.352564,
+          "goldPressure_1": 0.29922,
+          "goldPressure_2": 0.080267,
+          "goldPressure_3": 0.104204,
+          "diminishing_perUnit": 0.044468,
+          "diminishing_hardCapPenalty": 0.281581,
+          "round_tooEarlyPenalty": 0.089372,
+          "round_tooLatePenalty": 0.131882,
+          "round_mildPenalty": 0.207351,
+          "round_finalRoundBonus": 0.029559
+        },
+        "avgVP": 57.28
+      }
+    ],
+    "gen_best_avgVP": 57.43,
+    "gen_avg_vp": 52.65,
+    "alltime_best_avgVP": 60.1,
+    "sigma": 0.079137,
+    "elapsed_s": 223.0
+  },
+  {
+    "generation": 4,
+    "candidates": [
+      {
+        "weights": {
+          "penaltyScale": 0.237193,
+          "qualityThreshold": 0.142457,
+          "goldPressure_0": 0.316029,
+          "goldPressure_1": 0.205713,
+          "goldPressure_2": 0.028095,
+          "goldPressure_3": 0.161337,
+          "diminishing_perUnit": 0.038408,
+          "diminishing_hardCapPenalty": 0.3943,
+          "round_tooEarlyPenalty": 0.162605,
+          "round_tooLatePenalty": 0.21516,
+          "round_mildPenalty": 0.127696,
+          "round_finalRoundBonus": 0.021045
+        },
+        "avgVP": 55.48
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.40973,
+          "qualityThreshold": 0.141165,
+          "goldPressure_0": 0.169761,
+          "goldPressure_1": 0.190623,
+          "goldPressure_2": 0.025474,
+          "goldPressure_3": 0.09572,
+          "diminishing_perUnit": 0.010028,
+          "diminishing_hardCapPenalty": 0.477442,
+          "round_tooEarlyPenalty": 0.254342,
+          "round_tooLatePenalty": 0.091062,
+          "round_mildPenalty": 0.239664,
+          "round_finalRoundBonus": 0.037499
+        },
+        "avgVP": 60.03
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.381463,
+          "qualityThreshold": 0.095965,
+          "goldPressure_0": 0.291211,
+          "goldPressure_1": 0.120524,
+          "goldPressure_2": 0.027094,
+          "goldPressure_3": 0.093856,
+          "diminishing_perUnit": 0.05664,
+          "diminishing_hardCapPenalty": 0.361587,
+          "round_tooEarlyPenalty": 0.101288,
+          "round_tooLatePenalty": 0.250297,
+          "round_mildPenalty": 0.173374,
+          "round_finalRoundBonus": 0.060304
+        },
+        "avgVP": 55.43
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.27997,
+          "qualityThreshold": 0.18138,
+          "goldPressure_0": 0.218635,
+          "goldPressure_1": 0.194532,
+          "goldPressure_2": 0.152047,
+          "goldPressure_3": 0.063014,
+          "diminishing_perUnit": 0.014365,
+          "diminishing_hardCapPenalty": 0.403089,
+          "round_tooEarlyPenalty": 0.175701,
+          "round_tooLatePenalty": 0.068229,
+          "round_mildPenalty": 0.123753,
+          "round_finalRoundBonus": 0.112258
+        },
+        "avgVP": 55.37
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.288623,
+          "qualityThreshold": 0.048827,
+          "goldPressure_0": 0.176107,
+          "goldPressure_1": 0.107452,
+          "goldPressure_2": 0.025776,
+          "goldPressure_3": 0.130004,
+          "diminishing_perUnit": 0.167455,
+          "diminishing_hardCapPenalty": 0.296017,
+          "round_tooEarlyPenalty": 0.184063,
+          "round_tooLatePenalty": 0.126217,
+          "round_mildPenalty": 0.143485,
+          "round_finalRoundBonus": 0.051994
+        },
+        "avgVP": 54.64
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.467854,
+          "qualityThreshold": 0.023155,
+          "goldPressure_0": 0.298126,
+          "goldPressure_1": 0.347658,
+          "goldPressure_2": 0.055318,
+          "goldPressure_3": 0.08698,
+          "diminishing_perUnit": 0.02467,
+          "diminishing_hardCapPenalty": 0.268635,
+          "round_tooEarlyPenalty": 0.090089,
+          "round_tooLatePenalty": 0.178831,
+          "round_mildPenalty": 0.116616,
+          "round_finalRoundBonus": 0.011596
+        },
+        "avgVP": 51.93
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.187756,
+          "qualityThreshold": 0.120676,
+          "goldPressure_0": 0.379135,
+          "goldPressure_1": 0.097654,
+          "goldPressure_2": 0.025898,
+          "goldPressure_3": 0.074749,
+          "diminishing_perUnit": 0.01047,
+          "diminishing_hardCapPenalty": 0.40871,
+          "round_tooEarlyPenalty": 0.203153,
+          "round_tooLatePenalty": 0.141027,
+          "round_mildPenalty": 0.136745,
+          "round_finalRoundBonus": 0.011818
+        },
+        "avgVP": 51.85
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.347937,
+          "qualityThreshold": 0.113001,
+          "goldPressure_0": 0.326314,
+          "goldPressure_1": 0.067551,
+          "goldPressure_2": 0.028527,
+          "goldPressure_3": 0.214229,
+          "diminishing_perUnit": 0.044017,
+          "diminishing_hardCapPenalty": 0.319919,
+          "round_tooEarlyPenalty": 0.070499,
+          "round_tooLatePenalty": 0.135918,
+          "round_mildPenalty": 0.249681,
+          "round_finalRoundBonus": 0.088196
+        },
+        "avgVP": 51.47
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.356224,
+          "qualityThreshold": 0.143918,
+          "goldPressure_0": 0.37676,
+          "goldPressure_1": 0.23727,
+          "goldPressure_2": 0.140642,
+          "goldPressure_3": 0.103456,
+          "diminishing_perUnit": 0.037294,
+          "diminishing_hardCapPenalty": 0.398749,
+          "round_tooEarlyPenalty": 0.108481,
+          "round_tooLatePenalty": 0.077273,
+          "round_mildPenalty": 0.166326,
+          "round_finalRoundBonus": 0.059681
+        },
+        "avgVP": 52.12
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.298474,
+          "qualityThreshold": 0.161117,
+          "goldPressure_0": 0.365917,
+          "goldPressure_1": 0.381265,
+          "goldPressure_2": 0.025096,
+          "goldPressure_3": 0.048392,
+          "diminishing_perUnit": 0.056898,
+          "diminishing_hardCapPenalty": 0.245845,
+          "round_tooEarlyPenalty": 0.184919,
+          "round_tooLatePenalty": 0.046455,
+          "round_mildPenalty": 0.075745,
+          "round_finalRoundBonus": 0.039795
+        },
+        "avgVP": 59.14
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.297159,
+          "qualityThreshold": 0.059564,
+          "goldPressure_0": 0.239163,
+          "goldPressure_1": 0.218075,
+          "goldPressure_2": 0.08274,
+          "goldPressure_3": 0.085267,
+          "diminishing_perUnit": 0.014231,
+          "diminishing_hardCapPenalty": 0.256227,
+          "round_tooEarlyPenalty": 0.085108,
+          "round_tooLatePenalty": 0.069583,
+          "round_mildPenalty": 0.056853,
+          "round_finalRoundBonus": 0.044133
+        },
+        "avgVP": 52.8
+      }
+    ],
+    "gen_best_avgVP": 60.03,
+    "gen_avg_vp": 54.57,
+    "alltime_best_avgVP": 60.1,
+    "sigma": 0.077455,
+    "elapsed_s": 296.0
+  },
+  {
+    "generation": 5,
+    "candidates": [
+      {
+        "weights": {
+          "penaltyScale": 0.35267,
+          "qualityThreshold": 0.109928,
+          "goldPressure_0": 0.091849,
+          "goldPressure_1": 0.2913,
+          "goldPressure_2": 0.045555,
+          "goldPressure_3": 0.108161,
+          "diminishing_perUnit": 0.020594,
+          "diminishing_hardCapPenalty": 0.351052,
+          "round_tooEarlyPenalty": 0.225186,
+          "round_tooLatePenalty": 0.024307,
+          "round_mildPenalty": 0.214786,
+          "round_finalRoundBonus": 0.017407
+        },
+        "avgVP": 50.83
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.425986,
+          "qualityThreshold": 0.147701,
+          "goldPressure_0": 0.234676,
+          "goldPressure_1": 0.337933,
+          "goldPressure_2": 0.121379,
+          "goldPressure_3": 0.119828,
+          "diminishing_perUnit": 0.014977,
+          "diminishing_hardCapPenalty": 0.357143,
+          "round_tooEarlyPenalty": 0.22061,
+          "round_tooLatePenalty": 0.023692,
+          "round_mildPenalty": 0.076968,
+          "round_finalRoundBonus": 0.087738
+        },
+        "avgVP": 50.01
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.307998,
+          "qualityThreshold": 0.186181,
+          "goldPressure_0": 0.259605,
+          "goldPressure_1": 0.152295,
+          "goldPressure_2": 0.027384,
+          "goldPressure_3": 0.204395,
+          "diminishing_perUnit": 0.010737,
+          "diminishing_hardCapPenalty": 0.51679,
+          "round_tooEarlyPenalty": 0.27668,
+          "round_tooLatePenalty": 0.031619,
+          "round_mildPenalty": 0.225088,
+          "round_finalRoundBonus": 0.013168
+        },
+        "avgVP": 60.91
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.327026,
+          "qualityThreshold": 0.160353,
+          "goldPressure_0": 0.218275,
+          "goldPressure_1": 0.097181,
+          "goldPressure_2": 0.021465,
+          "goldPressure_3": 0.141233,
+          "diminishing_perUnit": 0.011158,
+          "diminishing_hardCapPenalty": 0.489477,
+          "round_tooEarlyPenalty": 0.138501,
+          "round_tooLatePenalty": 0.12979,
+          "round_mildPenalty": 0.173955,
+          "round_finalRoundBonus": 0.153367
+        },
+        "avgVP": 54.28
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.138782,
+          "qualityThreshold": 0.121611,
+          "goldPressure_0": 0.19954,
+          "goldPressure_1": 0.20541,
+          "goldPressure_2": 0.022734,
+          "goldPressure_3": 0.041228,
+          "diminishing_perUnit": 0.012692,
+          "diminishing_hardCapPenalty": 0.386883,
+          "round_tooEarlyPenalty": 0.269983,
+          "round_tooLatePenalty": 0.20468,
+          "round_mildPenalty": 0.138422,
+          "round_finalRoundBonus": 0.105494
+        },
+        "avgVP": 50.3
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.482935,
+          "qualityThreshold": 0.184894,
+          "goldPressure_0": 0.179577,
+          "goldPressure_1": 0.287005,
+          "goldPressure_2": 0.036448,
+          "goldPressure_3": 0.15274,
+          "diminishing_perUnit": 0.027945,
+          "diminishing_hardCapPenalty": 0.501158,
+          "round_tooEarlyPenalty": 0.109013,
+          "round_tooLatePenalty": 0.155467,
+          "round_mildPenalty": 0.124783,
+          "round_finalRoundBonus": 0.138954
+        },
+        "avgVP": 57.55
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.463514,
+          "qualityThreshold": 0.094666,
+          "goldPressure_0": 0.179404,
+          "goldPressure_1": 0.357153,
+          "goldPressure_2": 0.030038,
+          "goldPressure_3": 0.094742,
+          "diminishing_perUnit": 0.025103,
+          "diminishing_hardCapPenalty": 0.370162,
+          "round_tooEarlyPenalty": 0.233406,
+          "round_tooLatePenalty": 0.117927,
+          "round_mildPenalty": 0.137001,
+          "round_finalRoundBonus": 0.14842
+        },
+        "avgVP": 53.27
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.284566,
+          "qualityThreshold": 0.193971,
+          "goldPressure_0": 0.296163,
+          "goldPressure_1": 0.169897,
+          "goldPressure_2": 0.064396,
+          "goldPressure_3": 0.10217,
+          "diminishing_perUnit": 0.056345,
+          "diminishing_hardCapPenalty": 0.368727,
+          "round_tooEarlyPenalty": 0.181114,
+          "round_tooLatePenalty": 0.045843,
+          "round_mildPenalty": 0.237221,
+          "round_finalRoundBonus": 0.011631
+        },
+        "avgVP": 60.26
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.38714,
+          "qualityThreshold": 0.199701,
+          "goldPressure_0": 0.223612,
+          "goldPressure_1": 0.15202,
+          "goldPressure_2": 0.026087,
+          "goldPressure_3": 0.137376,
+          "diminishing_perUnit": 0.01664,
+          "diminishing_hardCapPenalty": 0.454992,
+          "round_tooEarlyPenalty": 0.263123,
+          "round_tooLatePenalty": 0.099043,
+          "round_mildPenalty": 0.14681,
+          "round_finalRoundBonus": 0.038578
+        },
+        "avgVP": 53.8
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.404541,
+          "qualityThreshold": 0.061421,
+          "goldPressure_0": 0.323891,
+          "goldPressure_1": 0.142581,
+          "goldPressure_2": 0.024518,
+          "goldPressure_3": 0.139682,
+          "diminishing_perUnit": 0.092266,
+          "diminishing_hardCapPenalty": 0.479617,
+          "round_tooEarlyPenalty": 0.036123,
+          "round_tooLatePenalty": 0.190673,
+          "round_mildPenalty": 0.096999,
+          "round_finalRoundBonus": 0.024328
+        },
+        "avgVP": 49.53
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.227091,
+          "qualityThreshold": 0.040412,
+          "goldPressure_0": 0.313521,
+          "goldPressure_1": 0.343951,
+          "goldPressure_2": 0.047515,
+          "goldPressure_3": 0.193363,
+          "diminishing_perUnit": 0.020045,
+          "diminishing_hardCapPenalty": 0.315502,
+          "round_tooEarlyPenalty": 0.149363,
+          "round_tooLatePenalty": 0.134574,
+          "round_mildPenalty": 0.200009,
+          "round_finalRoundBonus": 0.068425
+        },
+        "avgVP": 56.28
+      }
+    ],
+    "gen_best_avgVP": 60.91,
+    "gen_avg_vp": 54.27,
+    "alltime_best_avgVP": 60.91,
+    "sigma": 0.08056,
+    "elapsed_s": 370.0
+  },
+  {
+    "generation": 6,
+    "candidates": [
+      {
+        "weights": {
+          "penaltyScale": 0.374372,
+          "qualityThreshold": 0.182814,
+          "goldPressure_0": 0.177159,
+          "goldPressure_1": 0.074581,
+          "goldPressure_2": 0.02621,
+          "goldPressure_3": 0.197363,
+          "diminishing_perUnit": 0.125018,
+          "diminishing_hardCapPenalty": 0.409001,
+          "round_tooEarlyPenalty": 0.20188,
+          "round_tooLatePenalty": 0.207192,
+          "round_mildPenalty": 0.145534,
+          "round_finalRoundBonus": 0.088401
+        },
+        "avgVP": 58.02
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.328169,
+          "qualityThreshold": 0.2,
+          "goldPressure_0": 0.34872,
+          "goldPressure_1": 0.066087,
+          "goldPressure_2": 0.050226,
+          "goldPressure_3": 0.156147,
+          "diminishing_perUnit": 0.065733,
+          "diminishing_hardCapPenalty": 0.365974,
+          "round_tooEarlyPenalty": 0.23303,
+          "round_tooLatePenalty": 0.128818,
+          "round_mildPenalty": 0.181033,
+          "round_finalRoundBonus": 0.070196
+        },
+        "avgVP": 56.83
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.37124,
+          "qualityThreshold": 0.125504,
+          "goldPressure_0": 0.384832,
+          "goldPressure_1": 0.115791,
+          "goldPressure_2": 0.031476,
+          "goldPressure_3": 0.205241,
+          "diminishing_perUnit": 0.010026,
+          "diminishing_hardCapPenalty": 0.322152,
+          "round_tooEarlyPenalty": 0.148538,
+          "round_tooLatePenalty": 0.02046,
+          "round_mildPenalty": 0.227644,
+          "round_finalRoundBonus": 0.042514
+        },
+        "avgVP": 54.18
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.285778,
+          "qualityThreshold": 0.199358,
+          "goldPressure_0": 0.337633,
+          "goldPressure_1": 0.255165,
+          "goldPressure_2": 0.082158,
+          "goldPressure_3": 0.140483,
+          "diminishing_perUnit": 0.05331,
+          "diminishing_hardCapPenalty": 0.567177,
+          "round_tooEarlyPenalty": 0.249899,
+          "round_tooLatePenalty": 0.217997,
+          "round_mildPenalty": 0.147162,
+          "round_finalRoundBonus": 0.047094
+        },
+        "avgVP": 60.31
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.173879,
+          "qualityThreshold": 0.120292,
+          "goldPressure_0": 0.278964,
+          "goldPressure_1": 0.133358,
+          "goldPressure_2": 0.046564,
+          "goldPressure_3": 0.147403,
+          "diminishing_perUnit": 0.042414,
+          "diminishing_hardCapPenalty": 0.521599,
+          "round_tooEarlyPenalty": 0.199621,
+          "round_tooLatePenalty": 0.022899,
+          "round_mildPenalty": 0.217737,
+          "round_finalRoundBonus": 0.01
+        },
+        "avgVP": 55.9
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.254049,
+          "qualityThreshold": 0.177381,
+          "goldPressure_0": 0.263298,
+          "goldPressure_1": 0.172639,
+          "goldPressure_2": 0.052352,
+          "goldPressure_3": 0.21148,
+          "diminishing_perUnit": 0.025826,
+          "diminishing_hardCapPenalty": 0.42573,
+          "round_tooEarlyPenalty": 0.252282,
+          "round_tooLatePenalty": 0.042875,
+          "round_mildPenalty": 0.177135,
+          "round_finalRoundBonus": 0.059677
+        },
+        "avgVP": 58.03
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.160132,
+          "qualityThreshold": 0.19735,
+          "goldPressure_0": 0.312537,
+          "goldPressure_1": 0.141132,
+          "goldPressure_2": 0.02725,
+          "goldPressure_3": 0.249867,
+          "diminishing_perUnit": 0.03248,
+          "diminishing_hardCapPenalty": 0.462446,
+          "round_tooEarlyPenalty": 0.30298,
+          "round_tooLatePenalty": 0.060291,
+          "round_mildPenalty": 0.24243,
+          "round_finalRoundBonus": 0.012628
+        },
+        "avgVP": 58.53
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.404214,
+          "qualityThreshold": 0.154127,
+          "goldPressure_0": 0.208322,
+          "goldPressure_1": 0.353855,
+          "goldPressure_2": 0.054228,
+          "goldPressure_3": 0.154147,
+          "diminishing_perUnit": 0.045193,
+          "diminishing_hardCapPenalty": 0.54816,
+          "round_tooEarlyPenalty": 0.158899,
+          "round_tooLatePenalty": 0.050509,
+          "round_mildPenalty": 0.237766,
+          "round_finalRoundBonus": 0.021454
+        },
+        "avgVP": 59.89
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.109965,
+          "qualityThreshold": 0.136748,
+          "goldPressure_0": 0.368706,
+          "goldPressure_1": 0.25523,
+          "goldPressure_2": 0.060218,
+          "goldPressure_3": 0.177736,
+          "diminishing_perUnit": 0.074425,
+          "diminishing_hardCapPenalty": 0.516361,
+          "round_tooEarlyPenalty": 0.176679,
+          "round_tooLatePenalty": 0.029766,
+          "round_mildPenalty": 0.130172,
+          "round_finalRoundBonus": 0.039796
+        },
+        "avgVP": 52.78
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.476947,
+          "qualityThreshold": 0.161569,
+          "goldPressure_0": 0.312205,
+          "goldPressure_1": 0.266004,
+          "goldPressure_2": 0.041025,
+          "goldPressure_3": 0.179433,
+          "diminishing_perUnit": 0.014426,
+          "diminishing_hardCapPenalty": 0.330176,
+          "round_tooEarlyPenalty": 0.103661,
+          "round_tooLatePenalty": 0.038498,
+          "round_mildPenalty": 0.249742,
+          "round_finalRoundBonus": 0.124735
+        },
+        "avgVP": 56.51
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.363157,
+          "qualityThreshold": 0.174987,
+          "goldPressure_0": 0.320424,
+          "goldPressure_1": 0.094946,
+          "goldPressure_2": 0.072526,
+          "goldPressure_3": 0.107577,
+          "diminishing_perUnit": 0.011604,
+          "diminishing_hardCapPenalty": 0.483048,
+          "round_tooEarlyPenalty": 0.16165,
+          "round_tooLatePenalty": 0.048921,
+          "round_mildPenalty": 0.246398,
+          "round_finalRoundBonus": 0.079431
+        },
+        "avgVP": 55.68
+      }
+    ],
+    "gen_best_avgVP": 60.31,
+    "gen_avg_vp": 56.97,
+    "alltime_best_avgVP": 60.91,
+    "sigma": 0.082635,
+    "elapsed_s": 443.0
+  },
+  {
+    "generation": 7,
+    "candidates": [
+      {
+        "weights": {
+          "penaltyScale": 0.365291,
+          "qualityThreshold": 0.181045,
+          "goldPressure_0": 0.376291,
+          "goldPressure_1": 0.246007,
+          "goldPressure_2": 0.05212,
+          "goldPressure_3": 0.217765,
+          "diminishing_perUnit": 0.107729,
+          "diminishing_hardCapPenalty": 0.52166,
+          "round_tooEarlyPenalty": 0.186193,
+          "round_tooLatePenalty": 0.253572,
+          "round_mildPenalty": 0.210047,
+          "round_finalRoundBonus": 0.055788
+        },
+        "avgVP": 56.02
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.401408,
+          "qualityThreshold": 0.108336,
+          "goldPressure_0": 0.291372,
+          "goldPressure_1": 0.23414,
+          "goldPressure_2": 0.024264,
+          "goldPressure_3": 0.022844,
+          "diminishing_perUnit": 0.035704,
+          "diminishing_hardCapPenalty": 0.353003,
+          "round_tooEarlyPenalty": 0.176024,
+          "round_tooLatePenalty": 0.299922,
+          "round_mildPenalty": 0.080878,
+          "round_finalRoundBonus": 0.010349
+        },
+        "avgVP": 49.8
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.19783,
+          "qualityThreshold": 0.180491,
+          "goldPressure_0": 0.386248,
+          "goldPressure_1": 0.309451,
+          "goldPressure_2": 0.284414,
+          "goldPressure_3": 0.158316,
+          "diminishing_perUnit": 0.04577,
+          "diminishing_hardCapPenalty": 0.484756,
+          "round_tooEarlyPenalty": 0.272434,
+          "round_tooLatePenalty": 0.144596,
+          "round_mildPenalty": 0.157489,
+          "round_finalRoundBonus": 0.010009
+        },
+        "avgVP": 58.94
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.450379,
+          "qualityThreshold": 0.181119,
+          "goldPressure_0": 0.255518,
+          "goldPressure_1": 0.187521,
+          "goldPressure_2": 0.173716,
+          "goldPressure_3": 0.158425,
+          "diminishing_perUnit": 0.044203,
+          "diminishing_hardCapPenalty": 0.599094,
+          "round_tooEarlyPenalty": 0.241152,
+          "round_tooLatePenalty": 0.113757,
+          "round_mildPenalty": 0.160216,
+          "round_finalRoundBonus": 0.036723
+        },
+        "avgVP": 57.44
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.319604,
+          "qualityThreshold": 0.134951,
+          "goldPressure_0": 0.196807,
+          "goldPressure_1": 0.169923,
+          "goldPressure_2": 0.089154,
+          "goldPressure_3": 0.034623,
+          "diminishing_perUnit": 0.108257,
+          "diminishing_hardCapPenalty": 0.522989,
+          "round_tooEarlyPenalty": 0.091284,
+          "round_tooLatePenalty": 0.163012,
+          "round_mildPenalty": 0.212119,
+          "round_finalRoundBonus": 0.0284
+        },
+        "avgVP": 58.33
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.243088,
+          "qualityThreshold": 0.183595,
+          "goldPressure_0": 0.265756,
+          "goldPressure_1": 0.200736,
+          "goldPressure_2": 0.082928,
+          "goldPressure_3": 0.199071,
+          "diminishing_perUnit": 0.012778,
+          "diminishing_hardCapPenalty": 0.544378,
+          "round_tooEarlyPenalty": 0.318707,
+          "round_tooLatePenalty": 0.149961,
+          "round_mildPenalty": 0.175501,
+          "round_finalRoundBonus": 0.017825
+        },
+        "avgVP": 56.85
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.165229,
+          "qualityThreshold": 0.198988,
+          "goldPressure_0": 0.203766,
+          "goldPressure_1": 0.210129,
+          "goldPressure_2": 0.107782,
+          "goldPressure_3": 0.245448,
+          "diminishing_perUnit": 0.08633,
+          "diminishing_hardCapPenalty": 0.510606,
+          "round_tooEarlyPenalty": 0.21457,
+          "round_tooLatePenalty": 0.18194,
+          "round_mildPenalty": 0.15968,
+          "round_finalRoundBonus": 0.09046
+        },
+        "avgVP": 55.33
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.308029,
+          "qualityThreshold": 0.198283,
+          "goldPressure_0": 0.143483,
+          "goldPressure_1": 0.266883,
+          "goldPressure_2": 0.087735,
+          "goldPressure_3": 0.1729,
+          "diminishing_perUnit": 0.010601,
+          "diminishing_hardCapPenalty": 0.595574,
+          "round_tooEarlyPenalty": 0.09792,
+          "round_tooLatePenalty": 0.175389,
+          "round_mildPenalty": 0.084356,
+          "round_finalRoundBonus": 0.034934
+        },
+        "avgVP": 58.74
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.252006,
+          "qualityThreshold": 0.152146,
+          "goldPressure_0": 0.500734,
+          "goldPressure_1": 0.290043,
+          "goldPressure_2": 0.089049,
+          "goldPressure_3": 0.102636,
+          "diminishing_perUnit": 0.081314,
+          "diminishing_hardCapPenalty": 0.498354,
+          "round_tooEarlyPenalty": 0.351414,
+          "round_tooLatePenalty": 0.263941,
+          "round_mildPenalty": 0.165718,
+          "round_finalRoundBonus": 0.073599
+        },
+        "avgVP": 51.82
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.319217,
+          "qualityThreshold": 0.199786,
+          "goldPressure_0": 0.2765,
+          "goldPressure_1": 0.284443,
+          "goldPressure_2": 0.057473,
+          "goldPressure_3": 0.20799,
+          "diminishing_perUnit": 0.010165,
+          "diminishing_hardCapPenalty": 0.579974,
+          "round_tooEarlyPenalty": 0.207228,
+          "round_tooLatePenalty": 0.043483,
+          "round_mildPenalty": 0.126067,
+          "round_finalRoundBonus": 0.108239
+        },
+        "avgVP": 57.75
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.25239,
+          "qualityThreshold": 0.194388,
+          "goldPressure_0": 0.260971,
+          "goldPressure_1": 0.162225,
+          "goldPressure_2": 0.073638,
+          "goldPressure_3": 0.162134,
+          "diminishing_perUnit": 0.015462,
+          "diminishing_hardCapPenalty": 0.533614,
+          "round_tooEarlyPenalty": 0.281934,
+          "round_tooLatePenalty": 0.02136,
+          "round_mildPenalty": 0.139626,
+          "round_finalRoundBonus": 0.156257
+        },
+        "avgVP": 51.29
+      }
+    ],
+    "gen_best_avgVP": 58.94,
+    "gen_avg_vp": 55.66,
+    "alltime_best_avgVP": 60.91,
+    "sigma": 0.083281,
+    "elapsed_s": 516.0
+  },
+  {
+    "generation": 8,
+    "candidates": [
+      {
+        "weights": {
+          "penaltyScale": 0.056805,
+          "qualityThreshold": 0.198416,
+          "goldPressure_0": 0.226232,
+          "goldPressure_1": 0.366386,
+          "goldPressure_2": 0.066966,
+          "goldPressure_3": 0.156203,
+          "diminishing_perUnit": 0.045404,
+          "diminishing_hardCapPenalty": 0.459754,
+          "round_tooEarlyPenalty": 0.071443,
+          "round_tooLatePenalty": 0.201205,
+          "round_mildPenalty": 0.101544,
+          "round_finalRoundBonus": 0.049829
+        },
+        "avgVP": 56.96
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.229823,
+          "qualityThreshold": 0.075019,
+          "goldPressure_0": 0.240478,
+          "goldPressure_1": 0.250702,
+          "goldPressure_2": 0.19043,
+          "goldPressure_3": 0.062716,
+          "diminishing_perUnit": 0.039578,
+          "diminishing_hardCapPenalty": 0.579656,
+          "round_tooEarlyPenalty": 0.086979,
+          "round_tooLatePenalty": 0.316701,
+          "round_mildPenalty": 0.024648,
+          "round_finalRoundBonus": 0.011417
+        },
+        "avgVP": 55.23
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.250313,
+          "qualityThreshold": 0.199037,
+          "goldPressure_0": 0.215065,
+          "goldPressure_1": 0.076738,
+          "goldPressure_2": 0.130425,
+          "goldPressure_3": 0.221716,
+          "diminishing_perUnit": 0.059418,
+          "diminishing_hardCapPenalty": 0.419664,
+          "round_tooEarlyPenalty": 0.252068,
+          "round_tooLatePenalty": 0.179806,
+          "round_mildPenalty": 0.245576,
+          "round_finalRoundBonus": 0.032126
+        },
+        "avgVP": 53.19
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.209859,
+          "qualityThreshold": 0.169484,
+          "goldPressure_0": 0.294219,
+          "goldPressure_1": 0.36648,
+          "goldPressure_2": 0.222596,
+          "goldPressure_3": 0.218166,
+          "diminishing_perUnit": 0.031014,
+          "diminishing_hardCapPenalty": 0.505114,
+          "round_tooEarlyPenalty": 0.21074,
+          "round_tooLatePenalty": 0.273115,
+          "round_mildPenalty": 0.162787,
+          "round_finalRoundBonus": 0.120567
+        },
+        "avgVP": 52.21
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.328274,
+          "qualityThreshold": 0.198,
+          "goldPressure_0": 0.483866,
+          "goldPressure_1": 0.196952,
+          "goldPressure_2": 0.086636,
+          "goldPressure_3": 0.147978,
+          "diminishing_perUnit": 0.0126,
+          "diminishing_hardCapPenalty": 0.491504,
+          "round_tooEarlyPenalty": 0.231694,
+          "round_tooLatePenalty": 0.141036,
+          "round_mildPenalty": 0.069,
+          "round_finalRoundBonus": 0.01164
+        },
+        "avgVP": 60.6
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.150424,
+          "qualityThreshold": 0.14942,
+          "goldPressure_0": 0.140921,
+          "goldPressure_1": 0.103764,
+          "goldPressure_2": 0.098007,
+          "goldPressure_3": 0.117552,
+          "diminishing_perUnit": 0.078989,
+          "diminishing_hardCapPenalty": 0.301135,
+          "round_tooEarlyPenalty": 0.225072,
+          "round_tooLatePenalty": 0.134015,
+          "round_mildPenalty": 0.131293,
+          "round_finalRoundBonus": 0.010148
+        },
+        "avgVP": 59.28
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.352351,
+          "qualityThreshold": 0.168617,
+          "goldPressure_0": 0.312032,
+          "goldPressure_1": 0.0504,
+          "goldPressure_2": 0.057318,
+          "goldPressure_3": 0.214224,
+          "diminishing_perUnit": 0.092486,
+          "diminishing_hardCapPenalty": 0.587306,
+          "round_tooEarlyPenalty": 0.100559,
+          "round_tooLatePenalty": 0.095832,
+          "round_mildPenalty": 0.149131,
+          "round_finalRoundBonus": 0.132221
+        },
+        "avgVP": 55.7
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.158448,
+          "qualityThreshold": 0.199958,
+          "goldPressure_0": 0.366333,
+          "goldPressure_1": 0.135776,
+          "goldPressure_2": 0.183536,
+          "goldPressure_3": 0.19813,
+          "diminishing_perUnit": 0.11747,
+          "diminishing_hardCapPenalty": 0.598536,
+          "round_tooEarlyPenalty": 0.135567,
+          "round_tooLatePenalty": 0.065942,
+          "round_mildPenalty": 0.244494,
+          "round_finalRoundBonus": 0.010761
+        },
+        "avgVP": 57.15
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.3489,
+          "qualityThreshold": 0.190541,
+          "goldPressure_0": 0.269813,
+          "goldPressure_1": 0.347225,
+          "goldPressure_2": 0.07783,
+          "goldPressure_3": 0.230919,
+          "diminishing_perUnit": 0.057236,
+          "diminishing_hardCapPenalty": 0.599999,
+          "round_tooEarlyPenalty": 0.112561,
+          "round_tooLatePenalty": 0.147098,
+          "round_mildPenalty": 0.082104,
+          "round_finalRoundBonus": 0.010557
+        },
+        "avgVP": 62.31
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.331474,
+          "qualityThreshold": 0.19686,
+          "goldPressure_0": 0.327616,
+          "goldPressure_1": 0.170009,
+          "goldPressure_2": 0.31517,
+          "goldPressure_3": 0.135819,
+          "diminishing_perUnit": 0.042681,
+          "diminishing_hardCapPenalty": 0.594755,
+          "round_tooEarlyPenalty": 0.123988,
+          "round_tooLatePenalty": 0.19971,
+          "round_mildPenalty": 0.060806,
+          "round_finalRoundBonus": 0.017018
+        },
+        "avgVP": 59.46
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.462672,
+          "qualityThreshold": 0.183496,
+          "goldPressure_0": 0.247023,
+          "goldPressure_1": 0.282898,
+          "goldPressure_2": 0.115778,
+          "goldPressure_3": 0.189238,
+          "diminishing_perUnit": 0.013787,
+          "diminishing_hardCapPenalty": 0.499748,
+          "round_tooEarlyPenalty": 0.162193,
+          "round_tooLatePenalty": 0.188886,
+          "round_mildPenalty": 0.011471,
+          "round_finalRoundBonus": 0.042214
+        },
+        "avgVP": 56.05
+      }
+    ],
+    "gen_best_avgVP": 62.31,
+    "gen_avg_vp": 57.1,
+    "alltime_best_avgVP": 62.31,
+    "sigma": 0.083548,
+    "elapsed_s": 591.0
+  },
+  {
+    "generation": 9,
+    "candidates": [
+      {
+        "weights": {
+          "penaltyScale": 0.369485,
+          "qualityThreshold": 0.163575,
+          "goldPressure_0": 0.454516,
+          "goldPressure_1": 0.139668,
+          "goldPressure_2": 0.12257,
+          "goldPressure_3": 0.156936,
+          "diminishing_perUnit": 0.085167,
+          "diminishing_hardCapPenalty": 0.588336,
+          "round_tooEarlyPenalty": 0.152842,
+          "round_tooLatePenalty": 0.190846,
+          "round_mildPenalty": 0.112576,
+          "round_finalRoundBonus": 0.092213
+        },
+        "avgVP": 55.68
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.328674,
+          "qualityThreshold": 0.098433,
+          "goldPressure_0": 0.292945,
+          "goldPressure_1": 0.291344,
+          "goldPressure_2": 0.029929,
+          "goldPressure_3": 0.224655,
+          "diminishing_perUnit": 0.083285,
+          "diminishing_hardCapPenalty": 0.511551,
+          "round_tooEarlyPenalty": 0.251585,
+          "round_tooLatePenalty": 0.225367,
+          "round_mildPenalty": 0.013341,
+          "round_finalRoundBonus": 0.010002
+        },
+        "avgVP": 50.94
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.410125,
+          "qualityThreshold": 0.199317,
+          "goldPressure_0": 0.411233,
+          "goldPressure_1": 0.214313,
+          "goldPressure_2": 0.251706,
+          "goldPressure_3": 0.249993,
+          "diminishing_perUnit": 0.018793,
+          "diminishing_hardCapPenalty": 0.569589,
+          "round_tooEarlyPenalty": 0.162335,
+          "round_tooLatePenalty": 0.237296,
+          "round_mildPenalty": 0.024382,
+          "round_finalRoundBonus": 0.096117
+        },
+        "avgVP": 56.46
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.272104,
+          "qualityThreshold": 0.190286,
+          "goldPressure_0": 0.265548,
+          "goldPressure_1": 0.15157,
+          "goldPressure_2": 0.209054,
+          "goldPressure_3": 0.242678,
+          "diminishing_perUnit": 0.046471,
+          "diminishing_hardCapPenalty": 0.57638,
+          "round_tooEarlyPenalty": 0.108287,
+          "round_tooLatePenalty": 0.022999,
+          "round_mildPenalty": 0.077542,
+          "round_finalRoundBonus": 0.010103
+        },
+        "avgVP": 57.6
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.311077,
+          "qualityThreshold": 0.177854,
+          "goldPressure_0": 0.287916,
+          "goldPressure_1": 0.236248,
+          "goldPressure_2": 0.12864,
+          "goldPressure_3": 0.105297,
+          "diminishing_perUnit": 0.03267,
+          "diminishing_hardCapPenalty": 0.593189,
+          "round_tooEarlyPenalty": 0.134469,
+          "round_tooLatePenalty": 0.106904,
+          "round_mildPenalty": 0.042139,
+          "round_finalRoundBonus": 0.075622
+        },
+        "avgVP": 59.69
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.22057,
+          "qualityThreshold": 0.193177,
+          "goldPressure_0": 0.339148,
+          "goldPressure_1": 0.117819,
+          "goldPressure_2": 0.114768,
+          "goldPressure_3": 0.193685,
+          "diminishing_perUnit": 0.109082,
+          "diminishing_hardCapPenalty": 0.580899,
+          "round_tooEarlyPenalty": 0.148421,
+          "round_tooLatePenalty": 0.135536,
+          "round_mildPenalty": 0.093763,
+          "round_finalRoundBonus": 0.070087
+        },
+        "avgVP": 59.09
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.364851,
+          "qualityThreshold": 0.196931,
+          "goldPressure_0": 0.365278,
+          "goldPressure_1": 0.161605,
+          "goldPressure_2": 0.023241,
+          "goldPressure_3": 0.129473,
+          "diminishing_perUnit": 0.025286,
+          "diminishing_hardCapPenalty": 0.571966,
+          "round_tooEarlyPenalty": 0.192192,
+          "round_tooLatePenalty": 0.123897,
+          "round_mildPenalty": 0.115017,
+          "round_finalRoundBonus": 0.083739
+        },
+        "avgVP": 59.87
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.39776,
+          "qualityThreshold": 0.18253,
+          "goldPressure_0": 0.234041,
+          "goldPressure_1": 0.267616,
+          "goldPressure_2": 0.02027,
+          "goldPressure_3": 0.197846,
+          "diminishing_perUnit": 0.095306,
+          "diminishing_hardCapPenalty": 0.49909,
+          "round_tooEarlyPenalty": 0.105589,
+          "round_tooLatePenalty": 0.03895,
+          "round_mildPenalty": 0.188655,
+          "round_finalRoundBonus": 0.099824
+        },
+        "avgVP": 54.83
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.400756,
+          "qualityThreshold": 0.132379,
+          "goldPressure_0": 0.127118,
+          "goldPressure_1": 0.166405,
+          "goldPressure_2": 0.029613,
+          "goldPressure_3": 0.158218,
+          "diminishing_perUnit": 0.094671,
+          "diminishing_hardCapPenalty": 0.572168,
+          "round_tooEarlyPenalty": 0.164779,
+          "round_tooLatePenalty": 0.18913,
+          "round_mildPenalty": 0.222381,
+          "round_finalRoundBonus": 0.099009
+        },
+        "avgVP": 56.89
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.246595,
+          "qualityThreshold": 0.199468,
+          "goldPressure_0": 0.238166,
+          "goldPressure_1": 0.323548,
+          "goldPressure_2": 0.112776,
+          "goldPressure_3": 0.153758,
+          "diminishing_perUnit": 0.014893,
+          "diminishing_hardCapPenalty": 0.592668,
+          "round_tooEarlyPenalty": 0.360412,
+          "round_tooLatePenalty": 0.192179,
+          "round_mildPenalty": 0.089988,
+          "round_finalRoundBonus": 0.026777
+        },
+        "avgVP": 55.28
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.264649,
+          "qualityThreshold": 0.194957,
+          "goldPressure_0": 0.323189,
+          "goldPressure_1": 0.304304,
+          "goldPressure_2": 0.138239,
+          "goldPressure_3": 0.128083,
+          "diminishing_perUnit": 0.01794,
+          "diminishing_hardCapPenalty": 0.584168,
+          "round_tooEarlyPenalty": 0.260249,
+          "round_tooLatePenalty": 0.166432,
+          "round_mildPenalty": 0.011797,
+          "round_finalRoundBonus": 0.011635
+        },
+        "avgVP": 60.15
+      }
+    ],
+    "gen_best_avgVP": 60.15,
+    "gen_avg_vp": 56.95,
+    "alltime_best_avgVP": 62.31,
+    "sigma": 0.08239,
+    "elapsed_s": 662.0
+  },
+  {
+    "generation": 10,
+    "candidates": [
+      {
+        "weights": {
+          "penaltyScale": 0.334897,
+          "qualityThreshold": 0.190938,
+          "goldPressure_0": 0.314342,
+          "goldPressure_1": 0.073097,
+          "goldPressure_2": 0.078236,
+          "goldPressure_3": 0.142253,
+          "diminishing_perUnit": 0.012991,
+          "diminishing_hardCapPenalty": 0.517217,
+          "round_tooEarlyPenalty": 0.132397,
+          "round_tooLatePenalty": 0.146872,
+          "round_mildPenalty": 0.013079,
+          "round_finalRoundBonus": 0.033377
+        },
+        "avgVP": 55.73
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.260768,
+          "qualityThreshold": 0.183248,
+          "goldPressure_0": 0.394565,
+          "goldPressure_1": 0.282984,
+          "goldPressure_2": 0.081701,
+          "goldPressure_3": 0.137974,
+          "diminishing_perUnit": 0.010229,
+          "diminishing_hardCapPenalty": 0.43593,
+          "round_tooEarlyPenalty": 0.242386,
+          "round_tooLatePenalty": 0.131112,
+          "round_mildPenalty": 0.068556,
+          "round_finalRoundBonus": 0.022996
+        },
+        "avgVP": 57.85
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.309246,
+          "qualityThreshold": 0.128201,
+          "goldPressure_0": 0.437717,
+          "goldPressure_1": 0.333875,
+          "goldPressure_2": 0.161921,
+          "goldPressure_3": 0.097828,
+          "diminishing_perUnit": 0.033354,
+          "diminishing_hardCapPenalty": 0.467275,
+          "round_tooEarlyPenalty": 0.166961,
+          "round_tooLatePenalty": 0.203808,
+          "round_mildPenalty": 0.087761,
+          "round_finalRoundBonus": 0.049272
+        },
+        "avgVP": 54.41
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.385618,
+          "qualityThreshold": 0.166998,
+          "goldPressure_0": 0.195601,
+          "goldPressure_1": 0.151002,
+          "goldPressure_2": 0.135954,
+          "goldPressure_3": 0.172907,
+          "diminishing_perUnit": 0.095536,
+          "diminishing_hardCapPenalty": 0.4937,
+          "round_tooEarlyPenalty": 0.318284,
+          "round_tooLatePenalty": 0.208544,
+          "round_mildPenalty": 0.0109,
+          "round_finalRoundBonus": 0.038621
+        },
+        "avgVP": 57.75
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.307184,
+          "qualityThreshold": 0.193795,
+          "goldPressure_0": 0.370676,
+          "goldPressure_1": 0.133175,
+          "goldPressure_2": 0.227758,
+          "goldPressure_3": 0.201545,
+          "diminishing_perUnit": 0.01529,
+          "diminishing_hardCapPenalty": 0.548052,
+          "round_tooEarlyPenalty": 0.060765,
+          "round_tooLatePenalty": 0.099873,
+          "round_mildPenalty": 0.078581,
+          "round_finalRoundBonus": 0.020305
+        },
+        "avgVP": 60.93
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.337563,
+          "qualityThreshold": 0.189049,
+          "goldPressure_0": 0.211842,
+          "goldPressure_1": 0.227092,
+          "goldPressure_2": 0.057364,
+          "goldPressure_3": 0.084067,
+          "diminishing_perUnit": 0.018818,
+          "diminishing_hardCapPenalty": 0.56709,
+          "round_tooEarlyPenalty": 0.221567,
+          "round_tooLatePenalty": 0.090335,
+          "round_mildPenalty": 0.085734,
+          "round_finalRoundBonus": 0.080924
+        },
+        "avgVP": 59.36
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.286117,
+          "qualityThreshold": 0.17953,
+          "goldPressure_0": 0.371407,
+          "goldPressure_1": 0.393235,
+          "goldPressure_2": 0.140096,
+          "goldPressure_3": 0.108437,
+          "diminishing_perUnit": 0.092102,
+          "diminishing_hardCapPenalty": 0.432562,
+          "round_tooEarlyPenalty": 0.243382,
+          "round_tooLatePenalty": 0.14663,
+          "round_mildPenalty": 0.012963,
+          "round_finalRoundBonus": 0.056426
+        },
+        "avgVP": 60.1
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.307024,
+          "qualityThreshold": 0.196935,
+          "goldPressure_0": 0.160046,
+          "goldPressure_1": 0.365956,
+          "goldPressure_2": 0.03803,
+          "goldPressure_3": 0.093736,
+          "diminishing_perUnit": 0.034494,
+          "diminishing_hardCapPenalty": 0.55036,
+          "round_tooEarlyPenalty": 0.169744,
+          "round_tooLatePenalty": 0.163247,
+          "round_mildPenalty": 0.012461,
+          "round_finalRoundBonus": 0.078182
+        },
+        "avgVP": 57.82
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.313311,
+          "qualityThreshold": 0.198205,
+          "goldPressure_0": 0.375629,
+          "goldPressure_1": 0.395302,
+          "goldPressure_2": 0.053626,
+          "goldPressure_3": 0.122528,
+          "diminishing_perUnit": 0.031793,
+          "diminishing_hardCapPenalty": 0.547632,
+          "round_tooEarlyPenalty": 0.218319,
+          "round_tooLatePenalty": 0.092762,
+          "round_mildPenalty": 0.086863,
+          "round_finalRoundBonus": 0.193996
+        },
+        "avgVP": 57.6
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.34729,
+          "qualityThreshold": 0.138908,
+          "goldPressure_0": 0.276805,
+          "goldPressure_1": 0.197857,
+          "goldPressure_2": 0.031616,
+          "goldPressure_3": 0.126532,
+          "diminishing_perUnit": 0.033602,
+          "diminishing_hardCapPenalty": 0.51816,
+          "round_tooEarlyPenalty": 0.160346,
+          "round_tooLatePenalty": 0.112565,
+          "round_mildPenalty": 0.031802,
+          "round_finalRoundBonus": 0.084087
+        },
+        "avgVP": 54.48
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.281147,
+          "qualityThreshold": 0.167286,
+          "goldPressure_0": 0.380934,
+          "goldPressure_1": 0.313129,
+          "goldPressure_2": 0.112188,
+          "goldPressure_3": 0.121758,
+          "diminishing_perUnit": 0.08032,
+          "diminishing_hardCapPenalty": 0.59879,
+          "round_tooEarlyPenalty": 0.106808,
+          "round_tooLatePenalty": 0.212963,
+          "round_mildPenalty": 0.010413,
+          "round_finalRoundBonus": 0.11547
+        },
+        "avgVP": 53.03
+      }
+    ],
+    "gen_best_avgVP": 60.93,
+    "gen_avg_vp": 57.19,
+    "alltime_best_avgVP": 62.31,
+    "sigma": 0.074809,
+    "elapsed_s": 734.0
+  },
+  {
+    "generation": 11,
+    "candidates": [
+      {
+        "weights": {
+          "penaltyScale": 0.296462,
+          "qualityThreshold": 0.199948,
+          "goldPressure_0": 0.326694,
+          "goldPressure_1": 0.190056,
+          "goldPressure_2": 0.086217,
+          "goldPressure_3": 0.220124,
+          "diminishing_perUnit": 0.10321,
+          "diminishing_hardCapPenalty": 0.558473,
+          "round_tooEarlyPenalty": 0.131031,
+          "round_tooLatePenalty": 0.116275,
+          "round_mildPenalty": 0.050285,
+          "round_finalRoundBonus": 0.065742
+        },
+        "avgVP": 55.98
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.368764,
+          "qualityThreshold": 0.172694,
+          "goldPressure_0": 0.271662,
+          "goldPressure_1": 0.230938,
+          "goldPressure_2": 0.159155,
+          "goldPressure_3": 0.152643,
+          "diminishing_perUnit": 0.010827,
+          "diminishing_hardCapPenalty": 0.531101,
+          "round_tooEarlyPenalty": 0.158779,
+          "round_tooLatePenalty": 0.230274,
+          "round_mildPenalty": 0.010028,
+          "round_finalRoundBonus": 0.013998
+        },
+        "avgVP": 59.32
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.177437,
+          "qualityThreshold": 0.181917,
+          "goldPressure_0": 0.409375,
+          "goldPressure_1": 0.249218,
+          "goldPressure_2": 0.233478,
+          "goldPressure_3": 0.179097,
+          "diminishing_perUnit": 0.028603,
+          "diminishing_hardCapPenalty": 0.40991,
+          "round_tooEarlyPenalty": 0.206907,
+          "round_tooLatePenalty": 0.133683,
+          "round_mildPenalty": 0.09956,
+          "round_finalRoundBonus": 0.017251
+        },
+        "avgVP": 57.58
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.4032,
+          "qualityThreshold": 0.157564,
+          "goldPressure_0": 0.30676,
+          "goldPressure_1": 0.22888,
+          "goldPressure_2": 0.027419,
+          "goldPressure_3": 0.149247,
+          "diminishing_perUnit": 0.010621,
+          "diminishing_hardCapPenalty": 0.554388,
+          "round_tooEarlyPenalty": 0.192525,
+          "round_tooLatePenalty": 0.092407,
+          "round_mildPenalty": 0.121888,
+          "round_finalRoundBonus": 0.060979
+        },
+        "avgVP": 59.38
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.327435,
+          "qualityThreshold": 0.199564,
+          "goldPressure_0": 0.35486,
+          "goldPressure_1": 0.198269,
+          "goldPressure_2": 0.049263,
+          "goldPressure_3": 0.098744,
+          "diminishing_perUnit": 0.09173,
+          "diminishing_hardCapPenalty": 0.486393,
+          "round_tooEarlyPenalty": 0.171571,
+          "round_tooLatePenalty": 0.114326,
+          "round_mildPenalty": 0.15324,
+          "round_finalRoundBonus": 0.011465
+        },
+        "avgVP": 60.07
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.322081,
+          "qualityThreshold": 0.146039,
+          "goldPressure_0": 0.210161,
+          "goldPressure_1": 0.293843,
+          "goldPressure_2": 0.142349,
+          "goldPressure_3": 0.179236,
+          "diminishing_perUnit": 0.018379,
+          "diminishing_hardCapPenalty": 0.496984,
+          "round_tooEarlyPenalty": 0.230961,
+          "round_tooLatePenalty": 0.021404,
+          "round_mildPenalty": 0.221244,
+          "round_finalRoundBonus": 0.010187
+        },
+        "avgVP": 57.59
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.280851,
+          "qualityThreshold": 0.172774,
+          "goldPressure_0": 0.359387,
+          "goldPressure_1": 0.365243,
+          "goldPressure_2": 0.089034,
+          "goldPressure_3": 0.241163,
+          "diminishing_perUnit": 0.036998,
+          "diminishing_hardCapPenalty": 0.504625,
+          "round_tooEarlyPenalty": 0.252972,
+          "round_tooLatePenalty": 0.057782,
+          "round_mildPenalty": 0.028346,
+          "round_finalRoundBonus": 0.098799
+        },
+        "avgVP": 54.98
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.375251,
+          "qualityThreshold": 0.19958,
+          "goldPressure_0": 0.379958,
+          "goldPressure_1": 0.228369,
+          "goldPressure_2": 0.097444,
+          "goldPressure_3": 0.137864,
+          "diminishing_perUnit": 0.060329,
+          "diminishing_hardCapPenalty": 0.578655,
+          "round_tooEarlyPenalty": 0.167721,
+          "round_tooLatePenalty": 0.055671,
+          "round_mildPenalty": 0.184912,
+          "round_finalRoundBonus": 0.06858
+        },
+        "avgVP": 58.88
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.284009,
+          "qualityThreshold": 0.112224,
+          "goldPressure_0": 0.43476,
+          "goldPressure_1": 0.273534,
+          "goldPressure_2": 0.203023,
+          "goldPressure_3": 0.095438,
+          "diminishing_perUnit": 0.015434,
+          "diminishing_hardCapPenalty": 0.403722,
+          "round_tooEarlyPenalty": 0.071943,
+          "round_tooLatePenalty": 0.089166,
+          "round_mildPenalty": 0.066967,
+          "round_finalRoundBonus": 0.017581
+        },
+        "avgVP": 50.06
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.325886,
+          "qualityThreshold": 0.194647,
+          "goldPressure_0": 0.404078,
+          "goldPressure_1": 0.127489,
+          "goldPressure_2": 0.161139,
+          "goldPressure_3": 0.063964,
+          "diminishing_perUnit": 0.092843,
+          "diminishing_hardCapPenalty": 0.343553,
+          "round_tooEarlyPenalty": 0.199966,
+          "round_tooLatePenalty": 0.209664,
+          "round_mildPenalty": 0.01837,
+          "round_finalRoundBonus": 0.133785
+        },
+        "avgVP": 57.87
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.235193,
+          "qualityThreshold": 0.142493,
+          "goldPressure_0": 0.349941,
+          "goldPressure_1": 0.275888,
+          "goldPressure_2": 0.156435,
+          "goldPressure_3": 0.147613,
+          "diminishing_perUnit": 0.079752,
+          "diminishing_hardCapPenalty": 0.415287,
+          "round_tooEarlyPenalty": 0.111693,
+          "round_tooLatePenalty": 0.156448,
+          "round_mildPenalty": 0.067981,
+          "round_finalRoundBonus": 0.130851
+        },
+        "avgVP": 54.78
+      }
+    ],
+    "gen_best_avgVP": 60.07,
+    "gen_avg_vp": 56.95,
+    "alltime_best_avgVP": 62.31,
+    "sigma": 0.067052,
+    "elapsed_s": 804.0
+  },
+  {
+    "generation": 12,
+    "candidates": [
+      {
+        "weights": {
+          "penaltyScale": 0.289195,
+          "qualityThreshold": 0.19252,
+          "goldPressure_0": 0.344746,
+          "goldPressure_1": 0.294882,
+          "goldPressure_2": 0.041786,
+          "goldPressure_3": 0.159613,
+          "diminishing_perUnit": 0.017584,
+          "diminishing_hardCapPenalty": 0.516242,
+          "round_tooEarlyPenalty": 0.288589,
+          "round_tooLatePenalty": 0.152058,
+          "round_mildPenalty": 0.101759,
+          "round_finalRoundBonus": 0.01397
+        },
+        "avgVP": 64.7
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.413439,
+          "qualityThreshold": 0.196955,
+          "goldPressure_0": 0.339753,
+          "goldPressure_1": 0.25486,
+          "goldPressure_2": 0.04903,
+          "goldPressure_3": 0.109784,
+          "diminishing_perUnit": 0.081652,
+          "diminishing_hardCapPenalty": 0.498064,
+          "round_tooEarlyPenalty": 0.23129,
+          "round_tooLatePenalty": 0.137834,
+          "round_mildPenalty": 0.129549,
+          "round_finalRoundBonus": 0.042377
+        },
+        "avgVP": 60.42
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.350402,
+          "qualityThreshold": 0.195072,
+          "goldPressure_0": 0.374847,
+          "goldPressure_1": 0.169713,
+          "goldPressure_2": 0.171087,
+          "goldPressure_3": 0.20044,
+          "diminishing_perUnit": 0.030334,
+          "diminishing_hardCapPenalty": 0.570112,
+          "round_tooEarlyPenalty": 0.205921,
+          "round_tooLatePenalty": 0.227215,
+          "round_mildPenalty": 0.090453,
+          "round_finalRoundBonus": 0.017713
+        },
+        "avgVP": 62.02
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.291171,
+          "qualityThreshold": 0.163939,
+          "goldPressure_0": 0.372931,
+          "goldPressure_1": 0.320094,
+          "goldPressure_2": 0.104398,
+          "goldPressure_3": 0.19305,
+          "diminishing_perUnit": 0.013954,
+          "diminishing_hardCapPenalty": 0.524843,
+          "round_tooEarlyPenalty": 0.143786,
+          "round_tooLatePenalty": 0.143623,
+          "round_mildPenalty": 0.084701,
+          "round_finalRoundBonus": 0.023361
+        },
+        "avgVP": 58.01
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.348726,
+          "qualityThreshold": 0.19985,
+          "goldPressure_0": 0.346733,
+          "goldPressure_1": 0.238028,
+          "goldPressure_2": 0.07403,
+          "goldPressure_3": 0.139972,
+          "diminishing_perUnit": 0.073656,
+          "diminishing_hardCapPenalty": 0.51123,
+          "round_tooEarlyPenalty": 0.165787,
+          "round_tooLatePenalty": 0.073712,
+          "round_mildPenalty": 0.165765,
+          "round_finalRoundBonus": 0.016113
+        },
+        "avgVP": 57.31
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.261355,
+          "qualityThreshold": 0.168773,
+          "goldPressure_0": 0.259749,
+          "goldPressure_1": 0.227353,
+          "goldPressure_2": 0.045926,
+          "goldPressure_3": 0.016769,
+          "diminishing_perUnit": 0.046965,
+          "diminishing_hardCapPenalty": 0.439877,
+          "round_tooEarlyPenalty": 0.251695,
+          "round_tooLatePenalty": 0.084631,
+          "round_mildPenalty": 0.160224,
+          "round_finalRoundBonus": 0.016783
+        },
+        "avgVP": 60.14
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.320854,
+          "qualityThreshold": 0.172164,
+          "goldPressure_0": 0.375227,
+          "goldPressure_1": 0.281589,
+          "goldPressure_2": 0.279779,
+          "goldPressure_3": 0.155699,
+          "diminishing_perUnit": 0.069172,
+          "diminishing_hardCapPenalty": 0.551795,
+          "round_tooEarlyPenalty": 0.251543,
+          "round_tooLatePenalty": 0.067664,
+          "round_mildPenalty": 0.131094,
+          "round_finalRoundBonus": 0.062275
+        },
+        "avgVP": 57.5
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.35786,
+          "qualityThreshold": 0.160179,
+          "goldPressure_0": 0.297638,
+          "goldPressure_1": 0.193363,
+          "goldPressure_2": 0.074228,
+          "goldPressure_3": 0.096094,
+          "diminishing_perUnit": 0.03592,
+          "diminishing_hardCapPenalty": 0.379269,
+          "round_tooEarlyPenalty": 0.035876,
+          "round_tooLatePenalty": 0.197427,
+          "round_mildPenalty": 0.070626,
+          "round_finalRoundBonus": 0.010456
+        },
+        "avgVP": 57.31
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.398929,
+          "qualityThreshold": 0.198173,
+          "goldPressure_0": 0.285977,
+          "goldPressure_1": 0.226052,
+          "goldPressure_2": 0.184975,
+          "goldPressure_3": 0.051581,
+          "diminishing_perUnit": 0.117838,
+          "diminishing_hardCapPenalty": 0.471334,
+          "round_tooEarlyPenalty": 0.089894,
+          "round_tooLatePenalty": 0.086593,
+          "round_mildPenalty": 0.110399,
+          "round_finalRoundBonus": 0.010776
+        },
+        "avgVP": 56.83
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.338238,
+          "qualityThreshold": 0.192282,
+          "goldPressure_0": 0.315783,
+          "goldPressure_1": 0.122579,
+          "goldPressure_2": 0.050757,
+          "goldPressure_3": 0.087623,
+          "diminishing_perUnit": 0.024032,
+          "diminishing_hardCapPenalty": 0.411858,
+          "round_tooEarlyPenalty": 0.120894,
+          "round_tooLatePenalty": 0.208098,
+          "round_mildPenalty": 0.10963,
+          "round_finalRoundBonus": 0.02229
+        },
+        "avgVP": 63.37
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.254424,
+          "qualityThreshold": 0.158215,
+          "goldPressure_0": 0.297323,
+          "goldPressure_1": 0.242195,
+          "goldPressure_2": 0.020565,
+          "goldPressure_3": 0.123201,
+          "diminishing_perUnit": 0.023211,
+          "diminishing_hardCapPenalty": 0.511196,
+          "round_tooEarlyPenalty": 0.170438,
+          "round_tooLatePenalty": 0.029786,
+          "round_mildPenalty": 0.146184,
+          "round_finalRoundBonus": 0.068004
+        },
+        "avgVP": 54.63
+      }
+    ],
+    "gen_best_avgVP": 64.7,
+    "gen_avg_vp": 59.29,
+    "alltime_best_avgVP": 64.7,
+    "sigma": 0.060648,
+    "elapsed_s": 874.0
+  },
+  {
+    "generation": 13,
+    "candidates": [
+      {
+        "weights": {
+          "penaltyScale": 0.359233,
+          "qualityThreshold": 0.196589,
+          "goldPressure_0": 0.367007,
+          "goldPressure_1": 0.194261,
+          "goldPressure_2": 0.058459,
+          "goldPressure_3": 0.134929,
+          "diminishing_perUnit": 0.02404,
+          "diminishing_hardCapPenalty": 0.593402,
+          "round_tooEarlyPenalty": 0.230968,
+          "round_tooLatePenalty": 0.219986,
+          "round_mildPenalty": 0.133611,
+          "round_finalRoundBonus": 0.082595
+        },
+        "avgVP": 57.81
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.307784,
+          "qualityThreshold": 0.19997,
+          "goldPressure_0": 0.315808,
+          "goldPressure_1": 0.269479,
+          "goldPressure_2": 0.022926,
+          "goldPressure_3": 0.128725,
+          "diminishing_perUnit": 0.059755,
+          "diminishing_hardCapPenalty": 0.544524,
+          "round_tooEarlyPenalty": 0.291385,
+          "round_tooLatePenalty": 0.132409,
+          "round_mildPenalty": 0.160959,
+          "round_finalRoundBonus": 0.017004
+        },
+        "avgVP": 60.12
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.356502,
+          "qualityThreshold": 0.196628,
+          "goldPressure_0": 0.362976,
+          "goldPressure_1": 0.267073,
+          "goldPressure_2": 0.102898,
+          "goldPressure_3": 0.173381,
+          "diminishing_perUnit": 0.028548,
+          "diminishing_hardCapPenalty": 0.570061,
+          "round_tooEarlyPenalty": 0.239738,
+          "round_tooLatePenalty": 0.163871,
+          "round_mildPenalty": 0.044686,
+          "round_finalRoundBonus": 0.059787
+        },
+        "avgVP": 56.44
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.361501,
+          "qualityThreshold": 0.183443,
+          "goldPressure_0": 0.485044,
+          "goldPressure_1": 0.175646,
+          "goldPressure_2": 0.021408,
+          "goldPressure_3": 0.087126,
+          "diminishing_perUnit": 0.137998,
+          "diminishing_hardCapPenalty": 0.446385,
+          "round_tooEarlyPenalty": 0.189857,
+          "round_tooLatePenalty": 0.137171,
+          "round_mildPenalty": 0.136725,
+          "round_finalRoundBonus": 0.022816
+        },
+        "avgVP": 56.31
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.282907,
+          "qualityThreshold": 0.2,
+          "goldPressure_0": 0.252408,
+          "goldPressure_1": 0.177964,
+          "goldPressure_2": 0.100506,
+          "goldPressure_3": 0.153023,
+          "diminishing_perUnit": 0.061824,
+          "diminishing_hardCapPenalty": 0.459051,
+          "round_tooEarlyPenalty": 0.277042,
+          "round_tooLatePenalty": 0.279931,
+          "round_mildPenalty": 0.125075,
+          "round_finalRoundBonus": 0.029599
+        },
+        "avgVP": 57.73
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.233829,
+          "qualityThreshold": 0.171825,
+          "goldPressure_0": 0.239278,
+          "goldPressure_1": 0.200051,
+          "goldPressure_2": 0.153404,
+          "goldPressure_3": 0.202954,
+          "diminishing_perUnit": 0.026237,
+          "diminishing_hardCapPenalty": 0.522134,
+          "round_tooEarlyPenalty": 0.187156,
+          "round_tooLatePenalty": 0.139428,
+          "round_mildPenalty": 0.128632,
+          "round_finalRoundBonus": 0.103536
+        },
+        "avgVP": 55.77
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.377214,
+          "qualityThreshold": 0.19399,
+          "goldPressure_0": 0.329628,
+          "goldPressure_1": 0.158586,
+          "goldPressure_2": 0.069754,
+          "goldPressure_3": 0.133535,
+          "diminishing_perUnit": 0.013029,
+          "diminishing_hardCapPenalty": 0.468691,
+          "round_tooEarlyPenalty": 0.212493,
+          "round_tooLatePenalty": 0.170816,
+          "round_mildPenalty": 0.146891,
+          "round_finalRoundBonus": 0.02552
+        },
+        "avgVP": 62.27
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.250271,
+          "qualityThreshold": 0.199082,
+          "goldPressure_0": 0.296605,
+          "goldPressure_1": 0.206578,
+          "goldPressure_2": 0.077965,
+          "goldPressure_3": 0.093557,
+          "diminishing_perUnit": 0.04312,
+          "diminishing_hardCapPenalty": 0.52486,
+          "round_tooEarlyPenalty": 0.209297,
+          "round_tooLatePenalty": 0.166174,
+          "round_mildPenalty": 0.127815,
+          "round_finalRoundBonus": 0.030725
+        },
+        "avgVP": 56.56
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.38826,
+          "qualityThreshold": 0.124065,
+          "goldPressure_0": 0.412487,
+          "goldPressure_1": 0.185603,
+          "goldPressure_2": 0.087764,
+          "goldPressure_3": 0.068583,
+          "diminishing_perUnit": 0.02322,
+          "diminishing_hardCapPenalty": 0.410113,
+          "round_tooEarlyPenalty": 0.337196,
+          "round_tooLatePenalty": 0.086874,
+          "round_mildPenalty": 0.031798,
+          "round_finalRoundBonus": 0.05813
+        },
+        "avgVP": 52.73
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.302492,
+          "qualityThreshold": 0.199864,
+          "goldPressure_0": 0.474032,
+          "goldPressure_1": 0.26849,
+          "goldPressure_2": 0.025697,
+          "goldPressure_3": 0.162743,
+          "diminishing_perUnit": 0.013572,
+          "diminishing_hardCapPenalty": 0.443001,
+          "round_tooEarlyPenalty": 0.249635,
+          "round_tooLatePenalty": 0.143796,
+          "round_mildPenalty": 0.138024,
+          "round_finalRoundBonus": 0.019241
+        },
+        "avgVP": 61.73
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.25067,
+          "qualityThreshold": 0.169801,
+          "goldPressure_0": 0.35614,
+          "goldPressure_1": 0.156936,
+          "goldPressure_2": 0.158728,
+          "goldPressure_3": 0.122517,
+          "diminishing_perUnit": 0.016917,
+          "diminishing_hardCapPenalty": 0.525456,
+          "round_tooEarlyPenalty": 0.228008,
+          "round_tooLatePenalty": 0.283958,
+          "round_mildPenalty": 0.13637,
+          "round_finalRoundBonus": 0.021936
+        },
+        "avgVP": 60.01
+      }
+    ],
+    "gen_best_avgVP": 62.27,
+    "gen_avg_vp": 57.95,
+    "alltime_best_avgVP": 64.7,
+    "sigma": 0.057328,
+    "elapsed_s": 943.0
+  },
+  {
+    "generation": 14,
+    "candidates": [
+      {
+        "weights": {
+          "penaltyScale": 0.278044,
+          "qualityThreshold": 0.198186,
+          "goldPressure_0": 0.310939,
+          "goldPressure_1": 0.202193,
+          "goldPressure_2": 0.138955,
+          "goldPressure_3": 0.11542,
+          "diminishing_perUnit": 0.048023,
+          "diminishing_hardCapPenalty": 0.505082,
+          "round_tooEarlyPenalty": 0.238999,
+          "round_tooLatePenalty": 0.189229,
+          "round_mildPenalty": 0.16851,
+          "round_finalRoundBonus": 0.015923
+        },
+        "avgVP": 60.75
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.32333,
+          "qualityThreshold": 0.189253,
+          "goldPressure_0": 0.399749,
+          "goldPressure_1": 0.25113,
+          "goldPressure_2": 0.067064,
+          "goldPressure_3": 0.11412,
+          "diminishing_perUnit": 0.080337,
+          "diminishing_hardCapPenalty": 0.401361,
+          "round_tooEarlyPenalty": 0.253681,
+          "round_tooLatePenalty": 0.21138,
+          "round_mildPenalty": 0.075944,
+          "round_finalRoundBonus": 0.098407
+        },
+        "avgVP": 56.18
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.364245,
+          "qualityThreshold": 0.195798,
+          "goldPressure_0": 0.515389,
+          "goldPressure_1": 0.135759,
+          "goldPressure_2": 0.091209,
+          "goldPressure_3": 0.142088,
+          "diminishing_perUnit": 0.017365,
+          "diminishing_hardCapPenalty": 0.583571,
+          "round_tooEarlyPenalty": 0.173705,
+          "round_tooLatePenalty": 0.215772,
+          "round_mildPenalty": 0.160092,
+          "round_finalRoundBonus": 0.021317
+        },
+        "avgVP": 58.2
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.384732,
+          "qualityThreshold": 0.195622,
+          "goldPressure_0": 0.370403,
+          "goldPressure_1": 0.23701,
+          "goldPressure_2": 0.022273,
+          "goldPressure_3": 0.118041,
+          "diminishing_perUnit": 0.026126,
+          "diminishing_hardCapPenalty": 0.437258,
+          "round_tooEarlyPenalty": 0.238044,
+          "round_tooLatePenalty": 0.159929,
+          "round_mildPenalty": 0.128192,
+          "round_finalRoundBonus": 0.010071
+        },
+        "avgVP": 58.14
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.342196,
+          "qualityThreshold": 0.19701,
+          "goldPressure_0": 0.291736,
+          "goldPressure_1": 0.175313,
+          "goldPressure_2": 0.142861,
+          "goldPressure_3": 0.124028,
+          "diminishing_perUnit": 0.023097,
+          "diminishing_hardCapPenalty": 0.498919,
+          "round_tooEarlyPenalty": 0.211868,
+          "round_tooLatePenalty": 0.11743,
+          "round_mildPenalty": 0.152936,
+          "round_finalRoundBonus": 0.012602
+        },
+        "avgVP": 60.2
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.305217,
+          "qualityThreshold": 0.188124,
+          "goldPressure_0": 0.404329,
+          "goldPressure_1": 0.211798,
+          "goldPressure_2": 0.025776,
+          "goldPressure_3": 0.137173,
+          "diminishing_perUnit": 0.06741,
+          "diminishing_hardCapPenalty": 0.534795,
+          "round_tooEarlyPenalty": 0.252897,
+          "round_tooLatePenalty": 0.079113,
+          "round_mildPenalty": 0.093235,
+          "round_finalRoundBonus": 0.023208
+        },
+        "avgVP": 58.91
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.355225,
+          "qualityThreshold": 0.198908,
+          "goldPressure_0": 0.358069,
+          "goldPressure_1": 0.207136,
+          "goldPressure_2": 0.05972,
+          "goldPressure_3": 0.106835,
+          "diminishing_perUnit": 0.029479,
+          "diminishing_hardCapPenalty": 0.551052,
+          "round_tooEarlyPenalty": 0.190468,
+          "round_tooLatePenalty": 0.182189,
+          "round_mildPenalty": 0.076796,
+          "round_finalRoundBonus": 0.010539
+        },
+        "avgVP": 59.24
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.283928,
+          "qualityThreshold": 0.191078,
+          "goldPressure_0": 0.390806,
+          "goldPressure_1": 0.271184,
+          "goldPressure_2": 0.078782,
+          "goldPressure_3": 0.205384,
+          "diminishing_perUnit": 0.03148,
+          "diminishing_hardCapPenalty": 0.582518,
+          "round_tooEarlyPenalty": 0.209496,
+          "round_tooLatePenalty": 0.166578,
+          "round_mildPenalty": 0.127656,
+          "round_finalRoundBonus": 0.01714
+        },
+        "avgVP": 54.97
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.298212,
+          "qualityThreshold": 0.197638,
+          "goldPressure_0": 0.353716,
+          "goldPressure_1": 0.179847,
+          "goldPressure_2": 0.021227,
+          "goldPressure_3": 0.10638,
+          "diminishing_perUnit": 0.011503,
+          "diminishing_hardCapPenalty": 0.482051,
+          "round_tooEarlyPenalty": 0.285063,
+          "round_tooLatePenalty": 0.236613,
+          "round_mildPenalty": 0.106748,
+          "round_finalRoundBonus": 0.036162
+        },
+        "avgVP": 56.81
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.324984,
+          "qualityThreshold": 0.191225,
+          "goldPressure_0": 0.30599,
+          "goldPressure_1": 0.253263,
+          "goldPressure_2": 0.079639,
+          "goldPressure_3": 0.116913,
+          "diminishing_perUnit": 0.012382,
+          "diminishing_hardCapPenalty": 0.478203,
+          "round_tooEarlyPenalty": 0.260672,
+          "round_tooLatePenalty": 0.179265,
+          "round_mildPenalty": 0.098851,
+          "round_finalRoundBonus": 0.016376
+        },
+        "avgVP": 61.48
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.3157,
+          "qualityThreshold": 0.198342,
+          "goldPressure_0": 0.397178,
+          "goldPressure_1": 0.301717,
+          "goldPressure_2": 0.103959,
+          "goldPressure_3": 0.068493,
+          "diminishing_perUnit": 0.015308,
+          "diminishing_hardCapPenalty": 0.47981,
+          "round_tooEarlyPenalty": 0.181356,
+          "round_tooLatePenalty": 0.126143,
+          "round_mildPenalty": 0.149003,
+          "round_finalRoundBonus": 0.019599
+        },
+        "avgVP": 63.08
+      }
+    ],
+    "gen_best_avgVP": 63.08,
+    "gen_avg_vp": 58.91,
+    "alltime_best_avgVP": 64.7,
+    "sigma": 0.052905,
+    "elapsed_s": 1011.0
+  },
+  {
+    "generation": 15,
+    "candidates": [
+      {
+        "weights": {
+          "penaltyScale": 0.289112,
+          "qualityThreshold": 0.199989,
+          "goldPressure_0": 0.356681,
+          "goldPressure_1": 0.269714,
+          "goldPressure_2": 0.226623,
+          "goldPressure_3": 0.076379,
+          "diminishing_perUnit": 0.042464,
+          "diminishing_hardCapPenalty": 0.449632,
+          "round_tooEarlyPenalty": 0.309186,
+          "round_tooLatePenalty": 0.202582,
+          "round_mildPenalty": 0.205272,
+          "round_finalRoundBonus": 0.011858
+        },
+        "avgVP": 58.76
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.34963,
+          "qualityThreshold": 0.176954,
+          "goldPressure_0": 0.292456,
+          "goldPressure_1": 0.251522,
+          "goldPressure_2": 0.075021,
+          "goldPressure_3": 0.124226,
+          "diminishing_perUnit": 0.022183,
+          "diminishing_hardCapPenalty": 0.513475,
+          "round_tooEarlyPenalty": 0.197527,
+          "round_tooLatePenalty": 0.218847,
+          "round_mildPenalty": 0.082041,
+          "round_finalRoundBonus": 0.069414
+        },
+        "avgVP": 57.3
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.416346,
+          "qualityThreshold": 0.199155,
+          "goldPressure_0": 0.366268,
+          "goldPressure_1": 0.335379,
+          "goldPressure_2": 0.100672,
+          "goldPressure_3": 0.162124,
+          "diminishing_perUnit": 0.011636,
+          "diminishing_hardCapPenalty": 0.532471,
+          "round_tooEarlyPenalty": 0.258598,
+          "round_tooLatePenalty": 0.111593,
+          "round_mildPenalty": 0.139864,
+          "round_finalRoundBonus": 0.018661
+        },
+        "avgVP": 58.61
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.358934,
+          "qualityThreshold": 0.192456,
+          "goldPressure_0": 0.377154,
+          "goldPressure_1": 0.211361,
+          "goldPressure_2": 0.035461,
+          "goldPressure_3": 0.121285,
+          "diminishing_perUnit": 0.017981,
+          "diminishing_hardCapPenalty": 0.465336,
+          "round_tooEarlyPenalty": 0.179963,
+          "round_tooLatePenalty": 0.139115,
+          "round_mildPenalty": 0.144262,
+          "round_finalRoundBonus": 0.012455
+        },
+        "avgVP": 57.97
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.382982,
+          "qualityThreshold": 0.17343,
+          "goldPressure_0": 0.460122,
+          "goldPressure_1": 0.100777,
+          "goldPressure_2": 0.053527,
+          "goldPressure_3": 0.090061,
+          "diminishing_perUnit": 0.010028,
+          "diminishing_hardCapPenalty": 0.457476,
+          "round_tooEarlyPenalty": 0.199028,
+          "round_tooLatePenalty": 0.172758,
+          "round_mildPenalty": 0.128212,
+          "round_finalRoundBonus": 0.027099
+        },
+        "avgVP": 59.04
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.350037,
+          "qualityThreshold": 0.183274,
+          "goldPressure_0": 0.346559,
+          "goldPressure_1": 0.213805,
+          "goldPressure_2": 0.122977,
+          "goldPressure_3": 0.115581,
+          "diminishing_perUnit": 0.012407,
+          "diminishing_hardCapPenalty": 0.508181,
+          "round_tooEarlyPenalty": 0.261162,
+          "round_tooLatePenalty": 0.179287,
+          "round_mildPenalty": 0.134733,
+          "round_finalRoundBonus": 0.021204
+        },
+        "avgVP": 59.36
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.394374,
+          "qualityThreshold": 0.195113,
+          "goldPressure_0": 0.42588,
+          "goldPressure_1": 0.245239,
+          "goldPressure_2": 0.122583,
+          "goldPressure_3": 0.158939,
+          "diminishing_perUnit": 0.022173,
+          "diminishing_hardCapPenalty": 0.510133,
+          "round_tooEarlyPenalty": 0.201259,
+          "round_tooLatePenalty": 0.186742,
+          "round_mildPenalty": 0.137367,
+          "round_finalRoundBonus": 0.038121
+        },
+        "avgVP": 60.22
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.338185,
+          "qualityThreshold": 0.199907,
+          "goldPressure_0": 0.41558,
+          "goldPressure_1": 0.288512,
+          "goldPressure_2": 0.103721,
+          "goldPressure_3": 0.125541,
+          "diminishing_perUnit": 0.012649,
+          "diminishing_hardCapPenalty": 0.525818,
+          "round_tooEarlyPenalty": 0.24409,
+          "round_tooLatePenalty": 0.1415,
+          "round_mildPenalty": 0.155397,
+          "round_finalRoundBonus": 0.016877
+        },
+        "avgVP": 61.79
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.296529,
+          "qualityThreshold": 0.164815,
+          "goldPressure_0": 0.343455,
+          "goldPressure_1": 0.195936,
+          "goldPressure_2": 0.151198,
+          "goldPressure_3": 0.038656,
+          "diminishing_perUnit": 0.032013,
+          "diminishing_hardCapPenalty": 0.458078,
+          "round_tooEarlyPenalty": 0.237684,
+          "round_tooLatePenalty": 0.155258,
+          "round_mildPenalty": 0.047887,
+          "round_finalRoundBonus": 0.010177
+        },
+        "avgVP": 59.93
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.321562,
+          "qualityThreshold": 0.197633,
+          "goldPressure_0": 0.357887,
+          "goldPressure_1": 0.242541,
+          "goldPressure_2": 0.16838,
+          "goldPressure_3": 0.141286,
+          "diminishing_perUnit": 0.019545,
+          "diminishing_hardCapPenalty": 0.521888,
+          "round_tooEarlyPenalty": 0.286537,
+          "round_tooLatePenalty": 0.135957,
+          "round_mildPenalty": 0.115928,
+          "round_finalRoundBonus": 0.010043
+        },
+        "avgVP": 64.56
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.336217,
+          "qualityThreshold": 0.199457,
+          "goldPressure_0": 0.303286,
+          "goldPressure_1": 0.340717,
+          "goldPressure_2": 0.128609,
+          "goldPressure_3": 0.231874,
+          "diminishing_perUnit": 0.014947,
+          "diminishing_hardCapPenalty": 0.574999,
+          "round_tooEarlyPenalty": 0.237665,
+          "round_tooLatePenalty": 0.072169,
+          "round_mildPenalty": 0.137834,
+          "round_finalRoundBonus": 0.039927
+        },
+        "avgVP": 62.16
+      }
+    ],
+    "gen_best_avgVP": 64.56,
+    "gen_avg_vp": 59.97,
+    "alltime_best_avgVP": 64.7,
+    "sigma": 0.052273,
+    "elapsed_s": 1081.0
+  },
+  {
+    "generation": 16,
+    "candidates": [
+      {
+        "weights": {
+          "penaltyScale": 0.406149,
+          "qualityThreshold": 0.198668,
+          "goldPressure_0": 0.309122,
+          "goldPressure_1": 0.336293,
+          "goldPressure_2": 0.116084,
+          "goldPressure_3": 0.182243,
+          "diminishing_perUnit": 0.021027,
+          "diminishing_hardCapPenalty": 0.590486,
+          "round_tooEarlyPenalty": 0.229401,
+          "round_tooLatePenalty": 0.135583,
+          "round_mildPenalty": 0.182244,
+          "round_finalRoundBonus": 0.024796
+        },
+        "avgVP": 60.96
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.333459,
+          "qualityThreshold": 0.19836,
+          "goldPressure_0": 0.36768,
+          "goldPressure_1": 0.311184,
+          "goldPressure_2": 0.12778,
+          "goldPressure_3": 0.160833,
+          "diminishing_perUnit": 0.015105,
+          "diminishing_hardCapPenalty": 0.526514,
+          "round_tooEarlyPenalty": 0.281709,
+          "round_tooLatePenalty": 0.14473,
+          "round_mildPenalty": 0.064724,
+          "round_finalRoundBonus": 0.011081
+        },
+        "avgVP": 60.78
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.351704,
+          "qualityThreshold": 0.188496,
+          "goldPressure_0": 0.336265,
+          "goldPressure_1": 0.256529,
+          "goldPressure_2": 0.150474,
+          "goldPressure_3": 0.118407,
+          "diminishing_perUnit": 0.011616,
+          "diminishing_hardCapPenalty": 0.576457,
+          "round_tooEarlyPenalty": 0.29313,
+          "round_tooLatePenalty": 0.106928,
+          "round_mildPenalty": 0.125336,
+          "round_finalRoundBonus": 0.03175
+        },
+        "avgVP": 60.34
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.280779,
+          "qualityThreshold": 0.182063,
+          "goldPressure_0": 0.355226,
+          "goldPressure_1": 0.223689,
+          "goldPressure_2": 0.174661,
+          "goldPressure_3": 0.103229,
+          "diminishing_perUnit": 0.034314,
+          "diminishing_hardCapPenalty": 0.455422,
+          "round_tooEarlyPenalty": 0.327413,
+          "round_tooLatePenalty": 0.121491,
+          "round_mildPenalty": 0.13235,
+          "round_finalRoundBonus": 0.028036
+        },
+        "avgVP": 57.47
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.328081,
+          "qualityThreshold": 0.190319,
+          "goldPressure_0": 0.274014,
+          "goldPressure_1": 0.229348,
+          "goldPressure_2": 0.05067,
+          "goldPressure_3": 0.186038,
+          "diminishing_perUnit": 0.022202,
+          "diminishing_hardCapPenalty": 0.554853,
+          "round_tooEarlyPenalty": 0.234857,
+          "round_tooLatePenalty": 0.053657,
+          "round_mildPenalty": 0.143106,
+          "round_finalRoundBonus": 0.012753
+        },
+        "avgVP": 61.8
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.347217,
+          "qualityThreshold": 0.19653,
+          "goldPressure_0": 0.292095,
+          "goldPressure_1": 0.292097,
+          "goldPressure_2": 0.087029,
+          "goldPressure_3": 0.163907,
+          "diminishing_perUnit": 0.014501,
+          "diminishing_hardCapPenalty": 0.596482,
+          "round_tooEarlyPenalty": 0.353494,
+          "round_tooLatePenalty": 0.072669,
+          "round_mildPenalty": 0.158409,
+          "round_finalRoundBonus": 0.028418
+        },
+        "avgVP": 58.63
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.321644,
+          "qualityThreshold": 0.199195,
+          "goldPressure_0": 0.42672,
+          "goldPressure_1": 0.355822,
+          "goldPressure_2": 0.185652,
+          "goldPressure_3": 0.161436,
+          "diminishing_perUnit": 0.013166,
+          "diminishing_hardCapPenalty": 0.485017,
+          "round_tooEarlyPenalty": 0.210048,
+          "round_tooLatePenalty": 0.116287,
+          "round_mildPenalty": 0.124138,
+          "round_finalRoundBonus": 0.046295
+        },
+        "avgVP": 57.39
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.369501,
+          "qualityThreshold": 0.199771,
+          "goldPressure_0": 0.303977,
+          "goldPressure_1": 0.327312,
+          "goldPressure_2": 0.164524,
+          "goldPressure_3": 0.062555,
+          "diminishing_perUnit": 0.025849,
+          "diminishing_hardCapPenalty": 0.522867,
+          "round_tooEarlyPenalty": 0.243166,
+          "round_tooLatePenalty": 0.141435,
+          "round_mildPenalty": 0.103507,
+          "round_finalRoundBonus": 0.023689
+        },
+        "avgVP": 59.07
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.302805,
+          "qualityThreshold": 0.199856,
+          "goldPressure_0": 0.41191,
+          "goldPressure_1": 0.253798,
+          "goldPressure_2": 0.123233,
+          "goldPressure_3": 0.102504,
+          "diminishing_perUnit": 0.010203,
+          "diminishing_hardCapPenalty": 0.386423,
+          "round_tooEarlyPenalty": 0.285626,
+          "round_tooLatePenalty": 0.125726,
+          "round_mildPenalty": 0.068733,
+          "round_finalRoundBonus": 0.01607
+        },
+        "avgVP": 58.23
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.313658,
+          "qualityThreshold": 0.194388,
+          "goldPressure_0": 0.355678,
+          "goldPressure_1": 0.255488,
+          "goldPressure_2": 0.141019,
+          "goldPressure_3": 0.177078,
+          "diminishing_perUnit": 0.035497,
+          "diminishing_hardCapPenalty": 0.469503,
+          "round_tooEarlyPenalty": 0.254093,
+          "round_tooLatePenalty": 0.165882,
+          "round_mildPenalty": 0.123684,
+          "round_finalRoundBonus": 0.015988
+        },
+        "avgVP": 58.43
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.373958,
+          "qualityThreshold": 0.199826,
+          "goldPressure_0": 0.300198,
+          "goldPressure_1": 0.206527,
+          "goldPressure_2": 0.252563,
+          "goldPressure_3": 0.138338,
+          "diminishing_perUnit": 0.013124,
+          "diminishing_hardCapPenalty": 0.519285,
+          "round_tooEarlyPenalty": 0.264806,
+          "round_tooLatePenalty": 0.121054,
+          "round_mildPenalty": 0.070119,
+          "round_finalRoundBonus": 0.018445
+        },
+        "avgVP": 57.48
+      }
+    ],
+    "gen_best_avgVP": 61.8,
+    "gen_avg_vp": 59.14,
+    "alltime_best_avgVP": 64.7,
+    "sigma": 0.050227,
+    "elapsed_s": 1152.0
+  },
+  {
+    "generation": 17,
+    "candidates": [
+      {
+        "weights": {
+          "penaltyScale": 0.367287,
+          "qualityThreshold": 0.196939,
+          "goldPressure_0": 0.322048,
+          "goldPressure_1": 0.192258,
+          "goldPressure_2": 0.142323,
+          "goldPressure_3": 0.174128,
+          "diminishing_perUnit": 0.04631,
+          "diminishing_hardCapPenalty": 0.58542,
+          "round_tooEarlyPenalty": 0.297013,
+          "round_tooLatePenalty": 0.168379,
+          "round_mildPenalty": 0.181672,
+          "round_finalRoundBonus": 0.028004
+        },
+        "avgVP": 54.27
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.327845,
+          "qualityThreshold": 0.196237,
+          "goldPressure_0": 0.352342,
+          "goldPressure_1": 0.344679,
+          "goldPressure_2": 0.203557,
+          "goldPressure_3": 0.132536,
+          "diminishing_perUnit": 0.021913,
+          "diminishing_hardCapPenalty": 0.538534,
+          "round_tooEarlyPenalty": 0.24938,
+          "round_tooLatePenalty": 0.127328,
+          "round_mildPenalty": 0.073074,
+          "round_finalRoundBonus": 0.014823
+        },
+        "avgVP": 57.89
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.385429,
+          "qualityThreshold": 0.199681,
+          "goldPressure_0": 0.409102,
+          "goldPressure_1": 0.293439,
+          "goldPressure_2": 0.159079,
+          "goldPressure_3": 0.171659,
+          "diminishing_perUnit": 0.026583,
+          "diminishing_hardCapPenalty": 0.587892,
+          "round_tooEarlyPenalty": 0.303705,
+          "round_tooLatePenalty": 0.024264,
+          "round_mildPenalty": 0.128807,
+          "round_finalRoundBonus": 0.017577
+        },
+        "avgVP": 61.98
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.386178,
+          "qualityThreshold": 0.195273,
+          "goldPressure_0": 0.252467,
+          "goldPressure_1": 0.273414,
+          "goldPressure_2": 0.075621,
+          "goldPressure_3": 0.146817,
+          "diminishing_perUnit": 0.016882,
+          "diminishing_hardCapPenalty": 0.534648,
+          "round_tooEarlyPenalty": 0.226457,
+          "round_tooLatePenalty": 0.050804,
+          "round_mildPenalty": 0.06087,
+          "round_finalRoundBonus": 0.016331
+        },
+        "avgVP": 59.78
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.300455,
+          "qualityThreshold": 0.197814,
+          "goldPressure_0": 0.261866,
+          "goldPressure_1": 0.279288,
+          "goldPressure_2": 0.107284,
+          "goldPressure_3": 0.147394,
+          "diminishing_perUnit": 0.036505,
+          "diminishing_hardCapPenalty": 0.587467,
+          "round_tooEarlyPenalty": 0.246885,
+          "round_tooLatePenalty": 0.101069,
+          "round_mildPenalty": 0.118664,
+          "round_finalRoundBonus": 0.019354
+        },
+        "avgVP": 60.09
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.386117,
+          "qualityThreshold": 0.19941,
+          "goldPressure_0": 0.25901,
+          "goldPressure_1": 0.224114,
+          "goldPressure_2": 0.190732,
+          "goldPressure_3": 0.238061,
+          "diminishing_perUnit": 0.01724,
+          "diminishing_hardCapPenalty": 0.467451,
+          "round_tooEarlyPenalty": 0.206695,
+          "round_tooLatePenalty": 0.103229,
+          "round_mildPenalty": 0.116508,
+          "round_finalRoundBonus": 0.010341
+        },
+        "avgVP": 57.74
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.356084,
+          "qualityThreshold": 0.170177,
+          "goldPressure_0": 0.258303,
+          "goldPressure_1": 0.254376,
+          "goldPressure_2": 0.170573,
+          "goldPressure_3": 0.197353,
+          "diminishing_perUnit": 0.013229,
+          "diminishing_hardCapPenalty": 0.590319,
+          "round_tooEarlyPenalty": 0.283193,
+          "round_tooLatePenalty": 0.137449,
+          "round_mildPenalty": 0.189019,
+          "round_finalRoundBonus": 0.01339
+        },
+        "avgVP": 58.73
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.322815,
+          "qualityThreshold": 0.199975,
+          "goldPressure_0": 0.375967,
+          "goldPressure_1": 0.23199,
+          "goldPressure_2": 0.078209,
+          "goldPressure_3": 0.165272,
+          "diminishing_perUnit": 0.013572,
+          "diminishing_hardCapPenalty": 0.572118,
+          "round_tooEarlyPenalty": 0.222594,
+          "round_tooLatePenalty": 0.14864,
+          "round_mildPenalty": 0.160969,
+          "round_finalRoundBonus": 0.044895
+        },
+        "avgVP": 61.58
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.357483,
+          "qualityThreshold": 0.199045,
+          "goldPressure_0": 0.255703,
+          "goldPressure_1": 0.297644,
+          "goldPressure_2": 0.115959,
+          "goldPressure_3": 0.190096,
+          "diminishing_perUnit": 0.020775,
+          "diminishing_hardCapPenalty": 0.553153,
+          "round_tooEarlyPenalty": 0.283913,
+          "round_tooLatePenalty": 0.110557,
+          "round_mildPenalty": 0.194078,
+          "round_finalRoundBonus": 0.038571
+        },
+        "avgVP": 58.33
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.38485,
+          "qualityThreshold": 0.184949,
+          "goldPressure_0": 0.30119,
+          "goldPressure_1": 0.342093,
+          "goldPressure_2": 0.081102,
+          "goldPressure_3": 0.152229,
+          "diminishing_perUnit": 0.051226,
+          "diminishing_hardCapPenalty": 0.590327,
+          "round_tooEarlyPenalty": 0.230695,
+          "round_tooLatePenalty": 0.127897,
+          "round_mildPenalty": 0.17674,
+          "round_finalRoundBonus": 0.010119
+        },
+        "avgVP": 58.14
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.339716,
+          "qualityThreshold": 0.182283,
+          "goldPressure_0": 0.295721,
+          "goldPressure_1": 0.309991,
+          "goldPressure_2": 0.198133,
+          "goldPressure_3": 0.162204,
+          "diminishing_perUnit": 0.014383,
+          "diminishing_hardCapPenalty": 0.568529,
+          "round_tooEarlyPenalty": 0.229021,
+          "round_tooLatePenalty": 0.118923,
+          "round_mildPenalty": 0.137464,
+          "round_finalRoundBonus": 0.014479
+        },
+        "avgVP": 59.47
+      }
+    ],
+    "gen_best_avgVP": 61.98,
+    "gen_avg_vp": 58.91,
+    "alltime_best_avgVP": 64.7,
+    "sigma": 0.049233,
+    "elapsed_s": 1223.0
+  },
+  {
+    "generation": 18,
+    "candidates": [
+      {
+        "weights": {
+          "penaltyScale": 0.330335,
+          "qualityThreshold": 0.199427,
+          "goldPressure_0": 0.387093,
+          "goldPressure_1": 0.229124,
+          "goldPressure_2": 0.133492,
+          "goldPressure_3": 0.230548,
+          "diminishing_perUnit": 0.013752,
+          "diminishing_hardCapPenalty": 0.511571,
+          "round_tooEarlyPenalty": 0.336884,
+          "round_tooLatePenalty": 0.080613,
+          "round_mildPenalty": 0.19743,
+          "round_finalRoundBonus": 0.02648
+        },
+        "avgVP": 59.92
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.279036,
+          "qualityThreshold": 0.196641,
+          "goldPressure_0": 0.350347,
+          "goldPressure_1": 0.22763,
+          "goldPressure_2": 0.068936,
+          "goldPressure_3": 0.085935,
+          "diminishing_perUnit": 0.010022,
+          "diminishing_hardCapPenalty": 0.599899,
+          "round_tooEarlyPenalty": 0.250965,
+          "round_tooLatePenalty": 0.095799,
+          "round_mildPenalty": 0.072525,
+          "round_finalRoundBonus": 0.048564
+        },
+        "avgVP": 56.25
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.388405,
+          "qualityThreshold": 0.199627,
+          "goldPressure_0": 0.437277,
+          "goldPressure_1": 0.283349,
+          "goldPressure_2": 0.070236,
+          "goldPressure_3": 0.158155,
+          "diminishing_perUnit": 0.044536,
+          "diminishing_hardCapPenalty": 0.545698,
+          "round_tooEarlyPenalty": 0.308301,
+          "round_tooLatePenalty": 0.07781,
+          "round_mildPenalty": 0.155602,
+          "round_finalRoundBonus": 0.010002
+        },
+        "avgVP": 60.13
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.313885,
+          "qualityThreshold": 0.199998,
+          "goldPressure_0": 0.304962,
+          "goldPressure_1": 0.257915,
+          "goldPressure_2": 0.071025,
+          "goldPressure_3": 0.165587,
+          "diminishing_perUnit": 0.026189,
+          "diminishing_hardCapPenalty": 0.472807,
+          "round_tooEarlyPenalty": 0.32785,
+          "round_tooLatePenalty": 0.05086,
+          "round_mildPenalty": 0.146361,
+          "round_finalRoundBonus": 0.045255
+        },
+        "avgVP": 59.13
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.274463,
+          "qualityThreshold": 0.195129,
+          "goldPressure_0": 0.351012,
+          "goldPressure_1": 0.397939,
+          "goldPressure_2": 0.083654,
+          "goldPressure_3": 0.198947,
+          "diminishing_perUnit": 0.020882,
+          "diminishing_hardCapPenalty": 0.530697,
+          "round_tooEarlyPenalty": 0.288206,
+          "round_tooLatePenalty": 0.118002,
+          "round_mildPenalty": 0.16547,
+          "round_finalRoundBonus": 0.024344
+        },
+        "avgVP": 62.54
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.391358,
+          "qualityThreshold": 0.198782,
+          "goldPressure_0": 0.388427,
+          "goldPressure_1": 0.229695,
+          "goldPressure_2": 0.135849,
+          "goldPressure_3": 0.227411,
+          "diminishing_perUnit": 0.012069,
+          "diminishing_hardCapPenalty": 0.587982,
+          "round_tooEarlyPenalty": 0.297267,
+          "round_tooLatePenalty": 0.03356,
+          "round_mildPenalty": 0.173744,
+          "round_finalRoundBonus": 0.011053
+        },
+        "avgVP": 60.05
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.423589,
+          "qualityThreshold": 0.188962,
+          "goldPressure_0": 0.334274,
+          "goldPressure_1": 0.273017,
+          "goldPressure_2": 0.103764,
+          "goldPressure_3": 0.141806,
+          "diminishing_perUnit": 0.051036,
+          "diminishing_hardCapPenalty": 0.559929,
+          "round_tooEarlyPenalty": 0.212291,
+          "round_tooLatePenalty": 0.087031,
+          "round_mildPenalty": 0.180996,
+          "round_finalRoundBonus": 0.030505
+        },
+        "avgVP": 57.48
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.300213,
+          "qualityThreshold": 0.198253,
+          "goldPressure_0": 0.327121,
+          "goldPressure_1": 0.24971,
+          "goldPressure_2": 0.10055,
+          "goldPressure_3": 0.163455,
+          "diminishing_perUnit": 0.051355,
+          "diminishing_hardCapPenalty": 0.583262,
+          "round_tooEarlyPenalty": 0.337418,
+          "round_tooLatePenalty": 0.04079,
+          "round_mildPenalty": 0.130479,
+          "round_finalRoundBonus": 0.010173
+        },
+        "avgVP": 60.49
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.428699,
+          "qualityThreshold": 0.1958,
+          "goldPressure_0": 0.414373,
+          "goldPressure_1": 0.22141,
+          "goldPressure_2": 0.122628,
+          "goldPressure_3": 0.143695,
+          "diminishing_perUnit": 0.02302,
+          "diminishing_hardCapPenalty": 0.572393,
+          "round_tooEarlyPenalty": 0.325968,
+          "round_tooLatePenalty": 0.108903,
+          "round_mildPenalty": 0.120591,
+          "round_finalRoundBonus": 0.011553
+        },
+        "avgVP": 63.13
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.347466,
+          "qualityThreshold": 0.16404,
+          "goldPressure_0": 0.392341,
+          "goldPressure_1": 0.190436,
+          "goldPressure_2": 0.163833,
+          "goldPressure_3": 0.214084,
+          "diminishing_perUnit": 0.016164,
+          "diminishing_hardCapPenalty": 0.479306,
+          "round_tooEarlyPenalty": 0.246935,
+          "round_tooLatePenalty": 0.058481,
+          "round_mildPenalty": 0.086643,
+          "round_finalRoundBonus": 0.027098
+        },
+        "avgVP": 57.38
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.37384,
+          "qualityThreshold": 0.184267,
+          "goldPressure_0": 0.339522,
+          "goldPressure_1": 0.274047,
+          "goldPressure_2": 0.118431,
+          "goldPressure_3": 0.170981,
+          "diminishing_perUnit": 0.029445,
+          "diminishing_hardCapPenalty": 0.517753,
+          "round_tooEarlyPenalty": 0.215708,
+          "round_tooLatePenalty": 0.034882,
+          "round_mildPenalty": 0.117465,
+          "round_finalRoundBonus": 0.023802
+        },
+        "avgVP": 56.08
+      }
+    ],
+    "gen_best_avgVP": 63.13,
+    "gen_avg_vp": 59.33,
+    "alltime_best_avgVP": 64.7,
+    "sigma": 0.048022,
+    "elapsed_s": 1294.0
+  },
+  {
+    "generation": 19,
+    "candidates": [
+      {
+        "weights": {
+          "penaltyScale": 0.397008,
+          "qualityThreshold": 0.199687,
+          "goldPressure_0": 0.394183,
+          "goldPressure_1": 0.225193,
+          "goldPressure_2": 0.165713,
+          "goldPressure_3": 0.159408,
+          "diminishing_perUnit": 0.032127,
+          "diminishing_hardCapPenalty": 0.599998,
+          "round_tooEarlyPenalty": 0.281429,
+          "round_tooLatePenalty": 0.102619,
+          "round_mildPenalty": 0.112267,
+          "round_finalRoundBonus": 0.015617
+        },
+        "avgVP": 55.91
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.315138,
+          "qualityThreshold": 0.192105,
+          "goldPressure_0": 0.386648,
+          "goldPressure_1": 0.306912,
+          "goldPressure_2": 0.089909,
+          "goldPressure_3": 0.16721,
+          "diminishing_perUnit": 0.07395,
+          "diminishing_hardCapPenalty": 0.517792,
+          "round_tooEarlyPenalty": 0.322295,
+          "round_tooLatePenalty": 0.115521,
+          "round_mildPenalty": 0.105792,
+          "round_finalRoundBonus": 0.017795
+        },
+        "avgVP": 59.88
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.390427,
+          "qualityThreshold": 0.193997,
+          "goldPressure_0": 0.421489,
+          "goldPressure_1": 0.30532,
+          "goldPressure_2": 0.08577,
+          "goldPressure_3": 0.182633,
+          "diminishing_perUnit": 0.013492,
+          "diminishing_hardCapPenalty": 0.500381,
+          "round_tooEarlyPenalty": 0.236622,
+          "round_tooLatePenalty": 0.084257,
+          "round_mildPenalty": 0.173717,
+          "round_finalRoundBonus": 0.024441
+        },
+        "avgVP": 62.81
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.405307,
+          "qualityThreshold": 0.186955,
+          "goldPressure_0": 0.389761,
+          "goldPressure_1": 0.233906,
+          "goldPressure_2": 0.099498,
+          "goldPressure_3": 0.137921,
+          "diminishing_perUnit": 0.01371,
+          "diminishing_hardCapPenalty": 0.527706,
+          "round_tooEarlyPenalty": 0.373638,
+          "round_tooLatePenalty": 0.068821,
+          "round_mildPenalty": 0.13886,
+          "round_finalRoundBonus": 0.018279
+        },
+        "avgVP": 59.02
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.44019,
+          "qualityThreshold": 0.196994,
+          "goldPressure_0": 0.350925,
+          "goldPressure_1": 0.312603,
+          "goldPressure_2": 0.069537,
+          "goldPressure_3": 0.167814,
+          "diminishing_perUnit": 0.016874,
+          "diminishing_hardCapPenalty": 0.571489,
+          "round_tooEarlyPenalty": 0.283349,
+          "round_tooLatePenalty": 0.055077,
+          "round_mildPenalty": 0.208534,
+          "round_finalRoundBonus": 0.028539
+        },
+        "avgVP": 52.11
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.392211,
+          "qualityThreshold": 0.192656,
+          "goldPressure_0": 0.360377,
+          "goldPressure_1": 0.271895,
+          "goldPressure_2": 0.075277,
+          "goldPressure_3": 0.19342,
+          "diminishing_perUnit": 0.013749,
+          "diminishing_hardCapPenalty": 0.534384,
+          "round_tooEarlyPenalty": 0.358303,
+          "round_tooLatePenalty": 0.090275,
+          "round_mildPenalty": 0.166507,
+          "round_finalRoundBonus": 0.021163
+        },
+        "avgVP": 61.34
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.327678,
+          "qualityThreshold": 0.166778,
+          "goldPressure_0": 0.419123,
+          "goldPressure_1": 0.221318,
+          "goldPressure_2": 0.149858,
+          "goldPressure_3": 0.154704,
+          "diminishing_perUnit": 0.035463,
+          "diminishing_hardCapPenalty": 0.596287,
+          "round_tooEarlyPenalty": 0.377473,
+          "round_tooLatePenalty": 0.058892,
+          "round_mildPenalty": 0.162631,
+          "round_finalRoundBonus": 0.019403
+        },
+        "avgVP": 59.39
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.336884,
+          "qualityThreshold": 0.199411,
+          "goldPressure_0": 0.420595,
+          "goldPressure_1": 0.28827,
+          "goldPressure_2": 0.023746,
+          "goldPressure_3": 0.175476,
+          "diminishing_perUnit": 0.054845,
+          "diminishing_hardCapPenalty": 0.500904,
+          "round_tooEarlyPenalty": 0.256664,
+          "round_tooLatePenalty": 0.138771,
+          "round_mildPenalty": 0.163108,
+          "round_finalRoundBonus": 0.011054
+        },
+        "avgVP": 55.64
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.339318,
+          "qualityThreshold": 0.192248,
+          "goldPressure_0": 0.430315,
+          "goldPressure_1": 0.266439,
+          "goldPressure_2": 0.135111,
+          "goldPressure_3": 0.179043,
+          "diminishing_perUnit": 0.025903,
+          "diminishing_hardCapPenalty": 0.578724,
+          "round_tooEarlyPenalty": 0.333497,
+          "round_tooLatePenalty": 0.079456,
+          "round_mildPenalty": 0.159131,
+          "round_finalRoundBonus": 0.010052
+        },
+        "avgVP": 59.36
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.322683,
+          "qualityThreshold": 0.195653,
+          "goldPressure_0": 0.336324,
+          "goldPressure_1": 0.228787,
+          "goldPressure_2": 0.125605,
+          "goldPressure_3": 0.078182,
+          "diminishing_perUnit": 0.028262,
+          "diminishing_hardCapPenalty": 0.551598,
+          "round_tooEarlyPenalty": 0.283803,
+          "round_tooLatePenalty": 0.112513,
+          "round_mildPenalty": 0.198054,
+          "round_finalRoundBonus": 0.010486
+        },
+        "avgVP": 61.76
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.381244,
+          "qualityThreshold": 0.199902,
+          "goldPressure_0": 0.435925,
+          "goldPressure_1": 0.25136,
+          "goldPressure_2": 0.172471,
+          "goldPressure_3": 0.179784,
+          "diminishing_perUnit": 0.013494,
+          "diminishing_hardCapPenalty": 0.537113,
+          "round_tooEarlyPenalty": 0.309983,
+          "round_tooLatePenalty": 0.059233,
+          "round_mildPenalty": 0.151232,
+          "round_finalRoundBonus": 0.013281
+        },
+        "avgVP": 56.48
+      }
+    ],
+    "gen_best_avgVP": 62.81,
+    "gen_avg_vp": 58.52,
+    "alltime_best_avgVP": 64.7,
+    "sigma": 0.044628,
+    "elapsed_s": 1366.0
+  },
+  {
+    "generation": 20,
+    "candidates": [
+      {
+        "weights": {
+          "penaltyScale": 0.327032,
+          "qualityThreshold": 0.196343,
+          "goldPressure_0": 0.348979,
+          "goldPressure_1": 0.26387,
+          "goldPressure_2": 0.090229,
+          "goldPressure_3": 0.192087,
+          "diminishing_perUnit": 0.019556,
+          "diminishing_hardCapPenalty": 0.584245,
+          "round_tooEarlyPenalty": 0.249117,
+          "round_tooLatePenalty": 0.097153,
+          "round_mildPenalty": 0.176956,
+          "round_finalRoundBonus": 0.010268
+        },
+        "avgVP": 66.19
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.301275,
+          "qualityThreshold": 0.168572,
+          "goldPressure_0": 0.334073,
+          "goldPressure_1": 0.247508,
+          "goldPressure_2": 0.119279,
+          "goldPressure_3": 0.160699,
+          "diminishing_perUnit": 0.013825,
+          "diminishing_hardCapPenalty": 0.552772,
+          "round_tooEarlyPenalty": 0.236983,
+          "round_tooLatePenalty": 0.058941,
+          "round_mildPenalty": 0.146886,
+          "round_finalRoundBonus": 0.010135
+        },
+        "avgVP": 63.97
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.352874,
+          "qualityThreshold": 0.187403,
+          "goldPressure_0": 0.38425,
+          "goldPressure_1": 0.210119,
+          "goldPressure_2": 0.11457,
+          "goldPressure_3": 0.184418,
+          "diminishing_perUnit": 0.018948,
+          "diminishing_hardCapPenalty": 0.486266,
+          "round_tooEarlyPenalty": 0.313448,
+          "round_tooLatePenalty": 0.187807,
+          "round_mildPenalty": 0.114345,
+          "round_finalRoundBonus": 0.015928
+        },
+        "avgVP": 61.82
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.365546,
+          "qualityThreshold": 0.199529,
+          "goldPressure_0": 0.317306,
+          "goldPressure_1": 0.228456,
+          "goldPressure_2": 0.058888,
+          "goldPressure_3": 0.124434,
+          "diminishing_perUnit": 0.014598,
+          "diminishing_hardCapPenalty": 0.45397,
+          "round_tooEarlyPenalty": 0.220811,
+          "round_tooLatePenalty": 0.134854,
+          "round_mildPenalty": 0.203378,
+          "round_finalRoundBonus": 0.036085
+        },
+        "avgVP": 55.98
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.418346,
+          "qualityThreshold": 0.196056,
+          "goldPressure_0": 0.445209,
+          "goldPressure_1": 0.201759,
+          "goldPressure_2": 0.077369,
+          "goldPressure_3": 0.17015,
+          "diminishing_perUnit": 0.022648,
+          "diminishing_hardCapPenalty": 0.509938,
+          "round_tooEarlyPenalty": 0.346611,
+          "round_tooLatePenalty": 0.092947,
+          "round_mildPenalty": 0.207154,
+          "round_finalRoundBonus": 0.037127
+        },
+        "avgVP": 56.83
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.356048,
+          "qualityThreshold": 0.18016,
+          "goldPressure_0": 0.323672,
+          "goldPressure_1": 0.218098,
+          "goldPressure_2": 0.081067,
+          "goldPressure_3": 0.214021,
+          "diminishing_perUnit": 0.039211,
+          "diminishing_hardCapPenalty": 0.507344,
+          "round_tooEarlyPenalty": 0.329116,
+          "round_tooLatePenalty": 0.119263,
+          "round_mildPenalty": 0.184886,
+          "round_finalRoundBonus": 0.05021
+        },
+        "avgVP": 62.42
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.392334,
+          "qualityThreshold": 0.198878,
+          "goldPressure_0": 0.461942,
+          "goldPressure_1": 0.251143,
+          "goldPressure_2": 0.100148,
+          "goldPressure_3": 0.15064,
+          "diminishing_perUnit": 0.045467,
+          "diminishing_hardCapPenalty": 0.583839,
+          "round_tooEarlyPenalty": 0.294795,
+          "round_tooLatePenalty": 0.051639,
+          "round_mildPenalty": 0.193731,
+          "round_finalRoundBonus": 0.017722
+        },
+        "avgVP": 57.13
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.331604,
+          "qualityThreshold": 0.199715,
+          "goldPressure_0": 0.386813,
+          "goldPressure_1": 0.310489,
+          "goldPressure_2": 0.165316,
+          "goldPressure_3": 0.170698,
+          "diminishing_perUnit": 0.039328,
+          "diminishing_hardCapPenalty": 0.508245,
+          "round_tooEarlyPenalty": 0.202169,
+          "round_tooLatePenalty": 0.168781,
+          "round_mildPenalty": 0.174868,
+          "round_finalRoundBonus": 0.040521
+        },
+        "avgVP": 56.99
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.426476,
+          "qualityThreshold": 0.196048,
+          "goldPressure_0": 0.358025,
+          "goldPressure_1": 0.228743,
+          "goldPressure_2": 0.072247,
+          "goldPressure_3": 0.114172,
+          "diminishing_perUnit": 0.013334,
+          "diminishing_hardCapPenalty": 0.515606,
+          "round_tooEarlyPenalty": 0.328248,
+          "round_tooLatePenalty": 0.125408,
+          "round_mildPenalty": 0.228572,
+          "round_finalRoundBonus": 0.036591
+        },
+        "avgVP": 59.73
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.338034,
+          "qualityThreshold": 0.196939,
+          "goldPressure_0": 0.425465,
+          "goldPressure_1": 0.276344,
+          "goldPressure_2": 0.106796,
+          "goldPressure_3": 0.070885,
+          "diminishing_perUnit": 0.044114,
+          "diminishing_hardCapPenalty": 0.468105,
+          "round_tooEarlyPenalty": 0.297689,
+          "round_tooLatePenalty": 0.120104,
+          "round_mildPenalty": 0.171417,
+          "round_finalRoundBonus": 0.069511
+        },
+        "avgVP": 57.93
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.405105,
+          "qualityThreshold": 0.197496,
+          "goldPressure_0": 0.471619,
+          "goldPressure_1": 0.239268,
+          "goldPressure_2": 0.095741,
+          "goldPressure_3": 0.078162,
+          "diminishing_perUnit": 0.013902,
+          "diminishing_hardCapPenalty": 0.511359,
+          "round_tooEarlyPenalty": 0.302787,
+          "round_tooLatePenalty": 0.156034,
+          "round_mildPenalty": 0.125658,
+          "round_finalRoundBonus": 0.058175
+        },
+        "avgVP": 56.08
+      }
+    ],
+    "gen_best_avgVP": 66.19,
+    "gen_avg_vp": 59.55,
+    "alltime_best_avgVP": 66.19,
+    "sigma": 0.040911,
+    "elapsed_s": 1439.0
+  },
+  {
+    "generation": 21,
+    "candidates": [
+      {
+        "weights": {
+          "penaltyScale": 0.307312,
+          "qualityThreshold": 0.192628,
+          "goldPressure_0": 0.434695,
+          "goldPressure_1": 0.364581,
+          "goldPressure_2": 0.037507,
+          "goldPressure_3": 0.17434,
+          "diminishing_perUnit": 0.028668,
+          "diminishing_hardCapPenalty": 0.577003,
+          "round_tooEarlyPenalty": 0.181457,
+          "round_tooLatePenalty": 0.047302,
+          "round_mildPenalty": 0.18645,
+          "round_finalRoundBonus": 0.012528
+        },
+        "avgVP": 59.54
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.402869,
+          "qualityThreshold": 0.146872,
+          "goldPressure_0": 0.34307,
+          "goldPressure_1": 0.24131,
+          "goldPressure_2": 0.061187,
+          "goldPressure_3": 0.184926,
+          "diminishing_perUnit": 0.023047,
+          "diminishing_hardCapPenalty": 0.564798,
+          "round_tooEarlyPenalty": 0.299485,
+          "round_tooLatePenalty": 0.106105,
+          "round_mildPenalty": 0.203039,
+          "round_finalRoundBonus": 0.020519
+        },
+        "avgVP": 57.58
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.247974,
+          "qualityThreshold": 0.186949,
+          "goldPressure_0": 0.284682,
+          "goldPressure_1": 0.220491,
+          "goldPressure_2": 0.142739,
+          "goldPressure_3": 0.14246,
+          "diminishing_perUnit": 0.017061,
+          "diminishing_hardCapPenalty": 0.530798,
+          "round_tooEarlyPenalty": 0.26252,
+          "round_tooLatePenalty": 0.129018,
+          "round_mildPenalty": 0.151184,
+          "round_finalRoundBonus": 0.011048
+        },
+        "avgVP": 62.93
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.392493,
+          "qualityThreshold": 0.199433,
+          "goldPressure_0": 0.355895,
+          "goldPressure_1": 0.255886,
+          "goldPressure_2": 0.138121,
+          "goldPressure_3": 0.197568,
+          "diminishing_perUnit": 0.024072,
+          "diminishing_hardCapPenalty": 0.593059,
+          "round_tooEarlyPenalty": 0.250018,
+          "round_tooLatePenalty": 0.103651,
+          "round_mildPenalty": 0.142129,
+          "round_finalRoundBonus": 0.018744
+        },
+        "avgVP": 62.11
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.296432,
+          "qualityThreshold": 0.191725,
+          "goldPressure_0": 0.345111,
+          "goldPressure_1": 0.264896,
+          "goldPressure_2": 0.053095,
+          "goldPressure_3": 0.231749,
+          "diminishing_perUnit": 0.013871,
+          "diminishing_hardCapPenalty": 0.570135,
+          "round_tooEarlyPenalty": 0.32209,
+          "round_tooLatePenalty": 0.092982,
+          "round_mildPenalty": 0.149319,
+          "round_finalRoundBonus": 0.010702
+        },
+        "avgVP": 59.76
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.343371,
+          "qualityThreshold": 0.188685,
+          "goldPressure_0": 0.331892,
+          "goldPressure_1": 0.253627,
+          "goldPressure_2": 0.059564,
+          "goldPressure_3": 0.2262,
+          "diminishing_perUnit": 0.015759,
+          "diminishing_hardCapPenalty": 0.568445,
+          "round_tooEarlyPenalty": 0.303625,
+          "round_tooLatePenalty": 0.149926,
+          "round_mildPenalty": 0.144988,
+          "round_finalRoundBonus": 0.011467
+        },
+        "avgVP": 57.28
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.299688,
+          "qualityThreshold": 0.17665,
+          "goldPressure_0": 0.311193,
+          "goldPressure_1": 0.309819,
+          "goldPressure_2": 0.142943,
+          "goldPressure_3": 0.172484,
+          "diminishing_perUnit": 0.016387,
+          "diminishing_hardCapPenalty": 0.56526,
+          "round_tooEarlyPenalty": 0.239798,
+          "round_tooLatePenalty": 0.084901,
+          "round_mildPenalty": 0.159165,
+          "round_finalRoundBonus": 0.016335
+        },
+        "avgVP": 57.68
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.330007,
+          "qualityThreshold": 0.194203,
+          "goldPressure_0": 0.329603,
+          "goldPressure_1": 0.268031,
+          "goldPressure_2": 0.030195,
+          "goldPressure_3": 0.217137,
+          "diminishing_perUnit": 0.022495,
+          "diminishing_hardCapPenalty": 0.529222,
+          "round_tooEarlyPenalty": 0.270219,
+          "round_tooLatePenalty": 0.117435,
+          "round_mildPenalty": 0.170528,
+          "round_finalRoundBonus": 0.011947
+        },
+        "avgVP": 61.66
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.361103,
+          "qualityThreshold": 0.191466,
+          "goldPressure_0": 0.395771,
+          "goldPressure_1": 0.238072,
+          "goldPressure_2": 0.102252,
+          "goldPressure_3": 0.223874,
+          "diminishing_perUnit": 0.020016,
+          "diminishing_hardCapPenalty": 0.575314,
+          "round_tooEarlyPenalty": 0.290796,
+          "round_tooLatePenalty": 0.070735,
+          "round_mildPenalty": 0.209039,
+          "round_finalRoundBonus": 0.022173
+        },
+        "avgVP": 61.44
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.336189,
+          "qualityThreshold": 0.170025,
+          "goldPressure_0": 0.354501,
+          "goldPressure_1": 0.215294,
+          "goldPressure_2": 0.068872,
+          "goldPressure_3": 0.141858,
+          "diminishing_perUnit": 0.01817,
+          "diminishing_hardCapPenalty": 0.523922,
+          "round_tooEarlyPenalty": 0.27925,
+          "round_tooLatePenalty": 0.120496,
+          "round_mildPenalty": 0.138661,
+          "round_finalRoundBonus": 0.010736
+        },
+        "avgVP": 56.19
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.377976,
+          "qualityThreshold": 0.186608,
+          "goldPressure_0": 0.37346,
+          "goldPressure_1": 0.268691,
+          "goldPressure_2": 0.073533,
+          "goldPressure_3": 0.215581,
+          "diminishing_perUnit": 0.016909,
+          "diminishing_hardCapPenalty": 0.527081,
+          "round_tooEarlyPenalty": 0.320806,
+          "round_tooLatePenalty": 0.110139,
+          "round_mildPenalty": 0.148884,
+          "round_finalRoundBonus": 0.010613
+        },
+        "avgVP": 61.59
+      }
+    ],
+    "gen_best_avgVP": 62.93,
+    "gen_avg_vp": 59.8,
+    "alltime_best_avgVP": 66.19,
+    "sigma": 0.036807,
+    "elapsed_s": 1520.0
+  },
+  {
+    "generation": 22,
+    "candidates": [
+      {
+        "weights": {
+          "penaltyScale": 0.315031,
+          "qualityThreshold": 0.199974,
+          "goldPressure_0": 0.30743,
+          "goldPressure_1": 0.282659,
+          "goldPressure_2": 0.134957,
+          "goldPressure_3": 0.180614,
+          "diminishing_perUnit": 0.025219,
+          "diminishing_hardCapPenalty": 0.572707,
+          "round_tooEarlyPenalty": 0.255065,
+          "round_tooLatePenalty": 0.095682,
+          "round_mildPenalty": 0.149208,
+          "round_finalRoundBonus": 0.026552
+        },
+        "avgVP": 60.86
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.371997,
+          "qualityThreshold": 0.199294,
+          "goldPressure_0": 0.298679,
+          "goldPressure_1": 0.265102,
+          "goldPressure_2": 0.03434,
+          "goldPressure_3": 0.209289,
+          "diminishing_perUnit": 0.034971,
+          "diminishing_hardCapPenalty": 0.578451,
+          "round_tooEarlyPenalty": 0.211665,
+          "round_tooLatePenalty": 0.085365,
+          "round_mildPenalty": 0.164325,
+          "round_finalRoundBonus": 0.011726
+        },
+        "avgVP": 58.35
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.321535,
+          "qualityThreshold": 0.197067,
+          "goldPressure_0": 0.401332,
+          "goldPressure_1": 0.269285,
+          "goldPressure_2": 0.126315,
+          "goldPressure_3": 0.182438,
+          "diminishing_perUnit": 0.019677,
+          "diminishing_hardCapPenalty": 0.59624,
+          "round_tooEarlyPenalty": 0.269091,
+          "round_tooLatePenalty": 0.11964,
+          "round_mildPenalty": 0.144197,
+          "round_finalRoundBonus": 0.014187
+        },
+        "avgVP": 57.68
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.261652,
+          "qualityThreshold": 0.186437,
+          "goldPressure_0": 0.313276,
+          "goldPressure_1": 0.208688,
+          "goldPressure_2": 0.063495,
+          "goldPressure_3": 0.182502,
+          "diminishing_perUnit": 0.024367,
+          "diminishing_hardCapPenalty": 0.523525,
+          "round_tooEarlyPenalty": 0.296286,
+          "round_tooLatePenalty": 0.149173,
+          "round_mildPenalty": 0.165678,
+          "round_finalRoundBonus": 0.012749
+        },
+        "avgVP": 59.33
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.324977,
+          "qualityThreshold": 0.18005,
+          "goldPressure_0": 0.345398,
+          "goldPressure_1": 0.223351,
+          "goldPressure_2": 0.129748,
+          "goldPressure_3": 0.144874,
+          "diminishing_perUnit": 0.049661,
+          "diminishing_hardCapPenalty": 0.53114,
+          "round_tooEarlyPenalty": 0.256353,
+          "round_tooLatePenalty": 0.134874,
+          "round_mildPenalty": 0.148837,
+          "round_finalRoundBonus": 0.011332
+        },
+        "avgVP": 58.36
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.315033,
+          "qualityThreshold": 0.191329,
+          "goldPressure_0": 0.264627,
+          "goldPressure_1": 0.248329,
+          "goldPressure_2": 0.133544,
+          "goldPressure_3": 0.158788,
+          "diminishing_perUnit": 0.030647,
+          "diminishing_hardCapPenalty": 0.547213,
+          "round_tooEarlyPenalty": 0.2566,
+          "round_tooLatePenalty": 0.133762,
+          "round_mildPenalty": 0.15436,
+          "round_finalRoundBonus": 0.020491
+        },
+        "avgVP": 60.54
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.348117,
+          "qualityThreshold": 0.199206,
+          "goldPressure_0": 0.387411,
+          "goldPressure_1": 0.243936,
+          "goldPressure_2": 0.05406,
+          "goldPressure_3": 0.189015,
+          "diminishing_perUnit": 0.050283,
+          "diminishing_hardCapPenalty": 0.53591,
+          "round_tooEarlyPenalty": 0.340587,
+          "round_tooLatePenalty": 0.072322,
+          "round_mildPenalty": 0.127201,
+          "round_finalRoundBonus": 0.02094
+        },
+        "avgVP": 61.98
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.339203,
+          "qualityThreshold": 0.193114,
+          "goldPressure_0": 0.284718,
+          "goldPressure_1": 0.255599,
+          "goldPressure_2": 0.107614,
+          "goldPressure_3": 0.197998,
+          "diminishing_perUnit": 0.023247,
+          "diminishing_hardCapPenalty": 0.595962,
+          "round_tooEarlyPenalty": 0.290986,
+          "round_tooLatePenalty": 0.140834,
+          "round_mildPenalty": 0.169054,
+          "round_finalRoundBonus": 0.012364
+        },
+        "avgVP": 56.7
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.311151,
+          "qualityThreshold": 0.184104,
+          "goldPressure_0": 0.305074,
+          "goldPressure_1": 0.218417,
+          "goldPressure_2": 0.093443,
+          "goldPressure_3": 0.170365,
+          "diminishing_perUnit": 0.019711,
+          "diminishing_hardCapPenalty": 0.472477,
+          "round_tooEarlyPenalty": 0.238543,
+          "round_tooLatePenalty": 0.129303,
+          "round_mildPenalty": 0.14738,
+          "round_finalRoundBonus": 0.018546
+        },
+        "avgVP": 62.18
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.241803,
+          "qualityThreshold": 0.199639,
+          "goldPressure_0": 0.381892,
+          "goldPressure_1": 0.228185,
+          "goldPressure_2": 0.051529,
+          "goldPressure_3": 0.204634,
+          "diminishing_perUnit": 0.019415,
+          "diminishing_hardCapPenalty": 0.556798,
+          "round_tooEarlyPenalty": 0.291661,
+          "round_tooLatePenalty": 0.148151,
+          "round_mildPenalty": 0.146644,
+          "round_finalRoundBonus": 0.021239
+        },
+        "avgVP": 58.62
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.260211,
+          "qualityThreshold": 0.199767,
+          "goldPressure_0": 0.360389,
+          "goldPressure_1": 0.237865,
+          "goldPressure_2": 0.083499,
+          "goldPressure_3": 0.181861,
+          "diminishing_perUnit": 0.026639,
+          "diminishing_hardCapPenalty": 0.529504,
+          "round_tooEarlyPenalty": 0.321213,
+          "round_tooLatePenalty": 0.094922,
+          "round_mildPenalty": 0.141117,
+          "round_finalRoundBonus": 0.011457
+        },
+        "avgVP": 60.71
+      }
+    ],
+    "gen_best_avgVP": 62.18,
+    "gen_avg_vp": 59.57,
+    "alltime_best_avgVP": 66.19,
+    "sigma": 0.033949,
+    "elapsed_s": 1598.0
+  },
+  {
+    "generation": 23,
+    "candidates": [
+      {
+        "weights": {
+          "penaltyScale": 0.356187,
+          "qualityThreshold": 0.197202,
+          "goldPressure_0": 0.358852,
+          "goldPressure_1": 0.213195,
+          "goldPressure_2": 0.063373,
+          "goldPressure_3": 0.197122,
+          "diminishing_perUnit": 0.02891,
+          "diminishing_hardCapPenalty": 0.51392,
+          "round_tooEarlyPenalty": 0.301688,
+          "round_tooLatePenalty": 0.093597,
+          "round_mildPenalty": 0.155973,
+          "round_finalRoundBonus": 0.019612
+        },
+        "avgVP": 62.3
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.296287,
+          "qualityThreshold": 0.192687,
+          "goldPressure_0": 0.311243,
+          "goldPressure_1": 0.234784,
+          "goldPressure_2": 0.042308,
+          "goldPressure_3": 0.147226,
+          "diminishing_perUnit": 0.057626,
+          "diminishing_hardCapPenalty": 0.428201,
+          "round_tooEarlyPenalty": 0.297335,
+          "round_tooLatePenalty": 0.097369,
+          "round_mildPenalty": 0.12739,
+          "round_finalRoundBonus": 0.021251
+        },
+        "avgVP": 57.59
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.296135,
+          "qualityThreshold": 0.196474,
+          "goldPressure_0": 0.404583,
+          "goldPressure_1": 0.245852,
+          "goldPressure_2": 0.097913,
+          "goldPressure_3": 0.187219,
+          "diminishing_perUnit": 0.025465,
+          "diminishing_hardCapPenalty": 0.462603,
+          "round_tooEarlyPenalty": 0.216822,
+          "round_tooLatePenalty": 0.120794,
+          "round_mildPenalty": 0.133371,
+          "round_finalRoundBonus": 0.013406
+        },
+        "avgVP": 62.24
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.325108,
+          "qualityThreshold": 0.19537,
+          "goldPressure_0": 0.270739,
+          "goldPressure_1": 0.213295,
+          "goldPressure_2": 0.099547,
+          "goldPressure_3": 0.102191,
+          "diminishing_perUnit": 0.03003,
+          "diminishing_hardCapPenalty": 0.561757,
+          "round_tooEarlyPenalty": 0.273164,
+          "round_tooLatePenalty": 0.085986,
+          "round_mildPenalty": 0.146403,
+          "round_finalRoundBonus": 0.030582
+        },
+        "avgVP": 61.39
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.266396,
+          "qualityThreshold": 0.198703,
+          "goldPressure_0": 0.317337,
+          "goldPressure_1": 0.272114,
+          "goldPressure_2": 0.095586,
+          "goldPressure_3": 0.218021,
+          "diminishing_perUnit": 0.047767,
+          "diminishing_hardCapPenalty": 0.520624,
+          "round_tooEarlyPenalty": 0.253597,
+          "round_tooLatePenalty": 0.085701,
+          "round_mildPenalty": 0.154337,
+          "round_finalRoundBonus": 0.016746
+        },
+        "avgVP": 60.98
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.308375,
+          "qualityThreshold": 0.189297,
+          "goldPressure_0": 0.301993,
+          "goldPressure_1": 0.198288,
+          "goldPressure_2": 0.049284,
+          "goldPressure_3": 0.220674,
+          "diminishing_perUnit": 0.023647,
+          "diminishing_hardCapPenalty": 0.506946,
+          "round_tooEarlyPenalty": 0.288519,
+          "round_tooLatePenalty": 0.060702,
+          "round_mildPenalty": 0.106766,
+          "round_finalRoundBonus": 0.014061
+        },
+        "avgVP": 62.81
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.32238,
+          "qualityThreshold": 0.199303,
+          "goldPressure_0": 0.364269,
+          "goldPressure_1": 0.236388,
+          "goldPressure_2": 0.079209,
+          "goldPressure_3": 0.202651,
+          "diminishing_perUnit": 0.020246,
+          "diminishing_hardCapPenalty": 0.512566,
+          "round_tooEarlyPenalty": 0.280722,
+          "round_tooLatePenalty": 0.133296,
+          "round_mildPenalty": 0.143321,
+          "round_finalRoundBonus": 0.019558
+        },
+        "avgVP": 61.42
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.372188,
+          "qualityThreshold": 0.191404,
+          "goldPressure_0": 0.387803,
+          "goldPressure_1": 0.249175,
+          "goldPressure_2": 0.145744,
+          "goldPressure_3": 0.123347,
+          "diminishing_perUnit": 0.046555,
+          "diminishing_hardCapPenalty": 0.50441,
+          "round_tooEarlyPenalty": 0.280454,
+          "round_tooLatePenalty": 0.159805,
+          "round_mildPenalty": 0.159014,
+          "round_finalRoundBonus": 0.010759
+        },
+        "avgVP": 56.67
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.327482,
+          "qualityThreshold": 0.199285,
+          "goldPressure_0": 0.337329,
+          "goldPressure_1": 0.262219,
+          "goldPressure_2": 0.033257,
+          "goldPressure_3": 0.239785,
+          "diminishing_perUnit": 0.038561,
+          "diminishing_hardCapPenalty": 0.536267,
+          "round_tooEarlyPenalty": 0.306896,
+          "round_tooLatePenalty": 0.082062,
+          "round_mildPenalty": 0.149074,
+          "round_finalRoundBonus": 0.014171
+        },
+        "avgVP": 58.98
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.313941,
+          "qualityThreshold": 0.195409,
+          "goldPressure_0": 0.332851,
+          "goldPressure_1": 0.236023,
+          "goldPressure_2": 0.1078,
+          "goldPressure_3": 0.183392,
+          "diminishing_perUnit": 0.039122,
+          "diminishing_hardCapPenalty": 0.538358,
+          "round_tooEarlyPenalty": 0.296995,
+          "round_tooLatePenalty": 0.064658,
+          "round_mildPenalty": 0.120654,
+          "round_finalRoundBonus": 0.010397
+        },
+        "avgVP": 60.93
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.275496,
+          "qualityThreshold": 0.190055,
+          "goldPressure_0": 0.314743,
+          "goldPressure_1": 0.253742,
+          "goldPressure_2": 0.111125,
+          "goldPressure_3": 0.191355,
+          "diminishing_perUnit": 0.060181,
+          "diminishing_hardCapPenalty": 0.451649,
+          "round_tooEarlyPenalty": 0.256132,
+          "round_tooLatePenalty": 0.160197,
+          "round_mildPenalty": 0.152708,
+          "round_finalRoundBonus": 0.015349
+        },
+        "avgVP": 59.08
+      }
+    ],
+    "gen_best_avgVP": 62.81,
+    "gen_avg_vp": 60.4,
+    "alltime_best_avgVP": 66.19,
+    "sigma": 0.033704,
+    "elapsed_s": 1674.0
+  },
+  {
+    "generation": 24,
+    "candidates": [
+      {
+        "weights": {
+          "penaltyScale": 0.363704,
+          "qualityThreshold": 0.192204,
+          "goldPressure_0": 0.322168,
+          "goldPressure_1": 0.268148,
+          "goldPressure_2": 0.077442,
+          "goldPressure_3": 0.152025,
+          "diminishing_perUnit": 0.019137,
+          "diminishing_hardCapPenalty": 0.521676,
+          "round_tooEarlyPenalty": 0.218566,
+          "round_tooLatePenalty": 0.135209,
+          "round_mildPenalty": 0.097084,
+          "round_finalRoundBonus": 0.039863
+        },
+        "avgVP": 61.06
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.333396,
+          "qualityThreshold": 0.199069,
+          "goldPressure_0": 0.309097,
+          "goldPressure_1": 0.238342,
+          "goldPressure_2": 0.099292,
+          "goldPressure_3": 0.214173,
+          "diminishing_perUnit": 0.014733,
+          "diminishing_hardCapPenalty": 0.549115,
+          "round_tooEarlyPenalty": 0.260027,
+          "round_tooLatePenalty": 0.069246,
+          "round_mildPenalty": 0.179808,
+          "round_finalRoundBonus": 0.019463
+        },
+        "avgVP": 59.2
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.286129,
+          "qualityThreshold": 0.174423,
+          "goldPressure_0": 0.338847,
+          "goldPressure_1": 0.19265,
+          "goldPressure_2": 0.044866,
+          "goldPressure_3": 0.175246,
+          "diminishing_perUnit": 0.019226,
+          "diminishing_hardCapPenalty": 0.514674,
+          "round_tooEarlyPenalty": 0.271509,
+          "round_tooLatePenalty": 0.141899,
+          "round_mildPenalty": 0.105317,
+          "round_finalRoundBonus": 0.010531
+        },
+        "avgVP": 60.05
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.324251,
+          "qualityThreshold": 0.193205,
+          "goldPressure_0": 0.30773,
+          "goldPressure_1": 0.268137,
+          "goldPressure_2": 0.073305,
+          "goldPressure_3": 0.175079,
+          "diminishing_perUnit": 0.023659,
+          "diminishing_hardCapPenalty": 0.444581,
+          "round_tooEarlyPenalty": 0.284749,
+          "round_tooLatePenalty": 0.084938,
+          "round_mildPenalty": 0.188199,
+          "round_finalRoundBonus": 0.011059
+        },
+        "avgVP": 59.94
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.356308,
+          "qualityThreshold": 0.196689,
+          "goldPressure_0": 0.377386,
+          "goldPressure_1": 0.244146,
+          "goldPressure_2": 0.116324,
+          "goldPressure_3": 0.214626,
+          "diminishing_perUnit": 0.023543,
+          "diminishing_hardCapPenalty": 0.560959,
+          "round_tooEarlyPenalty": 0.315765,
+          "round_tooLatePenalty": 0.073576,
+          "round_mildPenalty": 0.101473,
+          "round_finalRoundBonus": 0.013303
+        },
+        "avgVP": 59.44
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.326523,
+          "qualityThreshold": 0.198933,
+          "goldPressure_0": 0.30991,
+          "goldPressure_1": 0.23015,
+          "goldPressure_2": 0.099965,
+          "goldPressure_3": 0.174453,
+          "diminishing_perUnit": 0.01826,
+          "diminishing_hardCapPenalty": 0.541172,
+          "round_tooEarlyPenalty": 0.215117,
+          "round_tooLatePenalty": 0.118848,
+          "round_mildPenalty": 0.143041,
+          "round_finalRoundBonus": 0.037918
+        },
+        "avgVP": 63.43
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.346319,
+          "qualityThreshold": 0.192184,
+          "goldPressure_0": 0.316751,
+          "goldPressure_1": 0.258923,
+          "goldPressure_2": 0.067394,
+          "goldPressure_3": 0.224581,
+          "diminishing_perUnit": 0.017995,
+          "diminishing_hardCapPenalty": 0.527694,
+          "round_tooEarlyPenalty": 0.27898,
+          "round_tooLatePenalty": 0.100335,
+          "round_mildPenalty": 0.158902,
+          "round_finalRoundBonus": 0.022818
+        },
+        "avgVP": 61.18
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.349713,
+          "qualityThreshold": 0.199996,
+          "goldPressure_0": 0.338449,
+          "goldPressure_1": 0.223683,
+          "goldPressure_2": 0.022688,
+          "goldPressure_3": 0.235679,
+          "diminishing_perUnit": 0.018823,
+          "diminishing_hardCapPenalty": 0.508569,
+          "round_tooEarlyPenalty": 0.28783,
+          "round_tooLatePenalty": 0.056808,
+          "round_mildPenalty": 0.1165,
+          "round_finalRoundBonus": 0.010031
+        },
+        "avgVP": 60.35
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.304616,
+          "qualityThreshold": 0.193369,
+          "goldPressure_0": 0.288413,
+          "goldPressure_1": 0.195593,
+          "goldPressure_2": 0.075226,
+          "goldPressure_3": 0.180395,
+          "diminishing_perUnit": 0.022003,
+          "diminishing_hardCapPenalty": 0.449881,
+          "round_tooEarlyPenalty": 0.234085,
+          "round_tooLatePenalty": 0.140842,
+          "round_mildPenalty": 0.152345,
+          "round_finalRoundBonus": 0.016369
+        },
+        "avgVP": 60.03
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.296368,
+          "qualityThreshold": 0.187549,
+          "goldPressure_0": 0.31122,
+          "goldPressure_1": 0.199113,
+          "goldPressure_2": 0.113851,
+          "goldPressure_3": 0.207663,
+          "diminishing_perUnit": 0.018798,
+          "diminishing_hardCapPenalty": 0.513149,
+          "round_tooEarlyPenalty": 0.296565,
+          "round_tooLatePenalty": 0.091717,
+          "round_mildPenalty": 0.133809,
+          "round_finalRoundBonus": 0.01448
+        },
+        "avgVP": 58.45
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.277242,
+          "qualityThreshold": 0.195881,
+          "goldPressure_0": 0.352836,
+          "goldPressure_1": 0.238304,
+          "goldPressure_2": 0.080309,
+          "goldPressure_3": 0.18735,
+          "diminishing_perUnit": 0.020833,
+          "diminishing_hardCapPenalty": 0.468531,
+          "round_tooEarlyPenalty": 0.211683,
+          "round_tooLatePenalty": 0.100713,
+          "round_mildPenalty": 0.134283,
+          "round_finalRoundBonus": 0.041387
+        },
+        "avgVP": 58.08
+      }
+    ],
+    "gen_best_avgVP": 63.43,
+    "gen_avg_vp": 60.11,
+    "alltime_best_avgVP": 66.19,
+    "sigma": 0.031494,
+    "elapsed_s": 1752.0
+  },
+  {
+    "generation": 25,
+    "candidates": [
+      {
+        "weights": {
+          "penaltyScale": 0.344913,
+          "qualityThreshold": 0.192302,
+          "goldPressure_0": 0.264676,
+          "goldPressure_1": 0.203295,
+          "goldPressure_2": 0.076404,
+          "goldPressure_3": 0.19508,
+          "diminishing_perUnit": 0.021676,
+          "diminishing_hardCapPenalty": 0.543878,
+          "round_tooEarlyPenalty": 0.262214,
+          "round_tooLatePenalty": 0.171992,
+          "round_mildPenalty": 0.143325,
+          "round_finalRoundBonus": 0.023595
+        },
+        "avgVP": 62.56
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.322399,
+          "qualityThreshold": 0.194243,
+          "goldPressure_0": 0.293617,
+          "goldPressure_1": 0.228567,
+          "goldPressure_2": 0.094584,
+          "goldPressure_3": 0.21173,
+          "diminishing_perUnit": 0.036417,
+          "diminishing_hardCapPenalty": 0.583644,
+          "round_tooEarlyPenalty": 0.268074,
+          "round_tooLatePenalty": 0.086181,
+          "round_mildPenalty": 0.119661,
+          "round_finalRoundBonus": 0.030311
+        },
+        "avgVP": 56.28
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.350234,
+          "qualityThreshold": 0.190759,
+          "goldPressure_0": 0.315584,
+          "goldPressure_1": 0.244396,
+          "goldPressure_2": 0.055901,
+          "goldPressure_3": 0.219416,
+          "diminishing_perUnit": 0.024106,
+          "diminishing_hardCapPenalty": 0.543867,
+          "round_tooEarlyPenalty": 0.26234,
+          "round_tooLatePenalty": 0.082853,
+          "round_mildPenalty": 0.114708,
+          "round_finalRoundBonus": 0.010035
+        },
+        "avgVP": 62.08
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.28391,
+          "qualityThreshold": 0.197965,
+          "goldPressure_0": 0.262145,
+          "goldPressure_1": 0.217039,
+          "goldPressure_2": 0.062943,
+          "goldPressure_3": 0.138521,
+          "diminishing_perUnit": 0.018849,
+          "diminishing_hardCapPenalty": 0.565439,
+          "round_tooEarlyPenalty": 0.215717,
+          "round_tooLatePenalty": 0.085024,
+          "round_mildPenalty": 0.135087,
+          "round_finalRoundBonus": 0.013571
+        },
+        "avgVP": 56.31
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.31262,
+          "qualityThreshold": 0.198858,
+          "goldPressure_0": 0.341054,
+          "goldPressure_1": 0.24929,
+          "goldPressure_2": 0.065191,
+          "goldPressure_3": 0.224448,
+          "diminishing_perUnit": 0.028723,
+          "diminishing_hardCapPenalty": 0.516299,
+          "round_tooEarlyPenalty": 0.24106,
+          "round_tooLatePenalty": 0.144011,
+          "round_mildPenalty": 0.146589,
+          "round_finalRoundBonus": 0.025354
+        },
+        "avgVP": 61.4
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.347226,
+          "qualityThreshold": 0.189379,
+          "goldPressure_0": 0.287905,
+          "goldPressure_1": 0.311364,
+          "goldPressure_2": 0.088465,
+          "goldPressure_3": 0.129248,
+          "diminishing_perUnit": 0.030867,
+          "diminishing_hardCapPenalty": 0.540801,
+          "round_tooEarlyPenalty": 0.215379,
+          "round_tooLatePenalty": 0.101214,
+          "round_mildPenalty": 0.089932,
+          "round_finalRoundBonus": 0.043953
+        },
+        "avgVP": 58.93
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.270846,
+          "qualityThreshold": 0.19953,
+          "goldPressure_0": 0.318272,
+          "goldPressure_1": 0.222001,
+          "goldPressure_2": 0.051745,
+          "goldPressure_3": 0.222584,
+          "diminishing_perUnit": 0.028471,
+          "diminishing_hardCapPenalty": 0.493597,
+          "round_tooEarlyPenalty": 0.262078,
+          "round_tooLatePenalty": 0.116021,
+          "round_mildPenalty": 0.127377,
+          "round_finalRoundBonus": 0.020079
+        },
+        "avgVP": 57.03
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.354981,
+          "qualityThreshold": 0.184218,
+          "goldPressure_0": 0.290001,
+          "goldPressure_1": 0.259098,
+          "goldPressure_2": 0.076499,
+          "goldPressure_3": 0.181178,
+          "diminishing_perUnit": 0.022667,
+          "diminishing_hardCapPenalty": 0.526256,
+          "round_tooEarlyPenalty": 0.218614,
+          "round_tooLatePenalty": 0.141805,
+          "round_mildPenalty": 0.125221,
+          "round_finalRoundBonus": 0.027834
+        },
+        "avgVP": 59.92
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.291638,
+          "qualityThreshold": 0.196459,
+          "goldPressure_0": 0.351234,
+          "goldPressure_1": 0.198018,
+          "goldPressure_2": 0.110084,
+          "goldPressure_3": 0.230582,
+          "diminishing_perUnit": 0.011084,
+          "diminishing_hardCapPenalty": 0.544071,
+          "round_tooEarlyPenalty": 0.235547,
+          "round_tooLatePenalty": 0.093396,
+          "round_mildPenalty": 0.089095,
+          "round_finalRoundBonus": 0.014674
+        },
+        "avgVP": 59.51
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.320992,
+          "qualityThreshold": 0.191638,
+          "goldPressure_0": 0.330994,
+          "goldPressure_1": 0.279118,
+          "goldPressure_2": 0.104167,
+          "goldPressure_3": 0.226569,
+          "diminishing_perUnit": 0.022327,
+          "diminishing_hardCapPenalty": 0.534164,
+          "round_tooEarlyPenalty": 0.210536,
+          "round_tooLatePenalty": 0.109979,
+          "round_mildPenalty": 0.119175,
+          "round_finalRoundBonus": 0.029639
+        },
+        "avgVP": 56.59
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.336084,
+          "qualityThreshold": 0.194081,
+          "goldPressure_0": 0.345169,
+          "goldPressure_1": 0.259614,
+          "goldPressure_2": 0.063976,
+          "goldPressure_3": 0.199746,
+          "diminishing_perUnit": 0.022684,
+          "diminishing_hardCapPenalty": 0.530617,
+          "round_tooEarlyPenalty": 0.214581,
+          "round_tooLatePenalty": 0.166297,
+          "round_mildPenalty": 0.106464,
+          "round_finalRoundBonus": 0.014007
+        },
+        "avgVP": 57.89
+      }
+    ],
+    "gen_best_avgVP": 62.56,
+    "gen_avg_vp": 58.95,
+    "alltime_best_avgVP": 66.19,
+    "sigma": 0.030472,
+    "elapsed_s": 1829.0
+  },
+  {
+    "generation": 26,
+    "candidates": [
+      {
+        "weights": {
+          "penaltyScale": 0.343213,
+          "qualityThreshold": 0.197478,
+          "goldPressure_0": 0.305572,
+          "goldPressure_1": 0.213813,
+          "goldPressure_2": 0.078786,
+          "goldPressure_3": 0.216525,
+          "diminishing_perUnit": 0.029027,
+          "diminishing_hardCapPenalty": 0.513765,
+          "round_tooEarlyPenalty": 0.260132,
+          "round_tooLatePenalty": 0.137752,
+          "round_mildPenalty": 0.091718,
+          "round_finalRoundBonus": 0.031833
+        },
+        "avgVP": 59.28
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.377878,
+          "qualityThreshold": 0.189718,
+          "goldPressure_0": 0.304839,
+          "goldPressure_1": 0.180812,
+          "goldPressure_2": 0.054863,
+          "goldPressure_3": 0.234788,
+          "diminishing_perUnit": 0.012791,
+          "diminishing_hardCapPenalty": 0.540259,
+          "round_tooEarlyPenalty": 0.222582,
+          "round_tooLatePenalty": 0.151944,
+          "round_mildPenalty": 0.10347,
+          "round_finalRoundBonus": 0.023011
+        },
+        "avgVP": 60.93
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.384566,
+          "qualityThreshold": 0.192638,
+          "goldPressure_0": 0.288816,
+          "goldPressure_1": 0.233951,
+          "goldPressure_2": 0.073141,
+          "goldPressure_3": 0.209112,
+          "diminishing_perUnit": 0.015903,
+          "diminishing_hardCapPenalty": 0.545466,
+          "round_tooEarlyPenalty": 0.254655,
+          "round_tooLatePenalty": 0.125129,
+          "round_mildPenalty": 0.151673,
+          "round_finalRoundBonus": 0.025462
+        },
+        "avgVP": 56.72
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.359741,
+          "qualityThreshold": 0.189476,
+          "goldPressure_0": 0.327855,
+          "goldPressure_1": 0.218163,
+          "goldPressure_2": 0.097579,
+          "goldPressure_3": 0.181204,
+          "diminishing_perUnit": 0.016733,
+          "diminishing_hardCapPenalty": 0.533014,
+          "round_tooEarlyPenalty": 0.21956,
+          "round_tooLatePenalty": 0.147926,
+          "round_mildPenalty": 0.141372,
+          "round_finalRoundBonus": 0.010314
+        },
+        "avgVP": 61.26
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.343116,
+          "qualityThreshold": 0.199771,
+          "goldPressure_0": 0.274884,
+          "goldPressure_1": 0.225221,
+          "goldPressure_2": 0.040655,
+          "goldPressure_3": 0.179246,
+          "diminishing_perUnit": 0.027426,
+          "diminishing_hardCapPenalty": 0.535736,
+          "round_tooEarlyPenalty": 0.274424,
+          "round_tooLatePenalty": 0.182537,
+          "round_mildPenalty": 0.159159,
+          "round_finalRoundBonus": 0.01236
+        },
+        "avgVP": 59.6
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.339891,
+          "qualityThreshold": 0.180108,
+          "goldPressure_0": 0.30162,
+          "goldPressure_1": 0.202688,
+          "goldPressure_2": 0.029191,
+          "goldPressure_3": 0.207331,
+          "diminishing_perUnit": 0.022657,
+          "diminishing_hardCapPenalty": 0.530049,
+          "round_tooEarlyPenalty": 0.294696,
+          "round_tooLatePenalty": 0.137423,
+          "round_mildPenalty": 0.112749,
+          "round_finalRoundBonus": 0.011119
+        },
+        "avgVP": 59.82
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.311045,
+          "qualityThreshold": 0.19841,
+          "goldPressure_0": 0.296338,
+          "goldPressure_1": 0.240967,
+          "goldPressure_2": 0.076629,
+          "goldPressure_3": 0.201439,
+          "diminishing_perUnit": 0.025336,
+          "diminishing_hardCapPenalty": 0.527085,
+          "round_tooEarlyPenalty": 0.227203,
+          "round_tooLatePenalty": 0.187604,
+          "round_mildPenalty": 0.162638,
+          "round_finalRoundBonus": 0.015721
+        },
+        "avgVP": 60.47
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.332117,
+          "qualityThreshold": 0.187776,
+          "goldPressure_0": 0.262053,
+          "goldPressure_1": 0.240938,
+          "goldPressure_2": 0.078096,
+          "goldPressure_3": 0.192626,
+          "diminishing_perUnit": 0.012996,
+          "diminishing_hardCapPenalty": 0.513979,
+          "round_tooEarlyPenalty": 0.195301,
+          "round_tooLatePenalty": 0.158643,
+          "round_mildPenalty": 0.129503,
+          "round_finalRoundBonus": 0.020205
+        },
+        "avgVP": 59.15
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.335007,
+          "qualityThreshold": 0.199947,
+          "goldPressure_0": 0.317281,
+          "goldPressure_1": 0.267256,
+          "goldPressure_2": 0.062088,
+          "goldPressure_3": 0.199355,
+          "diminishing_perUnit": 0.016593,
+          "diminishing_hardCapPenalty": 0.512227,
+          "round_tooEarlyPenalty": 0.301892,
+          "round_tooLatePenalty": 0.133792,
+          "round_mildPenalty": 0.130406,
+          "round_finalRoundBonus": 0.023627
+        },
+        "avgVP": 60.28
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.341439,
+          "qualityThreshold": 0.199253,
+          "goldPressure_0": 0.316374,
+          "goldPressure_1": 0.212798,
+          "goldPressure_2": 0.07165,
+          "goldPressure_3": 0.217547,
+          "diminishing_perUnit": 0.034975,
+          "diminishing_hardCapPenalty": 0.505624,
+          "round_tooEarlyPenalty": 0.296324,
+          "round_tooLatePenalty": 0.157005,
+          "round_mildPenalty": 0.101621,
+          "round_finalRoundBonus": 0.013718
+        },
+        "avgVP": 60.28
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.333043,
+          "qualityThreshold": 0.187412,
+          "goldPressure_0": 0.324327,
+          "goldPressure_1": 0.175863,
+          "goldPressure_2": 0.061442,
+          "goldPressure_3": 0.214274,
+          "diminishing_perUnit": 0.051998,
+          "diminishing_hardCapPenalty": 0.483103,
+          "round_tooEarlyPenalty": 0.312487,
+          "round_tooLatePenalty": 0.086801,
+          "round_mildPenalty": 0.089556,
+          "round_finalRoundBonus": 0.010836
+        },
+        "avgVP": 62.63
+      }
+    ],
+    "gen_best_avgVP": 62.63,
+    "gen_avg_vp": 60.04,
+    "alltime_best_avgVP": 66.19,
+    "sigma": 0.030143,
+    "elapsed_s": 1908.0
+  },
+  {
+    "generation": 27,
+    "candidates": [
+      {
+        "weights": {
+          "penaltyScale": 0.30603,
+          "qualityThreshold": 0.197241,
+          "goldPressure_0": 0.349551,
+          "goldPressure_1": 0.241067,
+          "goldPressure_2": 0.068446,
+          "goldPressure_3": 0.227786,
+          "diminishing_perUnit": 0.058637,
+          "diminishing_hardCapPenalty": 0.566672,
+          "round_tooEarlyPenalty": 0.273826,
+          "round_tooLatePenalty": 0.121046,
+          "round_mildPenalty": 0.125641,
+          "round_finalRoundBonus": 0.033904
+        },
+        "avgVP": 61.78
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.331386,
+          "qualityThreshold": 0.183669,
+          "goldPressure_0": 0.344719,
+          "goldPressure_1": 0.194178,
+          "goldPressure_2": 0.088213,
+          "goldPressure_3": 0.223332,
+          "diminishing_perUnit": 0.01925,
+          "diminishing_hardCapPenalty": 0.472825,
+          "round_tooEarlyPenalty": 0.25463,
+          "round_tooLatePenalty": 0.096515,
+          "round_mildPenalty": 0.12394,
+          "round_finalRoundBonus": 0.010005
+        },
+        "avgVP": 63.22
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.368824,
+          "qualityThreshold": 0.198746,
+          "goldPressure_0": 0.289491,
+          "goldPressure_1": 0.246815,
+          "goldPressure_2": 0.081394,
+          "goldPressure_3": 0.215855,
+          "diminishing_perUnit": 0.031231,
+          "diminishing_hardCapPenalty": 0.551199,
+          "round_tooEarlyPenalty": 0.293185,
+          "round_tooLatePenalty": 0.115797,
+          "round_mildPenalty": 0.133618,
+          "round_finalRoundBonus": 0.025931
+        },
+        "avgVP": 58.96
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.295073,
+          "qualityThreshold": 0.19136,
+          "goldPressure_0": 0.297777,
+          "goldPressure_1": 0.216261,
+          "goldPressure_2": 0.074835,
+          "goldPressure_3": 0.177195,
+          "diminishing_perUnit": 0.020204,
+          "diminishing_hardCapPenalty": 0.513265,
+          "round_tooEarlyPenalty": 0.255687,
+          "round_tooLatePenalty": 0.127011,
+          "round_mildPenalty": 0.137466,
+          "round_finalRoundBonus": 0.010049
+        },
+        "avgVP": 61.32
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.360887,
+          "qualityThreshold": 0.168411,
+          "goldPressure_0": 0.280694,
+          "goldPressure_1": 0.214098,
+          "goldPressure_2": 0.11116,
+          "goldPressure_3": 0.200675,
+          "diminishing_perUnit": 0.014873,
+          "diminishing_hardCapPenalty": 0.508932,
+          "round_tooEarlyPenalty": 0.260759,
+          "round_tooLatePenalty": 0.075966,
+          "round_mildPenalty": 0.134343,
+          "round_finalRoundBonus": 0.026932
+        },
+        "avgVP": 56.53
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.338024,
+          "qualityThreshold": 0.199824,
+          "goldPressure_0": 0.349375,
+          "goldPressure_1": 0.202519,
+          "goldPressure_2": 0.091402,
+          "goldPressure_3": 0.199625,
+          "diminishing_perUnit": 0.035333,
+          "diminishing_hardCapPenalty": 0.496653,
+          "round_tooEarlyPenalty": 0.280123,
+          "round_tooLatePenalty": 0.133744,
+          "round_mildPenalty": 0.108206,
+          "round_finalRoundBonus": 0.015579
+        },
+        "avgVP": 60.67
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.377405,
+          "qualityThreshold": 0.187944,
+          "goldPressure_0": 0.283552,
+          "goldPressure_1": 0.213181,
+          "goldPressure_2": 0.072841,
+          "goldPressure_3": 0.206849,
+          "diminishing_perUnit": 0.013685,
+          "diminishing_hardCapPenalty": 0.510473,
+          "round_tooEarlyPenalty": 0.238307,
+          "round_tooLatePenalty": 0.216541,
+          "round_mildPenalty": 0.12269,
+          "round_finalRoundBonus": 0.020483
+        },
+        "avgVP": 60.56
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.321112,
+          "qualityThreshold": 0.194625,
+          "goldPressure_0": 0.302355,
+          "goldPressure_1": 0.194571,
+          "goldPressure_2": 0.051872,
+          "goldPressure_3": 0.207413,
+          "diminishing_perUnit": 0.026431,
+          "diminishing_hardCapPenalty": 0.546106,
+          "round_tooEarlyPenalty": 0.24041,
+          "round_tooLatePenalty": 0.160971,
+          "round_mildPenalty": 0.124388,
+          "round_finalRoundBonus": 0.016369
+        },
+        "avgVP": 56.23
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.351384,
+          "qualityThreshold": 0.164837,
+          "goldPressure_0": 0.306285,
+          "goldPressure_1": 0.150254,
+          "goldPressure_2": 0.040989,
+          "goldPressure_3": 0.2325,
+          "diminishing_perUnit": 0.021757,
+          "diminishing_hardCapPenalty": 0.449592,
+          "round_tooEarlyPenalty": 0.293004,
+          "round_tooLatePenalty": 0.130863,
+          "round_mildPenalty": 0.096392,
+          "round_finalRoundBonus": 0.010112
+        },
+        "avgVP": 58.94
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.392659,
+          "qualityThreshold": 0.194391,
+          "goldPressure_0": 0.378138,
+          "goldPressure_1": 0.165676,
+          "goldPressure_2": 0.098509,
+          "goldPressure_3": 0.191668,
+          "diminishing_perUnit": 0.050781,
+          "diminishing_hardCapPenalty": 0.53553,
+          "round_tooEarlyPenalty": 0.247398,
+          "round_tooLatePenalty": 0.1172,
+          "round_mildPenalty": 0.089664,
+          "round_finalRoundBonus": 0.025105
+        },
+        "avgVP": 59.53
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.373901,
+          "qualityThreshold": 0.187099,
+          "goldPressure_0": 0.324878,
+          "goldPressure_1": 0.221214,
+          "goldPressure_2": 0.046272,
+          "goldPressure_3": 0.201192,
+          "diminishing_perUnit": 0.027887,
+          "diminishing_hardCapPenalty": 0.53482,
+          "round_tooEarlyPenalty": 0.285145,
+          "round_tooLatePenalty": 0.076243,
+          "round_mildPenalty": 0.150369,
+          "round_finalRoundBonus": 0.015739
+        },
+        "avgVP": 60.68
+      }
+    ],
+    "gen_best_avgVP": 63.22,
+    "gen_avg_vp": 59.86,
+    "alltime_best_avgVP": 66.19,
+    "sigma": 0.027435,
+    "elapsed_s": 1989.0
+  },
+  {
+    "generation": 28,
+    "candidates": [
+      {
+        "weights": {
+          "penaltyScale": 0.341015,
+          "qualityThreshold": 0.190981,
+          "goldPressure_0": 0.292544,
+          "goldPressure_1": 0.191561,
+          "goldPressure_2": 0.072665,
+          "goldPressure_3": 0.189669,
+          "diminishing_perUnit": 0.031737,
+          "diminishing_hardCapPenalty": 0.477837,
+          "round_tooEarlyPenalty": 0.240932,
+          "round_tooLatePenalty": 0.084703,
+          "round_mildPenalty": 0.094766,
+          "round_finalRoundBonus": 0.01009
+        },
+        "avgVP": 62.53
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.364574,
+          "qualityThreshold": 0.186117,
+          "goldPressure_0": 0.329258,
+          "goldPressure_1": 0.185015,
+          "goldPressure_2": 0.075809,
+          "goldPressure_3": 0.223193,
+          "diminishing_perUnit": 0.034771,
+          "diminishing_hardCapPenalty": 0.527912,
+          "round_tooEarlyPenalty": 0.27495,
+          "round_tooLatePenalty": 0.0996,
+          "round_mildPenalty": 0.119411,
+          "round_finalRoundBonus": 0.014698
+        },
+        "avgVP": 60.63
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.340541,
+          "qualityThreshold": 0.185074,
+          "goldPressure_0": 0.340666,
+          "goldPressure_1": 0.169065,
+          "goldPressure_2": 0.08662,
+          "goldPressure_3": 0.217408,
+          "diminishing_perUnit": 0.024566,
+          "diminishing_hardCapPenalty": 0.477183,
+          "round_tooEarlyPenalty": 0.270292,
+          "round_tooLatePenalty": 0.082916,
+          "round_mildPenalty": 0.174899,
+          "round_finalRoundBonus": 0.027009
+        },
+        "avgVP": 58.31
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.348589,
+          "qualityThreshold": 0.192237,
+          "goldPressure_0": 0.350888,
+          "goldPressure_1": 0.198801,
+          "goldPressure_2": 0.068559,
+          "goldPressure_3": 0.200109,
+          "diminishing_perUnit": 0.027235,
+          "diminishing_hardCapPenalty": 0.506103,
+          "round_tooEarlyPenalty": 0.222457,
+          "round_tooLatePenalty": 0.098082,
+          "round_mildPenalty": 0.114546,
+          "round_finalRoundBonus": 0.017104
+        },
+        "avgVP": 58.88
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.320525,
+          "qualityThreshold": 0.191665,
+          "goldPressure_0": 0.274846,
+          "goldPressure_1": 0.211205,
+          "goldPressure_2": 0.048377,
+          "goldPressure_3": 0.224822,
+          "diminishing_perUnit": 0.033195,
+          "diminishing_hardCapPenalty": 0.510853,
+          "round_tooEarlyPenalty": 0.262975,
+          "round_tooLatePenalty": 0.0936,
+          "round_mildPenalty": 0.130102,
+          "round_finalRoundBonus": 0.011804
+        },
+        "avgVP": 60.02
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.309953,
+          "qualityThreshold": 0.195065,
+          "goldPressure_0": 0.334954,
+          "goldPressure_1": 0.209798,
+          "goldPressure_2": 0.090519,
+          "goldPressure_3": 0.234711,
+          "diminishing_perUnit": 0.039793,
+          "diminishing_hardCapPenalty": 0.504651,
+          "round_tooEarlyPenalty": 0.275727,
+          "round_tooLatePenalty": 0.078578,
+          "round_mildPenalty": 0.123719,
+          "round_finalRoundBonus": 0.014614
+        },
+        "avgVP": 59.55
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.34064,
+          "qualityThreshold": 0.198487,
+          "goldPressure_0": 0.329377,
+          "goldPressure_1": 0.255061,
+          "goldPressure_2": 0.082745,
+          "goldPressure_3": 0.231641,
+          "diminishing_perUnit": 0.025027,
+          "diminishing_hardCapPenalty": 0.553735,
+          "round_tooEarlyPenalty": 0.257884,
+          "round_tooLatePenalty": 0.127487,
+          "round_mildPenalty": 0.112751,
+          "round_finalRoundBonus": 0.03751
+        },
+        "avgVP": 59.43
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.313976,
+          "qualityThreshold": 0.191297,
+          "goldPressure_0": 0.324862,
+          "goldPressure_1": 0.174904,
+          "goldPressure_2": 0.065631,
+          "goldPressure_3": 0.234032,
+          "diminishing_perUnit": 0.040432,
+          "diminishing_hardCapPenalty": 0.523339,
+          "round_tooEarlyPenalty": 0.318013,
+          "round_tooLatePenalty": 0.090002,
+          "round_mildPenalty": 0.089712,
+          "round_finalRoundBonus": 0.010488
+        },
+        "avgVP": 58.94
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.296914,
+          "qualityThreshold": 0.185609,
+          "goldPressure_0": 0.328863,
+          "goldPressure_1": 0.234047,
+          "goldPressure_2": 0.107919,
+          "goldPressure_3": 0.231363,
+          "diminishing_perUnit": 0.018681,
+          "diminishing_hardCapPenalty": 0.50612,
+          "round_tooEarlyPenalty": 0.267516,
+          "round_tooLatePenalty": 0.09731,
+          "round_mildPenalty": 0.148473,
+          "round_finalRoundBonus": 0.015885
+        },
+        "avgVP": 60.51
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.334424,
+          "qualityThreshold": 0.17247,
+          "goldPressure_0": 0.29958,
+          "goldPressure_1": 0.197257,
+          "goldPressure_2": 0.128734,
+          "goldPressure_3": 0.232482,
+          "diminishing_perUnit": 0.050047,
+          "diminishing_hardCapPenalty": 0.510829,
+          "round_tooEarlyPenalty": 0.27649,
+          "round_tooLatePenalty": 0.122739,
+          "round_mildPenalty": 0.123186,
+          "round_finalRoundBonus": 0.015183
+        },
+        "avgVP": 56.03
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.309441,
+          "qualityThreshold": 0.190773,
+          "goldPressure_0": 0.38539,
+          "goldPressure_1": 0.210708,
+          "goldPressure_2": 0.069777,
+          "goldPressure_3": 0.188277,
+          "diminishing_perUnit": 0.038828,
+          "diminishing_hardCapPenalty": 0.495973,
+          "round_tooEarlyPenalty": 0.291107,
+          "round_tooLatePenalty": 0.089563,
+          "round_mildPenalty": 0.156647,
+          "round_finalRoundBonus": 0.024005
+        },
+        "avgVP": 58.35
+      }
+    ],
+    "gen_best_avgVP": 62.53,
+    "gen_avg_vp": 59.38,
+    "alltime_best_avgVP": 66.19,
+    "sigma": 0.026156,
+    "elapsed_s": 2073.0
+  },
+  {
+    "generation": 29,
+    "candidates": [
+      {
+        "weights": {
+          "penaltyScale": 0.364999,
+          "qualityThreshold": 0.191496,
+          "goldPressure_0": 0.316874,
+          "goldPressure_1": 0.154339,
+          "goldPressure_2": 0.084374,
+          "goldPressure_3": 0.201726,
+          "diminishing_perUnit": 0.029455,
+          "diminishing_hardCapPenalty": 0.461758,
+          "round_tooEarlyPenalty": 0.227539,
+          "round_tooLatePenalty": 0.136801,
+          "round_mildPenalty": 0.088418,
+          "round_finalRoundBonus": 0.010378
+        },
+        "avgVP": 62.6
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.340227,
+          "qualityThreshold": 0.192904,
+          "goldPressure_0": 0.313407,
+          "goldPressure_1": 0.21212,
+          "goldPressure_2": 0.09163,
+          "goldPressure_3": 0.206323,
+          "diminishing_perUnit": 0.031257,
+          "diminishing_hardCapPenalty": 0.467112,
+          "round_tooEarlyPenalty": 0.240672,
+          "round_tooLatePenalty": 0.097728,
+          "round_mildPenalty": 0.126185,
+          "round_finalRoundBonus": 0.010398
+        },
+        "avgVP": 57.71
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.347433,
+          "qualityThreshold": 0.190219,
+          "goldPressure_0": 0.311197,
+          "goldPressure_1": 0.172289,
+          "goldPressure_2": 0.054081,
+          "goldPressure_3": 0.219701,
+          "diminishing_perUnit": 0.028996,
+          "diminishing_hardCapPenalty": 0.494929,
+          "round_tooEarlyPenalty": 0.272575,
+          "round_tooLatePenalty": 0.061684,
+          "round_mildPenalty": 0.09548,
+          "round_finalRoundBonus": 0.010001
+        },
+        "avgVP": 60.09
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.345928,
+          "qualityThreshold": 0.194618,
+          "goldPressure_0": 0.344021,
+          "goldPressure_1": 0.196658,
+          "goldPressure_2": 0.125924,
+          "goldPressure_3": 0.207832,
+          "diminishing_perUnit": 0.030003,
+          "diminishing_hardCapPenalty": 0.554397,
+          "round_tooEarlyPenalty": 0.300182,
+          "round_tooLatePenalty": 0.150031,
+          "round_mildPenalty": 0.093037,
+          "round_finalRoundBonus": 0.02505
+        },
+        "avgVP": 56.99
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.359258,
+          "qualityThreshold": 0.189484,
+          "goldPressure_0": 0.292018,
+          "goldPressure_1": 0.226062,
+          "goldPressure_2": 0.111569,
+          "goldPressure_3": 0.204346,
+          "diminishing_perUnit": 0.041733,
+          "diminishing_hardCapPenalty": 0.481291,
+          "round_tooEarlyPenalty": 0.241503,
+          "round_tooLatePenalty": 0.064564,
+          "round_mildPenalty": 0.120197,
+          "round_finalRoundBonus": 0.018026
+        },
+        "avgVP": 60.84
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.320511,
+          "qualityThreshold": 0.198959,
+          "goldPressure_0": 0.302956,
+          "goldPressure_1": 0.210469,
+          "goldPressure_2": 0.122662,
+          "goldPressure_3": 0.207121,
+          "diminishing_perUnit": 0.028971,
+          "diminishing_hardCapPenalty": 0.511302,
+          "round_tooEarlyPenalty": 0.243421,
+          "round_tooLatePenalty": 0.107622,
+          "round_mildPenalty": 0.104676,
+          "round_finalRoundBonus": 0.011953
+        },
+        "avgVP": 64.68
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.376678,
+          "qualityThreshold": 0.183492,
+          "goldPressure_0": 0.284542,
+          "goldPressure_1": 0.181468,
+          "goldPressure_2": 0.042124,
+          "goldPressure_3": 0.236154,
+          "diminishing_perUnit": 0.02669,
+          "diminishing_hardCapPenalty": 0.488854,
+          "round_tooEarlyPenalty": 0.249453,
+          "round_tooLatePenalty": 0.075888,
+          "round_mildPenalty": 0.137677,
+          "round_finalRoundBonus": 0.017916
+        },
+        "avgVP": 59.26
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.319917,
+          "qualityThreshold": 0.188171,
+          "goldPressure_0": 0.317232,
+          "goldPressure_1": 0.178437,
+          "goldPressure_2": 0.098102,
+          "goldPressure_3": 0.234327,
+          "diminishing_perUnit": 0.049402,
+          "diminishing_hardCapPenalty": 0.499679,
+          "round_tooEarlyPenalty": 0.274539,
+          "round_tooLatePenalty": 0.097446,
+          "round_mildPenalty": 0.090878,
+          "round_finalRoundBonus": 0.010924
+        },
+        "avgVP": 62.51
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.350832,
+          "qualityThreshold": 0.16356,
+          "goldPressure_0": 0.327059,
+          "goldPressure_1": 0.160912,
+          "goldPressure_2": 0.093918,
+          "goldPressure_3": 0.205521,
+          "diminishing_perUnit": 0.038455,
+          "diminishing_hardCapPenalty": 0.497572,
+          "round_tooEarlyPenalty": 0.293079,
+          "round_tooLatePenalty": 0.099803,
+          "round_mildPenalty": 0.093625,
+          "round_finalRoundBonus": 0.014412
+        },
+        "avgVP": 61.21
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.337795,
+          "qualityThreshold": 0.178599,
+          "goldPressure_0": 0.272461,
+          "goldPressure_1": 0.177031,
+          "goldPressure_2": 0.13218,
+          "goldPressure_3": 0.197249,
+          "diminishing_perUnit": 0.029374,
+          "diminishing_hardCapPenalty": 0.474182,
+          "round_tooEarlyPenalty": 0.244994,
+          "round_tooLatePenalty": 0.12059,
+          "round_mildPenalty": 0.122579,
+          "round_finalRoundBonus": 0.013184
+        },
+        "avgVP": 62.98
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.328609,
+          "qualityThreshold": 0.193251,
+          "goldPressure_0": 0.324873,
+          "goldPressure_1": 0.224778,
+          "goldPressure_2": 0.05458,
+          "goldPressure_3": 0.201896,
+          "diminishing_perUnit": 0.048711,
+          "diminishing_hardCapPenalty": 0.498181,
+          "round_tooEarlyPenalty": 0.257532,
+          "round_tooLatePenalty": 0.11767,
+          "round_mildPenalty": 0.12741,
+          "round_finalRoundBonus": 0.014992
+        },
+        "avgVP": 59.03
+      }
+    ],
+    "gen_best_avgVP": 64.68,
+    "gen_avg_vp": 60.72,
+    "alltime_best_avgVP": 66.19,
+    "sigma": 0.026538,
+    "elapsed_s": 2162.0
+  },
+  {
+    "generation": 30,
+    "candidates": [
+      {
+        "weights": {
+          "penaltyScale": 0.356481,
+          "qualityThreshold": 0.196244,
+          "goldPressure_0": 0.265569,
+          "goldPressure_1": 0.151749,
+          "goldPressure_2": 0.094297,
+          "goldPressure_3": 0.220318,
+          "diminishing_perUnit": 0.035244,
+          "diminishing_hardCapPenalty": 0.448104,
+          "round_tooEarlyPenalty": 0.236921,
+          "round_tooLatePenalty": 0.103094,
+          "round_mildPenalty": 0.083033,
+          "round_finalRoundBonus": 0.010211
+        },
+        "avgVP": 64.38
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.314875,
+          "qualityThreshold": 0.195561,
+          "goldPressure_0": 0.289741,
+          "goldPressure_1": 0.216149,
+          "goldPressure_2": 0.104789,
+          "goldPressure_3": 0.207865,
+          "diminishing_perUnit": 0.029947,
+          "diminishing_hardCapPenalty": 0.504122,
+          "round_tooEarlyPenalty": 0.210497,
+          "round_tooLatePenalty": 0.069293,
+          "round_mildPenalty": 0.103892,
+          "round_finalRoundBonus": 0.025571
+        },
+        "avgVP": 59.44
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.335248,
+          "qualityThreshold": 0.191101,
+          "goldPressure_0": 0.297954,
+          "goldPressure_1": 0.178177,
+          "goldPressure_2": 0.125432,
+          "goldPressure_3": 0.188168,
+          "diminishing_perUnit": 0.020732,
+          "diminishing_hardCapPenalty": 0.459986,
+          "round_tooEarlyPenalty": 0.273697,
+          "round_tooLatePenalty": 0.138455,
+          "round_mildPenalty": 0.085463,
+          "round_finalRoundBonus": 0.010012
+        },
+        "avgVP": 59.08
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.344794,
+          "qualityThreshold": 0.183268,
+          "goldPressure_0": 0.275747,
+          "goldPressure_1": 0.167357,
+          "goldPressure_2": 0.135966,
+          "goldPressure_3": 0.188515,
+          "diminishing_perUnit": 0.026822,
+          "diminishing_hardCapPenalty": 0.495317,
+          "round_tooEarlyPenalty": 0.203894,
+          "round_tooLatePenalty": 0.078639,
+          "round_mildPenalty": 0.099914,
+          "round_finalRoundBonus": 0.014541
+        },
+        "avgVP": 59.41
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.294441,
+          "qualityThreshold": 0.199944,
+          "goldPressure_0": 0.32305,
+          "goldPressure_1": 0.203634,
+          "goldPressure_2": 0.13717,
+          "goldPressure_3": 0.198431,
+          "diminishing_perUnit": 0.033164,
+          "diminishing_hardCapPenalty": 0.489797,
+          "round_tooEarlyPenalty": 0.264765,
+          "round_tooLatePenalty": 0.103751,
+          "round_mildPenalty": 0.12586,
+          "round_finalRoundBonus": 0.0113
+        },
+        "avgVP": 57.12
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.33299,
+          "qualityThreshold": 0.196902,
+          "goldPressure_0": 0.291789,
+          "goldPressure_1": 0.174353,
+          "goldPressure_2": 0.134739,
+          "goldPressure_3": 0.176352,
+          "diminishing_perUnit": 0.051034,
+          "diminishing_hardCapPenalty": 0.452309,
+          "round_tooEarlyPenalty": 0.291877,
+          "round_tooLatePenalty": 0.091915,
+          "round_mildPenalty": 0.154875,
+          "round_finalRoundBonus": 0.011856
+        },
+        "avgVP": 59.97
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.304728,
+          "qualityThreshold": 0.194542,
+          "goldPressure_0": 0.302683,
+          "goldPressure_1": 0.189312,
+          "goldPressure_2": 0.124824,
+          "goldPressure_3": 0.220657,
+          "diminishing_perUnit": 0.022735,
+          "diminishing_hardCapPenalty": 0.515124,
+          "round_tooEarlyPenalty": 0.249795,
+          "round_tooLatePenalty": 0.152939,
+          "round_mildPenalty": 0.095962,
+          "round_finalRoundBonus": 0.011732
+        },
+        "avgVP": 57.15
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.342066,
+          "qualityThreshold": 0.194308,
+          "goldPressure_0": 0.341782,
+          "goldPressure_1": 0.158265,
+          "goldPressure_2": 0.102558,
+          "goldPressure_3": 0.194041,
+          "diminishing_perUnit": 0.029229,
+          "diminishing_hardCapPenalty": 0.483682,
+          "round_tooEarlyPenalty": 0.276075,
+          "round_tooLatePenalty": 0.062953,
+          "round_mildPenalty": 0.08373,
+          "round_finalRoundBonus": 0.015097
+        },
+        "avgVP": 62.53
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.314097,
+          "qualityThreshold": 0.190662,
+          "goldPressure_0": 0.288788,
+          "goldPressure_1": 0.198394,
+          "goldPressure_2": 0.157351,
+          "goldPressure_3": 0.209892,
+          "diminishing_perUnit": 0.036091,
+          "diminishing_hardCapPenalty": 0.493201,
+          "round_tooEarlyPenalty": 0.268166,
+          "round_tooLatePenalty": 0.110339,
+          "round_mildPenalty": 0.103505,
+          "round_finalRoundBonus": 0.012512
+        },
+        "avgVP": 59.06
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.334131,
+          "qualityThreshold": 0.186468,
+          "goldPressure_0": 0.292856,
+          "goldPressure_1": 0.179962,
+          "goldPressure_2": 0.128187,
+          "goldPressure_3": 0.213738,
+          "diminishing_perUnit": 0.020821,
+          "diminishing_hardCapPenalty": 0.498796,
+          "round_tooEarlyPenalty": 0.220604,
+          "round_tooLatePenalty": 0.122833,
+          "round_mildPenalty": 0.107879,
+          "round_finalRoundBonus": 0.010627
+        },
+        "avgVP": 61.77
+      },
+      {
+        "weights": {
+          "penaltyScale": 0.355374,
+          "qualityThreshold": 0.197545,
+          "goldPressure_0": 0.313111,
+          "goldPressure_1": 0.167542,
+          "goldPressure_2": 0.103387,
+          "goldPressure_3": 0.193041,
+          "diminishing_perUnit": 0.033609,
+          "diminishing_hardCapPenalty": 0.424827,
+          "round_tooEarlyPenalty": 0.263441,
+          "round_tooLatePenalty": 0.103545,
+          "round_mildPenalty": 0.071008,
+          "round_finalRoundBonus": 0.010585
+        },
+        "avgVP": 59.93
+      }
+    ],
+    "gen_best_avgVP": 64.38,
+    "gen_avg_vp": 59.99,
+    "alltime_best_avgVP": 66.19,
+    "sigma": 0.028313,
+    "elapsed_s": 2247.0
+  }
+]

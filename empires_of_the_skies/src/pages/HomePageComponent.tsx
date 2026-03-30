@@ -150,7 +150,7 @@ const HomePageComponent = (props: HomePageComponentProps) => {
         boxSizing: "border-box",
       }}
     >
-      {/* ── Centered content column ──────────────────────────────── */}
+      {/* Centered content column */}
       <Box
         sx={{
           display: "flex",

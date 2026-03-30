@@ -48,7 +48,6 @@ const RetrieveFleetsDialog = (props: MyGameProps) => {
           FAITHDOM_TILES,
           props.G.mapState.currentTileArray,
         );
-        // Count tiles that don't already have this player's route skyship
         let cost = 0;
         for (const [px, py] of path) {
           const pk = tileKey(px, py);

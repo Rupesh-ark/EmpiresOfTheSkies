@@ -12,7 +12,7 @@ import { V2_CONFIG } from "../config";
 import { personalityBonus, countOutposts } from "../common";
 import { countActiveTradeRoutes } from "../../../helpers/mapUtils";
 
-// ── Generic evaluator for binary/ternary decisions ───────────────────────────
+// Generic evaluator for binary/ternary decisions
 
 function simpleEval(move: AIMove, quality: number, reason: string): MoveEval {
   quality = Math.max(0, Math.min(1, quality));
@@ -24,7 +24,7 @@ function simpleEval(move: AIMove, quality: number, reason: string): MoveEval {
   };
 }
 
-// ── Aerial Battle ────────────────────────────────────────────────────────────
+// Aerial Battle
 
 function evaluateAerialAttackOrPass(
   G: MyGameState, playerID: string, move: AIMove, personality: BotPersonality,
@@ -78,7 +78,7 @@ function evaluateAerialEvadeOrFight(
   return simpleEval(move, quality, `retaliate (fight back, FoW:${fowCards})`);
 }
 
-// ── FoW Card Selection (aerial_resolve, ground_resolve) ──────────────────────
+// FoW Card Selection (aerial_resolve, ground_resolve)
 
 function evaluateCardSelection(
   G: MyGameState, playerID: string, move: AIMove, _personality: BotPersonality,
@@ -102,7 +102,7 @@ function evaluateCardSelection(
   return simpleEval(move, quality, `play card ${cardIndex} (${card.sword}sw/${card.shield}sh)`);
 }
 
-// ── Plunder ──────────────────────────────────────────────────────────────────
+// Plunder
 
 function evaluatePlunder(
   G: MyGameState, playerID: string, move: AIMove, personality: BotPersonality,
@@ -119,7 +119,7 @@ function evaluatePlunder(
   return simpleEval(move, quality, `plunder legend tile`);
 }
 
-// ── Ground Battle ────────────────────────────────────────────────────────────
+// Ground Battle
 
 function evaluateGroundAttackOrPass(
   G: MyGameState, playerID: string, move: AIMove, personality: BotPersonality,
@@ -147,7 +147,7 @@ function evaluateGroundDefendOrYield(
   return simpleEval(move, V2_CONFIG.resolution.defendBase, "defend ground (fight)");
 }
 
-// ── Garrison ─────────────────────────────────────────────────────────────────
+// Garrison
 
 function evaluateGarrisonTroops(
   _G: MyGameState, _playerID: string, move: AIMove, _personality: BotPersonality,
@@ -159,7 +159,7 @@ function evaluateGarrisonTroops(
   return simpleEval(move, V2_CONFIG.resolution.garrisonTroopsBase, `garrison ${total} troops`);
 }
 
-// ── Conquest ─────────────────────────────────────────────────────────────────
+// Conquest
 
 function evaluateConquest(
   G: MyGameState, playerID: string, move: AIMove, personality: BotPersonality,
@@ -189,7 +189,7 @@ function evaluateConquest(
   return simpleEval(move, V2_CONFIG.resolution.fallbackConquestBase, `conquest: ${move.move}`);
 }
 
-// ── Conquest Card Draw ───────────────────────────────────────────────────────
+// Conquest Card Draw
 
 function evaluateConquestCard(
   G: MyGameState, playerID: string, move: AIMove, _personality: BotPersonality,
@@ -208,7 +208,7 @@ function evaluateConquestCard(
   return simpleEval(move, quality, `play conquest card ${cardIndex} (${card.sword}sw/${card.shield}sh)`);
 }
 
-// ── Election ─────────────────────────────────────────────────────────────────
+// Election
 
 function evaluateElection(
   G: MyGameState, playerID: string, move: AIMove, personality: BotPersonality,
@@ -240,7 +240,7 @@ function evaluateElection(
   return simpleEval(move, quality, `vote P${targetID}. ${reasons.join(", ")}`);
 }
 
-// ── Relocate Defeated Fleet ──────────────────────────────────────────────────
+// Relocate Defeated Fleet
 
 function evaluateRelocate(
   _G: MyGameState, _playerID: string, move: AIMove, _personality: BotPersonality,
@@ -249,7 +249,7 @@ function evaluateRelocate(
   return simpleEval(move, V2_CONFIG.resolution.relocateBase, `relocate to [${move.args[0]}]`);
 }
 
-// ── Retrieve Fleets ──────────────────────────────────────────────────────────
+// Retrieve Fleets
 
 function evaluateRetrieveFleets(
   G: MyGameState, playerID: string, move: AIMove, _personality: BotPersonality,
@@ -291,7 +291,7 @@ function evaluateRetrieveFleets(
   return simpleEval(move, quality, `retrieve ${indices.length} fleet(s)`);
 }
 
-// ── Infidel Fleet ────────────────────────────────────────────────────────────
+// Infidel Fleet
 
 function evaluateInfidelFleet(
   _G: MyGameState, _playerID: string, move: AIMove, _personality: BotPersonality,
@@ -301,7 +301,7 @@ function evaluateInfidelFleet(
   return simpleEval(move, V2_CONFIG.resolution.infidelEvadeBase, "evade infidel fleet");
 }
 
-// ── Rebellion ────────────────────────────────────────────────────────────────
+// Rebellion
 
 function evaluateRebellion(
   _G: MyGameState, _playerID: string, move: AIMove, _personality: BotPersonality,
@@ -322,7 +322,7 @@ function evaluateRebellion(
   return simpleEval(move, V2_CONFIG.resolution.rebellionFallbackBase, `rebellion: ${move.move}`);
 }
 
-// ── Invasion ─────────────────────────────────────────────────────────────────
+// Invasion
 
 function evaluateInvasion(
   _G: MyGameState, _playerID: string, move: AIMove, _personality: BotPersonality,
@@ -346,7 +346,7 @@ function evaluateInvasion(
   return simpleEval(move, V2_CONFIG.resolution.invasionFallbackBase, `invasion: ${move.move}`);
 }
 
-// ── Deferred Battle ──────────────────────────────────────────────────────────
+// Deferred Battle
 
 function evaluateDeferredBattle(
   G: MyGameState, playerID: string, move: AIMove, _personality: BotPersonality,
@@ -363,7 +363,7 @@ function evaluateDeferredBattle(
   return simpleEval(move, quality, `commit card ${cardIndex} (${card.sword}sw/${card.shield}sh)`);
 }
 
-// ── Main Resolution Evaluator ────────────────────────────────────────────────
+// Main Resolution Evaluator
 
 export function evaluateResolution(
   G: MyGameState,

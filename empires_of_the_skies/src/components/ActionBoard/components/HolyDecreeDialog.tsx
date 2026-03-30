@@ -11,7 +11,7 @@ import {
   GiBookPile,
 } from "react-icons/gi";
 
-// ── Decree definitions ──────────────────────────────────────────────────
+// Decree definitions
 
 type DecreeKey = "curse monarch" | "bless monarch" | "inquisition" | "reform dogma" | "confirm dogma";
 
@@ -67,7 +67,7 @@ const DECREES: DecreeOption[] = [
   },
 ];
 
-// ── Decree card ─────────────────────────────────────────────────────────
+// Decree card
 
 const DecreeCard = ({
   decree,
@@ -157,7 +157,7 @@ const DecreeCard = ({
   );
 };
 
-// ── Target picker ───────────────────────────────────────────────────────
+// Target picker
 
 const TargetPicker = ({
   targets,
@@ -206,7 +206,7 @@ const TargetPicker = ({
   </Box>
 );
 
-// ── Main dialog ─────────────────────────────────────────────────────────
+// Main dialog
 
 const HolyDecreeDialog = (props: HolyDecreeDialogProps) => {
   const mostHereticalKingdoms = findMostHereticalKingdoms(props.G);
@@ -274,7 +274,7 @@ const HolyDecreeDialog = (props: HolyDecreeDialogProps) => {
       cancelLabel="Cancel"
       onCancel={() => { setPendingDecree(null); props.setOpen(false); }}
     >
-      {/* ── Targeted decrees ──────────────────────────────── */}
+      {/* Targeted decrees */}
       <Box sx={{ display: "flex", flexDirection: "column", gap: "6px", mb: "8px" }}>
         {DECREES.slice(0, 3).map((d) => {
           const disabled = d.key === "inquisition" ? inquisitionDisabled : false;
@@ -291,7 +291,7 @@ const HolyDecreeDialog = (props: HolyDecreeDialogProps) => {
         })}
       </Box>
 
-      {/* ── Dogma decrees (side by side) ──────────────────── */}
+      {/* Dogma decrees (side by side) */}
       <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px" }}>
         {DECREES.slice(3).map((d) => (
           <DecreeCard
@@ -304,7 +304,7 @@ const HolyDecreeDialog = (props: HolyDecreeDialogProps) => {
         ))}
       </Box>
 
-      {/* ── Target picker (only when multiple targets) ───── */}
+      {/* Target picker (only when multiple targets) */}
       {pendingDecree && pendingTargets.length > 1 && (
         <Box
           sx={{

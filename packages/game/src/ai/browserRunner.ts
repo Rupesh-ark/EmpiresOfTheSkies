@@ -27,7 +27,7 @@ import { AerialBattleStrategy } from "./v1/strategies/AerialBattleStrategy";
 import { GroundBattleStrategy } from "./v1/strategies/GroundBattleStrategy";
 import { AI_CONFIG } from "./v1/weightsConfig";
 
-// ── Progress callback for UI updates ─────────────────────────────────────────
+// Progress callback for UI updates
 
 export type ProgressCallback = (info: {
   iteration: number;
@@ -36,7 +36,7 @@ export type ProgressCallback = (info: {
   playerID: string;
 }) => void;
 
-// ── Bounce detection (mirrors selfPlay.ts constants) ─────────────────────────
+// Bounce detection (mirrors selfPlay.ts constants)
 
 const BOUNCE_THRESHOLD_TURN = 50;
 const BOUNCE_THRESHOLD_PHASE = 100;
@@ -51,7 +51,7 @@ interface BounceTracker {
   roundIters: number;
 }
 
-// ── NaN detection helpers (same logic as selfPlay.ts) ────────────────────────
+// NaN detection helpers (same logic as selfPlay.ts)
 
 function isInvalidNumber(val: unknown): boolean {
   return val === null || val === undefined || typeof val !== "number" || isNaN(val as number);
@@ -86,10 +86,10 @@ function hasNaNFleets(G: MyGameState): boolean {
   return false;
 }
 
-// ── Snapshot builder — imported from GameRecorder (captureSnapshot) ──────────
+// Snapshot builder — imported from GameRecorder (captureSnapshot)
 // captureSnapshot(G, playerID) is re-exported from GameRecorder and used below.
 
-// ── Bounce checker (logs to recorder instead of /tmp/) ───────────────────────
+// Bounce checker (logs to recorder instead of /tmp/)
 
 function checkBounce(
   recorder: GameRecorder,
@@ -170,7 +170,7 @@ function checkBounce(
   }
 }
 
-// ── Main exported runner ──────────────────────────────────────────────────────
+// Main exported runner
 
 /**
  * Run a single complete game headlessly in the browser.
@@ -189,7 +189,7 @@ export function runGameInBrowser(
   // Record the config snapshot (merge overrides on top of live config for traceability)
   recorder.setConfig({ ...AI_CONFIG as unknown as Record<string, unknown>, ...configOverrides });
 
-  // ── Wire AILogger to capture decisions into the recorder ──────────────────
+  // Wire AILogger to capture decisions into the recorder
   const logger = new AILogger("silent", (entry) => {
     if (entry.type !== "decision") return;
 
@@ -238,7 +238,7 @@ export function runGameInBrowser(
   const origLogger = getAILogger();
   setAILogger(logger);
 
-  // ── Create 6 clients + bots ───────────────────────────────────────────────
+  // Create 6 clients + bots
   const clients: ReturnType<typeof Client>[] = [];
   // bots is declared here (referenced in the closure above via hoisting)
   const bots: EmpiresBot[] = [];
@@ -263,7 +263,7 @@ export function runGameInBrowser(
     clients.push(client);
   }
 
-  // ── Game loop (adapted from runGameLoop in selfPlay.ts) ───────────────────
+  // Game loop (adapted from runGameLoop in selfPlay.ts)
 
   const MAX_ITERATIONS = 50000;
   let iterations = 0;
@@ -351,7 +351,7 @@ export function runGameInBrowser(
       });
     }
 
-    // ── Handle activePlayers (election — simultaneous) ────────────────────
+    // Handle activePlayers (election — simultaneous)
     if (ctx.activePlayers) {
       for (const [pid] of Object.entries(ctx.activePlayers)) {
         const pIdx = parseInt(pid);
@@ -369,7 +369,7 @@ export function runGameInBrowser(
         }
       }
     } else {
-      // ── Sequential turn: current player acts ─────────────────────────
+      // Sequential turn: current player acts
       const currentPlayer = ctx.currentPlayer;
       const pIdx = parseInt(currentPlayer);
       const botState = clients[pIdx].getState();
@@ -431,7 +431,7 @@ export function runGameInBrowser(
     }
   }
 
-  // ── Populate player summaries from final state (BEFORE stopping clients) ──
+  // Populate player summaries from final state (BEFORE stopping clients)
   const finalState = clients[0].getState();
 
   // Stop all clients

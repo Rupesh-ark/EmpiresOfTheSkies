@@ -16,7 +16,7 @@ const relocateDefeatedFleet: MoveDefinition = {
     if (isRetreatHome) {
       forceRetrieveFleets(G, defeatedPlayer, x, y);
     } else {
-      // Validate retreat destination per v4.2 rules
+      // Validate retreat destination
       if (
         !isValidRetreatDestination(
           G,

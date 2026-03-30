@@ -29,7 +29,7 @@ import { GroundBattleStrategy } from "./v1/strategies/GroundBattleStrategy";
 import { AI_CONFIG } from "./v1/weightsConfig";
 import { enumerateLegalMoves } from "./enumerate";
 
-// ── Default snapshot (used when bot has not yet set one) ─────────────────────
+// Default snapshot (used when bot has not yet set one)
 
 const DEFAULT_SNAPSHOT: PlayerSnapshot = {
   resources: {
@@ -53,7 +53,7 @@ const DEFAULT_SNAPSHOT: PlayerSnapshot = {
   fleetPositions: [],
 };
 
-// ── NaN Detection Helpers ─────────────────────────────────────────────────────
+// NaN Detection Helpers
 
 function isInvalidNumber(val: unknown): boolean {
   return val === null || val === undefined || typeof val !== "number" || isNaN(val as number);
@@ -84,7 +84,7 @@ function hasNaNFleets(G: MyGameState): boolean {
   return false;
 }
 
-// ── Result types ─────────────────────────────────────────────────────────────
+// Result types
 
 export interface BalanceReport {
   totalGames: number;
@@ -100,7 +100,7 @@ export interface BalanceReport {
   worstCardCombo: { ka: string; legacy: string; winRate: number; games: number } | null;
 }
 
-// ── Bounce Detection ──────────────────────────────────────────────────────────
+// Bounce Detection
 
 interface BounceTracker {
   iterationsAtLastTurn: number;
@@ -200,7 +200,7 @@ function checkBounce(
   }
 }
 
-// ── Shared game loop ──────────────────────────────────────────────────────────
+// Shared game loop
 
 /**
  * Runs the boardgame.io local client loop until gameover or maxIterations.
@@ -440,7 +440,7 @@ export function runGameLoop(
   return { finalState, iterations };
 }
 
-// ── Single game runner ────────────────────────────────────────────────────────
+// Single game runner
 
 export function runSingleGame(gameNumber: number): GameRecord {
   const recorder = new GameRecorder(`game_${gameNumber}`);
@@ -563,7 +563,7 @@ export function runSingleGame(gameNumber: number): GameRecord {
   return recorder.getRecord();
 }
 
-// ── Batch runner — returns raw GameRecord[] ───────────────────────────────────
+// Batch runner — returns raw GameRecord[]
 
 export function runSelfPlayRecords(
   numGames: number,
@@ -600,7 +600,7 @@ export function runSelfPlayRecords(
   return records;
 }
 
-// ── Batch runner — backward-compatible BalanceReport wrapper ─────────────────
+// Batch runner — backward-compatible BalanceReport wrapper
 
 export function runSelfPlay(
   numGames: number,
@@ -610,7 +610,7 @@ export function runSelfPlay(
   return analyzeBalance(records, numGames);
 }
 
-// ── Balance analysis ─────────────────────────────────────────────────────────
+// Balance analysis
 
 function analyzeBalance(records: GameRecord[], totalGames: number): BalanceReport {
   const winsByPersonality: Record<string, number> = {};
@@ -744,7 +744,7 @@ function analyzeBalance(records: GameRecord[], totalGames: number): BalanceRepor
   };
 }
 
-// ── Report formatter ──────────────────────────────────────────────────────────
+// Report formatter
 
 export function printBalanceReport(report: BalanceReport): void {
   console.log("\n" + "═".repeat(70));

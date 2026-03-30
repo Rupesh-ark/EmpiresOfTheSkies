@@ -32,7 +32,7 @@ export interface PhaseLayoutConfig {
   leftWidth: string;
 }
 
-// ── Reusable layout fragments ──────────────────────────────────────────
+// Reusable layout fragments
 
 const COMMON_TABS: PanelSlot[] = ["game-log", "stats", "trade", "chat"];
 const ACTIONS_TABS: PanelSlot[] = COMMON_TABS;
@@ -83,7 +83,7 @@ const ELECTION_LAYOUT: PhaseLayoutConfig = {
   leftWidth: "clamp(240px, 20vw, 320px)",
 };
 
-// ── Layout selection keyed off GameStage ────────────────────────────────
+// Layout selection keyed off GameStage
 import type { GameStage } from "@eots/game";
 
 /**

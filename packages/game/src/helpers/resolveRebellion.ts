@@ -20,7 +20,7 @@ import { CARD_RESOLVERS, resolveCardWithAlignmentPenalty } from "./legacyCardDef
 import { KINGDOM_LOCATION } from "../data/gameData";
 import { logRebellionEvent } from "./logger";
 
-// ── Battle math ──────────────────────────────────────────────────────────────
+// Battle math
 
 type BattleResult = {
   defenderWins: boolean;
@@ -91,7 +91,7 @@ const applyTroopLosses = (
   player.resources.regiments -= regimentsLost;
 };
 
-// ── Per-card outcome handlers ────────────────────────────────────────────────
+// Per-card outcome handlers
 
 const resolvePretenderRebellion = (
   G: MyGameState,
@@ -178,7 +178,7 @@ const resolveColonialRebellion = (
   }
 };
 
-// ── Main resolver ────────────────────────────────────────────────────────────
+// Main resolver
 
 /**
  * Process a single pending rebellion event. Draws a contingent counter,
@@ -297,7 +297,7 @@ const returnCounter = (
   G.contingentPool.push(counterSwords);
 };
 
-// ── Interactive rebellion helpers ─────────────────────────────────────────────
+// Interactive rebellion helpers
 
 /**
  * Find the next rebellion in deferredEvents, draw a contingent counter,

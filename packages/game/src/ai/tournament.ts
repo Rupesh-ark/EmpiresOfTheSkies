@@ -16,7 +16,7 @@ import { AILogger, setAILogger } from "./AILogger";
 import { runGameLoop } from "./selfPlay";
 import { GameRecorder } from "./GameRecorder";
 
-// ── Types ───────────────────────────────────────────────────────────────────
+// Types
 
 export interface TournamentMatchup {
   name: string;
@@ -77,7 +77,7 @@ export interface LeagueResult {
   }>;
 }
 
-// ── Core: run a single game with specific bot configs ───────────────────────
+// Core: run a single game with specific bot configs
 
 interface BotSlotConfig {
   playerID: string;
@@ -135,7 +135,7 @@ function runConfiguredGame(slots: BotSlotConfig[]): {
   return { winner: ranking[0], scores, positions, mercyReceived };
 }
 
-// ── Mode 1: A/B Test ────────────────────────────────────────────────────────
+// Mode 1: A/B Test
 
 export function runTournament(matchup: TournamentMatchup): TournamentResult {
   setAILogger(new AILogger("silent"));
@@ -234,7 +234,7 @@ export function runTournament(matchup: TournamentMatchup): TournamentResult {
   return { matchupName: matchup.name, weightSetResults, bestWeightSet, confidenceLevel };
 }
 
-// ── Mode 2: Hill Climb ──────────────────────────────────────────────────────
+// Mode 2: Hill Climb
 
 export function runHillClimb(config: HillClimbConfig): HillClimbResult {
   setAILogger(new AILogger("silent"));
@@ -358,7 +358,7 @@ function evaluateWeightSet(weights: AIWeights, numGames: number): { winRate: num
   };
 }
 
-// ── Mode 3: League ──────────────────────────────────────────────────────────
+// Mode 3: League
 
 export function runLeague(config: LeagueConfig): LeagueResult {
   setAILogger(new AILogger("silent"));
@@ -445,7 +445,7 @@ export function runLeague(config: LeagueConfig): LeagueResult {
   return { standings };
 }
 
-// ── Helpers ─────────────────────────────────────────────────────────────────
+// Helpers
 
 function normalizeWeights(w: AIWeights): AIWeights {
   const result = { ...w };
@@ -459,7 +459,7 @@ function normalizeWeights(w: AIWeights): AIWeights {
   return result;
 }
 
-// ── Report formatters ───────────────────────────────────────────────────────
+// Report formatters
 
 export function printTournamentResult(result: TournamentResult): void {
   console.log("\n" + "═".repeat(70));

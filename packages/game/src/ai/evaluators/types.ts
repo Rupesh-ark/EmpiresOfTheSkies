@@ -7,7 +7,7 @@
 import type { MyGameState } from "../../types";
 import type { AIMove } from "../types";
 
-// ── Core evaluation result ──────────────────────────────────────────────────
+// Core evaluation result
 
 export interface MoveEval {
   move: AIMove;
@@ -16,7 +16,7 @@ export interface MoveEval {
   reason: string;        // for analytics: why this score
 }
 
-// ── Bot personality (derived from dealt cards) ──────────────────────────────
+// Bot personality (derived from dealt cards)
 
 export interface BotPersonality {
   kaCard: string;        // "patriarch_of_the_church", "elite_regiments", etc.
@@ -25,7 +25,7 @@ export interface BotPersonality {
   legacyCardColour: string; // "purple" (orthodox) | "orange" (heretic) | "none"
 }
 
-// ── Evaluator function signature ────────────────────────────────────────────
+// Evaluator function signature
 
 export type MoveEvaluator = (
   G: MyGameState,

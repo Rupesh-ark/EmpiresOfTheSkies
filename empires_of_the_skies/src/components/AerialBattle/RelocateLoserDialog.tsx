@@ -19,7 +19,6 @@ const RelocateLoserDialog = (props: MyGameProps) => {
       }
     });
 
-  // Valid relocation tiles are pre-computed by the backend when battle resolves
   const emptyTiles = props.G.validRelocationTiles ?? [];
 
   return (

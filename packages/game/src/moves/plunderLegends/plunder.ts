@@ -15,14 +15,13 @@ const plunder: MoveDefinition = {
       const lootNameAsResource = lootName as keyof typeof currentTile.loot.colony;
       currentPlayer.resources[lootNameAsResource] += lootAmount;
     });
-    // GAP-CQ1: shift price markers left for goods plundered from legend
     GOODS.forEach((good) => {
       const qty = currentTile.loot.colony[good];
       if (qty > 0) {
         G.mapState.goodsPriceMarkers[good] = Math.max(PRICE_MARKER_MIN, G.mapState.goodsPriceMarkers[good] - qty);
       }
     });
-    // v4.2: plundering a Legend advances the plunderer's heresy by 1
+    // plundering a Legend advances the plunderer's heresy by 1
     increaseHeresyWithinMove(G, playerID);
 
     const landName = currentTile?.name ?? "unknown land";

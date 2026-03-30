@@ -41,7 +41,7 @@ export class EventsStrategy implements PhaseStrategy {
     return { move: moves[0], score: 0 };
   }
 
-  // ── Card Selection ────────────────────────────────────────────────────────
+  // Card Selection
 
   private chooseCard(
     G: MyGameState,
@@ -204,7 +204,7 @@ export class EventsStrategy implements PhaseStrategy {
     }
   }
 
-  // ── Event Resolution ──────────────────────────────────────────────────────
+  // Event Resolution
 
   private chooseResolution(
     G: MyGameState,
@@ -321,7 +321,7 @@ export class EventsStrategy implements PhaseStrategy {
     return bestMove;
   }
 
-  // ── Immediate Election Vote ───────────────────────────────────────────────
+  // Immediate Election Vote
 
   private chooseVote(
     G: MyGameState,
@@ -345,7 +345,7 @@ export class EventsStrategy implements PhaseStrategy {
     return bestMove;
   }
 
-  // ── Helpers ───────────────────────────────────────────────────────────────
+  // Helpers
 
   private hasHighestResource(
     player: MyGameState["playerInfo"][string],

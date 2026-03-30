@@ -1,4 +1,4 @@
-// ── Home Page images ─────────────────────────────────────────────────────────
+// Home Page images
 
 import bgDesktop from "../boards_and_assets/branding/box_art_desktop.webp";
 import bgTablet from "../boards_and_assets/branding/box_art_tablet.webp";

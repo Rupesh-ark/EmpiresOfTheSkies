@@ -44,9 +44,6 @@ export function evaluateFoundFactory(
   let quality = V2_CONFIG.baseQuality.foundFactory;
   const reasons: string[] = [];
 
-  // The critical check: engaged vs unengaged
-  // This is NOT a soft penalty — an unengaged factory literally generates zero income.
-  // It should almost never be built. This bypasses penaltyScale intentionally.
   if (factories >= routes) {
     quality = V2_CONFIG.bonuses.unengagedFactoryBase; // near-zero — only viable if personality strongly wants it
     reasons.push(`unengaged (${factories} fac >= ${routes} routes)`);

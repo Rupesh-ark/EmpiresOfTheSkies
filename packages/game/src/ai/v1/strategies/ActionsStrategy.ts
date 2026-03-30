@@ -26,7 +26,7 @@ export class ActionsStrategy implements PhaseStrategy {
     personality: AIPersonality,
     availableMoves?: AIMove[]
   ): ScoredAIMove {
-    // ── Sub-stage handling ─────────────────────────────────────────────
+    // Sub-stage handling
     if (G.stage.sub === "confirm_fow_draw") {
       return { move: { move: "drawFoWCards", args: [] }, score: 0 };
     }
@@ -35,14 +35,14 @@ export class ActionsStrategy implements PhaseStrategy {
       return { move: this.discardWorstCard(G, playerID), score: 0 };
     }
 
-    // ── Counsellor action already done this turn → end turn immediately ──
+    // Counsellor action already done this turn → end turn immediately
     // confirmAction calls endTurn() so we come back for another action next cycle.
     // Free actions (sendAgitators, convertMonarch) happen BEFORE the counsellor action.
     if (G.playerInfo[playerID].turnComplete) {
       return { move: { move: "confirmAction", args: [] }, score: 0 };
     }
 
-    // ── Normal actions (G.stage === "actions") ────────────────────────
+    // Normal actions (G.stage === "actions")
     const moves = availableMoves ?? [];
     if (moves.length === 0) return { move: { move: "pass", args: [] }, score: 0 };
     if (moves.length === 1) return { move: moves[0], score: 0 };
@@ -99,7 +99,7 @@ export class ActionsStrategy implements PhaseStrategy {
     return { move: scored[0].move, score: scored[0].score, topMoves };
   }
 
-  // ── Strategic context bonuses ───────────────────────────────────────────
+  // Strategic context bonuses
 
   private contextBonus(
     m: AIMove,
@@ -252,7 +252,7 @@ export class ActionsStrategy implements PhaseStrategy {
     return bonus;
   }
 
-  // ── Sub-stage: discard worst FoW card ─────────────────────────────────
+  // Sub-stage: discard worst FoW card
 
   private discardWorstCard(G: MyGameState, playerID: string): AIMove {
     const hand = G.playerInfo[playerID].resources.fortuneCards;

@@ -12,7 +12,7 @@ import { calculateCombat } from "./combatMath";
 
 const GOODS: GoodKey[] = ["mithril", "dragonScales", "krakenSkin", "magicDust", "stickyIchor", "pipeweed"];
 
-// ── NaN/Null Sanitization Helpers ─────────────────────────────────────────────
+// NaN/Null Sanitization Helpers
 
 function sanitizeFleet(fleet: FleetInfo, context: string = ""): FleetInfo {
   const hasNaN = typeof fleet.levies !== 'number' || isNaN(fleet.levies) ||
@@ -52,7 +52,6 @@ function sanitizePlayerResources(player: PlayerInfo, context: string = ""): void
     issues.push(`skyships=${r.skyships}`);
     r.skyships = typeof r.skyships === 'number' && !isNaN(r.skyships) ? r.skyships : 0;
   }
-  // Note: gold can be negative (debt mechanic) - that's valid, don't sanitize
   if (issues.length > 0) {
     console.warn(`[resolveBattle] Invalid player resources${context ? ` at ${context}` : ""}: ${issues.join(", ")}`);
   }
@@ -207,7 +206,6 @@ const applyFleetLosses = (
         remaining -= 3;
       }
     }
-    // GAP-23 / GAP-14: troops aboard destroyed Skyships are lost — trim to capacity
     trimFleetCapacity(fleet);
   });
 
@@ -318,7 +316,6 @@ export const resolveBattleAndReturnWinner = (
   let attackerShieldValue = baseAttackerShield;
   attackerSwordValue += G.battleState?.attacker.fowCard?.sword ?? 0;
   attackerShieldValue += G.battleState?.attacker.fowCard?.shield ?? 0;
-  // GAP-8: improved_training KA — +1 sword/shield per FoW card played, matching the card's stats
   if (
     G.battleState?.attacker.fowCard &&
     G.playerInfo[G.battleState.attacker.id].resources.advantageCard === "improved_training"
@@ -351,7 +348,6 @@ export const resolveBattleAndReturnWinner = (
   }
   defenderSwordValue += G.battleState?.defender.fowCard?.sword ?? 0;
   defenderShieldValue += G.battleState?.defender.fowCard?.shield ?? 0;
-  // GAP-8: improved_training KA for defender
   if (
     G.battleState?.defender.fowCard &&
     G.playerInfo[G.battleState.defender.id].resources.advantageCard === "improved_training"
@@ -378,13 +374,11 @@ export const resolveBattleAndReturnWinner = (
   const garrisonSnapElite = G.stage.sub === "ground_resolve" ? (G.mapState.buildings[y][x].garrisonedEliteRegiments ?? 0) : 0;
 
   // --- Apply losses ---
-  // GAP-22: odd-hit rule applies to aerial/ground fleet combats
   applyFleetLosses(attackerFleets, attackerLosses, true);
 
   if (G.stage.sub === "ground_resolve") {
     const currentBuilding = G.mapState.buildings[y][x];
     let defenderLossesCopy = defenderLosses;
-    // GAP-22: odd hit rule for garrison defender — at least 1 Levy must absorb if hits are odd
     if (defenderLosses % 2 === 1 && (currentBuilding.garrisonedLevies ?? 0) > 0) {
       currentBuilding.garrisonedLevies! -= 1;
       defenderLossesCopy -= 1;
@@ -491,8 +485,6 @@ export const resolveBattleAndReturnWinner = (
     G.battleState &&
       Object.values(G.battleState).forEach((player) => {
         if (player.id === winner) {
-          // DEV-8: heresy shift applies to both aerial and ground battles,
-          // but only when the two sides have opposing alignments
           const loserId = Object.values(G.battleState!).find(p => p.id !== winner)?.id;
           const loserAlignment = loserId ? G.playerInfo[loserId].hereticOrOrthodox : undefined;
           if (loserAlignment && loserAlignment !== player.hereticOrOrthodox) {
@@ -612,7 +604,6 @@ export const resolveConquest = (
   let attackerSwordValue = baseAttackerSword;
   let attackerShieldValue = baseAttackerShield;
 
-  // Garrison troops contribute swords (but not shields — no fort during conquest attempt)
   let attackerGarrisonedRegiments = G.mapState.buildings[y][x].garrisonedRegiments;
   let attackerGarrisonedLevies = G.mapState.buildings[y][x].garrisonedLevies;
   let attackerGarrisonedEliteRegiments = G.mapState.buildings[y][x].garrisonedEliteRegiments ?? 0;
@@ -647,7 +638,6 @@ export const resolveConquest = (
   const conquestGarrisonSnapElite = attackerGarrisonedEliteRegiments;
   const conquestFleetSnap = snapshotFleets(attackerFleets);
 
-  // Garrison troops absorb losses first (conquest-specific priority — no odd-hit rule here)
   if (attackerLossesCopy > attackerGarrisonedLevies) {
     attackerLossesCopy -= attackerGarrisonedLevies;
     attackerGarrisonedLevies = 0;
@@ -670,7 +660,6 @@ export const resolveConquest = (
     attackerLossesCopy = 0;
   }
 
-  // Fleet troops absorb any remaining losses (no odd-hit rule — garrison absorbed first)
   applyFleetLosses(attackerFleets, attackerLossesCopy, false);
 
   // --- Log conquest unit losses ---
@@ -746,7 +735,6 @@ export const resolveConquest = (
     currentBuilding.garrisonedLevies = 0;
     currentBuilding.garrisonedRegiments = 0;
     currentBuilding.garrisonedEliteRegiments = 0;
-    // GAP-15 sub-rule 3: record that this player failed conquest here this round
     G.failedConquests.push({
       playerId: attackerID,
       tile: [x, y],
@@ -760,13 +748,9 @@ export const resolveConquest = (
     const currentBuilding = G.mapState.buildings[y][x];
     const currentTile = G.mapState.currentTileArray[y][x];
 
-    // GAP-RES1: goods are no longer granted immediately on conquest —
-    // they are recalculated each round via grantTradeRouteGoods in resolveRound.
     currentPlayer.resources.victoryPoints += 1;
     increaseHeresyWithinMove(G, currentPlayer.id);
 
-    // GAP-15 sub-rule 2: move price markers left for each additional colony good
-    // (the broken-line rectangle goods on the tile, per "Resolve Conquest Attempt" rule)
     GOODS.forEach((good) => {
       const qty = currentTile.loot.colony[good];
       if (qty > 0) {

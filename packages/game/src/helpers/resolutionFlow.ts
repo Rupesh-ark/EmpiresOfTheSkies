@@ -3,7 +3,7 @@
  *
  * Walker that advances through the unified Resolution phase:
  *
- *   Rulebook order (v4.2 Phase 5):
+ *   Rulebook order (Phase 5):
  *   1. Rebellions
  *   2. Encounters: aerial → plunder → ground → conquest
  *   3-6. Trade/Piracy/Factories (auto, handled in resolveRound)
@@ -134,7 +134,7 @@ export const getResolutionTarget = (G: MyGameState): string | null => {
   }
 };
 
-// ── Resolution Walker ─────────────────────────────────────────────────────
+// Resolution Walker
 // Each "advance" function is called when its step is exhausted.
 // It tries the NEXT step; if that step has no work, it chains further.
 

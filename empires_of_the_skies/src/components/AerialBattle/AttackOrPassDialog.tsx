@@ -10,7 +10,6 @@ const AttackOrPassDiaLog = (props: AerialBattleDialogProps) => {
   const [x, y] = props.G.mapState.currentBattle;
   const [open, setOpen] = useState(true);
 
-  // Possible defenders are pre-computed by the backend when the battle stage is set
   const possibleDefenders = props.G.possibleDefenders ?? [];
 
   const [currentKingdom, setCurrentKingdom] = useState(possibleDefenders[0]);

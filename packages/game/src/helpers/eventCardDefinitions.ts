@@ -19,7 +19,7 @@ const HERESY_EVENT_STEPS = 4;
 const CROPS_TAX_MODIFIER = 3;
 const ARCHPRELATE_MAX_VP = 6;
 
-// ── Card metadata ────────────────────────────────────────────────────────────
+// Card metadata
 
 export type EventCardDef = {
   displayName: string;
@@ -253,7 +253,7 @@ export const EVENT_CARD_DEFS: Record<EventCardName, EventCardDef> = {
   },
 };
 
-// ── Deck composition (36 cards) ──────────────────────────────────────────────
+// Deck composition (36 cards)
 // Most cards have 1 copy; some have multiples per the physical game.
 const UNIQUE_CARD_NAMES: EventCardName[] = Object.keys(
   EVENT_CARD_DEFS
@@ -272,13 +272,13 @@ export const ALL_EVENT_CARD_NAMES: EventCardName[] = [
   ),
 ];
 
-// ── Legend tile groupings (for void checks & resolvers) ──────────────────────
+// Legend tile groupings (for void checks & resolvers)
 
 const MERFOLK_SEA_ELVES = ["TheKingdomOfTheMerfolk", "SeaElves"];
 const CITY_FOUNTAIN = ["TheLostCityOfGold", "TheFountainOfYouth"];
 const DRAGONS_KRAKENS = ["HereBeDragons", "TheKraken"];
 
-// ── Helpers ──────────────────────────────────────────────────────────────────
+// Helpers
 
 /** Find map coordinates of legend tiles by name */
 const findLegendTileCoords = (
@@ -338,7 +338,7 @@ const ALL_PLAYER_KINGDOMS = [
   "Constantium",
 ];
 
-// ── Targeting helpers ────────────────────────────────────────────────────────
+// Targeting helpers
 
 /** Player with fewest VPs; break ties IPO (first in turn order wins) */
 const playerWithFewestVP = (
@@ -425,7 +425,7 @@ const resolveImmediateElection = (
   addVPAmount(G, winnerId, Math.min(ARCHPRELATE_MAX_VP, Math.floor((2 * orthodoxRealms) / 3)));
 };
 
-// ── Void condition checks ────────────────────────────────────────────────────
+// Void condition checks
 
 /** Returns a reason string if the card would have no effect and should be skipped, or false if it should play */
 export const isEventVoid = (
@@ -537,7 +537,7 @@ export const isEventVoid = (
   }
 };
 
-// ── Card resolvers ───────────────────────────────────────────────────────────
+// Card resolvers
 
 /**
  * Resolves an event card's immediate effect.
@@ -551,7 +551,7 @@ export const resolveEventCard = (
   shuffle: <T>(arr: T[]) => T[]
 ): void => {
   switch (card) {
-    // ── Heresy shifts ──────────────────────────────────────────────────────
+    // Heresy shifts
     case "prelacy_condemned":
       advanceAllHeresyTrackers(G, HERESY_EVENT_STEPS);
       logEvent(G, `Prelacy Condemned: all heresy trackers advance ${HERESY_EVENT_STEPS} steps`);
@@ -562,7 +562,7 @@ export const resolveEventCard = (
       logEvent(G, `Defence of the Faith: all heresy trackers retreat ${HERESY_EVENT_STEPS} steps`);
       break;
 
-    // ── Tax modifiers (applied during taxes phase) ─────────────────────────
+    // Tax modifiers (applied during taxes phase)
     case "crops_fail":
       G.eventState.taxModifier = -CROPS_TAX_MODIFIER;
       logEvent(G, `Crops Fail: tax income reduced by ${CROPS_TAX_MODIFIER} this round`);
@@ -573,7 +573,7 @@ export const resolveEventCard = (
       logEvent(G, `Bumper Crops: tax income increased by ${CROPS_TAX_MODIFIER} this round`);
       break;
 
-    // ── VP awards ──────────────────────────────────────────────────────────
+    // VP awards
     case "patrons_of_the_arts":
       for (const id of turnOrder) {
         const p = G.playerInfo[id];
@@ -585,7 +585,7 @@ export const resolveEventCard = (
       }
       break;
 
-    // ── Round-tracking events (flags set here, scored in moves/phases) ──
+    // Round-tracking events (flags set here, scored in moves/phases)
     case "royal_patronage":
       G.eventState.royalPatronageActive = true;
       logEvent(G, "Royal Patronage: the first player to claim a Land this round gains +2 VP and 2 gold");
@@ -599,7 +599,7 @@ export const resolveEventCard = (
       break;
     }
 
-    // ── Disasters ──────────────────────────────────────────────────────────
+    // Disasters
     case "the_faerie_plague":
       // Lose half (rounded down) of all Regiments & Levies everywhere
       for (const id of turnOrder) {
@@ -647,8 +647,6 @@ export const resolveEventCard = (
       }
       break;
     }
-
-    // ── Gap-fix events ─────────────────────────────────────────────────
 
     case "guild_revolt":
       // Resolved via interactive choice (prepareEventChoice → resolveEventChoice)
@@ -714,7 +712,7 @@ export const resolveEventCard = (
       break;
     }
 
-    // ── Legend tile attacks ─────────────────────────────────────────────────
+    // Legend tile attacks
     case "treacherous_creatures":
     case "mysterious_disappearances":
     case "monsters_awake": {
@@ -763,7 +761,7 @@ export const resolveEventCard = (
       break;
     }
 
-    // ── NPR heretic markers ────────────────────────────────────────────────
+    // NPR heretic markers
     case "zeeland_turns_heretic":
       if (!G.eventState.nprHeretic.includes("Zeeland")) {
         G.eventState.nprHeretic.push("Zeeland");
@@ -803,7 +801,7 @@ export const resolveEventCard = (
       break;
     }
 
-    // ── Persistent effects (set flag, enforcement in other phases) ────────
+    // Persistent effects (set flag, enforcement in other phases)
     case "peace_accord_reached":
       G.eventState.peaceAccordActive = true;
       logEvent(G, "Peace Accord Reached: no aerial battles may be declared this round");
@@ -850,7 +848,7 @@ export const resolveEventCard = (
       logEvent(G, "Colonial Prelates: each colony now counts as +1 vote in elections");
       break;
 
-    // ── Allies in Faerie — free regiments at outposts ──────────────────────
+    // Allies in Faerie — free regiments at outposts
     case "allies_in_faerie":
       for (const id of turnOrder) {
         let totalGained = 0;
@@ -877,13 +875,13 @@ export const resolveEventCard = (
       }
       break;
 
-    // ── No-op (infidel invasion not implemented) ───────────────────────────
+    // No-op (infidel invasion not implemented)
     case "grand_infidel_dies":
       G.eventState.grandInfidelDies = true;
       logEvent(G, "Grand Infidel Dies: the infidel invasion is delayed this round");
       break;
 
-    // ── Royal Succession ─────────────────────────────────────────────────
+    // Royal Succession
     case "royal_succession": {
       // Target: fewest VP player. Score their legacy card, reshuffle it
       // into legacy deck, draw 2 new cards, auto-pick the higher-value one.
@@ -926,13 +924,13 @@ export const resolveEventCard = (
       break;
     }
 
-    // ── Archprelate Dies — deferred to interactive election within events phase
+    // Archprelate Dies — deferred to interactive election within events phase
     case "archprelate_dies":
       G.eventState.immediateElectionPending = true;
       logEvent(G, "Archprelate Dies: an emergency election will now be held");
       break;
 
-    // ── Dynastic Marriage — auto-pick: fewest + second-fewest VP ─────────
+    // Dynastic Marriage — auto-pick: fewest + second-fewest VP
     case "dynastic_marriage": {
       const dmTarget = playerWithFewestVP(G, turnOrder);
       // Pick ally: second-fewest VP player (excluding target)
@@ -964,7 +962,7 @@ export const resolveEventCard = (
   }
 };
 
-// ── Battle event targeting ───────────────────────────────────────────────────
+// Battle event targeting
 
 /**
  * Compute the target for a battle/rebellion event card.
@@ -1111,7 +1109,7 @@ export const getBattleEventTarget = (
   }
 };
 
-// ── Interactive event choice preparation ─────────────────────────────────────
+// Interactive event choice preparation
 
 /**
  * Check if a revealed event card requires a player choice before resolving.

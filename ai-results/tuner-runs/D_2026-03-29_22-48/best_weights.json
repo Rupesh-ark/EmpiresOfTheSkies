@@ -1,0 +1,14 @@
+{
+  "penaltyScale": 0.333606,
+  "qualityThreshold": 0.021068,
+  "goldPressure_0": 0.401526,
+  "goldPressure_1": 0.418576,
+  "goldPressure_2": 0.028591,
+  "goldPressure_3": 0.243781,
+  "diminishing_perUnit": 0.054063,
+  "diminishing_hardCapPenalty": 0.524209,
+  "round_tooEarlyPenalty": 0.326866,
+  "round_tooLatePenalty": 0.020008,
+  "round_mildPenalty": 0.055457,
+  "round_finalRoundBonus": 0.027791
+}

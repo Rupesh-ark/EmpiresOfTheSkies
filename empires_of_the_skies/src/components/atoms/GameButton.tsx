@@ -23,7 +23,6 @@ const sizeMap = {
   lg: { height: 46, fontSize: tokens.fontSize.base, px: `${tokens.spacing.lg}px`, letterSpacing: "0.01em" },
 };
 
-// Embossed brass plate — raised surface with light-catching bevel
 const variantStyleMap = {
   primary: {
     background: `

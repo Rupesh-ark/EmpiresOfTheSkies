@@ -64,16 +64,16 @@ export function evaluateDeployFleet(
   const reasons: string[] = [];
   let quality = V2_CONFIG.baseQuality.deployFleet;
 
-  // ── No skyships = useless deploy ───────────────────────────────────────
+  // No skyships = useless deploy
   if (skyshipCount === 0) {
     return { move, viable: false, quality: 0, reason: "no skyships in deploy" };
   }
 
-  // ── Troop loadout ──────────────────────────────────────────────────────
+  // Troop loadout
   const hasTroops = regimentCount + eliteCount > 0;
   const armySwords = regimentCount * 2 + eliteCount * 3 + skyshipCount;
 
-  // ── Destination tile analysis ──────────────────────────────────────────
+  // Destination tile analysis
   if (dest) {
     const [dx, dy] = dest;
     const tile = G.mapState.currentTileArray[dy]?.[dx];
@@ -151,7 +151,7 @@ export function evaluateDeployFleet(
       reasons.push("1 rival on tile");
     }
 
-    // ── Trade route potential ────────────────────────────────────────────
+    // Trade route potential
     if (tile.type === "land" || tile.type === "legend") {
       if (hasTradeRoutePotential(G, playerID, dx, dy)) {
         quality += V2_CONFIG.bonuses.tradeRoutePotential;
@@ -159,7 +159,7 @@ export function evaluateDeployFleet(
       }
     }
 
-    // ── Route chain value — does deploying here help complete a skyship chain? ──
+    // Route chain value — does deploying here help complete a skyship chain?
     const chainValue = tradeRouteChainValue(G, playerID, dx, dy);
     if (chainValue.score > 0) {
       if (chainValue.score >= 0.8) {
@@ -189,22 +189,22 @@ export function evaluateDeployFleet(
     reasons.push("no routes yet");
   }
 
-  // ── Gold pressure (from common) ────────────────────────────────────────
+  // Gold pressure (from common)
   quality += goldPressure(gold, estimatedCost);
   const gpReason = goldPressureReason(gold, estimatedCost);
   if (gpReason) reasons.push(gpReason);
 
-  // ── Round awareness (from common) ──────────────────────────────────────
+  // Round awareness (from common)
   const ra = roundAwareness(G.round, G.finalRound, "early");
   quality += ra.modifier;
   if (ra.reason) reasons.push(ra.reason);
 
-  // ── Personality (from common) ──────────────────────────────────────────
+  // Personality (from common)
   const pb = personalityBonus(personality, DEPLOY_PERSONALITY);
   quality += pb.bonus;
   reasons.push(...pb.reasons);
 
-  // ── Clamp and return ───────────────────────────────────────────────────
+  // Clamp and return
   quality = Math.max(0, Math.min(1, quality));
 
   return {

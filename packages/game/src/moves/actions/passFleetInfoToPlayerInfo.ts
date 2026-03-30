@@ -125,7 +125,7 @@ const passFleetInfoToPlayerInfo: MoveDefinition = {
       currentPlayer.resources.regiments -= deltaRegiments;
       currentPlayer.resources.levies -= deltaLevies;
       currentPlayer.resources.eliteRegiments -= deltaElite;
-      // v4.2: Kingdom↔Fleet transfers are a free Anytime action — do NOT set turnComplete
+      // Kingdom↔Fleet transfers are a free Anytime action — do NOT set turnComplete
     }
   },
   errorMessage: "Cannot transfer resources to fleet",

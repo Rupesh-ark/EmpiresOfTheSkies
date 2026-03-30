@@ -124,7 +124,6 @@ export const ActionBoardButtonLarge = (props: ActionBoardButtonProps) => {
     setSelectedTile(coords);
   };
 
-  // Valid fort locations are computed by the backend when foundBuildings(3) fires
   const possibleFortTiles = props.G.validFortLocations ?? [];
 
   return (
@@ -158,7 +157,6 @@ export const ActionBoardButtonLarge = (props: ActionBoardButtonProps) => {
         disabled={props.disabled || restricted}
         onClick={() => {
           clearMoves(props);
-          // Palace (value=1): open dialog first, move fires after direction is chosen
           if (props.value !== 1) {
             props.onClickFunction(props.value);
           }

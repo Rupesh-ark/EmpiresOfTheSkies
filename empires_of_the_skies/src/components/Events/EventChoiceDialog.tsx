@@ -4,7 +4,7 @@ import { MyGameProps, EVENT_CARD_DEFS } from "@eots/game";
 import { DialogShell } from "@/components/atoms/DialogShell";
 import { GameButton } from "@/components/atoms/GameButton";
 
-// ── Shared wrapper for the 4 chip-selection branches ─────────────────────
+// Shared wrapper for the 4 chip-selection branches
 
 const ChipChoice = ({
   title,
@@ -38,7 +38,7 @@ const ChipChoice = ({
   </DialogShell>
 );
 
-// ── Main component ───────────────────────────────────────────────────────
+// Main component
 
 const EventChoiceDialog = (props: MyGameProps) => {
   const [selected, setSelected] = useState<any>(undefined);
@@ -50,7 +50,7 @@ const EventChoiceDialog = (props: MyGameProps) => {
   const def = EVENT_CARD_DEFS[choice.card];
   const resolve = () => props.moves.resolveEventChoice(selected);
 
-  // ── Binary options — direct buttons, no selection state ────────────────
+  // Binary options — direct buttons, no selection state
 
   if (choice.binaryOptions) {
     const formatLabel = (opt: string): string => {
@@ -77,7 +77,7 @@ const EventChoiceDialog = (props: MyGameProps) => {
     );
   }
 
-  // ── Chip-selection branches — build chips, render once ─────────────────
+  // Chip-selection branches — build chips, render once
 
   let title: string;
   let description: string;

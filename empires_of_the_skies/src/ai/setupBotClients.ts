@@ -8,7 +8,7 @@ export type BotClientHandle = {
   playerID: string;
 };
 
-// ── Bot log collection ───────────────────────────────────────────────────
+// Bot log collection
 const botLogLines: string[] = [];
 let currentMatchID = "";
 let logServer = "";

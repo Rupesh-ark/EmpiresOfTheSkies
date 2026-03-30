@@ -244,7 +244,7 @@ export class AerialBattleStrategy implements PhaseStrategy {
     return bestMove;
   }
 
-  // ── Strength helpers ──────────────────────────────────────────────────
+  // Strength helpers
 
   private getFleetStrengthAtBattle(G: MyGameState, playerID: string): number {
     const player = G.playerInfo[playerID];

@@ -1,0 +1,142 @@
+[
+  {
+    "game": 1,
+    "rounds": 10,
+    "winnerVP": 38,
+    "scores": {
+      "0": 1,
+      "1": -3,
+      "2": -29,
+      "3": 38,
+      "4": 5,
+      "5": 7
+    },
+    "winnerPersonality": "Merchant",
+    "metrics": {
+      "r1_skyships": 3,
+      "r1_laden_deploys": 1,
+      "r1_counsellors": 3,
+      "total_deploys": 18,
+      "total_laden": 4,
+      "total_factories": 0,
+      "total_conquests": 0,
+      "total_battles": 0,
+      "total_religion": 67,
+      "total_agitators": 40,
+      "total_pass": 61,
+      "nan_events": 0
+    }
+  },
+  {
+    "game": 2,
+    "rounds": 10,
+    "winnerVP": 38,
+    "scores": {
+      "0": 1,
+      "1": -3,
+      "2": -29,
+      "3": 38,
+      "4": 5,
+      "5": 7
+    },
+    "winnerPersonality": "Unknown",
+    "metrics": {
+      "r1_skyships": 0,
+      "r1_laden_deploys": 0,
+      "r1_counsellors": 0,
+      "total_deploys": 0,
+      "total_laden": 0,
+      "total_factories": 0,
+      "total_conquests": 0,
+      "total_battles": 0,
+      "total_religion": 0,
+      "total_agitators": 0,
+      "total_pass": 0,
+      "nan_events": 0
+    }
+  },
+  {
+    "game": 3,
+    "rounds": 10,
+    "winnerVP": 38,
+    "scores": {
+      "0": 1,
+      "1": -3,
+      "2": -29,
+      "3": 38,
+      "4": 5,
+      "5": 7
+    },
+    "winnerPersonality": "Unknown",
+    "metrics": {
+      "r1_skyships": 0,
+      "r1_laden_deploys": 0,
+      "r1_counsellors": 0,
+      "total_deploys": 0,
+      "total_laden": 0,
+      "total_factories": 0,
+      "total_conquests": 0,
+      "total_battles": 0,
+      "total_religion": 0,
+      "total_agitators": 0,
+      "total_pass": 0,
+      "nan_events": 0
+    }
+  },
+  {
+    "game": 4,
+    "rounds": 10,
+    "winnerVP": 38,
+    "scores": {
+      "0": 1,
+      "1": -3,
+      "2": -29,
+      "3": 38,
+      "4": 5,
+      "5": 7
+    },
+    "winnerPersonality": "Unknown",
+    "metrics": {
+      "r1_skyships": 0,
+      "r1_laden_deploys": 0,
+      "r1_counsellors": 0,
+      "total_deploys": 0,
+      "total_laden": 0,
+      "total_factories": 0,
+      "total_conquests": 0,
+      "total_battles": 0,
+      "total_religion": 0,
+      "total_agitators": 0,
+      "total_pass": 0,
+      "nan_events": 0
+    }
+  },
+  {
+    "game": 5,
+    "rounds": 10,
+    "winnerVP": 38,
+    "scores": {
+      "0": 1,
+      "1": -3,
+      "2": -29,
+      "3": 38,
+      "4": 5,
+      "5": 7
+    },
+    "winnerPersonality": "Unknown",
+    "metrics": {
+      "r1_skyships": 0,
+      "r1_laden_deploys": 0,
+      "r1_counsellors": 0,
+      "total_deploys": 0,
+      "total_laden": 0,
+      "total_factories": 0,
+      "total_conquests": 0,
+      "total_battles": 0,
+      "total_religion": 0,
+      "total_agitators": 0,
+      "total_pass": 0,
+      "nan_events": 0
+    }
+  }
+]

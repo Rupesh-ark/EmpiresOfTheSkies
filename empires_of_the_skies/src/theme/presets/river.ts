@@ -2,7 +2,7 @@ import type { TokenPreset } from "./types";
 
 /**
  * RIVER PRESET — Enhanced Visibility
- * ────────────────────────────────────
+ *
  * Inspired by NASA's satellite river image: deep teal cutting through desert sand.
  *
  * Key changes:

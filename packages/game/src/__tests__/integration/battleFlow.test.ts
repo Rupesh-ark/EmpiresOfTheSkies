@@ -44,7 +44,7 @@ import {
 } from "../testHelpers";
 import type { EventsAPI } from "boardgame.io/dist/types/src/plugins/events/events";
 
-// ── Helpers ────────────────────────────────────────────────────────────────
+// Helpers
 
 const stubEvents = () =>
   ({
@@ -157,7 +157,7 @@ function buildBattleG() {
   return G;
 }
 
-// ── Test 1: Aerial battle — attacker initiates → defender retaliates → FoW → VP ──
+// Test 1: Aerial battle — attacker initiates → defender retaliates → FoW → VP
 
 describe("aerial: attacker initiates → defender retaliates → battle resolves with VP award", () => {
   it("attackOtherPlayersFleet sets attacker=fight, defender=undecided, stage='attack or evade'", () => {
@@ -223,7 +223,7 @@ describe("aerial: attacker initiates → defender retaliates → battle resolves
   });
 });
 
-// ── Test 2: Aerial battle — defender evades → stage becomes "relocate loser" ──
+// Test 2: Aerial battle — defender evades → stage becomes "relocate loser"
 
 describe("aerial: defender evades → stage becomes 'relocate loser'", () => {
   it("evadeAttackingFleet sets defender.decision='evade' and stage='relocate loser'", () => {
@@ -265,7 +265,7 @@ describe("aerial: defender evades → stage becomes 'relocate loser'", () => {
   });
 });
 
-// ── Test 3: Ground battle — attacker attacks building → defender yields → ownership transfers ──
+// Test 3: Ground battle — attacker attacks building → defender yields → ownership transfers
 
 describe("ground: attacker attacks building → defender yields → ownership transfers", () => {
   it("attackPlayersBuilding creates battleState with attacker=0 and defender=1", () => {
@@ -382,7 +382,7 @@ describe("ground: attacker attacks building → defender yields → ownership tr
   });
 });
 
-// ── Test 4: Conquest — outpost placed → garrison troops ──
+// Test 4: Conquest — outpost placed → garrison troops
 
 describe("ground: after ground win → constructOutpost + garrisonTroops", () => {
   it("constructOutpost sets building type to 'outpost' at currentBattle", () => {
@@ -465,14 +465,14 @@ describe("ground: after ground win → constructOutpost + garrisonTroops", () =>
   });
 });
 
-// ── Test 5: Full chain — aerial → retaliate → resolve → ground attack → yield → outpost → garrison ──
+// Test 5: Full chain — aerial → retaliate → resolve → ground attack → yield → outpost → garrison
 
 describe("full chain: aerial attack → retaliate → resolve → ground attack → yield → outpost → garrison", () => {
   it("runs the complete battle sequence and leaves consistent state", () => {
     const G = buildBattleG();
     const events = stubEvents();
 
-    // ── Phase 1: Aerial battle ──
+    // Phase 1: Aerial battle
     // Attacker (0) initiates
     attackOtherPlayersFleet.fn(
       { G, ctx: buildCtxForPhase("0"), playerID: "0", events, random: buildRandom() },
@@ -499,7 +499,7 @@ describe("full chain: aerial attack → retaliate → resolve → ground attack 
     // Player 0 wins aerial battle → +1 VP
     expect(G.playerInfo["0"].resources.victoryPoints).toBeGreaterThanOrEqual(vp0BeforeAerial + 1);
 
-    // ── Phase 2: Ground battle (set up manually as aerial left only attacker at tile) ──
+    // Phase 2: Ground battle (set up manually as aerial left only attacker at tile)
     // After aerial win, simulate that attacker now faces the defender's building
     // Reset battleMap so only player 0 remains at the tile for the ground phase
     G.mapState.battleMap[0][0] = ["0"];
@@ -536,7 +536,7 @@ describe("full chain: aerial attack → retaliate → resolve → ground attack 
     expect(G.mapState.buildings[0][0].player?.id).toBe("0");
     expect(G.battleState).toBeUndefined();
 
-    // ── Phase 3: Conquest — place outpost, garrison troops ──
+    // Phase 3: Conquest — place outpost, garrison troops
     G.mapState.buildings[0][0].buildings = undefined;
     G.mapState.buildings[0][0].garrisonedRegiments = 0;
     G.mapState.buildings[0][0].garrisonedLevies = 0;

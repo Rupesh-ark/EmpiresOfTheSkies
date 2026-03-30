@@ -106,7 +106,7 @@ export const CollapsedActionRow = ({
         }),
       }}
     >
-      {/* ── Thumbnail with feathered right edge ────────── */}
+      {/* Thumbnail with feathered right edge */}
       {bgImage && (
         <Box
           sx={{
@@ -135,7 +135,7 @@ export const CollapsedActionRow = ({
         </Box>
       )}
 
-      {/* ── Label ────────────────────────────────── */}
+      {/* Label */}
       <Box sx={{ flex: 1, minWidth: 0, pl: bgImage ? 0 : `${tokens.spacing.md}px` }}>
         <Typography
           noWrap
@@ -150,7 +150,7 @@ export const CollapsedActionRow = ({
         </Typography>
       </Box>
 
-      {/* ── Slot count + counsellor dots ──────────────── */}
+      {/* Slot count + counsellor dots */}
       <Box
         sx={{
           display: "flex",
@@ -198,7 +198,7 @@ export const CollapsedActionRow = ({
     </Box>
   );
 
-  // ── Rich tooltip content (inline hover info) ──────────────────
+  // Rich tooltip content (inline hover info)
   const actionInfo = actionId ? ACTION_INFO[actionId] : null;
   const richTooltip = actionInfo ? (
     <Box sx={{ p: 0.5, maxWidth: 260 }}>
@@ -229,7 +229,6 @@ export const CollapsedActionRow = ({
     </Box>
   ) : (isDisabled ? (disabledReason ?? "All slots filled") : "");
 
-  // Always wrap in tooltip — rich content for actions with info, simple for disabled-only
   if (richTooltip) {
     return (
       <Tooltip title={richTooltip} placement="right" arrow enterDelay={TOOLTIP_DELAY.enter} enterNextDelay={TOOLTIP_DELAY.enterNext}>

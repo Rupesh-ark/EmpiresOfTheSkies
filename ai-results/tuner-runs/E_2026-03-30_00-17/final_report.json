@@ -1,0 +1,30 @@
+{
+  "bucket": "E",
+  "generations_run": 17,
+  "default_avgVP": 59.04,
+  "best_avgVP": 64.8,
+  "best_weights": {
+    "unclaimedLand": 0.2077,
+    "soleOccupier": 0.063583,
+    "canConquer": 0.079539,
+    "tradeRoutePotential": 0.045116,
+    "noRoutesUrgency": 0.079724,
+    "routeChainComplete": 0.380432,
+    "routeChainExtend": 0.162919,
+    "routeChainAdjacent": 0.270307,
+    "noTroopsPenalty": 0.128478,
+    "ownTerritory": 0.142255,
+    "rivalTerritory": 0.132631,
+    "legendTile": 0.038229,
+    "targetNeedsTroops": 0.113245,
+    "rivalsAtLocation": 0.239081,
+    "givingColonyPenalty": 0.099708,
+    "breakRoutePenalty": 0.020987,
+    "colonyValue": 0.137768,
+    "rivalsPresent": 0.045355
+  },
+  "improvement": 5.76,
+  "early_stopped": true,
+  "total_time_s": 1358.0,
+  "total_time_human": "22.6m"
+}

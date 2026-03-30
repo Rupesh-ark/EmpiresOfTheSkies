@@ -37,7 +37,7 @@ function readJSON(path: string): any {
   return JSON.parse(fs.readFileSync(path, "utf8"));
 }
 
-// ── Bucket injection ──────────────────────────────────────────────────────────
+// Bucket injection
 
 function injectBucketA(weights: Record<string, number>): void {
   setEvalWeights(weights as unknown as EvalWeights);
@@ -157,7 +157,7 @@ function injectBucketI(
   setV2Config({ bonuses: weights });
 }
 
-// ── Inject weights for a bucket ──────────────────────────────────────────────
+// Inject weights for a bucket
 
 function injectWeights(
   bucket: string,
@@ -181,7 +181,7 @@ function injectWeights(
   }
 }
 
-// ── Single game ───────────────────────────────────────────────────────────────
+// Single game
 
 let gameCounter = 0;
 
@@ -238,7 +238,7 @@ function runOneGame(): number[] | null {
     .map((pid) => G.playerInfo[pid].resources.victoryPoints);
 }
 
-// ── Evaluate one candidate (N games) ─────────────────────────────────────────
+// Evaluate one candidate (N games)
 
 function evaluateCandidate(numGames: number): { avgVP: number; scores: number[][] } {
   const allScores: number[][] = [];
@@ -264,7 +264,7 @@ function evaluateCandidate(numGames: number): { avgVP: number; scores: number[][
   return { avgVP: Math.round(avgVP * 100) / 100, scores: allScores };
 }
 
-// ── Main ─────────────────────────────────────────────────────────────────────
+// Main
 
 function main(): void {
   const originalLog = console.log;

@@ -32,7 +32,6 @@ const validateBuildSkyships = (
 
 const buildSkyships: MoveDefinition = {
   fn: ({ G, playerID, events }, ...args: any[]) => {
-    // GAP-20: player chooses 1 or 2 skyships per shipyard, pays 1 Gold each
     const perShipyard: number = args[0];
     if (validateBuildSkyships(G, playerID, perShipyard)) return INVALID_MOVE;
     const total = perShipyard * G.playerInfo[playerID].shipyards;

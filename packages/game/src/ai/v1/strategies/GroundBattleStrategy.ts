@@ -242,7 +242,7 @@ export class GroundBattleStrategy implements PhaseStrategy {
     return pickMoves[bestIdx] ?? drawMove ?? moves[0];
   }
 
-  // ── Helpers ───────────────────────────────────────────────────────────
+  // Helpers
 
   private getTroopsAtTile(G: MyGameState, playerID: string, bx: number, by: number): number {
     const player = G.playerInfo[playerID];

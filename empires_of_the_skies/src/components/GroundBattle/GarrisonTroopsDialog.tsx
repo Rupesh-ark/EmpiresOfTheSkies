@@ -15,7 +15,7 @@ import { IconRegiment, IconElite, IconLevy } from "@/theme";
 
 const log = createLogger("battle");
 
-// ── Troop types & icons (same pattern as FleetTransferDialog) ──────────────
+// Troop types & icons (same pattern as FleetTransferDialog)
 
 type TroopKind = "regiment" | "elite" | "levy";
 
@@ -64,7 +64,7 @@ function DraggableTroop({ id, kind }: { id: string; kind: TroopKind }) {
   );
 }
 
-// ── Drag ID parsing ────────────────────────────────────────────────────────
+// Drag ID parsing
 
 type DragSource =
   | { zone: "fleet"; kind: TroopKind }
@@ -80,7 +80,7 @@ function parseDragId(id: string): DragSource | null {
   return null;
 }
 
-// ── Drop zones ─────────────────────────────────────────────────────────────
+// Drop zones
 
 const sectionHeader = {
   fontFamily: tokens.font.body,
@@ -170,14 +170,14 @@ function GarrisonZone({ regiments, elites, levies }: { regiments: number; elites
   );
 }
 
-// ── Local state ────────────────────────────────────────────────────────────
+// Local state
 
 interface GarrisonState {
   fleet: { regiments: number; elites: number; levies: number };
   garrison: { regiments: number; elites: number; levies: number };
 }
 
-// ── Main dialog ────────────────────────────────────────────────────────────
+// Main dialog
 
 const GarrisonTroopsDialog = (props: MyGameProps) => {
   const [x, y] = props.G.mapState.currentBattle;
@@ -188,7 +188,6 @@ const GarrisonTroopsDialog = (props: MyGameProps) => {
       props.playerID ?? props.ctx.currentPlayer
     );
 
-  // Troops available for garrisoning are pre-computed by the backend
   const troops = props.G.troopsAvailableForGarrison ?? { regiments: 0, elites: 0, levies: 0 };
   const playerRegiments = troops.regiments;
   const playerElites = troops.elites;

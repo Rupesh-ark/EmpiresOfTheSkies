@@ -1,0 +1,22 @@
+{
+  "lowSkyships": 0.010009,
+  "firstCounsellor": 0.149865,
+  "extraCounsellor": 0.149128,
+  "lowTroops": 0.2348,
+  "lowFoWCards": 0.029866,
+  "noFleetsOrSkyships": 0.142218,
+  "strongCardBonus": 0.062895,
+  "midCardBonus": 0.044012,
+  "strongCardPenalty": 0.247617,
+  "weakCardBonus": 0.068447,
+  "fowHandFullPenalty": 0.068431,
+  "fowHandLowBonus": 0.037789,
+  "noActiveFleetsPenalty": 0.01475,
+  "activeFleetTrainBonus": 0.065466,
+  "lowSkyshipsBonus": 0.108247,
+  "veryLowTroopsBonus": 0.022664,
+  "lowTroopsBuildBonus": 0.13955,
+  "cantAffordRegimentsBonus": 0.182067,
+  "selectiveRetrievalBonus": 0.021341,
+  "loadFleetFromGarrisonBonus": 0.249553
+}

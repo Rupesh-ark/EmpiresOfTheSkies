@@ -1,0 +1,20 @@
+{
+  "unclaimedLand": 0.095434,
+  "soleOccupier": 0.026915,
+  "canConquer": 0.029205,
+  "tradeRoutePotential": 0.160295,
+  "noRoutesUrgency": 0.143802,
+  "routeChainComplete": 0.304784,
+  "routeChainExtend": 0.106725,
+  "routeChainAdjacent": 0.261478,
+  "noTroopsPenalty": 0.010239,
+  "ownTerritory": 0.071262,
+  "rivalTerritory": 0.077053,
+  "legendTile": 0.160169,
+  "targetNeedsTroops": 0.086367,
+  "rivalsAtLocation": 0.015469,
+  "givingColonyPenalty": 0.137147,
+  "breakRoutePenalty": 0.26432,
+  "colonyValue": 0.041187,
+  "rivalsPresent": 0.20955
+}

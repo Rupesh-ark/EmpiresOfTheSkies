@@ -47,7 +47,7 @@ export class ResolutionStrategy implements PhaseStrategy {
     return { move: chosen, score: 0 };
   }
 
-  // ── Retrieve Fleets ─────────────────────────────────────────────────────
+  // Retrieve Fleets
 
   private retrieveFleets(
     G: MyGameState,
@@ -169,7 +169,7 @@ export class ResolutionStrategy implements PhaseStrategy {
     return score;
   }
 
-  // ── Infidel Fleet Combat ────────────────────────────────────────────────
+  // Infidel Fleet Combat
 
   private infidelFleetCombat(
     G: MyGameState,
@@ -198,7 +198,7 @@ export class ResolutionStrategy implements PhaseStrategy {
     return fleetStrength >= fightThreshold ? fightMove : evadeMove;
   }
 
-  // ── Deferred Battle ─────────────────────────────────────────────────────
+  // Deferred Battle
 
   private deferredBattle(
     G: MyGameState,
@@ -225,7 +225,7 @@ export class ResolutionStrategy implements PhaseStrategy {
     return commitMoves[bestIdx] ?? moves[0];
   }
 
-  // ── Rebellion ───────────────────────────────────────────────────────────
+  // Rebellion
 
   private rebellion(
     G: MyGameState,
@@ -265,7 +265,7 @@ export class ResolutionStrategy implements PhaseStrategy {
     return bestMove;
   }
 
-  // ── Rebellion Rival Support ─────────────────────────────────────────────
+  // Rebellion Rival Support
 
   private rebellionRivalSupport(
     G: MyGameState,
@@ -310,7 +310,7 @@ export class ResolutionStrategy implements PhaseStrategy {
     return bestMove;
   }
 
-  // ── Invasion: Nominate Captain General ───────────────────────────────────
+  // Invasion: Nominate Captain General
 
   private invasionNominate(
     G: MyGameState,
@@ -345,7 +345,7 @@ export class ResolutionStrategy implements PhaseStrategy {
     return targetMove ?? nominateMoves[0];
   }
 
-  // ── Invasion: Contribute ────────────────────────────────────────────────
+  // Invasion: Contribute
 
   private invasionContribute(
     G: MyGameState,
@@ -386,7 +386,7 @@ export class ResolutionStrategy implements PhaseStrategy {
     return bestMove;
   }
 
-  // ── Invasion: Buyoff ────────────────────────────────────────────────────
+  // Invasion: Buyoff
 
   private invasionBuyoff(
     G: MyGameState,

@@ -136,7 +136,7 @@ export function enumerateLegalMoves(G: MyGameState, ctx: Ctx, playerID: string):
         }
 
         // Cascade fallback: if last tile has no hidden neighbors,
-        // allow any tile adjacent to any discovered tile (v4.2 rule)
+        // allow any tile adjacent to any discovered tile (rule)
         if (moves.length === 0) {
           for (let y = 0; y < MAP_HEIGHT; y++) {
             for (let x = 0; x < MAP_WIDTH; x++) {
@@ -227,8 +227,6 @@ export function enumerateLegalMoves(G: MyGameState, ctx: Ctx, playerID: string):
       }
 
       // No-arg action moves
-      // NOTE: increaseHeresy/increaseOrthodoxy are NOT player actions —
-      // they're side effects of other game events (discovery, buildings, decrees)
       for (const moveName of [
         "trainTroops",
         "drawFoWCards",
@@ -456,7 +454,6 @@ export function enumerateLegalMoves(G: MyGameState, ctx: Ctx, playerID: string):
         }
       }
 
-      // TODO: enumerate proposeDeal options (trade negotiations with other players)
 
       // Diagnostic: disabled for performance — re-enable for debugging
       // if (_failedValidations.length > 0) {

@@ -23,9 +23,6 @@ const constructOutpost: MoveDefinition = {
       }
     });
 
-    // GAP-RES1: goods are no longer granted immediately on claim —
-    // they are recalculated each round via grantTradeRouteGoods in resolveRound.
-
     currentPlayer.resources.victoryPoints += 1;
     increaseHeresyWithinMove(G, playerID);
 

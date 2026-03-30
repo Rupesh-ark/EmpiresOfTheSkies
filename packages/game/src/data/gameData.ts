@@ -1,19 +1,19 @@
 import { EventCardName, FortuneOfWarCardInfo, InfidelHostCounter, KingdomAdvantageCard, KingdomName, LegacyCardInfo } from "../types";
 
-// ── Game configuration ────────────────────────────────────────────────────────
+// Game configuration
 
 export const MAX_PLAYERS = 6;
 export const MIN_PLAYERS = 1;
 
-// ── Map dimensions ────────────────────────────────────────────────────────────
+// Map dimensions
 export const MAP_WIDTH = 8;
 export const MAP_HEIGHT = 4;
 
-// ── Heresy track bounds ───────────────────────────────────────────────────────
+// Heresy track bounds
 export const HERESY_MAX = 9;
 export const HERESY_MIN = -9;
 
-// ── Price marker bounds ───────────────────────────────────────────────────────
+// Price marker bounds
 export const PRICE_MARKER_MAX = 4;
 export const PRICE_MARKER_MIN = 1;
 export const MIN_ROUNDS = 6;
@@ -24,38 +24,37 @@ export const MAX_FACTORIES = 6;
 export const MAX_HERESY = 19;
 export const MAX_LEVIES = 12;
 
-// ── Building limits ──────────────────────────────────────────────────────────
+// Building limits
 export const MAX_CATHEDRALS = 6;
 export const MAX_PALACES = 6;
 export const MAX_SHIPYARDS = 3;
 
-// ── Building sell prices ─────────────────────────────────────────────────────
+// Building sell prices
 export const BUILDING_SELL_PRICE = 3;
 export const SKYSHIP_SELL_PRICE = 1;
 
-// ── Building VP rewards ──────────────────────────────────────────────────────
+// Building VP rewards
 export const CATHEDRAL_VP = 2;
 export const PALACE_VP_HERETIC = 2;
 export const PALACE_VP_ORTHODOX = 1;
 
-// ── Fleet & troop caps ──────────────────────────────────────────────────────
+// Fleet & troop caps
 export const MAX_SKYSHIPS_PER_FLEET = 5;
 export const MAX_SKYSHIPS = 24;
 export const MAX_REGIMENTS = 30;
 
-// ── Kingdom location (home base) ─────────────────────────────────────────────
+// Kingdom location (home base)
 export const KINGDOM_LOCATION: [number, number] = [4, 0];
 
-// ── Punish Dissenters ────────────────────────────────────────────────────────
+// Punish Dissenters
 export const BASE_PRISONERS = 3;
 export const MORE_PRISONS_BONUS = 1;
 export const PUNISH_GOLD_COST = 2;
 export const PUNISH_EXECUTE_VP_COST = 1;
 
-// ── Infidel Host counters ────────────────────────────────────────────────────
+// Infidel Host counters
 export const INFIDEL_EMPIRE_LOCATION: [number, number] = [4, 1];
 
-// Config-driven: change count to adjust pool size
 export const INFIDEL_HOST_CONFIG: (InfidelHostCounter & { count: number })[] = [
   { swords: 30, shields: 0, isFleet: false, isInvasionTrigger: true, count: 2 },
   { swords: 20, shields: 0, isFleet: false, isInvasionTrigger: false, count: 3 },
@@ -77,11 +76,10 @@ export const TIED_LARGEST_VP = 4;
 // Number of kingdoms (for Grand Army contingent draws)
 export const TOTAL_KINGDOMS = 6;
 
-// ── Event cards ──────────────────────────────────────────────────────────────
+// Event cards
 export const EVENT_HAND_SIZE = 3;
 
-// ── Contingent counters (Rebels / Grand Army) ────────────────────────────────
-// Config-driven: change count to adjust pool size
+// Contingent counters (Rebels / Grand Army)
 export const CONTINGENT_CONFIG: { swords: number; count: number }[] = [
   { swords: 15, count: 1 },
   { swords: 12, count: 5 },
@@ -93,20 +91,20 @@ export const CONTINGENT_COUNTERS: number[] =
     Array(count).fill(swords)
   );
 
-// ── Fortune of War ───────────────────────────────────────────────────────────
+// Fortune of War
 export const FOW_CARDS_DRAWN = 2;
 export const FOW_HAND_MAX = 4;
 
-// ── Conscript Levies ─────────────────────────────────────────────────────────
+// Conscript Levies
 export const LEVY_GROUP_SIZE = 3;
 
-// ── Kingdom Advantage ────────────────────────────────────────────────────────
+// Kingdom Advantage
 export const ELITE_REGIMENTS_COUNT = 3;
 
-// ── Recruit Regiments ────────────────────────────────────────────────────────
+// Recruit Regiments
 export const RECRUIT_REGIMENTS_REWARD = 4;
 
-// ── Resolution / scoring ─────────────────────────────────────────────────────
+// Resolution / scoring
 export const FINAL_ROUND_GOLD_PER_VP = 5;
 export const DEBT_PENALTY_DIVISOR = 2;
 export const TRADE_VP_SCHEDULE: Record<number, [number, number, number]> = {
@@ -122,7 +120,7 @@ export const CounsellorSlot = {
   Third:  3,
 } as const;
 
-// ── Action board slot counts ───────────────────────────────────────────────
+// Action board slot counts
 export const SLOTS_RECRUIT_COUNSELLORS = 3;
 export const SLOTS_RECRUIT_REGIMENTS = 6;
 export const SLOTS_PURCHASE_SKYSHIPS = 2;
@@ -207,8 +205,7 @@ export const colourToKingdomMap: Record<string, KingdomName> = {
   "#478779": "Constantium",
 };
 
-// ── Fortune of War cards ─────────────────────────────────────────────────────
-// Config-driven: change count to adjust deck size, adjust sword/shield values
+// Fortune of War cards
 export const FOW_CARD_CONFIG: { sword: number; shield: number; count: number }[] = [
   { sword: 1, shield: 0, count: 3 },
   { sword: 2, shield: 0, count: 3 },

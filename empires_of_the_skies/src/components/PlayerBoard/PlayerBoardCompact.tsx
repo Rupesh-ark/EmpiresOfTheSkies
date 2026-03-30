@@ -44,7 +44,7 @@ const getFoWCardImage = (card: PlayerFortuneOfWarCardInfo): string => {
   return NO_EFFECT_CARD;
 };
 
-// ── Section header — brass ruled line with small-caps label ─────────────
+// Section header — brass ruled line with small-caps label
 
 const CompactSectionHeader = ({ label }: { label: string }) => (
   <Box
@@ -88,7 +88,7 @@ const CompactSectionHeader = ({ label }: { label: string }) => (
   </Box>
 );
 
-// ── Main component ──────────────────────────────────────────────────────
+// Main component
 
 type CardTab = "fow" | "legacy" | "ka" | "events";
 
@@ -119,7 +119,7 @@ export const PlayerBoardCompact = memo((props: PlayerBoardCompactProps) => {
         overflowY: "auto",
       }}
     >
-      {/* ── Kingdom Name + Titles ──────────────────────────────── */}
+      {/* Kingdom Name + Titles */}
       <Box sx={{ mb: `${tokens.spacing.xs}px` }}>
         <Box sx={{ display: "flex", alignItems: "center", gap: `${tokens.spacing.sm}px` }}>
           <Box
@@ -195,7 +195,7 @@ export const PlayerBoardCompact = memo((props: PlayerBoardCompactProps) => {
         )}
       </Box>
 
-      {/* ── Treasury ─────────────────────────────────────────────── */}
+      {/* Treasury */}
       <GamePanel variant="default" padding="sm">
         <CompactSectionHeader label="Treasury" />
         <Box sx={{ display: "flex", flexWrap: "wrap", gap: `${tokens.spacing.xs}px` }}>
@@ -297,7 +297,7 @@ export const PlayerBoardCompact = memo((props: PlayerBoardCompactProps) => {
         )}
       </GamePanel>
 
-      {/* ── Forces ───────────────────────────────────────────────── */}
+      {/* Forces */}
       <GamePanel variant="default" padding="sm">
         <CompactSectionHeader label="Forces" />
         <Box sx={{ display: "flex", flexWrap: "wrap", gap: `${tokens.spacing.xs}px` }}>
@@ -319,7 +319,7 @@ export const PlayerBoardCompact = memo((props: PlayerBoardCompactProps) => {
         </Box>
       </GamePanel>
 
-      {/* ── Fleets ───────────────────────────────────────────────── */}
+      {/* Fleets */}
       <GamePanel variant="default" padding="sm">
         <CompactSectionHeader label="Fleets" />
         <Box sx={{ display: "flex", flexDirection: "column", gap: "2px" }}>
@@ -376,7 +376,7 @@ export const PlayerBoardCompact = memo((props: PlayerBoardCompactProps) => {
         </Box>
       </GamePanel>
 
-      {/* ── Cards ────────────────────────────────────────────────── */}
+      {/* Cards */}
       <GamePanel variant="default" padding="sm">
         <CompactSectionHeader label="Cards" />
 
@@ -640,7 +640,7 @@ export const PlayerBoardCompact = memo((props: PlayerBoardCompactProps) => {
 
       <CardLightbox card={enlargedCard} onClose={() => setEnlargedCard(null)} />
 
-      {/* ── Holdings (fills remaining space) ─────────────────────── */}
+      {/* Holdings (fills remaining space) */}
       <Holdings {...props} variant="compact" />
     </Box>
   );

@@ -109,7 +109,7 @@ export const ACTION_INFO: Record<string, { title: string; cost: string; descript
     details: "Only the Archprelate can do this, once per round. Bless yourself or an ally for Victory Points. Curse a rival to cost them points. Reform or Confirm dogma shifts the religious landscape. Powerful political tool.",
   },
 
-  // ── Kingdom Actions (PlayerBoard) ──────────────────────────────
+  // Kingdom Actions (PlayerBoard)
 
   "deploy-fleet": {
     title: "Deploy Fleet",
@@ -148,7 +148,7 @@ export const ACTION_INFO: Record<string, { title: string; cost: string; descript
     details: "Both fleets must be on the same map hex. You can move skyships and regiments freely between them. Use this to merge weak fleets or split a large fleet for multiple targets.",
   },
 
-  // ── Map Overlay Buttons ────────────────────────────────────────
+  // Map Overlay Buttons
 
   "clear-moves": {
     title: "Clear Moves",
@@ -166,7 +166,7 @@ export const ACTION_INFO: Record<string, { title: string; cost: string; descript
     description: "Finalize all your actions and end your turn. Your counsellor placements and kingdom actions will be locked in.",
   },
 
-  // ── Player Board Info ──────────────────────────────────────────
+  // Player Board Info
 
   "treasury": {
     title: "Treasury",

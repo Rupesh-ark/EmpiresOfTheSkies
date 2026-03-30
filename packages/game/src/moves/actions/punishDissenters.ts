@@ -81,7 +81,6 @@ const punishDissenters: MoveDefinition = {
 
     const playerInfo = G.playerInfo[playerID];
 
-    // GAP-11: execute an existing prisoner — returns cube to pool, shifts heresy, costs 1 VP
     if (paymentType === "execute") {
       playerInfo.prisoners -= 1;
       removeVPAmount(G, playerID, PUNISH_EXECUTE_VP_COST);
@@ -96,7 +95,6 @@ const punishDissenters: MoveDefinition = {
       return;
     }
 
-    // GAP-6: more_prisons KA raises max prisoners from 3 to 4
     const maxPrisoners = playerInfo.resources.advantageCard === "more_prisons"
       ? BASE_PRISONERS + MORE_PRISONS_BONUS
       : BASE_PRISONERS;

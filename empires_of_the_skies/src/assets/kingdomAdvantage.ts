@@ -1,4 +1,4 @@
-// ── Kingdom Advantage Card images ────────────────────────────────────────────
+// Kingdom Advantage Card images
 
 import eliteRegiments from "../boards_and_assets/cards/kingdom_advantage_cards/elite_regiments.webp";
 import improvedTraining from "../boards_and_assets/cards/kingdom_advantage_cards/improved_training.webp";

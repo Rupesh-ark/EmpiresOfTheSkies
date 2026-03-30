@@ -79,7 +79,7 @@ export function evaluateInfluencePrelates(
   let quality = V2_CONFIG.baseQuality.influencePrelates;
   const reasons: string[] = [];
 
-  // ── Slot type ──────────────────────────────────────────────────────────
+  // Slot type
   if (isOwnSlot(G, playerID, slotIndex)) {
     quality += V2_CONFIG.bonuses.ownSlotBonus;
     reasons.push("own slot (free)");
@@ -99,28 +99,28 @@ export function evaluateInfluencePrelates(
     }
   }
 
-  // ── Gold pressure (from common) ────────────────────────────────────────
+  // Gold pressure (from common)
   quality += goldPressure(gold, cost);
   const gpReason = goldPressureReason(gold, cost);
   if (gpReason) reasons.push(gpReason);
 
-  // ── Counsellor drain as diminishing returns ────────────────────────────
+  // Counsellor drain as diminishing returns
   // Each slot burns a counsellor. Use flow-based diminishing (slots this round).
   const dim = diminishingReturns(slotsTaken, 0.1, 4);
   quality -= dim.penalty;
   if (dim.reason) reasons.push(dim.reason);
 
-  // ── Round awareness (from common) ──────────────────────────────────────
+  // Round awareness (from common)
   const ra = roundAwareness(G.round, G.finalRound, "mid");
   quality += ra.modifier;
   if (ra.reason) reasons.push(ra.reason);
 
-  // ── Personality (from common) ──────────────────────────────────────────
+  // Personality (from common)
   const pb = personalityBonus(personality, INFLUENCE_PERSONALITY);
   quality += pb.bonus;
   reasons.push(...pb.reasons);
 
-  // ── Clamp and return ───────────────────────────────────────────────────
+  // Clamp and return
   quality = Math.max(0, Math.min(1, quality));
 
   return {

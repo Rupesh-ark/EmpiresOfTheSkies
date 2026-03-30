@@ -2,12 +2,7 @@ import { INVALID_MOVE } from "boardgame.io/core";
 import { MoveDefinition } from "../../types";
 import { HERESY_MIN, logEvent } from "../../helpers/stateUtils";
 
-/**
- * Vote move for the immediate election triggered by "Archprelate Dies".
- * Same tally logic as the regular election, but runs within the events phase.
- * No bribes — players vote with their own cathedral influence only.
- * Turn-based: each player votes in turn order.
- */
+/** Emergency election vote (Archprelate Dies event). */
 const immediateElectionVote: MoveDefinition = {
   fn: ({ G, ctx, playerID, events }, ...args) => {
     if (!G.eventState.immediateElectionPending) return INVALID_MOVE;

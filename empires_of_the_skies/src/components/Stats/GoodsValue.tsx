@@ -47,7 +47,7 @@ function useSupplyAmounts(props: MyGameProps) {
   return amounts;
 }
 
-// ── Compact: just good name + current value ─────────────────────────────
+// Compact: just good name + current value
 
 const GoodsValueCompact = ({ props }: { props: MyGameProps }) => {
   const amounts = useSupplyAmounts(props);
@@ -117,7 +117,7 @@ const GoodsValueCompact = ({ props }: { props: MyGameProps }) => {
   );
 };
 
-// ── Full: supply/demand grid ────────────────────────────────────────────
+// Full: supply/demand grid
 
 const GoodsValueFull = ({ props }: { props: MyGameProps }) => {
   const amounts = useSupplyAmounts(props);
@@ -186,7 +186,7 @@ const GoodsValueFull = ({ props }: { props: MyGameProps }) => {
   );
 };
 
-// ── Export ───────────────────────────────────────────────────────────────
+// Export
 
 export const GoodsValue = ({ props, compact }: { props: MyGameProps; compact?: boolean }) => {
   return compact ? <GoodsValueCompact props={props} /> : <GoodsValueFull props={props} />;

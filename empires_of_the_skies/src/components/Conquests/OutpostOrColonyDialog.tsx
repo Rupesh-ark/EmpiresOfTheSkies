@@ -12,7 +12,7 @@ import { getLocationPresentation } from "@/utils/locationLabels";
 import { IconRegiment } from "@/theme";
 import type { ReactNode } from "react";
 
-/* ── Goods colours & labels ─────────────────────────────────────────── */
+/* Goods colours & labels */
 
 const GOODS_META: Record<string, { label: string; color: string }> = {
   gold: { label: "Gold", color: "#B8860B" },
@@ -74,7 +74,7 @@ const LootChips = ({ loot }: { loot: TileLoot }) => {
   );
 };
 
-/* ── Option card ────────────────────────────────────────────────────── */
+/* Option card */
 
 const OptionCard = ({
   icon,
@@ -176,7 +176,7 @@ const OptionCard = ({
   </Box>
 );
 
-/* ── Main dialog ────────────────────────────────────────────────────── */
+/* Main dialog */
 
 const OutpostOrColonyDialog = (props: MyGameProps) => {
   const [x, y] = props.G.mapState.currentBattle;
@@ -212,7 +212,7 @@ const OutpostOrColonyDialog = (props: MyGameProps) => {
       size="sm"
       hideActions
     >
-      {/* ── Garrison Strength banner ──────────────────────────────── */}
+      {/* Garrison Strength banner */}
       <Box
         sx={{
           display: "flex",
@@ -267,7 +267,7 @@ const OutpostOrColonyDialog = (props: MyGameProps) => {
         </Box>
       </Box>
 
-      {/* ── Option cards ──────────────────────────────────────────── */}
+      {/* Option cards */}
       <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
         <OptionCard
           icon={<GiWatchtower size={22} />}

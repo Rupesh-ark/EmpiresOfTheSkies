@@ -1,6 +1,6 @@
 /**
  * CSS BACKGROUND PATTERNS
- * ───────────────────────
+ *
  * Composable CSS background values for UI surfaces.
  * Image paths come from assets/backgrounds.ts — patterns and gradients live here.
  *
@@ -21,7 +21,7 @@ import {
 } from "@/assets/backgrounds";
 
 export const backgrounds = {
-  // ── Image-based textures ─────────────────────────────────────────────────
+  // Image-based textures
 
   /** Original parchment texture — tiled, subtle */
   parchment: `url(${BG_PARCHMENT}) center / 600px repeat`,
@@ -50,7 +50,7 @@ export const backgrounds = {
   /** Map fog overlay — for unrevealed tiles */
   mapFog: `url(${BG_MAP_FOG}) center / cover no-repeat`,
 
-  // ── CSS gradient patterns (no images) ────────────────────────────────────
+  // CSS gradient patterns (no images)
 
   /** Parchment with color tint overlay */
   parchmentTinted: `

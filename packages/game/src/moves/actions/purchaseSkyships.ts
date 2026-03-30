@@ -43,7 +43,7 @@ const purchaseSkyships: MoveDefinition = {
 
     const slot: keyof typeof boardSlots = (slotIndex + 1) as 1 | 2;
 
-    // v4.2: cost = 2 Gold + 1 per counsellor in this slot including the one just placed
+    // cost = 2 Gold + 1 per counsellor in this slot including the one just placed
     // slot 1 (takenSlots=0): 2+1 = 3 Gold; slot 2 (takenSlots=1): 2+2 = 4 Gold
     const takenSlots = Object.values(boardSlots).filter(
       (v) => v !== undefined

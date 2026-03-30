@@ -1,0 +1,24 @@
+{
+  "bucket": "D",
+  "generations_run": 23,
+  "default_avgVP": 55.3,
+  "best_avgVP": 63.16,
+  "best_weights": {
+    "penaltyScale": 0.363291,
+    "qualityThreshold": 0.078066,
+    "goldPressure_0": 0.392632,
+    "goldPressure_1": 0.341515,
+    "goldPressure_2": 0.088837,
+    "goldPressure_3": 0.249942,
+    "diminishing_perUnit": 0.083849,
+    "diminishing_hardCapPenalty": 0.493577,
+    "round_tooEarlyPenalty": 0.215081,
+    "round_tooLatePenalty": 0.078734,
+    "round_mildPenalty": 0.137561,
+    "round_finalRoundBonus": 0.012288
+  },
+  "improvement": 7.86,
+  "early_stopped": true,
+  "total_time_s": 1903.0,
+  "total_time_human": "31.7m"
+}

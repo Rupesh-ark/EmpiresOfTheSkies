@@ -16,7 +16,7 @@ import { DialogShell } from "@/components/atoms/DialogShell";
 
 const PULSING_MOODS = new Set(["battle", "crisis"]);
 
-// ── Recessed gauge styling ──────────────────────────────────────────────
+// Recessed gauge styling
 
 const gaugeSx = {
   borderColor: "rgba(200,170,120,0.30)",
@@ -30,7 +30,7 @@ const gaugeSx = {
   "& svg": { color: "#E8C860 !important" },
 };
 
-// ── Decorative rivet ────────────────────────────────────────────────────
+// Decorative rivet
 
 const BAR_GOLD = "#D4A840";
 
@@ -47,7 +47,7 @@ const Rivet = () => (
   />
 );
 
-// ── Brass divider line ──────────────────────────────────────────────────
+// Brass divider line
 
 const BrassDivider = () => (
   <Box
@@ -60,7 +60,7 @@ const BrassDivider = () => (
   />
 );
 
-// ── Main component ──────────────────────────────────────────────────────
+// Main component
 
 const StatusBar = (props: StatusBarProps) => {
   const [passDialogOpen, setPassDialogOpen] = useState(false);
@@ -139,7 +139,7 @@ const StatusBar = (props: StatusBarProps) => {
           }),
         }}
       >
-        {/* ── LEFT: Round + Phase + Turn ──────────────────────────── */}
+        {/* LEFT: Round + Phase + Turn */}
         <Box
           sx={{
             display: "flex",
@@ -242,7 +242,7 @@ const StatusBar = (props: StatusBarProps) => {
           )}
         </Box>
 
-        {/* ── RIGHT: Action Buttons ──────────────────────────────── */}
+        {/* RIGHT: Action Buttons */}
         <Box
           sx={{
             display: "flex",
@@ -303,7 +303,7 @@ const StatusBar = (props: StatusBarProps) => {
         </Box>
       </Box>
 
-      {/* ── Pass confirmation dialog ────────────────────────────── */}
+      {/* Pass confirmation dialog */}
       <DialogShell
         open={passDialogOpen}
         title="Pass Turn?"

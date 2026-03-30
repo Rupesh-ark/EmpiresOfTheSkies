@@ -1,13 +1,4 @@
-/**
- * resolveInfidelFleet.ts
- *
- * Handles the Infidel Fleet's per-round behavior during Resolve Encounters:
- * 1. Reactivate if flipped inactive
- * 2. Target the player with highest military power
- * 3. Move to that player's largest fleet's square
- * 4. Player chooses fight or evade (interactive via respondToInfidelFleet move)
- * 5. If fight: resolve aerial combat with optional player FoW card
- */
+/** Infidel Fleet per-round resolution. */
 
 import { MyGameState } from "../types";
 import { logEvent } from "./stateUtils";
@@ -15,7 +6,7 @@ import { drawFortuneOfWarCard } from "./helpers";
 import { calculateCombat } from "./combatMath";
 import { INFIDEL_EMPIRE_LOCATION } from "../data/gameData";
 
-// ── Military power calculation ───────────────────────────────────────────────
+// Military power calculation
 
 /** Total military power: regiments×2 + levies×1 + skyships×1 everywhere */
 const getPlayerMilitaryPower = (G: MyGameState, playerID: string): number => {
@@ -47,7 +38,7 @@ const getPlayerMilitaryPower = (G: MyGameState, playerID: string): number => {
   return power;
 };
 
-// ── Targeting ────────────────────────────────────────────────────────────────
+// Targeting
 
 /**
  * Find the target player: highest military power.
@@ -78,7 +69,7 @@ const findTarget = (G: MyGameState): string | null => {
   return candidates[idx];
 };
 
-// ── Movement ─────────────────────────────────────────────────────────────────
+// Movement
 
 /**
  * Move the Fleet to the target player's largest fleet on the map.
@@ -105,7 +96,7 @@ const findTargetFleetSquare = (
   return bestLocation;
 };
 
-// ── Aerial combat ────────────────────────────────────────────────────────────
+// Aerial combat
 
 type FleetCombatResult = {
   /** true if Infidel Fleet won or drew */
@@ -176,7 +167,7 @@ const applyPlayerFleetLosses = (
   fleet.levies -= levyLost;
 };
 
-// ── Main entry point ─────────────────────────────────────────────────────────
+// Main entry point
 
 /**
  * Prepare the Infidel Fleet for combat: reactivate, target, move.
@@ -186,20 +177,20 @@ const applyPlayerFleetLosses = (
 export const prepareInfidelFleetCombat = (G: MyGameState): boolean => {
   if (!G.infidelFleet || G.infidelFleet.destroyed) return false;
 
-  // ── 1. Reactivate if flipped ──
+  // 1. Reactivate if flipped
   if (!G.infidelFleet.active) {
     G.infidelFleet.active = true;
     logEvent(G, "Infidel Fleet reactivates");
   }
 
-  // ── 2. Target ──
+  // 2. Target
   const targetID = findTarget(G);
   if (!targetID) return false;
 
   const targetKingdom = G.playerInfo[targetID].kingdomName;
   logEvent(G, `Infidel Fleet targets ${targetKingdom} (highest military power)`);
 
-  // ── 3. Move ──
+  // 3. Move
   const destination = findTargetFleetSquare(G, targetID);
   G.infidelFleet.location = destination;
 

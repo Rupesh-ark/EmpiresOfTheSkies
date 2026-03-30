@@ -101,7 +101,7 @@ import { createLogger } from "./helpers/logger";
 const phaseLog = createLogger("phase");
 const budgetLog = createLogger("turn-budget");
 
-// ── Turn-ending budget tracker ──────────────────────────────────────────────
+// Turn-ending budget tracker
 // Module-level counter — avoids Immer frozen-object issues.
 // Reset each round in discovery.onBegin. Logged at milestones.
 const TURN_ENDING_LIMIT = 550; // bail before boardgame.io's 600 (numPlayers * 100)
@@ -243,7 +243,6 @@ const MyGame: Game<MyGameState> = {
 
     const playerInfoMap = buildPlayerInfoMap(ctx);
 
-    // GAP-18: compute which player-type kingdoms are NPRs this session (1 cathedral each to start)
     const assignedKingdoms = new Set(
       Object.values(playerInfoMap).map((p) => p.kingdomName)
     );
@@ -638,7 +637,6 @@ const MyGame: Game<MyGameState> = {
           if (context.G._halted) return;
           const sub = context.G.stage.sub;
 
-          // Election + conquest + multi-player contribution stages — no turn routing needed
           if (sub === "election" || sub === "conquest"
               || sub === "rebellion_rival_support"
               || sub === "invasion_contribute" || sub === "invasion_buyoff") return;

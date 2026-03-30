@@ -48,7 +48,6 @@ const WorldMap = (props: WorldMapProps) => {
     }
   }, [props.expanded]);
 
-  // Space-to-pan — uses refs to avoid stale closures in mouse handlers
   const scrollRef = useRef<HTMLDivElement>(null);
   const isPanningRef = useRef(false);
   const [isPanningState, setIsPanningState] = useState(false);
@@ -112,9 +111,6 @@ const WorldMap = (props: WorldMapProps) => {
 
     const fleet = playerInfo.fleetInfo[fleetIndex];
     const isLaden = fleet.regiments > 0 || fleet.levies > 0 || fleet.eliteRegiments > 0;
-    // findPossibleDestinations returns [allReachable, within1, within2, within3]
-    // Each ring is CUMULATIVE (within2 includes within1 tiles), so we assign
-    // costs in reverse: 3 first, then 2 overwrites, then 1 overwrites — closest wins.
     const [allDests, within1, within2, within3] = findPossibleDestinations(
       props.G,
       fleet.location,

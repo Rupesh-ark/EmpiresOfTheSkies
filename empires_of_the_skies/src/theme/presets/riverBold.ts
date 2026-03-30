@@ -2,7 +2,7 @@ import type { TokenPreset } from "./types";
 
 /**
  * RIVER BOLD PRESET — Aggressive Contrast
- * ─────────────────────────────────────────
+ *
  * Same direction as 'river' but pushed further.
  * Background drops to 73% — very visible zone separation.
  * Mood tints at 20-25% — impossible to miss phase changes.

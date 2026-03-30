@@ -30,7 +30,6 @@ const pass: MoveDefinition = {
     process.stderr.write(`[PASS] P${playerID} phase=${ctx.phase} flags=[${flags}]\n`);
 
     if (allPlayersPassed(G)) {
-      // Dead code — next phase's onBegin overwrites. Set valid value for current context.
       if (ctx.phase === "actions") setStage(G, "actions", "default");
       else if (ctx.phase === "discovery") setStage(G, "discovery", "default");
       else setStage(G, "resolution", "retrieve_fleets");

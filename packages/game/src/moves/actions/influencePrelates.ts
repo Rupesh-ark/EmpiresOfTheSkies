@@ -44,7 +44,6 @@ const influencePrelates: MoveDefinition = {
       8: PlayerColour.green,
     };
 
-    // GAP-5: placing in your own kingdom's slot is free
     const slotColour = kingdomToIDMap[value];
     const actingPlayerColour = G.playerInfo[playerID].colour;
     if (slotColour !== null && slotColour === actingPlayerColour) {

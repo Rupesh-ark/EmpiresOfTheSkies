@@ -97,7 +97,7 @@ function callContribute(
   return { result, events };
 }
 
-// ── Test 1: Defender commits → transitions to rival support stage ─────────────
+// Test 1: Defender commits → transitions to rival support stage
 
 describe("rebellionFlow — defender commits troops", () => {
   it("transitions to rebellion_rival_support stage with 2+ players", () => {
@@ -130,7 +130,7 @@ describe("rebellionFlow — defender commits troops", () => {
   });
 });
 
-// ── Test 2: All rivals contribute → rebellion resolves ────────────────────────
+// Test 2: All rivals contribute → rebellion resolves
 
 describe("rebellionFlow — all rivals contribute resolves battle", () => {
   it("clears currentRebellion after all rivals have contributed", () => {
@@ -173,7 +173,7 @@ describe("rebellionFlow — all rivals contribute resolves battle", () => {
   });
 });
 
-// ── Test 3: Defender wins → VP reward ────────────────────────────────────────
+// Test 3: Defender wins → VP reward
 
 describe("rebellionFlow — defender wins pretender_rebellion → +1 VP", () => {
   it("awards +1 VP to defender when counterSwords is very small", () => {
@@ -197,7 +197,7 @@ describe("rebellionFlow — defender wins pretender_rebellion → +1 VP", () => 
   });
 });
 
-// ── Test 4: Rival supports defender ──────────────────────────────────────────
+// Test 4: Rival supports defender
 
 describe("rebellionFlow — rival supports defender", () => {
   it("valid to contribute troops to either side", () => {
@@ -230,7 +230,7 @@ describe("rebellionFlow — rival supports defender", () => {
   });
 });
 
-// ── Test 5: Contributing 0 troops is valid ───────────────────────────────────
+// Test 5: Contributing 0 troops is valid
 
 describe("rebellionFlow — contributing 0 troops is valid (stay out)", () => {
   it("allows rival to contribute nothing", () => {
@@ -250,7 +250,7 @@ describe("rebellionFlow — contributing 0 troops is valid (stay out)", () => {
   });
 });
 
-// ── Test 6: 3-player chain ────────────────────────────────────────────────────
+// Test 6: 3-player chain
 
 describe("rebellionFlow — 3-player chain: all rivals must contribute before resolving", () => {
   it("does not resolve after only 1 of 2 rivals has contributed", () => {
@@ -287,7 +287,7 @@ describe("rebellionFlow — 3-player chain: all rivals must contribute before re
   });
 });
 
-// ── Test 7: Invalid move guards ───────────────────────────────────────────────
+// Test 7: Invalid move guards
 
 describe("rebellionFlow — INVALID_MOVE guards", () => {
   it("defender cannot contribute as a rival", () => {

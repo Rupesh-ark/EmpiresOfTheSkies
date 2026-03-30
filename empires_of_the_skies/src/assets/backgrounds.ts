@@ -1,4 +1,4 @@
-// ── Background image assets ──────────────────────────────────────────────────
+// Background image assets
 // Raw image imports for background textures.
 // CSS patterns and gradients live in theme/backgrounds.ts
 

@@ -1,0 +1,16 @@
+{
+  "targetLeaderBonus": 0.01879,
+  "earlyAgitatorPenalty": 0.024062,
+  "urgentDissenters": 0.194267,
+  "someDissenters": 0.082325,
+  "executeVPCost": 0.271718,
+  "rivalDissentersBonus": 0.123511,
+  "unpunishedDissentersPenalty": 0.114017,
+  "vpCostPenalty": 0.035512,
+  "misalignedBonus": 0.098522,
+  "cathedralConversionPenalty": 0.115035,
+  "dissenterConversionPenalty": 0.096485,
+  "deepDebtSellBonus": 0.116004,
+  "mildDebtSellBonus": 0.210141,
+  "lowSkyshipsSellPenalty": 0.022498
+}

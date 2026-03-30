@@ -1,4 +1,4 @@
-// ── Action Board — button background illustrations (manuscript line drawings) ──
+// Action Board — button background illustrations (manuscript line drawings)
 
 import recruitCounsellorsBg from "../boards_and_assets/action_board/recruit_counsellors_btnBg.webp";
 import recruitRegimentsBg from "../boards_and_assets/action_board/recruit_regiments_btnBg.webp";

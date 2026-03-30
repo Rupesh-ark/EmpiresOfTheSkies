@@ -44,8 +44,6 @@ const collectFactoryIncome = (G: MyGameState) => {
     return G.turnOrder.indexOf(a.id) - G.turnOrder.indexOf(b.id);
   });
 
-  // GAP-4: repeat the cycle until the pool is exhausted
-  // GAP-F1: guard against infinite loop when all players have 0 factories
   while (pool > 0) {
     let distributed = 0;
     sortedPlayers.forEach((player) => {
@@ -98,9 +96,6 @@ const applyFinalRoundBonus = (G: MyGameState) => {
   });
 };
 
-// BUG-2: heresy track VP scored every round.
-// Track is 19 spaces: h in [-9, +9]. orthodoxVP = -h (so orthodox gains at h<0,
-// heretic gains at h>0, both score 0 at h=0).
 const scoreHeresyTrackVP = (G: MyGameState) => {
   Object.values(G.playerInfo).forEach((player) => {
     const h = player.heresyTracker;
@@ -113,18 +108,12 @@ const scoreHeresyTrackVP = (G: MyGameState) => {
 };
 
 const resolveRound = (G: MyGameState, events: EventsAPI, random: RandomAPI) => {
-  // GAP-15 sub-rule 3: failed conquest records are per-round only
   G.failedConquests = [];
   scoreHeresyTrackVP(G);
   palaceBonus(G);
 
-  // GAP-RES1: grant goods from connected trade routes (recalculated each round)
   grantTradeRouteGoods(G);
 
-  // GAP-9: licenced_smugglers KA — grant +1 good before goods are sold
-  // GAP-RES5: record which good each smuggler received so we can recover the
-  // price marker after selling (smugglerGoodChoice is cleared here, so we
-  // cannot read it again after the loop)
   const smugglerGoods: Record<string, GoodKey> = {};
   Object.values(G.playerInfo).forEach((player) => {
     if (player.resources.advantageCard !== "licenced_smugglers") return;
@@ -162,10 +151,6 @@ const resolveRound = (G: MyGameState, events: EventsAPI, random: RandomAPI) => {
     player.resources.mithril = 0;
   });
 
-  // GAP-RES5: price markers recover after smuggler goods sold (v4.2 line 257)
-  // The smuggled cube was temporary supply — once it is sold the marker moves
-  // right by 1 (toward expensive) to undo the supply-side depression it caused.
-  // Cap at 4 (the maximum price on the Sell Goods track).
   Object.values(smugglerGoods).forEach((good) => {
     G.mapState.goodsPriceMarkers[good] = Math.min(PRICE_MARKER_MAX, G.mapState.goodsPriceMarkers[good] + 1);
   });
@@ -188,7 +173,6 @@ const resolveRound = (G: MyGameState, events: EventsAPI, random: RandomAPI) => {
   });
 
   // D8: debt penalty — gold < 0 only (not at exactly 0)
-  // GAP-16: VP floor enforced inside removeVPAmount
   Object.values(G.playerInfo).forEach((player) => {
     if (player.resources.gold < 0) {
       const penalty = Math.floor(Math.abs(player.resources.gold) / DEBT_PENALTY_DIVISOR);
@@ -230,7 +214,6 @@ const resolveRound = (G: MyGameState, events: EventsAPI, random: RandomAPI) => {
     // D2: corrected VP amounts per round
     const vpAmounts = tradeVictoryPoints(G);
     if (winners.length >= 3) {
-      // GAP-12: Math.ceil for tied trade VP splits
       const awardedAmount = Math.ceil(
         (vpAmounts[0] + vpAmounts[1] + vpAmounts[2]) / winners.length
       );
@@ -266,7 +249,6 @@ const resolveRound = (G: MyGameState, events: EventsAPI, random: RandomAPI) => {
           });
         }
       } else if (secondPlace.length > 1) {
-        // GAP-12: rule says "rounding up" — use ceil not round
         const awardAmountSecondPlace = Math.ceil(
           (vpAmounts[1] + vpAmounts[2]) / secondPlace.length
         );
@@ -289,7 +271,6 @@ const resolveRound = (G: MyGameState, events: EventsAPI, random: RandomAPI) => {
   if (G.round >= G.finalRound) {
     applyFinalRoundBonus(G);
     legacyResolutions(G);
-    // GAP-17: final score tie-break — most Gold, then earliest IPO position
     const ranking = Object.values(G.playerInfo)
       .sort((a, b) => {
         if (b.resources.victoryPoints !== a.resources.victoryPoints)

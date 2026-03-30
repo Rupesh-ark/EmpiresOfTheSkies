@@ -10,7 +10,7 @@ import type { AIMove } from "../types";
 import type { MoveEval, MoveEvaluator, BotPersonality } from "./types";
 import { V2_CONFIG } from "./config";
 
-// ── Import all evaluators ────────────────────────────────────────────────────
+// Import all evaluators
 import { evaluateFoundBuildings } from "./actions/foundBuildings";
 import { evaluateInfluencePrelates } from "./actions/influencePrelates";
 import { evaluateDeployFleet } from "./actions/deployFleet";
@@ -40,7 +40,7 @@ import {
   evaluateSellBuilding,
 } from "./actions/misc";
 
-// ── Move evaluator registry ─────────────────────────────────────────────────
+// Move evaluator registry
 
 const evaluatorRegistry = new Map<string, MoveEvaluator>();
 
@@ -49,7 +49,7 @@ export function registerEvaluator(moveName: string, evaluator: MoveEvaluator): v
   evaluatorRegistry.set(moveName, evaluator);
 }
 
-// ── Register all known evaluators ───────────────────────────────────────────
+// Register all known evaluators
 
 registerEvaluator("foundBuildings", evaluateFoundBuildings);
 registerEvaluator("influencePrelates", evaluateInfluencePrelates);
@@ -78,7 +78,7 @@ registerEvaluator("pass", evaluatePass);
 registerEvaluator("confirmAction", evaluateConfirmAction);
 registerEvaluator("discardFoWCard", evaluateDiscardFoWCard);
 
-// ── Default evaluator for unregistered moves ────────────────────────────────
+// Default evaluator for unregistered moves
 
 function defaultEvaluator(
   _G: MyGameState,
@@ -94,7 +94,7 @@ function defaultEvaluator(
   };
 }
 
-// ── Main evaluation function ────────────────────────────────────────────────
+// Main evaluation function
 
 export interface EvaluationResult {
   viable: MoveEval[];

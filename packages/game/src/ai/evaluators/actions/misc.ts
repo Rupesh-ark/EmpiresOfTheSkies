@@ -22,7 +22,7 @@ function clampEval(move: AIMove, quality: number, reason: string): MoveEval {
   };
 }
 
-// ── pass ─────────────────────────────────────────────────────────────────────
+// pass
 
 export function evaluatePass(
   G: MyGameState,
@@ -54,7 +54,7 @@ export function evaluatePass(
   return clampEval(move, quality, `pass. ${reasons.join(", ")}`);
 }
 
-// ── confirmAction ────────────────────────────────────────────────────────────
+// confirmAction
 
 export function evaluateConfirmAction(
   G: MyGameState,
@@ -62,10 +62,6 @@ export function evaluateConfirmAction(
   move: AIMove,
   _personality: BotPersonality,
 ): MoveEval {
-  // confirmAction ends your turn after a counsellor action.
-  // It's viable when turnComplete=true. The question is:
-  // should you do anytime actions first (sendAgitators, garrisonTransfer)?
-  // We give it moderate quality — if anytime actions score higher, they'll be picked.
   const player = G.playerInfo[playerID];
 
   let quality = V2_CONFIG.baseQuality.confirmAction;
@@ -80,7 +76,7 @@ export function evaluateConfirmAction(
   return clampEval(move, quality, `confirm action (end turn). ${reasons.join(", ")}`);
 }
 
-// ── discardFoWCard ───────────────────────────────────────────────────────────
+// discardFoWCard
 
 export function evaluateDiscardFoWCard(
   G: MyGameState,
@@ -124,7 +120,7 @@ export function evaluateDiscardFoWCard(
   return clampEval(move, quality, `discard card ${cardIndex}. ${reasons.join(", ")}`);
 }
 
-// ── punishDissenters ─────────────────────────────────────────────────────────
+// punishDissenters
 
 export function evaluatePunishDissenters(
   G: MyGameState,
@@ -171,7 +167,7 @@ export function evaluatePunishDissenters(
   return clampEval(move, quality, `punish (${paymentType}). ${reasons.join(", ")}`);
 }
 
-// ── garrisonTransfer ─────────────────────────────────────────────────────────
+// garrisonTransfer
 
 export function evaluateGarrisonTransfer(
   G: MyGameState,
@@ -213,7 +209,7 @@ export function evaluateGarrisonTransfer(
   return clampEval(move, quality, `garrison transfer. ${reasons.join(", ")}`);
 }
 
-// ── moveFleet ────────────────────────────────────────────────────────────────
+// moveFleet
 
 export function evaluateMoveFleet(
   G: MyGameState,
@@ -263,7 +259,7 @@ export function evaluateMoveFleet(
       reasons.push(`${rivalsOnTile} rivals`);
     }
 
-    // ── Route chain value — does moving here help complete a trade route? ──
+    // Route chain value — does moving here help complete a trade route?
     const chainValue = tradeRouteChainValue(G, playerID, dx, dy);
     if (chainValue.score > 0) {
       if (chainValue.score >= 0.8) {
@@ -295,7 +291,7 @@ export function evaluateMoveFleet(
   return clampEval(move, quality, `move fleet to [${dest?.[0]},${dest?.[1]}]. ${reasons.join(", ")}`);
 }
 
-// ── buildSkyships ────────────────────────────────────────────────────────────
+// buildSkyships
 
 export function evaluateBuildSkyships(
   G: MyGameState,
@@ -344,7 +340,7 @@ export function evaluateBuildSkyships(
   return clampEval(move, quality, `build skyships. ${reasons.join(", ")}`);
 }
 
-// ── conscriptLevies ──────────────────────────────────────────────────────────
+// conscriptLevies
 
 export function evaluateConscriptLevies(
   G: MyGameState,
@@ -385,7 +381,7 @@ export function evaluateConscriptLevies(
   return clampEval(move, quality, `conscript levies, troops=${totalTroops}. ${reasons.join(", ")}`);
 }
 
-// ── convertMonarch ───────────────────────────────────────────────────────────
+// convertMonarch
 
 export function evaluateConvertMonarch(
   G: MyGameState,
@@ -455,7 +451,7 @@ export function evaluateConvertMonarch(
   return clampEval(move, quality, `convert monarch (${move.args[0]}). ${reasons.join(", ")}`);
 }
 
-// ── alterPlayerOrder ─────────────────────────────────────────────────────────
+// alterPlayerOrder
 
 export function evaluateAlterPlayerOrder(
   G: MyGameState,
@@ -485,7 +481,7 @@ export function evaluateAlterPlayerOrder(
   return clampEval(move, quality, `alter order to pos ${move.args[0]}. ${reasons.join(", ")}`);
 }
 
-// ── sellSkyships / sellBuilding ──────────────────────────────────────────────
+// sellSkyships / sellBuilding
 
 export function evaluateSellSkyships(
   G: MyGameState,
@@ -537,7 +533,7 @@ export function evaluateSellBuilding(
   return clampEval(move, quality, `sell building (gold:${gold}). ${reasons.join(", ")}`);
 }
 
-// ── declareSmugglerGood ──────────────────────────────────────────────────────
+// declareSmugglerGood
 
 export function evaluateDeclareSmugglerGood(
   G: MyGameState,
@@ -588,7 +584,7 @@ export function evaluateDeclareSmugglerGood(
   return clampEval(move, quality, `smuggle ${goodName} @${price}g. ${reasons.join(", ")}`);
 }
 
-// ── checkAndPlaceFort ────────────────────────────────────────────────────────
+// checkAndPlaceFort
 
 export function evaluateCheckAndPlaceFort(
   G: MyGameState,
@@ -634,7 +630,7 @@ export function evaluateCheckAndPlaceFort(
   return clampEval(move, quality, `place fort at [${x},${y}]. ${reasons.join(", ")}`);
 }
 
-// ── issueHolyDecree ──────────────────────────────────────────────────────────
+// issueHolyDecree
 
 export function evaluateIssueHolyDecree(
   G: MyGameState,
@@ -675,7 +671,7 @@ export function evaluateIssueHolyDecree(
   return clampEval(move, quality, `holy decree. ${reasons.join(", ")}`);
 }
 
-// ── transferBetweenFleets ────────────────────────────────────────────────────
+// transferBetweenFleets
 
 export function evaluateTransferBetweenFleets(
   G: MyGameState,
@@ -718,7 +714,7 @@ export function evaluateTransferBetweenFleets(
   return clampEval(move, quality, `transfer fleets ${srcIdx}→${tgtIdx}. ${reasons.join(", ")}`);
 }
 
-// ── transferOutpost ──────────────────────────────────────────────────────────
+// transferOutpost
 
 export function evaluateTransferOutpost(
   G: MyGameState,

@@ -1,15 +1,6 @@
 import { MyGameState, MoveError } from "../types";
 
-/**
- * Centralized pre-move validation. Each move declares what resources it
- * requires via `opts`, and this function checks whether the move is
- * allowed given the current game state (counsellors, event restrictions, etc.).
- *
- * Returns MoveError if blocked, null if allowed.
- *
- * To add a new restriction (e.g. from a new event card), add it here —
- * no need to touch individual move files.
- */
+/** Returns MoveError if blocked, null if allowed. */
 export const validateMove = (
   playerID: string,
   G: MyGameState,

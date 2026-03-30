@@ -18,7 +18,7 @@ import { ResourceChip } from "@/components/atoms/ResourceChip";
 import popeLogo from "@/boards_and_assets/action_board/pope_logo.webp";
 import captainGeneralLogo from "@/boards_and_assets/action_board/captain_general.webp";
 
-// ── Shared card wrapper ─────────────────────────────────────────────────
+// Shared card wrapper
 
 const StatsCard = ({
   title,
@@ -85,7 +85,7 @@ const StatsCard = ({
   );
 };
 
-// ── Card 1: Opponent Summary ────────────────────────────────────────────
+// Card 1: Opponent Summary
 
 const OpponentSummary = ({ props }: { props: MyGameProps }) => {
   const players = Object.entries(props.G.playerInfo) as [string, PlayerInfo][];
@@ -282,7 +282,7 @@ const OpponentSummary = ({ props }: { props: MyGameProps }) => {
   );
 };
 
-// ── Card 2: Heresy Track ────────────────────────────────────────────────
+// Card 2: Heresy Track
 
 const TRACK_POSITIONS = Array.from({ length: 19 }, (_, i) => i - 9);
 
@@ -408,7 +408,7 @@ const HeresyTrack = ({ props }: { props: MyGameProps }) => {
   );
 };
 
-// ── Card 3: NPR Kingdoms ────────────────────────────────────────────────
+// Card 3: NPR Kingdoms
 
 const KINGDOM_SLOT_MAP: Record<string, number> = {
   Angland: 1, Gallois: 2, Castillia: 3, Zeeland: 4,
@@ -516,7 +516,7 @@ const NprKingdoms = ({ props }: { props: MyGameProps }) => {
   );
 };
 
-// ── Main StatsPanel ─────────────────────────────────────────────────────
+// Main StatsPanel
 
 export const StatsPanel = (props: MyGameProps) => {
   return (

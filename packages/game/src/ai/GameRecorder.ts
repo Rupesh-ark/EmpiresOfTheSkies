@@ -1,15 +1,9 @@
-// GameRecorder.ts — in-memory game data collector for the AI analytics dashboard.
-//
-// This is the browser-compatible replacement for the fs.appendFileSync calls in
-// selfPlay.ts. Instead of writing to /tmp/ files, it accumulates structured records
-// in memory that can be inspected live or serialized to JSON for the UI.
-
 import type { MyGameState } from "../types";
 import type { AIWeights } from "./types";
 import type { ResourceSnapshot, DecisionLogEntry, RoundSummaryEntry } from "./AILogger";
 import { countActiveTradeRoutes } from "../helpers/mapUtils";
 
-// ── Player snapshot at a decision point ──────────────────────────────────────
+// Player snapshot at a decision point
 
 export interface PlayerSnapshot {
   resources: ResourceSnapshot;
@@ -25,7 +19,7 @@ export interface PlayerSnapshot {
   fleetPositions: { x: number; y: number }[];
 }
 
-// ── Snapshot builder ─────────────────────────────────────────────────────────
+// Snapshot builder
 
 export function captureSnapshot(G: MyGameState, playerID: string): PlayerSnapshot {
   const player = G.playerInfo[playerID];
@@ -94,7 +88,7 @@ export function captureSnapshot(G: MyGameState, playerID: string): PlayerSnapsho
   };
 }
 
-// ── Battle context captured by AerialBattleStrategy ──────────────────────────
+// Battle context captured by AerialBattleStrategy
 
 export interface BattleContext {
   myStrength: number;
@@ -108,14 +102,14 @@ export interface BattleContext {
   outcome?: "won" | "lost" | "evaded";
 }
 
-// ── Decision entry enriched with game-state context ──────────────────────────
+// Decision entry enriched with game-state context
 
 export interface EnrichedDecision extends DecisionLogEntry {
   snapshot: PlayerSnapshot;
   battleContext?: BattleContext;
 }
 
-// ── Per-player summary for the whole game ────────────────────────────────────
+// Per-player summary for the whole game
 
 export interface PlayerGameSummary {
   playerID: string;
@@ -128,8 +122,7 @@ export interface PlayerGameSummary {
   finalRank: number;
 }
 
-// ── Diagnostic entry (replaces fs.appendFileSync to /tmp/selfplay_trace.log) ─
-
+// Diagnostic entry (replaces fs.appendFileSync to /tmp/selfplay_trace.log)
 export interface DiagnosticEntry {
   type: "bounce" | "stall" | "nan" | "skip" | "transition" | "round_start";
   iteration: number;
@@ -139,7 +132,7 @@ export interface DiagnosticEntry {
   details: string;
 }
 
-// ── Complete game record ───────────────────────────────────────────────────────
+// Complete game record
 
 export interface GameRecord {
   gameId: string;
@@ -159,7 +152,7 @@ export interface GameRecord {
   } | null;
 }
 
-// ── GameRecorder class ────────────────────────────────────────────────────────
+// GameRecorder class
 
 export class GameRecorder {
   private record: GameRecord;

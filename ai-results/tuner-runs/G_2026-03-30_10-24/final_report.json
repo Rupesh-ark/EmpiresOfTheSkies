@@ -1,0 +1,32 @@
+{
+  "bucket": "G",
+  "generations_run": 22,
+  "default_avgVP": 54.7,
+  "best_avgVP": 64.77,
+  "best_weights": {
+    "lowSkyships": 0.013318,
+    "firstCounsellor": 0.016201,
+    "extraCounsellor": 0.294746,
+    "lowTroops": 0.219069,
+    "lowFoWCards": 0.063302,
+    "noFleetsOrSkyships": 0.228742,
+    "strongCardBonus": 0.12445,
+    "midCardBonus": 0.16147,
+    "strongCardPenalty": 0.357521,
+    "weakCardBonus": 0.019821,
+    "fowHandFullPenalty": 0.059195,
+    "fowHandLowBonus": 0.022333,
+    "noActiveFleetsPenalty": 0.057108,
+    "activeFleetTrainBonus": 0.132876,
+    "lowSkyshipsBonus": 0.08072,
+    "veryLowTroopsBonus": 0.093436,
+    "lowTroopsBuildBonus": 0.087808,
+    "cantAffordRegimentsBonus": 0.113061,
+    "selectiveRetrievalBonus": 0.012772,
+    "loadFleetFromGarrisonBonus": 0.288253
+  },
+  "improvement": 10.07,
+  "early_stopped": true,
+  "total_time_s": 2230.0,
+  "total_time_human": "37.2m"
+}

@@ -1,0 +1,3944 @@
+[
+  {
+    "generation": 1,
+    "candidates": [
+      {
+        "weights": {
+          "targetLeaderBonus": 0.062125,
+          "earlyAgitatorPenalty": 0.078805,
+          "urgentDissenters": 0.196747,
+          "someDissenters": 0.039737,
+          "executeVPCost": 0.3273,
+          "rivalDissentersBonus": 0.065319,
+          "unpunishedDissentersPenalty": 0.01085,
+          "vpCostPenalty": 0.118591,
+          "misalignedBonus": 0.211725,
+          "cathedralConversionPenalty": 0.214137,
+          "dissenterConversionPenalty": 0.112728,
+          "deepDebtSellBonus": 0.162924,
+          "mildDebtSellBonus": 0.052923,
+          "lowSkyshipsSellPenalty": 0.105308
+        },
+        "avgVP": 58.84
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.091754,
+          "earlyAgitatorPenalty": 0.274813,
+          "urgentDissenters": 0.278032,
+          "someDissenters": 0.029988,
+          "executeVPCost": 0.12073,
+          "rivalDissentersBonus": 0.127385,
+          "unpunishedDissentersPenalty": 0.0105,
+          "vpCostPenalty": 0.0658,
+          "misalignedBonus": 0.189602,
+          "cathedralConversionPenalty": 0.024378,
+          "dissenterConversionPenalty": 0.010003,
+          "deepDebtSellBonus": 0.030935,
+          "mildDebtSellBonus": 0.013028,
+          "lowSkyshipsSellPenalty": 0.081041
+        },
+        "avgVP": 58.8
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.160567,
+          "earlyAgitatorPenalty": 0.091374,
+          "urgentDissenters": 0.143195,
+          "someDissenters": 0.119685,
+          "executeVPCost": 0.375778,
+          "rivalDissentersBonus": 0.010194,
+          "unpunishedDissentersPenalty": 0.052886,
+          "vpCostPenalty": 0.029458,
+          "misalignedBonus": 0.082422,
+          "cathedralConversionPenalty": 0.013929,
+          "dissenterConversionPenalty": 0.013826,
+          "deepDebtSellBonus": 0.026727,
+          "mildDebtSellBonus": 0.060522,
+          "lowSkyshipsSellPenalty": 0.039751
+        },
+        "avgVP": 59.39
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.135643,
+          "earlyAgitatorPenalty": 0.107972,
+          "urgentDissenters": 0.200939,
+          "someDissenters": 0.074258,
+          "executeVPCost": 0.254001,
+          "rivalDissentersBonus": 0.015839,
+          "unpunishedDissentersPenalty": 0.022127,
+          "vpCostPenalty": 0.01995,
+          "misalignedBonus": 0.048956,
+          "cathedralConversionPenalty": 0.014678,
+          "dissenterConversionPenalty": 0.084067,
+          "deepDebtSellBonus": 0.260282,
+          "mildDebtSellBonus": 0.134942,
+          "lowSkyshipsSellPenalty": 0.037129
+        },
+        "avgVP": 60.95
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.048063,
+          "earlyAgitatorPenalty": 0.092821,
+          "urgentDissenters": 0.190299,
+          "someDissenters": 0.146639,
+          "executeVPCost": 0.139156,
+          "rivalDissentersBonus": 0.279421,
+          "unpunishedDissentersPenalty": 0.105579,
+          "vpCostPenalty": 0.030696,
+          "misalignedBonus": 0.074068,
+          "cathedralConversionPenalty": 0.129888,
+          "dissenterConversionPenalty": 0.108084,
+          "deepDebtSellBonus": 0.096639,
+          "mildDebtSellBonus": 0.158505,
+          "lowSkyshipsSellPenalty": 0.069798
+        },
+        "avgVP": 59.22
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.061445,
+          "earlyAgitatorPenalty": 0.09896,
+          "urgentDissenters": 0.112761,
+          "someDissenters": 0.038127,
+          "executeVPCost": 0.097733,
+          "rivalDissentersBonus": 0.043639,
+          "unpunishedDissentersPenalty": 0.013464,
+          "vpCostPenalty": 0.162641,
+          "misalignedBonus": 0.159852,
+          "cathedralConversionPenalty": 0.130143,
+          "dissenterConversionPenalty": 0.023913,
+          "deepDebtSellBonus": 0.205918,
+          "mildDebtSellBonus": 0.069484,
+          "lowSkyshipsSellPenalty": 0.115698
+        },
+        "avgVP": 44.41
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.015471,
+          "earlyAgitatorPenalty": 0.021003,
+          "urgentDissenters": 0.071156,
+          "someDissenters": 0.078332,
+          "executeVPCost": 0.313654,
+          "rivalDissentersBonus": 0.022218,
+          "unpunishedDissentersPenalty": 0.012458,
+          "vpCostPenalty": 0.037317,
+          "misalignedBonus": 0.135416,
+          "cathedralConversionPenalty": 0.362336,
+          "dissenterConversionPenalty": 0.037391,
+          "deepDebtSellBonus": 0.330533,
+          "mildDebtSellBonus": 0.130044,
+          "lowSkyshipsSellPenalty": 0.010702
+        },
+        "avgVP": 56.77
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.022982,
+          "earlyAgitatorPenalty": 0.087333,
+          "urgentDissenters": 0.105384,
+          "someDissenters": 0.094685,
+          "executeVPCost": 0.240725,
+          "rivalDissentersBonus": 0.180384,
+          "unpunishedDissentersPenalty": 0.076298,
+          "vpCostPenalty": 0.044955,
+          "misalignedBonus": 0.057261,
+          "cathedralConversionPenalty": 0.21177,
+          "dissenterConversionPenalty": 0.046028,
+          "deepDebtSellBonus": 0.309344,
+          "mildDebtSellBonus": 0.061651,
+          "lowSkyshipsSellPenalty": 0.090025
+        },
+        "avgVP": 59.38
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.053007,
+          "earlyAgitatorPenalty": 0.180014,
+          "urgentDissenters": 0.056614,
+          "someDissenters": 0.066692,
+          "executeVPCost": 0.097104,
+          "rivalDissentersBonus": 0.190918,
+          "unpunishedDissentersPenalty": 0.010107,
+          "vpCostPenalty": 0.012551,
+          "misalignedBonus": 0.29613,
+          "cathedralConversionPenalty": 0.062421,
+          "dissenterConversionPenalty": 0.010038,
+          "deepDebtSellBonus": 0.168597,
+          "mildDebtSellBonus": 0.185184,
+          "lowSkyshipsSellPenalty": 0.161587
+        },
+        "avgVP": 60.73
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.191798,
+          "earlyAgitatorPenalty": 0.010496,
+          "urgentDissenters": 0.101495,
+          "someDissenters": 0.074782,
+          "executeVPCost": 0.085597,
+          "rivalDissentersBonus": 0.187201,
+          "unpunishedDissentersPenalty": 0.153688,
+          "vpCostPenalty": 0.069899,
+          "misalignedBonus": 0.197675,
+          "cathedralConversionPenalty": 0.017478,
+          "dissenterConversionPenalty": 0.045006,
+          "deepDebtSellBonus": 0.178929,
+          "mildDebtSellBonus": 0.044783,
+          "lowSkyshipsSellPenalty": 0.177815
+        },
+        "avgVP": 55.13
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.144834,
+          "earlyAgitatorPenalty": 0.149501,
+          "urgentDissenters": 0.268846,
+          "someDissenters": 0.18752,
+          "executeVPCost": 0.081461,
+          "rivalDissentersBonus": 0.035137,
+          "unpunishedDissentersPenalty": 0.011613,
+          "vpCostPenalty": 0.072554,
+          "misalignedBonus": 0.075391,
+          "cathedralConversionPenalty": 0.192495,
+          "dissenterConversionPenalty": 0.014428,
+          "deepDebtSellBonus": 0.144688,
+          "mildDebtSellBonus": 0.01593,
+          "lowSkyshipsSellPenalty": 0.047248
+        },
+        "avgVP": 59.33
+      }
+    ],
+    "gen_best_avgVP": 60.95,
+    "gen_avg_vp": 57.54,
+    "alltime_best_avgVP": 60.95,
+    "sigma": 0.094502,
+    "elapsed_s": 73.0
+  },
+  {
+    "generation": 2,
+    "candidates": [
+      {
+        "weights": {
+          "targetLeaderBonus": 0.188063,
+          "earlyAgitatorPenalty": 0.140439,
+          "urgentDissenters": 0.197413,
+          "someDissenters": 0.123121,
+          "executeVPCost": 0.142981,
+          "rivalDissentersBonus": 0.010606,
+          "unpunishedDissentersPenalty": 0.024806,
+          "vpCostPenalty": 0.012259,
+          "misalignedBonus": 0.041889,
+          "cathedralConversionPenalty": 0.036797,
+          "dissenterConversionPenalty": 0.066635,
+          "deepDebtSellBonus": 0.183169,
+          "mildDebtSellBonus": 0.084259,
+          "lowSkyshipsSellPenalty": 0.057052
+        },
+        "avgVP": 58.23
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.023697,
+          "earlyAgitatorPenalty": 0.12392,
+          "urgentDissenters": 0.102361,
+          "someDissenters": 0.062295,
+          "executeVPCost": 0.232073,
+          "rivalDissentersBonus": 0.134195,
+          "unpunishedDissentersPenalty": 0.017161,
+          "vpCostPenalty": 0.03223,
+          "misalignedBonus": 0.026785,
+          "cathedralConversionPenalty": 0.054092,
+          "dissenterConversionPenalty": 0.054094,
+          "deepDebtSellBonus": 0.045747,
+          "mildDebtSellBonus": 0.012167,
+          "lowSkyshipsSellPenalty": 0.090658
+        },
+        "avgVP": 60.9
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.102826,
+          "earlyAgitatorPenalty": 0.197417,
+          "urgentDissenters": 0.253722,
+          "someDissenters": 0.102239,
+          "executeVPCost": 0.137382,
+          "rivalDissentersBonus": 0.091168,
+          "unpunishedDissentersPenalty": 0.030579,
+          "vpCostPenalty": 0.011974,
+          "misalignedBonus": 0.107471,
+          "cathedralConversionPenalty": 0.010176,
+          "dissenterConversionPenalty": 0.012737,
+          "deepDebtSellBonus": 0.160445,
+          "mildDebtSellBonus": 0.141834,
+          "lowSkyshipsSellPenalty": 0.084102
+        },
+        "avgVP": 59.62
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.052109,
+          "earlyAgitatorPenalty": 0.092377,
+          "urgentDissenters": 0.196927,
+          "someDissenters": 0.023359,
+          "executeVPCost": 0.204516,
+          "rivalDissentersBonus": 0.178036,
+          "unpunishedDissentersPenalty": 0.012896,
+          "vpCostPenalty": 0.049596,
+          "misalignedBonus": 0.176522,
+          "cathedralConversionPenalty": 0.065668,
+          "dissenterConversionPenalty": 0.044045,
+          "deepDebtSellBonus": 0.024685,
+          "mildDebtSellBonus": 0.113528,
+          "lowSkyshipsSellPenalty": 0.105611
+        },
+        "avgVP": 60.83
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.135063,
+          "earlyAgitatorPenalty": 0.344192,
+          "urgentDissenters": 0.238778,
+          "someDissenters": 0.129143,
+          "executeVPCost": 0.178691,
+          "rivalDissentersBonus": 0.086779,
+          "unpunishedDissentersPenalty": 0.063246,
+          "vpCostPenalty": 0.055952,
+          "misalignedBonus": 0.201351,
+          "cathedralConversionPenalty": 0.114056,
+          "dissenterConversionPenalty": 0.082482,
+          "deepDebtSellBonus": 0.085179,
+          "mildDebtSellBonus": 0.155248,
+          "lowSkyshipsSellPenalty": 0.071957
+        },
+        "avgVP": 58.17
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.239439,
+          "earlyAgitatorPenalty": 0.101655,
+          "urgentDissenters": 0.091152,
+          "someDissenters": 0.103974,
+          "executeVPCost": 0.244857,
+          "rivalDissentersBonus": 0.010372,
+          "unpunishedDissentersPenalty": 0.116425,
+          "vpCostPenalty": 0.032209,
+          "misalignedBonus": 0.181188,
+          "cathedralConversionPenalty": 0.220269,
+          "dissenterConversionPenalty": 0.233422,
+          "deepDebtSellBonus": 0.173876,
+          "mildDebtSellBonus": 0.033853,
+          "lowSkyshipsSellPenalty": 0.120639
+        },
+        "avgVP": 56.18
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.115817,
+          "earlyAgitatorPenalty": 0.181782,
+          "urgentDissenters": 0.218431,
+          "someDissenters": 0.130914,
+          "executeVPCost": 0.24971,
+          "rivalDissentersBonus": 0.061219,
+          "unpunishedDissentersPenalty": 0.028772,
+          "vpCostPenalty": 0.018284,
+          "misalignedBonus": 0.096107,
+          "cathedralConversionPenalty": 0.079456,
+          "dissenterConversionPenalty": 0.022487,
+          "deepDebtSellBonus": 0.27302,
+          "mildDebtSellBonus": 0.177815,
+          "lowSkyshipsSellPenalty": 0.055919
+        },
+        "avgVP": 63.3
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.263348,
+          "earlyAgitatorPenalty": 0.01021,
+          "urgentDissenters": 0.043127,
+          "someDissenters": 0.03487,
+          "executeVPCost": 0.30417,
+          "rivalDissentersBonus": 0.086441,
+          "unpunishedDissentersPenalty": 0.014119,
+          "vpCostPenalty": 0.086731,
+          "misalignedBonus": 0.183373,
+          "cathedralConversionPenalty": 0.224356,
+          "dissenterConversionPenalty": 0.094022,
+          "deepDebtSellBonus": 0.148365,
+          "mildDebtSellBonus": 0.16527,
+          "lowSkyshipsSellPenalty": 0.147209
+        },
+        "avgVP": 53.8
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.155019,
+          "earlyAgitatorPenalty": 0.151326,
+          "urgentDissenters": 0.044225,
+          "someDissenters": 0.014291,
+          "executeVPCost": 0.181343,
+          "rivalDissentersBonus": 0.052881,
+          "unpunishedDissentersPenalty": 0.084579,
+          "vpCostPenalty": 0.071865,
+          "misalignedBonus": 0.190171,
+          "cathedralConversionPenalty": 0.133588,
+          "dissenterConversionPenalty": 0.117901,
+          "deepDebtSellBonus": 0.295219,
+          "mildDebtSellBonus": 0.087142,
+          "lowSkyshipsSellPenalty": 0.061211
+        },
+        "avgVP": 57.67
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.120643,
+          "earlyAgitatorPenalty": 0.231862,
+          "urgentDissenters": 0.055127,
+          "someDissenters": 0.140967,
+          "executeVPCost": 0.050993,
+          "rivalDissentersBonus": 0.04606,
+          "unpunishedDissentersPenalty": 0.191047,
+          "vpCostPenalty": 0.01609,
+          "misalignedBonus": 0.151614,
+          "cathedralConversionPenalty": 0.1182,
+          "dissenterConversionPenalty": 0.011082,
+          "deepDebtSellBonus": 0.199493,
+          "mildDebtSellBonus": 0.173147,
+          "lowSkyshipsSellPenalty": 0.043789
+        },
+        "avgVP": 54.03
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.122947,
+          "earlyAgitatorPenalty": 0.054391,
+          "urgentDissenters": 0.291781,
+          "someDissenters": 0.094079,
+          "executeVPCost": 0.336884,
+          "rivalDissentersBonus": 0.146708,
+          "unpunishedDissentersPenalty": 0.020615,
+          "vpCostPenalty": 0.010753,
+          "misalignedBonus": 0.157387,
+          "cathedralConversionPenalty": 0.010813,
+          "dissenterConversionPenalty": 0.084398,
+          "deepDebtSellBonus": 0.114161,
+          "mildDebtSellBonus": 0.013803,
+          "lowSkyshipsSellPenalty": 0.100171
+        },
+        "avgVP": 53.94
+      }
+    ],
+    "gen_best_avgVP": 63.3,
+    "gen_avg_vp": 57.88,
+    "alltime_best_avgVP": 63.3,
+    "sigma": 0.08492,
+    "elapsed_s": 152.0
+  },
+  {
+    "generation": 3,
+    "candidates": [
+      {
+        "weights": {
+          "targetLeaderBonus": 0.153388,
+          "earlyAgitatorPenalty": 0.06163,
+          "urgentDissenters": 0.113047,
+          "someDissenters": 0.069622,
+          "executeVPCost": 0.224789,
+          "rivalDissentersBonus": 0.040774,
+          "unpunishedDissentersPenalty": 0.052735,
+          "vpCostPenalty": 0.053476,
+          "misalignedBonus": 0.165314,
+          "cathedralConversionPenalty": 0.017809,
+          "dissenterConversionPenalty": 0.02454,
+          "deepDebtSellBonus": 0.154834,
+          "mildDebtSellBonus": 0.146577,
+          "lowSkyshipsSellPenalty": 0.053964
+        },
+        "avgVP": 56.92
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.123388,
+          "earlyAgitatorPenalty": 0.208003,
+          "urgentDissenters": 0.142339,
+          "someDissenters": 0.068762,
+          "executeVPCost": 0.239947,
+          "rivalDissentersBonus": 0.034927,
+          "unpunishedDissentersPenalty": 0.01449,
+          "vpCostPenalty": 0.083146,
+          "misalignedBonus": 0.104971,
+          "cathedralConversionPenalty": 0.043232,
+          "dissenterConversionPenalty": 0.043309,
+          "deepDebtSellBonus": 0.055054,
+          "mildDebtSellBonus": 0.069798,
+          "lowSkyshipsSellPenalty": 0.060779
+        },
+        "avgVP": 59.98
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.091968,
+          "earlyAgitatorPenalty": 0.210356,
+          "urgentDissenters": 0.280221,
+          "someDissenters": 0.213544,
+          "executeVPCost": 0.243421,
+          "rivalDissentersBonus": 0.075273,
+          "unpunishedDissentersPenalty": 0.069559,
+          "vpCostPenalty": 0.067919,
+          "misalignedBonus": 0.094036,
+          "cathedralConversionPenalty": 0.065313,
+          "dissenterConversionPenalty": 0.011932,
+          "deepDebtSellBonus": 0.292826,
+          "mildDebtSellBonus": 0.048228,
+          "lowSkyshipsSellPenalty": 0.078184
+        },
+        "avgVP": 61.56
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.065029,
+          "earlyAgitatorPenalty": 0.09205,
+          "urgentDissenters": 0.200075,
+          "someDissenters": 0.245835,
+          "executeVPCost": 0.285994,
+          "rivalDissentersBonus": 0.032005,
+          "unpunishedDissentersPenalty": 0.117687,
+          "vpCostPenalty": 0.085079,
+          "misalignedBonus": 0.085526,
+          "cathedralConversionPenalty": 0.01065,
+          "dissenterConversionPenalty": 0.020716,
+          "deepDebtSellBonus": 0.135953,
+          "mildDebtSellBonus": 0.088175,
+          "lowSkyshipsSellPenalty": 0.101725
+        },
+        "avgVP": 63.35
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.012613,
+          "earlyAgitatorPenalty": 0.185708,
+          "urgentDissenters": 0.108772,
+          "someDissenters": 0.090531,
+          "executeVPCost": 0.254032,
+          "rivalDissentersBonus": 0.080733,
+          "unpunishedDissentersPenalty": 0.03448,
+          "vpCostPenalty": 0.017305,
+          "misalignedBonus": 0.070893,
+          "cathedralConversionPenalty": 0.015219,
+          "dissenterConversionPenalty": 0.033082,
+          "deepDebtSellBonus": 0.18639,
+          "mildDebtSellBonus": 0.211983,
+          "lowSkyshipsSellPenalty": 0.230523
+        },
+        "avgVP": 60.53
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.090668,
+          "earlyAgitatorPenalty": 0.334013,
+          "urgentDissenters": 0.140359,
+          "someDissenters": 0.222154,
+          "executeVPCost": 0.21458,
+          "rivalDissentersBonus": 0.0652,
+          "unpunishedDissentersPenalty": 0.059178,
+          "vpCostPenalty": 0.010181,
+          "misalignedBonus": 0.188895,
+          "cathedralConversionPenalty": 0.117156,
+          "dissenterConversionPenalty": 0.022284,
+          "deepDebtSellBonus": 0.264383,
+          "mildDebtSellBonus": 0.066532,
+          "lowSkyshipsSellPenalty": 0.068816
+        },
+        "avgVP": 59.35
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.010014,
+          "earlyAgitatorPenalty": 0.079224,
+          "urgentDissenters": 0.277226,
+          "someDissenters": 0.064046,
+          "executeVPCost": 0.101296,
+          "rivalDissentersBonus": 0.192344,
+          "unpunishedDissentersPenalty": 0.037139,
+          "vpCostPenalty": 0.145954,
+          "misalignedBonus": 0.099522,
+          "cathedralConversionPenalty": 0.041609,
+          "dissenterConversionPenalty": 0.085158,
+          "deepDebtSellBonus": 0.121641,
+          "mildDebtSellBonus": 0.232308,
+          "lowSkyshipsSellPenalty": 0.017173
+        },
+        "avgVP": 48.74
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.077151,
+          "earlyAgitatorPenalty": 0.122509,
+          "urgentDissenters": 0.119975,
+          "someDissenters": 0.040281,
+          "executeVPCost": 0.183,
+          "rivalDissentersBonus": 0.167985,
+          "unpunishedDissentersPenalty": 0.06818,
+          "vpCostPenalty": 0.032201,
+          "misalignedBonus": 0.118205,
+          "cathedralConversionPenalty": 0.046902,
+          "dissenterConversionPenalty": 0.022418,
+          "deepDebtSellBonus": 0.193202,
+          "mildDebtSellBonus": 0.01316,
+          "lowSkyshipsSellPenalty": 0.119202
+        },
+        "avgVP": 60.41
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.023293,
+          "earlyAgitatorPenalty": 0.018566,
+          "urgentDissenters": 0.10365,
+          "someDissenters": 0.263319,
+          "executeVPCost": 0.245044,
+          "rivalDissentersBonus": 0.08412,
+          "unpunishedDissentersPenalty": 0.015515,
+          "vpCostPenalty": 0.118224,
+          "misalignedBonus": 0.010161,
+          "cathedralConversionPenalty": 0.030186,
+          "dissenterConversionPenalty": 0.158339,
+          "deepDebtSellBonus": 0.181181,
+          "mildDebtSellBonus": 0.17223,
+          "lowSkyshipsSellPenalty": 0.178557
+        },
+        "avgVP": 58.46
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.016792,
+          "earlyAgitatorPenalty": 0.160593,
+          "urgentDissenters": 0.248294,
+          "someDissenters": 0.14243,
+          "executeVPCost": 0.232667,
+          "rivalDissentersBonus": 0.119582,
+          "unpunishedDissentersPenalty": 0.015879,
+          "vpCostPenalty": 0.014654,
+          "misalignedBonus": 0.188479,
+          "cathedralConversionPenalty": 0.017851,
+          "dissenterConversionPenalty": 0.018446,
+          "deepDebtSellBonus": 0.065294,
+          "mildDebtSellBonus": 0.058027,
+          "lowSkyshipsSellPenalty": 0.052083
+        },
+        "avgVP": 61.84
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.136041,
+          "earlyAgitatorPenalty": 0.026727,
+          "urgentDissenters": 0.157284,
+          "someDissenters": 0.010056,
+          "executeVPCost": 0.187592,
+          "rivalDissentersBonus": 0.132772,
+          "unpunishedDissentersPenalty": 0.020227,
+          "vpCostPenalty": 0.190091,
+          "misalignedBonus": 0.126175,
+          "cathedralConversionPenalty": 0.172862,
+          "dissenterConversionPenalty": 0.132704,
+          "deepDebtSellBonus": 0.167618,
+          "mildDebtSellBonus": 0.231454,
+          "lowSkyshipsSellPenalty": 0.093957
+        },
+        "avgVP": 40.55
+      }
+    ],
+    "gen_best_avgVP": 63.35,
+    "gen_avg_vp": 57.43,
+    "alltime_best_avgVP": 63.35,
+    "sigma": 0.079933,
+    "elapsed_s": 232.0
+  },
+  {
+    "generation": 4,
+    "candidates": [
+      {
+        "weights": {
+          "targetLeaderBonus": 0.048699,
+          "earlyAgitatorPenalty": 0.129162,
+          "urgentDissenters": 0.134315,
+          "someDissenters": 0.128595,
+          "executeVPCost": 0.20295,
+          "rivalDissentersBonus": 0.028814,
+          "unpunishedDissentersPenalty": 0.024206,
+          "vpCostPenalty": 0.173031,
+          "misalignedBonus": 0.197964,
+          "cathedralConversionPenalty": 0.010698,
+          "dissenterConversionPenalty": 0.010897,
+          "deepDebtSellBonus": 0.129649,
+          "mildDebtSellBonus": 0.111707,
+          "lowSkyshipsSellPenalty": 0.025234
+        },
+        "avgVP": 41.87
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.05995,
+          "earlyAgitatorPenalty": 0.037232,
+          "urgentDissenters": 0.210298,
+          "someDissenters": 0.193581,
+          "executeVPCost": 0.202498,
+          "rivalDissentersBonus": 0.042824,
+          "unpunishedDissentersPenalty": 0.121817,
+          "vpCostPenalty": 0.086912,
+          "misalignedBonus": 0.09955,
+          "cathedralConversionPenalty": 0.072754,
+          "dissenterConversionPenalty": 0.088312,
+          "deepDebtSellBonus": 0.179622,
+          "mildDebtSellBonus": 0.020574,
+          "lowSkyshipsSellPenalty": 0.119495
+        },
+        "avgVP": 61.88
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.070907,
+          "earlyAgitatorPenalty": 0.195218,
+          "urgentDissenters": 0.186332,
+          "someDissenters": 0.169928,
+          "executeVPCost": 0.269695,
+          "rivalDissentersBonus": 0.011603,
+          "unpunishedDissentersPenalty": 0.072701,
+          "vpCostPenalty": 0.170774,
+          "misalignedBonus": 0.1674,
+          "cathedralConversionPenalty": 0.046153,
+          "dissenterConversionPenalty": 0.010292,
+          "deepDebtSellBonus": 0.173761,
+          "mildDebtSellBonus": 0.097167,
+          "lowSkyshipsSellPenalty": 0.132104
+        },
+        "avgVP": 45.65
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.010139,
+          "earlyAgitatorPenalty": 0.085102,
+          "urgentDissenters": 0.271893,
+          "someDissenters": 0.032385,
+          "executeVPCost": 0.239007,
+          "rivalDissentersBonus": 0.067732,
+          "unpunishedDissentersPenalty": 0.018401,
+          "vpCostPenalty": 0.026899,
+          "misalignedBonus": 0.072927,
+          "cathedralConversionPenalty": 0.018045,
+          "dissenterConversionPenalty": 0.039532,
+          "deepDebtSellBonus": 0.162723,
+          "mildDebtSellBonus": 0.165834,
+          "lowSkyshipsSellPenalty": 0.25062
+        },
+        "avgVP": 60.72
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.127479,
+          "earlyAgitatorPenalty": 0.113093,
+          "urgentDissenters": 0.223065,
+          "someDissenters": 0.143205,
+          "executeVPCost": 0.197361,
+          "rivalDissentersBonus": 0.163459,
+          "unpunishedDissentersPenalty": 0.155137,
+          "vpCostPenalty": 0.017302,
+          "misalignedBonus": 0.068146,
+          "cathedralConversionPenalty": 0.010122,
+          "dissenterConversionPenalty": 0.065651,
+          "deepDebtSellBonus": 0.125772,
+          "mildDebtSellBonus": 0.103268,
+          "lowSkyshipsSellPenalty": 0.029461
+        },
+        "avgVP": 61.97
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.019466,
+          "earlyAgitatorPenalty": 0.178952,
+          "urgentDissenters": 0.22878,
+          "someDissenters": 0.184886,
+          "executeVPCost": 0.181604,
+          "rivalDissentersBonus": 0.146713,
+          "unpunishedDissentersPenalty": 0.077006,
+          "vpCostPenalty": 0.076736,
+          "misalignedBonus": 0.119996,
+          "cathedralConversionPenalty": 0.020853,
+          "dissenterConversionPenalty": 0.022629,
+          "deepDebtSellBonus": 0.204464,
+          "mildDebtSellBonus": 0.010273,
+          "lowSkyshipsSellPenalty": 0.200455
+        },
+        "avgVP": 58.22
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.050552,
+          "earlyAgitatorPenalty": 0.013634,
+          "urgentDissenters": 0.259867,
+          "someDissenters": 0.2222,
+          "executeVPCost": 0.25655,
+          "rivalDissentersBonus": 0.022942,
+          "unpunishedDissentersPenalty": 0.124868,
+          "vpCostPenalty": 0.010417,
+          "misalignedBonus": 0.214978,
+          "cathedralConversionPenalty": 0.019982,
+          "dissenterConversionPenalty": 0.02473,
+          "deepDebtSellBonus": 0.180315,
+          "mildDebtSellBonus": 0.020869,
+          "lowSkyshipsSellPenalty": 0.118858
+        },
+        "avgVP": 60.14
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.040289,
+          "earlyAgitatorPenalty": 0.190204,
+          "urgentDissenters": 0.240917,
+          "someDissenters": 0.277551,
+          "executeVPCost": 0.386778,
+          "rivalDissentersBonus": 0.094472,
+          "unpunishedDissentersPenalty": 0.10098,
+          "vpCostPenalty": 0.032555,
+          "misalignedBonus": 0.210629,
+          "cathedralConversionPenalty": 0.039076,
+          "dissenterConversionPenalty": 0.068191,
+          "deepDebtSellBonus": 0.018988,
+          "mildDebtSellBonus": 0.017114,
+          "lowSkyshipsSellPenalty": 0.080717
+        },
+        "avgVP": 58.76
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.086716,
+          "earlyAgitatorPenalty": 0.039045,
+          "urgentDissenters": 0.196901,
+          "someDissenters": 0.243412,
+          "executeVPCost": 0.190104,
+          "rivalDissentersBonus": 0.225922,
+          "unpunishedDissentersPenalty": 0.145492,
+          "vpCostPenalty": 0.077675,
+          "misalignedBonus": 0.059685,
+          "cathedralConversionPenalty": 0.114744,
+          "dissenterConversionPenalty": 0.042996,
+          "deepDebtSellBonus": 0.094441,
+          "mildDebtSellBonus": 0.041092,
+          "lowSkyshipsSellPenalty": 0.031419
+        },
+        "avgVP": 61.07
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.015862,
+          "earlyAgitatorPenalty": 0.110721,
+          "urgentDissenters": 0.181729,
+          "someDissenters": 0.105975,
+          "executeVPCost": 0.327531,
+          "rivalDissentersBonus": 0.241434,
+          "unpunishedDissentersPenalty": 0.128908,
+          "vpCostPenalty": 0.17004,
+          "misalignedBonus": 0.012342,
+          "cathedralConversionPenalty": 0.045726,
+          "dissenterConversionPenalty": 0.010351,
+          "deepDebtSellBonus": 0.177594,
+          "mildDebtSellBonus": 0.010838,
+          "lowSkyshipsSellPenalty": 0.172873
+        },
+        "avgVP": 48.2
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.012968,
+          "earlyAgitatorPenalty": 0.108091,
+          "urgentDissenters": 0.190891,
+          "someDissenters": 0.193537,
+          "executeVPCost": 0.124929,
+          "rivalDissentersBonus": 0.04535,
+          "unpunishedDissentersPenalty": 0.011197,
+          "vpCostPenalty": 0.056054,
+          "misalignedBonus": 0.093647,
+          "cathedralConversionPenalty": 0.010138,
+          "dissenterConversionPenalty": 0.084506,
+          "deepDebtSellBonus": 0.167841,
+          "mildDebtSellBonus": 0.113674,
+          "lowSkyshipsSellPenalty": 0.051833
+        },
+        "avgVP": 57.35
+      }
+    ],
+    "gen_best_avgVP": 61.97,
+    "gen_avg_vp": 55.98,
+    "alltime_best_avgVP": 63.35,
+    "sigma": 0.074273,
+    "elapsed_s": 314.0
+  },
+  {
+    "generation": 5,
+    "candidates": [
+      {
+        "weights": {
+          "targetLeaderBonus": 0.095935,
+          "earlyAgitatorPenalty": 0.020654,
+          "urgentDissenters": 0.220074,
+          "someDissenters": 0.119082,
+          "executeVPCost": 0.314888,
+          "rivalDissentersBonus": 0.13047,
+          "unpunishedDissentersPenalty": 0.142942,
+          "vpCostPenalty": 0.024122,
+          "misalignedBonus": 0.165243,
+          "cathedralConversionPenalty": 0.01377,
+          "dissenterConversionPenalty": 0.029835,
+          "deepDebtSellBonus": 0.042233,
+          "mildDebtSellBonus": 0.04991,
+          "lowSkyshipsSellPenalty": 0.033069
+        },
+        "avgVP": 57.55
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.090642,
+          "earlyAgitatorPenalty": 0.093269,
+          "urgentDissenters": 0.166706,
+          "someDissenters": 0.10404,
+          "executeVPCost": 0.313805,
+          "rivalDissentersBonus": 0.194389,
+          "unpunishedDissentersPenalty": 0.116451,
+          "vpCostPenalty": 0.080483,
+          "misalignedBonus": 0.069012,
+          "cathedralConversionPenalty": 0.045536,
+          "dissenterConversionPenalty": 0.063979,
+          "deepDebtSellBonus": 0.116097,
+          "mildDebtSellBonus": 0.023847,
+          "lowSkyshipsSellPenalty": 0.016195
+        },
+        "avgVP": 61.63
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.156145,
+          "earlyAgitatorPenalty": 0.148408,
+          "urgentDissenters": 0.299824,
+          "someDissenters": 0.144231,
+          "executeVPCost": 0.30646,
+          "rivalDissentersBonus": 0.251914,
+          "unpunishedDissentersPenalty": 0.28252,
+          "vpCostPenalty": 0.023435,
+          "misalignedBonus": 0.043211,
+          "cathedralConversionPenalty": 0.016303,
+          "dissenterConversionPenalty": 0.073293,
+          "deepDebtSellBonus": 0.140925,
+          "mildDebtSellBonus": 0.074847,
+          "lowSkyshipsSellPenalty": 0.061149
+        },
+        "avgVP": 60.48
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.014376,
+          "earlyAgitatorPenalty": 0.019455,
+          "urgentDissenters": 0.135508,
+          "someDissenters": 0.098726,
+          "executeVPCost": 0.302706,
+          "rivalDissentersBonus": 0.125116,
+          "unpunishedDissentersPenalty": 0.180154,
+          "vpCostPenalty": 0.060732,
+          "misalignedBonus": 0.011363,
+          "cathedralConversionPenalty": 0.013631,
+          "dissenterConversionPenalty": 0.10316,
+          "deepDebtSellBonus": 0.071798,
+          "mildDebtSellBonus": 0.097565,
+          "lowSkyshipsSellPenalty": 0.22464
+        },
+        "avgVP": 56.23
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.12081,
+          "earlyAgitatorPenalty": 0.021468,
+          "urgentDissenters": 0.146453,
+          "someDissenters": 0.217072,
+          "executeVPCost": 0.331986,
+          "rivalDissentersBonus": 0.183137,
+          "unpunishedDissentersPenalty": 0.059404,
+          "vpCostPenalty": 0.037116,
+          "misalignedBonus": 0.064648,
+          "cathedralConversionPenalty": 0.010089,
+          "dissenterConversionPenalty": 0.065161,
+          "deepDebtSellBonus": 0.235085,
+          "mildDebtSellBonus": 0.08066,
+          "lowSkyshipsSellPenalty": 0.200798
+        },
+        "avgVP": 59.55
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.136444,
+          "earlyAgitatorPenalty": 0.097967,
+          "urgentDissenters": 0.24817,
+          "someDissenters": 0.127266,
+          "executeVPCost": 0.124369,
+          "rivalDissentersBonus": 0.106264,
+          "unpunishedDissentersPenalty": 0.170346,
+          "vpCostPenalty": 0.041446,
+          "misalignedBonus": 0.183961,
+          "cathedralConversionPenalty": 0.013402,
+          "dissenterConversionPenalty": 0.031302,
+          "deepDebtSellBonus": 0.031945,
+          "mildDebtSellBonus": 0.149021,
+          "lowSkyshipsSellPenalty": 0.121456
+        },
+        "avgVP": 55.84
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.120408,
+          "earlyAgitatorPenalty": 0.177566,
+          "urgentDissenters": 0.158837,
+          "someDissenters": 0.095576,
+          "executeVPCost": 0.081383,
+          "rivalDissentersBonus": 0.049639,
+          "unpunishedDissentersPenalty": 0.173499,
+          "vpCostPenalty": 0.056043,
+          "misalignedBonus": 0.176446,
+          "cathedralConversionPenalty": 0.13306,
+          "dissenterConversionPenalty": 0.088951,
+          "deepDebtSellBonus": 0.183557,
+          "mildDebtSellBonus": 0.078452,
+          "lowSkyshipsSellPenalty": 0.079791
+        },
+        "avgVP": 53.49
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.017534,
+          "earlyAgitatorPenalty": 0.097656,
+          "urgentDissenters": 0.248781,
+          "someDissenters": 0.155967,
+          "executeVPCost": 0.168801,
+          "rivalDissentersBonus": 0.12958,
+          "unpunishedDissentersPenalty": 0.0986,
+          "vpCostPenalty": 0.111722,
+          "misalignedBonus": 0.072543,
+          "cathedralConversionPenalty": 0.063009,
+          "dissenterConversionPenalty": 0.010668,
+          "deepDebtSellBonus": 0.093336,
+          "mildDebtSellBonus": 0.184413,
+          "lowSkyshipsSellPenalty": 0.163613
+        },
+        "avgVP": 60.86
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.132641,
+          "earlyAgitatorPenalty": 0.072225,
+          "urgentDissenters": 0.155318,
+          "someDissenters": 0.145394,
+          "executeVPCost": 0.251399,
+          "rivalDissentersBonus": 0.108001,
+          "unpunishedDissentersPenalty": 0.19413,
+          "vpCostPenalty": 0.171855,
+          "misalignedBonus": 0.051639,
+          "cathedralConversionPenalty": 0.010798,
+          "dissenterConversionPenalty": 0.201691,
+          "deepDebtSellBonus": 0.084043,
+          "mildDebtSellBonus": 0.015927,
+          "lowSkyshipsSellPenalty": 0.010305
+        },
+        "avgVP": 43.76
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.239774,
+          "earlyAgitatorPenalty": 0.111473,
+          "urgentDissenters": 0.205271,
+          "someDissenters": 0.064109,
+          "executeVPCost": 0.169354,
+          "rivalDissentersBonus": 0.234956,
+          "unpunishedDissentersPenalty": 0.251381,
+          "vpCostPenalty": 0.092597,
+          "misalignedBonus": 0.112689,
+          "cathedralConversionPenalty": 0.010826,
+          "dissenterConversionPenalty": 0.107574,
+          "deepDebtSellBonus": 0.182591,
+          "mildDebtSellBonus": 0.014185,
+          "lowSkyshipsSellPenalty": 0.053934
+        },
+        "avgVP": 55.43
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.095862,
+          "earlyAgitatorPenalty": 0.071876,
+          "urgentDissenters": 0.137388,
+          "someDissenters": 0.141349,
+          "executeVPCost": 0.342311,
+          "rivalDissentersBonus": 0.049739,
+          "unpunishedDissentersPenalty": 0.145266,
+          "vpCostPenalty": 0.023222,
+          "misalignedBonus": 0.073176,
+          "cathedralConversionPenalty": 0.010917,
+          "dissenterConversionPenalty": 0.026104,
+          "deepDebtSellBonus": 0.15066,
+          "mildDebtSellBonus": 0.042649,
+          "lowSkyshipsSellPenalty": 0.030236
+        },
+        "avgVP": 61.31
+      }
+    ],
+    "gen_best_avgVP": 61.63,
+    "gen_avg_vp": 56.92,
+    "alltime_best_avgVP": 63.35,
+    "sigma": 0.070115,
+    "elapsed_s": 394.0
+  },
+  {
+    "generation": 6,
+    "candidates": [
+      {
+        "weights": {
+          "targetLeaderBonus": 0.144516,
+          "earlyAgitatorPenalty": 0.121194,
+          "urgentDissenters": 0.178266,
+          "someDissenters": 0.096352,
+          "executeVPCost": 0.371513,
+          "rivalDissentersBonus": 0.230359,
+          "unpunishedDissentersPenalty": 0.128646,
+          "vpCostPenalty": 0.153338,
+          "misalignedBonus": 0.131583,
+          "cathedralConversionPenalty": 0.113672,
+          "dissenterConversionPenalty": 0.010359,
+          "deepDebtSellBonus": 0.16852,
+          "mildDebtSellBonus": 0.032641,
+          "lowSkyshipsSellPenalty": 0.063609
+        },
+        "avgVP": 45.57
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.052718,
+          "earlyAgitatorPenalty": 0.079894,
+          "urgentDissenters": 0.275848,
+          "someDissenters": 0.130764,
+          "executeVPCost": 0.340884,
+          "rivalDissentersBonus": 0.061647,
+          "unpunishedDissentersPenalty": 0.141244,
+          "vpCostPenalty": 0.041053,
+          "misalignedBonus": 0.063813,
+          "cathedralConversionPenalty": 0.054787,
+          "dissenterConversionPenalty": 0.032331,
+          "deepDebtSellBonus": 0.138846,
+          "mildDebtSellBonus": 0.010438,
+          "lowSkyshipsSellPenalty": 0.048867
+        },
+        "avgVP": 61.6
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.046315,
+          "earlyAgitatorPenalty": 0.114244,
+          "urgentDissenters": 0.218993,
+          "someDissenters": 0.108114,
+          "executeVPCost": 0.316073,
+          "rivalDissentersBonus": 0.156103,
+          "unpunishedDissentersPenalty": 0.154296,
+          "vpCostPenalty": 0.114182,
+          "misalignedBonus": 0.023737,
+          "cathedralConversionPenalty": 0.014003,
+          "dissenterConversionPenalty": 0.056236,
+          "deepDebtSellBonus": 0.103277,
+          "mildDebtSellBonus": 0.070924,
+          "lowSkyshipsSellPenalty": 0.076423
+        },
+        "avgVP": 57.73
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.022509,
+          "earlyAgitatorPenalty": 0.061043,
+          "urgentDissenters": 0.165624,
+          "someDissenters": 0.11689,
+          "executeVPCost": 0.275964,
+          "rivalDissentersBonus": 0.219508,
+          "unpunishedDissentersPenalty": 0.104549,
+          "vpCostPenalty": 0.079866,
+          "misalignedBonus": 0.082619,
+          "cathedralConversionPenalty": 0.010007,
+          "dissenterConversionPenalty": 0.029182,
+          "deepDebtSellBonus": 0.06958,
+          "mildDebtSellBonus": 0.16411,
+          "lowSkyshipsSellPenalty": 0.014698
+        },
+        "avgVP": 61.98
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.065392,
+          "earlyAgitatorPenalty": 0.014408,
+          "urgentDissenters": 0.198006,
+          "someDissenters": 0.089196,
+          "executeVPCost": 0.341631,
+          "rivalDissentersBonus": 0.216651,
+          "unpunishedDissentersPenalty": 0.227164,
+          "vpCostPenalty": 0.125606,
+          "misalignedBonus": 0.040868,
+          "cathedralConversionPenalty": 0.014583,
+          "dissenterConversionPenalty": 0.011207,
+          "deepDebtSellBonus": 0.119806,
+          "mildDebtSellBonus": 0.109516,
+          "lowSkyshipsSellPenalty": 0.098178
+        },
+        "avgVP": 57.19
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.032416,
+          "earlyAgitatorPenalty": 0.161199,
+          "urgentDissenters": 0.224995,
+          "someDissenters": 0.035567,
+          "executeVPCost": 0.262425,
+          "rivalDissentersBonus": 0.127528,
+          "unpunishedDissentersPenalty": 0.153726,
+          "vpCostPenalty": 0.186672,
+          "misalignedBonus": 0.010185,
+          "cathedralConversionPenalty": 0.020136,
+          "dissenterConversionPenalty": 0.171571,
+          "deepDebtSellBonus": 0.093502,
+          "mildDebtSellBonus": 0.012469,
+          "lowSkyshipsSellPenalty": 0.047678
+        },
+        "avgVP": 42.84
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.153252,
+          "earlyAgitatorPenalty": 0.07108,
+          "urgentDissenters": 0.146853,
+          "someDissenters": 0.064534,
+          "executeVPCost": 0.113041,
+          "rivalDissentersBonus": 0.06401,
+          "unpunishedDissentersPenalty": 0.074079,
+          "vpCostPenalty": 0.016316,
+          "misalignedBonus": 0.012096,
+          "cathedralConversionPenalty": 0.046422,
+          "dissenterConversionPenalty": 0.098444,
+          "deepDebtSellBonus": 0.053779,
+          "mildDebtSellBonus": 0.136711,
+          "lowSkyshipsSellPenalty": 0.019608
+        },
+        "avgVP": 58.63
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.077489,
+          "earlyAgitatorPenalty": 0.052279,
+          "urgentDissenters": 0.096424,
+          "someDissenters": 0.146491,
+          "executeVPCost": 0.212323,
+          "rivalDissentersBonus": 0.212454,
+          "unpunishedDissentersPenalty": 0.186364,
+          "vpCostPenalty": 0.205999,
+          "misalignedBonus": 0.079504,
+          "cathedralConversionPenalty": 0.028094,
+          "dissenterConversionPenalty": 0.01,
+          "deepDebtSellBonus": 0.160568,
+          "mildDebtSellBonus": 0.01783,
+          "lowSkyshipsSellPenalty": 0.058949
+        },
+        "avgVP": 45.77
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.19036,
+          "earlyAgitatorPenalty": 0.093221,
+          "urgentDissenters": 0.148064,
+          "someDissenters": 0.193711,
+          "executeVPCost": 0.399004,
+          "rivalDissentersBonus": 0.111538,
+          "unpunishedDissentersPenalty": 0.167525,
+          "vpCostPenalty": 0.077088,
+          "misalignedBonus": 0.072807,
+          "cathedralConversionPenalty": 0.012749,
+          "dissenterConversionPenalty": 0.010667,
+          "deepDebtSellBonus": 0.173215,
+          "mildDebtSellBonus": 0.092841,
+          "lowSkyshipsSellPenalty": 0.014451
+        },
+        "avgVP": 57.43
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.040501,
+          "earlyAgitatorPenalty": 0.170714,
+          "urgentDissenters": 0.125704,
+          "someDissenters": 0.278613,
+          "executeVPCost": 0.349238,
+          "rivalDissentersBonus": 0.124658,
+          "unpunishedDissentersPenalty": 0.100188,
+          "vpCostPenalty": 0.123947,
+          "misalignedBonus": 0.135576,
+          "cathedralConversionPenalty": 0.046575,
+          "dissenterConversionPenalty": 0.017577,
+          "deepDebtSellBonus": 0.106138,
+          "mildDebtSellBonus": 0.021704,
+          "lowSkyshipsSellPenalty": 0.013343
+        },
+        "avgVP": 57.64
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.078655,
+          "earlyAgitatorPenalty": 0.093308,
+          "urgentDissenters": 0.183631,
+          "someDissenters": 0.086456,
+          "executeVPCost": 0.268725,
+          "rivalDissentersBonus": 0.168124,
+          "unpunishedDissentersPenalty": 0.138599,
+          "vpCostPenalty": 0.088824,
+          "misalignedBonus": 0.02008,
+          "cathedralConversionPenalty": 0.012178,
+          "dissenterConversionPenalty": 0.02426,
+          "deepDebtSellBonus": 0.072185,
+          "mildDebtSellBonus": 0.106388,
+          "lowSkyshipsSellPenalty": 0.010036
+        },
+        "avgVP": 59.05
+      }
+    ],
+    "gen_best_avgVP": 61.98,
+    "gen_avg_vp": 55.04,
+    "alltime_best_avgVP": 63.35,
+    "sigma": 0.065816,
+    "elapsed_s": 475.0
+  },
+  {
+    "generation": 7,
+    "candidates": [
+      {
+        "weights": {
+          "targetLeaderBonus": 0.083448,
+          "earlyAgitatorPenalty": 0.039619,
+          "urgentDissenters": 0.182142,
+          "someDissenters": 0.120022,
+          "executeVPCost": 0.175029,
+          "rivalDissentersBonus": 0.177225,
+          "unpunishedDissentersPenalty": 0.126095,
+          "vpCostPenalty": 0.187091,
+          "misalignedBonus": 0.010153,
+          "cathedralConversionPenalty": 0.022532,
+          "dissenterConversionPenalty": 0.081106,
+          "deepDebtSellBonus": 0.132919,
+          "mildDebtSellBonus": 0.125857,
+          "lowSkyshipsSellPenalty": 0.045554
+        },
+        "avgVP": 39.78
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.058765,
+          "earlyAgitatorPenalty": 0.012395,
+          "urgentDissenters": 0.256317,
+          "someDissenters": 0.032766,
+          "executeVPCost": 0.22525,
+          "rivalDissentersBonus": 0.153455,
+          "unpunishedDissentersPenalty": 0.086277,
+          "vpCostPenalty": 0.079232,
+          "misalignedBonus": 0.010031,
+          "cathedralConversionPenalty": 0.01,
+          "dissenterConversionPenalty": 0.070109,
+          "deepDebtSellBonus": 0.024035,
+          "mildDebtSellBonus": 0.082332,
+          "lowSkyshipsSellPenalty": 0.010852
+        },
+        "avgVP": 55.06
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.019314,
+          "earlyAgitatorPenalty": 0.02854,
+          "urgentDissenters": 0.207558,
+          "someDissenters": 0.045714,
+          "executeVPCost": 0.225756,
+          "rivalDissentersBonus": 0.192787,
+          "unpunishedDissentersPenalty": 0.246576,
+          "vpCostPenalty": 0.010585,
+          "misalignedBonus": 0.035936,
+          "cathedralConversionPenalty": 0.109664,
+          "dissenterConversionPenalty": 0.061344,
+          "deepDebtSellBonus": 0.049576,
+          "mildDebtSellBonus": 0.107172,
+          "lowSkyshipsSellPenalty": 0.015805
+        },
+        "avgVP": 60.23
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.01384,
+          "earlyAgitatorPenalty": 0.055124,
+          "urgentDissenters": 0.185954,
+          "someDissenters": 0.11009,
+          "executeVPCost": 0.184049,
+          "rivalDissentersBonus": 0.018921,
+          "unpunishedDissentersPenalty": 0.079377,
+          "vpCostPenalty": 0.108324,
+          "misalignedBonus": 0.084686,
+          "cathedralConversionPenalty": 0.061459,
+          "dissenterConversionPenalty": 0.010277,
+          "deepDebtSellBonus": 0.144294,
+          "mildDebtSellBonus": 0.073808,
+          "lowSkyshipsSellPenalty": 0.01003
+        },
+        "avgVP": 61.83
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.022685,
+          "earlyAgitatorPenalty": 0.188499,
+          "urgentDissenters": 0.28549,
+          "someDissenters": 0.158088,
+          "executeVPCost": 0.304427,
+          "rivalDissentersBonus": 0.110201,
+          "unpunishedDissentersPenalty": 0.203951,
+          "vpCostPenalty": 0.146109,
+          "misalignedBonus": 0.164865,
+          "cathedralConversionPenalty": 0.112222,
+          "dissenterConversionPenalty": 0.104597,
+          "deepDebtSellBonus": 0.067279,
+          "mildDebtSellBonus": 0.103062,
+          "lowSkyshipsSellPenalty": 0.010415
+        },
+        "avgVP": 49.16
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.075064,
+          "earlyAgitatorPenalty": 0.115031,
+          "urgentDissenters": 0.210641,
+          "someDissenters": 0.085359,
+          "executeVPCost": 0.275307,
+          "rivalDissentersBonus": 0.070974,
+          "unpunishedDissentersPenalty": 0.08901,
+          "vpCostPenalty": 0.088737,
+          "misalignedBonus": 0.096168,
+          "cathedralConversionPenalty": 0.069616,
+          "dissenterConversionPenalty": 0.029442,
+          "deepDebtSellBonus": 0.098311,
+          "mildDebtSellBonus": 0.143996,
+          "lowSkyshipsSellPenalty": 0.012885
+        },
+        "avgVP": 62.28
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.014693,
+          "earlyAgitatorPenalty": 0.132731,
+          "urgentDissenters": 0.242891,
+          "someDissenters": 0.141792,
+          "executeVPCost": 0.148647,
+          "rivalDissentersBonus": 0.200946,
+          "unpunishedDissentersPenalty": 0.133755,
+          "vpCostPenalty": 0.126283,
+          "misalignedBonus": 0.012685,
+          "cathedralConversionPenalty": 0.03268,
+          "dissenterConversionPenalty": 0.040646,
+          "deepDebtSellBonus": 0.151857,
+          "mildDebtSellBonus": 0.077782,
+          "lowSkyshipsSellPenalty": 0.020495
+        },
+        "avgVP": 56.3
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.101785,
+          "earlyAgitatorPenalty": 0.010172,
+          "urgentDissenters": 0.259883,
+          "someDissenters": 0.183686,
+          "executeVPCost": 0.217463,
+          "rivalDissentersBonus": 0.162296,
+          "unpunishedDissentersPenalty": 0.146033,
+          "vpCostPenalty": 0.039014,
+          "misalignedBonus": 0.051115,
+          "cathedralConversionPenalty": 0.022491,
+          "dissenterConversionPenalty": 0.074083,
+          "deepDebtSellBonus": 0.150963,
+          "mildDebtSellBonus": 0.106719,
+          "lowSkyshipsSellPenalty": 0.034545
+        },
+        "avgVP": 59.28
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.026691,
+          "earlyAgitatorPenalty": 0.035211,
+          "urgentDissenters": 0.156546,
+          "someDissenters": 0.192875,
+          "executeVPCost": 0.361664,
+          "rivalDissentersBonus": 0.175579,
+          "unpunishedDissentersPenalty": 0.092949,
+          "vpCostPenalty": 0.050913,
+          "misalignedBonus": 0.110393,
+          "cathedralConversionPenalty": 0.018123,
+          "dissenterConversionPenalty": 0.10496,
+          "deepDebtSellBonus": 0.183533,
+          "mildDebtSellBonus": 0.116804,
+          "lowSkyshipsSellPenalty": 0.012394
+        },
+        "avgVP": 61.27
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.010272,
+          "earlyAgitatorPenalty": 0.122514,
+          "urgentDissenters": 0.213318,
+          "someDissenters": 0.179476,
+          "executeVPCost": 0.204048,
+          "rivalDissentersBonus": 0.073177,
+          "unpunishedDissentersPenalty": 0.209896,
+          "vpCostPenalty": 0.082845,
+          "misalignedBonus": 0.01683,
+          "cathedralConversionPenalty": 0.126377,
+          "dissenterConversionPenalty": 0.105558,
+          "deepDebtSellBonus": 0.160745,
+          "mildDebtSellBonus": 0.105595,
+          "lowSkyshipsSellPenalty": 0.010089
+        },
+        "avgVP": 57.41
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.092339,
+          "earlyAgitatorPenalty": 0.094724,
+          "urgentDissenters": 0.168792,
+          "someDissenters": 0.118388,
+          "executeVPCost": 0.263601,
+          "rivalDissentersBonus": 0.185915,
+          "unpunishedDissentersPenalty": 0.182205,
+          "vpCostPenalty": 0.040438,
+          "misalignedBonus": 0.051953,
+          "cathedralConversionPenalty": 0.115779,
+          "dissenterConversionPenalty": 0.145323,
+          "deepDebtSellBonus": 0.068831,
+          "mildDebtSellBonus": 0.095896,
+          "lowSkyshipsSellPenalty": 0.026395
+        },
+        "avgVP": 56.84
+      }
+    ],
+    "gen_best_avgVP": 62.28,
+    "gen_avg_vp": 56.31,
+    "alltime_best_avgVP": 63.35,
+    "sigma": 0.061078,
+    "elapsed_s": 558.0
+  },
+  {
+    "generation": 8,
+    "candidates": [
+      {
+        "weights": {
+          "targetLeaderBonus": 0.044034,
+          "earlyAgitatorPenalty": 0.054065,
+          "urgentDissenters": 0.301136,
+          "someDissenters": 0.053708,
+          "executeVPCost": 0.196625,
+          "rivalDissentersBonus": 0.051459,
+          "unpunishedDissentersPenalty": 0.198197,
+          "vpCostPenalty": 0.035824,
+          "misalignedBonus": 0.177439,
+          "cathedralConversionPenalty": 0.097965,
+          "dissenterConversionPenalty": 0.010021,
+          "deepDebtSellBonus": 0.220748,
+          "mildDebtSellBonus": 0.14932,
+          "lowSkyshipsSellPenalty": 0.031017
+        },
+        "avgVP": 57.35
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.014793,
+          "earlyAgitatorPenalty": 0.024743,
+          "urgentDissenters": 0.269086,
+          "someDissenters": 0.10001,
+          "executeVPCost": 0.245855,
+          "rivalDissentersBonus": 0.065504,
+          "unpunishedDissentersPenalty": 0.053956,
+          "vpCostPenalty": 0.018764,
+          "misalignedBonus": 0.120437,
+          "cathedralConversionPenalty": 0.029817,
+          "dissenterConversionPenalty": 0.068338,
+          "deepDebtSellBonus": 0.135135,
+          "mildDebtSellBonus": 0.032557,
+          "lowSkyshipsSellPenalty": 0.013191
+        },
+        "avgVP": 57.38
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.107373,
+          "earlyAgitatorPenalty": 0.014704,
+          "urgentDissenters": 0.147876,
+          "someDissenters": 0.267231,
+          "executeVPCost": 0.239153,
+          "rivalDissentersBonus": 0.046388,
+          "unpunishedDissentersPenalty": 0.03177,
+          "vpCostPenalty": 0.056705,
+          "misalignedBonus": 0.091124,
+          "cathedralConversionPenalty": 0.025976,
+          "dissenterConversionPenalty": 0.029202,
+          "deepDebtSellBonus": 0.196648,
+          "mildDebtSellBonus": 0.02489,
+          "lowSkyshipsSellPenalty": 0.010655
+        },
+        "avgVP": 55.95
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.01373,
+          "earlyAgitatorPenalty": 0.061668,
+          "urgentDissenters": 0.23731,
+          "someDissenters": 0.113368,
+          "executeVPCost": 0.336237,
+          "rivalDissentersBonus": 0.036002,
+          "unpunishedDissentersPenalty": 0.109792,
+          "vpCostPenalty": 0.025872,
+          "misalignedBonus": 0.113812,
+          "cathedralConversionPenalty": 0.021776,
+          "dissenterConversionPenalty": 0.057946,
+          "deepDebtSellBonus": 0.118208,
+          "mildDebtSellBonus": 0.060195,
+          "lowSkyshipsSellPenalty": 0.087132
+        },
+        "avgVP": 63.23
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.027898,
+          "earlyAgitatorPenalty": 0.118088,
+          "urgentDissenters": 0.283295,
+          "someDissenters": 0.162478,
+          "executeVPCost": 0.292629,
+          "rivalDissentersBonus": 0.108773,
+          "unpunishedDissentersPenalty": 0.058106,
+          "vpCostPenalty": 0.150329,
+          "misalignedBonus": 0.105245,
+          "cathedralConversionPenalty": 0.023076,
+          "dissenterConversionPenalty": 0.083273,
+          "deepDebtSellBonus": 0.133036,
+          "mildDebtSellBonus": 0.175066,
+          "lowSkyshipsSellPenalty": 0.047009
+        },
+        "avgVP": 47.8
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.091015,
+          "earlyAgitatorPenalty": 0.117328,
+          "urgentDissenters": 0.200891,
+          "someDissenters": 0.055743,
+          "executeVPCost": 0.26026,
+          "rivalDissentersBonus": 0.077808,
+          "unpunishedDissentersPenalty": 0.109478,
+          "vpCostPenalty": 0.132244,
+          "misalignedBonus": 0.026675,
+          "cathedralConversionPenalty": 0.107621,
+          "dissenterConversionPenalty": 0.025768,
+          "deepDebtSellBonus": 0.116658,
+          "mildDebtSellBonus": 0.149505,
+          "lowSkyshipsSellPenalty": 0.035973
+        },
+        "avgVP": 51.08
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.107369,
+          "earlyAgitatorPenalty": 0.024783,
+          "urgentDissenters": 0.187539,
+          "someDissenters": 0.051363,
+          "executeVPCost": 0.182423,
+          "rivalDissentersBonus": 0.14445,
+          "unpunishedDissentersPenalty": 0.067201,
+          "vpCostPenalty": 0.121978,
+          "misalignedBonus": 0.128439,
+          "cathedralConversionPenalty": 0.048217,
+          "dissenterConversionPenalty": 0.018998,
+          "deepDebtSellBonus": 0.08081,
+          "mildDebtSellBonus": 0.174326,
+          "lowSkyshipsSellPenalty": 0.039697
+        },
+        "avgVP": 52.62
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.01879,
+          "earlyAgitatorPenalty": 0.024062,
+          "urgentDissenters": 0.194267,
+          "someDissenters": 0.082325,
+          "executeVPCost": 0.271718,
+          "rivalDissentersBonus": 0.123511,
+          "unpunishedDissentersPenalty": 0.114017,
+          "vpCostPenalty": 0.035512,
+          "misalignedBonus": 0.098522,
+          "cathedralConversionPenalty": 0.115035,
+          "dissenterConversionPenalty": 0.096485,
+          "deepDebtSellBonus": 0.116004,
+          "mildDebtSellBonus": 0.210141,
+          "lowSkyshipsSellPenalty": 0.022498
+        },
+        "avgVP": 66.82
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.042319,
+          "earlyAgitatorPenalty": 0.143627,
+          "urgentDissenters": 0.183246,
+          "someDissenters": 0.100812,
+          "executeVPCost": 0.28199,
+          "rivalDissentersBonus": 0.12458,
+          "unpunishedDissentersPenalty": 0.018555,
+          "vpCostPenalty": 0.120228,
+          "misalignedBonus": 0.18363,
+          "cathedralConversionPenalty": 0.09911,
+          "dissenterConversionPenalty": 0.030097,
+          "deepDebtSellBonus": 0.123785,
+          "mildDebtSellBonus": 0.117048,
+          "lowSkyshipsSellPenalty": 0.023156
+        },
+        "avgVP": 58.15
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.054542,
+          "earlyAgitatorPenalty": 0.132454,
+          "urgentDissenters": 0.195971,
+          "someDissenters": 0.036584,
+          "executeVPCost": 0.226311,
+          "rivalDissentersBonus": 0.062448,
+          "unpunishedDissentersPenalty": 0.125459,
+          "vpCostPenalty": 0.032742,
+          "misalignedBonus": 0.087105,
+          "cathedralConversionPenalty": 0.081542,
+          "dissenterConversionPenalty": 0.013072,
+          "deepDebtSellBonus": 0.273028,
+          "mildDebtSellBonus": 0.179832,
+          "lowSkyshipsSellPenalty": 0.027374
+        },
+        "avgVP": 59.43
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.030578,
+          "earlyAgitatorPenalty": 0.092126,
+          "urgentDissenters": 0.224765,
+          "someDissenters": 0.037896,
+          "executeVPCost": 0.244576,
+          "rivalDissentersBonus": 0.218042,
+          "unpunishedDissentersPenalty": 0.048977,
+          "vpCostPenalty": 0.035926,
+          "misalignedBonus": 0.141029,
+          "cathedralConversionPenalty": 0.021841,
+          "dissenterConversionPenalty": 0.037684,
+          "deepDebtSellBonus": 0.121692,
+          "mildDebtSellBonus": 0.135534,
+          "lowSkyshipsSellPenalty": 0.023143
+        },
+        "avgVP": 62.24
+      }
+    ],
+    "gen_best_avgVP": 66.82,
+    "gen_avg_vp": 57.46,
+    "alltime_best_avgVP": 66.82,
+    "sigma": 0.057296,
+    "elapsed_s": 640.0
+  },
+  {
+    "generation": 9,
+    "candidates": [
+      {
+        "weights": {
+          "targetLeaderBonus": 0.019819,
+          "earlyAgitatorPenalty": 0.029265,
+          "urgentDissenters": 0.134875,
+          "someDissenters": 0.07523,
+          "executeVPCost": 0.247738,
+          "rivalDissentersBonus": 0.09212,
+          "unpunishedDissentersPenalty": 0.208331,
+          "vpCostPenalty": 0.063482,
+          "misalignedBonus": 0.214088,
+          "cathedralConversionPenalty": 0.167602,
+          "dissenterConversionPenalty": 0.011472,
+          "deepDebtSellBonus": 0.103895,
+          "mildDebtSellBonus": 0.161309,
+          "lowSkyshipsSellPenalty": 0.030168
+        },
+        "avgVP": 58.83
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.014199,
+          "earlyAgitatorPenalty": 0.118133,
+          "urgentDissenters": 0.265547,
+          "someDissenters": 0.153345,
+          "executeVPCost": 0.191766,
+          "rivalDissentersBonus": 0.194684,
+          "unpunishedDissentersPenalty": 0.105573,
+          "vpCostPenalty": 0.064205,
+          "misalignedBonus": 0.185762,
+          "cathedralConversionPenalty": 0.045473,
+          "dissenterConversionPenalty": 0.151892,
+          "deepDebtSellBonus": 0.153438,
+          "mildDebtSellBonus": 0.109957,
+          "lowSkyshipsSellPenalty": 0.05032
+        },
+        "avgVP": 61.91
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.033561,
+          "earlyAgitatorPenalty": 0.046116,
+          "urgentDissenters": 0.131856,
+          "someDissenters": 0.016668,
+          "executeVPCost": 0.32144,
+          "rivalDissentersBonus": 0.089921,
+          "unpunishedDissentersPenalty": 0.040645,
+          "vpCostPenalty": 0.012807,
+          "misalignedBonus": 0.1147,
+          "cathedralConversionPenalty": 0.194886,
+          "dissenterConversionPenalty": 0.104247,
+          "deepDebtSellBonus": 0.106042,
+          "mildDebtSellBonus": 0.148077,
+          "lowSkyshipsSellPenalty": 0.015021
+        },
+        "avgVP": 59.68
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.010502,
+          "earlyAgitatorPenalty": 0.111573,
+          "urgentDissenters": 0.223449,
+          "someDissenters": 0.014665,
+          "executeVPCost": 0.312585,
+          "rivalDissentersBonus": 0.084649,
+          "unpunishedDissentersPenalty": 0.108582,
+          "vpCostPenalty": 0.038248,
+          "misalignedBonus": 0.059851,
+          "cathedralConversionPenalty": 0.072286,
+          "dissenterConversionPenalty": 0.135828,
+          "deepDebtSellBonus": 0.157609,
+          "mildDebtSellBonus": 0.094982,
+          "lowSkyshipsSellPenalty": 0.078344
+        },
+        "avgVP": 62.82
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.060388,
+          "earlyAgitatorPenalty": 0.010056,
+          "urgentDissenters": 0.230429,
+          "someDissenters": 0.083865,
+          "executeVPCost": 0.318164,
+          "rivalDissentersBonus": 0.103361,
+          "unpunishedDissentersPenalty": 0.110438,
+          "vpCostPenalty": 0.020453,
+          "misalignedBonus": 0.239065,
+          "cathedralConversionPenalty": 0.111364,
+          "dissenterConversionPenalty": 0.148815,
+          "deepDebtSellBonus": 0.121204,
+          "mildDebtSellBonus": 0.199754,
+          "lowSkyshipsSellPenalty": 0.010005
+        },
+        "avgVP": 56.29
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.088505,
+          "earlyAgitatorPenalty": 0.013061,
+          "urgentDissenters": 0.27256,
+          "someDissenters": 0.104711,
+          "executeVPCost": 0.301349,
+          "rivalDissentersBonus": 0.06912,
+          "unpunishedDissentersPenalty": 0.12466,
+          "vpCostPenalty": 0.039899,
+          "misalignedBonus": 0.09831,
+          "cathedralConversionPenalty": 0.09633,
+          "dissenterConversionPenalty": 0.011336,
+          "deepDebtSellBonus": 0.265001,
+          "mildDebtSellBonus": 0.127229,
+          "lowSkyshipsSellPenalty": 0.031647
+        },
+        "avgVP": 63.76
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.010752,
+          "earlyAgitatorPenalty": 0.051916,
+          "urgentDissenters": 0.290803,
+          "someDissenters": 0.065848,
+          "executeVPCost": 0.311434,
+          "rivalDissentersBonus": 0.109799,
+          "unpunishedDissentersPenalty": 0.03597,
+          "vpCostPenalty": 0.10528,
+          "misalignedBonus": 0.099357,
+          "cathedralConversionPenalty": 0.010554,
+          "dissenterConversionPenalty": 0.016867,
+          "deepDebtSellBonus": 0.038434,
+          "mildDebtSellBonus": 0.210741,
+          "lowSkyshipsSellPenalty": 0.049215
+        },
+        "avgVP": 62.93
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.054738,
+          "earlyAgitatorPenalty": 0.019156,
+          "urgentDissenters": 0.130806,
+          "someDissenters": 0.202096,
+          "executeVPCost": 0.339563,
+          "rivalDissentersBonus": 0.099419,
+          "unpunishedDissentersPenalty": 0.049436,
+          "vpCostPenalty": 0.014359,
+          "misalignedBonus": 0.151149,
+          "cathedralConversionPenalty": 0.013767,
+          "dissenterConversionPenalty": 0.040842,
+          "deepDebtSellBonus": 0.192746,
+          "mildDebtSellBonus": 0.183091,
+          "lowSkyshipsSellPenalty": 0.048533
+        },
+        "avgVP": 61.58
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.013521,
+          "earlyAgitatorPenalty": 0.020176,
+          "urgentDissenters": 0.153197,
+          "someDissenters": 0.018073,
+          "executeVPCost": 0.218851,
+          "rivalDissentersBonus": 0.207545,
+          "unpunishedDissentersPenalty": 0.164455,
+          "vpCostPenalty": 0.012521,
+          "misalignedBonus": 0.106675,
+          "cathedralConversionPenalty": 0.074865,
+          "dissenterConversionPenalty": 0.108836,
+          "deepDebtSellBonus": 0.131368,
+          "mildDebtSellBonus": 0.048322,
+          "lowSkyshipsSellPenalty": 0.010742
+        },
+        "avgVP": 60.33
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.040034,
+          "earlyAgitatorPenalty": 0.030288,
+          "urgentDissenters": 0.246227,
+          "someDissenters": 0.095315,
+          "executeVPCost": 0.253794,
+          "rivalDissentersBonus": 0.139608,
+          "unpunishedDissentersPenalty": 0.273542,
+          "vpCostPenalty": 0.079715,
+          "misalignedBonus": 0.124832,
+          "cathedralConversionPenalty": 0.05346,
+          "dissenterConversionPenalty": 0.025813,
+          "deepDebtSellBonus": 0.120963,
+          "mildDebtSellBonus": 0.189853,
+          "lowSkyshipsSellPenalty": 0.018703
+        },
+        "avgVP": 62.68
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.035618,
+          "earlyAgitatorPenalty": 0.021588,
+          "urgentDissenters": 0.264538,
+          "someDissenters": 0.160343,
+          "executeVPCost": 0.201184,
+          "rivalDissentersBonus": 0.053739,
+          "unpunishedDissentersPenalty": 0.024891,
+          "vpCostPenalty": 0.011958,
+          "misalignedBonus": 0.185321,
+          "cathedralConversionPenalty": 0.113802,
+          "dissenterConversionPenalty": 0.131394,
+          "deepDebtSellBonus": 0.168711,
+          "mildDebtSellBonus": 0.12622,
+          "lowSkyshipsSellPenalty": 0.100228
+        },
+        "avgVP": 60.4
+      }
+    ],
+    "gen_best_avgVP": 63.76,
+    "gen_avg_vp": 61.02,
+    "alltime_best_avgVP": 66.82,
+    "sigma": 0.053965,
+    "elapsed_s": 715.0
+  },
+  {
+    "generation": 10,
+    "candidates": [
+      {
+        "weights": {
+          "targetLeaderBonus": 0.010709,
+          "earlyAgitatorPenalty": 0.109746,
+          "urgentDissenters": 0.192143,
+          "someDissenters": 0.056295,
+          "executeVPCost": 0.253734,
+          "rivalDissentersBonus": 0.215279,
+          "unpunishedDissentersPenalty": 0.111937,
+          "vpCostPenalty": 0.087223,
+          "misalignedBonus": 0.062569,
+          "cathedralConversionPenalty": 0.111347,
+          "dissenterConversionPenalty": 0.05455,
+          "deepDebtSellBonus": 0.114148,
+          "mildDebtSellBonus": 0.170377,
+          "lowSkyshipsSellPenalty": 0.061903
+        },
+        "avgVP": 63.04
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.036728,
+          "earlyAgitatorPenalty": 0.08013,
+          "urgentDissenters": 0.367655,
+          "someDissenters": 0.018553,
+          "executeVPCost": 0.317314,
+          "rivalDissentersBonus": 0.109879,
+          "unpunishedDissentersPenalty": 0.095741,
+          "vpCostPenalty": 0.104465,
+          "misalignedBonus": 0.155348,
+          "cathedralConversionPenalty": 0.0755,
+          "dissenterConversionPenalty": 0.082749,
+          "deepDebtSellBonus": 0.16034,
+          "mildDebtSellBonus": 0.076261,
+          "lowSkyshipsSellPenalty": 0.018429
+        },
+        "avgVP": 59.78
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.060342,
+          "earlyAgitatorPenalty": 0.020897,
+          "urgentDissenters": 0.297582,
+          "someDissenters": 0.147654,
+          "executeVPCost": 0.349779,
+          "rivalDissentersBonus": 0.06319,
+          "unpunishedDissentersPenalty": 0.087461,
+          "vpCostPenalty": 0.090929,
+          "misalignedBonus": 0.136896,
+          "cathedralConversionPenalty": 0.018687,
+          "dissenterConversionPenalty": 0.013329,
+          "deepDebtSellBonus": 0.201708,
+          "mildDebtSellBonus": 0.158951,
+          "lowSkyshipsSellPenalty": 0.011671
+        },
+        "avgVP": 58.53
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.129649,
+          "earlyAgitatorPenalty": 0.03775,
+          "urgentDissenters": 0.278119,
+          "someDissenters": 0.14843,
+          "executeVPCost": 0.217564,
+          "rivalDissentersBonus": 0.118191,
+          "unpunishedDissentersPenalty": 0.104261,
+          "vpCostPenalty": 0.027227,
+          "misalignedBonus": 0.116824,
+          "cathedralConversionPenalty": 0.058726,
+          "dissenterConversionPenalty": 0.031806,
+          "deepDebtSellBonus": 0.204656,
+          "mildDebtSellBonus": 0.085363,
+          "lowSkyshipsSellPenalty": 0.04965
+        },
+        "avgVP": 58.08
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.030084,
+          "earlyAgitatorPenalty": 0.015279,
+          "urgentDissenters": 0.238909,
+          "someDissenters": 0.101889,
+          "executeVPCost": 0.249225,
+          "rivalDissentersBonus": 0.064637,
+          "unpunishedDissentersPenalty": 0.0419,
+          "vpCostPenalty": 0.06704,
+          "misalignedBonus": 0.104833,
+          "cathedralConversionPenalty": 0.058641,
+          "dissenterConversionPenalty": 0.034131,
+          "deepDebtSellBonus": 0.115619,
+          "mildDebtSellBonus": 0.181476,
+          "lowSkyshipsSellPenalty": 0.010948
+        },
+        "avgVP": 61.53
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.012403,
+          "earlyAgitatorPenalty": 0.048939,
+          "urgentDissenters": 0.316154,
+          "someDissenters": 0.036522,
+          "executeVPCost": 0.160134,
+          "rivalDissentersBonus": 0.060324,
+          "unpunishedDissentersPenalty": 0.12576,
+          "vpCostPenalty": 0.069498,
+          "misalignedBonus": 0.15106,
+          "cathedralConversionPenalty": 0.053417,
+          "dissenterConversionPenalty": 0.010085,
+          "deepDebtSellBonus": 0.141522,
+          "mildDebtSellBonus": 0.075655,
+          "lowSkyshipsSellPenalty": 0.053875
+        },
+        "avgVP": 58.37
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.108341,
+          "earlyAgitatorPenalty": 0.102462,
+          "urgentDissenters": 0.116647,
+          "someDissenters": 0.136707,
+          "executeVPCost": 0.395682,
+          "rivalDissentersBonus": 0.13262,
+          "unpunishedDissentersPenalty": 0.064468,
+          "vpCostPenalty": 0.046613,
+          "misalignedBonus": 0.110789,
+          "cathedralConversionPenalty": 0.022184,
+          "dissenterConversionPenalty": 0.010095,
+          "deepDebtSellBonus": 0.239326,
+          "mildDebtSellBonus": 0.01702,
+          "lowSkyshipsSellPenalty": 0.058061
+        },
+        "avgVP": 62.72
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.047804,
+          "earlyAgitatorPenalty": 0.0106,
+          "urgentDissenters": 0.297362,
+          "someDissenters": 0.149537,
+          "executeVPCost": 0.252863,
+          "rivalDissentersBonus": 0.078973,
+          "unpunishedDissentersPenalty": 0.230238,
+          "vpCostPenalty": 0.083511,
+          "misalignedBonus": 0.088366,
+          "cathedralConversionPenalty": 0.092138,
+          "dissenterConversionPenalty": 0.049658,
+          "deepDebtSellBonus": 0.180829,
+          "mildDebtSellBonus": 0.134356,
+          "lowSkyshipsSellPenalty": 0.051628
+        },
+        "avgVP": 58.87
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.020302,
+          "earlyAgitatorPenalty": 0.0107,
+          "urgentDissenters": 0.28671,
+          "someDissenters": 0.192718,
+          "executeVPCost": 0.283098,
+          "rivalDissentersBonus": 0.031904,
+          "unpunishedDissentersPenalty": 0.209704,
+          "vpCostPenalty": 0.055643,
+          "misalignedBonus": 0.091484,
+          "cathedralConversionPenalty": 0.028891,
+          "dissenterConversionPenalty": 0.032398,
+          "deepDebtSellBonus": 0.168895,
+          "mildDebtSellBonus": 0.182324,
+          "lowSkyshipsSellPenalty": 0.063514
+        },
+        "avgVP": 58.7
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.105491,
+          "earlyAgitatorPenalty": 0.010028,
+          "urgentDissenters": 0.338884,
+          "someDissenters": 0.117726,
+          "executeVPCost": 0.301284,
+          "rivalDissentersBonus": 0.05365,
+          "unpunishedDissentersPenalty": 0.124115,
+          "vpCostPenalty": 0.097949,
+          "misalignedBonus": 0.073956,
+          "cathedralConversionPenalty": 0.063563,
+          "dissenterConversionPenalty": 0.013939,
+          "deepDebtSellBonus": 0.222938,
+          "mildDebtSellBonus": 0.136447,
+          "lowSkyshipsSellPenalty": 0.058156
+        },
+        "avgVP": 60.3
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.0275,
+          "earlyAgitatorPenalty": 0.020397,
+          "urgentDissenters": 0.268249,
+          "someDissenters": 0.117523,
+          "executeVPCost": 0.245847,
+          "rivalDissentersBonus": 0.03262,
+          "unpunishedDissentersPenalty": 0.229579,
+          "vpCostPenalty": 0.108504,
+          "misalignedBonus": 0.114556,
+          "cathedralConversionPenalty": 0.046857,
+          "dissenterConversionPenalty": 0.065403,
+          "deepDebtSellBonus": 0.11272,
+          "mildDebtSellBonus": 0.104275,
+          "lowSkyshipsSellPenalty": 0.145215
+        },
+        "avgVP": 56.38
+      }
+    ],
+    "gen_best_avgVP": 63.04,
+    "gen_avg_vp": 59.66,
+    "alltime_best_avgVP": 66.82,
+    "sigma": 0.04851,
+    "elapsed_s": 788.0
+  },
+  {
+    "generation": 11,
+    "candidates": [
+      {
+        "weights": {
+          "targetLeaderBonus": 0.048358,
+          "earlyAgitatorPenalty": 0.075546,
+          "urgentDissenters": 0.266089,
+          "someDissenters": 0.030362,
+          "executeVPCost": 0.275663,
+          "rivalDissentersBonus": 0.198113,
+          "unpunishedDissentersPenalty": 0.14141,
+          "vpCostPenalty": 0.060115,
+          "misalignedBonus": 0.059934,
+          "cathedralConversionPenalty": 0.108815,
+          "dissenterConversionPenalty": 0.033644,
+          "deepDebtSellBonus": 0.160444,
+          "mildDebtSellBonus": 0.052748,
+          "lowSkyshipsSellPenalty": 0.033439
+        },
+        "avgVP": 61.46
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.021985,
+          "earlyAgitatorPenalty": 0.137358,
+          "urgentDissenters": 0.184215,
+          "someDissenters": 0.133766,
+          "executeVPCost": 0.259765,
+          "rivalDissentersBonus": 0.212652,
+          "unpunishedDissentersPenalty": 0.072423,
+          "vpCostPenalty": 0.100385,
+          "misalignedBonus": 0.030206,
+          "cathedralConversionPenalty": 0.170061,
+          "dissenterConversionPenalty": 0.040649,
+          "deepDebtSellBonus": 0.294622,
+          "mildDebtSellBonus": 0.165579,
+          "lowSkyshipsSellPenalty": 0.050189
+        },
+        "avgVP": 62.55
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.113598,
+          "earlyAgitatorPenalty": 0.083129,
+          "urgentDissenters": 0.195011,
+          "someDissenters": 0.090941,
+          "executeVPCost": 0.29917,
+          "rivalDissentersBonus": 0.183775,
+          "unpunishedDissentersPenalty": 0.019704,
+          "vpCostPenalty": 0.095889,
+          "misalignedBonus": 0.050661,
+          "cathedralConversionPenalty": 0.108984,
+          "dissenterConversionPenalty": 0.023531,
+          "deepDebtSellBonus": 0.265609,
+          "mildDebtSellBonus": 0.106457,
+          "lowSkyshipsSellPenalty": 0.108662
+        },
+        "avgVP": 59.76
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.014304,
+          "earlyAgitatorPenalty": 0.03118,
+          "urgentDissenters": 0.264376,
+          "someDissenters": 0.095543,
+          "executeVPCost": 0.297151,
+          "rivalDissentersBonus": 0.051181,
+          "unpunishedDissentersPenalty": 0.03415,
+          "vpCostPenalty": 0.081913,
+          "misalignedBonus": 0.096092,
+          "cathedralConversionPenalty": 0.116678,
+          "dissenterConversionPenalty": 0.014239,
+          "deepDebtSellBonus": 0.163091,
+          "mildDebtSellBonus": 0.180723,
+          "lowSkyshipsSellPenalty": 0.049021
+        },
+        "avgVP": 62.72
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.039478,
+          "earlyAgitatorPenalty": 0.048376,
+          "urgentDissenters": 0.2391,
+          "someDissenters": 0.091848,
+          "executeVPCost": 0.368119,
+          "rivalDissentersBonus": 0.100962,
+          "unpunishedDissentersPenalty": 0.125252,
+          "vpCostPenalty": 0.096373,
+          "misalignedBonus": 0.067032,
+          "cathedralConversionPenalty": 0.101386,
+          "dissenterConversionPenalty": 0.093805,
+          "deepDebtSellBonus": 0.173784,
+          "mildDebtSellBonus": 0.086848,
+          "lowSkyshipsSellPenalty": 0.010115
+        },
+        "avgVP": 59.38
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.087735,
+          "earlyAgitatorPenalty": 0.071903,
+          "urgentDissenters": 0.200499,
+          "someDissenters": 0.105548,
+          "executeVPCost": 0.18452,
+          "rivalDissentersBonus": 0.173905,
+          "unpunishedDissentersPenalty": 0.15261,
+          "vpCostPenalty": 0.054086,
+          "misalignedBonus": 0.161152,
+          "cathedralConversionPenalty": 0.014346,
+          "dissenterConversionPenalty": 0.120378,
+          "deepDebtSellBonus": 0.129878,
+          "mildDebtSellBonus": 0.195857,
+          "lowSkyshipsSellPenalty": 0.022076
+        },
+        "avgVP": 55.23
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.017894,
+          "earlyAgitatorPenalty": 0.035489,
+          "urgentDissenters": 0.230933,
+          "someDissenters": 0.078464,
+          "executeVPCost": 0.328206,
+          "rivalDissentersBonus": 0.145945,
+          "unpunishedDissentersPenalty": 0.078946,
+          "vpCostPenalty": 0.102571,
+          "misalignedBonus": 0.085801,
+          "cathedralConversionPenalty": 0.143985,
+          "dissenterConversionPenalty": 0.136828,
+          "deepDebtSellBonus": 0.236763,
+          "mildDebtSellBonus": 0.086997,
+          "lowSkyshipsSellPenalty": 0.09359
+        },
+        "avgVP": 60.8
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.01245,
+          "earlyAgitatorPenalty": 0.040168,
+          "urgentDissenters": 0.11997,
+          "someDissenters": 0.117011,
+          "executeVPCost": 0.31728,
+          "rivalDissentersBonus": 0.247797,
+          "unpunishedDissentersPenalty": 0.064467,
+          "vpCostPenalty": 0.010112,
+          "misalignedBonus": 0.030151,
+          "cathedralConversionPenalty": 0.053912,
+          "dissenterConversionPenalty": 0.073746,
+          "deepDebtSellBonus": 0.195284,
+          "mildDebtSellBonus": 0.092693,
+          "lowSkyshipsSellPenalty": 0.078519
+        },
+        "avgVP": 60.16
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.04575,
+          "earlyAgitatorPenalty": 0.174654,
+          "urgentDissenters": 0.208072,
+          "someDissenters": 0.083425,
+          "executeVPCost": 0.381708,
+          "rivalDissentersBonus": 0.144587,
+          "unpunishedDissentersPenalty": 0.054124,
+          "vpCostPenalty": 0.104085,
+          "misalignedBonus": 0.048143,
+          "cathedralConversionPenalty": 0.060746,
+          "dissenterConversionPenalty": 0.014877,
+          "deepDebtSellBonus": 0.197702,
+          "mildDebtSellBonus": 0.081778,
+          "lowSkyshipsSellPenalty": 0.071824
+        },
+        "avgVP": 60.54
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.061456,
+          "earlyAgitatorPenalty": 0.078139,
+          "urgentDissenters": 0.046237,
+          "someDissenters": 0.069033,
+          "executeVPCost": 0.318711,
+          "rivalDissentersBonus": 0.137269,
+          "unpunishedDissentersPenalty": 0.025163,
+          "vpCostPenalty": 0.079757,
+          "misalignedBonus": 0.044936,
+          "cathedralConversionPenalty": 0.10265,
+          "dissenterConversionPenalty": 0.077954,
+          "deepDebtSellBonus": 0.221113,
+          "mildDebtSellBonus": 0.174878,
+          "lowSkyshipsSellPenalty": 0.016796
+        },
+        "avgVP": 59.92
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.010272,
+          "earlyAgitatorPenalty": 0.08466,
+          "urgentDissenters": 0.18671,
+          "someDissenters": 0.132147,
+          "executeVPCost": 0.359149,
+          "rivalDissentersBonus": 0.245305,
+          "unpunishedDissentersPenalty": 0.124214,
+          "vpCostPenalty": 0.033874,
+          "misalignedBonus": 0.114697,
+          "cathedralConversionPenalty": 0.118317,
+          "dissenterConversionPenalty": 0.051504,
+          "deepDebtSellBonus": 0.06736,
+          "mildDebtSellBonus": 0.033908,
+          "lowSkyshipsSellPenalty": 0.069375
+        },
+        "avgVP": 59.73
+      }
+    ],
+    "gen_best_avgVP": 62.72,
+    "gen_avg_vp": 60.2,
+    "alltime_best_avgVP": 66.82,
+    "sigma": 0.047261,
+    "elapsed_s": 864.0
+  },
+  {
+    "generation": 12,
+    "candidates": [
+      {
+        "weights": {
+          "targetLeaderBonus": 0.05034,
+          "earlyAgitatorPenalty": 0.055801,
+          "urgentDissenters": 0.217893,
+          "someDissenters": 0.112916,
+          "executeVPCost": 0.257499,
+          "rivalDissentersBonus": 0.127676,
+          "unpunishedDissentersPenalty": 0.027096,
+          "vpCostPenalty": 0.0949,
+          "misalignedBonus": 0.087922,
+          "cathedralConversionPenalty": 0.063967,
+          "dissenterConversionPenalty": 0.010724,
+          "deepDebtSellBonus": 0.241454,
+          "mildDebtSellBonus": 0.178961,
+          "lowSkyshipsSellPenalty": 0.028786
+        },
+        "avgVP": 56.9
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.012139,
+          "earlyAgitatorPenalty": 0.092633,
+          "urgentDissenters": 0.206066,
+          "someDissenters": 0.09518,
+          "executeVPCost": 0.22937,
+          "rivalDissentersBonus": 0.147941,
+          "unpunishedDissentersPenalty": 0.055153,
+          "vpCostPenalty": 0.142692,
+          "misalignedBonus": 0.081402,
+          "cathedralConversionPenalty": 0.168814,
+          "dissenterConversionPenalty": 0.017209,
+          "deepDebtSellBonus": 0.219655,
+          "mildDebtSellBonus": 0.185584,
+          "lowSkyshipsSellPenalty": 0.062582
+        },
+        "avgVP": 53.94
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.041154,
+          "earlyAgitatorPenalty": 0.035239,
+          "urgentDissenters": 0.171436,
+          "someDissenters": 0.151595,
+          "executeVPCost": 0.369955,
+          "rivalDissentersBonus": 0.140272,
+          "unpunishedDissentersPenalty": 0.039154,
+          "vpCostPenalty": 0.063977,
+          "misalignedBonus": 0.012034,
+          "cathedralConversionPenalty": 0.146916,
+          "dissenterConversionPenalty": 0.118263,
+          "deepDebtSellBonus": 0.165683,
+          "mildDebtSellBonus": 0.134709,
+          "lowSkyshipsSellPenalty": 0.119674
+        },
+        "avgVP": 59.88
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.036224,
+          "earlyAgitatorPenalty": 0.152432,
+          "urgentDissenters": 0.176509,
+          "someDissenters": 0.155595,
+          "executeVPCost": 0.281051,
+          "rivalDissentersBonus": 0.179269,
+          "unpunishedDissentersPenalty": 0.080403,
+          "vpCostPenalty": 0.105686,
+          "misalignedBonus": 0.131343,
+          "cathedralConversionPenalty": 0.123541,
+          "dissenterConversionPenalty": 0.040464,
+          "deepDebtSellBonus": 0.20974,
+          "mildDebtSellBonus": 0.155724,
+          "lowSkyshipsSellPenalty": 0.015098
+        },
+        "avgVP": 56.08
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.032694,
+          "earlyAgitatorPenalty": 0.110316,
+          "urgentDissenters": 0.277423,
+          "someDissenters": 0.0603,
+          "executeVPCost": 0.334278,
+          "rivalDissentersBonus": 0.108852,
+          "unpunishedDissentersPenalty": 0.060791,
+          "vpCostPenalty": 0.104064,
+          "misalignedBonus": 0.018965,
+          "cathedralConversionPenalty": 0.1162,
+          "dissenterConversionPenalty": 0.012276,
+          "deepDebtSellBonus": 0.068652,
+          "mildDebtSellBonus": 0.09766,
+          "lowSkyshipsSellPenalty": 0.137844
+        },
+        "avgVP": 61.23
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.038667,
+          "earlyAgitatorPenalty": 0.011685,
+          "urgentDissenters": 0.261686,
+          "someDissenters": 0.045544,
+          "executeVPCost": 0.329684,
+          "rivalDissentersBonus": 0.086722,
+          "unpunishedDissentersPenalty": 0.061967,
+          "vpCostPenalty": 0.033135,
+          "misalignedBonus": 0.124275,
+          "cathedralConversionPenalty": 0.09557,
+          "dissenterConversionPenalty": 0.012048,
+          "deepDebtSellBonus": 0.194037,
+          "mildDebtSellBonus": 0.107922,
+          "lowSkyshipsSellPenalty": 0.050082
+        },
+        "avgVP": 65.6
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.041831,
+          "earlyAgitatorPenalty": 0.082299,
+          "urgentDissenters": 0.292023,
+          "someDissenters": 0.202768,
+          "executeVPCost": 0.290741,
+          "rivalDissentersBonus": 0.059031,
+          "unpunishedDissentersPenalty": 0.090608,
+          "vpCostPenalty": 0.064382,
+          "misalignedBonus": 0.067878,
+          "cathedralConversionPenalty": 0.194819,
+          "dissenterConversionPenalty": 0.011365,
+          "deepDebtSellBonus": 0.16479,
+          "mildDebtSellBonus": 0.173919,
+          "lowSkyshipsSellPenalty": 0.120538
+        },
+        "avgVP": 66.35
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.012484,
+          "earlyAgitatorPenalty": 0.076342,
+          "urgentDissenters": 0.204353,
+          "someDissenters": 0.13758,
+          "executeVPCost": 0.246687,
+          "rivalDissentersBonus": 0.156897,
+          "unpunishedDissentersPenalty": 0.060885,
+          "vpCostPenalty": 0.116756,
+          "misalignedBonus": 0.093575,
+          "cathedralConversionPenalty": 0.118765,
+          "dissenterConversionPenalty": 0.030672,
+          "deepDebtSellBonus": 0.24471,
+          "mildDebtSellBonus": 0.091474,
+          "lowSkyshipsSellPenalty": 0.011672
+        },
+        "avgVP": 59.86
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.017723,
+          "earlyAgitatorPenalty": 0.109776,
+          "urgentDissenters": 0.290279,
+          "someDissenters": 0.179633,
+          "executeVPCost": 0.22362,
+          "rivalDissentersBonus": 0.072679,
+          "unpunishedDissentersPenalty": 0.0448,
+          "vpCostPenalty": 0.123959,
+          "misalignedBonus": 0.105219,
+          "cathedralConversionPenalty": 0.100932,
+          "dissenterConversionPenalty": 0.101078,
+          "deepDebtSellBonus": 0.249574,
+          "mildDebtSellBonus": 0.098776,
+          "lowSkyshipsSellPenalty": 0.087273
+        },
+        "avgVP": 59.81
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.092715,
+          "earlyAgitatorPenalty": 0.080433,
+          "urgentDissenters": 0.232299,
+          "someDissenters": 0.1158,
+          "executeVPCost": 0.178671,
+          "rivalDissentersBonus": 0.159542,
+          "unpunishedDissentersPenalty": 0.091887,
+          "vpCostPenalty": 0.035852,
+          "misalignedBonus": 0.096466,
+          "cathedralConversionPenalty": 0.156309,
+          "dissenterConversionPenalty": 0.026673,
+          "deepDebtSellBonus": 0.224007,
+          "mildDebtSellBonus": 0.162153,
+          "lowSkyshipsSellPenalty": 0.013027
+        },
+        "avgVP": 58.67
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.039115,
+          "earlyAgitatorPenalty": 0.042052,
+          "urgentDissenters": 0.242981,
+          "someDissenters": 0.081458,
+          "executeVPCost": 0.246064,
+          "rivalDissentersBonus": 0.081934,
+          "unpunishedDissentersPenalty": 0.066047,
+          "vpCostPenalty": 0.128406,
+          "misalignedBonus": 0.082916,
+          "cathedralConversionPenalty": 0.140113,
+          "dissenterConversionPenalty": 0.059414,
+          "deepDebtSellBonus": 0.132812,
+          "mildDebtSellBonus": 0.116896,
+          "lowSkyshipsSellPenalty": 0.02859
+        },
+        "avgVP": 55.68
+      }
+    ],
+    "gen_best_avgVP": 66.35,
+    "gen_avg_vp": 59.45,
+    "alltime_best_avgVP": 66.82,
+    "sigma": 0.046974,
+    "elapsed_s": 943.0
+  },
+  {
+    "generation": 13,
+    "candidates": [
+      {
+        "weights": {
+          "targetLeaderBonus": 0.02343,
+          "earlyAgitatorPenalty": 0.074563,
+          "urgentDissenters": 0.261109,
+          "someDissenters": 0.15252,
+          "executeVPCost": 0.347294,
+          "rivalDissentersBonus": 0.014108,
+          "unpunishedDissentersPenalty": 0.020293,
+          "vpCostPenalty": 0.098615,
+          "misalignedBonus": 0.041683,
+          "cathedralConversionPenalty": 0.107794,
+          "dissenterConversionPenalty": 0.011368,
+          "deepDebtSellBonus": 0.185153,
+          "mildDebtSellBonus": 0.036896,
+          "lowSkyshipsSellPenalty": 0.120234
+        },
+        "avgVP": 59.88
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.108541,
+          "earlyAgitatorPenalty": 0.107743,
+          "urgentDissenters": 0.351527,
+          "someDissenters": 0.198597,
+          "executeVPCost": 0.317888,
+          "rivalDissentersBonus": 0.07035,
+          "unpunishedDissentersPenalty": 0.030621,
+          "vpCostPenalty": 0.125508,
+          "misalignedBonus": 0.043023,
+          "cathedralConversionPenalty": 0.154824,
+          "dissenterConversionPenalty": 0.010009,
+          "deepDebtSellBonus": 0.113385,
+          "mildDebtSellBonus": 0.170199,
+          "lowSkyshipsSellPenalty": 0.130947
+        },
+        "avgVP": 55.64
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.010018,
+          "earlyAgitatorPenalty": 0.100181,
+          "urgentDissenters": 0.336115,
+          "someDissenters": 0.085341,
+          "executeVPCost": 0.316493,
+          "rivalDissentersBonus": 0.113201,
+          "unpunishedDissentersPenalty": 0.134186,
+          "vpCostPenalty": 0.048305,
+          "misalignedBonus": 0.024412,
+          "cathedralConversionPenalty": 0.187675,
+          "dissenterConversionPenalty": 0.046507,
+          "deepDebtSellBonus": 0.193446,
+          "mildDebtSellBonus": 0.167582,
+          "lowSkyshipsSellPenalty": 0.148022
+        },
+        "avgVP": 61.55
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.01385,
+          "earlyAgitatorPenalty": 0.073027,
+          "urgentDissenters": 0.179603,
+          "someDissenters": 0.176244,
+          "executeVPCost": 0.302915,
+          "rivalDissentersBonus": 0.124526,
+          "unpunishedDissentersPenalty": 0.028547,
+          "vpCostPenalty": 0.118611,
+          "misalignedBonus": 0.105608,
+          "cathedralConversionPenalty": 0.203611,
+          "dissenterConversionPenalty": 0.047475,
+          "deepDebtSellBonus": 0.156261,
+          "mildDebtSellBonus": 0.140048,
+          "lowSkyshipsSellPenalty": 0.046574
+        },
+        "avgVP": 60.86
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.014332,
+          "earlyAgitatorPenalty": 0.032878,
+          "urgentDissenters": 0.269767,
+          "someDissenters": 0.239361,
+          "executeVPCost": 0.315669,
+          "rivalDissentersBonus": 0.028432,
+          "unpunishedDissentersPenalty": 0.022108,
+          "vpCostPenalty": 0.104576,
+          "misalignedBonus": 0.080068,
+          "cathedralConversionPenalty": 0.177804,
+          "dissenterConversionPenalty": 0.035009,
+          "deepDebtSellBonus": 0.189041,
+          "mildDebtSellBonus": 0.134699,
+          "lowSkyshipsSellPenalty": 0.10192
+        },
+        "avgVP": 63.22
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.020062,
+          "earlyAgitatorPenalty": 0.056879,
+          "urgentDissenters": 0.243786,
+          "someDissenters": 0.141557,
+          "executeVPCost": 0.350424,
+          "rivalDissentersBonus": 0.162828,
+          "unpunishedDissentersPenalty": 0.068684,
+          "vpCostPenalty": 0.117812,
+          "misalignedBonus": 0.05366,
+          "cathedralConversionPenalty": 0.208564,
+          "dissenterConversionPenalty": 0.01011,
+          "deepDebtSellBonus": 0.171978,
+          "mildDebtSellBonus": 0.203024,
+          "lowSkyshipsSellPenalty": 0.075086
+        },
+        "avgVP": 62.69
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.077123,
+          "earlyAgitatorPenalty": 0.057327,
+          "urgentDissenters": 0.257759,
+          "someDissenters": 0.127522,
+          "executeVPCost": 0.269981,
+          "rivalDissentersBonus": 0.064401,
+          "unpunishedDissentersPenalty": 0.04782,
+          "vpCostPenalty": 0.049651,
+          "misalignedBonus": 0.012405,
+          "cathedralConversionPenalty": 0.161395,
+          "dissenterConversionPenalty": 0.010747,
+          "deepDebtSellBonus": 0.199848,
+          "mildDebtSellBonus": 0.069864,
+          "lowSkyshipsSellPenalty": 0.100973
+        },
+        "avgVP": 56.99
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.066857,
+          "earlyAgitatorPenalty": 0.036552,
+          "urgentDissenters": 0.251416,
+          "someDissenters": 0.141906,
+          "executeVPCost": 0.285858,
+          "rivalDissentersBonus": 0.085659,
+          "unpunishedDissentersPenalty": 0.0938,
+          "vpCostPenalty": 0.085115,
+          "misalignedBonus": 0.097802,
+          "cathedralConversionPenalty": 0.077631,
+          "dissenterConversionPenalty": 0.024683,
+          "deepDebtSellBonus": 0.180277,
+          "mildDebtSellBonus": 0.032427,
+          "lowSkyshipsSellPenalty": 0.124166
+        },
+        "avgVP": 62.33
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.097344,
+          "earlyAgitatorPenalty": 0.011863,
+          "urgentDissenters": 0.26099,
+          "someDissenters": 0.168998,
+          "executeVPCost": 0.22873,
+          "rivalDissentersBonus": 0.059552,
+          "unpunishedDissentersPenalty": 0.043449,
+          "vpCostPenalty": 0.086833,
+          "misalignedBonus": 0.125449,
+          "cathedralConversionPenalty": 0.129105,
+          "dissenterConversionPenalty": 0.029533,
+          "deepDebtSellBonus": 0.132933,
+          "mildDebtSellBonus": 0.108133,
+          "lowSkyshipsSellPenalty": 0.060694
+        },
+        "avgVP": 56.55
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.081973,
+          "earlyAgitatorPenalty": 0.055696,
+          "urgentDissenters": 0.342675,
+          "someDissenters": 0.127178,
+          "executeVPCost": 0.255416,
+          "rivalDissentersBonus": 0.062282,
+          "unpunishedDissentersPenalty": 0.05391,
+          "vpCostPenalty": 0.079622,
+          "misalignedBonus": 0.064248,
+          "cathedralConversionPenalty": 0.15874,
+          "dissenterConversionPenalty": 0.01023,
+          "deepDebtSellBonus": 0.249652,
+          "mildDebtSellBonus": 0.131777,
+          "lowSkyshipsSellPenalty": 0.076784
+        },
+        "avgVP": 62.77
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.044386,
+          "earlyAgitatorPenalty": 0.079118,
+          "urgentDissenters": 0.304749,
+          "someDissenters": 0.112537,
+          "executeVPCost": 0.291119,
+          "rivalDissentersBonus": 0.118814,
+          "unpunishedDissentersPenalty": 0.030518,
+          "vpCostPenalty": 0.034281,
+          "misalignedBonus": 0.113144,
+          "cathedralConversionPenalty": 0.145813,
+          "dissenterConversionPenalty": 0.01024,
+          "deepDebtSellBonus": 0.130123,
+          "mildDebtSellBonus": 0.206465,
+          "lowSkyshipsSellPenalty": 0.016396
+        },
+        "avgVP": 59.53
+      }
+    ],
+    "gen_best_avgVP": 63.22,
+    "gen_avg_vp": 60.18,
+    "alltime_best_avgVP": 66.82,
+    "sigma": 0.047754,
+    "elapsed_s": 1020.0
+  },
+  {
+    "generation": 14,
+    "candidates": [
+      {
+        "weights": {
+          "targetLeaderBonus": 0.023555,
+          "earlyAgitatorPenalty": 0.012652,
+          "urgentDissenters": 0.231025,
+          "someDissenters": 0.202467,
+          "executeVPCost": 0.387635,
+          "rivalDissentersBonus": 0.027654,
+          "unpunishedDissentersPenalty": 0.057008,
+          "vpCostPenalty": 0.0624,
+          "misalignedBonus": 0.024345,
+          "cathedralConversionPenalty": 0.188048,
+          "dissenterConversionPenalty": 0.010006,
+          "deepDebtSellBonus": 0.246114,
+          "mildDebtSellBonus": 0.2159,
+          "lowSkyshipsSellPenalty": 0.113077
+        },
+        "avgVP": 58.93
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.04087,
+          "earlyAgitatorPenalty": 0.062503,
+          "urgentDissenters": 0.187148,
+          "someDissenters": 0.08918,
+          "executeVPCost": 0.249237,
+          "rivalDissentersBonus": 0.141352,
+          "unpunishedDissentersPenalty": 0.013951,
+          "vpCostPenalty": 0.05314,
+          "misalignedBonus": 0.060044,
+          "cathedralConversionPenalty": 0.069343,
+          "dissenterConversionPenalty": 0.032273,
+          "deepDebtSellBonus": 0.148875,
+          "mildDebtSellBonus": 0.150953,
+          "lowSkyshipsSellPenalty": 0.124422
+        },
+        "avgVP": 63.85
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.029495,
+          "earlyAgitatorPenalty": 0.01743,
+          "urgentDissenters": 0.346004,
+          "someDissenters": 0.089224,
+          "executeVPCost": 0.310532,
+          "rivalDissentersBonus": 0.140547,
+          "unpunishedDissentersPenalty": 0.010364,
+          "vpCostPenalty": 0.065331,
+          "misalignedBonus": 0.042387,
+          "cathedralConversionPenalty": 0.177752,
+          "dissenterConversionPenalty": 0.02585,
+          "deepDebtSellBonus": 0.156801,
+          "mildDebtSellBonus": 0.144313,
+          "lowSkyshipsSellPenalty": 0.08204
+        },
+        "avgVP": 62.15
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.010409,
+          "earlyAgitatorPenalty": 0.05126,
+          "urgentDissenters": 0.261373,
+          "someDissenters": 0.182574,
+          "executeVPCost": 0.317566,
+          "rivalDissentersBonus": 0.036916,
+          "unpunishedDissentersPenalty": 0.098425,
+          "vpCostPenalty": 0.121501,
+          "misalignedBonus": 0.089999,
+          "cathedralConversionPenalty": 0.118373,
+          "dissenterConversionPenalty": 0.010582,
+          "deepDebtSellBonus": 0.159406,
+          "mildDebtSellBonus": 0.178896,
+          "lowSkyshipsSellPenalty": 0.090227
+        },
+        "avgVP": 55.98
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.01007,
+          "earlyAgitatorPenalty": 0.047221,
+          "urgentDissenters": 0.281435,
+          "someDissenters": 0.1204,
+          "executeVPCost": 0.243509,
+          "rivalDissentersBonus": 0.077376,
+          "unpunishedDissentersPenalty": 0.013666,
+          "vpCostPenalty": 0.032703,
+          "misalignedBonus": 0.02947,
+          "cathedralConversionPenalty": 0.231561,
+          "dissenterConversionPenalty": 0.088972,
+          "deepDebtSellBonus": 0.134952,
+          "mildDebtSellBonus": 0.171204,
+          "lowSkyshipsSellPenalty": 0.126164
+        },
+        "avgVP": 60.19
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.072793,
+          "earlyAgitatorPenalty": 0.013484,
+          "urgentDissenters": 0.292359,
+          "someDissenters": 0.154272,
+          "executeVPCost": 0.233395,
+          "rivalDissentersBonus": 0.068917,
+          "unpunishedDissentersPenalty": 0.054986,
+          "vpCostPenalty": 0.097926,
+          "misalignedBonus": 0.096283,
+          "cathedralConversionPenalty": 0.16111,
+          "dissenterConversionPenalty": 0.0103,
+          "deepDebtSellBonus": 0.314285,
+          "mildDebtSellBonus": 0.043364,
+          "lowSkyshipsSellPenalty": 0.022444
+        },
+        "avgVP": 66.08
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.088456,
+          "earlyAgitatorPenalty": 0.032,
+          "urgentDissenters": 0.260205,
+          "someDissenters": 0.139755,
+          "executeVPCost": 0.290449,
+          "rivalDissentersBonus": 0.106306,
+          "unpunishedDissentersPenalty": 0.113699,
+          "vpCostPenalty": 0.021069,
+          "misalignedBonus": 0.15875,
+          "cathedralConversionPenalty": 0.225758,
+          "dissenterConversionPenalty": 0.012316,
+          "deepDebtSellBonus": 0.134062,
+          "mildDebtSellBonus": 0.21115,
+          "lowSkyshipsSellPenalty": 0.073169
+        },
+        "avgVP": 53.81
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.013139,
+          "earlyAgitatorPenalty": 0.125461,
+          "urgentDissenters": 0.212713,
+          "someDissenters": 0.242594,
+          "executeVPCost": 0.286713,
+          "rivalDissentersBonus": 0.094445,
+          "unpunishedDissentersPenalty": 0.053937,
+          "vpCostPenalty": 0.134483,
+          "misalignedBonus": 0.057991,
+          "cathedralConversionPenalty": 0.133377,
+          "dissenterConversionPenalty": 0.02647,
+          "deepDebtSellBonus": 0.10743,
+          "mildDebtSellBonus": 0.17255,
+          "lowSkyshipsSellPenalty": 0.069504
+        },
+        "avgVP": 58.18
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.01664,
+          "earlyAgitatorPenalty": 0.073579,
+          "urgentDissenters": 0.301071,
+          "someDissenters": 0.12667,
+          "executeVPCost": 0.347373,
+          "rivalDissentersBonus": 0.027303,
+          "unpunishedDissentersPenalty": 0.036474,
+          "vpCostPenalty": 0.09715,
+          "misalignedBonus": 0.055072,
+          "cathedralConversionPenalty": 0.149567,
+          "dissenterConversionPenalty": 0.043159,
+          "deepDebtSellBonus": 0.149403,
+          "mildDebtSellBonus": 0.181192,
+          "lowSkyshipsSellPenalty": 0.1151
+        },
+        "avgVP": 58.3
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.018309,
+          "earlyAgitatorPenalty": 0.044344,
+          "urgentDissenters": 0.165714,
+          "someDissenters": 0.303154,
+          "executeVPCost": 0.353735,
+          "rivalDissentersBonus": 0.078173,
+          "unpunishedDissentersPenalty": 0.065301,
+          "vpCostPenalty": 0.097618,
+          "misalignedBonus": 0.031087,
+          "cathedralConversionPenalty": 0.11616,
+          "dissenterConversionPenalty": 0.017383,
+          "deepDebtSellBonus": 0.223678,
+          "mildDebtSellBonus": 0.096836,
+          "lowSkyshipsSellPenalty": 0.041041
+        },
+        "avgVP": 57.89
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.047209,
+          "earlyAgitatorPenalty": 0.033787,
+          "urgentDissenters": 0.299165,
+          "someDissenters": 0.157574,
+          "executeVPCost": 0.339421,
+          "rivalDissentersBonus": 0.033156,
+          "unpunishedDissentersPenalty": 0.099467,
+          "vpCostPenalty": 0.043445,
+          "misalignedBonus": 0.10381,
+          "cathedralConversionPenalty": 0.091157,
+          "dissenterConversionPenalty": 0.054124,
+          "deepDebtSellBonus": 0.181486,
+          "mildDebtSellBonus": 0.117856,
+          "lowSkyshipsSellPenalty": 0.091744
+        },
+        "avgVP": 61.06
+      }
+    ],
+    "gen_best_avgVP": 66.08,
+    "gen_avg_vp": 59.67,
+    "alltime_best_avgVP": 66.82,
+    "sigma": 0.045644,
+    "elapsed_s": 1098.0
+  },
+  {
+    "generation": 15,
+    "candidates": [
+      {
+        "weights": {
+          "targetLeaderBonus": 0.029259,
+          "earlyAgitatorPenalty": 0.051923,
+          "urgentDissenters": 0.267329,
+          "someDissenters": 0.141547,
+          "executeVPCost": 0.237475,
+          "rivalDissentersBonus": 0.022222,
+          "unpunishedDissentersPenalty": 0.010012,
+          "vpCostPenalty": 0.036071,
+          "misalignedBonus": 0.023553,
+          "cathedralConversionPenalty": 0.128379,
+          "dissenterConversionPenalty": 0.015735,
+          "deepDebtSellBonus": 0.235898,
+          "mildDebtSellBonus": 0.132746,
+          "lowSkyshipsSellPenalty": 0.112964
+        },
+        "avgVP": 57.35
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.072361,
+          "earlyAgitatorPenalty": 0.065422,
+          "urgentDissenters": 0.225688,
+          "someDissenters": 0.159975,
+          "executeVPCost": 0.309934,
+          "rivalDissentersBonus": 0.13936,
+          "unpunishedDissentersPenalty": 0.042234,
+          "vpCostPenalty": 0.088723,
+          "misalignedBonus": 0.048207,
+          "cathedralConversionPenalty": 0.146166,
+          "dissenterConversionPenalty": 0.039374,
+          "deepDebtSellBonus": 0.296939,
+          "mildDebtSellBonus": 0.132676,
+          "lowSkyshipsSellPenalty": 0.206833
+        },
+        "avgVP": 60.98
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.020633,
+          "earlyAgitatorPenalty": 0.040381,
+          "urgentDissenters": 0.300662,
+          "someDissenters": 0.147951,
+          "executeVPCost": 0.24477,
+          "rivalDissentersBonus": 0.08124,
+          "unpunishedDissentersPenalty": 0.012686,
+          "vpCostPenalty": 0.04351,
+          "misalignedBonus": 0.168611,
+          "cathedralConversionPenalty": 0.039258,
+          "dissenterConversionPenalty": 0.049554,
+          "deepDebtSellBonus": 0.248702,
+          "mildDebtSellBonus": 0.141129,
+          "lowSkyshipsSellPenalty": 0.067634
+        },
+        "avgVP": 57.59
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.030255,
+          "earlyAgitatorPenalty": 0.047033,
+          "urgentDissenters": 0.254646,
+          "someDissenters": 0.151425,
+          "executeVPCost": 0.194511,
+          "rivalDissentersBonus": 0.104786,
+          "unpunishedDissentersPenalty": 0.054481,
+          "vpCostPenalty": 0.115311,
+          "misalignedBonus": 0.122243,
+          "cathedralConversionPenalty": 0.141034,
+          "dissenterConversionPenalty": 0.010137,
+          "deepDebtSellBonus": 0.213261,
+          "mildDebtSellBonus": 0.017033,
+          "lowSkyshipsSellPenalty": 0.032041
+        },
+        "avgVP": 62.29
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.010928,
+          "earlyAgitatorPenalty": 0.010812,
+          "urgentDissenters": 0.260182,
+          "someDissenters": 0.0468,
+          "executeVPCost": 0.246458,
+          "rivalDissentersBonus": 0.049255,
+          "unpunishedDissentersPenalty": 0.046102,
+          "vpCostPenalty": 0.033074,
+          "misalignedBonus": 0.074293,
+          "cathedralConversionPenalty": 0.147186,
+          "dissenterConversionPenalty": 0.022456,
+          "deepDebtSellBonus": 0.358165,
+          "mildDebtSellBonus": 0.132549,
+          "lowSkyshipsSellPenalty": 0.014905
+        },
+        "avgVP": 60.73
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.056863,
+          "earlyAgitatorPenalty": 0.013477,
+          "urgentDissenters": 0.345221,
+          "someDissenters": 0.12038,
+          "executeVPCost": 0.206716,
+          "rivalDissentersBonus": 0.018688,
+          "unpunishedDissentersPenalty": 0.010348,
+          "vpCostPenalty": 0.044644,
+          "misalignedBonus": 0.058107,
+          "cathedralConversionPenalty": 0.189042,
+          "dissenterConversionPenalty": 0.046548,
+          "deepDebtSellBonus": 0.284285,
+          "mildDebtSellBonus": 0.10317,
+          "lowSkyshipsSellPenalty": 0.134626
+        },
+        "avgVP": 61.74
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.060125,
+          "earlyAgitatorPenalty": 0.031994,
+          "urgentDissenters": 0.287446,
+          "someDissenters": 0.194585,
+          "executeVPCost": 0.361984,
+          "rivalDissentersBonus": 0.032135,
+          "unpunishedDissentersPenalty": 0.112984,
+          "vpCostPenalty": 0.083158,
+          "misalignedBonus": 0.08616,
+          "cathedralConversionPenalty": 0.127705,
+          "dissenterConversionPenalty": 0.012466,
+          "deepDebtSellBonus": 0.270503,
+          "mildDebtSellBonus": 0.130058,
+          "lowSkyshipsSellPenalty": 0.131094
+        },
+        "avgVP": 64.05
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.067384,
+          "earlyAgitatorPenalty": 0.022185,
+          "urgentDissenters": 0.297263,
+          "someDissenters": 0.064285,
+          "executeVPCost": 0.242312,
+          "rivalDissentersBonus": 0.186083,
+          "unpunishedDissentersPenalty": 0.060491,
+          "vpCostPenalty": 0.074488,
+          "misalignedBonus": 0.112366,
+          "cathedralConversionPenalty": 0.082983,
+          "dissenterConversionPenalty": 0.061961,
+          "deepDebtSellBonus": 0.209645,
+          "mildDebtSellBonus": 0.178497,
+          "lowSkyshipsSellPenalty": 0.022209
+        },
+        "avgVP": 63.98
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.046753,
+          "earlyAgitatorPenalty": 0.020134,
+          "urgentDissenters": 0.248014,
+          "someDissenters": 0.10232,
+          "executeVPCost": 0.248832,
+          "rivalDissentersBonus": 0.084936,
+          "unpunishedDissentersPenalty": 0.043519,
+          "vpCostPenalty": 0.067285,
+          "misalignedBonus": 0.076936,
+          "cathedralConversionPenalty": 0.119681,
+          "dissenterConversionPenalty": 0.024588,
+          "deepDebtSellBonus": 0.179313,
+          "mildDebtSellBonus": 0.089691,
+          "lowSkyshipsSellPenalty": 0.088899
+        },
+        "avgVP": 63.09
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.055902,
+          "earlyAgitatorPenalty": 0.051512,
+          "urgentDissenters": 0.300757,
+          "someDissenters": 0.084553,
+          "executeVPCost": 0.229424,
+          "rivalDissentersBonus": 0.159033,
+          "unpunishedDissentersPenalty": 0.037762,
+          "vpCostPenalty": 0.036628,
+          "misalignedBonus": 0.026308,
+          "cathedralConversionPenalty": 0.210583,
+          "dissenterConversionPenalty": 0.043746,
+          "deepDebtSellBonus": 0.254674,
+          "mildDebtSellBonus": 0.067666,
+          "lowSkyshipsSellPenalty": 0.04478
+        },
+        "avgVP": 58.73
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.063537,
+          "earlyAgitatorPenalty": 0.031276,
+          "urgentDissenters": 0.268385,
+          "someDissenters": 0.162835,
+          "executeVPCost": 0.283734,
+          "rivalDissentersBonus": 0.094088,
+          "unpunishedDissentersPenalty": 0.010465,
+          "vpCostPenalty": 0.043474,
+          "misalignedBonus": 0.061263,
+          "cathedralConversionPenalty": 0.068106,
+          "dissenterConversionPenalty": 0.029568,
+          "deepDebtSellBonus": 0.231176,
+          "mildDebtSellBonus": 0.113327,
+          "lowSkyshipsSellPenalty": 0.019445
+        },
+        "avgVP": 61.2
+      }
+    ],
+    "gen_best_avgVP": 64.05,
+    "gen_avg_vp": 61.07,
+    "alltime_best_avgVP": 66.82,
+    "sigma": 0.041592,
+    "elapsed_s": 1175.0
+  },
+  {
+    "generation": 16,
+    "candidates": [
+      {
+        "weights": {
+          "targetLeaderBonus": 0.046697,
+          "earlyAgitatorPenalty": 0.04305,
+          "urgentDissenters": 0.31488,
+          "someDissenters": 0.113908,
+          "executeVPCost": 0.309846,
+          "rivalDissentersBonus": 0.09081,
+          "unpunishedDissentersPenalty": 0.103935,
+          "vpCostPenalty": 0.094553,
+          "misalignedBonus": 0.125943,
+          "cathedralConversionPenalty": 0.066325,
+          "dissenterConversionPenalty": 0.017757,
+          "deepDebtSellBonus": 0.205591,
+          "mildDebtSellBonus": 0.14393,
+          "lowSkyshipsSellPenalty": 0.035523
+        },
+        "avgVP": 57.34
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.042169,
+          "earlyAgitatorPenalty": 0.012572,
+          "urgentDissenters": 0.283031,
+          "someDissenters": 0.108828,
+          "executeVPCost": 0.264473,
+          "rivalDissentersBonus": 0.073591,
+          "unpunishedDissentersPenalty": 0.095978,
+          "vpCostPenalty": 0.071205,
+          "misalignedBonus": 0.092679,
+          "cathedralConversionPenalty": 0.115365,
+          "dissenterConversionPenalty": 0.010018,
+          "deepDebtSellBonus": 0.230442,
+          "mildDebtSellBonus": 0.091872,
+          "lowSkyshipsSellPenalty": 0.023153
+        },
+        "avgVP": 60.09
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.039821,
+          "earlyAgitatorPenalty": 0.103977,
+          "urgentDissenters": 0.265267,
+          "someDissenters": 0.113998,
+          "executeVPCost": 0.297123,
+          "rivalDissentersBonus": 0.09986,
+          "unpunishedDissentersPenalty": 0.067435,
+          "vpCostPenalty": 0.081329,
+          "misalignedBonus": 0.124196,
+          "cathedralConversionPenalty": 0.07466,
+          "dissenterConversionPenalty": 0.014178,
+          "deepDebtSellBonus": 0.247356,
+          "mildDebtSellBonus": 0.078957,
+          "lowSkyshipsSellPenalty": 0.03083
+        },
+        "avgVP": 60.33
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.05027,
+          "earlyAgitatorPenalty": 0.027816,
+          "urgentDissenters": 0.302073,
+          "someDissenters": 0.13774,
+          "executeVPCost": 0.340063,
+          "rivalDissentersBonus": 0.070546,
+          "unpunishedDissentersPenalty": 0.125673,
+          "vpCostPenalty": 0.083443,
+          "misalignedBonus": 0.138425,
+          "cathedralConversionPenalty": 0.142269,
+          "dissenterConversionPenalty": 0.030261,
+          "deepDebtSellBonus": 0.288314,
+          "mildDebtSellBonus": 0.13195,
+          "lowSkyshipsSellPenalty": 0.100141
+        },
+        "avgVP": 58.5
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.033482,
+          "earlyAgitatorPenalty": 0.032339,
+          "urgentDissenters": 0.1984,
+          "someDissenters": 0.13349,
+          "executeVPCost": 0.298684,
+          "rivalDissentersBonus": 0.133679,
+          "unpunishedDissentersPenalty": 0.087333,
+          "vpCostPenalty": 0.083664,
+          "misalignedBonus": 0.028267,
+          "cathedralConversionPenalty": 0.080126,
+          "dissenterConversionPenalty": 0.041136,
+          "deepDebtSellBonus": 0.29411,
+          "mildDebtSellBonus": 0.130049,
+          "lowSkyshipsSellPenalty": 0.061111
+        },
+        "avgVP": 61.28
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.028619,
+          "earlyAgitatorPenalty": 0.034139,
+          "urgentDissenters": 0.253624,
+          "someDissenters": 0.128881,
+          "executeVPCost": 0.257391,
+          "rivalDissentersBonus": 0.112893,
+          "unpunishedDissentersPenalty": 0.10099,
+          "vpCostPenalty": 0.013984,
+          "misalignedBonus": 0.108979,
+          "cathedralConversionPenalty": 0.187186,
+          "dissenterConversionPenalty": 0.026591,
+          "deepDebtSellBonus": 0.17235,
+          "mildDebtSellBonus": 0.121384,
+          "lowSkyshipsSellPenalty": 0.048721
+        },
+        "avgVP": 61.13
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.083052,
+          "earlyAgitatorPenalty": 0.013777,
+          "urgentDissenters": 0.334516,
+          "someDissenters": 0.141686,
+          "executeVPCost": 0.322572,
+          "rivalDissentersBonus": 0.094503,
+          "unpunishedDissentersPenalty": 0.095771,
+          "vpCostPenalty": 0.069783,
+          "misalignedBonus": 0.090571,
+          "cathedralConversionPenalty": 0.099765,
+          "dissenterConversionPenalty": 0.011975,
+          "deepDebtSellBonus": 0.314105,
+          "mildDebtSellBonus": 0.102824,
+          "lowSkyshipsSellPenalty": 0.064282
+        },
+        "avgVP": 60.18
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.034612,
+          "earlyAgitatorPenalty": 0.016392,
+          "urgentDissenters": 0.339795,
+          "someDissenters": 0.14533,
+          "executeVPCost": 0.293685,
+          "rivalDissentersBonus": 0.08005,
+          "unpunishedDissentersPenalty": 0.062888,
+          "vpCostPenalty": 0.12732,
+          "misalignedBonus": 0.199202,
+          "cathedralConversionPenalty": 0.107631,
+          "dissenterConversionPenalty": 0.095496,
+          "deepDebtSellBonus": 0.297152,
+          "mildDebtSellBonus": 0.094568,
+          "lowSkyshipsSellPenalty": 0.109002
+        },
+        "avgVP": 59.66
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.086667,
+          "earlyAgitatorPenalty": 0.090972,
+          "urgentDissenters": 0.352256,
+          "someDissenters": 0.129632,
+          "executeVPCost": 0.331113,
+          "rivalDissentersBonus": 0.046782,
+          "unpunishedDissentersPenalty": 0.096093,
+          "vpCostPenalty": 0.112123,
+          "misalignedBonus": 0.082056,
+          "cathedralConversionPenalty": 0.175647,
+          "dissenterConversionPenalty": 0.011741,
+          "deepDebtSellBonus": 0.186413,
+          "mildDebtSellBonus": 0.137212,
+          "lowSkyshipsSellPenalty": 0.083521
+        },
+        "avgVP": 62.92
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.040994,
+          "earlyAgitatorPenalty": 0.05633,
+          "urgentDissenters": 0.208934,
+          "someDissenters": 0.179739,
+          "executeVPCost": 0.330996,
+          "rivalDissentersBonus": 0.094867,
+          "unpunishedDissentersPenalty": 0.065431,
+          "vpCostPenalty": 0.072761,
+          "misalignedBonus": 0.100952,
+          "cathedralConversionPenalty": 0.068712,
+          "dissenterConversionPenalty": 0.026016,
+          "deepDebtSellBonus": 0.239555,
+          "mildDebtSellBonus": 0.178562,
+          "lowSkyshipsSellPenalty": 0.122411
+        },
+        "avgVP": 63.41
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.066119,
+          "earlyAgitatorPenalty": 0.010006,
+          "urgentDissenters": 0.317233,
+          "someDissenters": 0.127579,
+          "executeVPCost": 0.303999,
+          "rivalDissentersBonus": 0.025434,
+          "unpunishedDissentersPenalty": 0.023762,
+          "vpCostPenalty": 0.092786,
+          "misalignedBonus": 0.043507,
+          "cathedralConversionPenalty": 0.144339,
+          "dissenterConversionPenalty": 0.013553,
+          "deepDebtSellBonus": 0.18856,
+          "mildDebtSellBonus": 0.195294,
+          "lowSkyshipsSellPenalty": 0.061348
+        },
+        "avgVP": 63.27
+      }
+    ],
+    "gen_best_avgVP": 63.41,
+    "gen_avg_vp": 60.74,
+    "alltime_best_avgVP": 66.82,
+    "sigma": 0.038509,
+    "elapsed_s": 1253.0
+  },
+  {
+    "generation": 17,
+    "candidates": [
+      {
+        "weights": {
+          "targetLeaderBonus": 0.028742,
+          "earlyAgitatorPenalty": 0.079262,
+          "urgentDissenters": 0.246733,
+          "someDissenters": 0.153995,
+          "executeVPCost": 0.35356,
+          "rivalDissentersBonus": 0.060865,
+          "unpunishedDissentersPenalty": 0.03666,
+          "vpCostPenalty": 0.046159,
+          "misalignedBonus": 0.107964,
+          "cathedralConversionPenalty": 0.162694,
+          "dissenterConversionPenalty": 0.018267,
+          "deepDebtSellBonus": 0.17294,
+          "mildDebtSellBonus": 0.151194,
+          "lowSkyshipsSellPenalty": 0.105584
+        },
+        "avgVP": 62.73
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.061705,
+          "earlyAgitatorPenalty": 0.012564,
+          "urgentDissenters": 0.2676,
+          "someDissenters": 0.148675,
+          "executeVPCost": 0.301734,
+          "rivalDissentersBonus": 0.108278,
+          "unpunishedDissentersPenalty": 0.112575,
+          "vpCostPenalty": 0.124456,
+          "misalignedBonus": 0.068492,
+          "cathedralConversionPenalty": 0.037702,
+          "dissenterConversionPenalty": 0.086437,
+          "deepDebtSellBonus": 0.259368,
+          "mildDebtSellBonus": 0.217639,
+          "lowSkyshipsSellPenalty": 0.10977
+        },
+        "avgVP": 55.8
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.092128,
+          "earlyAgitatorPenalty": 0.052507,
+          "urgentDissenters": 0.347198,
+          "someDissenters": 0.117005,
+          "executeVPCost": 0.344469,
+          "rivalDissentersBonus": 0.118891,
+          "unpunishedDissentersPenalty": 0.064814,
+          "vpCostPenalty": 0.119987,
+          "misalignedBonus": 0.066094,
+          "cathedralConversionPenalty": 0.111386,
+          "dissenterConversionPenalty": 0.010579,
+          "deepDebtSellBonus": 0.354125,
+          "mildDebtSellBonus": 0.163415,
+          "lowSkyshipsSellPenalty": 0.032509
+        },
+        "avgVP": 61.32
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.102419,
+          "earlyAgitatorPenalty": 0.039783,
+          "urgentDissenters": 0.249781,
+          "someDissenters": 0.117365,
+          "executeVPCost": 0.305251,
+          "rivalDissentersBonus": 0.113094,
+          "unpunishedDissentersPenalty": 0.053012,
+          "vpCostPenalty": 0.048445,
+          "misalignedBonus": 0.120464,
+          "cathedralConversionPenalty": 0.119651,
+          "dissenterConversionPenalty": 0.048698,
+          "deepDebtSellBonus": 0.136499,
+          "mildDebtSellBonus": 0.162627,
+          "lowSkyshipsSellPenalty": 0.094019
+        },
+        "avgVP": 64.38
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.075444,
+          "earlyAgitatorPenalty": 0.050861,
+          "urgentDissenters": 0.311202,
+          "someDissenters": 0.073035,
+          "executeVPCost": 0.269636,
+          "rivalDissentersBonus": 0.023805,
+          "unpunishedDissentersPenalty": 0.021374,
+          "vpCostPenalty": 0.024795,
+          "misalignedBonus": 0.086486,
+          "cathedralConversionPenalty": 0.049968,
+          "dissenterConversionPenalty": 0.026719,
+          "deepDebtSellBonus": 0.178528,
+          "mildDebtSellBonus": 0.178237,
+          "lowSkyshipsSellPenalty": 0.093432
+        },
+        "avgVP": 61.48
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.045142,
+          "earlyAgitatorPenalty": 0.018154,
+          "urgentDissenters": 0.320887,
+          "someDissenters": 0.12777,
+          "executeVPCost": 0.277556,
+          "rivalDissentersBonus": 0.048066,
+          "unpunishedDissentersPenalty": 0.090241,
+          "vpCostPenalty": 0.06632,
+          "misalignedBonus": 0.065106,
+          "cathedralConversionPenalty": 0.156259,
+          "dissenterConversionPenalty": 0.013404,
+          "deepDebtSellBonus": 0.310092,
+          "mildDebtSellBonus": 0.172738,
+          "lowSkyshipsSellPenalty": 0.078203
+        },
+        "avgVP": 59.13
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.091776,
+          "earlyAgitatorPenalty": 0.079794,
+          "urgentDissenters": 0.24335,
+          "someDissenters": 0.173246,
+          "executeVPCost": 0.368601,
+          "rivalDissentersBonus": 0.089872,
+          "unpunishedDissentersPenalty": 0.059676,
+          "vpCostPenalty": 0.01936,
+          "misalignedBonus": 0.118174,
+          "cathedralConversionPenalty": 0.102682,
+          "dissenterConversionPenalty": 0.082914,
+          "deepDebtSellBonus": 0.244234,
+          "mildDebtSellBonus": 0.214521,
+          "lowSkyshipsSellPenalty": 0.147205
+        },
+        "avgVP": 63.76
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.117283,
+          "earlyAgitatorPenalty": 0.028815,
+          "urgentDissenters": 0.290667,
+          "someDissenters": 0.146109,
+          "executeVPCost": 0.361107,
+          "rivalDissentersBonus": 0.086924,
+          "unpunishedDissentersPenalty": 0.105236,
+          "vpCostPenalty": 0.140974,
+          "misalignedBonus": 0.039603,
+          "cathedralConversionPenalty": 0.126633,
+          "dissenterConversionPenalty": 0.045116,
+          "deepDebtSellBonus": 0.241196,
+          "mildDebtSellBonus": 0.167732,
+          "lowSkyshipsSellPenalty": 0.08646
+        },
+        "avgVP": 51.14
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.016859,
+          "earlyAgitatorPenalty": 0.011346,
+          "urgentDissenters": 0.239414,
+          "someDissenters": 0.205654,
+          "executeVPCost": 0.313458,
+          "rivalDissentersBonus": 0.064073,
+          "unpunishedDissentersPenalty": 0.080034,
+          "vpCostPenalty": 0.03484,
+          "misalignedBonus": 0.094355,
+          "cathedralConversionPenalty": 0.11065,
+          "dissenterConversionPenalty": 0.02491,
+          "deepDebtSellBonus": 0.194265,
+          "mildDebtSellBonus": 0.193482,
+          "lowSkyshipsSellPenalty": 0.074079
+        },
+        "avgVP": 60.11
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.039979,
+          "earlyAgitatorPenalty": 0.100891,
+          "urgentDissenters": 0.255678,
+          "someDissenters": 0.213052,
+          "executeVPCost": 0.379713,
+          "rivalDissentersBonus": 0.089133,
+          "unpunishedDissentersPenalty": 0.098209,
+          "vpCostPenalty": 0.129814,
+          "misalignedBonus": 0.072044,
+          "cathedralConversionPenalty": 0.138283,
+          "dissenterConversionPenalty": 0.012228,
+          "deepDebtSellBonus": 0.223627,
+          "mildDebtSellBonus": 0.210497,
+          "lowSkyshipsSellPenalty": 0.066893
+        },
+        "avgVP": 57.93
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.01241,
+          "earlyAgitatorPenalty": 0.021132,
+          "urgentDissenters": 0.253216,
+          "someDissenters": 0.173527,
+          "executeVPCost": 0.343185,
+          "rivalDissentersBonus": 0.062887,
+          "unpunishedDissentersPenalty": 0.091577,
+          "vpCostPenalty": 0.107477,
+          "misalignedBonus": 0.028298,
+          "cathedralConversionPenalty": 0.145394,
+          "dissenterConversionPenalty": 0.011058,
+          "deepDebtSellBonus": 0.25856,
+          "mildDebtSellBonus": 0.131088,
+          "lowSkyshipsSellPenalty": 0.081539
+        },
+        "avgVP": 57.98
+      }
+    ],
+    "gen_best_avgVP": 64.38,
+    "gen_avg_vp": 59.61,
+    "alltime_best_avgVP": 66.82,
+    "sigma": 0.03831,
+    "elapsed_s": 1334.0
+  },
+  {
+    "generation": 18,
+    "candidates": [
+      {
+        "weights": {
+          "targetLeaderBonus": 0.071191,
+          "earlyAgitatorPenalty": 0.043466,
+          "urgentDissenters": 0.288518,
+          "someDissenters": 0.107358,
+          "executeVPCost": 0.381101,
+          "rivalDissentersBonus": 0.104573,
+          "unpunishedDissentersPenalty": 0.040699,
+          "vpCostPenalty": 0.030973,
+          "misalignedBonus": 0.15117,
+          "cathedralConversionPenalty": 0.177445,
+          "dissenterConversionPenalty": 0.044531,
+          "deepDebtSellBonus": 0.208141,
+          "mildDebtSellBonus": 0.160586,
+          "lowSkyshipsSellPenalty": 0.085519
+        },
+        "avgVP": 57.78
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.103903,
+          "earlyAgitatorPenalty": 0.083629,
+          "urgentDissenters": 0.160895,
+          "someDissenters": 0.155148,
+          "executeVPCost": 0.273545,
+          "rivalDissentersBonus": 0.126036,
+          "unpunishedDissentersPenalty": 0.052998,
+          "vpCostPenalty": 0.052897,
+          "misalignedBonus": 0.108797,
+          "cathedralConversionPenalty": 0.022093,
+          "dissenterConversionPenalty": 0.108509,
+          "deepDebtSellBonus": 0.171847,
+          "mildDebtSellBonus": 0.102136,
+          "lowSkyshipsSellPenalty": 0.109974
+        },
+        "avgVP": 57.83
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.099456,
+          "earlyAgitatorPenalty": 0.047833,
+          "urgentDissenters": 0.262054,
+          "someDissenters": 0.116659,
+          "executeVPCost": 0.276608,
+          "rivalDissentersBonus": 0.141197,
+          "unpunishedDissentersPenalty": 0.013657,
+          "vpCostPenalty": 0.028857,
+          "misalignedBonus": 0.183037,
+          "cathedralConversionPenalty": 0.143283,
+          "dissenterConversionPenalty": 0.026681,
+          "deepDebtSellBonus": 0.163287,
+          "mildDebtSellBonus": 0.238585,
+          "lowSkyshipsSellPenalty": 0.099717
+        },
+        "avgVP": 51.89
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.096114,
+          "earlyAgitatorPenalty": 0.043446,
+          "urgentDissenters": 0.254857,
+          "someDissenters": 0.16398,
+          "executeVPCost": 0.281826,
+          "rivalDissentersBonus": 0.076739,
+          "unpunishedDissentersPenalty": 0.066074,
+          "vpCostPenalty": 0.03738,
+          "misalignedBonus": 0.155512,
+          "cathedralConversionPenalty": 0.087207,
+          "dissenterConversionPenalty": 0.067541,
+          "deepDebtSellBonus": 0.130568,
+          "mildDebtSellBonus": 0.182397,
+          "lowSkyshipsSellPenalty": 0.091414
+        },
+        "avgVP": 57.03
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.045442,
+          "earlyAgitatorPenalty": 0.05566,
+          "urgentDissenters": 0.216893,
+          "someDissenters": 0.17879,
+          "executeVPCost": 0.285547,
+          "rivalDissentersBonus": 0.05756,
+          "unpunishedDissentersPenalty": 0.023394,
+          "vpCostPenalty": 0.042999,
+          "misalignedBonus": 0.112787,
+          "cathedralConversionPenalty": 0.127859,
+          "dissenterConversionPenalty": 0.045907,
+          "deepDebtSellBonus": 0.25384,
+          "mildDebtSellBonus": 0.136251,
+          "lowSkyshipsSellPenalty": 0.089934
+        },
+        "avgVP": 61.71
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.063647,
+          "earlyAgitatorPenalty": 0.062528,
+          "urgentDissenters": 0.296179,
+          "someDissenters": 0.169727,
+          "executeVPCost": 0.347812,
+          "rivalDissentersBonus": 0.07876,
+          "unpunishedDissentersPenalty": 0.048196,
+          "vpCostPenalty": 0.055327,
+          "misalignedBonus": 0.129547,
+          "cathedralConversionPenalty": 0.107758,
+          "dissenterConversionPenalty": 0.028794,
+          "deepDebtSellBonus": 0.184029,
+          "mildDebtSellBonus": 0.126407,
+          "lowSkyshipsSellPenalty": 0.11107
+        },
+        "avgVP": 58.54
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.070342,
+          "earlyAgitatorPenalty": 0.123765,
+          "urgentDissenters": 0.237048,
+          "someDissenters": 0.122343,
+          "executeVPCost": 0.325003,
+          "rivalDissentersBonus": 0.089716,
+          "unpunishedDissentersPenalty": 0.033522,
+          "vpCostPenalty": 0.078628,
+          "misalignedBonus": 0.117673,
+          "cathedralConversionPenalty": 0.070047,
+          "dissenterConversionPenalty": 0.053517,
+          "deepDebtSellBonus": 0.19459,
+          "mildDebtSellBonus": 0.161797,
+          "lowSkyshipsSellPenalty": 0.086499
+        },
+        "avgVP": 60.97
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.077005,
+          "earlyAgitatorPenalty": 0.130018,
+          "urgentDissenters": 0.191615,
+          "someDissenters": 0.139407,
+          "executeVPCost": 0.389881,
+          "rivalDissentersBonus": 0.048881,
+          "unpunishedDissentersPenalty": 0.045819,
+          "vpCostPenalty": 0.042562,
+          "misalignedBonus": 0.128068,
+          "cathedralConversionPenalty": 0.092143,
+          "dissenterConversionPenalty": 0.038901,
+          "deepDebtSellBonus": 0.146734,
+          "mildDebtSellBonus": 0.211357,
+          "lowSkyshipsSellPenalty": 0.131218
+        },
+        "avgVP": 58.8
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.080873,
+          "earlyAgitatorPenalty": 0.086567,
+          "urgentDissenters": 0.205034,
+          "someDissenters": 0.12516,
+          "executeVPCost": 0.353496,
+          "rivalDissentersBonus": 0.134458,
+          "unpunishedDissentersPenalty": 0.094309,
+          "vpCostPenalty": 0.050735,
+          "misalignedBonus": 0.074302,
+          "cathedralConversionPenalty": 0.138122,
+          "dissenterConversionPenalty": 0.072554,
+          "deepDebtSellBonus": 0.216933,
+          "mildDebtSellBonus": 0.229903,
+          "lowSkyshipsSellPenalty": 0.09146
+        },
+        "avgVP": 62.08
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.051708,
+          "earlyAgitatorPenalty": 0.091152,
+          "urgentDissenters": 0.250235,
+          "someDissenters": 0.14489,
+          "executeVPCost": 0.370931,
+          "rivalDissentersBonus": 0.072814,
+          "unpunishedDissentersPenalty": 0.036402,
+          "vpCostPenalty": 0.072651,
+          "misalignedBonus": 0.141025,
+          "cathedralConversionPenalty": 0.074193,
+          "dissenterConversionPenalty": 0.028014,
+          "deepDebtSellBonus": 0.18805,
+          "mildDebtSellBonus": 0.109699,
+          "lowSkyshipsSellPenalty": 0.182565
+        },
+        "avgVP": 62.21
+      },
+      {
+        "weights": {
+          "targetLeaderBonus": 0.095864,
+          "earlyAgitatorPenalty": 0.025472,
+          "urgentDissenters": 0.248391,
+          "someDissenters": 0.095902,
+          "executeVPCost": 0.381506,
+          "rivalDissentersBonus": 0.086284,
+          "unpunishedDissentersPenalty": 0.012355,
+          "vpCostPenalty": 0.077989,
+          "misalignedBonus": 0.137702,
+          "cathedralConversionPenalty": 0.11452,
+          "dissenterConversionPenalty": 0.020283,
+          "deepDebtSellBonus": 0.102722,
+          "mildDebtSellBonus": 0.15994,
+          "lowSkyshipsSellPenalty": 0.161674
+        },
+        "avgVP": 59.03
+      }
+    ],
+    "gen_best_avgVP": 62.21,
+    "gen_avg_vp": 58.9,
+    "alltime_best_avgVP": 66.82,
+    "sigma": 0.03707,
+    "elapsed_s": 1408.0
+  }
+]

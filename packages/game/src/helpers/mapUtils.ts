@@ -11,7 +11,7 @@ export const FAITHDOM_TILES: [number, number][] = [
 
 export const tileKey = (x: number, y: number): string => `${x},${y}`;
 
-// ── Direction helpers for mountain blocking ──────────────────────────────
+// Direction helpers for mountain blocking
 
 /** Maps a (dx, dy) offset to its compass direction string. */
 const offsetToDir = (dx: number, dy: number): string => {
@@ -48,7 +48,7 @@ const isEdgeBlocked = (
          (dstTile?.blocked.includes(reverseDir) ?? false);
 };
 
-// ── Adjacency ────────────────────────────────────────────────────────────
+// Adjacency
 
 // Adjacency with east-west wrap. edgesOnly=true gives 4 cardinal directions only.
 export const getNeighbors = (x: number, y: number, edgesOnly = false): [number, number][] => {
@@ -79,7 +79,7 @@ export const getPassableNeighbors = (
   );
 };
 
-// ── BFS ──────────────────────────────────────────────────────────────────
+// BFS
 
 // BFS from start tiles through a network of allowed tiles.
 // When tileArray is provided, mountain edges are respected.
@@ -168,7 +168,7 @@ export function bfsShortestPath(
 
 /**
  * Validates a retreat/evasion destination.
- * v4.2 rules: destination must be discovered, adjacent (or same tile or Faithdom),
+ * rules: destination must be discovered, adjacent (or same tile or Faithdom),
  * and free of unfriendly fleets (Faithdom is always safe).
  */
 export const isValidRetreatDestination = (

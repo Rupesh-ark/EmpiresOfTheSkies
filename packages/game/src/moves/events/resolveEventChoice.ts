@@ -4,7 +4,7 @@ import { getBattleEventTarget } from "../../helpers/eventCardDefinitions";
 import { addVPAmount, removeVPAmount, logEvent } from "../../helpers/stateUtils";
 import { BUILDING_SELL_PRICE } from "../../data/gameData";
 
-// ── Choice handlers ──────────────────────────────────────────────────────────
+// Choice handlers
 // Each handler validates the choice, applies the effect, and returns true
 // on success or false if the choice is invalid.
 
@@ -120,7 +120,7 @@ const CHOICE_HANDLERS: Partial<Record<EventCardName, ChoiceHandler>> = {
   },
 };
 
-// ── Move ─────────────────────────────────────────────────────────────────────
+// Move
 
 const resolveEventChoice: MoveDefinition = {
   fn: ({ G, ctx, playerID, events }, ...args) => {

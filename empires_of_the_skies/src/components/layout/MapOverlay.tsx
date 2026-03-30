@@ -56,7 +56,7 @@ export const MapOverlay = (props: MyGameProps) => {
 
   return (
     <>
-      {/* ── Top bar: Hint (left) + Round/Phase/Turn (right) ──── */}
+      {/* Top bar: Hint (left) + Round/Phase/Turn (right) */}
       <Box
         sx={{
           position: "absolute",
@@ -197,7 +197,7 @@ export const MapOverlay = (props: MyGameProps) => {
         </Box>
       </Box>
 
-      {/* ── Bottom-right: Action buttons ───────────────────────── */}
+      {/* Bottom-right: Action buttons */}
       {showActions && (
         <Box
           sx={{
@@ -275,7 +275,7 @@ export const MapOverlay = (props: MyGameProps) => {
         </Box>
       )}
 
-      {/* ── Pass confirmation dialog ──────────────────────────── */}
+      {/* Pass confirmation dialog */}
       <DialogShell
         open={passDialogOpen}
         title="Pass Turn?"

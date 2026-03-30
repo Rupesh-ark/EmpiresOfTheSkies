@@ -8,9 +8,6 @@ interface LogEntry {
   data?: Record<string, unknown>;
 }
 
-// Lazily resolved log file path — only used on Node.js.
-// We wrap the fs calls in try/catch so that any import failure (e.g. in a
-// browser bundle that somehow reaches this branch) never crashes the app.
 let _logFilePath: string | null = null;
 
 function getLogFilePath(): string | null {
@@ -88,9 +85,7 @@ export const createLogger = (mod: string) => {
   };
 };
 
-// ── Self-Play Game Event Logger ───────────────────────────────────────────────
-// Writes key game events to /tmp/selfplay_trace.log for game analysis.
-// This is separate from the main game.log which is for live game debugging.
+// Self-Play Game Event Logger
 
 let _traceFilePath: string | null = null;
 
@@ -111,7 +106,7 @@ export function logGameEvent(category: string, message: string, data?: Record<st
   }
 }
 
-// ── Predefined game event loggers ───────────────────────────────────────────
+// Predefined game event loggers
 
 export const logBattleEvent = (attacker: string, defender: string, type: string, result?: string) => {
   logGameEvent('BATTLE', `${attacker} vs ${defender} (${type})`, result ? { result } : undefined);

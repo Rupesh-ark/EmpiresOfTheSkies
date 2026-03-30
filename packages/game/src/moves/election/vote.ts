@@ -68,7 +68,6 @@ export function calculateVotePower(G: MyGameState, playerID: string): number {
     }
   });
 
-  // GAP-18: NPR kingdoms under our influence contribute their cathedral count
   kingdomsUnderOurInfluence.forEach((kName) => {
     const nprVotes = G.nprCathedrals[kName];
     if (nprVotes !== undefined) {
@@ -79,7 +78,6 @@ export function calculateVotePower(G: MyGameState, playerID: string): number {
   if (kingdomsUnderOurInfluence.includes("Venoa")) votes += 1;
   if (kingdomsUnderOurInfluence.includes("Zeeland")) votes += 1;
 
-  // GAP-7: patriarch_of_the_church KA adds +1 permanent vote
   if (playerInfo.resources.advantageCard === "patriarch_of_the_church") {
     votes += 1;
   }

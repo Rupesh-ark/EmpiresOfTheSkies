@@ -46,7 +46,7 @@ function buildPassCtx(playerID: string, phase = "actions", playOrder = ["0", "1"
   };
 }
 
-// ── Test 1: recruitRegiments — full state change chain ────────────────────────
+// Test 1: recruitRegiments — full state change chain
 
 describe("actionPhase — recruitRegiments changes all state correctly", () => {
   it("gains 4 regiments, deducts gold, deducts counsellor, fills slot", () => {
@@ -70,7 +70,7 @@ describe("actionPhase — recruitRegiments changes all state correctly", () => {
   });
 });
 
-// ── Test 2: foundFactory — sequential slots accumulate cost ──────────────────
+// Test 2: foundFactory — sequential slots accumulate cost
 
 describe("actionPhase — foundFactory adds factory and deducts gold", () => {
   it("first slot costs 1 gold and increments factories by 1", () => {
@@ -109,7 +109,7 @@ describe("actionPhase — foundFactory adds factory and deducts gold", () => {
   });
 });
 
-// ── Test 3: trainTroops — counsellor used, stage changes ─────────────────────
+// Test 3: trainTroops — counsellor used, stage changes
 
 describe("actionPhase — trainTroops deducts counsellor and changes stage", () => {
   it("costs 1 counsellor and transitions to confirm_fow_draw", () => {
@@ -142,7 +142,7 @@ describe("actionPhase — trainTroops deducts counsellor and changes stage", () 
   });
 });
 
-// ── Test 4: pass — both players pass → stage → "attack or pass" ──────────────
+// Test 4: pass — both players pass → stage → "attack or pass"
 
 describe("actionPhase — both players pass advances to 'attack or pass'", () => {
   it("first player's pass doesn't end phase when second hasn't passed", () => {
@@ -174,7 +174,7 @@ describe("actionPhase — both players pass advances to 'attack or pass'", () =>
   });
 });
 
-// ── Test 5: 0-counsellor player gets INVALID_MOVE ────────────────────────────
+// Test 5: 0-counsellor player gets INVALID_MOVE
 
 describe("actionPhase — player with 0 counsellors cannot take counsellor actions", () => {
   it("recruitRegiments returns INVALID_MOVE with 0 counsellors", () => {
@@ -211,7 +211,7 @@ describe("actionPhase — player with 0 counsellors cannot take counsellor actio
   });
 });
 
-// ── Test 6: multi-action round — counsellors deplete across actions ───────────
+// Test 6: multi-action round — counsellors deplete across actions
 
 describe("actionPhase — counsellors deplete correctly across multiple actions", () => {
   it("player starting with 4 counsellors can take up to 4 actions before hitting 0", () => {

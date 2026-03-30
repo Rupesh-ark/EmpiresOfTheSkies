@@ -1,0 +1,26 @@
+{
+  "bucket": "I",
+  "generations_run": 14,
+  "default_avgVP": 57.86,
+  "best_avgVP": 63.54,
+  "best_weights": {
+    "targetLeaderBonus": 0.095385,
+    "earlyAgitatorPenalty": 0.080056,
+    "urgentDissenters": 0.1504,
+    "someDissenters": 0.072534,
+    "executeVPCost": 0.263159,
+    "rivalDissentersBonus": 0.104717,
+    "unpunishedDissentersPenalty": 0.256711,
+    "vpCostPenalty": 0.046242,
+    "misalignedBonus": 0.029845,
+    "cathedralConversionPenalty": 0.125214,
+    "dissenterConversionPenalty": 0.079752,
+    "deepDebtSellBonus": 0.205569,
+    "mildDebtSellBonus": 0.269918,
+    "lowSkyshipsSellPenalty": 0.015752
+  },
+  "improvement": 5.68,
+  "early_stopped": true,
+  "total_time_s": 1394.0,
+  "total_time_human": "23.2m"
+}

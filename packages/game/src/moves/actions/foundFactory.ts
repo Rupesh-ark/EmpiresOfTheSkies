@@ -24,11 +24,6 @@ const validateFoundFactory = (
   return null;
 };
 
-// Factories have their own row on the action board with individual slots
-// (like regiments/skyships). Data: { 1: string | undefined, 2: ... } — one
-// player per slot. Cost = 1g base + 1g per counsellor including your own.
-// This differs from foundBuildings where each building TYPE (cathedral, palace,
-// shipyard, fort) has its own independent cost track stored as arrays.
 const foundFactory: MoveDefinition = {
   fn: ({ G, playerID }, ...args) => {
     if (validateFoundFactory(G, playerID, args[0])) return INVALID_MOVE;

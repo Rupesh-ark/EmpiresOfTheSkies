@@ -11,7 +11,7 @@ import { tokens, IconCathedral, IconPalace, IconShipyard, IconFactory, IconPriso
 import { MyGameProps } from "@eots/game";
 import { getLocationPresentation } from "@/utils/locationLabels";
 
-// ── Count outposts, colonies, and forts from the map ────────────────────
+// Count outposts, colonies, and forts from the map
 
 function countTerritories(props: MyGameProps, playerColour: string) {
   let outposts = 0;
@@ -42,7 +42,7 @@ function countTerritories(props: MyGameProps, playerColour: string) {
   return { outposts, colonies, forts, locations };
 }
 
-// ── Holdings row — icon + count + label ─────────────────────────────────
+// Holdings row — icon + count + label
 
 const HoldingRow = ({
   icon,
@@ -95,7 +95,7 @@ const HoldingRow = ({
   </Box>
 );
 
-// ── Section header ──────────────────────────────────────────────────────
+// Section header
 
 const HoldingsHeader = ({ label }: { label: string }) => (
   <Box
@@ -138,7 +138,7 @@ const HoldingsHeader = ({ label }: { label: string }) => (
   </Box>
 );
 
-// ── Main component ──────────────────────────────────────────────────────
+// Main component
 
 interface HoldingsProps extends MyGameProps {
   variant?: "compact" | "full";

@@ -106,7 +106,6 @@ export const DialogShell = ({
         sx={{
           fontFamily: tokens.font.display,
           fontSize: tokens.fontSize.lg,
-          // Tint title color to mood accent when set, otherwise plain text
           color: moodAccent ?? tokens.ui.text,
           pb: subtitle ? `${tokens.spacing.xs}px` : `${tokens.spacing.md}px`,
         }}

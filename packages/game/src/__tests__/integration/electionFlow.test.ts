@@ -44,7 +44,7 @@ function castVote(
   vote.fn({ G, ctx, playerID, events: stubEvents, random: buildRandom() }, kingdomVotedFor);
 }
 
-// ── Test 1: Most cathedral-weighted votes wins ────────────────────────────────
+// Test 1: Most cathedral-weighted votes wins
 
 describe("electionFlow — most votes wins", () => {
   it("player with most cathedral-weighted votes becomes Archprelate", () => {
@@ -71,7 +71,7 @@ describe("electionFlow — most votes wins", () => {
   });
 });
 
-// ── Test 2: Tie goes to incumbent ─────────────────────────────────────────────
+// Test 2: Tie goes to incumbent
 
 describe("electionFlow — tie goes to incumbent Archprelate", () => {
   it("incumbent retains title on equal votes", () => {
@@ -102,7 +102,7 @@ describe("electionFlow — tie goes to incumbent Archprelate", () => {
   });
 });
 
-// ── Test 3: Winner gains VP based on orthodox count ──────────────────────────
+// Test 3: Winner gains VP based on orthodox count
 
 describe("electionFlow — new Archprelate gains VP based on orthodox count", () => {
   it("grants floor(2 × orthodoxRealms / 3) VP, capped at 6", () => {
@@ -143,7 +143,7 @@ describe("electionFlow — new Archprelate gains VP based on orthodox count", ()
   });
 });
 
-// ── Test 4: Previous Archprelate loses flag ───────────────────────────────────
+// Test 4: Previous Archprelate loses flag
 
 describe("electionFlow — previous Archprelate loses flag", () => {
   it("old Archprelate has isArchprelate set to false after new winner", () => {
@@ -161,7 +161,7 @@ describe("electionFlow — previous Archprelate loses flag", () => {
   });
 });
 
-// ── Test 5: consecutiveArchprelateWins tracking ───────────────────────────────
+// Test 5: consecutiveArchprelateWins tracking
 
 describe("electionFlow — consecutive wins tracking", () => {
   it("increments consecutiveArchprelateWins when same player wins again", () => {
@@ -224,7 +224,7 @@ describe("electionFlow — consecutive wins tracking", () => {
   });
 });
 
-// ── Integration: influence prelates add votes ─────────────────────────────────
+// Integration: influence prelates add votes
 
 describe("electionFlow — influence prelates affect vote tallying", () => {
   it("player under enemy influence loses own cathedral votes", () => {

@@ -13,7 +13,7 @@ interface TileDetailContentProps {
   location: [number, number];
 }
 
-// ── Lore text by tile type / name ────────────────────────────────────────
+// Lore text by tile type / name
 const LEGEND_LORE: Record<string, string> = {
   HereBeDragons: "Ancient wyrms circle these skies, guarding hoards of dragon scales. Only the bold claim their riches.",
   SeaElves: "The elusive Sea Elves trade in magic dust with those who earn their trust through peaceful passage.",
@@ -34,7 +34,7 @@ const getLore = (tile: TileInfoProps): string => {
   return TILE_TYPE_LORE[tile.type] ?? "";
 };
 
-// ── Format loot as readable lines ────────────────────────────────────────
+// Format loot as readable lines
 const LOOT_NAMES: Record<string, string> = {
   gold: "Gold", mithril: "Mithril", dragonScales: "Dragon Scales",
   krakenSkin: "Kraken Skin", magicDust: "Magic Dust",
@@ -48,7 +48,7 @@ const formatLoot = (loot: Record<string, number>): string => {
   return items.length > 0 ? items.join(", ") : "None";
 };
 
-// ── Shared icon components ───────────────────────────────────────────────
+// Shared icon components
 const Sword = ({ size = 14 }: { size?: number }) => (
   <GiCrossedSwords size={size} style={{ verticalAlign: "middle", marginRight: 2 }} />
 );
@@ -56,7 +56,7 @@ const Shield = ({ size = 14 }: { size?: number }) => (
   <GiShieldBounces size={size} style={{ verticalAlign: "middle", marginRight: 2 }} />
 );
 
-// ── Infidel Empire content ────────────────────────────────────────────────
+// Infidel Empire content
 const InfidelEmpireContent: React.FC<{ hosts: InfidelHostCounter[]; infidelFleet: MyGameState["infidelFleet"] }> = ({ hosts, infidelFleet }) => {
   const totalSwords = hosts.reduce((s, h) => s + h.swords, 0);
   const totalShields = hosts.reduce((s, h) => s + h.shields, 0);
@@ -167,7 +167,7 @@ const InfidelEmpireContent: React.FC<{ hosts: InfidelHostCounter[]; infidelFleet
   );
 };
 
-// ── Home Waters content ──────────────────────────────────────────────────
+// Home Waters content
 const HomeContent: React.FC<{ lore: string; x: number; y: number; G: MyGameState }> = ({ lore, x, y, G }) => (
   <>
     {lore && (
@@ -221,7 +221,7 @@ const HomeContent: React.FC<{ lore: string; x: number; y: number; G: MyGameState
   </>
 );
 
-// ── Ocean content ────────────────────────────────────────────────────────
+// Ocean content
 const OceanContent: React.FC<{ lore: string; x: number; y: number; G: MyGameState }> = ({ lore, x, y, G }) => (
   <>
     {lore && (
@@ -275,7 +275,7 @@ const OceanContent: React.FC<{ lore: string; x: number; y: number; G: MyGameStat
   </>
 );
 
-// ── Legend content ────────────────────────────────────────────────────────
+// Legend content
 const LegendContent: React.FC<{ lore: string; tile: TileInfoProps; x: number; y: number; G: MyGameState }> = ({ lore, tile, x, y, G }) => (
   <>
     {lore && (
@@ -336,7 +336,7 @@ const LegendContent: React.FC<{ lore: string; tile: TileInfoProps; x: number; y:
   </>
 );
 
-// ── Land content ──────────────────────────────────────────────────────────
+// Land content
 const LandContent: React.FC<{ tile: TileInfoProps; x: number; y: number; G: MyGameState }> = ({ tile, x, y, G }) => {
   const bld = G.mapState.buildings[y]?.[x];
   const isColony = bld?.buildings === "colony";
@@ -411,7 +411,7 @@ const LandContent: React.FC<{ tile: TileInfoProps; x: number; y: number; G: MyGa
   );
 };
 
-// ── Main TileDetailContent component ──────────────────────────────────────
+// Main TileDetailContent component
 export const TileDetailContent: React.FC<TileDetailContentProps> = ({ tile, G, location }) => {
   const lore = getLore(tile);
   const [x, y] = location;

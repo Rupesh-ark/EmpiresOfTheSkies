@@ -1,8 +1,3 @@
-// AILogger.ts — structured decision logging for AI bots.
-// This is intentionally separate from the game's createLogger (helpers/logger.ts),
-// which logs server-side game events. AILogger tracks bot decision-making metadata
-// (scored moves, personalities, timing) for debugging and batch-run analysis.
-
 export type VerbosityLevel = "silent" | "summary" | "decisions" | "verbose";
 
 export type ResourceSnapshot = {

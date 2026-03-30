@@ -1,11 +1,4 @@
-/**
- * resolveInvasion.ts
- *
- * Handles the "Check for Infidel Invasion" step each round during Resolution.
- * Draws Host counters, triggers invasion when an up-arrow counter appears,
- * and resolves the Grand Army battle. Interactive sub-phases (nomination,
- * contribution, buyoff) are handled by moves in moves/events/.
- */
+/** Infidel Invasion resolution logic. */
 
 import { MyGameState, InfidelHostCounter } from "../types";
 import {
@@ -26,7 +19,7 @@ import {
   TOTAL_KINGDOMS,
 } from "../data/gameData";
 
-// ── Host counter draw ────────────────────────────────────────────────────────
+// Host counter draw
 
 /**
  * Called each round during Resolution. Draws 1 Host counter and checks
@@ -95,7 +88,7 @@ export const getArchprelateForNomination = (G: MyGameState): string | null => {
   return archprelate?.id ?? null;
 };
 
-// ── Grand Army battle ────────────────────────────────────────────────────────
+// Grand Army battle
 
 type PlayerContribution = {
   playerID: string;
@@ -138,7 +131,7 @@ export const resolveGrandArmyBattle = (G: MyGameState, shuffle: <T>(arr: T[]) =>
     };
   });
 
-  // ── Draw Contingent counters as NPR Grand Army (1 per kingdom) ──
+  // Draw Contingent counters as NPR Grand Army (1 per kingdom)
   let contingentSwords = 0;
   const contingentsDrawn: number[] = [];
   for (let i = 0; i < TOTAL_KINGDOMS && G.contingentPool.length > 0; i++) {
@@ -147,12 +140,12 @@ export const resolveGrandArmyBattle = (G: MyGameState, shuffle: <T>(arr: T[]) =>
     contingentsDrawn.push(counter);
   }
 
-  // ── 4. Note force rankings before combat ──
+  // 4. Note force rankings before combat
   const sorted = [...contributions].sort(
     (a, b) => b.totalSwords - a.totalSwords
   );
 
-  // ── 5. Calculate battle ──
+  // 5. Calculate battle
   // Grand Army: player troops + skyship shields + contingent counters
   const grandArmySwords =
     contributions.reduce((sum, c) => sum + c.totalSwords, 0) +
@@ -182,7 +175,7 @@ export const resolveGrandArmyBattle = (G: MyGameState, shuffle: <T>(arr: T[]) =>
 
   const grandArmyWins = hitsOnInfidel >= infidelSwords;
 
-  // ── 6. Apply outcomes ──
+  // 6. Apply outcomes
   const captainKingdom = G.playerInfo[captainGeneral].kingdomName;
   logEvent(G, `Captain-General: ${captainKingdom} | Grand Army: ${grandArmySwords}S vs Infidel: ${infidelSwords}S`);
 
@@ -216,7 +209,7 @@ export const resolveGrandArmyBattle = (G: MyGameState, shuffle: <T>(arr: T[]) =>
       : `Grand Army defeated! Buy-off: ${buyoffCost} Gold`,
   };
 
-  // ── 7. Heresy shame — non-contributors ──
+  // 7. Heresy shame — non-contributors
   for (const c of contributions) {
     if (c.totalSwords === 0) {
       if (G.playerInfo[c.playerID].hereticOrOrthodox === "orthodox") {
@@ -227,7 +220,7 @@ export const resolveGrandArmyBattle = (G: MyGameState, shuffle: <T>(arr: T[]) =>
     }
   }
 
-  // ── 8. Return all Host counters to pool ──
+  // 8. Return all Host counters to pool
   for (const host of G.accumulatedHosts) {
     G.infidelHostPool.push(host);
   }
@@ -252,7 +245,7 @@ export const resolveGrandArmyBattle = (G: MyGameState, shuffle: <T>(arr: T[]) =>
   return buyoffCost;
 };
 
-// ── VP reward/penalty helpers ────────────────────────────────────────────────
+// VP reward/penalty helpers
 
 /** Grand Army wins: Captain-General +3, largest +5, 2nd +2 (tied: +4 each) */
 const applyVictoryRewards = (

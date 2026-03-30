@@ -24,7 +24,7 @@ export type DealProposal = {
   requesting: DealOffer;
 };
 
-// ── Discriminated-union game stage ──────────────────────────────────
+// Discriminated-union game stage
 export type GameStage =
   | { phase: "setup";      sub: "kingdom_advantage" | "legacy_card" }
   | { phase: "events";     sub: "default" | "immediate_election" }

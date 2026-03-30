@@ -53,7 +53,7 @@ export class ConquestStrategy implements PhaseStrategy {
       return { move: doNothing ?? moves[0], score: 0 };
     }
 
-    // ── Colonise sense ─────────────────────────────────────────────────
+    // Colonise sense
     const confidence = colonise ? coloniseConfidence(G, playerID, bx, by) : 0;
     const aggression = personality.tacticalPreferences.aggressionLevel;
 

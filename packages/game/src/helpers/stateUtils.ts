@@ -23,7 +23,6 @@ export const removeVPAmount = (
 ) => {
   const sanitizedVP = sanitizeValue(G.playerInfo[playerID].resources.victoryPoints);
   const sanitizedAmount = sanitizeValue(vpAmount, 0);
-  // GAP-16: "A player's total of Victory Points can never fall below zero"
   G.playerInfo[playerID].resources.victoryPoints = Math.max(
     0,
     sanitizedVP - sanitizedAmount
@@ -66,7 +65,6 @@ export const countRouteSkyships = (G: MyGameState, playerID: string): number =>
     .filter(players => players.includes(playerID)).length;
 
 export const addSkyship = (G: MyGameState, playerID: string) => {
-  // GAP-13: max MAX_SKYSHIPS skyships total (reserve + fleets + route discs)
   const player = G.playerInfo[playerID];
   const totalSkyships = player.resources.skyships +
     player.fleetInfo.reduce((sum, f) => sum + f.skyships, 0) +
@@ -81,7 +79,6 @@ export const addRegiments = (
   playerID: string,
   amount: number
 ) => {
-  // GAP-13: max MAX_REGIMENTS regiments total (reserve + fleets + garrisoned on map)
   const player = G.playerInfo[playerID];
   const totalRegiments = player.resources.regiments +
     player.fleetInfo.reduce((sum, f) => sum + f.regiments, 0) +

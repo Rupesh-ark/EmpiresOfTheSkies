@@ -44,7 +44,7 @@ interface PlayerSlot {
   isConnected?: boolean;
 }
 
-// ── Styling constants ───────────────────────────────────────────
+// Styling constants
 const CREAM = "#F5ECD8";
 const CREAM_DIM = "rgba(245,236,216,0.65)";
 const GOLD = "#E8C860";
@@ -72,7 +72,7 @@ const LobbyPage = ({ lobbyClient }: { lobbyClient: LobbyClient }) => {
   const [joined, setJoined] = useState(false);
   const hasJoinAttempted = useRef(false);
 
-  // ── Join the match on mount ───────────────────────────────────
+  // Join the match on mount
   useEffect(() => {
     if (hasJoinAttempted.current || !matchID || !playerName) return;
     hasJoinAttempted.current = true;

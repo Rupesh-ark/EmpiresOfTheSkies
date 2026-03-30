@@ -1,0 +1,22 @@
+{
+  "vp": 1.177864,
+  "colony": 0.617651,
+  "outpost": 0.51863,
+  "route": 0.643207,
+  "engagedFactory": 0.219836,
+  "cathedral": 0.342074,
+  "palace": 0.288066,
+  "shipyard": 0.309041,
+  "fort": 0.015699,
+  "skyship": 0.005636,
+  "regiment": 0.077965,
+  "eliteRegiment": 0.025226,
+  "levy": 0.001551,
+  "gold": 0.226423,
+  "counsellor": 0.361134,
+  "militaryStrength": 0.050588,
+  "heresyVP": 0.499991,
+  "debtPenalty": 0.046088,
+  "dissenterPenalty": 0.364092,
+  "unconnectedPenalty": 0.272532
+}

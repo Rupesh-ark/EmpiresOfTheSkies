@@ -137,7 +137,7 @@ export const drawFortuneOfWarCard = (
   const card = G.cardDecks.fortuneOfWarCards.splice(0, 1)[0];
   G.cardDecks.discardedFortuneOfWarCards.push(card);
 
-  // v4.2: No Effect → discard, reshuffle discard into deck, draw again
+  // No Effect → discard, reshuffle discard into deck, draw again
   const isNoEffect = card.sword === 0 && card.shield === 0;
   if (isNoEffect) {
     resetFortuneOfWarCardDeck(G, shuffle);
@@ -152,7 +152,7 @@ export const drawFortuneOfWarCard = (
   return card;
 };
 
-// ── Tile query helpers ────────────────────────────────────────────────────────
+// Tile query helpers
 // Reusable functions for checking tile state. All accept optional playerID
 // to scope the check to a specific player.
 
@@ -229,7 +229,7 @@ export const checkIfCurrentPlayerIsInCurrentBattle = (
   const [x, y] = G.mapState.currentBattle;
 
   if (G.mapState.battleMap[y][x].length > 0) {
-    // ── Battle sub-stage routing ──────────────────────────────────────
+    // Battle sub-stage routing
     // Each sub-stage has a specific player who should act. Route to them.
     // Uses ctx.phase to disambiguate shared G.stage values, and
     // G.battleState to identify attacker/defender/victor.

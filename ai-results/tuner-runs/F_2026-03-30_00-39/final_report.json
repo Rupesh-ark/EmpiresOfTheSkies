@@ -1,0 +1,29 @@
+{
+  "bucket": "F",
+  "generations_run": 21,
+  "default_avgVP": 57.81,
+  "best_avgVP": 64.62,
+  "best_weights": {
+    "emptyGarrison": 0.151001,
+    "engagedFactory": 0.10203,
+    "unengagedFactoryPenalty": 0.086174,
+    "unengagedFactoryBase": 0.063897,
+    "cathedralVPBonus": 0.04544,
+    "palaceVPBonus": 0.290241,
+    "shipyardBaseBonus": 0.011991,
+    "noTerritoryFortPenalty": 0.346415,
+    "highGoodPrice": 0.02116,
+    "decentGoodPrice": 0.010007,
+    "noIncomeExpensiveBuildingPenalty": 0.239945,
+    "ownSlotBonus": 0.151294,
+    "republicSlotBonus": 0.016347,
+    "rivalSlotHighPenalty": 0.332562,
+    "rivalSlotLowPenalty": 0.226248,
+    "brokePassBonus": 0.325664,
+    "debtPassBonus": 0.231268
+  },
+  "improvement": 6.81,
+  "early_stopped": true,
+  "total_time_s": 1733.0,
+  "total_time_human": "28.9m"
+}

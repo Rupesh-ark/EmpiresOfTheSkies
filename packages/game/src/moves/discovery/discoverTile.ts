@@ -24,7 +24,7 @@ export const discoverTile: MoveDefinition = {
       bordered = edgeNeighbors.some(([nx, ny]) => nx === lx && ny === ly);
 
       // Cascade fallback: if the last tile has no hidden edge-neighbors,
-      // allow any tile adjacent to any revealed tile (v4.2 discovery rule)
+      // allow any tile adjacent to any revealed tile (discovery rule)
       if (!bordered) {
         const lastTileNeighbors = getNeighbors(lx, ly, true);
         const hasHiddenNeighbor = lastTileNeighbors.some(
@@ -86,7 +86,6 @@ export const discoverTile: MoveDefinition = {
       return;
     }
 
-    // GAP-24: Discovery cascade — Ocean/Legend tiles don't count as Land; player must flip again
     if (currentTile.type === "ocean" || currentTile.type === "legend") {
       G.mustContinueDiscovery = true;
       // Do NOT end turn — player must flip an adjacent tile

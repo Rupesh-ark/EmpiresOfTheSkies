@@ -11,7 +11,7 @@ import type { EventsAPI } from "boardgame.io/dist/types/src/plugins/events/event
 import type { RandomAPI } from "boardgame.io/dist/types/src/plugins/random/random";
 import { fortuneOfWarCards } from "../data/gameData";
 
-// ── Player builder ────────────────────────────────────────────────────────────
+// Player builder
 
 export function buildPlayer(id: string, overrides: Partial<PlayerInfo> = {}): PlayerInfo {
   return {
@@ -89,7 +89,7 @@ export function buildFleet(fleetId: number, overrides: Partial<FleetInfo> = {}):
   };
 }
 
-// ── Map builder ──────────────────────────────────────────────────────────────
+// Map builder
 
 const EMPTY_LOOT = { gold: 0, mithril: 0, dragonScales: 0, krakenSkin: 0, magicDust: 0, stickyIchor: 0, pipeweed: 0, victoryPoints: 0 };
 
@@ -138,7 +138,7 @@ export function buildMapState(overrides: Partial<MapState> = {}): MapState {
   };
 }
 
-// ── ActionBoard builder ───────────────────────────────────────────────────────
+// ActionBoard builder
 
 export function buildActionBoard(overrides: Partial<ActionBoardInfo> = {}): ActionBoardInfo {
   return {
@@ -157,7 +157,7 @@ export function buildActionBoard(overrides: Partial<ActionBoardInfo> = {}): Acti
   };
 }
 
-// ── Full game state builder ───────────────────────────────────────────────────
+// Full game state builder
 
 /**
  * Returns a minimal valid MyGameState for two players ("0" and "1").
@@ -239,7 +239,7 @@ export function buildInitialG(
   };
 }
 
-// ── Move invocation helper ────────────────────────────────────────────────────
+// Move invocation helper
 
 /**
  * Simulates calling a boardgame.io move function directly.

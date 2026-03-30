@@ -11,12 +11,12 @@ import { MyGameProps } from "@eots/game";
 
 export interface ActionBoardProps extends MyGameProps {}
 
-// ── Shared tooltip config ────────────────────────────────────────────────
+// Shared tooltip config
 
 /** Standard tooltip delays — change here to update all action tooltips */
 export const TOOLTIP_DELAY = { enter: 700, enterNext: 400 } as const;
 
-// ── Shared rich tooltip for action rows ─────────────────────────────────
+// Shared rich tooltip for action rows
 
 import { ACTION_INFO } from "../ActionHoverContext";
 
@@ -41,7 +41,7 @@ export const ActionTooltipContent = ({ actionId }: { actionId: string }) => {
   );
 };
 
-// ── RowHeader — gold-edged label plate ────────────────────────────────────
+// RowHeader — gold-edged label plate
 
 export const RowHeader = ({
   label,
@@ -126,7 +126,7 @@ export const RowHeader = ({
   </Box>
 );
 
-// ── ActionRow — expanded panel station ────────────────────────────────────
+// ActionRow — expanded panel station
 
 export const ActionRow = ({
   header,

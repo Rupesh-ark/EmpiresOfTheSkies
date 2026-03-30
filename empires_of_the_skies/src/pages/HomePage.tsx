@@ -8,7 +8,6 @@ import ClientComponent from "./Client";
 import HomePageComponent from "./HomePageComponent";
 import LobbyPage from "./LobbyPage";
 
-// Lazy-load AI dashboard pages (heavy deps — game logic + charts)
 const AITunerPage = lazy(() => import("./AITuner"));
 const AITournamentPage = lazy(() => import("./AITournamentPage"));
 

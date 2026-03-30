@@ -8,7 +8,7 @@
 import type { GameRecord, EnrichedDecision } from "./GameRecorder";
 import type { PlayerSnapshot } from "./GameRecorder";
 
-// ── Formatting helpers ────────────────────────────────────────────────────────
+// Formatting helpers
 
 const SEP_DOUBLE = "═".repeat(62);
 const SEP_SINGLE = "─".repeat(62);
@@ -25,11 +25,11 @@ function fmtGoldDelta(start: number, end: number): string {
   return `${start}→${end} (${sign}${delta})`;
 }
 
-// ── Mechanical moves to exclude from display ─────────────────────────────────
+// Mechanical moves to exclude from display
 
 const NOISE_MOVES = new Set(["confirmAction", "drawFoWCards"]);
 
-// ── Decision grouping helpers ─────────────────────────────────────────────────
+// Decision grouping helpers
 
 /**
  * Returns all decisions grouped by round number.
@@ -62,7 +62,7 @@ function getRoundSnapshots(
   };
 }
 
-// ── 1. printGameTimeline ──────────────────────────────────────────────────────
+// 1. printGameTimeline
 
 export function printGameTimeline(record: GameRecord): void {
   const winner = record.result?.winner ?? "?";
@@ -130,7 +130,7 @@ export function printGameTimeline(record: GameRecord): void {
   console.log("\n" + SEP_DOUBLE + "\n");
 }
 
-// ── 2. printMoveAnalysis ──────────────────────────────────────────────────────
+// 2. printMoveAnalysis
 
 export function printMoveAnalysis(record: GameRecord, playerID?: string): void {
   const label = playerID
@@ -173,7 +173,7 @@ export function printMoveAnalysis(record: GameRecord, playerID?: string): void {
   console.log("\n" + SEP_DOUBLE + "\n");
 }
 
-// ── 3. printEconomyTimeline ───────────────────────────────────────────────────
+// 3. printEconomyTimeline
 
 export function printEconomyTimeline(record: GameRecord): void {
   console.log("\n" + SEP_DOUBLE);
@@ -225,7 +225,7 @@ export function printEconomyTimeline(record: GameRecord): void {
   console.log("\n" + SEP_DOUBLE + "\n");
 }
 
-// ── 4. printBattleLog ─────────────────────────────────────────────────────────
+// 4. printBattleLog
 
 export function printBattleLog(record: GameRecord): void {
   const battleDecisions = record.decisions.filter((d) => d.battleContext != null);
@@ -261,7 +261,7 @@ export function printBattleLog(record: GameRecord): void {
   console.log("\n" + SEP_DOUBLE + "\n");
 }
 
-// ── 5. printFullAnalysis ─────────────────────────────────────────────────────
+// 5. printFullAnalysis
 
 /**
  * Convenience function that prints game timeline, economy timeline, and battle

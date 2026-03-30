@@ -1,12 +1,12 @@
 /**
  * BASE TOKEN DEFINITIONS
- * ──────────────────────
+ *
  * All token keys and their default (classic) values live here.
  * Presets override specific values — see presets/ directory.
  * Do NOT import this file directly — import from tokens.ts instead.
  */
 export const baseTokens = {
-  // ── Kingdom palette (player colors from the game) ──────────────────────────
+  // Kingdom palette (player colors from the game)
   kingdom: {
     angland:     "#DC5454",   // red
     constantium: "#478779",   // green
@@ -16,19 +16,19 @@ export const baseTokens = {
     ostreich:    "#E6EFE9",   // white/cream
   },
 
-  // ── NPR (non-player realm) kingdom colors ──────────────────────────────────
+  // NPR (non-player realm) kingdom colors
   nprKingdom: {
     zeeland: "#FE9F10",
     venoa:   "#FE9ACC",
   },
 
-  // ── Religious allegiance ───────────────────────────────────────────────────
+  // Religious allegiance
   allegiance: {
     orthodox: "#8A3570",      // dark purple — 4.5:1 on surface (AA)
     heresy:   "#8A4D00",      // dark orange — 4.6:1 on surface (AA)
   },
 
-  // ── Semantic UI colors (parchment light theme) ─────────────────────────────
+  // Semantic UI colors (parchment light theme)
   ui: {
     background:    "#E8DEC8",       // aged parchment
     surface:       "#F0E8D4",       // lighter parchment panel
@@ -46,7 +46,6 @@ export const baseTokens = {
     warning:       "#7A4E05",       // dark amber — 4.8:1 on surface (AA)
     info:          "#1D5F8A",       // dark blue — 4.7:1 on surface (AA)
 
-    // Secondary accent (river teal) — empty in classic, filled by presets
     teal:          "",
     tealLight:     "",
     tealMuted:     "",
@@ -66,7 +65,7 @@ export const baseTokens = {
     white:            "#ffffff",
   },
 
-  // ── Goods colors ───────────────────────────────────────────────────────────
+  // Goods colors
   goods: {
     mithril:      "#ECEDED",
     magicDust:    "#F6B1B5",
@@ -76,7 +75,7 @@ export const baseTokens = {
     pipeweed:     "#AE9675",
   },
 
-  // ── Mood palettes (per game phase — warm parchment accents) ─────────────────
+  // Mood palettes (per game phase — warm parchment accents)
   mood: {
     peacetime: { accent: "#B8860B", bg: "rgba(184,134,11,0.06)",  border: "rgba(184,134,11,0.25)" },
     battle:    { accent: "#A82E22", bg: "rgba(168,46,34,0.08)",   border: "rgba(168,46,34,0.35)"  },
@@ -85,7 +84,7 @@ export const baseTokens = {
     crisis:    { accent: "#7A4E05", bg: "rgba(122,78,5,0.08)",    border: "rgba(122,78,5,0.30)" },
   },
 
-  // ── Typography ─────────────────────────────────────────────────────────────
+  // Typography
   font: {
     display: "dauphinn",
     body:    "Inter, system-ui, Avenir, Helvetica, Arial, sans-serif",
@@ -109,7 +108,7 @@ export const baseTokens = {
     chat:       16,
   },
 
-  // ── Spacing ────────────────────────────────────────────────────────────────
+  // Spacing
   spacing: {
     xs:  4,
     sm:  8,
@@ -119,7 +118,7 @@ export const baseTokens = {
     xxl: 48,
   },
 
-  // ── Shadows ────────────────────────────────────────────────────────────────
+  // Shadows
   shadow: {
     sm:   "0 1px 3px rgba(80,60,30,0.15)",
     md:   "0 4px 12px rgba(80,60,30,0.12)",
@@ -127,7 +126,7 @@ export const baseTokens = {
     glow: (color: string) => `0 0 8px ${color}30, 0 0 3px ${color}15`,
   },
 
-  // ── Border radii ───────────────────────────────────────────────────────────
+  // Border radii
   radius: {
     sm:   4,
     md:   8,
@@ -136,14 +135,14 @@ export const baseTokens = {
     pill: 999,
   },
 
-  // ── Transitions ────────────────────────────────────────────────────────────
+  // Transitions
   transition: {
     fast:   "150ms ease",
     normal: "250ms ease",
     slow:   "400ms ease",
   },
 
-  // ── Component sizes ────────────────────────────────────────────────────────
+  // Component sizes
   size: {
     card:        { width: 137, height: 250 },
     tile:        { width: 150, height: 150 },
@@ -154,28 +153,28 @@ export const baseTokens = {
     iconLg: 40,
   },
 
-  // ── Map colors ─────────────────────────────────────────────────────────────
+  // Map colors
   map: {
     unrevealedTile:   "#298932",
     selectableBorder: "#F5DE48",
     infidelEmpire:    "#8B0000",
   },
 
-  // ── SVG rendering ──────────────────────────────────────────────────────────
+  // SVG rendering
   svg: {
     stroke:      "#1A1A18",
     strokeWidth: "0.288",
     levyFill:    "#B1B2B2",
   },
 
-  // ── Desktop breakpoints (no mobile/tablet — game is desktop-only) ──────────
+  // Desktop breakpoints (no mobile/tablet — game is desktop-only)
   breakpoint: {
     laptop:    1366,   // 13-14" laptops (1366×768)
     desktop:   1920,   // standard 1080p monitors
     wide:      2560,   // 1440p / ultrawide
   },
 
-  // ── Home page / lobby (warm parchment palette) ─────────────────────────────
+  // Home page / lobby (warm parchment palette)
   home: {
     text:               "#3e2723",
     border:             "#a67c52",

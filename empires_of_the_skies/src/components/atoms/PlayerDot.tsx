@@ -47,7 +47,6 @@ const DotInner = ({ colour, initial, size = "md", active = false, sx }: PlayerDo
             color: tokens.ui.textBright,
             lineHeight: 1,
             userSelect: "none",
-            // Darken text for light-colored kingdoms (e.g. nordmark yellow, ostreich cream)
             textShadow: "0 1px 2px rgba(0,0,0,0.6)",
           }}
         >

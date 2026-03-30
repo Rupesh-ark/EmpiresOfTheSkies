@@ -6,7 +6,7 @@ import { logEvent } from "./stateUtils";
 
 const log = createLogger("move");
 
-// ── Move wrapper ────────────────────────────────────────────────────────────
+// Move wrapper
 
 /**
  * Wraps a MoveDefinition into a boardgame.io move function with:
@@ -75,7 +75,7 @@ export const wrapMove = (name: string, def: MoveDefinition): any => {
   };
 };
 
-// ── Phase onBegin wrappers ───────────────────────────────────────────────────
+// Phase onBegin wrappers
 
 const LOOP_GUARD_LIMIT = 200;
 const circuitLog = createLogger("circuit-breaker");

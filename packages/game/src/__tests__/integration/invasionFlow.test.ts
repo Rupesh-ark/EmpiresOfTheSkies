@@ -102,7 +102,7 @@ function callBuyoff(
   return { result, events };
 }
 
-// ── Test 1: Archprelate nominates Captain-General ─────────────────────────────
+// Test 1: Archprelate nominates Captain-General
 
 describe("invasionFlow — Archprelate nominates Captain-General", () => {
   it("sets isCaptainGeneral on the nominated player", () => {
@@ -154,7 +154,7 @@ describe("invasionFlow — Archprelate nominates Captain-General", () => {
   });
 });
 
-// ── Test 2: All players contribute → invasion resolves ───────────────────────
+// Test 2: All players contribute → invasion resolves
 
 describe("invasionFlow — all players contribute troops", () => {
   it("does not resolve after only one player has contributed (2-player game)", () => {
@@ -200,7 +200,7 @@ describe("invasionFlow — all players contribute troops", () => {
   });
 });
 
-// ── Test 3: Contributing 0 troops is valid ────────────────────────────────────
+// Test 3: Contributing 0 troops is valid
 
 describe("invasionFlow — contributing 0 troops is valid", () => {
   it("allows a player to contribute nothing", () => {
@@ -221,7 +221,7 @@ describe("invasionFlow — contributing 0 troops is valid", () => {
   });
 });
 
-// ── Test 4: Buyoff phase after Grand Army loses ───────────────────────────────
+// Test 4: Buyoff phase after Grand Army loses
 
 describe("invasionFlow — buyoff phase", () => {
   it("all players offer gold → transitions to retrieve fleets", () => {
@@ -288,7 +288,7 @@ describe("invasionFlow — buyoff phase", () => {
   });
 });
 
-// ── Test 5: Phase guard — wrong phase returns INVALID_MOVE ───────────────────
+// Test 5: Phase guard — wrong phase returns INVALID_MOVE
 
 describe("invasionFlow — phase guards", () => {
   it("contributeToGrandArmy returns INVALID_MOVE if phase is not 'contribute'", () => {

@@ -13,7 +13,6 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-// Note: Dialog/Button/etc still used by Palace heresy dialog
 import { tokens } from "@/theme";
 import { BTN_BG } from "@/assets/actionBoard";
 import { clearMoves } from "@/utils/gameHelpers";
@@ -192,16 +191,13 @@ const FoundBuildingsRow = (props: ActionBoardProps) => {
   const [palaceDialogOpen, setPalaceDialogOpen] = useState(false);
   const [fortDialogOpen, setFortDialogOpen] = useState(false);
 
-  // Valid fort locations are computed by the backend when foundBuildings(3) fires
   const possibleFortTiles = props.G.validFortLocations ?? [];
 
   const handleClick = (index: number) => {
     if (index === 1) {
-      // Palace: open heresy direction dialog first, move fires after choice
       clearMoves(props);
       setPalaceDialogOpen(true);
     } else if (index === 3) {
-      // Fort: call foundBuildings then open map selection dialog
       clearMoves(props);
       props.moves.foundBuildings(3);
       setFortDialogOpen(true);

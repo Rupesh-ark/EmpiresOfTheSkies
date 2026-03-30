@@ -19,7 +19,7 @@ import {
 } from "../../data/gameData";
 import { evaluatePosition } from "./StateEvaluator";
 
-// ── BattleMap helpers ─────────────────────────────────────────────────────────
+// BattleMap helpers
 
 function removeBattleMapPresence(G: MyGameState, playerID: string, x: number, y: number): void {
   const row = G.mapState.battleMap[y];
@@ -38,13 +38,13 @@ function addBattleMapPresence(G: MyGameState, playerID: string, x: number, y: nu
   }
 }
 
-// ── Cached trade route counting (single BFS per player per state) ────────────
+// Cached trade route counting (single BFS per player per state)
 
 function computeAllTradeRoutesCached(G: MyGameState): Record<string, number> {
   return getTradeRoutes(G, Object.keys(G.playerInfo));
 }
 
-// ── Apply a single move to a cloned state ────────────────────────────────────
+// Apply a single move to a cloned state
 
 export function applyMove(G: MyGameState, playerID: string, move: AIMove): void {
   const player = G.playerInfo[playerID];
@@ -153,7 +153,6 @@ export function applyMove(G: MyGameState, playerID: string, move: AIMove): void 
       const slot = (move.args[0] as number) ?? 0;
       const cost = slot >= 2 ? 2 : 1;
       player.resources.gold -= cost;
-      // Counsellor spent on board then a new one recruited — net 0
       player.resources.counsellors -= 1;
       player.resources.counsellors += 1;
       break;
@@ -416,7 +415,7 @@ export function applyMove(G: MyGameState, playerID: string, move: AIMove): void 
   }
 }
 
-// ── Simplified battle resolution with FoW cards ──────────────────────────────
+// Simplified battle resolution with FoW cards
 
 function resolveAerialBattles(G: MyGameState): void {
   const battleTiles = new Map<string, string[]>();
@@ -472,7 +471,7 @@ function resolveAerialBattles(G: MyGameState): void {
   }
 }
 
-// ── Simplified ground battle resolution ──────────────────────────────────────
+// Simplified ground battle resolution
 
 function resolveGroundBattles(G: MyGameState): void {
   for (let y = 0; y < G.mapState.battleMap.length; y++) {
@@ -576,7 +575,7 @@ function resolveElection(G: MyGameState): void {
   }
 }
 
-// ── Fleet retrieval ───────────────────────────────────────────────────────────
+// Fleet retrieval
 
 function retrieveFleets(G: MyGameState): void {
   for (const [pid, player] of Object.entries(G.playerInfo)) {
@@ -634,7 +633,7 @@ function retrieveFleets(G: MyGameState): void {
   }
 }
 
-// ── Trade VP scoring ──────────────────────────────────────────────────────────
+// Trade VP scoring
 
 function applyTradeGains(G: MyGameState, allRoutes: Record<string, number>): void {
   // Determine VP schedule for current round (highest threshold <= round)
@@ -653,7 +652,6 @@ function applyTradeGains(G: MyGameState, allRoutes: Record<string, number>): voi
 
   if (routeCounts.length === 0 || routeCounts[0].routes === 0) return;
 
-  // Award top 3 places (simple: first place, second, third — skip ties for now)
   const first = routeCounts[0];
   const second = routeCounts[1];
   const third = routeCounts[2];
@@ -669,7 +667,7 @@ function applyTradeGains(G: MyGameState, allRoutes: Record<string, number>): voi
   }
 }
 
-// ── Heresy VP scoring (applied every round) ───────────────────────────────────
+// Heresy VP scoring (applied every round)
 
 function applyHeresyScoring(G: MyGameState): void {
   // Track is [-9, +9]. VP = h if heretic, VP = -h if orthodox.
@@ -681,7 +679,7 @@ function applyHeresyScoring(G: MyGameState): void {
   }
 }
 
-// ── Debt penalty ─────────────────────────────────────────────────────────────
+// Debt penalty
 
 function applyDebtPenalty(G: MyGameState): void {
   for (const player of Object.values(G.playerInfo)) {
@@ -692,9 +690,9 @@ function applyDebtPenalty(G: MyGameState): void {
   }
 }
 
-// ── Action board reset ────────────────────────────────────────────────────────
+// Action board reset
 
-// ── Palace bonus (most palaces, non-tied) ────────────────────────────────────
+// Palace bonus (most palaces, non-tied)
 
 function applyPalaceBonus(G: MyGameState): void {
   let bestPID = "";
@@ -720,7 +718,7 @@ function applyPalaceBonus(G: MyGameState): void {
   }
 }
 
-// ── Free dissenters heresy ───────────────────────────────────────────────────
+// Free dissenters heresy
 
 function applyDissenterHeresy(G: MyGameState): void {
   for (const player of Object.values(G.playerInfo)) {
@@ -734,7 +732,7 @@ function applyDissenterHeresy(G: MyGameState): void {
   }
 }
 
-// ── Final round: gold → VP ───────────────────────────────────────────────────
+// Final round: gold → VP
 
 function applyFinalGoldBonus(G: MyGameState): void {
   for (const player of Object.values(G.playerInfo)) {
@@ -744,7 +742,7 @@ function applyFinalGoldBonus(G: MyGameState): void {
   }
 }
 
-// ── Action board reset ────────────────────────────────────────────────────────
+// Action board reset
 
 function resetActionBoard(G: MyGameState): void {
   for (const key of [1, 2, 3, 4] as const) {
@@ -764,7 +762,7 @@ function applyTaxes(G: MyGameState, allRoutes: Record<string, number>): void {
   }
 }
 
-// ── Tile pool: total counts from tileDefinitions ─────────────────────────────
+// Tile pool: total counts from tileDefinitions
 // 32 tiles total: 18 land, 6 legend, 8 ocean (from tileDefinitions.ts)
 const TOTAL_TILE_COUNTS = { land: 18, legend: 6, ocean: 8 } as const;
 
@@ -810,7 +808,7 @@ function makePlaceholderTile(type: "land" | "legend" | "ocean"): TileInfoProps {
   };
 }
 
-// ── Simulated discovery phase ────────────────────────────────────────────────
+// Simulated discovery phase
 
 function simulateDiscovery(G: MyGameState): void {
   // Count already-discovered tiles by type
@@ -879,7 +877,7 @@ function simulateDiscovery(G: MyGameState): void {
   }
 }
 
-// ── Simulated events phase (expected-value noise) ────────────────────────────
+// Simulated events phase (expected-value noise)
 
 function simulateEvents(G: MyGameState): void {
   for (const player of Object.values(G.playerInfo)) {
@@ -898,7 +896,7 @@ function simulateEvents(G: MyGameState): void {
   }
 }
 
-// ── Simulate one round ───────────────────────────────────────────────────────
+// Simulate one round
 
 const ROLLOUT_ACTIONS: AIMove[] = [
   { move: "foundBuildings", args: [0] },
@@ -970,7 +968,7 @@ export function simulateRound(
   G.round += 1;
 }
 
-// ── Rollout: simulate N rounds from current state ────────────────────────────
+// Rollout: simulate N rounds from current state
 
 /**
  * Rollout: simulate N rounds from current state, mutating G in place.

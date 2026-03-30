@@ -1,12 +1,4 @@
-/**
- * Manufactured Fun Seeding — setup algorithms that guarantee balanced card
- * distribution so every game has natural rivalry and counter-play.
- *
- * Three systems:
- *  1. KA pool filtering     – preserves rivalry pairs when reducing pool size
- *  2. Legacy seeded deal     – pool-based deal with rivalry/synergy/colour checks
- *  3. Event deck epoch split – early-game vs late-game deck separation
- */
+/** Balanced card distribution for setup: KA pool, legacy deal, event deck split. */
 
 import {
   KingdomAdvantageCard,
@@ -15,7 +7,7 @@ import {
   EventCardName,
 } from "../types";
 
-// ── KA Rivalry Groups ──────────────────────────────────────────────────────────
+// KA Rivalry Groups
 
 /** Each pair must be kept together or removed together. */
 const KA_RIVALRY_GROUPS: [KingdomAdvantageCard, KingdomAdvantageCard][] = [
@@ -84,7 +76,7 @@ export function filterKAPool(
   return { pool, log };
 }
 
-// ── Legacy Card Seeded Deal ────────────────────────────────────────────────────
+// Legacy Card Seeded Deal
 
 const POOL_ALPHA: LegacyCardName[] = ["the conqueror", "the navigator", "the merchant"];
 const POOL_BETA: LegacyCardName[] = ["the pious", "the magnificent"];
@@ -164,7 +156,7 @@ export function seedLegacyDeal(
   // Leftover cards → remainder (used by Royal Succession event)
   const remainder: LegacyCardInfo[] = [...poolA, ...poolB, ...poolG];
 
-  // ── Helpers for rivalry checks ──
+  // Helpers for rivalry checks
 
   /** Does any player other than `excludeID` have a card with the given name? */
   const someoneElseHas = (name: string, excludeID: string): boolean =>
@@ -302,7 +294,7 @@ export function seedLegacyDeal(
   return { hands, remainder, log };
 }
 
-// ── Event Deck Epoch Split ─────────────────────────────────────────────────────
+// Event Deck Epoch Split
 
 /** Events deferred to late deck (void at game start, or unfair tie-targeting in round 1) */
 const LATE_GAME_EVENTS: ReadonlySet<EventCardName> = new Set<EventCardName>([

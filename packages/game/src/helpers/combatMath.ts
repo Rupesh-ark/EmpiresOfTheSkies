@@ -1,8 +1,6 @@
 /**
- * combatMath.ts -- Pure battle math, no side effects.
- *
- * The core formula: hits = max(0, swords + fowSword - shields - fowShield)
- * Previously duplicated across 9 battle resolution sites.
+ * Pure battle math, no side effects.
+ * hits = max(0, swords + fowSword - shields - fowShield)
  */
 
 export interface CombatantStats {

@@ -12,7 +12,7 @@ import { goldPressure, goldPressureReason, personalityBonus, roundAwareness, dim
 import { BUILDING_BASE_COST, BuildingSlot } from "../../../data/gameData";
 import { countActiveTradeRoutes } from "../../../helpers/mapUtils";
 
-// ── Building type from slot index ───────────────────────────────────────────
+// Building type from slot index
 
 type BuildingType = "cathedral" | "palace" | "shipyard" | "fort";
 
@@ -30,7 +30,7 @@ const SLOT_TO_BUILDING_SLOT: Record<number, number> = {
   3: BuildingSlot.Fort,
 };
 
-// ── Cost calculation (mirrors foundBuildings.ts logic) ──────────────────────
+// Cost calculation (mirrors foundBuildings.ts logic)
 
 function getBuildingCost(G: MyGameState, slotIndex: number): number {
   const buildingType = SLOT_TO_TYPE[slotIndex];
@@ -49,7 +49,7 @@ function getOwnedCount(player: MyGameState["playerInfo"][string], buildingType: 
   }
 }
 
-// ── Personality config per building type ─────────────────────────────────────
+// Personality config per building type
 
 const CATHEDRAL_PERSONALITY = {
   kaCards: ["patriarch_of_the_church"],
@@ -75,7 +75,7 @@ const FORT_PERSONALITY = {
   legacyBonus: 0.08,
 };
 
-// ── Main evaluator ──────────────────────────────────────────────────────────
+// Main evaluator
 
 export function evaluateFoundBuildings(
   G: MyGameState,
@@ -93,17 +93,17 @@ export function evaluateFoundBuildings(
   let quality = V2_CONFIG.baseQuality.foundBuildings;
   const reasons: string[] = [];
 
-  // ── Gold pressure (from common) ────────────────────────────────────────
+  // Gold pressure (from common)
   quality += goldPressure(gold, cost);
   const gpReason = goldPressureReason(gold, cost);
   if (gpReason) reasons.push(gpReason);
 
-  // ── Diminishing returns (from common) ──────────────────────────────────
+  // Diminishing returns (from common)
   const dim = diminishingReturns(owned);
   quality -= dim.penalty;
   if (dim.reason) reasons.push(dim.reason);
 
-  // ── Round awareness — timing depends on building type + alignment ────────
+  // Round awareness — timing depends on building type + alignment
   let timing: "early" | "mid" | "late" | "any" = "mid";
   if (buildingType === "shipyard") {
     timing = "early"; // infrastructure — need it early to produce ships
@@ -129,7 +129,7 @@ export function evaluateFoundBuildings(
   quality += ra.modifier;
   if (ra.reason) reasons.push(ra.reason);
 
-  // ── Building-type-specific logic ───────────────────────────────────────
+  // Building-type-specific logic
 
   if (buildingType === "cathedral") {
     quality += V2_CONFIG.bonuses.cathedralVPBonus; // cathedrals give VP + election power
@@ -165,7 +165,6 @@ export function evaluateFoundBuildings(
     reasons.push(...pb.reasons);
   }
 
-  // ── Heresy pressure — buildings that shift heresy should align with card ─
   if (buildingType === "cathedral" || buildingType === "palace") {
     const hp = heresyPressure(personality.alignment, player.heresyTracker, personality.legacyCardColour);
     // Cathedral retreats heresy (good for orthodox), Palace can advance (good for heretic)
@@ -179,14 +178,14 @@ export function evaluateFoundBuildings(
     if (hp.reason) reasons.push(hp.reason);
   }
 
-  // ── No-income penalty: expensive buildings without trade routes ──────────
+  // No-income penalty: expensive buildings without trade routes
   const routes = countActiveTradeRoutes(G, playerID);
   if (routes === 0 && cost >= 5 && (buildingType === "cathedral" || buildingType === "palace")) {
     quality -= V2_CONFIG.bonuses.noIncomeExpensiveBuildingPenalty * V2_CONFIG.penaltyScale;
     reasons.push("no trade routes — expensive building bleeds gold");
   }
 
-  // ── Clamp and return ───────────────────────────────────────────────────
+  // Clamp and return
   quality = Math.max(0, Math.min(1, quality));
 
   return {

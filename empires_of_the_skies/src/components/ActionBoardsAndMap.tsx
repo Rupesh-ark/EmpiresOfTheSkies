@@ -22,7 +22,7 @@ import { PiracyIntentProvider } from "@/contexts/PiracyIntentContext";
 import { GameLayout } from "./layout";
 import type { PanelSlot, MapSize } from "./layout";
 
-// ── Compact heresy tracker bar (below map, always visible) ──────────────
+// Compact heresy tracker bar (below map, always visible)
 
 const HERESY_POSITIONS = Array.from({ length: 19 }, (_, i) => i - 9);
 
@@ -165,7 +165,7 @@ const ActionBoardsAndMapInner = (props: MyGameProps) => {
   const theme = useGameTheme(props.G.stage);
   const { showToast } = useToast();
 
-  // ── Discovery toast: show tile flips + heresy changes ────────
+  // Discovery toast: show tile flips + heresy changes
   const prevLogLen = useRef(props.G.gameLog.length);
   useEffect(() => {
     const logLen = props.G.gameLog.length;
@@ -191,7 +191,7 @@ const ActionBoardsAndMapInner = (props: MyGameProps) => {
     prevLogLen.current = logLen;
   }, [props.G.gameLog.length, props.G.stage.phase, props.ctx.currentPlayer, props.playerID, props.G.playerInfo, showToast]);
 
-  // ── Event toast: notify all players when an event card is resolved ──
+  // Event toast: notify all players when an event card is resolved
   const prevResolvedEvent = useRef(props.G.eventState.resolvedEvent);
   useEffect(() => {
     const resolved = props.G.eventState.resolvedEvent;
@@ -216,7 +216,7 @@ const ActionBoardsAndMapInner = (props: MyGameProps) => {
     }));
   }, []);
 
-  // ── Slot renderer — maps slot names to components ──────────────
+  // Slot renderer — maps slot names to components
 
   const renderSlot = useCallback((slot: PanelSlot): React.ReactNode => {
     switch (slot) {
@@ -259,7 +259,7 @@ const ActionBoardsAndMapInner = (props: MyGameProps) => {
     }
   }, [validatedProps, openMapAtLocation]);
 
-  // ── Map renderer ───────────────────────────────────────────────
+  // Map renderer
 
   const renderMap = useCallback((size: MapSize): React.ReactNode => {
     return (
@@ -281,7 +281,7 @@ const ActionBoardsAndMapInner = (props: MyGameProps) => {
     );
   }, [validatedProps, mapDetailRequest]);
 
-  // ── Render ─────────────────────────────────────────────────────
+  // Render
 
   return (
     <ThemeProvider theme={theme}>

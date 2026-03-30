@@ -101,8 +101,6 @@ export const enactPiracy = (G: MyGameState): void => {
           });
         });
 
-        // GAP-INF2: Infidel Fleet piracy — active fleet on a bottleneck tile
-        // sends gold to bank (deducted, no player receives it)
         if (G.infidelFleet?.active) {
           const fleetKey = tileKey(
             G.infidelFleet.location[0],
@@ -128,7 +126,7 @@ export const enactPiracy = (G: MyGameState): void => {
           }
         }
 
-        // v4.2: multiple pirates prioritized by nearest to Land source
+        // multiple pirates prioritized by nearest to Land source
         blockingPirates.sort((a, b) => a.distance - b.distance);
 
         blockingPirates.forEach(({ rivalID }) => {
@@ -139,7 +137,7 @@ export const enactPiracy = (G: MyGameState): void => {
           const shouldCut = G.playerInfo[rivalID].piracyIntent === "cut";
 
           if (shouldCut) {
-            // v4.2 amendment: remove one route skyship from the pirate's tile,
+            // amendment: remove one route skyship from the pirate's tile,
             // return it to the route owner's reserve.
             // Find which tile this rival's blocking fleet is on:
             let cutKey: string | null = null;

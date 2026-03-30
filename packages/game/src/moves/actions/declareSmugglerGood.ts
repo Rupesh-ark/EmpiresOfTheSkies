@@ -7,7 +7,6 @@ const validateDeclareSmugglerGood = (G: MyGameState, playerID: string): MoveErro
   return null;
 };
 
-// GAP-9: licenced_smugglers KA — player declares which good they want +1 of at trade time
 const declareSmugglerGood: MoveDefinition = {
   fn: ({ G, playerID }, ...args: any[]) => {
     const good: GoodKey = args[0];

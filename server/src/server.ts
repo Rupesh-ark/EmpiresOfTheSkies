@@ -31,7 +31,7 @@ server.app.use(
   })
 );
 
-// ── Bot log endpoint: POST /api/bot-log ──────────────────────────────────
+// Bot log endpoint: POST /api/bot-log
 const BOT_LOGS_DIR = path.resolve(__dirname, "../../bot-logs");
 if (!fs.existsSync(BOT_LOGS_DIR)) fs.mkdirSync(BOT_LOGS_DIR, { recursive: true });
 

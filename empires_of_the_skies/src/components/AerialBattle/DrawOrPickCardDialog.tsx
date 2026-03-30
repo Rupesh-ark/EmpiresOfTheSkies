@@ -14,7 +14,7 @@ const DrawOrPickCardDialog = (props: MyGameProps) => {
       props.playerID ?? props.ctx.currentPlayer
     );
 
-  // ── Visibility ─────────────────────────────────────────────────────────
+  // Visibility
   const isMyTurn = props.playerID === props.ctx.currentPlayer && inCurrentBattle;
 
   const isBattleReady =
@@ -30,14 +30,14 @@ const DrawOrPickCardDialog = (props: MyGameProps) => {
 
   const isOpen = isMyTurn && (isBattleReady || isConquestDraw);
 
-  // ── Move dispatch ──────────────────────────────────────────────────────
+  // Move dispatch
   const isConquest = props.G.stage.sub === "conquest_draw_or_pick";
   const handlePick = () =>
     isConquest ? props.moves.pickCardConquest(currentCard) : props.moves.pickCard(currentCard);
   const handleDraw = () =>
     isConquest ? props.moves.drawCardConquest() : props.moves.drawCard();
 
-  // ── Card hand ──────────────────────────────────────────────────────────
+  // Card hand
   const hand = props.G.playerInfo[props.playerID ?? props.ctx.currentPlayer]
     .resources.fortuneCards;
 

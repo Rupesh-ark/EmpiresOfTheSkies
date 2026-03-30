@@ -52,7 +52,7 @@ const retrieveFleets: MoveDefinition = {
         const currentFleet = currentPlayer.fleetInfo[fleetId];
         const oldLocation = currentFleet.location;
 
-        // ── Route skyship placement (before retrieval) ──────────────
+        // Route skyship placement (before retrieval)
 
         if (options?.placeAt?.includes(fleetId)) {
           // Place a single route skyship at the fleet's current tile
@@ -71,7 +71,7 @@ const retrieveFleets: MoveDefinition = {
           }
         }
 
-        // ── Existing retrieval logic ────────────────────────────────
+        // Existing retrieval logic
 
         currentFleet.location = [...KINGDOM_LOCATION];
 

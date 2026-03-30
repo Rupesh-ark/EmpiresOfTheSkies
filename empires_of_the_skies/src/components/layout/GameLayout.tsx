@@ -129,7 +129,6 @@ export const GameLayout = ({
   const [mapExpanded, setMapExpanded] = useState(false);
   const [extraTab, setExtraTab] = useState<PanelSlot | null>("game-log");
 
-  // Reset tab selection when phase changes or selected tab is no longer available
   useEffect(() => {
     if (extraTab !== null && !config.tabExtras.includes(extraTab)) {
       setExtraTab(null);
@@ -142,7 +141,6 @@ export const GameLayout = ({
   const hasExtras = config.tabExtras.length > 0;
   const resolvedMapSize: MapSize = mapExpanded ? "large" : config.mapSize;
 
-  // Left panel width from config (phase-dependent), collapsed when map is expanded
   const leftWidth = mapExpanded ? "0px" : config.leftWidth;
   const leftMinWidth = mapExpanded ? 0 : undefined;
   const rightWidth = (hasRight && !mapExpanded) ? "300px" : "0px";
@@ -162,7 +160,7 @@ export const GameLayout = ({
         transition: `background-color ${tokens.transition.slow}`,
       }}
     >
-      {/* ── Left panel (full height — spans map + bottom + tabs) ── */}
+      {/* Left panel (full height — spans map + bottom + tabs) */}
       {hasLeft && (
         <Box
           sx={{
@@ -183,7 +181,7 @@ export const GameLayout = ({
         </Box>
       )}
 
-      {/* ── Right column: map + bottom + tabs ──────────────────── */}
+      {/* Right column: map + bottom + tabs */}
       <Box
         sx={{
           display: "flex",
@@ -263,7 +261,7 @@ export const GameLayout = ({
           )}
         </Box>
 
-        {/* ── Heresy tracker — always visible below the map ── */}
+        {/* Heresy tracker — always visible below the map */}
         {heresyTracker && (
           <Box
             sx={{
@@ -279,7 +277,7 @@ export const GameLayout = ({
           </Box>
         )}
 
-        {/* ── Bottom panel: split (action board + tabs) — slides in/out ── */}
+        {/* Bottom panel: split (action board + tabs) — slides in/out */}
         <Box
           sx={{
             display: "flex",
@@ -330,7 +328,7 @@ export const GameLayout = ({
           </Box>
         </Box>
 
-        {/* ── Tab extras strip (collapse drawer — non-actions phases) ── */}
+        {/* Tab extras strip (collapse drawer — non-actions phases) */}
         {!hasBottom && hasExtras && (
           <Box sx={{ flexShrink: 0 }}>
             <Collapse in={extraTab !== null} unmountOnExit>

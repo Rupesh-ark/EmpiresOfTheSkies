@@ -1,11 +1,5 @@
 /**
  * Central registry of action-phase MoveDefinitions.
- *
- * The frontend uses this to call validate() before invoking moves,
- * providing immediate error feedback via toasts. See docs/TOAST_SYSTEM.md.
- *
- * Any MoveDefinition with a `validate` property will automatically
- * get client-side validation — no separate registry needed.
  */
 import { MoveDefinition } from "./types";
 

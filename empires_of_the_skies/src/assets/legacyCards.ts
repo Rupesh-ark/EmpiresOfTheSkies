@@ -1,4 +1,4 @@
-// ── Legacy Card images ───────────────────────────────────────────────────────
+// Legacy Card images
 
 import theAviator from "../boards_and_assets/cards/legacy_cards/the_aviator.webp";
 import theBuilder from "../boards_and_assets/cards/legacy_cards/the_builder.webp";

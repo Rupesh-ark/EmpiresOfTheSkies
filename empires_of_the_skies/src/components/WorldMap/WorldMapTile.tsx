@@ -19,7 +19,7 @@ import FleetTransferDialog from "./FleetTransferDialog";
 import { GiCrossedSwords, GiZeppelin } from "react-icons/gi";
 import { TilePresence, TileDetailContent, DraggableFleetIcon } from "./tiles";
 
-// ── Kingdom fleet positions on Home Waters tile ───────────────────────────
+// Kingdom fleet positions on Home Waters tile
 const KINGDOM_POSITIONS: Record<string, { top: string; left: string }[]> = {
   Angland:     [{ top: "8%",  left: "14%" }, { top: "8%",  left: "28%" }, { top: "22%", left: "14%" }],
   Gallois:     [{ top: "36%", left: "14%" }, { top: "36%", left: "28%" }, { top: "50%", left: "14%" }],
@@ -29,7 +29,6 @@ const KINGDOM_POSITIONS: Record<string, { top: string; left: string }[]> = {
   Constantium: [{ top: "64%", left: "68%" }, { top: "64%", left: "82%" }, { top: "78%", left: "68%" }],
 };
 
-// Generic positions for non-kingdom tiles (up to 18 slots: 6 players × 3 fleets)
 const TILE_SLOTS = [
   { top: "35%", left: "35%" }, { top: "35%", left: "55%" }, { top: "55%", left: "35%" },
   { top: "55%", left: "55%" }, { top: "25%", left: "45%" }, { top: "65%", left: "45%" },
@@ -39,7 +38,7 @@ const TILE_SLOTS = [
   { top: "65%", left: "75%" }, { top: "45%", left: "45%" }, { top: "10%", left: "45%" },
 ];
 
-// ── Type definitions ──────────────────────────────────────────────────────
+// Type definitions
 interface PositionedFleet {
   key: string;
   position: { top: string; left: string };
@@ -62,7 +61,7 @@ interface worldMapTileProps extends MyGameProps {
   onFleetDragAttempt?: (reason: string) => void;
 }
 
-// ── Main component ────────────────────────────────────────────────────────
+// Main component
 export const WorldMapTile = memo((props: worldMapTileProps) => {
   const xPosition = useRef(0);
   const yPosition = useRef(0);
@@ -101,7 +100,7 @@ export const WorldMapTile = memo((props: worldMapTileProps) => {
   const isMyTurn = props.ctx.currentPlayer === myPlayerID;
   const isHomeWaters = xLocation === 4 && yLocation === 0;
 
-  // ── Position fleets on tile ─────────────────────────────────────────
+  // Position fleets on tile
   const positionedFleets: PositionedFleet[] = [];
   let slotIdx = 0;
 
@@ -166,7 +165,7 @@ export const WorldMapTile = memo((props: worldMapTileProps) => {
     });
   });
 
-  // ── Tooltip text ────────────────────────────────────────────────────
+  // Tooltip text
   const currentTile = props.G.mapState.currentTileArray[yLocation][xLocation];
   const lootNameMap: Record<string, string> = {
     gold: "Gold", mithril: "Mithril", dragonScales: "Dragon Scales",
@@ -189,7 +188,7 @@ export const WorldMapTile = memo((props: worldMapTileProps) => {
   };
   const tooltipText = `Attack: ${currentTile.sword}\nDefence: ${currentTile.shield}\nLoot:\n\t Outpost:\n ${outpostLoot()}\n\t Colony:\n ${colonyLoot()}`;
 
-  // ── Event handlers ───────────────────────────────────────────────────
+  // Event handlers
   const longPressEvent = useLongPress(longPressCallback, {
     cancelOnMovement: true,
     cancelOutsideElement: true,
@@ -217,7 +216,7 @@ export const WorldMapTile = memo((props: worldMapTileProps) => {
   const myBuildingHere = buildingHere?.player?.id === myPlayerID && (buildingHere.buildings === "outpost" || buildingHere.buildings === "colony");
   const showManageFleets = myFleetsHere.length >= 2 || (myFleetsHere.length >= 1 && (isKingdomTile || myBuildingHere));
 
-  // ── Droppable zone ───────────────────────────────────────────────────
+  // Droppable zone
   const droppableId = `map-tile-${xLocation}-${yLocation}`;
   const { setNodeRef: setDroppableRef, isOver } = useDroppable({ id: droppableId });
 
@@ -247,7 +246,7 @@ export const WorldMapTile = memo((props: worldMapTileProps) => {
     }
   }, [flip, props.detailRequestKey, props.onDetailRequestHandled]);
 
-  // ── Render ─────────────────────────────────────────────────────────
+  // Render
   return (
     <ReactCardFlip isFlipped={flip} key={props.location.toString()}>
       {/* Back (fog tile) */}

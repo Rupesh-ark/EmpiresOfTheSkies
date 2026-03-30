@@ -11,7 +11,7 @@ import { DialogShell } from "@/components/atoms/DialogShell";
 import { GameButton } from "@/components/atoms/GameButton";
 import { GoodsValue } from "@/components/Stats/GoodsValue";
 
-// ── Compact action row ──────────────────────────────────────────────────
+// Compact action row
 
 const CompactAction = ({
   label,
@@ -58,7 +58,7 @@ const CompactAction = ({
   </Box>
 );
 
-// ── Main component ──────────────────────────────────────────────────────
+// Main component
 
 const Trade = (props: MyGameProps) => {
   const playerInfo = props.playerID ? props.G.playerInfo[props.playerID] : null;
@@ -90,7 +90,7 @@ const Trade = (props: MyGameProps) => {
   return (
     <Box sx={{ p: `${tokens.spacing.sm}px`, height: "100%" }}>
       <Box sx={{ display: "flex", gap: `${tokens.spacing.md}px`, height: "100%" }}>
-        {/* ── Left: Sell Actions ─────────────────────────── */}
+        {/* Left: Sell Actions */}
         <Box sx={{ minWidth: 200, maxWidth: 260, flexShrink: 0, display: "flex", flexDirection: "column", gap: `${tokens.spacing.xs}px` }}>
           <Typography
             sx={{
@@ -166,7 +166,7 @@ const Trade = (props: MyGameProps) => {
           )}
         </Box>
 
-        {/* ── Right: Goods Value ─────────────────────────── */}
+        {/* Right: Goods Value */}
         <Box
           sx={{
             flex: 1,
@@ -208,7 +208,7 @@ const Trade = (props: MyGameProps) => {
         </Box>
       </Box>
 
-      {/* ── Sell Skyships dialog ────────────────────────── */}
+      {/* Sell Skyships dialog */}
       <DialogShell
         open={sellSkyshipsOpen}
         title="Sell Skyships"
@@ -237,7 +237,7 @@ const Trade = (props: MyGameProps) => {
         />
       </DialogShell>
 
-      {/* ── Send Agitators dialog ─────────────────────── */}
+      {/* Send Agitators dialog */}
       <DialogShell
         open={agitatorsOpen}
         title="Send Agitators"

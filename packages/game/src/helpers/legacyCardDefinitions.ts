@@ -130,7 +130,6 @@ export const CARD_RESOLVERS: Record<LegacyCardName, CardResolver> = {
 
   "the magnificent": (player) => player.palaces * 4,
 
-  // BUG-4: 1 VP per trade good in active trade route (same as navigator)
   "the merchant": (player, G) => tradeRouteGoods(player, G),
 
   "the mighty": (player, G) => {
@@ -158,8 +157,6 @@ export const CARD_RESOLVERS: Record<LegacyCardName, CardResolver> = {
   "the pious": (player) => player.cathedrals * 4,
 };
 
-// GAP-3: apply alignment penalty — wrong alignment (Orthodox+orange or Heretic+purple)
-// halves the VP, rounded up.
 export const resolveCardWithAlignmentPenalty = (
   player: PlayerInfo,
   G: MyGameState,

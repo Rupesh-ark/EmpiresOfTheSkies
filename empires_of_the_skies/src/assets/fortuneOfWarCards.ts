@@ -1,4 +1,4 @@
-// ── Fortune of War card images ───────────────────────────────────────────────
+// Fortune of War card images
 
 import swordOne from "../boards_and_assets/cards/fortunes_of_war_cards/1_sword.svg";
 import swordTwo from "../boards_and_assets/cards/fortunes_of_war_cards/2_sword.svg";

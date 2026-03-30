@@ -7,7 +7,7 @@ import { HERESY_MAX, MAX_COUNSELLORS, MAP_WIDTH, MAP_HEIGHT, KINGDOM_LOCATION } 
 import { AI_CONFIG } from "./weightsConfig";
 import { getRepublicInfluence } from "../../helpers/republicUtils";
 
-// ── Internal helpers ──────────────────────────────────────────────────────────
+// Internal helpers
 
 function getAllPlayers(G: MyGameState): PlayerInfo[] {
   return Object.values(G.playerInfo);
@@ -56,7 +56,7 @@ function totalMilitaryStrength(player: PlayerInfo): number {
   return strength;
 }
 
-// ── Dimensions ────────────────────────────────────────────────────────────────
+// Dimensions
 
 function normalizedTerritory(G: MyGameState, playerID: string): number {
   const t = AI_CONFIG.eval.territory;
@@ -116,7 +116,6 @@ function normalizedReligion(G: MyGameState, playerID: string): number {
     score += (HERESY_MAX - heresy) / (2 * HERESY_MAX);
   }
 
-  // Archprelate bonus (diminished by consecutive wins — Archprelate Fatigue)
   if (player.isArchprelate) {
     const fatigueMultiplier = 1 / (1 + G.consecutiveArchprelateWins * r.fatigueFactor);
     score += r.archprelateBonus * fatigueMultiplier;
@@ -255,7 +254,7 @@ function normalizedRepublicAccess(G: MyGameState, playerID: string): number {
   return (supportingRepublics / 2) * mercyRelevance;
 }
 
-// ── Move value helper ─────────────────────────────────────────────────────────
+// Move value helper
 
 function computeMoveValue(
   configKey: string,
@@ -278,7 +277,7 @@ function computeMoveValue(
   return isNaN(value) ? (entry.base as number ?? 0.1) : value;
 }
 
-// ── Main export ───────────────────────────────────────────────────────────────
+// Main export
 
 /**
  * Evaluate the game state for a player, returning a score in [0, 1].
@@ -460,7 +459,7 @@ export function estimateMoveValue(
         tileBonus = -0.1;
       }
 
-      // ── P0: Hop cost ──
+      // P0: Hop cost
       const discoveredNet = new Set<string>();
       for (let iy = 0; iy < MAP_HEIGHT; iy++)
         for (let ix = 0; ix < MAP_WIDTH; ix++)
@@ -470,7 +469,7 @@ export function estimateMoveValue(
       const hopDist = dists.get(tileKey(dx, dy)) ?? 3;
       tileBonus -= hopDist * 0.03;
 
-      // ── P1: Trade route hazard — path through Infidel Empire ──
+      // P1: Trade route hazard — path through Infidel Empire
       if (dists.has(tileKey(4, 1))) {
         // Check if destination is only reachable through infidel tile
         // Simple heuristic: if dest is south of row 1, likely passes through [4,1]
@@ -483,7 +482,7 @@ export function estimateMoveValue(
         tileBonus -= rivalsOnTile * 0.25;
       }
 
-      // ── P1: Strategic positioning — rival presence NEAR destination ──
+      // P1: Strategic positioning — rival presence NEAR destination
       const rivalFleetsNearby = getAllPlayers(G).some((p) =>
         p.id !== playerID && p.fleetInfo.some((f) =>
           f.skyships > 0 &&

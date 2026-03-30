@@ -88,11 +88,6 @@ const BUILDING_NAMES: Record<number, string> = {
   [BuildingSlot.Fort]: "Fort",
 };
 
-// Each building type (cathedral, palace, shipyard, fort) has its own independent
-// cost track on the action board. Data: { 1: string[], 2: string[], ... } — each
-// array holds player IDs of everyone who built that type this round.
-// Cost = base + 1g per counsellor including your own (arrays are pushed AFTER cost).
-// This differs from foundFactory which uses a single shared row with slot-based data.
 const foundBuildings: MoveDefinition = {
   fn: ({ G, playerID }, ...args: any[]) => {
     const heresyDirection: "advance" | "retreat" | undefined = args[1];

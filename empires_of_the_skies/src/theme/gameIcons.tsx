@@ -26,13 +26,13 @@ import {
   GiAngryEyes,
 } from "react-icons/gi";
 
-// ── Resource icons ──────────────────────────────────────────────────────
+// Resource icons
 
 export const IconCounsellor = GiCrown;
 export const IconGold = GiTwoCoins;
 export const IconVP = GiLaurelCrown;
 
-// ── Military icons ──────────────────────────────────────────────────────
+// Military icons
 
 export const IconRegiment = GiCrossedSwords;
 export const IconElite = GiHelmet;
@@ -40,7 +40,7 @@ export const IconLevy = GiShield;
 export const IconSkyship = GiZeppelin;
 export const IconFoWCard = GiSwordBrandish;
 
-// ── Building icons ──────────────────────────────────────────────────────
+// Building icons
 
 export const IconCathedral = GiChurch;
 export const IconPalace = GiIndianPalace;
@@ -48,14 +48,14 @@ export const IconShipyard = GiZeppelin;
 export const IconFactory = GiFactory;
 export const IconFort = GiMilitaryFort;
 
-// ── Territory icons ─────────────────────────────────────────────────────
+// Territory icons
 
 export const IconOutpost = GiWatchtower;
 export const IconColony = GiVillage;
 export const IconPrisoner = GiPrisoner;
 export const IconDissenter = GiAngryEyes;
 
-// ── Allegiance icons ────────────────────────────────────────────────────
+// Allegiance icons
 
 export const IconOrthodox = GiChurch;
 export const IconHeretic = GiCastle;

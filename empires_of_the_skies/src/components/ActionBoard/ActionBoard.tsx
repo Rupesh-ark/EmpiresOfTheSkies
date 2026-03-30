@@ -5,7 +5,7 @@ import { tokens } from "@/theme";
 export { ActionHoverProvider } from "./ActionHoverContext";
 export { ActionInfoPanel } from "./ActionInfoPanel";
 
-// ── Row components ───────────────────────────────────────────────────────────
+// Row components
 import PlayerOrderRow from "./components/rows/PlayerOrderRow";
 import {
   RecruitCounsellorsRow,
@@ -20,7 +20,7 @@ import InfluencePrelatesRow from "./components/rows/InfluencePrelatesRow";
 import PunishDissentersRow from "./components/rows/PunishDissentersRow";
 import IssueHolyDecree from "./components/IssueHolyDecree";
 
-// ── Main component ───────────────────────────────────────────────────────────
+// Main component
 
 export const ActionBoard = memo((props: ActionBoardProps) => (
     <Box

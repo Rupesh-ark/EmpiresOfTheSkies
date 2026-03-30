@@ -1,0 +1,66 @@
+{
+  "timestamp": "2026-03-26T19:41:23.769Z",
+  "gamesRun": 3,
+  "moveDistribution": {
+    "doNotAttack": 67,
+    "chooseEventCard": 60,
+    "influencePrelates": 57,
+    "pass": 49,
+    "foundBuildings": 49,
+    "trainTroops": 46,
+    "recruitCounsellors": 30,
+    "recruitRegiments": 30,
+    "purchaseSkyships": 23,
+    "conscriptLevies": 18,
+    "deployFleet": 17,
+    "discoverTile": 16,
+    "convertMonarch": 14,
+    "alterPlayerOrder": 14,
+    "moveFleet": 10,
+    "immediateElectionVote": 6,
+    "issueHolyDecree": 3,
+    "plunder": 1,
+    "foundFactory": 1
+  },
+  "totalDecisions": 511,
+  "totalBattles": 0,
+  "totalConquest": 0,
+  "winners": [
+    {
+      "winner": "0",
+      "personality": "Conqueror",
+      "scores": {
+        "0": null,
+        "1": 3,
+        "2": 17,
+        "3": null,
+        "4": null,
+        "5": null
+      }
+    },
+    {
+      "winner": "0",
+      "personality": "Unknown",
+      "scores": {
+        "0": null,
+        "1": 3,
+        "2": 17,
+        "3": null,
+        "4": null,
+        "5": null
+      }
+    },
+    {
+      "winner": "0",
+      "personality": "Unknown",
+      "scores": {
+        "0": null,
+        "1": 3,
+        "2": 17,
+        "3": null,
+        "4": null,
+        "5": null
+      }
+    }
+  ]
+}

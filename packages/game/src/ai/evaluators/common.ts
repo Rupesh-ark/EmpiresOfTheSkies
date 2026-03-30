@@ -10,7 +10,7 @@ import { V2_CONFIG } from "./config";
 import { buildPlayerNetwork, bfsReachable, FAITHDOM_TILES, tileKey, getPassableNeighbors } from "../../helpers/mapUtils";
 import type { MyGameState } from "../../types";
 
-// ── Gold Pressure ────────────────────────────────────────────────────────────
+// Gold Pressure
 
 /**
  * Returns a penalty (0 to -max) based on what gold will be after spending.
@@ -38,7 +38,7 @@ export function goldPressureReason(currentGold: number, cost: number): string | 
   return null;
 }
 
-// ── Personality Bonus ────────────────────────────────────────────────────────
+// Personality Bonus
 
 interface PersonalityMatch {
   kaCards?: string[];       // KA cards that benefit from this move
@@ -79,7 +79,7 @@ export function personalityBonus(
   return { bonus, reasons };
 }
 
-// ── Round Awareness ──────────────────────────────────────────────────────────
+// Round Awareness
 
 /**
  * Returns a modifier based on whether this type of move makes sense now.
@@ -118,7 +118,7 @@ export function roundAwareness(
   return { modifier: 0, reason: null };
 }
 
-// ── Heresy Pressure ──────────────────────────────────────────────────────────
+// Heresy Pressure
 
 /**
  * Heresy pressure — how well does the player's current heresy position
@@ -171,7 +171,7 @@ export function heresyPressure(
   return { modifier: 0, reason: "" };
 }
 
-// ── Outpost/Colony Count ─────────────────────────────────────────────────────
+// Outpost/Colony Count
 
 /** Count outposts + colonies owned by a player on the map. */
 export function countOutposts(G: MyGameState, playerID: string): number {
@@ -186,7 +186,7 @@ export function countOutposts(G: MyGameState, playerID: string): number {
   return count;
 }
 
-// ── Trade Route Chain Value ──────────────────────────────────────────────────
+// Trade Route Chain Value
 
 /**
  * Check if placing skyships at (x, y) would help complete or extend a trade route.
@@ -263,7 +263,6 @@ export function tradeRouteChainValue(
   }
 
   if (newConnections > 0) {
-    // This tile COMPLETES a route — very high value
     const score = Math.min(1, 0.8 + (newConnections - 1) * 0.1);
     return {
       score,
@@ -274,7 +273,6 @@ export function tradeRouteChainValue(
   // Check if this tile extends the chain toward unconnected settlements
   if (settlements.length > alreadyConnected) {
     if (expandedReachable.has(tileKey(x, y))) {
-      // This tile is reachable from Faithdom through the expanded network — extends the chain
       return { score: 0.4, reason: "extends chain toward unconnected settlement" };
     }
 
@@ -289,7 +287,7 @@ export function tradeRouteChainValue(
   return { score: 0, reason: "" };
 }
 
-// ── Diminishing Returns ──────────────────────────────────────────────────────
+// Diminishing Returns
 
 /**
  * Returns a penalty based on how many of something you already have.
