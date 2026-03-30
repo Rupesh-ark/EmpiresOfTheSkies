@@ -2,6 +2,11 @@ import { BoardProps } from "boardgame.io/dist/types/packages/react";
 
 export interface MyGameProps extends BoardProps<MyGameState> {}
 
+export type MoveError = {
+  code: string;
+  message: string;
+};
+
 export type DealOffer = {
   gold?: number;
   skyships?: number;
@@ -53,6 +58,7 @@ export interface MyGameState {
     | "reset";
   electionResults: Record<string, number>;
   hasVoted: string[];
+  voteSubmitted: Record<string, string>;
   round: number;
   finalRound: number;
   firstTurnOfRound: boolean;
@@ -112,6 +118,7 @@ export type BattleState = {
 interface BattlePlayerInfo extends PlayerInfo {
   decision: "fight" | "evade" | "undecided";
   fowCard?: FortuneOfWarCardInfo;
+  fowSource?: "hand" | "deck";
   victorious?: boolean;
 }
 
@@ -165,6 +172,7 @@ export type MapBuildingInfo = {
   fort: boolean;
   garrisonedRegiments: number;
   garrisonedLevies: number;
+  garrisonedEliteRegiments: number;
   /** Contingent counter occupying this colony (Colonial REBELLION loss) */
   rebelCounter?: number;
 };
@@ -208,6 +216,7 @@ export type FleetInfo = {
   skyships: number;
   regiments: number;
   levies: number;
+  eliteRegiments: number;
 };
 
 export type PlayerBoardInfo = {

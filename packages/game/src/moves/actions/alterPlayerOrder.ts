@@ -3,22 +3,15 @@ import { PlayerOrder, MyGameState } from "../../types";
 import { validateMove } from "../moveValidation";
 import { INVALID_MOVE } from "boardgame.io/core";
 import { removeOneCounsellor } from "../../helpers/stateUtils";
-import { EventsAPI } from "boardgame.io/dist/types/src/plugins/plugin-events";
-import { RandomAPI } from "boardgame.io/dist/types/src/plugins/random/random";
 import { Ctx } from "boardgame.io/dist/types/src/types";
 
 export const alterPlayerOrder: Move<MyGameState> = (
   {
     G,
     ctx,
-    events,
-    random,
   }: {
     G: MyGameState;
     ctx: Ctx;
-    playerID: string;
-    events: EventsAPI;
-    random: RandomAPI;
   },
   ...args: any[]
 ) => {
@@ -26,16 +19,13 @@ export const alterPlayerOrder: Move<MyGameState> = (
   const playerID = ctx.currentPlayer;
   if (validateMove(playerID, G, { costsCounsellor: true })) return INVALID_MOVE;
   if (ctx.numPlayers < newPosition) {
-    console.log("Player has chosen a position that is out of bounds");
     return INVALID_MOVE;
   }
   if (G.boardState.pendingPlayerOrder[newPosition] !== undefined) {
-    console.log("Player has chosen a position that is already taken");
     return INVALID_MOVE;
   }
   for (const value of Object.values(G.boardState.pendingPlayerOrder)) {
     if (value === playerID) {
-      console.log("Player has already altered their position");
       return INVALID_MOVE;
     }
   }

@@ -14,12 +14,13 @@
 import { describe, it, expect } from "vitest";
 import { INVALID_MOVE } from "boardgame.io/core";
 import trainTroops from "../../moves/actions/trainTroops";
-import { buildInitialG, buildPlayer, buildCtx, buildResources, buildPlayerBoard } from "../testHelpers";
+import { buildInitialG, buildPlayer, buildCtx, buildResources, buildPlayerBoard, buildRandom } from "../testHelpers";
 import { fortuneOfWarCards } from "../../codifiedGameInfo";
 
 function callMove(G: ReturnType<typeof buildInitialG>, playerID: string) {
   const ctx = buildCtx(playerID);
-  return (trainTroops as Function)({ G, ctx, playerID });
+  const random = buildRandom();
+  return (trainTroops as Function)({ G, ctx, playerID, random });
 }
 
 describe("trainTroops — draws 2 FoW cards", () => {

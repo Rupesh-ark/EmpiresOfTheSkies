@@ -11,11 +11,12 @@ import { Ctx } from "boardgame.io/dist/types/src/types";
  * Move called by the targeted player to fight or evade the Infidel Fleet.
  */
 const respondToInfidelFleet: Move<MyGameState> = (
-  { G, ctx, playerID, events }: {
+  { G, ctx, playerID, events, random }: {
     G: MyGameState;
     ctx: Ctx;
     playerID: string;
     events: EventsAPI;
+    random: any;
   },
   response: "fight" | "evade",
   fowCardIndex?: number
@@ -42,7 +43,7 @@ const respondToInfidelFleet: Move<MyGameState> = (
       fowCard = { sword: card.sword, shield: card.shield };
       logEvent(G, `${kingdom} plays Fortune of War card: ${card.sword}S/${card.shield}Sh`);
     }
-    executeInfidelFleetCombat(G, fowCard);
+    executeInfidelFleetCombat(G, random.Shuffle, fowCard);
   }
 
   // Continue Resolution flow (deferred events → rebellions → invasion → retrieve)

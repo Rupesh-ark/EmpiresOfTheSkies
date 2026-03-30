@@ -8,38 +8,16 @@ import {
 } from "../../helpers/stateUtils";
 import { INVALID_MOVE } from "boardgame.io/core";
 import { blessingOrCurseVPAmount } from "../../helpers/helpers";
-import { EventsAPI } from "boardgame.io/dist/types/src/plugins/plugin-events";
-import { RandomAPI } from "boardgame.io/dist/types/src/plugins/random/random";
-import { Ctx } from "boardgame.io/dist/types/src/types";
-
 const issueHolyDecree: Move<MyGameState> = (
-  {
-    G,
-    ctx,
-    playerID,
-    events,
-    random,
-  }: {
-    G: MyGameState;
-    ctx: Ctx;
-    playerID: string;
-    events: EventsAPI;
-    random: RandomAPI;
-  },
+  { G, playerID },
   ...args: any[]
 ) => {
   const value = args[0];
   const id = args[1];
   if (!G.playerInfo[playerID].isArchprelate) {
-    console.log(
-      "One who has not been anointed by God has attempted to issue a holy decree."
-    );
     return INVALID_MOVE;
   }
   if (G.boardState.issueHolyDecree) {
-    console.log(
-      "You must prove your worthiness by re-election before issuing another holy decree."
-    );
     return INVALID_MOVE;
   }
 

@@ -19,6 +19,7 @@ import { drawFortuneOfWarCard, hasFortAt } from "./helpers";
 const resolveFaerieUprising = (
   G: MyGameState,
   event: DeferredEvent,
+  shuffle: <T>(arr: T[]) => T[],
   fowCard?: { sword: number; shield: number }
 ): void => {
   const { targetPlayerID, targetTile } = event;
@@ -38,8 +39,8 @@ const resolveFaerieUprising = (
   const defSwords = defRegiments * 2 + defLevies;
   const defShields = hasFortAt(G, x, y) ? defRegiments + defLevies : 0;
 
-  const fowLand = drawFortuneOfWarCard(G);
-  const fowDefender = fowCard ?? drawFortuneOfWarCard(G);
+  const fowLand = drawFortuneOfWarCard(G, shuffle);
+  const fowDefender = fowCard ?? drawFortuneOfWarCard(G, shuffle);
 
   const hitsOnDefender = Math.max(0, landSwords + fowLand.sword - defShields - fowDefender.shield);
   const hitsOnLand = Math.max(0, defSwords + fowDefender.sword - landShields - fowLand.shield);
@@ -67,6 +68,7 @@ const resolveFaerieUprising = (
 const resolveHeadstrongCommander = (
   G: MyGameState,
   event: DeferredEvent,
+  shuffle: <T>(arr: T[]) => T[],
   fowCard?: { sword: number; shield: number }
 ): void => {
   const { targetPlayerID, targetTile } = event;
@@ -87,8 +89,8 @@ const resolveHeadstrongCommander = (
   const landShields = land.shield;
 
   // Headstrong Commander: player's FoW card helps the attacker (their own troops)
-  const fowAttacker = fowCard ?? drawFortuneOfWarCard(G);
-  const fowLand = drawFortuneOfWarCard(G);
+  const fowAttacker = fowCard ?? drawFortuneOfWarCard(G, shuffle);
+  const fowLand = drawFortuneOfWarCard(G, shuffle);
 
   const hitsOnLand = Math.max(0, atkSwords + fowAttacker.sword - landShields - fowLand.shield);
   const hitsOnAttacker = Math.max(0, landSwords + fowLand.sword - fowAttacker.shield);
@@ -118,6 +120,7 @@ const resolveHeadstrongCommander = (
 const resolveInfidelsInvadeFaerie = (
   G: MyGameState,
   event: DeferredEvent,
+  shuffle: <T>(arr: T[]) => T[],
   fowCard?: { sword: number; shield: number }
 ): void => {
   const { targetPlayerID, targetTile } = event;
@@ -141,8 +144,8 @@ const resolveInfidelsInvadeFaerie = (
   const defSwords = defRegiments * 2 + defLevies;
   const defShields = hasFortAt(G, x, y) ? defRegiments + defLevies : 0;
 
-  const fowHost = drawFortuneOfWarCard(G);
-  const fowDefender = fowCard ?? drawFortuneOfWarCard(G);
+  const fowHost = drawFortuneOfWarCard(G, shuffle);
+  const fowDefender = fowCard ?? drawFortuneOfWarCard(G, shuffle);
 
   const hitsOnDefender = Math.max(0, host.swords + fowHost.sword - defShields - fowDefender.shield);
   const hitsOnHost = Math.max(0, defSwords + fowDefender.sword - host.shields - fowHost.shield);
@@ -169,17 +172,18 @@ const resolveInfidelsInvadeFaerie = (
 export const resolveDeferredBattleInteractive = (
   G: MyGameState,
   event: DeferredEvent,
+  shuffle: <T>(arr: T[]) => T[],
   fowCard?: { sword: number; shield: number }
 ): void => {
   switch (event.card) {
     case "faerie_uprising":
-      resolveFaerieUprising(G, event, fowCard);
+      resolveFaerieUprising(G, event, shuffle, fowCard);
       break;
     case "headstrong_commander":
-      resolveHeadstrongCommander(G, event, fowCard);
+      resolveHeadstrongCommander(G, event, shuffle, fowCard);
       break;
     case "infidels_invade_faerie":
-      resolveInfidelsInvadeFaerie(G, event, fowCard);
+      resolveInfidelsInvadeFaerie(G, event, shuffle, fowCard);
       break;
   }
 };
@@ -189,9 +193,10 @@ export const resolveDeferredBattleInteractive = (
  */
 export const resolveDeferredBattle = (
   G: MyGameState,
-  event: DeferredEvent
+  event: DeferredEvent,
+  shuffle: <T>(arr: T[]) => T[]
 ): void => {
-  resolveDeferredBattleInteractive(G, event);
+  resolveDeferredBattleInteractive(G, event, shuffle);
 };
 
 /**

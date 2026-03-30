@@ -88,9 +88,9 @@ import { logEvent } from "./helpers/stateUtils";
 const MyGame: Game<MyGameState> = {
   turn: { minMoves: 1 },
   name: "empires-of-the-skies",
-  setup: ({ ctx }: { ctx: Ctx }): MyGameState => {
+  setup: ({ ctx, random }: { ctx: Ctx; random: { Shuffle: <T>(arr: T[]) => T[] } }): MyGameState => {
     const mapState: MapState = {
-      currentTileArray: getRandomisedMapTileArray(),
+      currentTileArray: getRandomisedMapTileArray(random.Shuffle),
       discoveredTiles: getInitialDiscoveredTiles(),
       buildings: getInitialOutpostsAndColoniesInfo(),
       mostRecentlyDiscoveredTile: [4, 0],
@@ -124,25 +124,13 @@ const MyGame: Game<MyGameState> = {
     });
 
     // Shuffle contingent counter pool (used for rebellions and Grand Army)
-    const contingentPool = [...CONTINGENT_COUNTERS];
-    for (let i = contingentPool.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [contingentPool[i], contingentPool[j]] = [contingentPool[j], contingentPool[i]];
-    }
+    const contingentPool = random.Shuffle([...CONTINGENT_COUNTERS]);
 
     // Shuffle Infidel Host counter pool
-    const infidelHostPool = INFIDEL_HOST_COUNTERS.map((c) => ({ ...c }));
-    for (let i = infidelHostPool.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [infidelHostPool[i], infidelHostPool[j]] = [infidelHostPool[j], infidelHostPool[i]];
-    }
+    const infidelHostPool = random.Shuffle(INFIDEL_HOST_COUNTERS.map((c) => ({ ...c })));
 
     // Shuffle event deck and deal EVENT_HAND_SIZE cards to each player
-    const eventDeck = [...ALL_EVENT_CARD_NAMES];
-    for (let i = eventDeck.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [eventDeck[i], eventDeck[j]] = [eventDeck[j], eventDeck[i]];
-    }
+    const eventDeck = random.Shuffle([...ALL_EVENT_CARD_NAMES]);
     for (const id of ctx.playOrder) {
       playerInfoMap[id].resources.eventCards = eventDeck.splice(
         0,
@@ -155,7 +143,7 @@ const MyGame: Game<MyGameState> = {
       mapState: mapState,
       boardState: { ...initialBoardState },
       cardDecks: {
-        fortuneOfWarCards: fullResetFortuneOfWarCardDeck(),
+        fortuneOfWarCards: random.Shuffle(fullResetFortuneOfWarCardDeck()),
         discardedFortuneOfWarCards: [],
         kingdomAdvantagePool: [...ALL_KA_CARDS],
         legacyDeck: [],
@@ -163,6 +151,7 @@ const MyGame: Game<MyGameState> = {
       stage: "discovery",
       electionResults: {},
       hasVoted: [],
+      voteSubmitted: {},
       round: 0,
       finalRound: FINAL_ROUND,
       firstTurnOfRound: true,
@@ -271,16 +260,14 @@ const MyGame: Game<MyGameState> = {
       next: "events",
       onBegin: (context) => {
         context.G.stage = "pick legacy card";
-        const cards: LegacyCardInfo[] = [...LEGACY_CARDS];
+        const cards: LegacyCardInfo[] = context.random.Shuffle([...LEGACY_CARDS]);
+        let cardIndex = 0;
         Object.values(context.G.playerInfo).forEach((player) => {
-          for (let i = 0; i < 3; i++) {
-            let randomIndex = Math.floor(Math.random() * cards.length);
-            const card = cards.splice(randomIndex, 1);
-            player.legacyCardOptions.push(card[0]);
-          }
+          player.legacyCardOptions = cards.slice(cardIndex, cardIndex + 3);
+          cardIndex += 3;
         });
         // Store remaining cards for Royal Succession event
-        context.G.cardDecks.legacyDeck = cards;
+        context.G.cardDecks.legacyDeck = cards.slice(cardIndex);
       },
     },
     events: {
@@ -293,7 +280,6 @@ const MyGame: Game<MyGameState> = {
         context.G.eventState.chosenCards = [];
         context.G.eventState.resolvedEvent = null;
         context.G.eventState.cannotConvertThisRound = [];
-        console.log("Events phase has begun");
       },
       moves: { chooseEventCard, resolveEventChoice },
       next: "discovery",
@@ -301,10 +287,8 @@ const MyGame: Game<MyGameState> = {
     discovery: {
       onBegin: (context) => {
         context.G.round += 1;
-        console.log(`Round: ${context.G.round}`);
         context.ctx.playOrderPos = 0;
         context.G.stage = "discovery";
-        console.log("Discovery phase has begun");
 
         context.G.firstTurnOfRound = true;
 
@@ -337,7 +321,6 @@ const MyGame: Game<MyGameState> = {
       turn: { order: TurnOrder.ONCE },
       onBegin: (context) => {
         context.G.stage = "taxes";
-        console.log("Taxes phase has begun");
 
         // Peasant REBELLION loss: skip taxes this round
         if (context.G.eventState.skipTaxesNextRound) {
@@ -365,11 +348,9 @@ const MyGame: Game<MyGameState> = {
       onBegin: (context) => {
         context.G.firstTurnOfRound = true;
         context.G.stage = "actions";
-        console.log("Actions phase has begun");
       },
       turn: {
         onBegin: (context) => {
-          console.log("new turn in action phase");
           if (context.G.firstTurnOfRound && context.ctx.playOrderPos !== 0) {
             context.events.endTurn({ next: context.ctx.playOrder[0] });
           }
@@ -422,14 +403,10 @@ const MyGame: Game<MyGameState> = {
     },
     aerial_battle: {
       onBegin: (context) => {
-        console.log("Aerial battle phase has begun");
         findNextBattle(context.G, context.events);
       },
       turn: {
         onBegin: (context) => {
-          console.log(
-            `It is now player ${context.ctx.currentPlayer}'s turn in the aerial battle phase`
-          );
           checkIfCurrentPlayerIsInCurrentBattle(
             context.G,
             context.ctx,
@@ -437,7 +414,7 @@ const MyGame: Game<MyGameState> = {
           );
         },
       },
-      next: "ground_battle",
+      next: "plunder_legends",
       moves: {
         doNotAttack,
         attackOtherPlayersFleet,
@@ -450,14 +427,10 @@ const MyGame: Game<MyGameState> = {
     },
     ground_battle: {
       onBegin: (context) => {
-        console.log("Ground battle phase has begun");
         findNextGroundBattle(context.G, context.events);
       },
       turn: {
         onBegin: (context) => {
-          console.log(
-            `It is now player ${context.ctx.currentPlayer}'s turn in the ground battle phase`
-          );
           checkIfCurrentPlayerIsInCurrentBattle(
             context.G,
             context.ctx,
@@ -465,29 +438,26 @@ const MyGame: Game<MyGameState> = {
           );
         },
       },
-      next: "plunder_legends",
+      next: "conquest",
       moves: {
         attackPlayersBuilding,
         doNotGroundAttack,
         defendGroundAttack,
         garrisonTroops,
         yieldToAttacker,
+        drawCard,
+        pickCard,
       },
     },
     plunder_legends: {
       onBegin: (context) => {
         context.G.stage = "plunder legends";
-        console.log("Plunder legends phase has begun");
-
         findNextPlunder(context.G, context.events);
       },
       moves: { plunder, doNotPlunder },
-      next: "conquest",
+      next: "ground_battle",
       turn: {
         onBegin: (context) => {
-          console.log(
-            `it is now player ${context.ctx.currentPlayer}'s time to plunder`
-          );
           checkIfCurrentPlayerIsInCurrentBattle(
             context.G,
             context.ctx,
@@ -499,14 +469,9 @@ const MyGame: Game<MyGameState> = {
     conquest: {
       onBegin: (context) => {
         context.G.stage = "attack or pass";
-
-        console.log("Conquests have begun");
       },
       turn: {
         onBegin: (context) => {
-          console.log(
-            `it is now player ${context.ctx.currentPlayer}'s time to conquer`
-          );
           checkIfCurrentPlayerIsInCurrentBattle(
             context.G,
             context.ctx,
@@ -525,18 +490,24 @@ const MyGame: Game<MyGameState> = {
       next: "election",
     },
     election: {
+      turn: {
+        activePlayers: { all: "voting", moveLimit: 1 },
+        stages: {
+          voting: {
+            moves: { vote },
+          },
+        },
+      },
       onBegin: (context) => {
         context.G.electionResults = {};
         context.G.hasVoted = [];
+        context.G.voteSubmitted = {};
       },
-      moves: { vote },
       next: "resolution",
     },
     resolution: {
       turn: { order: TurnOrder.CUSTOM_FROM("turnOrder") },
       onBegin: (context) => {
-        console.log("resolution phase has begun");
-
         // Step 1: Infidel Fleet targeting + movement
         const hasCombat = prepareInfidelFleetCombat(context.G);
 
@@ -553,7 +524,6 @@ const MyGame: Game<MyGameState> = {
       },
       onEnd: (context) => {
         resolveRound(context.G, context.events, context.random);
-        console.log(`Round number:${context.G.round}`);
       },
       moves: { retrieveFleets, commitRebellionTroops, contributeToRebellion, nominateCaptainGeneral, contributeToGrandArmy, respondToInfidelFleet, offerBuyoffGold, commitDeferredBattleCard },
       next: "reset",
@@ -561,8 +531,6 @@ const MyGame: Game<MyGameState> = {
     reset: {
       turn: { order: TurnOrder.ONCE },
       onBegin: (context) => {
-        console.log("Reset phase has begun");
-
         // Recompute turn order from alterPlayerOrder choices
         const currentTurnOrder = [...context.ctx.playOrder];
         let newTurnOrder: string[] = [];
@@ -593,9 +561,6 @@ const MyGame: Game<MyGameState> = {
             if (key === "foundBuildings") {
               Object.values(gameStateObject).forEach((idArray: any) => {
                 idArray.forEach((id: string) => {
-                  console.log(
-                    `adding counsellor to player ${id} info for a founded ${key}`
-                  );
                   context.G.playerInfo[id].resources.counsellors += 1;
                 });
               });
@@ -604,9 +569,6 @@ const MyGame: Game<MyGameState> = {
             } else {
               Object.values(gameStateObject).forEach((id: any) => {
                 if (id) {
-                  console.log(
-                    `adding counsellor to player ${id} info for a ${key} button`
-                  );
                   context.G.playerInfo[id].resources.counsellors += 1;
                 }
               });
@@ -622,9 +584,6 @@ const MyGame: Game<MyGameState> = {
           Object.values(player.playerBoardCounsellorLocations).forEach(
             (counsellor, index) => {
               if (counsellor && index !== 3) {
-                console.log(
-                  "adding counsellor to player info for a player board button"
-                );
                 player.resources.counsellors += 1;
                 counsellor = false;
               }

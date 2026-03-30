@@ -6,7 +6,6 @@ const doNotPlunder: Move<MyGameState> = (
   { G, ctx, playerID, events, random },
   ...args
 ) => {
-  console.log("about to find the next plunder or move to the next phase");
   findNextPlunder(G, events);
 };
 

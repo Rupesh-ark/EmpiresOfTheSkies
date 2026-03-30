@@ -4,6 +4,18 @@ import { EventCardName, FortuneOfWarCardInfo, InfidelHostCounter, KingdomAdvanta
 
 export const MAX_PLAYERS = 6;
 export const MIN_PLAYERS = 1;
+
+// ── Map dimensions ────────────────────────────────────────────────────────────
+export const MAP_WIDTH = 8;
+export const MAP_HEIGHT = 4;
+
+// ── Heresy track bounds ───────────────────────────────────────────────────────
+export const HERESY_MAX = 9;
+export const HERESY_MIN = -9;
+
+// ── Price marker bounds ───────────────────────────────────────────────────────
+export const PRICE_MARKER_MAX = 4;
+export const PRICE_MARKER_MIN = 1;
 export const FINAL_ROUND = 4;
 export const BASE_GOLD_INCOME = 4;
 export const MAX_COUNSELLORS = 7;

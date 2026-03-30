@@ -1,5 +1,5 @@
 import { Move } from "boardgame.io";
-import { FleetInfo, MyGameState, PlayerInfo } from "../../types";
+import { MyGameState, PlayerInfo } from "../../types";
 
 const retrieveFleets: Move<MyGameState> = (
   { G, ctx, playerID, events, random },
@@ -14,17 +14,16 @@ const retrieveFleets: Move<MyGameState> = (
       const oldLocation = currentFleet.location;
 
       currentFleet.location = [4, 0];
-      console.log(
-        `New fleet location: ${G.playerInfo[playerID].fleetInfo[fleetId].location}`
-      );
 
       currentPlayer.resources.skyships += currentFleet.skyships;
       currentPlayer.resources.regiments += currentFleet.regiments;
       currentPlayer.resources.levies += currentFleet.levies;
+      currentPlayer.resources.eliteRegiments += currentFleet.eliteRegiments;
 
       currentFleet.skyships = 0;
       currentFleet.regiments = 0;
       currentFleet.levies = 0;
+      currentFleet.eliteRegiments = 0;
       let shouldScrubFromBattleMap = true;
       Object.values(currentPlayer.fleetInfo).forEach((fleet) => {
         const [fleetX, fleetY] = fleet.location;

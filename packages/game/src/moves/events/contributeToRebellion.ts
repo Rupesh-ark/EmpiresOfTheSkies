@@ -17,11 +17,12 @@ const MAX_RIVAL_TROOPS = 3;
  * 0-3 regiments/levies to either side of a rebellion.
  */
 const contributeToRebellion: Move<MyGameState> = (
-  { G, ctx, playerID, events }: {
+  { G, ctx, playerID, events, random }: {
     G: MyGameState;
     ctx: Ctx;
     playerID: string;
     events: EventsAPI;
+    random: any;
   },
   side: "defender" | "rebel",
   regiments: number,
@@ -57,7 +58,7 @@ const contributeToRebellion: Move<MyGameState> = (
 
   if (allRivalsContributed) {
     // Resolve the battle with defender + rival contributions
-    resolveRebellionWithTroopsAndRivals(G, rebellion);
+    resolveRebellionWithTroopsAndRivals(G, rebellion, random.Shuffle);
 
     G.currentRebellion = null;
 

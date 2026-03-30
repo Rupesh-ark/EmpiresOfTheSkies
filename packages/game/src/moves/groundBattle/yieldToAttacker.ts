@@ -1,7 +1,7 @@
 import { Move } from "boardgame.io";
 import { MyGameState } from "../../types";
 
-import { addLevyAmount, addRegiments } from "../../helpers/stateUtils";
+import { addEliteRegiments, addLevyAmount, addRegiments } from "../../helpers/stateUtils";
 import { findNextGroundBattle } from "../../helpers/findNext";
 
 const yieldToAttacker: Move<MyGameState> = (
@@ -25,8 +25,16 @@ const yieldToAttacker: Move<MyGameState> = (
         currentBuilding.garrisonedLevies ?? 0
       );
 
+    currentBuilding.player &&
+      addEliteRegiments(
+        G,
+        currentBuilding.player.id,
+        currentBuilding.garrisonedEliteRegiments ?? 0
+      );
+
     currentBuilding.garrisonedRegiments = 0;
     currentBuilding.garrisonedLevies = 0;
+    currentBuilding.garrisonedEliteRegiments = 0;
     currentBuilding.player = G.playerInfo[G.battleState.attacker.id];
   }
   G.battleState = undefined;

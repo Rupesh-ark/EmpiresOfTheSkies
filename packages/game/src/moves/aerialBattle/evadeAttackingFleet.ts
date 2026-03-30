@@ -9,7 +9,6 @@ const evadeAttackingFleet: Move<MyGameState> = (
     G.battleState.defender = { decision: "evade", ...G.playerInfo[playerID] };
     const attackerID = G.battleState.attacker.id;
     G.stage = "relocate loser";
-    console.log("a player has evaded attack");
     events.endTurn({ next: attackerID });
   }
 };

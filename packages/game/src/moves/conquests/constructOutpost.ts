@@ -1,5 +1,7 @@
 import { Move } from "boardgame.io";
 import { MyGameState, GoodKey } from "../../types";
+import { increaseHeresyWithinMove } from "../../helpers/stateUtils";
+import { PRICE_MARKER_MIN } from "../../codifiedGameInfo";
 
 const GOODS: GoodKey[] = ["mithril", "dragonScales", "krakenSkin", "magicDust", "stickyIchor", "pipeweed"];
 
@@ -19,17 +21,15 @@ const constructOutpost: Move<MyGameState> = (
   GOODS.forEach((good) => {
     const qty = currentTile.loot.outpost[good];
     if (qty > 0) {
-      G.mapState.goodsPriceMarkers[good] = Math.max(1, G.mapState.goodsPriceMarkers[good] - qty);
+      G.mapState.goodsPriceMarkers[good] = Math.max(PRICE_MARKER_MIN, G.mapState.goodsPriceMarkers[good] - qty);
     }
   });
 
-  Object.entries(currentTile.loot.outpost).forEach(([lootName, value]) => {
-    const lootNameAsResource = lootName as keyof typeof currentTile.loot.colony;
-    currentPlayer.resources[lootNameAsResource] += value;
-  });
+  // GAP-RES1: goods are no longer granted immediately on claim —
+  // they are recalculated each round via grantTradeRouteGoods in resolveRound.
 
   currentPlayer.resources.victoryPoints += 1;
-  currentPlayer.heresyTracker += 1;
+  increaseHeresyWithinMove(G, playerID);
 
   G.stage = "garrison troops";
 };

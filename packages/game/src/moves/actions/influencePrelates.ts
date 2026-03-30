@@ -1,40 +1,19 @@
 import { Move } from "boardgame.io";
 import { MyGameState, PlayerColour } from "../../types";
-import { validateMove } from "../moveValidation";
+import { validateInfluencePrelates } from "../moveValidation";
 import { INVALID_MOVE } from "boardgame.io/core";
 import {
   addGoldAmount,
   removeGoldAmount,
   removeOneCounsellor,
 } from "../../helpers/stateUtils";
-import { EventsAPI } from "boardgame.io/dist/types/src/plugins/plugin-events";
-import { RandomAPI } from "boardgame.io/dist/types/src/plugins/random/random";
-import { Ctx } from "boardgame.io/dist/types/src/types";
-
 export const influencePrelates: Move<MyGameState> = (
-  {
-    G,
-    ctx,
-    playerID,
-    events,
-    random,
-  }: {
-    G: MyGameState;
-    ctx: Ctx;
-    playerID: string;
-    events: EventsAPI;
-    random: RandomAPI;
-  },
+  { G, playerID },
   ...args: any[]
 ) => {
   const value: keyof typeof G.boardState.influencePrelates = args[0] + 1;
 
-  if (validateMove(playerID, G, { costsCounsellor: true, costsGold: true })) return INVALID_MOVE;
-
-  if (G.boardState.influencePrelates[value] !== undefined) {
-    console.log("Player has selected a move which has already been taken");
-    return INVALID_MOVE;
-  }
+  if (validateInfluencePrelates(G, playerID, args[0])) return INVALID_MOVE;
   let recipientOfPayment;
   let cost = 1;
 

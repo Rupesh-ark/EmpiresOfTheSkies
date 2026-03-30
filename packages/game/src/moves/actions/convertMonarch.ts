@@ -3,6 +3,8 @@ import { MyGameState } from "../../types";
 import {
   removeGoldAmount,
   removeOneCounsellor,
+  increaseHeresyWithinMove,
+  increaseOrthodoxyWithinMove,
 } from "../../helpers/stateUtils";
 import { INVALID_MOVE } from "boardgame.io/core";
 import { validateMove } from "../moveValidation";
@@ -21,11 +23,9 @@ const convertMonarch: Move<MyGameState> = (
   if (G.eventState.cannotConvertThisRound.includes(playerID)) return INVALID_MOVE;
 
   if (G.boardState.convertMonarch[value] !== undefined) {
-    console.log("Player has chosen a slot which is already taken");
     return INVALID_MOVE;
   }
   if (value > ctx.numPlayers) {
-    console.log("Player has selected a slot only available in larger games");
     return INVALID_MOVE;
   }
 
@@ -33,7 +33,6 @@ const convertMonarch: Move<MyGameState> = (
     (id) => id === playerID
   );
   if (alreadyConverting) {
-    console.log("Player has already placed a counsellor to convert monarch");
     return INVALID_MOVE;
   }
 
@@ -51,11 +50,15 @@ const convertMonarch: Move<MyGameState> = (
 
   if (playerInfo.hereticOrOrthodox === "heretic") {
     playerInfo.hereticOrOrthodox = "orthodox";
-    playerInfo.heresyTracker -= playerInfo.prisoners;
+    for (let i = 0; i < playerInfo.prisoners; i++) {
+      increaseOrthodoxyWithinMove(G, playerID);
+    }
     playerInfo.prisoners = 0;
   } else {
     playerInfo.hereticOrOrthodox = "heretic";
-    playerInfo.heresyTracker += playerInfo.prisoners;
+    for (let i = 0; i < playerInfo.prisoners; i++) {
+      increaseHeresyWithinMove(G, playerID);
+    }
     playerInfo.prisoners = 0;
   }
 

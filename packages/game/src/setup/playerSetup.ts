@@ -60,9 +60,9 @@ export const buildPlayerInfoMap = (ctx: Ctx): { [id: string]: PlayerInfo } => {
       },
       hereticOrOrthodox: "orthodox",
       fleetInfo: [
-        { fleetId: 0, location: [4, 0], skyships: 0, regiments: 0, levies: 0 },
-        { fleetId: 1, location: [4, 0], skyships: 0, regiments: 0, levies: 0 },
-        { fleetId: 2, location: [4, 0], skyships: 0, regiments: 0, levies: 0 },
+        { fleetId: 0, location: [4, 0], skyships: 0, regiments: 0, levies: 0, eliteRegiments: 0 },
+        { fleetId: 1, location: [4, 0], skyships: 0, regiments: 0, levies: 0, eliteRegiments: 0 },
+        { fleetId: 2, location: [4, 0], skyships: 0, regiments: 0, levies: 0, eliteRegiments: 0 },
       ],
       cathedrals: 1,
       palaces: 1,

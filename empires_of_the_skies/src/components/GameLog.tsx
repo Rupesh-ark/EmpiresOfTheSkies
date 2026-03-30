@@ -8,10 +8,13 @@ import {
   ListItemText,
   ListItemIcon,
   Divider,
+  IconButton,
+  Tooltip,
 } from "@mui/material";
 import {
   AttachMoney,
   Church,
+  ContentCopy,
   Gavel,
   HowToVote,
   LocalFireDepartment,
@@ -23,6 +26,7 @@ import {
   VolunteerActivism,
 } from "@mui/icons-material";
 import { GiTrumpetFlag } from "react-icons/gi";
+import { useState } from "react";
 
 type LogIconKey =
   | "event"
@@ -83,6 +87,16 @@ const ICON_MAP: Record<LogIconKey, { icon: React.ReactNode; color: string }> = {
 
 const GameLog = (props: MyGameProps) => {
   const log = props.G.gameLog ?? [];
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = () => {
+    if (props.matchID) {
+      navigator.clipboard.writeText(props.matchID).then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      });
+    }
+  };
 
   // Group entries by round, newest round first
   const rounds = new Map<number, string[]>();
@@ -135,6 +149,39 @@ const GameLog = (props: MyGameProps) => {
             Game Log
           </Typography>
         </Box>
+        {props.matchID && (
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              px: 2,
+              py: 0.5,
+              backgroundColor: "rgba(0,0,0,0.04)",
+              borderBottom: "1px solid rgba(0,0,0,0.08)",
+            }}
+          >
+            <Typography
+              sx={{
+                fontSize: "0.8rem",
+                color: "text.secondary",
+                fontFamily: "monospace",
+                letterSpacing: "0.03em",
+              }}
+            >
+              Match ID: <strong>{props.matchID}</strong>
+            </Typography>
+            <Tooltip title={copied ? "Copied!" : "Copy match ID"} placement="left">
+              <IconButton
+                size="small"
+                onClick={handleCopy}
+                sx={{ color: copied ? "success.main" : "action.active", p: 0.5 }}
+              >
+                <ContentCopy sx={{ fontSize: 15 }} />
+              </IconButton>
+            </Tooltip>
+          </Box>
+        )}
         {sortedRounds.length === 0 ? (
           <Box sx={{ p: 2 }}>
             <Typography variant="body2" color="text.secondary">

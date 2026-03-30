@@ -1,8 +1,7 @@
 import { MyGameState } from "../types";
-import { MAX_SKYSHIPS, MAX_REGIMENTS } from "../codifiedGameInfo";
+import { MAX_SKYSHIPS, MAX_REGIMENTS, HERESY_MAX, HERESY_MIN } from "../codifiedGameInfo";
 
-export const HERESY_MAX = 9;
-export const HERESY_MIN = -9;
+export { HERESY_MAX, HERESY_MIN };
 
 export const removeOneCounsellor = (G: MyGameState, playerID: string) => {
   G.playerInfo[playerID].resources.counsellors -= 1;
@@ -59,14 +58,6 @@ export const addSkyship = (G: MyGameState, playerID: string) => {
   }
 };
 
-export const removeRegiments = (
-  G: MyGameState,
-  playerID: string,
-  amount: number
-) => {
-  G.playerInfo[playerID].resources.regiments -= amount;
-};
-
 export const addRegiments = (
   G: MyGameState,
   playerID: string,
@@ -101,20 +92,22 @@ export const increaseOrthodoxyWithinMove = (
   }
 };
 
-export const removeLevyAmount = (
-  G: MyGameState,
-  playerID: string,
-  levyAmount: number
-) => {
-  G.playerInfo[playerID].resources.levies -= levyAmount;
-};
-
 export const addLevyAmount = (
   G: MyGameState,
   playerID: string,
   levyAmount: number
 ) => {
   G.playerInfo[playerID].resources.levies += levyAmount;
+};
+
+/** Return elite regiments to a kingdom's reserve. No max cap — they are non-recruitable,
+ *  so the pool can only shrink over a game; we never need to clamp here. */
+export const addEliteRegiments = (
+  G: MyGameState,
+  playerID: string,
+  amount: number
+) => {
+  G.playerInfo[playerID].resources.eliteRegiments += amount;
 };
 
 export const logEvent = (G: MyGameState, message: string) => {

@@ -7,6 +7,8 @@ const defendGroundAttack: Move<MyGameState> = (
 ) => {
   if (G.battleState) {
     G.battleState.defender.decision = "fight";
+    G.stage = "resolve battle";
+    events.endTurn({ next: G.battleState.attacker.id });
   }
 };
 

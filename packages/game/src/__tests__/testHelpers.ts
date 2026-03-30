@@ -78,6 +78,7 @@ export function buildFleet(fleetId: number, overrides: Partial<FleetInfo> = {}):
     skyships: 3,
     regiments: 0,
     levies: 0,
+    eliteRegiments: 0,
     ...overrides,
   };
 }
@@ -125,6 +126,7 @@ export function buildInitialG(
     nprCathedrals: {},
     electionResults: {},
     hasVoted: [],
+    voteSubmitted: {},
     turnOrder: players.map((p) => p.id),
     playerInfo,
     boardState: buildActionBoard(),
@@ -220,5 +222,12 @@ export function buildCtx(currentPlayer: string, numPlayers = 2): MockCtx {
       endTurn: () => {},
       endPhase: () => {},
     },
+  };
+}
+
+/** Mock boardgame.io random plugin — Shuffle returns array as-is (deterministic for tests). */
+export function buildRandom() {
+  return {
+    Shuffle: <T>(arr: T[]): T[] => [...arr],
   };
 }

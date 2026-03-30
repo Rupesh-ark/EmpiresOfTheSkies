@@ -63,11 +63,11 @@ describe("convertMonarch — faith flip", () => {
     expect(G.playerInfo["0"].heresyTracker).toBe(6);
   });
 
-  it("orthodox conversion: heresyTracker increases by prisoner count", () => {
+  it("orthodox conversion: heresyTracker increases by prisoner count, clamped at HERESY_MAX (9)", () => {
     const G = buildInitialG([buildPlayer("0", { hereticOrOrthodox: "orthodox", heresyTracker: 9, prisoners: 3 })]);
     callMove(G, "0", 0);
-    // heresyTracker += prisoners (3) → 9 + 3 = 12
-    expect(G.playerInfo["0"].heresyTracker).toBe(12);
+    // already at max (9), so stays at 9 — bounded by HERESY_MAX
+    expect(G.playerInfo["0"].heresyTracker).toBe(9);
   });
 });
 

@@ -157,15 +157,16 @@ describe("resolveBattleAndReturnWinner — aerial combat math", () => {
   });
 
   it("FoW sword card adds to attacker strength", () => {
-    // Attacker: 3 skyships + FoW sword=2 vs defender: 4 skyships.
+    // Attacker: 3 skyships + FoW sword=3 vs defender: 4 skyships.
     // Without FoW: attacker sword=3 vs defender shield=4 → defender losses=3-4=-1→0;
     //              attacker losses=4-3=1 → defender wins.
-    // With FoW: attacker sword=5 vs defender shield=4 → defender losses=5-4=1;
-    //           attacker losses=4-3=1 (equal, tiebreak → attacker); neither annihilated → attacker wins.
+    // With FoW: attacker sword=6 vs defender shield=4 → defender losses=6-4=2;
+    //           attacker losses=4-3=1 → attacker takes fewer losses → attacker wins.
+    // (Under v4.2 rules, ties go to defender, so we pick sword=3 to break the tie clearly.)
     const G = setupBattle(
       { skyships: 3, regiments: 0, levies: 0 },
       { skyships: 4, regiments: 0, levies: 0 },
-      { name: "Sword2", sword: 2, shield: 0 },
+      { name: "Sword3", sword: 3, shield: 0 },
       { name: "NoEffect", sword: 0, shield: 0 }
     );
     const vpBefore = G.playerInfo["0"].resources.victoryPoints;

@@ -18,10 +18,6 @@ export const findNextBattle = (G: MyGameState, events: EventsAPI) => {
         G.mapState.currentBattle = [x, y];
         G.battleState = undefined;
         G.stage = "attack or pass";
-        console.log(
-          `current battle is now ${G.mapState.currentBattle} and next possible attacker is player ${nextPlayer}`
-        );
-        G.stage = "attack or pass";
         events.endTurn({ next: nextPlayer });
         return;
       }
@@ -45,9 +41,6 @@ export const findNextPlunder = (G: MyGameState, events: EventsAPI): void => {
       ) {
         const nextPlayer = G.mapState.battleMap[y][x][0];
         G.mapState.currentBattle = [x, y];
-        console.log(
-          `current plunder is now ${G.mapState.currentBattle} with player ${nextPlayer} `
-        );
         G.stage = "plunder legends";
         events.endTurn({ next: nextPlayer });
         return;
@@ -55,7 +48,7 @@ export const findNextPlunder = (G: MyGameState, events: EventsAPI): void => {
     }
   }
   G.mapState.currentBattle = [0, 0];
-  G.stage = "conquest";
+  G.stage = "attack or pass";
   events.endPhase();
 };
 export const findNextGroundBattle = (
@@ -77,9 +70,6 @@ export const findNextGroundBattle = (
       ) {
         const nextPlayer = G.mapState.battleMap[y][x][0];
         G.mapState.currentBattle = [x, y];
-        console.log(
-          `current ground battle is now ${G.mapState.currentBattle} with player ${nextPlayer} potentially attacking`
-        );
         G.stage = "attack or pass";
         events.endTurn({ next: nextPlayer });
         return;
@@ -87,7 +77,7 @@ export const findNextGroundBattle = (
     }
   }
   G.mapState.currentBattle = [0, 0];
-  G.stage = "plunder legends";
+  G.stage = "conquest";
   events.endPhase();
 };
 
@@ -102,13 +92,14 @@ export const findNextConquest = (G: MyGameState, events: EventsAPI) => {
       } else if (
         G.mapState.currentTileArray[y][x].type === "land" &&
         G.mapState.battleMap[y][x].length === 1 &&
-        !G.mapState.buildings[y][x].player
+        (
+          !G.mapState.buildings[y][x].player ||
+          (G.mapState.buildings[y][x].player?.id === G.mapState.battleMap[y][x][0] &&
+           G.mapState.buildings[y][x].buildings === "outpost")
+        )
       ) {
         const nextPlayer = G.mapState.battleMap[y][x][0];
         G.mapState.currentBattle = [x, y];
-        console.log(
-          `current conquest is now ${G.mapState.currentBattle} with player ${nextPlayer} potentially attacking`
-        );
         G.stage = "conquest";
         events.endTurn({ next: nextPlayer });
         return;
@@ -138,18 +129,12 @@ export const findNextPlayerInBattleSequence = (
   );
   const nextPlayerIndex = currentPlayerIndex + 1;
   const nextPlayer = sortedPlayerIDs[nextPlayerIndex];
-  console.log(
-    `Next player to attack would be player ID at index ${nextPlayerIndex} of the sorted list if they exist, current number of players in this battle is ${sortedPlayerIDs.length}`
-  );
-
   if (
     nextPlayerIndex >= sortedPlayerIDs.length ||
     sortedPlayerIDs.length === 1
   ) {
-    console.log("finding next battle...");
     findNextBattle(G, events);
   } else {
-    console.log(`next player to attack or pass is ${nextPlayer}`);
     events.endTurn({ next: nextPlayer });
     G.stage = "attack or pass";
   }

@@ -16,9 +16,12 @@ export const fullResetFortuneOfWarCardDeck = (): FortuneOfWarCardInfo[] => {
   return [...fortuneOfWarCards];
 };
 
-export const resetFortuneOfWarCardDeck = (props: MyGameState) => {
-  props.cardDecks.fortuneOfWarCards = props.cardDecks.fortuneOfWarCards.concat(
-    props.cardDecks.discardedFortuneOfWarCards
+export const resetFortuneOfWarCardDeck = (
+  props: MyGameState,
+  shuffle: <T>(arr: T[]) => T[]
+) => {
+  props.cardDecks.fortuneOfWarCards = shuffle(
+    props.cardDecks.fortuneOfWarCards.concat(props.cardDecks.discardedFortuneOfWarCards)
   );
   props.cardDecks.discardedFortuneOfWarCards = [];
 };
@@ -138,9 +141,12 @@ export const sortPlayersInPlayerOrder = (
   return sortedPlayerIDs;
 };
 
-export const drawFortuneOfWarCard = (G: MyGameState): FortuneOfWarCardInfo => {
+export const drawFortuneOfWarCard = (
+  G: MyGameState,
+  shuffle: <T>(arr: T[]) => T[]
+): FortuneOfWarCardInfo => {
   if (G.cardDecks.fortuneOfWarCards.length === 0) {
-    resetFortuneOfWarCardDeck(G);
+    resetFortuneOfWarCardDeck(G, shuffle);
   }
   const card = G.cardDecks.fortuneOfWarCards.splice(0, 1)[0];
   G.cardDecks.discardedFortuneOfWarCards.push(card);
@@ -148,13 +154,13 @@ export const drawFortuneOfWarCard = (G: MyGameState): FortuneOfWarCardInfo => {
   // v4.2: No Effect → discard, reshuffle discard into deck, draw again
   const isNoEffect = card.sword === 0 && card.shield === 0;
   if (isNoEffect) {
-    resetFortuneOfWarCardDeck(G);
+    resetFortuneOfWarCardDeck(G, shuffle);
     // Guard against infinite loop if all remaining cards are No Effect
     const hasRealCard = G.cardDecks.fortuneOfWarCards.some(
       (c) => c.sword !== 0 || c.shield !== 0
     );
     if (hasRealCard) {
-      return drawFortuneOfWarCard(G);
+      return drawFortuneOfWarCard(G, shuffle);
     }
   }
   return card;
@@ -229,12 +235,8 @@ export const checkIfCurrentPlayerIsInCurrentBattle = (
   events: EventsAPI
 ) => {
   const [x, y] = G.mapState.currentBattle;
-  console.log("current battlemap:");
-  console.log(G.mapState.battleMap.toString());
-  console.log(`The bit just before the failure... ${[x, y]}`);
   if (G.mapState.battleMap[y][x].length > 0) {
     if (!G.mapState.battleMap[y][x].includes(ctx.currentPlayer)) {
-      console.log("ending turn");
       events.endTurn({
         next: G.mapState.battleMap[y][x][0],
       });
@@ -242,19 +244,15 @@ export const checkIfCurrentPlayerIsInCurrentBattle = (
   } else {
     switch (ctx.phase) {
       case "aerial_battle":
-        console.log("finding next aerial battle");
         findNextBattle(G, events);
         break;
       case "ground_battle":
-        console.log("finding next ground battle");
         findNextGroundBattle(G, events);
         break;
       case "plunder_legends":
-        console.log("finding next plunder");
         findNextPlunder(G, events);
         break;
       case "conquest":
-        console.log("finding next conquest");
         findNextConquest(G, events);
         break;
     }

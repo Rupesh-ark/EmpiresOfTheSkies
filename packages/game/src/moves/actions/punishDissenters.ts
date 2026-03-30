@@ -1,7 +1,7 @@
 import { Move } from "boardgame.io";
 import { MyGameState } from "../../types";
 import { INVALID_MOVE } from "boardgame.io/core";
-import { validateMove } from "../moveValidation";
+import { validatePunishDissenters } from "../moveValidation";
 import {
   increaseHeresyWithinMove,
   increaseOrthodoxyWithinMove,
@@ -10,12 +10,7 @@ import {
   removeVPAmount,
 } from "../../helpers/stateUtils";
 import { Ctx } from "boardgame.io/dist/types/src/types";
-import {
-  BASE_PRISONERS,
-  MORE_PRISONS_BONUS,
-  PUNISH_GOLD_COST,
-  PUNISH_EXECUTE_VP_COST,
-} from "../../codifiedGameInfo";
+import { PUNISH_EXECUTE_VP_COST, BASE_PRISONERS, MORE_PRISONS_BONUS, PUNISH_GOLD_COST } from "../../codifiedGameInfo";
 
 const punishDissenters: Move<MyGameState> = (
   { G, ctx, playerID }: { G: MyGameState; ctx: Ctx; playerID: string },
@@ -24,34 +19,12 @@ const punishDissenters: Move<MyGameState> = (
   const value: keyof typeof G.boardState.punishDissenters = args[0] + 1;
   const paymentType: "gold" | "counsellor" | "execute" = args[1];
 
-  if (validateMove(playerID, G, {
-    costsCounsellor: true,
-    costsGold: paymentType === "gold",
-  })) return INVALID_MOVE;
-  if (value > ctx.numPlayers) {
-    console.log("Player has selected a slot only available in larger games");
-    return INVALID_MOVE;
-  }
-  if (G.boardState.punishDissenters[value] !== undefined) {
-    console.log("Player has selected a slot which is already taken");
-    return INVALID_MOVE;
-  }
-
-  const alreadyPunishing = Object.values(G.boardState.punishDissenters).some(
-    (id) => id === playerID
-  );
-  if (alreadyPunishing) {
-    console.log("Player has already punished dissenters this round");
-    return INVALID_MOVE;
-  }
+  if (validatePunishDissenters(G, playerID, args[0], paymentType, ctx.numPlayers)) return INVALID_MOVE;
 
   const playerInfo = G.playerInfo[playerID];
 
   // GAP-11: execute an existing prisoner — returns cube to pool, shifts heresy, costs 1 VP
   if (paymentType === "execute") {
-    if (playerInfo.prisoners <= 0) {
-      return INVALID_MOVE;
-    }
     playerInfo.prisoners -= 1;
     removeVPAmount(G, playerID, PUNISH_EXECUTE_VP_COST);
     if (playerInfo.hereticOrOrthodox === "orthodox") {
