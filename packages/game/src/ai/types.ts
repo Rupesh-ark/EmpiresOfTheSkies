@@ -28,13 +28,20 @@ export type AIMove = {
   args: any[];
 };
 
+export type ScoredAIMove = {
+  move: AIMove;
+  score: number;
+  topMoves?: { move: string; args: any[]; score: number }[];
+};
+
 export interface PhaseStrategy {
   selectMove(
     G: MyGameState,
     ctx: Ctx,
     playerID: string,
-    personality: AIPersonality
-  ): AIMove;
+    personality: AIPersonality,
+    availableMoves?: AIMove[]
+  ): ScoredAIMove;
 }
 
 export type WeightOverrideMode = "none" | "full_override" | "modifier";

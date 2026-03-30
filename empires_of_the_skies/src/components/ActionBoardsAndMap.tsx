@@ -169,7 +169,7 @@ const ActionBoardsAndMapInner = (props: MyGameProps) => {
   const prevLogLen = useRef(props.G.gameLog.length);
   useEffect(() => {
     const logLen = props.G.gameLog.length;
-    const isDiscovery = props.ctx.phase === "discovery";
+    const isDiscovery = props.G.stage.phase === "discovery";
     const isMyTurn = props.ctx.currentPlayer === props.playerID;
 
     if (isDiscovery && logLen > prevLogLen.current) {
@@ -189,7 +189,7 @@ const ActionBoardsAndMapInner = (props: MyGameProps) => {
       }
     }
     prevLogLen.current = logLen;
-  }, [props.G.gameLog.length, props.ctx.phase, props.ctx.currentPlayer, props.playerID, props.G.playerInfo, showToast]);
+  }, [props.G.gameLog.length, props.G.stage.phase, props.ctx.currentPlayer, props.playerID, props.G.playerInfo, showToast]);
 
   // ── Event toast: notify all players when an event card is resolved ──
   const prevResolvedEvent = useRef(props.G.eventState.resolvedEvent);

@@ -52,13 +52,13 @@ const chooseEventCard: MoveDefinition = {
 
         // Check if this card needs a player choice before resolving
         const choice = !def.isBattle
-          ? prepareEventChoice(card, G, ctx.playOrder)
+          ? prepareEventChoice(card, G, ctx.playOrder, random.Shuffle)
           : null;
 
         if (def.isBattle) {
           // Battle events deferred to Resolution phase
           // Colonial Rebellion with multiple colonies needs a choice first
-          const colChoice = prepareEventChoice(card, G, ctx.playOrder);
+          const colChoice = prepareEventChoice(card, G, ctx.playOrder, random.Shuffle);
           if (colChoice) {
             G.eventState.pendingChoice = colChoice;
           } else {
@@ -72,7 +72,7 @@ const chooseEventCard: MoveDefinition = {
           G.eventState.pendingChoice = choice;
         } else {
           // Auto-resolve immediately
-          resolveEventCard(card, G, ctx.playOrder);
+          resolveEventCard(card, G, ctx.playOrder, random.Shuffle);
         }
 
         // All other chosen cards go back to deck

@@ -55,7 +55,7 @@ const stubEvents = () =>
     endPhase: ReturnType<typeof vi.fn>;
   });
 
-function buildCtxForPhase(playerID: string, phase = "aerial_battle") {
+function buildCtxForPhase(playerID: string, phase = "resolution") {
   return {
     ...buildCtx(playerID),
     currentPlayer: playerID,

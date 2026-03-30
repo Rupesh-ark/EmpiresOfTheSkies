@@ -4,6 +4,7 @@ import { CARD_RESOLVERS } from "../helpers/legacyCardDefinitions";
 import { countActiveTradeRoutes, bfsWithDistance, tileKey, FAITHDOM_TILES } from "../helpers/mapUtils";
 import { HERESY_MAX, MAX_COUNSELLORS, MAP_WIDTH, MAP_HEIGHT, KINGDOM_LOCATION } from "../data/gameData";
 import { AI_CONFIG } from "./weightsConfig";
+import { getRepublicInfluence } from "../helpers/republicUtils";
 
 // ── Internal helpers ──────────────────────────────────────────────────────────
 
@@ -237,19 +238,11 @@ function normalizedRepublicAccess(G: MyGameState, playerID: string): number {
   const player = G.playerInfo[playerID];
   const playerAlignment = player.hereticOrOrthodox;
 
+  // Use shared helper for republic influence
+  const republics = getRepublicInfluence(G, playerID);
   let supportingRepublics = 0;
-
-  // Venoa — slot 5 in influencePrelates
-  const venoaHeretic = G.eventState.nprHeretic.includes("Venoa");
-  const venoaAlignment = venoaHeretic ? "heretic" : "orthodox";
-  const venoaInfluenced = G.boardState.influencePrelates[5] === playerID;
-  if (venoaAlignment === playerAlignment || venoaInfluenced) supportingRepublics++;
-
-  // Zeeland — slot 4 in influencePrelates
-  const zeelandHeretic = G.eventState.nprHeretic.includes("Zeeland");
-  const zeelandAlignment = zeelandHeretic ? "heretic" : "orthodox";
-  const zeelandInfluenced = G.boardState.influencePrelates[4] === playerID;
-  if (zeelandAlignment === playerAlignment || zeelandInfluenced) supportingRepublics++;
+  if (republics.zeeland.supporting) supportingRepublics++;
+  if (republics.venoa.supporting) supportingRepublics++;
 
   // Mercy is only relevant when trailing
   const allVPs = getAllPlayers(G).map((p) => p.resources.victoryPoints);
@@ -274,10 +267,14 @@ function computeMoveValue(
   for (const [dim, mult] of Object.entries(entry)) {
     if (dim === "base") continue;
     if (dim in weights) {
-      value += weights[dim as keyof AIWeights] * (mult as number);
+      const w = weights[dim as keyof AIWeights];
+      const m = mult as number;
+      if (typeof w === "number" && !isNaN(w) && typeof m === "number" && !isNaN(m)) {
+        value += w * m;
+      }
     }
   }
-  return value;
+  return isNaN(value) ? (entry.base as number ?? 0.1) : value;
 }
 
 // ── Main export ───────────────────────────────────────────────────────────────
@@ -363,12 +360,14 @@ export function estimateMoveValue(
     case "influencePrelates": {
       const prelateIndex = move.args[0] as number;
       if (prelateIndex === 4 || prelateIndex === 5) {
-        const allVPs = getAllPlayers(G).map((p) => p.resources.victoryPoints);
+        const allVPs = getAllPlayers(G).map((p) => p.resources.victoryPoints ?? 0);
         const leaderVP = Math.max(...allVPs);
-        const vpGap = leaderVP - player.resources.victoryPoints;
+        const myVP = player.resources.victoryPoints ?? 0;
+        const vpGap = (isNaN(leaderVP) ? 0 : leaderVP) - (isNaN(myVP) ? 0 : myVP);
+        const scale = AI_CONFIG.moveValues.influenceMercyVPGapScale as number;
+        const boost = AI_CONFIG.moveValues.influenceMercyBoostScale as number;
         const mercyBoost =
-          Math.min(1, vpGap / (AI_CONFIG.moveValues.influenceMercyVPGapScale as number)) *
-          (AI_CONFIG.moveValues.influenceMercyBoostScale as number);
+          Math.min(1, Math.max(0, vpGap) / (scale || 1)) * (boost || 0);
         return computeMoveValue("influencePrelatesRepublic", weights) + mercyBoost;
       }
       return computeMoveValue("influencePrelatesRegular", weights);
@@ -394,8 +393,10 @@ export function estimateMoveValue(
       if (!tile) return base;
 
       let tileBonus = 0;
+      const rivalsOnTile = (G.mapState.battleMap[dy]?.[dx] ?? []).filter(
+        (id: string) => id !== playerID
+      ).length;
 
-      // ── P0: Tile type value ──
       if (tile.type === "land") {
         if (!building?.player) {
           // Unclaimed land → outpost/colony potential
@@ -419,7 +420,16 @@ export function estimateMoveValue(
 
           tileBonus = 0.2 * weights.territory + 0.1 * weights.economy + lootValue * 0.015;
 
-          // Strong tile but weak army → harder to upgrade to colony later
+          const hasTroops = fleetRegs + fleetElites > 0;
+          if (hasTroops && rivalsOnTile === 0) {
+            tileBonus += 0.3;
+            if (canConquer) tileBonus += 0.1;
+          } else if (hasTroops) {
+            tileBonus += 0.1;
+          } else {
+            tileBonus *= 0.3;
+          }
+
           if (!canConquer && tile.sword > 8) {
             tileBonus *= 0.7;
           }
@@ -444,8 +454,10 @@ export function estimateMoveValue(
         const loot = tile.loot.outpost;
         const lootValue = (loot.gold ?? 0) + (loot.victoryPoints ?? 0) * 2;
         tileBonus = 0.1 * weights.economy + 0.05 * weights.territory + lootValue * 0.015;
+      } else {
+        // ocean/home — deploying here has minimal value
+        tileBonus = -0.1;
       }
-      // ocean/home → tileBonus stays 0
 
       // ── P0: Hop cost ──
       const discoveredNet = new Set<string>();
@@ -466,13 +478,8 @@ export function estimateMoveValue(
         }
       }
 
-      // ── P1: Rival fleet crowding — sole occupation needed for conquest ──
-      const rivalsOnTile = (G.mapState.battleMap[dy]?.[dx] ?? []).filter(
-        (id: string) => id !== playerID
-      ).length;
       if (rivalsOnTile > 0) {
-        // Can't build outpost with rivals present — heavy penalty
-        tileBonus -= rivalsOnTile * 0.08;
+        tileBonus -= rivalsOnTile * 0.25;
       }
 
       // ── P1: Strategic positioning — rival presence NEAR destination ──

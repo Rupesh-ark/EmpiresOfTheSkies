@@ -1,38 +1,50 @@
-import type { PhaseStrategy, AIPersonality, AIMove } from "../types";
+import type { PhaseStrategy, AIPersonality, AIMove, ScoredAIMove } from "../types";
 import type { MyGameState } from "../../types";
 import type { Ctx } from "boardgame.io";
-import { enumerateLegalMoves } from "../enumerate";
+import type { BattleContext } from "../GameRecorder";
 
 /**
  * Ground battle strategy: decide whether to attack buildings,
  * defend or yield, and how many troops to garrison.
  */
 export class GroundBattleStrategy implements PhaseStrategy {
+  // The most recent ground battle context, consumed once by the recorder after each decision.
+  // Static so the browserRunner can read it without holding a bot reference.
+  private static _lastBattleContext: BattleContext | null = null;
+
+  /** Read and clear the most recent battle context (one-shot consumption). */
+  static getLastBattleContext(): BattleContext | null {
+    const ctx = GroundBattleStrategy._lastBattleContext;
+    GroundBattleStrategy._lastBattleContext = null;
+    return ctx;
+  }
+
   selectMove(
     G: MyGameState,
     ctx: Ctx,
     playerID: string,
-    personality: AIPersonality
-  ): AIMove {
-    const moves = enumerateLegalMoves(G, ctx, playerID);
-    if (moves.length === 0) return { move: "doNotGroundAttack", args: [] };
-    if (moves.length === 1) return moves[0];
+    personality: AIPersonality,
+    availableMoves?: AIMove[]
+  ): ScoredAIMove {
+    const moves = availableMoves ?? [];
+    if (moves.length === 0) return { move: { move: "doNotGroundAttack", args: [] }, score: 0 };
+    if (moves.length === 1) return { move: moves[0], score: 0 };
 
     switch (G.stage.sub) {
       case "ground_attack_or_pass":
-        return this.decideGroundAttack(G, playerID, personality, moves);
+        return { move: this.decideGroundAttack(G, playerID, personality, moves), score: 0 };
 
       case "ground_defend_or_yield":
-        return this.decideDefend(G, playerID, personality, moves);
+        return { move: this.decideDefend(G, playerID, personality, moves), score: 0 };
 
       case "ground_garrison":
-        return this.decideGarrison(G, playerID, personality, moves);
+        return { move: this.decideGarrison(G, playerID, personality, moves), score: 0 };
 
       case "conquest_draw_or_pick":
-        return this.pickFoWCard(G, playerID, moves);
+        return { move: this.pickFoWCard(G, playerID, moves), score: 0 };
 
       default:
-        return moves[0];
+        return { move: moves[0], score: 0 };
     }
   }
 
@@ -54,6 +66,7 @@ export class GroundBattleStrategy implements PhaseStrategy {
 
     let bestTarget: AIMove | null = null;
     let bestScore = -Infinity;
+    let bestDefenseStrength = 0;
 
     for (const m of attackMoves) {
       const targetID = m.args[0] as string;
@@ -65,7 +78,19 @@ export class GroundBattleStrategy implements PhaseStrategy {
       const hasFort = (building?.fort?.length ?? 0) > 0 ? 2 : 0; // fort adds defensive bonus
 
       const defenseStrength = garrisonStrength + hasFort;
-      if (defenseStrength === 0) return m; // undefended — free capture
+      if (defenseStrength === 0) {
+        // Undefended — free capture; record context and return immediately
+        GroundBattleStrategy._lastBattleContext = {
+          myStrength: myTroops,
+          enemyStrength: 0,
+          ratio: Infinity,
+          threshold,
+          fowCardCount: G.playerInfo[playerID]?.resources.fortuneCards?.length ?? 0,
+          targetID,
+          decision: "attack",
+        };
+        return m;
+      }
 
       const ratio = myTroops / defenseStrength;
       if (ratio < threshold) continue;
@@ -83,8 +108,21 @@ export class GroundBattleStrategy implements PhaseStrategy {
       if (score > bestScore) {
         bestScore = score;
         bestTarget = m;
+        bestDefenseStrength = defenseStrength;
       }
     }
+
+    // Capture context for analytics recorder
+    const chosenTargetID = bestTarget ? (bestTarget.args[0] as string) : "";
+    GroundBattleStrategy._lastBattleContext = {
+      myStrength: myTroops,
+      enemyStrength: bestDefenseStrength,
+      ratio: bestDefenseStrength > 0 ? myTroops / bestDefenseStrength : Infinity,
+      threshold,
+      fowCardCount: G.playerInfo[playerID]?.resources.fortuneCards?.length ?? 0,
+      targetID: chosenTargetID,
+      decision: bestTarget ? "attack" : "doNotAttack",
+    };
 
     return bestTarget ?? dontAttack ?? moves[0];
   }
@@ -123,13 +161,27 @@ export class GroundBattleStrategy implements PhaseStrategy {
     const isColony = building?.buildings === "colony";
     const buildingValue = isColony ? 0.8 : 0.4;
 
-    // Defend if we have reasonable chance or building is very valuable
-    if (defenseTotal > 0 && (defenseTotal / (attackerTroops || 1) >= 0.5 || buildingValue > 0.6)) {
-      return defendMove;
-    }
+    // Threshold: minimum defence-to-attack ratio we require before standing firm
+    const defenceThreshold = 0.5;
+    const ratio = defenseTotal / (attackerTroops || 1);
 
-    // Aggressive personality defends more
-    if (aggression > 0.6 && defenseTotal > 0) {
+    // Capture context for analytics recorder before any early return
+    const willFight =
+      (defenseTotal > 0 && (ratio >= defenceThreshold || buildingValue > 0.6)) ||
+      (aggression > 0.6 && defenseTotal > 0);
+
+    GroundBattleStrategy._lastBattleContext = {
+      myStrength: defenseTotal,
+      enemyStrength: attackerTroops,
+      ratio,
+      threshold: defenceThreshold,
+      fowCardCount: G.playerInfo[playerID]?.resources.fortuneCards?.length ?? 0,
+      targetID: attackerID ?? "",
+      // "fight" = defend, "evade" = yield (closest existing union members)
+      decision: willFight ? "fight" : "evade",
+    };
+
+    if (willFight) {
       return defendMove;
     }
 
@@ -147,6 +199,16 @@ export class GroundBattleStrategy implements PhaseStrategy {
 
     // Use troopsAvailableForGarrison from pre-computed state
     const available = G.troopsAvailableForGarrison;
+    
+    // Defensive: validate available is valid
+    if (!available || 
+        typeof available.levies !== 'number' || isNaN(available.levies) ||
+        typeof available.regiments !== 'number' || isNaN(available.regiments) ||
+        typeof available.elites !== 'number' || isNaN(available.elites)) {
+      console.warn(`[GroundBattleStrategy] Invalid troopsAvailableForGarrison: ${JSON.stringify(available)}`);
+      return garrisonMoves[0];
+    }
+    
     const aggression = personality.tacticalPreferences.aggressionLevel;
 
     // Aggressive: garrison everything (hold territory)

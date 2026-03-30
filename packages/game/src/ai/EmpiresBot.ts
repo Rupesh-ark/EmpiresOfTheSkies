@@ -6,23 +6,20 @@ import { RandomFallbackStrategy } from "./strategies/RandomFallback";
 import { DiscoveryStrategy } from "./strategies/DiscoveryStrategy";
 import { EventsStrategy } from "./strategies/EventsStrategy";
 import { ActionsStrategy } from "./strategies/ActionsStrategy";
-import { AerialBattleStrategy } from "./strategies/AerialBattleStrategy";
-import { GroundBattleStrategy } from "./strategies/GroundBattleStrategy";
-import { ElectionStrategy } from "./strategies/ElectionStrategy";
-import { ConquestStrategy } from "./strategies/ConquestStrategy";
-import { PlunderStrategy } from "./strategies/PlunderStrategy";
-import { ResolutionStrategy } from "./strategies/ResolutionStrategy";
+import { ResolutionCoordinator } from "./strategies/ResolutionCoordinator";
 import { deriveWeightsFromCards } from "./personalities";
 import { enumerateLegalMoves } from "./enumerate";
 import { estimateMoveValue } from "./evaluate";
 import { getAILogger } from "./AILogger";
 import { AI_CONFIG } from "./weightsConfig";
+import type { PlayerSnapshot } from "./GameRecorder";
 
 export class EmpiresBot {
   private config: BotConfig;
   private personality: AIPersonality | null = null;
   private registry: AIStrategyRegistry;
   private _thinking: boolean = false;
+  private lastSnapshot: PlayerSnapshot | null = null;
 
   constructor(config: BotConfig) {
     this.config = config;
@@ -45,6 +42,16 @@ export class EmpiresBot {
 
   getConfig(): BotConfig {
     return this.config;
+  }
+
+  // --- Snapshot for analytics enrichment ---
+
+  setSnapshot(snapshot: PlayerSnapshot): void {
+    this.lastSnapshot = snapshot;
+  }
+
+  getLastSnapshot(): PlayerSnapshot | null {
+    return this.lastSnapshot;
   }
 
   // --- Personality initialization ---
@@ -146,37 +153,36 @@ export class EmpiresBot {
 
     const personality = this.personality ?? this.defaultPersonality();
 
+    // ── Compute legal moves once and pass to strategy (avoids redundant enumeration) ──
+    const availableMoves = enumerateLegalMoves(G, ctx, playerID);
+
     // Check if a dedicated strategy is registered for this phase
     const strategy = this.registry.getStrategy(ctx.phase ?? "");
     const isRegisteredStrategy = !(strategy instanceof RandomFallbackStrategy);
 
     if (isRegisteredStrategy) {
-      // If enumerate says nothing to do, don't call the strategy
-      // (strategies return fallback moves like "pass" when empty, which may not exist)
-      const availableMoves = enumerateLegalMoves(G, ctx, playerID);
       if (availableMoves.length === 0) return null;
 
-      const chosen = strategy.selectMove(G, ctx, playerID, personality);
-      this.logDecision(G, ctx, playerID, [chosen], chosen, 0, "best_score", startTime);
-      return chosen;
+      const result = strategy.selectMove(G, ctx, playerID, personality, availableMoves);
+      this.logDecision(G, ctx, playerID, availableMoves, result.move, result.score, "best_score", startTime, result.topMoves);
+      return result.move;
     }
 
-    // Default path: enumerate + score with estimateMoveValue
-    const moves = enumerateLegalMoves(G, ctx, playerID);
-    if (moves.length === 0) return null;
-    if (moves.length === 1) {
-      this.logDecision(G, ctx, playerID, moves, moves[0], 0, "forced", startTime);
-      return moves[0];
+    // Default path: score with estimateMoveValue
+    if (availableMoves.length === 0) return null;
+    if (availableMoves.length === 1) {
+      this.logDecision(G, ctx, playerID, availableMoves, availableMoves[0], 0, "forced", startTime);
+      return availableMoves[0];
     }
 
-    const scored = moves.map((m) => ({
+    const scored = availableMoves.map((m) => ({
       move: m,
       score: estimateMoveValue(G, playerID, m, personality.weights),
     }));
     scored.sort((a, b) => b.score - a.score);
 
     const chosen = scored[0];
-    this.logDecision(G, ctx, playerID, moves, chosen.move, chosen.score, "best_score", startTime);
+    this.logDecision(G, ctx, playerID, availableMoves, chosen.move, chosen.score, "best_score", startTime);
     return chosen.move;
   }
 
@@ -272,13 +278,13 @@ export class EmpiresBot {
     chosen: AIMove,
     chosenScore: number,
     reason: "best_score" | "random_override" | "forced" | "fallback",
-    startTime: number
+    startTime: number,
+    preScored?: { move: string; args: any[]; score: number }[]
   ): void {
     const personality = this.personality ?? this.defaultPersonality();
     const weights = personality.weights;
 
-    // Score top 5 for logging
-    const scored = allMoves
+    const scored = preScored ?? allMoves
       .map((m) => ({
         move: m.move,
         args: m.args,
@@ -312,12 +318,7 @@ export class EmpiresBot {
     registry.register("discovery", new DiscoveryStrategy());
     registry.register("events", new EventsStrategy());
     registry.register("actions", new ActionsStrategy());
-    registry.register("aerial_battle", new AerialBattleStrategy());
-    registry.register("ground_battle", new GroundBattleStrategy());
-    registry.register("election", new ElectionStrategy());
-    registry.register("conquest", new ConquestStrategy());
-    registry.register("plunder_legends", new PlunderStrategy());
-    registry.register("resolution", new ResolutionStrategy());
+    registry.register("resolution", new ResolutionCoordinator());
     return registry;
   }
 }

@@ -2,6 +2,14 @@ import { MyGameState, MoveError, MoveDefinition } from "../../types";
 import { INVALID_MOVE } from "boardgame.io/core";
 import { KINGDOM_LOCATION } from "../../data/gameData";
 
+function sanitizeFleetValue(val: unknown, fallback = 0): number {
+  if (typeof val !== 'number' || isNaN(val)) {
+    console.warn(`[passFleetInfoToPlayerInfo] Invalid fleet value: ${val}, defaulting to ${fallback}`);
+    return fallback;
+  }
+  return val;
+}
+
 const validatePassFleetInfo = (
   G: MyGameState,
   playerID: string,
@@ -34,10 +42,15 @@ const validatePassFleetInfo = (
   }
 
   if (atHome) {
-    const deltaSkyships = skyshipCount - currentFleet.skyships;
-    const deltaRegiments = regimentCount - currentFleet.regiments;
-    const deltaLevies = levyCount - currentFleet.levies;
-    const deltaElite = eliteRegimentCount - currentFleet.eliteRegiments;
+    const fleetSkyships = sanitizeFleetValue(currentFleet.skyships);
+    const fleetRegiments = sanitizeFleetValue(currentFleet.regiments);
+    const fleetLevies = sanitizeFleetValue(currentFleet.levies);
+    const fleetElite = sanitizeFleetValue(currentFleet.eliteRegiments);
+
+    const deltaSkyships = skyshipCount - fleetSkyships;
+    const deltaRegiments = regimentCount - fleetRegiments;
+    const deltaLevies = levyCount - fleetLevies;
+    const deltaElite = eliteRegimentCount - fleetElite;
 
     if (deltaSkyships > 0 && currentPlayer.resources.skyships < deltaSkyships) {
       return {
@@ -76,15 +89,32 @@ const passFleetInfoToPlayerInfo: MoveDefinition = {
     const levyCount = args[3];
     const eliteRegimentCount = args[4] ?? 0;  // backwards compatible — older callers omit this
 
+    // Defensive: validate args are valid numbers
+    if (typeof levyCount !== 'number' || isNaN(levyCount)) {
+      console.warn(`[passFleetInfoToPlayerInfo] Invalid levyCount arg: ${levyCount}`);
+      return INVALID_MOVE;
+    }
+    if (typeof skyshipCount !== 'number' || isNaN(skyshipCount) ||
+        typeof regimentCount !== 'number' || isNaN(regimentCount)) {
+      console.warn(`[passFleetInfoToPlayerInfo] Invalid troop counts: sky=${skyshipCount} reg=${regimentCount}`);
+      return INVALID_MOVE;
+    }
+
     if (validatePassFleetInfo(G, playerID, fleetId, skyshipCount, regimentCount, levyCount, eliteRegimentCount)) return INVALID_MOVE;
 
     const currentPlayer = G.playerInfo[playerID];
     const currentFleet = currentPlayer.fleetInfo[fleetId];
     if (currentFleet.location[0] === KINGDOM_LOCATION[0] && currentFleet.location[1] === KINGDOM_LOCATION[1]) {
-      const deltaSkyships = skyshipCount - currentFleet.skyships;
-      const deltaRegiments = regimentCount - currentFleet.regiments;
-      const deltaLevies = levyCount - currentFleet.levies;
-      const deltaElite = eliteRegimentCount - currentFleet.eliteRegiments;
+      // Sanitize fleet values to prevent NaN in delta calculations
+      const fleetSkyships = sanitizeFleetValue(currentFleet.skyships);
+      const fleetRegiments = sanitizeFleetValue(currentFleet.regiments);
+      const fleetLevies = sanitizeFleetValue(currentFleet.levies);
+      const fleetElite = sanitizeFleetValue(currentFleet.eliteRegiments);
+
+      const deltaSkyships = skyshipCount - fleetSkyships;
+      const deltaRegiments = regimentCount - fleetRegiments;
+      const deltaLevies = levyCount - fleetLevies;
+      const deltaElite = eliteRegimentCount - fleetElite;
 
       currentFleet.skyships = skyshipCount;
       currentFleet.regiments = regimentCount;

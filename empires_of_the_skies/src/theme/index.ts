@@ -1,4 +1,5 @@
 export { tokens } from "./tokens";
+export type { TokenAliases } from "./tokens";
 export { baseTheme } from "./baseTheme";
 export { useGameTheme, getMood, getMoodTokens } from "./useGameTheme";
 export type { GameMood } from "./phaseMoods";

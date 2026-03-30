@@ -1,4 +1,5 @@
 import { MoveDefinition, MyGameState, MoveError } from "../../types";
+import { INVALID_MOVE } from "boardgame.io/core";
 import { MAX_SKYSHIPS_PER_FLEET } from "../../data/gameData";
 
 const validateTransferBetweenFleets = (
@@ -52,6 +53,17 @@ const transferBetweenFleets: MoveDefinition = {
     const regiments: number = args[3];
     const levies: number = args[4];
     const eliteRegiments: number = args[5] ?? 0;
+
+    // Defensive: validate args are valid numbers
+    if (typeof levies !== 'number' || isNaN(levies)) {
+      console.warn(`[transferBetweenFleets] Invalid levies arg: ${levies}`);
+      return INVALID_MOVE;
+    }
+    if (typeof skyships !== 'number' || isNaN(skyships) ||
+        typeof regiments !== 'number' || isNaN(regiments)) {
+      console.warn(`[transferBetweenFleets] Invalid troop counts: sky=${skyships} reg=${regiments}`);
+      return INVALID_MOVE;
+    }
 
     const currentPlayer = G.playerInfo[playerID];
     const sourceFleet = currentPlayer.fleetInfo[sourceFleetIndex];

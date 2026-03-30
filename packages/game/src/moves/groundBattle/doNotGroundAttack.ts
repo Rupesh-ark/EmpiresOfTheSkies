@@ -1,9 +1,9 @@
 import { MoveDefinition } from "../../types";
-import { findNextGroundBattle } from "../../helpers/findNext";
+import { nextAfterGroundDecision } from "../../helpers/resolutionSequencer";
 
 const doNotGroundAttack: MoveDefinition = {
-  fn: ({ G, events }, ...args) => {
-    findNextGroundBattle(G, events);
+  fn: ({ G, ctx, playerID, events }) => {
+    nextAfterGroundDecision(G, ctx, events, playerID);
   },
   errorMessage: "Cannot pass on ground attack right now",
 };

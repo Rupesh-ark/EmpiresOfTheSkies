@@ -4,6 +4,9 @@
  * Runs complete games locally (no server, no WebSocket) using boardgame.io's
  * local Client. Each game creates 6 EmpiresBot instances that derive their
  * personalities from dealt cards.
+ *
+ * Diagnostics are written to a GameRecorder (in-memory) instead of /tmp/ files,
+ * mirroring the same pattern used by browserRunner.ts.
  */
 import { Client } from "boardgame.io/client";
 import { Local } from "boardgame.io/multiplayer";
@@ -11,21 +14,75 @@ import { MyGame } from "../Game";
 import type { MyGameState } from "../types";
 import { EmpiresBot } from "./EmpiresBot";
 import { AILogger, getAILogger, setAILogger } from "./AILogger";
-import type { VerbosityLevel } from "./AILogger";
+import type { DecisionLogEntry, VerbosityLevel } from "./AILogger";
+import type { AIMove } from "./types";
+import {
+  GameRecorder,
+  captureSnapshot,
+  type EnrichedDecision,
+  type PlayerSnapshot,
+  type GameRecord,
+} from "./GameRecorder";
+import { AerialBattleStrategy } from "./strategies/AerialBattleStrategy";
+import { GroundBattleStrategy } from "./strategies/GroundBattleStrategy";
+import { AI_CONFIG } from "./weightsConfig";
 
-// ── Result types ────────────────────────────────────────────────────────────
+// ── Default snapshot (used when bot has not yet set one) ─────────────────────
 
-export interface GameResult {
-  gameNumber: number;
-  winner: string;
-  winnerPersonality: string;
-  winnerKACard: string;
-  winnerLegacyCard: string;
-  scores: Record<string, number>;
-  rounds: number;
-  personalities: Record<string, string>;
-  cardCombos: Record<string, { ka: string; legacy: string; vp: number }>;
+const DEFAULT_SNAPSHOT: PlayerSnapshot = {
+  resources: {
+    gold: 0,
+    victoryPoints: 0,
+    counsellors: 0,
+    skyships: 0,
+    regiments: 0,
+    levies: 0,
+    eliteRegiments: 0,
+  },
+  territory: { outposts: 0, colonies: 0, forts: 0 },
+  vpStanding: { mine: 0, leader: 0, rank: 0 },
+  fleetCount: 0,
+  factories: 0,
+  freeDissenters: 0,
+  economy: { activeRoutes: 0, factories: 0, engagedFactories: 0 },
+  buildings: { cathedrals: 0, palaces: 0, shipyards: 0 },
+  alignment: { heresyPosition: 0, type: "orthodox" },
+  fowCards: { count: 0, totalSwords: 0, totalShields: 0 },
+  fleetPositions: [],
+};
+
+// ── NaN Detection Helpers ─────────────────────────────────────────────────────
+
+function isInvalidNumber(val: unknown): boolean {
+  return val === null || val === undefined || typeof val !== "number" || isNaN(val as number);
 }
+
+function hasNaNResources(G: MyGameState): { hasIssue: boolean; detail: string } {
+  for (const [id, player] of Object.entries(G.playerInfo)) {
+    const r = player.resources;
+    if (isInvalidNumber(r.levies)) return { hasIssue: true, detail: `P${id} levies=${r.levies}` };
+    if (isInvalidNumber(r.regiments)) return { hasIssue: true, detail: `P${id} regiments=${r.regiments}` };
+    if (isInvalidNumber(r.skyships)) return { hasIssue: true, detail: `P${id} skyships=${r.skyships}` };
+  }
+  return { hasIssue: false, detail: "" };
+}
+
+function hasNaNFleets(G: MyGameState): boolean {
+  for (const player of Object.values(G.playerInfo)) {
+    for (const fleet of player.fleetInfo) {
+      if (
+        typeof fleet.levies !== "number" || isNaN(fleet.levies) ||
+        typeof fleet.regiments !== "number" || isNaN(fleet.regiments) ||
+        typeof fleet.skyships !== "number" || isNaN(fleet.skyships)
+      ) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+// ── Result types ─────────────────────────────────────────────────────────────
 
 export interface BalanceReport {
   totalGames: number;
@@ -41,7 +98,107 @@ export interface BalanceReport {
   worstCardCombo: { ka: string; legacy: string; winRate: number; games: number } | null;
 }
 
-// ── Shared game loop ─────────────────────────────────────────────────────────
+// ── Bounce Detection ──────────────────────────────────────────────────────────
+
+interface BounceTracker {
+  iterationsAtLastTurn: number;
+  iterationsAtLastPhase: number;
+  iterationsAtLastRound: number;
+  lastTurn: number;
+  lastPhase: string;
+  lastRound: number;
+  turnIters: number;
+  phaseIters: number;
+  roundIters: number;
+}
+
+const BOUNCE_THRESHOLD_TURN = 50;
+const BOUNCE_THRESHOLD_PHASE = 100;
+const BOUNCE_THRESHOLD_ROUND = 200;
+
+function checkBounce(
+  recorder: GameRecorder,
+  tracker: BounceTracker,
+  ctx: any,
+  G: MyGameState,
+  iterations: number
+): void {
+  const currentTurn = ctx.turn;
+  const currentPhase = `${ctx.phase}/${G.stage.phase}:${G.stage.sub}`;
+  const currentRound = G.round;
+
+  // Track turn bounces
+  if (currentTurn !== tracker.lastTurn) {
+    if (tracker.turnIters > BOUNCE_THRESHOLD_TURN) {
+      recorder.addDiagnostic({
+        type: "bounce",
+        iteration: iterations,
+        round: currentRound,
+        phase: currentPhase,
+        playerID: ctx.currentPlayer,
+        details: `BOUNCE-TURN: ${tracker.turnIters} iters on turn ${tracker.lastTurn} (>${BOUNCE_THRESHOLD_TURN})`,
+      });
+    }
+    tracker.turnIters = 0;
+    tracker.lastTurn = currentTurn;
+  } else {
+    tracker.turnIters++;
+  }
+
+  // Track phase bounces (stuck in same phase/stage)
+  if (currentPhase !== tracker.lastPhase) {
+    if (tracker.phaseIters > BOUNCE_THRESHOLD_PHASE) {
+      recorder.addDiagnostic({
+        type: "bounce",
+        iteration: iterations,
+        round: currentRound,
+        phase: currentPhase,
+        playerID: ctx.currentPlayer,
+        details: `BOUNCE-PHASE: ${tracker.phaseIters} iters in "${tracker.lastPhase}" (>${BOUNCE_THRESHOLD_PHASE})`,
+      });
+    }
+    recorder.addDiagnostic({
+      type: "transition",
+      iteration: iterations,
+      round: currentRound,
+      phase: currentPhase,
+      playerID: ctx.currentPlayer,
+      details: `${tracker.lastPhase || "start"} -> ${currentPhase}`,
+    });
+    tracker.phaseIters = 0;
+    tracker.lastPhase = currentPhase;
+  } else {
+    tracker.phaseIters++;
+  }
+
+  // Track round bounces (stuck in same round)
+  if (currentRound !== tracker.lastRound) {
+    if (tracker.roundIters > BOUNCE_THRESHOLD_ROUND) {
+      recorder.addDiagnostic({
+        type: "bounce",
+        iteration: iterations,
+        round: currentRound,
+        phase: currentPhase,
+        playerID: ctx.currentPlayer,
+        details: `BOUNCE-ROUND: ${tracker.roundIters} iters in round ${tracker.lastRound} (>${BOUNCE_THRESHOLD_ROUND})`,
+      });
+    }
+    recorder.addDiagnostic({
+      type: "round_start",
+      iteration: iterations,
+      round: currentRound,
+      phase: currentPhase,
+      playerID: ctx.currentPlayer,
+      details: `Round ${currentRound} starting`,
+    });
+    tracker.roundIters = 0;
+    tracker.lastRound = currentRound;
+  } else {
+    tracker.roundIters++;
+  }
+}
+
+// ── Shared game loop ──────────────────────────────────────────────────────────
 
 /**
  * Runs the boardgame.io local client loop until gameover or maxIterations.
@@ -53,12 +210,30 @@ export interface BalanceReport {
 export function runGameLoop(
   clients: ReturnType<typeof Client>[],
   bots: EmpiresBot[],
+  recorder: GameRecorder,
   maxIterations = 50000
 ): { finalState: any; iterations: number } {
   let iterations = 0;
-  const fs = require("fs");
   let lastStateKey = "";
   let staleCount = 0;
+  let lastRound = -1;
+  let lastPhase = "";
+  const phaseTiming: Record<string, { ms: number; iters: number }> = {};
+  let phaseStart = Date.now();
+  let lastSub = "";
+
+  // Bounce detection tracker
+  const bounceTracker: BounceTracker = {
+    iterationsAtLastTurn: 0,
+    iterationsAtLastPhase: 0,
+    iterationsAtLastRound: 0,
+    lastTurn: 0,
+    lastPhase: "",
+    lastRound: 0,
+    turnIters: 0,
+    phaseIters: 0,
+    roundIters: 0,
+  };
 
   while (iterations < maxIterations) {
     const state = clients[0].getState();
@@ -66,35 +241,91 @@ export function runGameLoop(
 
     const ctx = state.ctx;
     const G = state.G as MyGameState;
+    const currentRound = G.round;
+    const currentPhase = `${ctx.phase}/${G.stage.phase}:${G.stage.sub}`;
+
+    // Round boundary
+    if (currentRound !== lastRound) {
+      lastRound = currentRound;
+    }
+
+    // Phase/stage transitions — track timing
+    if (currentPhase !== lastPhase) {
+      if (lastSub) {
+        const entry = phaseTiming[lastSub] ?? { ms: 0, iters: 0 };
+        entry.ms += Date.now() - phaseStart;
+        phaseTiming[lastSub] = entry;
+      }
+      phaseStart = Date.now();
+      lastSub = `${G.stage.phase}:${G.stage.sub}`;
+      lastPhase = currentPhase;
+    }
+
+    // Track time per sub-stage
+    const currentSub = `${G.stage.phase}:${G.stage.sub}`;
+    if (currentSub !== lastSub) {
+      if (lastSub) {
+        const entry = phaseTiming[lastSub] ?? { ms: 0, iters: 0 };
+        entry.ms += Date.now() - phaseStart;
+        phaseTiming[lastSub] = entry;
+      }
+      phaseStart = Date.now();
+      lastSub = currentSub;
+    }
+    if (lastSub) {
+      const entry = phaseTiming[lastSub] ?? { ms: 0, iters: 0 };
+      entry.iters++;
+      phaseTiming[lastSub] = entry;
+    }
+
+    // Bounce detection (logs transitions + bounce warnings to recorder)
+    checkBounce(recorder, bounceTracker, ctx, G, iterations);
 
     // Detect stalls: same phase/stage/turn/player repeating
-    const stateKey = `${ctx.phase}/${G.stage}/t${ctx.turn}/P${ctx.currentPlayer}`;
+    const stateKey = `${ctx.phase}/${G.stage.phase}:${G.stage.sub}/t${ctx.turn}/P${ctx.currentPlayer}`;
     if (stateKey === lastStateKey) {
       staleCount++;
       if (staleCount === 5) {
         const pIdx = parseInt(ctx.currentPlayer);
         const botState = clients[pIdx].getState();
-        const move = botState ? bots[pIdx].chooseMove(botState.G as MyGameState, botState.ctx, ctx.currentPlayer) : null;
-        const invasion = G.currentInvasion;
-        const conquestState = G.conquestState;
-        fs.appendFileSync("/tmp/selfplay_trace.log",
-          `[STALL] iter=${iterations} R${G.round} ${stateKey}\n` +
-          `  move=${move ? move.move + "(" + JSON.stringify(move.args) + ")" : "NULL"}\n` +
-          `  invasion=${invasion ? JSON.stringify({ phase: invasion.phase, contributions: Object.keys(invasion.contributions || {}), buyoffCost: invasion.buyoffCost }) : "none"}\n` +
-          `  conquestState=${conquestState ? "exists" : "none"}\n` +
-          `  battleState=${G.battleState ? `att=${G.battleState.attacker?.id} def=${G.battleState.defender?.id}` : "none"}\n` +
-          `  validReloc=${G.validRelocationTiles?.length ?? 0}\n` +
-          `  playerRegs=${G.playerInfo[ctx.currentPlayer]?.resources?.regiments} levies=${G.playerInfo[ctx.currentPlayer]?.resources?.levies} sky=${G.playerInfo[ctx.currentPlayer]?.resources?.skyships}\n`);
+        const move = botState
+          ? bots[pIdx].chooseMove(botState.G as MyGameState, botState.ctx, ctx.currentPlayer)
+          : null;
+        recorder.addDiagnostic({
+          type: "stall",
+          iteration: iterations,
+          round: G.round,
+          phase: `${G.stage.phase}:${G.stage.sub}`,
+          playerID: ctx.currentPlayer,
+          details: `STALL: ${stateKey} — proposed move: ${move ? `${move.move}(${JSON.stringify(move.args)})` : "NULL"}`,
+        });
       }
     } else {
       staleCount = 0;
       lastStateKey = stateKey;
     }
 
-    // Trace every 50th iteration
-    if (iterations % 50 === 0) {
-      fs.appendFileSync("/tmp/selfplay_trace.log",
-        `[iter=${iterations}] R${G.round} ${ctx.phase}/${G.stage} P${ctx.currentPlayer} turn=${ctx.turn}\n`);
+    // NaN checks
+    const nanCheck = hasNaNResources(G);
+    if (nanCheck.hasIssue) {
+      recorder.addDiagnostic({
+        type: "nan",
+        iteration: iterations,
+        round: G.round,
+        phase: `${G.stage.phase}:${G.stage.sub}`,
+        playerID: ctx.currentPlayer,
+        details: nanCheck.detail,
+      });
+    }
+    if (hasNaNFleets(G)) {
+      recorder.addDiagnostic({
+        type: "nan",
+        iteration: iterations,
+        round: G.round,
+        phase: `${G.stage.phase}:${G.stage.sub}`,
+        playerID: ctx.currentPlayer,
+        details: "FLEET_NAN detected",
+      });
     }
 
     // Handle activePlayers (election — all players act simultaneously)
@@ -103,7 +334,12 @@ export function runGameLoop(
         const pIdx = parseInt(pid);
         const botState = clients[pIdx].getState();
         if (!botState) continue;
-        const move = bots[pIdx].chooseMove(botState.G as MyGameState, botState.ctx, pid);
+        const botG = botState.G as MyGameState;
+
+        // Set snapshot BEFORE chooseMove so the AILogger onEntry callback can read it
+        bots[pIdx].setSnapshot(captureSnapshot(botG, pid));
+
+        const move = bots[pIdx].chooseMove(botG, botState.ctx, pid);
         if (move) {
           (clients[pIdx] as any).moves[move.move]?.(...move.args);
         }
@@ -115,11 +351,36 @@ export function runGameLoop(
       const botState = clients[pIdx].getState();
       if (!botState) { iterations++; continue; }
 
-      const move = bots[pIdx].chooseMove(botState.G as MyGameState, botState.ctx, currentPlayer);
+      const botG = botState.G as MyGameState;
+
+      // Set snapshot BEFORE chooseMove so the AILogger onEntry callback can read it
+      bots[pIdx].setSnapshot(captureSnapshot(botG, currentPlayer));
+
+      const move = bots[pIdx].chooseMove(botG, botState.ctx, currentPlayer);
       if (move) {
         (clients[pIdx] as any).moves[move.move]?.(...move.args);
+        // Check NaN AFTER move execution to find the culprit
+        const afterState = clients[pIdx].getState();
+        if (afterState && hasNaNFleets(afterState.G as MyGameState)) {
+          recorder.addDiagnostic({
+            type: "nan",
+            iteration: iterations,
+            round: G.round,
+            phase: `${G.stage.phase}:${G.stage.sub}`,
+            playerID: currentPlayer,
+            details: `FLEET_NAN_AFTER_MOVE: ${move.move}(${JSON.stringify(move.args)})`,
+          });
+        }
+      } else {
+        recorder.addDiagnostic({
+          type: "skip",
+          iteration: iterations,
+          round: G.round,
+          phase: `${G.stage.phase}:${G.stage.sub}`,
+          playerID: currentPlayer,
+          details: "No valid moves available",
+        });
       }
-      // null move → skip. EmpiresBot returns null when enumerate has no valid moves.
     }
 
     iterations++;
@@ -128,19 +389,40 @@ export function runGameLoop(
     if (iterations % 100 === 0) {
       const s = clients[0].getState();
       if (s) {
-        const G = s.G as MyGameState;
-        console.log(`[DIAG] iter=${iterations} R${G.round} phase=${s.ctx.phase} stage=${G.stage} turn=${s.ctx.turn} P${s.ctx.currentPlayer} halted=${G._halted}`);
+        const diagG = s.G as MyGameState;
+        console.log(`[DIAG] iter=${iterations} R${diagG.round} phase=${s.ctx.phase} stage=${diagG.stage} turn=${s.ctx.turn} P${s.ctx.currentPlayer} halted=${diagG._halted}`);
       }
     }
+
     // Hard exit if way too many iterations
     if (iterations >= 49000) {
       const s = clients[0].getState();
       if (s) {
-        const G = s.G as MyGameState;
-        console.log(`[STUCK] iter=${iterations} R${G.round} phase=${s.ctx.phase} stage=${G.stage} turn=${s.ctx.turn} P${s.ctx.currentPlayer}`);
+        const stuckG = s.G as MyGameState;
+        console.log(`[STUCK] iter=${iterations} R${stuckG.round} phase=${s.ctx.phase} stage=${stuckG.stage.phase}:${stuckG.stage.sub} turn=${s.ctx.turn} P${s.ctx.currentPlayer}`);
+        recorder.addDiagnostic({
+          type: "stall",
+          iteration: iterations,
+          round: stuckG.round,
+          phase: `${stuckG.stage.phase}:${stuckG.stage.sub}`,
+          playerID: s.ctx.currentPlayer,
+          details: "STUCK at iteration limit",
+        });
       }
       break;
     }
+  }
+
+  // Log phase timing breakdown
+  if (lastSub) {
+    const entry = phaseTiming[lastSub] ?? { ms: 0, iters: 0 };
+    entry.ms += Date.now() - phaseStart;
+    phaseTiming[lastSub] = entry;
+  }
+  const sorted = Object.entries(phaseTiming).sort((a, b) => b[1].ms - a[1].ms);
+  console.log(`[TIMING] iters=${iterations} breakdown:`);
+  for (const [sub, { ms, iters }] of sorted.slice(0, 10)) {
+    console.log(`  ${sub}: ${ms}ms (${iters} iters)`);
   }
 
   const finalState = clients[0].getState();
@@ -149,14 +431,36 @@ export function runGameLoop(
   return { finalState, iterations };
 }
 
-// ── Single game runner ──────────────────────────────────────────────────────
+// ── Single game runner ────────────────────────────────────────────────────────
 
-export function runSingleGame(gameNumber: number): GameResult | null {
-  const fs = require("fs");
-  fs.appendFileSync("/tmp/selfplay_trace.log", `[${Date.now()}] START creating clients\n`);
+export function runSingleGame(gameNumber: number): GameRecord {
+  const recorder = new GameRecorder(`game_${gameNumber}`);
+  recorder.setConfig(AI_CONFIG as unknown as Record<string, unknown>);
+
   // Create 6 local clients sharing the same match via Local multiplayer
   const clients: ReturnType<typeof Client>[] = [];
   const bots: EmpiresBot[] = [];
+
+  // Wire AILogger to capture decisions into the recorder
+  const logger = new AILogger("silent", (entry) => {
+    if (entry.type !== "decision") return;
+    const decisionEntry = entry as DecisionLogEntry;
+    const pIdx = parseInt(decisionEntry.playerID);
+    const snapshot = bots[pIdx]?.getLastSnapshot();
+    // Consume any pending battle context — aerial and ground are mutually exclusive phases
+    const battleContext =
+      (AerialBattleStrategy.getLastBattleContext() ??
+        GroundBattleStrategy.getLastBattleContext()) ?? undefined;
+    const enriched: EnrichedDecision = {
+      ...decisionEntry,
+      snapshot: snapshot ?? DEFAULT_SNAPSHOT,
+      battleContext,
+    };
+    recorder.addDecision(enriched);
+  });
+
+  const origLogger = getAILogger();
+  setAILogger(logger);
 
   for (let p = 0; p < 6; p++) {
     const playerID = String(p);
@@ -169,89 +473,90 @@ export function runSingleGame(gameNumber: number): GameResult | null {
       multiplayer: Local(),
       playerID,
     });
-    fs.appendFileSync("/tmp/selfplay_trace.log", `[${Date.now()}] starting client P${p}\n`);
     client.start();
-    fs.appendFileSync("/tmp/selfplay_trace.log", `[${Date.now()}] client P${p} started\n`);
     clients.push(client);
   }
 
-  fs.appendFileSync("/tmp/selfplay_trace.log", `[${Date.now()}] entering game loop\n`);
-  const { finalState, iterations } = runGameLoop(clients, bots);
-  fs.appendFileSync("/tmp/selfplay_trace.log", `[${Date.now()}] game loop done, iterations=${iterations}\n`);
+  const { finalState, iterations } = runGameLoop(clients, bots, recorder);
+
+  // Restore the previous logger
+  setAILogger(origLogger);
 
   if (!finalState?.ctx.gameover) {
     console.warn(`Game ${gameNumber}: did not complete (${iterations} iterations)`);
-    return null;
+    return recorder.getRecord();
   }
 
-  return extractResult(finalState, bots, gameNumber);
-}
-
-// ── Result extraction ───────────────────────────────────────────────────────
-
-function extractResult(state: any, bots: EmpiresBot[], gameNumber: number): GameResult {
-  const G = state.G as MyGameState;
-  const ranking: string[] = state.ctx.gameover?.ranking ?? [];
-  const winnerID = ranking[0] ?? "0";
-
-  const scores: Record<string, number> = {};
-  const personalities: Record<string, string> = {};
-  const cardCombos: Record<string, { ka: string; legacy: string; vp: number }> = {};
+  // Populate player summaries
+  const G = finalState.G as MyGameState;
+  const ranking: string[] = finalState.ctx.gameover?.ranking ?? [];
 
   for (const [pid, player] of Object.entries(G.playerInfo)) {
-    scores[pid] = player.resources.victoryPoints;
     const bot = bots[parseInt(pid)];
     const personality = bot.getPersonality();
-    personalities[pid] = personality?.name ?? "Unknown";
-    cardCombos[pid] = {
-      ka: player.resources.advantageCard ?? "none",
-      legacy: player.resources.legacyCard?.name ?? "none",
-      vp: player.resources.victoryPoints,
-    };
+    const weights = personality?.weights ?? AI_CONFIG.defaultPersonality.weights;
+    recorder.addPlayer(pid, {
+      playerID: pid,
+      personality: personality?.name ?? "Unknown",
+      kaCard: player.resources.advantageCard ?? "none",
+      legacyCard: player.resources.legacyCard?.name ?? "none",
+      alignment: player.hereticOrOrthodox,
+      weights,
+      finalVP: player.resources.victoryPoints,
+      finalRank: ranking.indexOf(pid) + 1,
+    });
   }
 
-  const winner = G.playerInfo[winnerID];
-  const winnerBot = bots[parseInt(winnerID)];
+  const scores: Record<string, number> = {};
+  for (const [pid, player] of Object.entries(G.playerInfo)) {
+    scores[pid] = player.resources.victoryPoints;
+  }
 
-  return {
-    gameNumber,
+  const winnerID = ranking[0] ?? "0";
+  const winnerBot = bots[parseInt(winnerID)];
+  const rankingsArray = ranking.map((pid, idx) => ({
+    playerID: pid,
+    personality: bots[parseInt(pid)]?.getPersonality()?.name ?? "Unknown",
+    vp: G.playerInfo[pid]?.resources.victoryPoints ?? 0,
+    rank: idx + 1,
+  }));
+
+  recorder.setResult({
     winner: winnerID,
-    winnerPersonality: winnerBot.getPersonality()?.name ?? "Unknown",
-    winnerKACard: winner?.resources.advantageCard ?? "none",
-    winnerLegacyCard: winner?.resources.legacyCard?.name ?? "none",
+    winnerPersonality: winnerBot?.getPersonality()?.name ?? "Unknown",
     scores,
     rounds: G.round,
-    personalities,
-    cardCombos,
-  };
+    rankings: rankingsArray,
+  });
+
+  return recorder.getRecord();
 }
 
-// ── Batch runner ────────────────────────────────────────────────────────────
+// ── Batch runner — returns raw GameRecord[] ───────────────────────────────────
 
-export function runSelfPlay(
+export function runSelfPlayRecords(
   numGames: number,
   verbosity: VerbosityLevel = "silent"
-): BalanceReport {
-  // Set up logger for the batch
+): GameRecord[] {
   const logger = new AILogger(verbosity);
   setAILogger(logger);
 
-  const results: GameResult[] = [];
+  const records: GameRecord[] = [];
 
   for (let i = 0; i < numGames; i++) {
     if (verbosity !== "silent" && i % 10 === 0) {
       console.log(`Running game ${i + 1}/${numGames}...`);
     }
 
-    const result = runSingleGame(i + 1);
-    if (result) {
-      results.push(result);
+    const record = runSingleGame(i + 1);
+    records.push(record);
 
-      if (verbosity !== "silent") {
-        console.log(
-          `  Game ${i + 1}: Winner P${result.winner} (${result.winnerPersonality}) — ${result.winnerKACard} + ${result.winnerLegacyCard} — ${result.scores[result.winner]} VP`
-        );
-      }
+    if (verbosity !== "silent" && record.result) {
+      const r = record.result;
+      const winnerVP = r.scores[r.winner] ?? 0;
+      console.log(
+        `  Game ${i + 1}: Winner P${r.winner} (${r.winnerPersonality}) — ${winnerVP} VP`
+      );
     }
 
     // Clear logger between games to prevent memory growth
@@ -261,12 +566,22 @@ export function runSelfPlay(
   // Restore default logger
   setAILogger(new AILogger("summary"));
 
-  return analyzeBalance(results, numGames);
+  return records;
 }
 
-// ── Balance analysis ────────────────────────────────────────────────────────
+// ── Batch runner — backward-compatible BalanceReport wrapper ─────────────────
 
-function analyzeBalance(results: GameResult[], totalGames: number): BalanceReport {
+export function runSelfPlay(
+  numGames: number,
+  verbosity: VerbosityLevel = "silent"
+): BalanceReport {
+  const records = runSelfPlayRecords(numGames, verbosity);
+  return analyzeBalance(records, numGames);
+}
+
+// ── Balance analysis ─────────────────────────────────────────────────────────
+
+function analyzeBalance(records: GameRecord[], totalGames: number): BalanceReport {
   const winsByPersonality: Record<string, number> = {};
   const scoresByPersonality: Record<string, number[]> = {};
   const winsByKA: Record<string, number> = {};
@@ -277,33 +592,45 @@ function analyzeBalance(results: GameResult[], totalGames: number): BalanceRepor
   const comboGames: Record<string, number> = {};
   const scoreSpread: number[] = [];
 
-  for (const r of results) {
-    // Personality stats
-    const wp = r.winnerPersonality;
-    winsByPersonality[wp] = (winsByPersonality[wp] ?? 0) + 1;
+  for (const record of records) {
+    // Only analyse completed games
+    if (!record.result) continue;
 
-    for (const [pid, personality] of Object.entries(r.personalities)) {
+    const r = record.result;
+    const winnerID = r.winner;
+
+    // Winner personality — read from players summary
+    const winnerSummary = record.players[winnerID];
+    const winnerPersonality = winnerSummary?.personality ?? "Unknown";
+    const winnerKACard = winnerSummary?.kaCard ?? "none";
+    const winnerLegacyCard = winnerSummary?.legacyCard ?? "none";
+
+    // Personality stats
+    winsByPersonality[winnerPersonality] = (winsByPersonality[winnerPersonality] ?? 0) + 1;
+
+    for (const [pid, summary] of Object.entries(record.players)) {
+      const personality = summary.personality;
       if (!scoresByPersonality[personality]) scoresByPersonality[personality] = [];
-      scoresByPersonality[personality].push(r.scores[pid]);
+      scoresByPersonality[personality].push(r.scores[pid] ?? 0);
     }
 
     // KA card stats
-    winsByKA[r.winnerKACard] = (winsByKA[r.winnerKACard] ?? 0) + 1;
-    for (const combo of Object.values(r.cardCombos)) {
-      gamesByKA[combo.ka] = (gamesByKA[combo.ka] ?? 0) + 1;
+    winsByKA[winnerKACard] = (winsByKA[winnerKACard] ?? 0) + 1;
+    for (const summary of Object.values(record.players)) {
+      gamesByKA[summary.kaCard] = (gamesByKA[summary.kaCard] ?? 0) + 1;
     }
 
     // Legacy card stats
-    winsByLegacy[r.winnerLegacyCard] = (winsByLegacy[r.winnerLegacyCard] ?? 0) + 1;
-    for (const combo of Object.values(r.cardCombos)) {
-      gamesByLegacy[combo.legacy] = (gamesByLegacy[combo.legacy] ?? 0) + 1;
+    winsByLegacy[winnerLegacyCard] = (winsByLegacy[winnerLegacyCard] ?? 0) + 1;
+    for (const summary of Object.values(record.players)) {
+      gamesByLegacy[summary.legacyCard] = (gamesByLegacy[summary.legacyCard] ?? 0) + 1;
     }
 
     // Card combo stats
-    for (const [pid, combo] of Object.entries(r.cardCombos)) {
-      const key = `${combo.ka}+${combo.legacy}`;
+    for (const [pid, summary] of Object.entries(record.players)) {
+      const key = `${summary.kaCard}+${summary.legacyCard}`;
       comboGames[key] = (comboGames[key] ?? 0) + 1;
-      if (pid === r.winner) {
+      if (pid === winnerID) {
         comboWins[key] = (comboWins[key] ?? 0) + 1;
       }
     }
@@ -316,7 +643,7 @@ function analyzeBalance(results: GameResult[], totalGames: number): BalanceRepor
   }
 
   // Compute rates
-  const completedGames = results.length;
+  const completedGames = records.filter((r) => r.result !== null).length;
 
   const winRateByPersonality: Record<string, number> = {};
   for (const [p, wins] of Object.entries(winsByPersonality)) {
@@ -386,7 +713,7 @@ function analyzeBalance(results: GameResult[], totalGames: number): BalanceRepor
   };
 }
 
-// ── Report formatter ────────────────────────────────────────────────────────
+// ── Report formatter ──────────────────────────────────────────────────────────
 
 export function printBalanceReport(report: BalanceReport): void {
   console.log("\n" + "═".repeat(70));
@@ -395,7 +722,7 @@ export function printBalanceReport(report: BalanceReport): void {
   console.log(`  Games: ${report.completedGames}/${report.totalGames} completed`);
   console.log(`  Avg score spread (1st - last): ${report.avgScoreSpread.toFixed(1)} VP`);
   if (report.dominantStrategy) {
-    console.log(`  ⚠ DOMINANT STRATEGY: ${report.dominantStrategy} (>25% win rate)`);
+    console.log(`  WARNING DOMINANT STRATEGY: ${report.dominantStrategy} (>25% win rate)`);
   }
 
   console.log("\n" + "─".repeat(70));
@@ -430,10 +757,10 @@ export function printBalanceReport(report: BalanceReport): void {
     console.log("  CARD COMBOS");
     console.log("─".repeat(70));
     const b = report.bestCardCombo;
-    console.log(`  Best:  ${b.ka} + ${b.legacy} → ${(b.winRate * 100).toFixed(1)}% (${b.games} games)`);
+    console.log(`  Best:  ${b.ka} + ${b.legacy} -> ${(b.winRate * 100).toFixed(1)}% (${b.games} games)`);
     if (report.worstCardCombo) {
       const w = report.worstCardCombo;
-      console.log(`  Worst: ${w.ka} + ${w.legacy} → ${(w.winRate * 100).toFixed(1)}% (${w.games} games)`);
+      console.log(`  Worst: ${w.ka} + ${w.legacy} -> ${(w.winRate * 100).toFixed(1)}% (${w.games} games)`);
     }
   }
 

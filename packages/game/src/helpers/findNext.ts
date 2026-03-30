@@ -153,7 +153,8 @@ export const findNextPlayerInBattleSequence = (
   playerID: string,
   ctx: Ctx,
   G: MyGameState,
-  events: EventsAPI
+  events: EventsAPI,
+  onExhausted?: (G: MyGameState, events: EventsAPI) => void
 ): void => {
   G.battleState = undefined;
   const playerIDs: string[] = [
@@ -171,7 +172,7 @@ export const findNextPlayerInBattleSequence = (
     nextPlayerIndex >= sortedPlayerIDs.length ||
     sortedPlayerIDs.length === 1
   ) {
-    findNextBattle(G, events);
+    findNextBattle(G, events, false, onExhausted);
   } else {
     events.endTurn({ next: nextPlayer });
     // Determine aerial vs ground from current stage context

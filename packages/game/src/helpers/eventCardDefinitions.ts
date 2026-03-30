@@ -542,7 +542,8 @@ export const isEventVoid = (
 export const resolveEventCard = (
   card: EventCardName,
   G: MyGameState,
-  turnOrder: string[]
+  turnOrder: string[],
+  shuffle: <T>(arr: T[]) => T[]
 ): void => {
   switch (card) {
     // ── Heresy shifts ──────────────────────────────────────────────────────
@@ -890,12 +891,10 @@ export const resolveEventCard = (
       }
       // Draw 2 new cards (if available), auto-pick the one worth more VP
       if (G.cardDecks.legacyDeck.length > 0) {
+        G.cardDecks.legacyDeck = shuffle(G.cardDecks.legacyDeck);
         const drawn: LegacyCardInfo[] = [];
         for (let i = 0; i < 2 && G.cardDecks.legacyDeck.length > 0; i++) {
-          const idx = Math.floor(
-            Math.random() * G.cardDecks.legacyDeck.length
-          );
-          drawn.push(G.cardDecks.legacyDeck.splice(idx, 1)[0]);
+          drawn.push(G.cardDecks.legacyDeck.pop()!);
         }
         // Auto-pick: evaluate which card would give more raw VP
         let bestCard = drawn[0];
@@ -1114,7 +1113,8 @@ export const getBattleEventTarget = (
 export const prepareEventChoice = (
   card: EventCardName,
   G: MyGameState,
-  turnOrder: string[]
+  turnOrder: string[],
+  shuffle: <T>(arr: T[]) => T[]
 ): EventChoice | null => {
   switch (card) {
     case "the_great_fire": {
@@ -1160,12 +1160,12 @@ export const prepareEventChoice = (
         player.resources.legacyCard = undefined;
       }
 
-      // Draw 2 new cards
+      // Draw 2 new cards — shuffle deck then pop for deterministic PRNG
       if (G.cardDecks.legacyDeck.length === 0) return null;
+      G.cardDecks.legacyDeck = shuffle(G.cardDecks.legacyDeck);
       const drawn: LegacyCardInfo[] = [];
       for (let i = 0; i < 2 && G.cardDecks.legacyDeck.length > 0; i++) {
-        const idx = Math.floor(Math.random() * G.cardDecks.legacyDeck.length);
-        drawn.push(G.cardDecks.legacyDeck.splice(idx, 1)[0]);
+        drawn.push(G.cardDecks.legacyDeck.pop()!);
       }
 
       if (drawn.length <= 1) {

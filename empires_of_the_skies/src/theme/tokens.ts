@@ -37,4 +37,29 @@ function applyPreset(base: typeof baseTokens, preset: TokenPreset) {
   } as const;
 }
 
-export const tokens = applyPreset(baseTokens, activePreset);
+export type TokenAliases = {
+  text: string;
+  textMuted: string;
+  textBright: string;
+  gold: string;
+  surface: string;
+  surfaceRaised: string;
+  surfaceHover: string;
+  border: string;
+  borderMedium: string;
+  danger: string;
+  success: string;
+  warning: string;
+  info: string;
+};
+
+const base = applyPreset(baseTokens, activePreset);
+
+export const tokens = {
+  ...base,
+  ...Object.fromEntries(
+    (["text", "textMuted", "textBright", "gold", "surface", "surfaceRaised", "surfaceHover", "border", "borderMedium", "danger", "success", "warning", "info"] as const).map(
+      (key) => [key, base.ui[key as keyof typeof base.ui]]
+    )
+  ),
+} as typeof base & TokenAliases;

@@ -2,10 +2,15 @@ import { useState } from "react";
 
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
+import { lazy, Suspense } from "react";
 import { LobbyClient } from "boardgame.io/client";
 import ClientComponent from "./Client";
 import HomePageComponent from "./HomePageComponent";
 import LobbyPage from "./LobbyPage";
+
+// Lazy-load AI dashboard pages (heavy deps — game logic + charts)
+const AITunerPage = lazy(() => import("./AITunerPage"));
+const AITournamentPage = lazy(() => import("./AITournamentPage"));
 
 const HomePage = () => {
   const [startGame, setStartGame] = useState(false);
@@ -39,6 +44,14 @@ const HomePage = () => {
           <Route
             path="/game/:matchID/:playerName"
             element={<ClientComponent server={server} />}
+          />
+          <Route
+            path="/ai-tuner"
+            element={<Suspense fallback={<div>Loading AI Tuner...</div>}><AITunerPage /></Suspense>}
+          />
+          <Route
+            path="/ai-tournament"
+            element={<Suspense fallback={<div>Loading Tournament Lab...</div>}><AITournamentPage /></Suspense>}
           />
         </Route>
       </Routes>

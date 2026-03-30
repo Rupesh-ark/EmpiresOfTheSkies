@@ -1,9 +1,9 @@
 import { MoveDefinition } from "../../types";
-import { findNextConquest } from "../../helpers/findNext";
+import { nextAfterConquest } from "../../helpers/resolutionSequencer";
 
 const doNothing: MoveDefinition = {
-  fn: ({ G, events }, ...args) => {
-    findNextConquest(G, events);
+  fn: ({ G, events }) => {
+    nextAfterConquest(G, events);
   },
   errorMessage: "Cannot pass on conquest right now",
 };

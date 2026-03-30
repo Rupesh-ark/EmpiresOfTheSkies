@@ -2,7 +2,7 @@ import { MOVE_DEFINITIONS } from "../moveDefinitions";
 import type { MyGameState } from "../types";
 import type { Ctx } from "boardgame.io";
 import type { AIMove } from "./types";
-import { getNeighbors } from "../helpers/mapUtils";
+import { getNeighbors, isValidRetreatDestination } from "../helpers/mapUtils";
 import { MAP_WIDTH, MAP_HEIGHT, KINGDOM_LOCATION, MAX_SKYSHIPS_PER_FLEET } from "../data/gameData";
 import { findPossibleDestinations } from "../helpers/helpers";
 import { isStage } from "../helpers/stageUtils";
@@ -125,7 +125,7 @@ export function enumerateLegalMoves(G: MyGameState, ctx: Ctx, playerID: string):
 
       const moves: AIMove[] = [];
 
-      if (ctx.numMoves > 0) {
+      if (ctx.numMoves && ctx.numMoves > 0) {
         // Cascade: must pick a tile adjacent to the most recently discovered tile
         const [lx, ly] = G.mapState.mostRecentlyDiscoveredTile;
         const cascadeNeighbors = getNeighbors(lx, ly, true);
@@ -341,13 +341,16 @@ export function enumerateLegalMoves(G: MyGameState, ctx: Ctx, playerID: string):
           }
 
           // Assault loadout destinations (laden if troops exist)
-          const hasTroops = res.regiments > 0 || res.levies > 0 || res.eliteRegiments > 0;
+          const safeRegs = res.regiments || 0;
+          const safeLevies = res.levies || 0;
+          const safeElites = res.eliteRegiments || 0;
+          const hasTroops = safeRegs > 0 || safeLevies > 0 || safeElites > 0;
           if (hasTroops && maxSky > 0) {
             const [ladenDests] = findPossibleDestinations(G, KINGDOM_LOCATION, false);
             const troopCapacity = maxSky; // 1 troop per skyship
-            const elites = Math.min(res.eliteRegiments, troopCapacity);
-            const regs = Math.min(res.regiments, troopCapacity - elites);
-            const levs = Math.min(res.levies, troopCapacity - elites - regs);
+            const elites = Math.min(safeElites, troopCapacity);
+            const regs = Math.min(safeRegs, troopCapacity - elites);
+            const levs = Math.min(safeLevies, Math.max(0, troopCapacity - elites - regs));
 
             for (const dest of ladenDests.slice(0, 10)) {
               if (tryValidate("deployFleet", G, playerID, fi, dest, maxSky, regs, levs, elites)) {
@@ -359,8 +362,8 @@ export function enumerateLegalMoves(G: MyGameState, ctx: Ctx, playerID: string):
             if (maxSky >= 3) {
               const balSky = 3;
               const balCap = balSky;
-              const balRegs = Math.min(res.regiments, Math.ceil(balCap / 2));
-              const balLevs = Math.min(res.levies, balCap - balRegs);
+              const balRegs = Math.min(safeRegs, Math.ceil(balCap / 2));
+              const balLevs = Math.min(safeLevies, Math.max(0, balCap - balRegs));
               for (const dest of ladenDests.slice(0, 5)) {
                 if (tryValidate("deployFleet", G, playerID, fi, dest, balSky, balRegs, balLevs, 0)) {
                   moves.push({ move: "deployFleet", args: [fi, dest, balSky, balRegs, balLevs, 0] });
@@ -402,7 +405,6 @@ export function enumerateLegalMoves(G: MyGameState, ctx: Ctx, playerID: string):
         const garrisonElites = building.garrisonedEliteRegiments ?? 0;
         const garrisonTotal = garrisonRegs + garrisonLevs + garrisonElites;
         if (garrisonTotal > 0) {
-          // Respect fleet capacity: troops on fleet after transfer must not exceed skyships
           const currentFleetTroops = fleet.regiments + fleet.levies + fleet.eliteRegiments;
           const freeCapacity = fleet.skyships - currentFleetTroops;
           if (freeCapacity > 0) {
@@ -522,15 +524,23 @@ export function enumerateLegalMoves(G: MyGameState, ctx: Ctx, playerID: string):
 
       if (isStage(G, "resolution", "aerial_attack_or_pass")) {
         moves.push({ move: "doNotAttack", args: [] });
-        for (const defenderID of G.possibleDefenders ?? []) {
-          moves.push({ move: "attackOtherPlayersFleet", args: [defenderID] });
+        // Read battleMap directly — G.possibleDefenders can be stale with Local() multiplayer
+        const [bx, by] = G.mapState.currentBattle;
+        const playersAtTile = G.mapState.battleMap[by]?.[bx] ?? [];
+        for (const defenderID of playersAtTile) {
+          if (defenderID !== playerID && tryValidate("attackOtherPlayersFleet", G, playerID, defenderID)) {
+            moves.push({ move: "attackOtherPlayersFleet", args: [defenderID] });
+          }
         }
         return moves;
       } else if (isStage(G, "resolution", "aerial_attack_or_evade")) {
-        // Only the defender decides to evade or fight
-        if (G.battleState?.defender?.id === playerID) {
+        // The defender decides to evade or fight
+        // Check battleState first; fall back to "if I'm not the attacker, I'm the defender"
+        const isDefender = G.battleState?.defender?.id === playerID
+          || (G.battleState?.attacker?.id !== playerID);
+        if (isDefender) {
           moves.push({ move: "evadeAttackingFleet", args: [] });
-          moves.push({ move: "drawCard", args: [] });
+          moves.push({ move: "retaliate", args: [] });
         }
         return moves;
       } else if (isStage(G, "resolution", "aerial_resolve")) {
@@ -545,6 +555,8 @@ export function enumerateLegalMoves(G: MyGameState, ctx: Ctx, playerID: string):
             moves.push({ move: "pickCard", args: [i] });
           }
           moves.push({ move: "drawCard", args: [] });
+        } else {
+          moves.push({ move: "pass", args: [] });
         }
         return moves;
       } else if (isStage(G, "resolution", "plunder_legends")) {
@@ -554,11 +566,12 @@ export function enumerateLegalMoves(G: MyGameState, ctx: Ctx, playerID: string):
         ];
       } else if (isStage(G, "resolution", "ground_attack_or_pass")) {
         moves.push({ move: "doNotGroundAttack", args: [] });
-        // Only list rivals who have a building at the current battle tile
-        const [gbx, gby] = G.mapState.currentBattle;
-        const tileBuilding = G.mapState.buildings[gby]?.[gbx];
-        if (tileBuilding?.player && tileBuilding.player.id !== playerID && tileBuilding.buildings) {
-          moves.push({ move: "attackPlayersBuilding", args: [tileBuilding.player.id] });
+        if (G.battleState) {
+          const [gbx, gby] = G.mapState.currentBattle;
+          const tileBuilding = G.mapState.buildings[gby]?.[gbx];
+          if (tileBuilding?.player && tileBuilding.player.id !== playerID && tileBuilding.buildings) {
+            moves.push({ move: "attackPlayersBuilding", args: [tileBuilding.player.id] });
+          }
         }
         return moves;
       } else if (isStage(G, "resolution", "ground_defend_or_yield")) {
@@ -580,10 +593,20 @@ export function enumerateLegalMoves(G: MyGameState, ctx: Ctx, playerID: string):
             moves.push({ move: "pickCard", args: [i] });
           }
           moves.push({ move: "drawCard", args: [] });
+        } else {
+          moves.push({ move: "pass", args: [] });
         }
         return moves;
       } else if (isStage(G, "resolution", "ground_garrison")) {
         const avail = G.troopsAvailableForGarrison;
+        // Defensive: validate avail is defined and has valid numbers
+        if (!avail || 
+            typeof avail.regiments !== 'number' || isNaN(avail.regiments) ||
+            typeof avail.levies !== 'number' || isNaN(avail.levies) ||
+            typeof avail.elites !== 'number' || isNaN(avail.elites)) {
+          console.warn(`[enumerate] Invalid troopsAvailableForGarrison at ground_garrison: ${JSON.stringify(avail)}`);
+          return moves;
+        }
         // All available troops
         moves.push({ move: "garrisonTroops", args: [[avail.regiments, avail.levies, avail.elites]] });
         // Half available troops
@@ -607,6 +630,14 @@ export function enumerateLegalMoves(G: MyGameState, ctx: Ctx, playerID: string):
         return moves;
       } else if (isStage(G, "resolution", "conquest_garrison")) {
         const avail = G.troopsAvailableForGarrison;
+        // Defensive: validate avail is defined and has valid numbers
+        if (!avail || 
+            typeof avail.regiments !== 'number' || isNaN(avail.regiments) ||
+            typeof avail.levies !== 'number' || isNaN(avail.levies) ||
+            typeof avail.elites !== 'number' || isNaN(avail.elites)) {
+          console.warn(`[enumerate] Invalid troopsAvailableForGarrison at conquest_garrison: ${JSON.stringify(avail)}`);
+          return moves;
+        }
         return [
           { move: "garrisonTroops", args: [[avail.regiments, avail.levies, avail.elites]] },
           {
@@ -621,7 +652,16 @@ export function enumerateLegalMoves(G: MyGameState, ctx: Ctx, playerID: string):
         ];
       } else if (isStage(G, "resolution", "conquest")) {
         const conquestMoves: AIMove[] = [{ move: "doNothing", args: [] }];
-        conquestMoves.push({ move: "coloniseLand", args: [] });
+        // Only offer coloniseLand if valid: no rival building, and not already failed here this round
+        const [cx, cy] = G.mapState.currentBattle;
+        const conquestBuilding = G.mapState.buildings[cy]?.[cx];
+        const rivalOwns = conquestBuilding?.player && conquestBuilding.player.id !== playerID;
+        const alreadyFailed = G.failedConquests?.some(
+          (f) => f.playerId === playerID && f.tile[0] === cx && f.tile[1] === cy
+        );
+        if (!rivalOwns && !alreadyFailed) {
+          conquestMoves.push({ move: "coloniseLand", args: [] });
+        }
         const conquestPlayer = G.playerInfo[playerID];
         for (const fleet of conquestPlayer.fleetInfo) {
           const isAtHome =
@@ -649,12 +689,15 @@ export function enumerateLegalMoves(G: MyGameState, ctx: Ctx, playerID: string):
               battleState.attacker.id === playerID
                 ? battleState.defender.id
                 : battleState.attacker.id;
+            const battleLoc = G.mapState.currentBattle as [number, number];
             for (const tile of G.validRelocationTiles) {
-              moves.push({ move: "relocateDefeatedFleet", args: [tile, defeatedPlayerID] });
+              if (isValidRetreatDestination(G, battleLoc, tile as [number, number], defeatedPlayerID)) {
+                moves.push({ move: "relocateDefeatedFleet", args: [tile, defeatedPlayerID] });
+              }
             }
-            // Fallback: if no valid tiles, retreat home
-            if (G.validRelocationTiles.length === 0) {
-              moves.push({ move: "relocateDefeatedFleet", args: [[4, 0], defeatedPlayerID] });
+            // Fallback: if no valid tiles survive validation, retreat home
+            if (moves.length === 0) {
+              moves.push({ move: "relocateDefeatedFleet", args: [[...KINGDOM_LOCATION], defeatedPlayerID] });
             }
           }
         }
@@ -695,6 +738,8 @@ export function enumerateLegalMoves(G: MyGameState, ctx: Ctx, playerID: string):
           }
           // Draw from deck (no card index = undefined)
           moves.push({ move: "commitDeferredBattleCard", args: [] });
+        } else {
+          moves.push({ move: "pass", args: [] });
         }
       } else if (isStage(G, "resolution", "rebellion")) {
         const rebellion = G.currentRebellion;
@@ -709,8 +754,9 @@ export function enumerateLegalMoves(G: MyGameState, ctx: Ctx, playerID: string):
           moves.push({ move: "commitRebellionTroops", args: [Math.ceil(regs / 2), Math.ceil(levs / 2)] });
           // Commit none
           moves.push({ move: "commitRebellionTroops", args: [0, 0] });
+        } else {
+          moves.push({ move: "pass", args: [] });
         }
-        // Not the target → nothing to do (return empty moves)
       } else if (isStage(G, "resolution", "rebellion_rival_support")) {
         // Rivals choose to support defender or rebels
         // contributeToRebellion(side, regiments, levies) — max 3 troops total
@@ -725,8 +771,11 @@ export function enumerateLegalMoves(G: MyGameState, ctx: Ctx, playerID: string):
           moves.push({ move: "contributeToRebellion", args: ["rebel", regs, 0] });
         }
       } else if (G.stage.sub === "invasion_nominate") {
-        // Only the Archprelate can nominate — others have nothing to do
-        if (!G.playerInfo[playerID].isArchprelate) return moves;
+        // Only the Archprelate can nominate — others pass
+        if (!G.playerInfo[playerID].isArchprelate) {
+          moves.push({ move: "pass", args: [] });
+          return moves;
+        }
         const eligible = G.currentInvasion?.eligibleCaptainGenerals ?? ctx.playOrder;
         for (const id of eligible) {
           moves.push({ move: "nominateCaptainGeneral", args: [id] });
@@ -761,6 +810,11 @@ export function enumerateLegalMoves(G: MyGameState, ctx: Ctx, playerID: string):
         moves.push({ move: "pass", args: [] });
       }
 
+      // DEBUG: catch empty resolution moves
+      if (moves.length === 0) {
+        console.log(`[ENUM-EMPTY] P${playerID} sub=${G.stage?.sub} att=${G.battleState?.attacker?.id} def=${G.battleState?.defender?.id}`);
+        moves.push({ move: "pass", args: [] }); // prevent stall
+      }
       return moves;
     }
 

@@ -1,8 +1,14 @@
 import { MyGameState } from "../types";
 import { MAX_SKYSHIPS, MAX_REGIMENTS, HERESY_MAX, HERESY_MIN } from "../data/gameData";
 import { archiveGameLogEntries } from "./gameLogArchive";
+import { getRepublicInfluence } from "./republicUtils";
 
 export { HERESY_MAX, HERESY_MIN };
+
+function sanitizeValue(val: unknown, fallback = 0): number {
+  if (typeof val !== 'number' || isNaN(val)) return fallback;
+  return val;
+}
 
 export const removeOneCounsellor = (G: MyGameState, playerID: string) => {
   G.playerInfo[playerID].resources.counsellors -= 1;
@@ -15,10 +21,12 @@ export const removeVPAmount = (
   playerID: string,
   vpAmount: number
 ) => {
+  const sanitizedVP = sanitizeValue(G.playerInfo[playerID].resources.victoryPoints);
+  const sanitizedAmount = sanitizeValue(vpAmount, 0);
   // GAP-16: "A player's total of Victory Points can never fall below zero"
   G.playerInfo[playerID].resources.victoryPoints = Math.max(
     0,
-    G.playerInfo[playerID].resources.victoryPoints - vpAmount
+    sanitizedVP - sanitizedAmount
   );
 };
 
@@ -27,7 +35,9 @@ export const addVPAmount = (
   playerID: string,
   vpAmount: number
 ) => {
-  G.playerInfo[playerID].resources.victoryPoints += vpAmount;
+  const sanitizedVP = sanitizeValue(G.playerInfo[playerID].resources.victoryPoints);
+  const sanitizedAmount = sanitizeValue(vpAmount, 0);
+  G.playerInfo[playerID].resources.victoryPoints = sanitizedVP + sanitizedAmount;
 };
 
 export const removeGoldAmount = (
@@ -98,8 +108,22 @@ export const addLevyAmount = (
   playerID: string,
   levyAmount: number
 ) => {
-  G.playerInfo[playerID].resources.levies += levyAmount;
+  const sanitized = sanitizeValue(levyAmount, 0);
+  const currentLevies = sanitizeValue(G.playerInfo[playerID].resources.levies);
+  G.playerInfo[playerID].resources.levies = currentLevies + sanitized;
 };
+
+export const removeLevyAmount = (
+  G: MyGameState,
+  playerID: string,
+  levyAmount: number
+) => {
+  const sanitized = sanitizeValue(levyAmount, 0);
+  const currentLevies = sanitizeValue(G.playerInfo[playerID].resources.levies);
+  G.playerInfo[playerID].resources.levies = Math.max(0, currentLevies - sanitized);
+};
+
+export { sanitizeValue };
 
 /** Return elite regiments to a kingdom's reserve. No max cap — they are non-recruitable,
  *  so the pool can only shrink over a game; we never need to clamp here. */
@@ -149,21 +173,11 @@ export const calculateMercy = (G: MyGameState) => {
     const baseMercy = Math.floor(gap / 3);
     if (baseMercy <= 0) continue;
 
-    // 3. Count supporting republics
+    // 3. Count supporting republics using shared helper
+    const republics = getRepublicInfluence(G, playerID);
     let supporting = 0;
-    const playerAlignment = player.hereticOrOrthodox;
-
-    // Venoa — slot 5 in influencePrelates
-    const venoaHeretic = G.eventState.nprHeretic.includes("Venoa");
-    const venoaAlignment = venoaHeretic ? "heretic" : "orthodox";
-    const venoaInfluenced = G.boardState.influencePrelates[5] === playerID;
-    if (venoaAlignment === playerAlignment || venoaInfluenced) supporting++;
-
-    // Zeeland — slot 4 in influencePrelates
-    const zeelandHeretic = G.eventState.nprHeretic.includes("Zeeland");
-    const zeelandAlignment = zeelandHeretic ? "heretic" : "orthodox";
-    const zeelandInfluenced = G.boardState.influencePrelates[4] === playerID;
-    if (zeelandAlignment === playerAlignment || zeelandInfluenced) supporting++;
+    if (republics.zeeland.supporting) supporting++;
+    if (republics.venoa.supporting) supporting++;
 
     // 4. Apply multiplier
     let mercyGold = 0;

@@ -1,8 +1,9 @@
-import type { PhaseStrategy, AIPersonality, AIMove, AIWeights } from "../types";
+import type { PhaseStrategy, AIPersonality, AIMove, AIWeights, ScoredAIMove } from "../types";
 import type { MyGameState, FleetInfo } from "../../types";
 import type { Ctx } from "boardgame.io";
-import { enumerateLegalMoves } from "../enumerate";
 import { KINGDOM_LOCATION } from "../../data/gameData";
+import { calculateFleetStrength } from "../../helpers/fleetUtils";
+import { countActiveTradeRoutes } from "../../helpers/mapUtils";
 
 /**
  * Resolution phase strategy: handles 8 distinct sub-stages.
@@ -13,40 +14,37 @@ export class ResolutionStrategy implements PhaseStrategy {
     G: MyGameState,
     ctx: Ctx,
     playerID: string,
-    personality: AIPersonality
-  ): AIMove {
-    const moves = enumerateLegalMoves(G, ctx, playerID);
-    if (moves.length === 0) return { move: "pass", args: [] };
-    if (moves.length === 1) return moves[0];
+    personality: AIPersonality,
+    availableMoves?: AIMove[]
+  ): ScoredAIMove {
+    const moves = availableMoves ?? [];
+    if (moves.length === 0) return { move: { move: "pass", args: [] }, score: 0 };
+    if (moves.length === 1) return { move: moves[0], score: 0 };
 
-    switch (G.stage.sub) {
-      case "retrieve_fleets":
-        return this.retrieveFleets(G, playerID, personality, moves);
+    const chosen = (() => {
+      switch (G.stage.sub) {
+        case "retrieve_fleets":
+          return this.retrieveFleets(G, playerID, personality, moves);
+        case "infidel_fleet_combat":
+          return this.infidelFleetCombat(G, playerID, personality, moves);
+        case "deferred_battle":
+          return this.deferredBattle(G, playerID, moves);
+        case "rebellion":
+          return this.rebellion(G, playerID, personality, moves);
+        case "rebellion_rival_support":
+          return this.rebellionRivalSupport(G, playerID, personality, moves);
+        case "invasion_nominate":
+          return this.invasionNominate(G, playerID, moves);
+        case "invasion_contribute":
+          return this.invasionContribute(G, playerID, personality, moves);
+        case "invasion_buyoff":
+          return this.invasionBuyoff(G, playerID, personality, moves);
+        default:
+          return moves[0];
+      }
+    })();
 
-      case "infidel_fleet_combat":
-        return this.infidelFleetCombat(G, playerID, personality, moves);
-
-      case "deferred_battle":
-        return this.deferredBattle(G, playerID, moves);
-
-      case "rebellion":
-        return this.rebellion(G, playerID, personality, moves);
-
-      case "rebellion_rival_support":
-        return this.rebellionRivalSupport(G, playerID, personality, moves);
-
-      case "invasion_nominate":
-        return this.invasionNominate(G, playerID, moves);
-
-      case "invasion_contribute":
-        return this.invasionContribute(G, playerID, personality, moves);
-
-      case "invasion_buyoff":
-        return this.invasionBuyoff(G, playerID, personality, moves);
-
-      default:
-        return moves[0];
-    }
+    return { move: chosen, score: 0 };
   }
 
   // ── Retrieve Fleets ─────────────────────────────────────────────────────
@@ -72,10 +70,11 @@ export class ResolutionStrategy implements PhaseStrategy {
     if (deployedFleets.length === 0) return passMove ?? moves[0];
 
     // Score each fleet: is it generating value where it is?
+    // Threshold: roughly "is this fleet worth more than the 1-2 gold to redeploy?"
     const idleIndices: number[] = [];
     for (const fleet of deployedFleets) {
       const score = this.scoreFleetPosition(G, playerID, fleet, w);
-      if (score < 0.05) {
+      if (score < 0.01) {
         // Fleet is idle — retrieve it
         idleIndices.push(fleet.fleetId);
       }
@@ -106,11 +105,13 @@ export class ResolutionStrategy implements PhaseStrategy {
    * Score a deployed fleet's position: is it generating value where it is?
    * Returns 0 for idle fleets, higher values for fleets doing useful work.
    *
-   * Reasons to keep a fleet deployed:
-   * 1. Protecting own outpost/colony (garrison deterrent)
-   * 2. On a trade route tile (piracy collection/protection)
-   * 3. Blocking rival from sole occupation (preventing their conquest)
-   * 4. On a rival's route (piracy income for Sanctioned Piracy)
+   * Reasons to keep deployed (from strategic guide):
+   * 1. Trade route protection — fleet prevents piracy on your route
+   * 2. Garrison reinforcement — fleet on colony deters ground attacks
+   * 3. Piracy positioning — fleet on rival route generates income
+   * 4. Blocking rival from sole occupation (preventing conquest)
+   *
+   * Retrieve when: empty ocean, no rival routes, no land to guard.
    */
   private scoreFleetPosition(
     G: MyGameState,
@@ -121,39 +122,49 @@ export class ResolutionStrategy implements PhaseStrategy {
     const [fx, fy] = fleet.location;
     let score = 0;
 
-    // 1. Guarding own building
     const building = G.mapState.buildings[fy]?.[fx];
-    if (building?.player?.id === playerID && building?.buildings) {
-      score += 0.15 * w.territory + 0.1 * w.threats;
-      // Extra value if fleet has troops (stronger deterrent)
-      if (fleet.regiments + fleet.eliteRegiments > 0) {
-        score += 0.05;
-      }
-    }
-
-    // 2. Trade route presence — fleet skyships form part of the chain
-    // If removing this fleet would break a trade route, it's very valuable
     const tile = G.mapState.currentTileArray[fy]?.[fx];
-    if (tile && tile.type !== "ocean" && tile.type !== "home") {
-      // Check if any rival has an outpost/colony that routes through this tile
-      const rivalsOnTile = (G.mapState.battleMap[fy]?.[fx] ?? []).filter(
-        (id: string) => id !== playerID
-      );
-      if (rivalsOnTile.length > 0) {
-        // Piracy opportunity — rival fleet/route passes through here
-        score += 0.1 * w.economy + 0.05 * w.military;
+    const playersOnTile = G.mapState.battleMap[fy]?.[fx] ?? [];
+
+    // 1. Guarding own building — strongest reason to stay
+    if (building?.player?.id === playerID && building?.buildings) {
+      const isColony = building.buildings === "colony";
+      score += isColony ? 0.08 : 0.04; // colonies more valuable
+      score += 0.02; // base deterrent value
+      if (fleet.regiments + fleet.eliteRegiments > 0) {
+        score += 0.03; // armed fleet is better deterrent
       }
     }
 
-    // 3. Blocking rival from sole occupation
-    const playersOnTile = G.mapState.battleMap[fy]?.[fx] ?? [];
-    if (playersOnTile.length === 2 && playersOnTile.includes(playerID)) {
-      // Two players on this tile — our presence blocks their conquest
-      score += 0.05 * w.military;
+    // 2. Trade route contribution — fleet skyships form part of the chain
+    // Check if this player has active trade routes passing through this tile
+    const routesBefore = countActiveTradeRoutes(G, playerID);
+    if (routesBefore > 0 && tile && tile.type === "land") {
+      // If this fleet is on a land tile and we have routes, it likely helps
+      score += 0.04;
     }
 
-    // 4. Personality boost for keeping fleets out
-    score += 0.02 * w.positioning; // positioning bots prefer fleet presence
+    // 3. Piracy positioning — rival fleet/building on same tile
+    const rivalsOnTile = playersOnTile.filter((id: string) => id !== playerID);
+    if (rivalsOnTile.length > 0) {
+      // Piracy opportunity or blocking rival
+      score += 0.04;
+      // Blocking rival from conquest (they can't conquer while we're here)
+      if (rivalsOnTile.some((rid: string) => {
+        const rBuilding = G.mapState.buildings[fy]?.[fx];
+        return rBuilding?.player?.id === rid;
+      })) {
+        score += 0.02; // we're contesting their territory
+      }
+    }
+
+    // 4. Fleet on empty ocean/undiscovered tile doing nothing
+    if (tile?.type === "ocean" && rivalsOnTile.length === 0 && !building?.player) {
+      score -= 0.02; // actively penalise idle ocean fleets
+    }
+
+    // 5. Positioning value — fleet presence on the map has inherent strategic value
+    score += 0.01;
 
     return score;
   }
@@ -179,7 +190,7 @@ export class ResolutionStrategy implements PhaseStrategy {
     const fleet = player.fleetInfo[combat.fleetIndex];
     if (!fleet) return evadeMove;
 
-    const fleetStrength = fleet.skyships * 1.5 + fleet.regiments + fleet.levies * 0.5 + fleet.eliteRegiments * 1.5;
+    const fleetStrength = calculateFleetStrength(fleet);
     const aggression = personality.tacticalPreferences.aggressionLevel;
 
     // Fight if strong enough (infidel fleet has ~3-5 swords typically)

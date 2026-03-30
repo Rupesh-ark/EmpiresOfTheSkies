@@ -1,9 +1,8 @@
 import { INVALID_MOVE } from "boardgame.io/core";
 import { MoveDefinition } from "../../types";
-import { findNextPlayerInBattleSequence } from "../../helpers/findNext";
 import { isValidRetreatDestination } from "../../helpers/mapUtils";
 import { forceRetrieveFleets } from "../../helpers/resolveBattle";
-import { setStage } from "../../helpers/stageUtils";
+import { nextAfterAerialDecision } from "../../helpers/resolutionSequencer";
 
 const relocateDefeatedFleet: MoveDefinition = {
   fn: ({ G, ctx, playerID, events }, ...args) => {
@@ -41,20 +40,8 @@ const relocateDefeatedFleet: MoveDefinition = {
       });
     }
 
-    if (
-      G.battleState?.defender.decision !== "evade" ||
-      G.mapState.battleMap[y][x].length <= 1
-    ) {
-      findNextPlayerInBattleSequence(
-        G.battleState?.attacker.id ?? playerID,
-        ctx,
-        G,
-        events
-      );
-    } else {
-      G.battleState = undefined;
-      setStage(G, "resolution", "aerial_attack_or_pass");
-    }
+    // Advance: next player at this tile, or next tile, or plunder
+    nextAfterAerialDecision(G, ctx, events, G.battleState?.attacker.id ?? playerID);
   },
   errorMessage: "Cannot relocate fleet to that destination",
 };

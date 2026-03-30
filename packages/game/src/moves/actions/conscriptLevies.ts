@@ -5,6 +5,7 @@ import {
   addLevyAmount,
   removeOneCounsellor,
   removeVPAmount,
+  sanitizeValue,
 } from "../../helpers/stateUtils";
 import { LEVY_GROUP_SIZE, MAX_LEVIES } from "../../data/gameData";
 
@@ -20,14 +21,16 @@ const validateConscriptLevies = (
   const base = validateMove(playerID, G, { costsCounsellor: true });
   if (base) return base;
 
-  if (levyAmount <= 0) {
+  const sanitizedLevyAmount = sanitizeValue(levyAmount, 0);
+  if (sanitizedLevyAmount <= 0) {
     return { code: "INVALID_LEVY_AMOUNT", message: "Must conscript at least 1 Levy" };
   }
 
-  if (G.playerInfo[playerID].resources.levies + levyAmount > MAX_LEVIES) {
+  const currentLevies = sanitizeValue(G.playerInfo[playerID].resources.levies);
+  if (currentLevies + sanitizedLevyAmount > MAX_LEVIES) {
     return {
       code: "LEVY_CAP_EXCEEDED",
-      message: `Cannot exceed ${MAX_LEVIES} Levies — you have ${G.playerInfo[playerID].resources.levies}`,
+      message: `Cannot exceed ${MAX_LEVIES} Levies — you have ${currentLevies}`,
     };
   }
 
@@ -36,7 +39,8 @@ const validateConscriptLevies = (
 
 const conscriptLevies: MoveDefinition = {
   fn: ({ G, playerID }, ...args: any[]) => {
-    const levyAmount: number = args[0];
+    const rawLevyAmount = args[0];
+    const levyAmount = sanitizeValue(rawLevyAmount, 0);
 
     // B4: enforce MAX_LEVIES cap
     if (validateConscriptLevies(G, playerID, levyAmount)) return INVALID_MOVE;

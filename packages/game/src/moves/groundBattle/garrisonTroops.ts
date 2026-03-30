@@ -1,10 +1,23 @@
 import { MoveDefinition } from "../../types";
-import { findNextConquest, findNextGroundBattle } from "../../helpers/findNext";
+import { nextAfterGroundDecision, nextAfterConquest } from "../../helpers/resolutionSequencer";
+import { INVALID_MOVE } from "boardgame.io/core";
 
 const garrisonTroops: MoveDefinition = {
   fn: ({ G, ctx, playerID, events }, ...args) => {
+    // Defensive: validate args
+    if (!Array.isArray(args[0]) || args[0].length < 1) {
+      console.warn(`[garrisonTroops] Invalid args: ${JSON.stringify(args)}`);
+      return INVALID_MOVE;
+    }
+    
     const [x, y] = G.mapState.currentBattle;
-    const [regiments, levies, eliteRegiments = 0] = args[0];
+    let [regiments, levies, eliteRegiments = 0] = args[0];
+    
+    // Sanitize NaN values
+    regiments = (typeof regiments === 'number' && !isNaN(regiments)) ? regiments : 0;
+    levies = (typeof levies === 'number' && !isNaN(levies)) ? levies : 0;
+    eliteRegiments = (typeof eliteRegiments === 'number' && !isNaN(eliteRegiments)) ? eliteRegiments : 0;
+    
     const troopInfo: GarrisonTroopsInfo = {
       regiments: regiments,
       levies: levies,
@@ -52,9 +65,9 @@ const garrisonTroops: MoveDefinition = {
     G.playerInfo[playerID].troopsToGarrison = undefined;
 
     if (G.stage.sub === "ground_garrison") {
-      findNextGroundBattle(G, events);
+      nextAfterGroundDecision(G, ctx, events, playerID);
     } else if (G.stage.sub === "conquest_garrison") {
-      findNextConquest(G, events);
+      nextAfterConquest(G, events);
     }
   },
   errorMessage: "Cannot garrison troops right now",

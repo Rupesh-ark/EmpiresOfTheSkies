@@ -635,36 +635,45 @@ const MyGame: Game<MyGameState> = {
         order: TurnOrder.CUSTOM_FROM("turnOrder"),
         onBegin: (context) => {
           if (context.G._halted) return;
+          const sub = context.G.stage.sub;
 
-          // Redirect turn to the correct player for the current stage
-          const target = getResolutionTarget(context.G);
-          if (target && target !== context.ctx.currentPlayer) {
-            context.events.endTurn({ next: target });
+          // Election + conquest — no turn routing needed, player just acts
+          if (sub === "election" || sub === "conquest") return;
+
+          // Retrieve fleets — auto-skip players with nothing to retrieve
+          if (sub === "retrieve_fleets") {
+            const playerID = context.ctx.currentPlayer;
+            const player = context.G.playerInfo[playerID];
+            const hasRetrievableFleets = player.fleetInfo.some(
+              (f: any) => f.skyships > 0 && (f.location[0] !== 4 || f.location[1] !== 0)
+            );
+            if (!hasRetrievableFleets || player.passed) {
+              player.passed = true;
+              if (allPlayersPassed(context.G)) {
+                context.events.endPhase();
+              } else {
+                context.events.endTurn();
+              }
+            }
             return;
           }
 
-          // Battle sub-stage routing
+          // Post-election stages — redirect to correct player
+          const target = getResolutionTarget(context.G);
+          if (target) {
+            if (target !== context.ctx.currentPlayer) {
+              context.events.endTurn({ next: target });
+            }
+            // Correct player has the turn — let them act (don't fall through to battle check)
+            return;
+          }
+
+          // Battle sub-stages — route attacker/defender/victor
           checkIfCurrentPlayerIsInCurrentBattle(
             context.G,
             context.ctx,
             context.events
           );
-
-          // Auto-skip players with no retrievable fleets
-          if (!isStage(context.G, "resolution", "retrieve_fleets")) return;
-          const playerID = context.ctx.currentPlayer;
-          const player = context.G.playerInfo[playerID];
-          const hasRetrievableFleets = player.fleetInfo.some(
-            (f: any) => f.skyships > 0 && (f.location[0] !== 4 || f.location[1] !== 0)
-          );
-          if (!hasRetrievableFleets || player.passed) {
-            player.passed = true;
-            if (allPlayersPassed(context.G)) {
-              context.events.endPhase();
-            } else {
-              context.events.endTurn();
-            }
-          }
         },
       },
       onBegin: (context) => {

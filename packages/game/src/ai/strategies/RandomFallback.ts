@@ -1,4 +1,4 @@
-import type { PhaseStrategy, AIPersonality, AIMove } from "../types";
+import type { PhaseStrategy, AIPersonality, AIMove, ScoredAIMove } from "../types";
 import type { MyGameState } from "../../types";
 import type { Ctx } from "boardgame.io";
 import { enumerateLegalMoves } from "../enumerate";
@@ -9,11 +9,11 @@ export class RandomFallbackStrategy implements PhaseStrategy {
     ctx: Ctx,
     playerID: string,
     _personality: AIPersonality
-  ): AIMove {
+  ): ScoredAIMove {
     const moves = enumerateLegalMoves(G, ctx, playerID);
     if (moves.length === 0) {
-      return { move: "pass", args: [] };
+      return { move: { move: "pass", args: [] }, score: 0 };
     }
-    return moves[Math.floor(Math.random() * moves.length)];
+    return { move: moves[Math.floor(Math.random() * moves.length)], score: 0 };
   }
 }

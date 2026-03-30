@@ -3,7 +3,8 @@ import { defineConfig } from "vitest/config";
 export default defineConfig({
   test: {
     environment: "node",
-    // boardgame.io is CJS; tell Vite to pre-bundle it so ESM tests can import it
+    include: ["src/**/*.test.ts"],
+    exclude: ["dist/**", "node_modules/**"],
     server: {
       deps: {
         inline: ["boardgame.io"],

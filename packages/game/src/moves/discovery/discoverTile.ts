@@ -13,7 +13,7 @@ export const discoverTile: MoveDefinition = {
     const edgeNeighbors = getNeighbors(x, y, true);
     let bordered = false;
 
-    if (ctx.numMoves === 0) {
+    if (!ctx.numMoves) {
       // First flip: must be adjacent to any discovered tile
       bordered = edgeNeighbors.some(
         ([nx, ny]) => G.mapState.discoveredTiles[ny][nx]
@@ -47,11 +47,11 @@ export const discoverTile: MoveDefinition = {
 
     if (currentTile.type === "legend") {
       advanceAllHeresyTrackers(G);
-      logEvent(G, `Legend discovered: ${currentTile.name} \u2014 all heresy advances`);
+      logEvent(G, `Legend discovered: ${currentTile.name} — all heresy advances`);
     } else if (tileRace !== "ocean" && !G.mapState.discoveredRaces.includes(tileRace)) {
       advanceAllHeresyTrackers(G);
       G.mapState.discoveredRaces.push(tileRace);
-      logEvent(G, `New race discovered: ${tileRace} \u2014 all heresy advances`);
+      logEvent(G, `New race discovered: ${tileRace} — all heresy advances`);
     } else if (currentTile.type !== "ocean") {
       logEvent(G, `Tile discovered: ${currentTile.name}`);
     }

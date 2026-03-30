@@ -28,8 +28,8 @@ export type {
 } from "./AILogger";
 export { evaluateState, estimateMoveValue } from "./evaluate";
 export { EmpiresBot } from "./EmpiresBot";
-export { runSelfPlay, runSingleGame, runGameLoop, printBalanceReport } from "./selfPlay";
-export type { GameResult, BalanceReport } from "./selfPlay";
+export { runSelfPlay, runSelfPlayRecords, runSingleGame, runGameLoop, printBalanceReport } from "./selfPlay";
+export type { BalanceReport } from "./selfPlay";
 export {
   runTournament,
   runHillClimb,
@@ -46,3 +46,22 @@ export type {
   LeagueConfig,
   LeagueResult,
 } from "./tournament";
+export { ResolutionCoordinator } from "./strategies/ResolutionCoordinator";
+export { GameRecorder } from "./GameRecorder";
+export type {
+  GameRecord,
+  EnrichedDecision,
+  PlayerSnapshot,
+  PlayerGameSummary,
+  BattleContext,
+  DiagnosticEntry,
+} from "./GameRecorder";
+export { runGameInBrowser } from "./browserRunner";
+export type { ProgressCallback } from "./browserRunner";
+export {
+  printGameTimeline,
+  printMoveAnalysis,
+  printEconomyTimeline,
+  printBattleLog,
+  printFullAnalysis,
+} from "./analyzeGameRecord";

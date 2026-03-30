@@ -209,7 +209,7 @@ const GarrisonTroopsDialog = (props: MyGameProps) => {
     ) &&
     !(props.G.stage.sub === "conquest_garrison" && inCurrentBattle && hasTroopsToGarrison)
   ) {
-    log.info("garrison dialog", { phase: props.ctx.phase });
+    log.info("garrison dialog", { phase: props.G.stage.phase, sub: props.G.stage.sub });
     props.G.stage.sub === "ground_garrison"
       ? props.moves.doNotGroundAttack()
       : props.moves.doNothing();

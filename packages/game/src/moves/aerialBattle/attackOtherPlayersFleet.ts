@@ -1,6 +1,7 @@
 import { MoveDefinition } from "../../types";
 import { removeVPAmount } from "../../helpers/stateUtils";
 import { setStage } from "../../helpers/stageUtils";
+import { logBattleEvent } from "../../helpers/logger";
 
 const attackOtherPlayersFleet: MoveDefinition = {
   validate: (G, playerID, ...args) => {
@@ -17,6 +18,8 @@ const attackOtherPlayersFleet: MoveDefinition = {
   },
   fn: ({ G, playerID, events }, ...args) => {
     const defenderID: string = args[0];
+    const attackerName = G.playerInfo[playerID].kingdomName;
+    const defenderName = G.playerInfo[defenderID].kingdomName;
 
     // Peace Accord: first attacker loses 3 VP and nullifies the accord
     if (G.eventState.peaceAccordActive) {
@@ -34,6 +37,8 @@ const attackOtherPlayersFleet: MoveDefinition = {
         G.eventState.dynasticMarriage = null;
       }
     }
+
+    logBattleEvent(attackerName, defenderName, "AERIAL", "initiated");
 
     G.battleState = {
       attacker: { decision: "fight", ...G.playerInfo[playerID] },

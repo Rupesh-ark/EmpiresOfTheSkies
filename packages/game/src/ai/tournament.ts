@@ -14,6 +14,7 @@ import type { AIWeights } from "./types";
 import { EmpiresBot } from "./EmpiresBot";
 import { AILogger, setAILogger } from "./AILogger";
 import { runGameLoop } from "./selfPlay";
+import { GameRecorder } from "./GameRecorder";
 
 // ── Types ───────────────────────────────────────────────────────────────────
 
@@ -115,7 +116,7 @@ function runConfiguredGame(slots: BotSlotConfig[]): {
     clients.push(client);
   }
 
-  const { finalState } = runGameLoop(clients, bots);
+  const { finalState } = runGameLoop(clients, bots, new GameRecorder());
 
   if (!finalState?.ctx.gameover) return null;
 

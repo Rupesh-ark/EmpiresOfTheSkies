@@ -1,12 +1,16 @@
 import { MoveDefinition } from "../../types";
 import { removeVPAmount } from "../../helpers/stateUtils";
 import { setStage } from "../../helpers/stageUtils";
+import { logBattleEvent } from "../../helpers/logger";
 
 const attackPlayersBuilding: MoveDefinition = {
   fn: ({ G, playerID, events }, ...args) => {
     const [x, y] = G.mapState.currentBattle;
     const defender = G.mapState.buildings[y][x].player;
     if (defender) {
+      const attackerName = G.playerInfo[playerID].kingdomName;
+      const defenderName = G.playerInfo[defender.id].kingdomName;
+
       // Peace Accord: first attacker loses 3 VP and nullifies the accord
       if (G.eventState.peaceAccordActive) {
         removeVPAmount(G, playerID, 3);
@@ -23,6 +27,8 @@ const attackPlayersBuilding: MoveDefinition = {
           G.eventState.dynasticMarriage = null;
         }
       }
+
+      logBattleEvent(attackerName, defenderName, "GROUND", "initiated");
 
       G.battleState = {
         attacker: { decision: "fight", ...G.playerInfo[playerID] },

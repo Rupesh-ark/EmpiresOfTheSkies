@@ -22,7 +22,7 @@ export interface PlayerBoardProps extends MyGameProps {
 }
 
 export const PlayerBoard = (props: PlayerBoardProps) => {
-  const phase = props.ctx.phase ?? "";
+  const phase = props.G.stage.phase;
 
   const mood = getMood(props.G.stage);
   const moodTokens = getMoodTokens(mood);
@@ -36,7 +36,7 @@ export const PlayerBoard = (props: PlayerBoardProps) => {
     ) : (
       <PlayerBoardCompact
         {...props}
-        showHeresy={phase === "election"}
+        showHeresy={phase === "resolution" && props.G.stage.sub === "election"}
       />
     );
 

@@ -147,14 +147,19 @@ export const beginResolution = (
   events: EventsAPI,
   skipEndTurn = false
 ): void => {
+  console.log('[RES-FLOW] beginResolution R' + G.round);
   // Reset battle scan position
   G.mapState.currentBattle = [0, 0];
   // Start with aerial battles (step 2a in rulebook)
   findNextBattle(G, events, skipEndTurn, advanceFromAerial);
+  console.log('[RES-FLOW] beginResolution done');
 };
 
 /** Called when aerial battles are exhausted → try plunder */
 export const advanceFromAerial = (G: MyGameState, events: EventsAPI): void => {
+  // DEBUG: detect infinite recursion in resolution chain
+  (G as any)._resFlowDepth = ((G as any)._resFlowDepth ?? 0) + 1;
+  if ((G as any)._resFlowDepth > 20) { console.error('[RES-FLOW] infinite recursion detected at advanceFromAerial depth=' + (G as any)._resFlowDepth); return; }
   G.mapState.currentBattle = [0, 0];
   findNextPlunder(G, events, advanceFromPlunder);
 };

@@ -1,137 +1,134 @@
 import type { AIWeights } from "./types";
 
 // ═══════════════════════════════════════════════════════════════════════════
-// DEFAULT AI CONFIG — committed to repo. Bland/average placeholders only.
-//
-// Real tuned weights live in weightsConfig.local.json (gitignored).
-// Create that file with any subset of keys to override these defaults.
+// AI CONFIG — single source of truth for all AI weights and parameters.
+// See WEIGHT_RATIONALE.md for derivation methodology.
 // ═══════════════════════════════════════════════════════════════════════════
 
-const BALANCED: AIWeights = {
-  territory: 0.125, economy: 0.125, military: 0.125, religion: 0.125,
-  legacy: 0.125, positioning: 0.125, threats: 0.125, republicAccess: 0.125,
-};
+export const AI_CONFIG = {
+  baseline: {
+    territory: 0.13, economy: 0.13, military: 0.13, religion: 0.13,
+    legacy: 0.13, positioning: 0.11, threats: 0.11, republicAccess: 0.13,
+  } as AIWeights,
 
-const NO_SHIFT = {} as Record<string, number>;
-
-const DEFAULTS = {
-  baseline: { ...BALANCED } as AIWeights,
-
-  jitterRange: 0,
+  jitterRange: 0.1,
   minWeight: 0.01,
-  tacticalMultiplier: 1,
+  tacticalMultiplier: 2.5,
 
   kaShifts: {
-    elite_regiments:         NO_SHIFT,
-    improved_training:       NO_SHIFT,
-    licenced_smugglers:      NO_SHIFT,
-    more_efficient_taxation: NO_SHIFT,
-    more_prisons:            NO_SHIFT,
-    patriarch_of_the_church: NO_SHIFT,
-    sanctioned_piracy:       NO_SHIFT,
+    elite_regiments:         { military: 0.12 },
+    improved_training:       { military: 0.08 },
+    licenced_smugglers:      { economy: 0.12 },
+    more_efficient_taxation: { economy: 0.08, republicAccess: -0.05 },
+    more_prisons:            { religion: 0.10 },
+    patriarch_of_the_church: { religion: 0.12, republicAccess: 0.03 },
+    sanctioned_piracy:       { military: 0.05, economy: 0.08, republicAccess: -0.03 },
   } as Record<string, Record<string, number>>,
 
   legacyNameShifts: {
-    "the conqueror":   NO_SHIFT,
-    "the navigator":   NO_SHIFT,
-    "the merchant":    NO_SHIFT,
-    "the mighty":      NO_SHIFT,
-    "the pious":       NO_SHIFT,
-    "the magnificent": NO_SHIFT,
-    "the builder":     NO_SHIFT,
-    "the aviator":     NO_SHIFT,
-    "the great":       NO_SHIFT,
+    "the conqueror":   { territory: 0.15, military: 0.08 },
+    "the navigator":   { territory: 0.12, positioning: 0.05 },
+    "the merchant":    { economy: 0.15, territory: 0.05 },
+    "the mighty":      { military: 0.15, threats: 0.05 },
+    "the pious":       { religion: 0.15 },
+    "the magnificent": { religion: 0.12 },
+    "the builder":     { territory: 0.08, religion: 0.05 },
+    "the aviator":     { military: 0.08, positioning: 0.08 },
+    "the great":       {},
   } as Record<string, Record<string, number>>,
 
   legacyAlignmentShifts: {
-    purpleWhenHeretic:  NO_SHIFT,
-    orangeWhenOrthodox: NO_SHIFT,
-    theMagnificent:     NO_SHIFT,
-    thePious:           NO_SHIFT,
+    purpleWhenHeretic:  { republicAccess: 0.08 },
+    orangeWhenOrthodox: { republicAccess: 0.10 },
+    theMagnificent:     { republicAccess: 0.08 },
+    thePious:           { republicAccess: -0.05 },
   } as Record<string, Record<string, number>>,
 
   eval: {
-    territory:      { colonyWeight: 1, fortWeight: 1, routeWeight: 1 },
-    economy:        { factoryIncomeValue: 1, unengagedPenalty: 0 },
-    military:       { levyWeight: 1, eliteWeight: 1, skyshipWeight: 1 },
-    religion:       { archprelateBonus: 0, fatigueFactor: 0, buildingBonus: 0, dissenterPenalty: 0 },
-    legacy:         { maxReasonableVP: 20, earlyGameWeight: 0.5, lateGameWeight: 0.5 },
-    positioning:    { fleetWeight: 0.33, counsellorWeight: 0.34, fowWeight: 0.33, fowMax: 4 },
-    threats:        { dissenterThreat: 0, piracyExposureWeight: 0 },
+    territory:      { colonyWeight: 1.5, fortWeight: 0.5, routeWeight: 0.3 },
+    economy:        { factoryIncomeValue: 3, unengagedPenalty: 2 },
+    military:       { levyWeight: 0.5, eliteWeight: 1.5, skyshipWeight: 1.5 },
+    religion:       { archprelateBonus: 0.3, fatigueFactor: 0.3, buildingBonus: 0.08, dissenterPenalty: 0.05 },
+    legacy:         { maxReasonableVP: 20, earlyGameWeight: 0.3, lateGameWeight: 0.7 },
+    positioning:    { fleetWeight: 0.3, counsellorWeight: 0.4, fowWeight: 0.3, fowMax: 4 },
+    threats:        { dissenterThreat: 0.1, piracyExposureWeight: 0.3 },
     republicAccess: { mercyVPGapScale: 20 },
   },
 
   moveValues: {
-    recruitCounsellors:        { base: 0.1 },
-    recruitRegiments:          { base: 0.1 },
-    purchaseSkyships:          { base: 0.1 },
-    cathedralOrthodox:         { base: 0.1 },
-    cathedralHeretic:          { base: 0.1 },
-    palaceHeretic:             { base: 0.1 },
-    palaceOrthodox:            { base: 0.1 },
-    shipyard:                  { base: 0.1 },
-    fort:                      { base: 0.1 },
+    recruitCounsellors:        { base: 0.18, positioning: 0.15 },
+    recruitRegiments:          { base: 0.1, military: 0.25 },
+    purchaseSkyships:          { base: 0.08, military: 0.3, positioning: 0.2 },
+    cathedralOrthodox:         { base: 0.06, religion: 0.4, legacy: 0.2 },
+    cathedralHeretic:          { base: 0.06, religion: 0.1 },
+    palaceHeretic:             { base: 0.06, religion: 0.4, legacy: 0.2 },
+    palaceOrthodox:            { base: 0.06, religion: 0.1 },
+    shipyard:                  { base: 0.04, economy: 0.2, positioning: 0.15 },
+    fort:                      { base: 0.04, threats: 0.3, territory: 0.1 },
     foundBuildingsDefault:     { base: 0.1 },
-    foundFactoryEngaged:       { base: 0.1 },
-    foundFactoryUnengaged:     { base: 0.1 },
-    influencePrelatesRegular:  { base: 0.1 },
-    influencePrelatesRepublic: { base: 0.1 },
-    influenceMercyBoostScale:  0,
-    influenceMercyVPGapScale:  1,
-    sendAgitatorsBase:         { base: 0.1 },
-    sendAgitatorsLeaderBonus:  0,
-    deployFleet:               { base: 0.1 },
-    moveFleet:                 { base: 0.1 },
-    garrisonTransfer:          { base: 0.1 },
-    trainTroops:               { base: 0.1 },
-    drawFoWCards:              { base: 0.1 },
-    buildSkyships:             { base: 0.1 },
-    conscriptLevies:           { base: 0.1 },
-    increaseHeresyAligned:     { base: 0.1 },
+    foundFactoryEngaged:       { base: 0.12, economy: 0.4 },
+    foundFactoryUnengaged:     { base: 0.02 },
+    influencePrelatesRegular:  { base: 0, religion: 0.4 },
+    influencePrelatesRepublic: { base: 0, religion: 0.3, republicAccess: 0.2 },
+    influenceMercyBoostScale:  0.3,
+    influenceMercyVPGapScale:  15,
+    sendAgitatorsBase:         { base: 0, military: 0.05 },
+    sendAgitatorsLeaderBonus:  0.05,
+    deployFleet:               { base: 0.15, territory: 0.3, military: 0.2, positioning: 0.15 },
+    moveFleet:                 { base: 0.1, positioning: 0.2, territory: 0.15 },
+    garrisonTransfer:          { base: 0.1, threats: 0.2, territory: 0.1 },
+    trainTroops:               { base: 0.12, military: 0.2 },
+    drawFoWCards:              { base: 0.1, military: 0.15, positioning: 0.1 },
+    buildSkyships:             { base: 0.08, military: 0.25, positioning: 0.15 },
+    conscriptLevies:           { base: 0.1, military: 0.15 },
+    increaseHeresyAligned:     { base: 0.1, religion: 0.3 },
     increaseHeresyMisaligned:  { base: 0.05 },
-    convertMonarch:            { base: 0.1 },
-    alterPlayerOrder:          { base: 0.1 },
+    convertMonarch:            { base: 0, legacy: 0.3, religion: 0.2 },
+    alterPlayerOrder:          { base: 0, positioning: 0.1 },
     sell:                      { base: 0.05 },
-    discoverTile:              { base: 0.1 },
-    attack:                    { base: 0.1 },
-    passive:                   { base: 0.05 },
-    evade:                     { base: 0.1 },
-    plunder:                   { base: 0.1 },
-    coloniseLand:              { base: 0.1 },
-    constructOutpost:          { base: 0.1 },
-    voteSelf:                  { base: 0.1 },
+    discoverTile:              { base: 0.1, territory: 0.2 },
+    attack:                    { base: 0.15, military: 0.35, territory: 0.15 },
+    passive:                   { base: 0.01 },
+    evade:                     { base: 0.05, threats: 0.15 },
+    plunder:                   { base: 0.1, economy: 0.3, territory: 0.1 },
+    coloniseLand:              { base: 0.1, territory: 0.5, legacy: 0.2 },
+    constructOutpost:          { base: 0.1, territory: 0.4, economy: 0.15 },
+    voteSelf:                  { base: 0.1, religion: 0.3 },
     voteOther:                 { base: 0.1 },
-    retrieveFleets:            { base: 0.1 },
+    retrieveFleets:            { base: 0.15 },
     chooseEventCard:           { base: 0.1 },
-    pickCard:                  { base: 0.1 },
+    pickCard:                  { base: 0.5 },
     pass:                      { base: 0.0 },
     defaultMove:               { base: 0.05 },
-    punishDissenters:          { base: 0.1 },
-    drawBattleCard:            { base: 0.1 },
-    playBattleCard:            { base: 0.1 },
-    garrisonTroops:            { base: 0.1 },
-    defendGround:              { base: 0.1 },
+    punishDissenters:          { base: 0.1, religion: 0.3, threats: 0.2 },
+    drawBattleCard:            { base: 0.15, military: 0.1 },
+    playBattleCard:            { base: 0.2, military: 0.15 },
+    garrisonTroops:            { base: 0.1, threats: 0.2, territory: 0.15 },
+    defendGround:              { base: 0.15, military: 0.2, threats: 0.2 },
     yieldGround:               { base: 0.05 },
-    commitRebellionTroops:     { base: 0.1 },
-    contributeToRebellion:     { base: 0.05 },
-    contributeToGrandArmy:     { base: 0.1 },
-    nominateCaptainGeneral:    { base: 0.1 },
-    offerBuyoffGold:           { base: 0.1 },
-    immediateElectionVote:     { base: 0.1 },
-    relocateDefeatedFleet:     { base: 0.1 },
+    commitRebellionTroops:     { base: 0.1, military: 0.2, threats: 0.15 },
+    contributeToRebellion:     { base: 0.05, military: 0.15 },
+    contributeToGrandArmy:     { base: 0.1, military: 0.2, religion: 0.1 },
+    nominateCaptainGeneral:    { base: 0.1, military: 0.15, religion: 0.1 },
+    offerBuyoffGold:           { base: 0.1, economy: 0.15 },
+    immediateElectionVote:     { base: 0.1, religion: 0.2 },
+    relocateDefeatedFleet:     { base: 0.1, positioning: 0.15 },
     resolveEventChoice:        { base: 0.1 },
-    respondToInfidelFleet:     { base: 0.1 },
+    respondToInfidelFleet:     { base: 0.1, military: 0.2 },
     discardFoWCard:            { base: 0.05 },
-    transferBetweenFleets:     { base: 0.05 },
-    transferOutpost:           { base: 0.02 },
-    declareSmugglerGood:       { base: 0.08 },
-    checkAndPlaceFort:         { base: 0.1 },
-    retaliate:                 { base: 0.1 },
-    commitDeferredBattleCard:  { base: 0.15 },
+    transferBetweenFleets:     { base: 0.05, military: 0.1, positioning: 0.1 },
+    transferOutpost:           { base: 0.02, economy: 0.1 },
+    declareSmugglerGood:       { base: 0.08, economy: 0.2 },
+    checkAndPlaceFort:         { base: 0.1, threats: 0.25, territory: 0.15 },
+    retaliate:                 { base: 0.1, military: 0.3 },
+    commitDeferredBattleCard:  { base: 0.15, military: 0.15 },
   } as Record<string, Record<string, number> | number>,
 
   defaultPersonality: {
-    weights: { ...BALANCED } as AIWeights,
+    weights: {
+      territory: 0.125, economy: 0.125, military: 0.125, religion: 0.125,
+      legacy: 0.125, positioning: 0.125, threats: 0.125, republicAccess: 0.125,
+    } as AIWeights,
     tacticalDefaults: {
       aggressionLevel: 0.5,
       tradePreference: 0.5,
@@ -139,32 +136,3 @@ const DEFAULTS = {
     },
   },
 };
-
-// ═══════════════════════════════════════════════════════════════════════════
-// JSON override: deep-merge weightsConfig.local.json on top of defaults.
-// If the file doesn't exist, defaults are used as-is.
-// IMPORTANT: To override a base value, set it explicitly (e.g. "base": 0).
-// ═══════════════════════════════════════════════════════════════════════════
-
-function deepMerge(target: any, source: any): any {
-  if (!source || typeof source !== "object") return target;
-  const result = { ...target };
-  for (const key of Object.keys(source)) {
-    if (
-      typeof source[key] === "object" &&
-      source[key] !== null &&
-      !Array.isArray(source[key]) &&
-      typeof target[key] === "object" &&
-      target[key] !== null
-    ) {
-      result[key] = deepMerge(target[key], source[key]);
-    } else {
-      result[key] = source[key];
-    }
-  }
-  return result;
-}
-
-import localOverrides from "./weightsConfig.local.json";
-
-export const AI_CONFIG: typeof DEFAULTS = deepMerge(DEFAULTS, localOverrides as Record<string, unknown>);

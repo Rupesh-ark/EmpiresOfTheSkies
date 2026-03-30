@@ -73,13 +73,13 @@ const StatusBar = (props: StatusBarProps) => {
   const isMyTurn = props.ctx.currentPlayer === props.playerID;
   const turnComplete = playerInfo.turnComplete;
   const showConfirmEndTurn =
-    turnComplete && props.ctx.phase === "actions" && isMyTurn;
+    turnComplete && props.G.stage.phase === "actions" && isMyTurn;
 
   const mood = getMood(props.G.stage);
   const moodTokens = getMoodTokens(mood);
   const shouldPulse = PULSING_MOODS.has(mood);
 
-  const phase = GAME_PHASES.find((p) => p.key === props.ctx.phase);
+  const phase = GAME_PHASES.find((p) => p.key === props.G.stage.phase);
   const phaseName = phase?.label ?? props.G.stage.sub;
   const currentPlayerName =
     props.matchData?.find((p) => String(p.id) === props.ctx.currentPlayer)
@@ -251,7 +251,7 @@ const StatusBar = (props: StatusBarProps) => {
         >
           {isMyTurn &&
             props.ctx.numMoves > 0 &&
-            props.ctx.phase === "actions" && (
+            props.G.stage.phase === "actions" && (
               <GameButton
                 variant="ghost"
                 size="sm"

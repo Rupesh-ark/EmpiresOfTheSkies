@@ -1,26 +1,78 @@
 import { Ctx } from "boardgame.io";
 import { EventsAPI } from "boardgame.io/dist/types/src/plugins/plugin-events";
-import { FleetInfo, GoodKey, MyGameState } from "../types";
-import {
-  findNextConquest,
-  findNextGroundBattle,
-  findNextPlayerInBattleSequence,
-} from "./findNext";
+import { FleetInfo, GoodKey, MyGameState, PlayerInfo } from "../types";
+// findNext functions no longer called directly — resolutionSequencer handles all transitions
 import { drawFortuneOfWarCard, findPossibleDestinations } from "./helpers";
 import { RandomAPI } from "boardgame.io/dist/types/src/plugins/random/random";
 import { increaseHeresyWithinMove, increaseOrthodoxyWithinMove, logEvent } from "./stateUtils";
-import { PRICE_MARKER_MIN } from "../data/gameData";
+import { PRICE_MARKER_MIN, KINGDOM_LOCATION } from "../data/gameData";
+import { nextAfterAerialDecision, nextAfterGroundDecision, nextAfterConquest } from "./resolutionSequencer";
 import { setStage } from "./stageUtils";
 import { calculateCombat } from "./combatMath";
 
 const GOODS: GoodKey[] = ["mithril", "dragonScales", "krakenSkin", "magicDust", "stickyIchor", "pipeweed"];
 
+// ── NaN/Null Sanitization Helpers ─────────────────────────────────────────────
+
+function sanitizeFleet(fleet: FleetInfo, context: string = ""): FleetInfo {
+  const hasNaN = typeof fleet.levies !== 'number' || isNaN(fleet.levies) ||
+                 typeof fleet.regiments !== 'number' || isNaN(fleet.regiments) ||
+                 typeof fleet.skyships !== 'number' || isNaN(fleet.skyships) ||
+                 typeof fleet.eliteRegiments !== 'number' || isNaN(fleet.eliteRegiments);
+  if (hasNaN) {
+    console.warn(`[resolveBattle] Invalid value detected in fleet${context ? ` at ${context}` : ""}:`, {
+      fleetId: fleet.fleetId,
+      location: fleet.location,
+      skyships: fleet.skyships,
+      regiments: fleet.regiments,
+      levies: fleet.levies,
+      eliteRegiments: fleet.eliteRegiments,
+    });
+    fleet.levies = typeof fleet.levies === 'number' && !isNaN(fleet.levies) ? fleet.levies : 0;
+    fleet.regiments = typeof fleet.regiments === 'number' && !isNaN(fleet.regiments) ? fleet.regiments : 0;
+    fleet.skyships = typeof fleet.skyships === 'number' && !isNaN(fleet.skyships) ? fleet.skyships : 0;
+    fleet.eliteRegiments = typeof fleet.eliteRegiments === 'number' && !isNaN(fleet.eliteRegiments) ? fleet.eliteRegiments : 0;
+  }
+  return fleet;
+}
+
+function sanitizePlayerResources(player: PlayerInfo, context: string = ""): void {
+  const r = player.resources;
+  const issues: string[] = [];
+  
+  if (typeof r.levies !== 'number' || isNaN(r.levies) || r.levies === null) {
+    issues.push(`levies=${r.levies}`);
+    r.levies = typeof r.levies === 'number' && !isNaN(r.levies) ? r.levies : 0;
+  }
+  if (typeof r.regiments !== 'number' || isNaN(r.regiments) || r.regiments === null) {
+    issues.push(`regiments=${r.regiments}`);
+    r.regiments = typeof r.regiments === 'number' && !isNaN(r.regiments) ? r.regiments : 0;
+  }
+  if (typeof r.skyships !== 'number' || isNaN(r.skyships) || r.skyships === null) {
+    issues.push(`skyships=${r.skyships}`);
+    r.skyships = typeof r.skyships === 'number' && !isNaN(r.skyships) ? r.skyships : 0;
+  }
+  // Note: gold can be negative (debt mechanic) - that's valid, don't sanitize
+  if (issues.length > 0) {
+    console.warn(`[resolveBattle] Invalid player resources${context ? ` at ${context}` : ""}: ${issues.join(", ")}`);
+  }
+}
+
 /** Compute troops available for garrisoning at a battle tile from a player's fleets. */
 const computeGarrisonTroops = (G: MyGameState, playerID: string): void => {
   const [x, y] = G.mapState.currentBattle;
   let regiments = 0, elites = 0, levies = 0;
+  
+  // Sanitize player resources first
+  const player = G.playerInfo[playerID];
+  if (player) {
+    sanitizePlayerResources(player, `computeGarrisonTroops player ${playerID}`);
+  }
+  
   G.playerInfo[playerID]?.fleetInfo.forEach((fleet) => {
     if (fleet.location[0] === x && fleet.location[1] === y) {
+      // Sanitize fleet values before using them
+      sanitizeFleet(fleet, `computeGarrisonTroops [${x},${y}]`);
       regiments += fleet.regiments;
       elites += fleet.eliteRegiments;
       levies += fleet.levies;
@@ -45,6 +97,8 @@ function formatLosses(losses: { levies: number; regiments: number; eliteRegiment
 function snapshotFleets(fleets: FleetInfo[]): { levies: number; regiments: number; eliteRegiments: number; skyships: number } {
   let levies = 0, regiments = 0, eliteRegiments = 0, skyships = 0;
   for (const f of fleets) {
+    // Sanitize fleet values before using them
+    sanitizeFleet(f, "snapshotFleets");
     levies += f.levies;
     regiments += f.regiments;
     eliteRegiments += f.eliteRegiments ?? 0;
@@ -180,7 +234,7 @@ const cleanupWipedFleets = (
       const units = fleetUnitCount(fleet);
       remaining += units;
       if (units === 0) {
-        fleet.location = [4, 0];
+        fleet.location = [...KINGDOM_LOCATION];
         const tile = battleMap[y][x];
         const idx = tile.indexOf(playerID);
         if (idx !== -1) tile.splice(idx, 1);
@@ -190,8 +244,16 @@ const cleanupWipedFleets = (
   return remaining;
 };
 
+function sanitizeFleetValue(val: unknown, fallback = 0): number {
+  if (typeof val !== 'number' || isNaN(val)) {
+    console.warn(`[forceRetrieveFleets] Invalid fleet value: ${val}, defaulting to ${fallback}`);
+    return fallback;
+  }
+  return val;
+}
+
 /**
- * Force-retrieves all of a player's fleets at (x, y) back to home [4, 0].
+ * Force-retrieves all of a player's fleets at (x, y) back to home.
  * Returns troops to the player's resource pool and removes them from battleMap.
  * Used when a defeated/evading fleet has no valid retreat destination.
  */
@@ -206,15 +268,21 @@ export const forceRetrieveFleets = (
 
   player.fleetInfo.forEach((fleet) => {
     if (fleet.location[0] === x && fleet.location[1] === y) {
-      player.resources.skyships += fleet.skyships;
-      player.resources.regiments += fleet.regiments;
-      player.resources.levies += fleet.levies;
-      player.resources.eliteRegiments += fleet.eliteRegiments;
+      // Sanitize fleet values to prevent NaN in player resources
+      const fleetSkyships = sanitizeFleetValue(fleet.skyships);
+      const fleetRegiments = sanitizeFleetValue(fleet.regiments);
+      const fleetLevies = sanitizeFleetValue(fleet.levies);
+      const fleetElite = sanitizeFleetValue(fleet.eliteRegiments);
+
+      player.resources.skyships += fleetSkyships;
+      player.resources.regiments += fleetRegiments;
+      player.resources.levies += fleetLevies;
+      player.resources.eliteRegiments += fleetElite;
       fleet.skyships = 0;
       fleet.regiments = 0;
       fleet.levies = 0;
       fleet.eliteRegiments = 0;
-      fleet.location = [4, 0];
+      fleet.location = [...KINGDOM_LOCATION];
     }
   });
 
@@ -466,16 +534,11 @@ export const resolveBattleAndReturnWinner = (
         computeGarrisonTroops(G, winner);
         events.endTurn({ next: winner });
       } else {
-        findNextPlayerInBattleSequence(
-          G.battleState?.attacker.id ?? ctx.currentPlayer,
-          ctx,
-          G,
-          events
-        );
+        nextAfterAerialDecision(G, ctx, events, G.battleState?.attacker.id ?? ctx.currentPlayer);
       }
     } else {
       if (G.stage.sub === "ground_resolve") {
-        findNextGroundBattle(G, events);
+        nextAfterGroundDecision(G, ctx, events, G.battleState?.attacker.id ?? ctx.currentPlayer);
       } else {
         // Pre-compute valid relocation tiles for the frontend
         try {
@@ -496,7 +559,7 @@ export const resolveBattleAndReturnWinner = (
         }
         if (G.validRelocationTiles.length === 0) {
           // No valid relocation destinations — skip relocate stage, advance battle
-          findNextPlayerInBattleSequence(winner, ctx, G, events);
+          nextAfterAerialDecision(G, ctx, events, winner);
         } else {
           setStage(G, "resolution", "relocate_loser");
           events.endTurn({ next: winner });
@@ -523,14 +586,9 @@ export const resolveBattleAndReturnWinner = (
     if (G.stage.sub === "ground_resolve") {
       const currentBuilding = G.mapState.buildings[y][x];
       currentBuilding.player = undefined;
-      findNextGroundBattle(G, events);
+      nextAfterGroundDecision(G, ctx, events, G.battleState?.attacker.id ?? ctx.currentPlayer);
     } else {
-      findNextPlayerInBattleSequence(
-        G.battleState?.attacker.id ?? ctx.currentPlayer,
-        ctx,
-        G,
-        events
-      );
+      nextAfterAerialDecision(G, ctx, events, G.battleState?.attacker.id ?? ctx.currentPlayer);
     }
   }
 };
@@ -694,7 +752,7 @@ export const resolveConquest = (
       tile: [x, y],
     });
     G.conquestState = undefined;
-    findNextConquest(G, events);
+    nextAfterConquest(G, events);
   } else if (attackerHits >= tileStrength && remainingAttackers > 0) {
     logEvent(G, `Conquest succeeded: ${conquestPlayerName} colonises ${landName} (+1 VP)`);
     G.battleResult = { ...conquestResultBase, winner: conquestPlayerName, outcome: `${conquestPlayerName} colonises ${landName} (+1 VP)` };

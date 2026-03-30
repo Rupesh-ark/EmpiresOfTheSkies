@@ -1,5 +1,14 @@
 import { MoveDefinition, PlayerInfo } from "../../types";
 import { allPlayersPassed } from "../../helpers/stateUtils";
+import { KINGDOM_LOCATION } from "../../data/gameData";
+
+function sanitizeFleetValue(val: unknown, fallback = 0): number {
+  if (typeof val !== 'number' || isNaN(val)) {
+    console.warn(`[retrieveFleets] Invalid fleet value: ${val}, defaulting to ${fallback}`);
+    return fallback;
+  }
+  return val;
+}
 
 const retrieveFleets: MoveDefinition = {
   fn: ({ G, playerID, events }, ...args) => {
@@ -11,12 +20,18 @@ const retrieveFleets: MoveDefinition = {
 
         const oldLocation = currentFleet.location;
 
-        currentFleet.location = [4, 0];
+        currentFleet.location = [...KINGDOM_LOCATION];
 
-        currentPlayer.resources.skyships += currentFleet.skyships;
-        currentPlayer.resources.regiments += currentFleet.regiments;
-        currentPlayer.resources.levies += currentFleet.levies;
-        currentPlayer.resources.eliteRegiments += currentFleet.eliteRegiments;
+        // Sanitize fleet values to prevent NaN
+        const fleetSkyships = sanitizeFleetValue(currentFleet.skyships);
+        const fleetRegiments = sanitizeFleetValue(currentFleet.regiments);
+        const fleetLevies = sanitizeFleetValue(currentFleet.levies);
+        const fleetElite = sanitizeFleetValue(currentFleet.eliteRegiments);
+
+        currentPlayer.resources.skyships += fleetSkyships;
+        currentPlayer.resources.regiments += fleetRegiments;
+        currentPlayer.resources.levies += fleetLevies;
+        currentPlayer.resources.eliteRegiments += fleetElite;
 
         currentFleet.skyships = 0;
         currentFleet.regiments = 0;

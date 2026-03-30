@@ -12,8 +12,11 @@ import { getLocationPresentation } from "@/utils/locationLabels";
 import { GameButton } from "@/components/atoms/GameButton";
 import type { FleetDragState } from "./fleetDragTypes";
 
-const BATTLE_PHASES = new Set([
-  "aerial_battle", "ground_battle", "plunder_legends", "conquest",
+const BATTLE_RESOLUTION_SUBS = new Set([
+  "aerial_attack_or_pass", "aerial_attack_or_evade", "aerial_resolve",
+  "ground_attack_or_pass", "ground_defend_or_yield", "ground_resolve",
+  "plunder_legends", "conquest", "conquest_draw_or_pick", "conquest_garrison",
+  "relocate_loser",
 ]);
 
 interface PendingDeploy {
@@ -25,7 +28,8 @@ interface PendingDeploy {
 const WorldMap = (props: WorldMapProps) => {
   const currentMap = props.G.mapState.currentTileArray;
   const battleCoords = props.G.mapState.currentBattle;
-  const isBattlePhase = BATTLE_PHASES.has(props.ctx.phase ?? "");
+  const isBattlePhase = props.G.stage.phase === "resolution" && 
+    BATTLE_RESOLUTION_SUBS.has(props.G.stage.sub);
   const { showToast } = useToast();
 
   const [fleetDragState, setFleetDragState] = useState<FleetDragState | null>(null);

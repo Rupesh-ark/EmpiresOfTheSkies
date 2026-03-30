@@ -187,16 +187,13 @@ export const LEGACY_CARDS: LegacyCardInfo[] = [
 ];
 
 export const GAME_PHASES: { key: string; label: string; hint: string }[] = [
-  { key: "legacy_card",     label: "Legacy Card",       hint: "Draw a legacy card for a permanent bonus" },
-  { key: "events",          label: "Events",             hint: "Respond to world events affecting your kingdom" },
-  { key: "discovery",       label: "Discovery",          hint: "Flip map tiles to reveal new territories" },
-  { key: "taxes",           label: "Taxes",              hint: "Collect income from your territories" },
-  { key: "actions",         label: "Actions",            hint: "Place counsellors on the board to take actions" },
-  { key: "battle",          label: "Battle",             hint: "Resolve aerial and ground combat" },
-  { key: "plunder_legends", label: "Plunder & Legends",  hint: "Claim rewards from conquered territories" },
-  { key: "conquest",        label: "Conquest",           hint: "Take control of territories where you have forces" },
-  { key: "election",        label: "Election",           hint: "Vote for the next Archprelate" },
-  { key: "resolution",      label: "Resolution",         hint: "End-of-round income, scoring, and cleanup" },
+  { key: "setup",       label: "Setup",       hint: "Choose kingdom advantage and legacy cards" },
+  { key: "events",      label: "Events",     hint: "Respond to world events affecting your kingdom" },
+  { key: "discovery",   label: "Discovery",  hint: "Flip map tiles to reveal new territories" },
+  { key: "taxes",       label: "Taxes",      hint: "Collect income from your territories" },
+  { key: "actions",     label: "Actions",    hint: "Place counsellors on the board to take actions" },
+  { key: "resolution",  label: "Resolution", hint: "Resolve battles, conquest, piracy, trade, and archprelate election" },
+  { key: "reset",       label: "Reset",      hint: "Prepare for the next round" },
 ];
 
 export const colourToKingdomMap: Record<string, KingdomName> = {

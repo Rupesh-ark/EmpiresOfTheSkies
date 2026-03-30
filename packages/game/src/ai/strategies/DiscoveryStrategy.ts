@@ -1,7 +1,6 @@
-import type { PhaseStrategy, AIPersonality, AIMove, AIWeights } from "../types";
+import type { PhaseStrategy, AIPersonality, AIMove, AIWeights, ScoredAIMove } from "../types";
 import type { MyGameState } from "../../types";
 import type { Ctx } from "boardgame.io";
-import { enumerateLegalMoves } from "../enumerate";
 import { getNeighbors } from "../../helpers/mapUtils";
 import { KINGDOM_LOCATION, MAP_WIDTH, MAP_HEIGHT } from "../../data/gameData";
 
@@ -17,16 +16,17 @@ export class DiscoveryStrategy implements PhaseStrategy {
     G: MyGameState,
     ctx: Ctx,
     playerID: string,
-    personality: AIPersonality
-  ): AIMove {
-    const moves = enumerateLegalMoves(G, ctx, playerID);
-    if (moves.length === 0) return { move: "pass", args: [] };
+    personality: AIPersonality,
+    availableMoves?: AIMove[]
+  ): ScoredAIMove {
+    const moves = availableMoves ?? [];
+    if (moves.length === 0) return { move: { move: "pass", args: [] }, score: 0 };
 
     const discoverMoves = moves.filter((m) => m.move === "discoverTile");
     const passMove = moves.find((m) => m.move === "pass") ?? { move: "pass", args: [] };
 
     // If no tiles to discover, pass
-    if (discoverMoves.length === 0) return passMove;
+    if (discoverMoves.length === 0) return { move: passMove, score: 0 };
 
     // Score each tile
     const w = personality.weights;
@@ -43,10 +43,10 @@ export class DiscoveryStrategy implements PhaseStrategy {
 
     // Should we pass instead of discovering?
     if (this.shouldPass(G, playerID, ctx, scored[0].score, w)) {
-      return passMove;
+      return { move: passMove, score: 0 };
     }
 
-    return scored[0].move;
+    return { move: scored[0].move, score: scored[0].score };
   }
 
   private scoreTile(
@@ -134,6 +134,17 @@ export class DiscoveryStrategy implements PhaseStrategy {
     if (G.mustContinueDiscovery) return false;
 
     const player = G.playerInfo[playerID];
+
+    // No territory yet → must discover to expand (can't play the game without tiles)
+    let hasTerritory = false;
+    G.mapState.buildings.forEach((row) =>
+      row.forEach((cell) => {
+        if (cell.player?.id === playerID && (cell.buildings === "outpost" || cell.buildings === "colony")) {
+          hasTerritory = true;
+        }
+      })
+    );
+    if (!hasTerritory) return false;
     const allVPs = Object.values(G.playerInfo).map(p => p.resources.victoryPoints);
     const leaderVP = Math.max(...allVPs);
     const myVP = player.resources.victoryPoints;

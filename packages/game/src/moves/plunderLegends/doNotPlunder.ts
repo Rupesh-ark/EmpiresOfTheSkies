@@ -1,9 +1,9 @@
 import { MoveDefinition } from "../../types";
-import { findNextPlunder } from "../../helpers/findNext";
+import { nextAfterPlunder } from "../../helpers/resolutionSequencer";
 
 const doNotPlunder: MoveDefinition = {
-  fn: ({ G, events }, ...args) => {
-    findNextPlunder(G, events);
+  fn: ({ G, events }) => {
+    nextAfterPlunder(G, events);
   },
   errorMessage: "Cannot pass on plundering right now",
 };

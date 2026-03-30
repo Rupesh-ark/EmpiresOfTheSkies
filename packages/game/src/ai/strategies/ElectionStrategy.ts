@@ -1,7 +1,6 @@
-import type { PhaseStrategy, AIPersonality, AIMove } from "../types";
+import type { PhaseStrategy, AIPersonality, AIMove, ScoredAIMove } from "../types";
 import type { MyGameState } from "../../types";
 import type { Ctx } from "boardgame.io";
-import { enumerateLegalMoves } from "../enumerate";
 import { calculateVotePower } from "../../moves/election/vote";
 
 /**
@@ -19,14 +18,15 @@ export class ElectionStrategy implements PhaseStrategy {
     G: MyGameState,
     ctx: Ctx,
     playerID: string,
-    personality: AIPersonality
-  ): AIMove {
-    const moves = enumerateLegalMoves(G, ctx, playerID);
-    if (moves.length === 0) return { move: "vote", args: [playerID] };
-    if (moves.length === 1) return moves[0];
+    personality: AIPersonality,
+    availableMoves?: AIMove[]
+  ): ScoredAIMove {
+    const moves = availableMoves ?? [];
+    if (moves.length === 0) return { move: { move: "vote", args: [playerID] }, score: 0 };
+    if (moves.length === 1) return { move: moves[0], score: 0 };
 
     const voteMoves = moves.filter((m) => m.move === "vote");
-    if (voteMoves.length === 0) return moves[0];
+    if (voteMoves.length === 0) return { move: moves[0], score: 0 };
 
     const allPlayers = Object.values(G.playerInfo);
     const playOrder = ctx.playOrder;
@@ -99,7 +99,7 @@ export class ElectionStrategy implements PhaseStrategy {
     // Case A: I am the VP leader — protect position by voting self
     if (leaderID === playerID) {
       const selfMove = voteMoves.find((m) => m.args[0] === playerID);
-      if (selfMove) return selfMove;
+      if (selfMove) return { move: selfMove, score: 0 };
     }
 
     // Case B: Can I win by voting for myself?
@@ -110,7 +110,7 @@ export class ElectionStrategy implements PhaseStrategy {
 
       if (selfWins) {
         const selfMove = voteMoves.find((m) => m.args[0] === playerID);
-        if (selfMove) return selfMove;
+        if (selfMove) return { move: selfMove, score: 0 };
       }
 
       // Religious bots: also self-vote when one more vote could tip it
@@ -121,7 +121,7 @@ export class ElectionStrategy implements PhaseStrategy {
         );
         if (myPower >= bestRival - 1 || (iAmIncumbent && myPower >= bestRival)) {
           const selfMove = voteMoves.find((m) => m.args[0] === playerID);
-          if (selfMove) return selfMove;
+          if (selfMove) return { move: selfMove, score: 0 };
         }
       }
     }
@@ -144,7 +144,7 @@ export class ElectionStrategy implements PhaseStrategy {
 
     if (bestCandidate !== null) {
       const move = voteMoves.find((m) => m.args[0] === bestCandidate);
-      if (move) return move;
+      if (move) return { move, score: 0 };
     }
 
     // Case D: Nobody can beat the leader even with my help.
@@ -161,6 +161,6 @@ export class ElectionStrategy implements PhaseStrategy {
     }
 
     const fallbackMove = voteMoves.find((m) => m.args[0] === fallbackTarget);
-    return fallbackMove ?? voteMoves[0];
+    return { move: fallbackMove ?? voteMoves[0], score: 0 };
   }
 }

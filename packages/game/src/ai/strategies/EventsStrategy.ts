@@ -1,7 +1,6 @@
-import type { PhaseStrategy, AIPersonality, AIMove, AIWeights } from "../types";
+import type { PhaseStrategy, AIPersonality, AIMove, AIWeights, ScoredAIMove } from "../types";
 import type { MyGameState, EventCardName } from "../../types";
 import type { Ctx } from "boardgame.io";
-import { enumerateLegalMoves } from "../enumerate";
 
 /**
  * Events phase strategy: choose the best event card to submit,
@@ -12,11 +11,12 @@ export class EventsStrategy implements PhaseStrategy {
     G: MyGameState,
     ctx: Ctx,
     playerID: string,
-    personality: AIPersonality
-  ): AIMove {
-    const moves = enumerateLegalMoves(G, ctx, playerID);
-    if (moves.length === 0) return { move: "pass", args: [] };
-    if (moves.length === 1) return moves[0];
+    personality: AIPersonality,
+    availableMoves?: AIMove[]
+  ): ScoredAIMove {
+    const moves = availableMoves ?? [];
+    if (moves.length === 0) return { move: { move: "pass", args: [] }, score: 0 };
+    if (moves.length === 1) return { move: moves[0], score: 0 };
 
     // Card submission phase
     const cardMoves = moves.filter((m) => m.move === "chooseEventCard");
@@ -27,17 +27,17 @@ export class EventsStrategy implements PhaseStrategy {
     // Immediate election voting
     const voteMoves = moves.filter((m) => m.move === "immediateElectionVote");
     if (voteMoves.length > 0) {
-      return this.chooseVote(G, playerID, personality, voteMoves);
+      return { move: this.chooseVote(G, playerID, personality, voteMoves), score: 0 };
     }
 
     // Event resolution choices (accept/decline, binary options)
     const resolveMoves = moves.filter((m) => m.move === "resolveEventChoice");
     if (resolveMoves.length > 0) {
-      return this.chooseResolution(G, playerID, personality, resolveMoves);
+      return { move: this.chooseResolution(G, playerID, personality, resolveMoves), score: 0 };
     }
 
     // Fallback
-    return moves[0];
+    return { move: moves[0], score: 0 };
   }
 
   // ── Card Selection ────────────────────────────────────────────────────────
@@ -47,7 +47,7 @@ export class EventsStrategy implements PhaseStrategy {
     playerID: string,
     personality: AIPersonality,
     cardMoves: AIMove[]
-  ): AIMove {
+  ): ScoredAIMove {
     const w = personality.weights;
     const player = G.playerInfo[playerID];
     const allPlayers = Object.values(G.playerInfo);
@@ -63,7 +63,7 @@ export class EventsStrategy implements PhaseStrategy {
     });
 
     scored.sort((a, b) => b.score - a.score);
-    return scored[0].move;
+    return { move: scored[0].move, score: scored[0].score };
   }
 
   private scoreCard(

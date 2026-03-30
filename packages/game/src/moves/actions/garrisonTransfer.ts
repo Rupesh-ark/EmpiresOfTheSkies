@@ -104,6 +104,16 @@ const garrisonTransfer: MoveDefinition = {
     const levies: number = args[3];
     const eliteRegiments: number = args[4];
 
+    // Defensive: validate args are valid numbers
+    if (typeof levies !== 'number' || isNaN(levies)) {
+      console.warn(`[garrisonTransfer] Invalid levies arg: ${levies}`);
+      return INVALID_MOVE;
+    }
+    if (typeof regiments !== 'number' || isNaN(regiments)) {
+      console.warn(`[garrisonTransfer] Invalid regiments arg: ${regiments}`);
+      return INVALID_MOVE;
+    }
+
     if (validateGarrisonTransfer(G, playerID, fleetId, tileCoords, regiments, levies, eliteRegiments)) {
       return INVALID_MOVE;
     }

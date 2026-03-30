@@ -1,9 +1,9 @@
 import { MoveDefinition } from "../../types";
 import { addEliteRegiments, addLevyAmount, addRegiments } from "../../helpers/stateUtils";
-import { findNextGroundBattle } from "../../helpers/findNext";
+import { nextAfterGroundDecision } from "../../helpers/resolutionSequencer";
 
 const yieldToAttacker: MoveDefinition = {
-  fn: ({ G, events }, ...args) => {
+  fn: ({ G, ctx, playerID, events }, ...args) => {
     const [x, y] = G.mapState.currentBattle;
     if (G.battleState) {
       const currentBuilding = G.mapState.buildings[y][x];
@@ -35,7 +35,7 @@ const yieldToAttacker: MoveDefinition = {
     }
     G.battleState = undefined;
 
-    findNextGroundBattle(G, events);
+    nextAfterGroundDecision(G, ctx, events, G.battleState?.attacker.id ?? playerID);
   },
   errorMessage: "Cannot yield right now",
 };

@@ -1,28 +1,29 @@
-import type { PhaseStrategy, AIPersonality, AIMove } from "../types";
+import type { PhaseStrategy, AIPersonality, AIMove, ScoredAIMove } from "../types";
 import type { MyGameState } from "../../types";
 import type { Ctx } from "boardgame.io";
-import { enumerateLegalMoves } from "../enumerate";
+import { coloniseConfidence, hasTroopsAtTile } from "../../helpers/fleetUtils";
 
 /**
  * Conquest strategy: decide whether to colonise, build outpost, or pass.
- * - Empire Builder: always expand
- * - Economic: prefer colonies (trade routes, factory income)
- * - Military: prefer outposts (cheaper, wider spread)
+ *
+ * Uses coloniseConfidence() to assess whether the bot can beat the land's
+ * defences. Confident → colonise. Risky → outpost (safe). Hopeless → skip.
  */
 export class ConquestStrategy implements PhaseStrategy {
   selectMove(
     G: MyGameState,
     ctx: Ctx,
     playerID: string,
-    personality: AIPersonality
-  ): AIMove {
-    const moves = enumerateLegalMoves(G, ctx, playerID);
-    if (moves.length === 0) return { move: "doNothing", args: [] };
-    if (moves.length === 1) return moves[0];
+    personality: AIPersonality,
+    availableMoves?: AIMove[]
+  ): ScoredAIMove {
+    const moves = availableMoves ?? [];
+    if (moves.length === 0) return { move: { move: "doNothing", args: [] }, score: 0 };
+    if (moves.length === 1) return { move: moves[0], score: 0 };
 
     // Handle card draw/pick sub-stages
     if (G.stage.sub === "conquest_draw_or_pick") {
-      return this.pickConquestCard(G, playerID, moves);
+      return { move: this.pickConquestCard(G, playerID, moves), score: 0 };
     }
 
     const w = personality.weights;
@@ -30,6 +31,9 @@ export class ConquestStrategy implements PhaseStrategy {
     const doNothing = moves.find((m) => m.move === "doNothing");
     const colonise = moves.find((m) => m.move === "coloniseLand");
     const outpostMoves = moves.filter((m) => m.move === "constructOutpost");
+
+    const [bx, by] = G.mapState.currentBattle ?? [0, 0];
+    const canGarrison = hasTroopsAtTile(player, bx, by);
 
     // Count undefended outposts (no garrison, no fort)
     let undefendedOutposts = 0;
@@ -45,36 +49,39 @@ export class ConquestStrategy implements PhaseStrategy {
 
     // Too many undefended outposts and not a territory-focused bot? Don't expand
     if (undefendedOutposts >= 3 && w.territory < 0.2 && w.threats > 0.1) {
-      return doNothing ?? moves[0];
+      return { move: doNothing ?? moves[0], score: 0 };
     }
 
-    // Can we afford to garrison a colony? (need regiments at the tile)
-    const hasTroopsForGarrison = player.fleetInfo.some((f) => {
-      const [bx, by] = G.mapState.currentBattle ?? [0, 0];
-      return f.location[0] === bx && f.location[1] === by && (f.regiments > 0 || f.eliteRegiments > 0);
-    });
+    // ── Colonise sense ─────────────────────────────────────────────────
+    const confidence = colonise ? coloniseConfidence(G, playerID, bx, by) : 0;
+    const aggression = personality.tacticalPreferences.aggressionLevel;
 
-    // Score options
     let bestMove = doNothing ?? moves[0];
     let bestScore = 0.01; // doNothing baseline
 
-    if (colonise) {
-      let score = 0.5 * w.territory + 0.2 * w.legacy;
-      // Economic bots love colonies (trade routes → factory income)
-      score += 0.15 * w.economy;
-      // But only if we can garrison it
-      if (!hasTroopsForGarrison) score *= 0.5;
-      if (score > bestScore) { bestScore = score; bestMove = colonise; }
+    if (colonise && canGarrison) {
+      if (confidence >= 1.5) {
+        // Comfortable win — colonise confidently
+        const score = 0.6 * w.territory + 0.2 * w.legacy + 0.15 * w.economy;
+        if (score > bestScore) { bestScore = score; bestMove = colonise; }
+      } else if (confidence >= 1.0) {
+        // Risky — aggressive bots might try
+        const score = (0.3 + aggression * 0.2) * w.territory + 0.1 * w.legacy;
+        if (score > bestScore) { bestScore = score; bestMove = colonise; }
+      }
+      // Below 1.0: too risky, fall through to outpost
     }
 
     for (const m of outpostMoves) {
-      let score = 0.35 * w.territory + 0.1 * w.economy;
-      // Military bots prefer outposts (cheap, wide coverage)
-      score += 0.1 * w.military;
+      let score = 0.35 * w.territory + 0.1 * w.economy + 0.1 * w.military;
+      // If colonise is available but too risky, outpost gets a safety bonus
+      if (colonise && confidence < 1.5) {
+        score += 0.1;
+      }
       if (score > bestScore) { bestScore = score; bestMove = m; }
     }
 
-    return bestMove;
+    return { move: bestMove, score: bestScore };
   }
 
   private pickConquestCard(G: MyGameState, playerID: string, moves: AIMove[]): AIMove {

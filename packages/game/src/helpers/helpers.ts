@@ -6,12 +6,6 @@ import { fortuneOfWarCards } from "../data/gameData";
 import { getNeighbors, getPassableNeighbors } from "./mapUtils";
 import { Ctx } from "boardgame.io";
 import { EventsAPI } from "boardgame.io/dist/types/src/plugins/events/events";
-import {
-  findNextBattle,
-  findNextConquest,
-  findNextGroundBattle,
-  findNextPlunder,
-} from "./findNext";
 
 export const fullResetFortuneOfWarCardDeck = (): FortuneOfWarCardInfo[] => {
   return [...fortuneOfWarCards];
@@ -221,11 +215,17 @@ export const hasAnyColony = (G: MyGameState, playerID?: string): boolean => {
   return false;
 };
 
+let _battleCheckCount = 0;
 export const checkIfCurrentPlayerIsInCurrentBattle = (
   G: MyGameState,
   ctx: Ctx,
   events: EventsAPI
 ) => {
+  _battleCheckCount++;
+  if (_battleCheckCount > 50) {
+    console.error('[BATTLE-CHECK] called ' + _battleCheckCount + 'x P' + ctx.currentPlayer + ' sub=' + G.stage?.sub + ' battle=' + JSON.stringify(G.mapState.currentBattle));
+    if (_battleCheckCount > 100) return; // break the loop
+  }
   const [x, y] = G.mapState.currentBattle;
 
   if (G.mapState.battleMap[y][x].length > 0) {
@@ -286,26 +286,12 @@ export const checkIfCurrentPlayerIsInCurrentBattle = (
     }
 
     // Fallback: if current player isn't on this tile at all, redirect to first player there
+    // Guard: only redirect if the target is different from current player (prevents infinite endTurn loop)
     if (!G.mapState.battleMap[y][x].includes(ctx.currentPlayer)) {
-      events.endTurn({
-        next: G.mapState.battleMap[y][x][0],
-      });
-    }
-  } else {
-    // No players on this tile — advance to next battle/conquest
-    switch (ctx.phase) {
-      case "aerial_battle":
-        findNextBattle(G, events);
-        break;
-      case "ground_battle":
-        findNextGroundBattle(G, events);
-        break;
-      case "plunder_legends":
-        findNextPlunder(G, events);
-        break;
-      case "conquest":
-        findNextConquest(G, events);
-        break;
+      const fallbackTarget = G.mapState.battleMap[y][x][0];
+      if (fallbackTarget && fallbackTarget !== ctx.currentPlayer) {
+        events.endTurn({ next: fallbackTarget });
+      }
     }
   }
 };

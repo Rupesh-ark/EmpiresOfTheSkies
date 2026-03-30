@@ -16,6 +16,16 @@ const contributeToRebellion: MoveDefinition = {
     const regiments: number = args[1];
     const levies: number = args[2];
 
+    // Defensive: validate args are valid numbers
+    if (typeof levies !== 'number' || isNaN(levies)) {
+      console.warn(`[contributeToRebellion] Invalid levies arg: ${levies}`);
+      return INVALID_MOVE;
+    }
+    if (typeof regiments !== 'number' || isNaN(regiments)) {
+      console.warn(`[contributeToRebellion] Invalid regiments arg: ${regiments}`);
+      return INVALID_MOVE;
+    }
+
     const rebellion = G.currentRebellion;
     if (!rebellion) return INVALID_MOVE;
     if (rebellion.event.targetPlayerID === playerID) return INVALID_MOVE;

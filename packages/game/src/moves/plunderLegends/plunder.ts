@@ -1,5 +1,5 @@
 import { MoveDefinition, GoodKey } from "../../types";
-import { findNextPlunder } from "../../helpers/findNext";
+import { nextAfterPlunder } from "../../helpers/resolutionSequencer";
 import { increaseHeresyWithinMove, logEvent } from "../../helpers/stateUtils";
 import { PRICE_MARKER_MIN } from "../../data/gameData";
 
@@ -27,7 +27,7 @@ const plunder: MoveDefinition = {
 
     const landName = currentTile?.name ?? "unknown land";
     logEvent(G, `${currentPlayer.kingdomName} plunders ${landName} (+1 heresy)`);
-    findNextPlunder(G, events);
+    nextAfterPlunder(G, events);
   },
   errorMessage: "Cannot plunder right now",
 };

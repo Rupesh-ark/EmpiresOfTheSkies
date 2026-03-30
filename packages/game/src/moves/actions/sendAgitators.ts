@@ -18,9 +18,8 @@ const validateSendAgitators = (
   if (G.playerInfo[playerID].agitatorsSentThisRound.includes(targetID)) {
     return { code: "ALREADY_SENT", message: "Already sent agitators to this rival this round" };
   }
-  if (G.playerInfo[playerID].resources.gold < AGITATOR_COST) {
-    return { code: "INSUFFICIENT_GOLD", message: `Need ${AGITATOR_COST} gold to send agitators` };
-  }
+  // Gold check removed — debt mechanics allow deficit spending (v4.2 rules).
+  // Only Lenders Refuse Credit (checked in validateMove) blocks gold spending.
   return null;
 };
 

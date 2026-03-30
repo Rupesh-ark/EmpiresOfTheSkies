@@ -89,12 +89,24 @@ const validateDeployFleet = (
 
 const deployFleet: MoveDefinition = {
   fn: ({ G, playerID, events }, ...args: any[]) => {
+    // Validate numeric args
     const selectedFleetIndex = args[0];
     const [x, y] = args[1];
     const skyshipCount = args[2];
     const regimentCount = args[3];
     const levyCount = args[4];
     const eliteRegimentCount = args[5] ?? 0;
+
+    // Defensive: validate args are valid numbers
+    if (typeof levyCount !== 'number' || isNaN(levyCount)) {
+      console.warn(`[deployFleet] Invalid levyCount arg: ${levyCount}`);
+      return INVALID_MOVE;
+    }
+    if (typeof skyshipCount !== 'number' || isNaN(skyshipCount) ||
+        typeof regimentCount !== 'number' || isNaN(regimentCount)) {
+      console.warn(`[deployFleet] Invalid troop counts: sky=${skyshipCount} reg=${regimentCount}`);
+      return INVALID_MOVE;
+    }
 
     if (validateDeployFleet(G, playerID, selectedFleetIndex, [x, y], skyshipCount, regimentCount, levyCount, eliteRegimentCount)) return INVALID_MOVE;
 

@@ -1,7 +1,6 @@
-import type { PhaseStrategy, AIPersonality, AIMove } from "../types";
+import type { PhaseStrategy, AIPersonality, AIMove, ScoredAIMove } from "../types";
 import type { MyGameState } from "../../types";
 import type { Ctx } from "boardgame.io";
-import { enumerateLegalMoves } from "../enumerate";
 
 /**
  * Plunder legends strategy: decide whether to plunder a legend tile.
@@ -15,17 +14,18 @@ export class PlunderStrategy implements PhaseStrategy {
     G: MyGameState,
     ctx: Ctx,
     playerID: string,
-    personality: AIPersonality
-  ): AIMove {
-    const moves = enumerateLegalMoves(G, ctx, playerID);
-    if (moves.length === 0) return { move: "doNotPlunder", args: [] };
-    if (moves.length === 1) return moves[0];
+    personality: AIPersonality,
+    availableMoves?: AIMove[]
+  ): ScoredAIMove {
+    const moves = availableMoves ?? [];
+    if (moves.length === 0) return { move: { move: "doNotPlunder", args: [] }, score: 0 };
+    if (moves.length === 1) return { move: moves[0], score: 0 };
 
     const plunderMove = moves.find((m) => m.move === "plunder");
     const doNotPlunder = moves.find((m) => m.move === "doNotPlunder");
 
-    if (!plunderMove) return doNotPlunder ?? moves[0];
-    if (!doNotPlunder) return plunderMove;
+    if (!plunderMove) return { move: doNotPlunder ?? moves[0], score: 0 };
+    if (!doNotPlunder) return { move: plunderMove, score: 0 };
 
     const player = G.playerInfo[playerID];
     const w = personality.weights;
@@ -58,6 +58,9 @@ export class PlunderStrategy implements PhaseStrategy {
     const plunderScore = resourceValue + aggressionBonus - heresyCost;
     const passScore = 0.02; // small baseline for not plundering
 
-    return plunderScore > passScore ? plunderMove : doNotPlunder;
+    if (plunderScore > passScore) {
+      return { move: plunderMove, score: plunderScore };
+    }
+    return { move: doNotPlunder, score: passScore };
   }
 }

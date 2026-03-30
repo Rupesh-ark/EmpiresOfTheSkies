@@ -19,7 +19,7 @@ import { buildInitialG, buildPlayer, buildCtx, buildFleet, buildEvents, buildRan
 
 const stubEvents = buildEvents();
 
-function buildCtxWithPhase(playerID: string, phase = "ground_battle") {
+function buildCtxWithPhase(playerID: string, phase = "resolution") {
   return {
     ...buildCtx(playerID),
     currentPlayer: playerID,

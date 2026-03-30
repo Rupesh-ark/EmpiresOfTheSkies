@@ -87,3 +87,60 @@ export const createLogger = (mod: string) => {
     error: (msg: string, data?: Record<string, unknown>) => emit('error', msg, data),
   };
 };
+
+// ── Self-Play Game Event Logger ───────────────────────────────────────────────
+// Writes key game events to /tmp/selfplay_trace.log for game analysis.
+// This is separate from the main game.log which is for live game debugging.
+
+let _traceFilePath: string | null = null;
+
+function getTraceFilePath(): string {
+  if (_traceFilePath === null) {
+    _traceFilePath = '/tmp/selfplay_trace.log';
+  }
+  return _traceFilePath;
+}
+
+export function logGameEvent(category: string, message: string, data?: Record<string, unknown>): void {
+  try {
+    const fs = require('fs') as typeof import('fs');
+    const line = `[EVENT:${category}] ${message}` + (data ? ` ${JSON.stringify(data)}` : '');
+    fs.appendFileSync(getTraceFilePath(), line + '\n');
+  } catch {
+    // Never let file I/O crash the game
+  }
+}
+
+// ── Predefined game event loggers ───────────────────────────────────────────
+
+export const logBattleEvent = (attacker: string, defender: string, type: string, result?: string) => {
+  logGameEvent('BATTLE', `${attacker} vs ${defender} (${type})`, result ? { result } : undefined);
+};
+
+export const logDiscoveryEvent = (player: string, tile: [number, number], race?: string) => {
+  logGameEvent('DISCOVERY', `${player} discovered [${tile}]`, race ? { race } : undefined);
+};
+
+export const logConquestEvent = (player: string, tile: [number, number], action: string) => {
+  logGameEvent('CONQUEST', `${player} ${action} at [${tile}]`);
+};
+
+export const logRebellionEvent = (target: string, event: string) => {
+  logGameEvent('REBELLION', `${event}`, { target });
+};
+
+export const logInvasionEvent = (captainGeneral: string, phase: string) => {
+  logGameEvent('INVASION', `Phase: ${phase}`, { captainGeneral });
+};
+
+export const logElectionEvent = (archprelate: string, results: Record<string, number>) => {
+  logGameEvent('ELECTION', `${archprelate} elected`, { results });
+};
+
+export const logRoundEnd = (round: number, scores: Record<string, number>) => {
+  logGameEvent('ROUND_END', `Round ${round} complete`, { scores });
+};
+
+export const logGameEnd = (winner: string, scores: Record<string, number>) => {
+  logGameEvent('GAME_OVER', `${winner} wins!`, { scores });
+};

@@ -32,13 +32,13 @@ export const MapOverlay = (props: MyGameProps) => {
   const isMyTurn = props.ctx.currentPlayer === props.playerID;
   const turnComplete = playerInfo.turnComplete;
   const showConfirmEndTurn =
-    turnComplete && props.ctx.phase === "actions" && isMyTurn;
+    turnComplete && props.G.stage.phase === "actions" && isMyTurn;
 
   const mood = getMood(props.G.stage);
   const moodTokens = getMoodTokens(mood);
   const shouldPulse = PULSING_MOODS.has(mood);
 
-  const phase = GAME_PHASES.find((p) => p.key === props.ctx.phase);
+  const phase = GAME_PHASES.find((p) => p.key === props.G.stage.phase);
   const phaseName = phase?.label ?? props.G.stage.sub;
   const phaseHint = phase?.hint ?? "";
   const currentPlayerName =
@@ -48,7 +48,7 @@ export const MapOverlay = (props: MyGameProps) => {
   const colour = playerInfo.colour;
 
   const showClear =
-    isMyTurn && props.ctx.numMoves > 0 && props.ctx.phase === "actions";
+    isMyTurn && props.ctx.numMoves > 0 && props.G.stage.phase === "actions";
   const showActions = showClear || showConfirmEndTurn || isMyTurn;
 
   return (

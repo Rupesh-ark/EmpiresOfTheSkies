@@ -18,6 +18,7 @@ import { calculateCombat } from "./combatMath";
 import { drawFortuneOfWarCard, hasFortAt } from "./helpers";
 import { CARD_RESOLVERS, resolveCardWithAlignmentPenalty } from "./legacyCardDefinitions";
 import { KINGDOM_LOCATION } from "../data/gameData";
+import { logRebellionEvent } from "./logger";
 
 // ── Battle math ──────────────────────────────────────────────────────────────
 
@@ -95,7 +96,8 @@ const applyTroopLosses = (
 const resolvePretenderRebellion = (
   G: MyGameState,
   targetID: string,
-  defenderWins: boolean
+  defenderWins: boolean,
+  shuffle: <T>(arr: T[]) => T[]
 ): void => {
   if (defenderWins) {
     addVPAmount(G, targetID, 1);
@@ -108,10 +110,10 @@ const resolvePretenderRebellion = (
       G.cardDecks.legacyDeck.push(currentCard);
       player.resources.legacyCard = undefined;
     }
-    // Draw 1 new card (auto-pick best)
+    // Draw 1 new card — shuffle deck then pop for deterministic PRNG
     if (G.cardDecks.legacyDeck.length > 0) {
-      const idx = Math.floor(Math.random() * G.cardDecks.legacyDeck.length);
-      player.resources.legacyCard = G.cardDecks.legacyDeck.splice(idx, 1)[0];
+      G.cardDecks.legacyDeck = shuffle(G.cardDecks.legacyDeck);
+      player.resources.legacyCard = G.cardDecks.legacyDeck.pop()!;
     }
   }
 };
@@ -210,7 +212,7 @@ export const resolveRebellionEvent = (
   // If no troops committed, rebels auto-win
   if (defenderRegiments === 0 && defenderLevies === 0) {
     logEvent(G, `${kingdom} has no troops \u2014 rebels win automatically`);
-    applyOutcome(G, card, targetPlayerID, false, counterSwords, targetTile);
+    applyOutcome(G, card, targetPlayerID, false, counterSwords, targetTile, shuffle);
     returnCounter(G, card, false, counterSwords);
     return;
   }
@@ -246,7 +248,7 @@ export const resolveRebellionEvent = (
   );
 
   // Apply per-card outcome
-  applyOutcome(G, card, targetPlayerID, defenderWins, counterSwords, targetTile);
+  applyOutcome(G, card, targetPlayerID, defenderWins, counterSwords, targetTile, shuffle);
 
   // Return counter to pool (except Colonial REBELLION loss)
   returnCounter(G, card, defenderWins, counterSwords);
@@ -259,11 +261,12 @@ const applyOutcome = (
   targetID: string,
   defenderWins: boolean,
   counterSwords: number,
-  targetTile?: [number, number]
+  targetTile?: [number, number],
+  shuffle?: <T>(arr: T[]) => T[]
 ): void => {
   switch (card) {
     case "pretender_rebellion":
-      resolvePretenderRebellion(G, targetID, defenderWins);
+      resolvePretenderRebellion(G, targetID, defenderWins, shuffle!);
       break;
     case "peasant_rebellion":
       resolvePeasantRebellion(G, targetID, defenderWins);
@@ -318,6 +321,9 @@ export const setupNextRebellion = (G: MyGameState): boolean => {
   const kingdom = G.playerInfo[event.targetPlayerID].kingdomName;
   logEvent(G, `Rebellion in ${kingdom}! Rebel force: ${counterSwords} swords`);
 
+  // Log to trace for self-play analysis
+  logRebellionEvent(kingdom, `REBELLION_START`);
+
   G.currentRebellion = { event, counterSwords };
   return true;
 };
@@ -340,7 +346,7 @@ export const resolveRebellionWithTroops = (
   // If no troops committed, rebels auto-win
   if (regiments === 0 && levies === 0) {
     logEvent(G, `${kingdom} surrenders \u2014 rebels win automatically`);
-    applyOutcome(G, card, targetPlayerID, false, counterSwords, targetTile);
+    applyOutcome(G, card, targetPlayerID, false, counterSwords, targetTile, shuffle);
     returnCounter(G, card, false, counterSwords);
     return;
   }
@@ -397,7 +403,7 @@ export const resolveRebellionWithTroops = (
     outcome: defenderWins ? `${kingdom} defeats the rebels!` : `Rebels overwhelm ${kingdom}!`,
   };
 
-  applyOutcome(G, card, targetPlayerID, defenderWins, counterSwords, targetTile);
+  applyOutcome(G, card, targetPlayerID, defenderWins, counterSwords, targetTile, shuffle);
   returnCounter(G, card, defenderWins, counterSwords);
 };
 
@@ -431,7 +437,7 @@ export const resolveRebellionWithTroopsAndRivals = (
 
   if (totalDefenderSwords === 0 && defReg === 0 && defLev === 0) {
     logEvent(G, `${kingdom} surrenders \u2014 rebels win automatically`);
-    applyOutcome(G, card, targetPlayerID, false, counterSwords, targetTile);
+    applyOutcome(G, card, targetPlayerID, false, counterSwords, targetTile, shuffle);
     returnCounter(G, card, false, counterSwords);
     returnRivalTroops(G, false, rivalContributions ?? {});
     return;
@@ -490,7 +496,7 @@ export const resolveRebellionWithTroopsAndRivals = (
       : `Rebels overwhelm ${kingdom}!`,
   };
 
-  applyOutcome(G, card, targetPlayerID, defenderWins, counterSwords, targetTile);
+  applyOutcome(G, card, targetPlayerID, defenderWins, counterSwords, targetTile, shuffle);
   returnCounter(G, card, defenderWins, counterSwords);
   returnRivalTroops(G, defenderWins, rivalContributions ?? {});
 };
