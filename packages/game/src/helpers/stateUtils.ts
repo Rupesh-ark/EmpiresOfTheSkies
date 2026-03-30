@@ -135,6 +135,54 @@ export const retreatAllHeresyTrackers = (G: MyGameState) => {
   });
 };
 
+export const calculateMercy = (G: MyGameState) => {
+  // Reset each round before recalculating — previous values remain readable until this runs
+  G.mercyGold = {};
+
+  // 1. Find leader VP
+  const allVPs = Object.values(G.playerInfo).map(p => p.resources.victoryPoints);
+  const leaderVP = Math.max(...allVPs);
+
+  // 2. For each player, calculate mercy
+  for (const [playerID, player] of Object.entries(G.playerInfo)) {
+    const gap = leaderVP - player.resources.victoryPoints;
+    const baseMercy = Math.floor(gap / 3);
+    if (baseMercy <= 0) continue;
+
+    // 3. Count supporting republics
+    let supporting = 0;
+    const playerAlignment = player.hereticOrOrthodox;
+
+    // Venoa — slot 5 in influencePrelates
+    const venoaHeretic = G.eventState.nprHeretic.includes("Venoa");
+    const venoaAlignment = venoaHeretic ? "heretic" : "orthodox";
+    const venoaInfluenced = G.boardState.influencePrelates[5] === playerID;
+    if (venoaAlignment === playerAlignment || venoaInfluenced) supporting++;
+
+    // Zeeland — slot 4 in influencePrelates
+    const zeelandHeretic = G.eventState.nprHeretic.includes("Zeeland");
+    const zeelandAlignment = zeelandHeretic ? "heretic" : "orthodox";
+    const zeelandInfluenced = G.boardState.influencePrelates[4] === playerID;
+    if (zeelandAlignment === playerAlignment || zeelandInfluenced) supporting++;
+
+    // 4. Apply multiplier
+    let mercyGold = 0;
+    if (supporting === 2) {
+      mercyGold = baseMercy;
+    } else if (supporting === 1) {
+      mercyGold = Math.floor(baseMercy * 0.5);
+    }
+    // supporting === 0: no mercy
+
+    // 5. Add gold, record for UI, and log
+    if (mercyGold > 0) {
+      addGoldAmount(G, playerID, mercyGold);
+      G.mercyGold[playerID] = mercyGold;
+      logEvent(G, `${player.kingdomName} receives ${mercyGold} Gold (Mercy of the Republics)`);
+    }
+  }
+};
+
 /**
  * Validates that an outpost/colony transfer from ownerID to targetID at
  * tileCoords is legal. Returns undefined if valid, or an error string if not.

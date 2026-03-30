@@ -16,7 +16,8 @@ export const HERESY_MIN = -9;
 // ── Price marker bounds ───────────────────────────────────────────────────────
 export const PRICE_MARKER_MAX = 4;
 export const PRICE_MARKER_MIN = 1;
-export const FINAL_ROUND = 4;
+export const MIN_ROUNDS = 6;
+export const MAX_ROUNDS = 10;
 export const BASE_GOLD_INCOME = 4;
 export const MAX_COUNSELLORS = 7;
 export const MAX_FACTORIES = 6;

@@ -16,3 +16,5 @@ export * from "./types";
 export * from "./data/gameData"
 
 export { MOVE_DEFINITIONS } from "./moveDefinitions";
+
+export * from "./ai";

@@ -8,7 +8,8 @@
     "strict": false,
     "noImplicitAny": false,
 
-    "moduleResolution": "Node"
+    "moduleResolution": "Node",
+    "resolveJsonModule": true
   },
   "include": ["src"]
 }

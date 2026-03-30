@@ -5,8 +5,8 @@ import { resolveGrandArmyBattle } from "../../helpers/resolveInvasion";
 
 const contributeToGrandArmy: MoveDefinition = {
   fn: ({ G, ctx, playerID, events, random }, ...args) => {
-    const regiments: number = args[0];
-    const levies: number = args[1];
+    const regiments: number = args[0] ?? 0;
+    const levies: number = args[1] ?? 0;
     const skyships: number = args[2] ?? 0;
 
     if (!G.currentInvasion) return INVALID_MOVE;
@@ -20,8 +20,15 @@ const contributeToGrandArmy: MoveDefinition = {
     if (levies > player.resources.levies) return INVALID_MOVE;
     if (skyships > player.resources.skyships) return INVALID_MOVE;
 
-    // Record contribution
-    G.currentInvasion.contributions[playerID] = { regiments, levies, skyships };
+    // Record contribution — coerce to numbers to prevent NaN in battle resolution
+    const safeRegs = Number(regiments) || 0;
+    const safeLevs = Number(levies) || 0;
+    const safeSky = Number(skyships) || 0;
+    G.currentInvasion.contributions[playerID] = {
+      regiments: safeRegs,
+      levies: safeLevs,
+      skyships: safeSky,
+    };
 
     const totalSwords = regiments * 2 + levies + skyships;
     const parts = [];

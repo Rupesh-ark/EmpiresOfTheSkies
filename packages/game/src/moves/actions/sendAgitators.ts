@@ -15,6 +15,9 @@ const validateSendAgitators = (
   if (targetID === playerID) {
     return { code: "SELF_TARGET", message: "Cannot send agitators to yourself" };
   }
+  if (G.playerInfo[playerID].agitatorsSentThisRound.includes(targetID)) {
+    return { code: "ALREADY_SENT", message: "Already sent agitators to this rival this round" };
+  }
   if (G.playerInfo[playerID].resources.gold < AGITATOR_COST) {
     return { code: "INSUFFICIENT_GOLD", message: `Need ${AGITATOR_COST} gold to send agitators` };
   }
@@ -35,6 +38,7 @@ const sendAgitators: MoveDefinition = {
 
     G.playerInfo[playerID].resources.gold -= AGITATOR_COST;
     G.playerInfo[targetID].freeDissenters += 1;
+    G.playerInfo[playerID].agitatorsSentThisRound.push(targetID);
 
     const senderName = G.playerInfo[playerID].kingdomName;
     const targetName = G.playerInfo[targetID].kingdomName;

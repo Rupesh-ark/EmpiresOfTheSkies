@@ -2,7 +2,7 @@ import type { Game, Ctx } from "boardgame.io";
 
 import { LegacyCardInfo, MyGameState, MapState } from "./types";
 
-import { ALL_KA_CARDS, CONTINGENT_COUNTERS, EVENT_HAND_SIZE, FINAL_ROUND, INFIDEL_HOST_COUNTERS, LEGACY_CARDS } from "./data/gameData";
+import { ALL_KA_CARDS, CONTINGENT_COUNTERS, EVENT_HAND_SIZE, MAX_ROUNDS, INFIDEL_HOST_COUNTERS, LEGACY_CARDS } from "./data/gameData";
 import { filterKAPool, seedLegacyDeal, classifyEventDeck } from "./helpers/manufacturedFunSeed";
 import { initialBoardState, initialBattleMapState } from "./setup/boardSetup";
 import {
@@ -83,7 +83,7 @@ import resolveEventChoice from "./moves/events/resolveEventChoice";
 import immediateElectionVote from "./moves/events/immediateElectionVote";
 import { ALL_EVENT_CARD_NAMES } from "./helpers/eventCardDefinitions";
 import { prepareInfidelFleetCombat } from "./helpers/resolveInfidelFleet";
-import { continueResolution } from "./helpers/resolutionFlow";
+import { continueResolution, getResolutionTarget } from "./helpers/resolutionFlow";
 import respondToInfidelFleet from "./moves/events/respondToInfidelFleet";
 import commitRebellionTroops from "./moves/events/commitRebellionTroops";
 import contributeToRebellion from "./moves/events/contributeToRebellion";
@@ -91,7 +91,7 @@ import offerBuyoffGold from "./moves/events/offerBuyoffGold";
 import nominateCaptainGeneral from "./moves/events/nominateCaptainGeneral";
 import commitDeferredBattleCard from "./moves/events/commitDeferredBattleCard";
 import contributeToGrandArmy from "./moves/events/contributeToGrandArmy";
-import { logEvent, allPlayersPassed } from "./helpers/stateUtils";
+import { logEvent, allPlayersPassed, calculateMercy } from "./helpers/stateUtils";
 import { wrapMove, withPhaseGuard, withPhaseReset, checkLoopGuard } from "./helpers/moveWrapper";
 import { createLogger } from "./helpers/logger";
 
@@ -165,7 +165,7 @@ const MyGame: Game<MyGameState> = {
       voteSubmitted: {},
       consecutiveArchprelateWins: 0,
       round: 0,
-      finalRound: FINAL_ROUND,
+      finalRound: MAX_ROUNDS,
       firstTurnOfRound: true,
       mustContinueDiscovery: false,
       nprCathedrals,
@@ -186,6 +186,7 @@ const MyGame: Game<MyGameState> = {
       infidelFleetCombat: null,
       currentDeferredBattle: null,
       pendingDeal: undefined,
+      mercyGold: {},
       _loopGuard: 0,
       _halted: false,
       eventState: {
@@ -436,6 +437,7 @@ const MyGame: Game<MyGameState> = {
           }
           context.G.playerInfo[id].resources.gold += Math.max(0, income);
         });
+        calculateMercy(context.G);
         logEvent(context.G, `Taxes collected${taxMod !== 0 ? ` (modifier: ${taxMod > 0 ? "+" : ""}${taxMod})` : ""}`);
         context.events.endPhase();
       },
@@ -645,14 +647,24 @@ const MyGame: Game<MyGameState> = {
       turn: {
         order: TurnOrder.CUSTOM_FROM("turnOrder"),
         onBegin: (context) => {
-          // Auto-skip players with no deployed fleets during retrieve fleets stage
+          // Redirect turn to the correct player for the current stage.
+          // Phase onBegin sets up G.stage but cannot call endTurn (boardgame.io
+          // silently discards it — see docs/BOARDGAMEIO_ENDTURN_ONBEGIN.md).
+          // This hook runs AFTER the turn is initialized, so endTurn works here.
+          const target = getResolutionTarget(context.G);
+          if (target && target !== context.ctx.currentPlayer) {
+            context.events.endTurn({ next: target });
+            return;
+          }
+
+          // Auto-skip players with no retrievable fleets during retrieve fleets stage
           if (context.G.stage !== "retrieve fleets") return;
           const playerID = context.ctx.currentPlayer;
           const player = context.G.playerInfo[playerID];
-          const hasDeployedFleets = player.fleetInfo.some(
-            (f) => f.skyships > 0 && (f.location[0] !== 4 || f.location[1] !== 0)
+          const hasRetrievableFleets = player.fleetInfo.some(
+            (f: any) => f.skyships > 0 && (f.location[0] !== 4 || f.location[1] !== 0)
           );
-          if (!hasDeployedFleets) {
+          if (!hasRetrievableFleets || player.passed) {
             player.passed = true;
             if (allPlayersPassed(context.G)) {
               context.events.endPhase();
@@ -669,20 +681,20 @@ const MyGame: Game<MyGameState> = {
         const hasCombat = prepareInfidelFleetCombat(context.G);
 
         if (hasCombat) {
-          // Interactive: target player chooses fight or evade
+          // State setup only — turn.onBegin handles the endTurn redirect
           context.G.stage = "infidel_fleet_combat";
-          context.events.endTurn({
-            next: context.G.infidelFleetCombat!.targetPlayerID,
-          });
         } else {
-          // No Fleet combat — continue to deferred events, rebellions, invasion
-          continueResolution(context.G, context.events);
+          // No Fleet combat — set up deferred events, rebellions, invasion
+          // skipEndTurn=true: endTurn is discarded in phase onBegin (boardgame.io bug)
+          // turn.onBegin will redirect via getResolutionTarget()
+          continueResolution(context.G, context.events, true);
         }
       },
       onEnd: (context) => {
         resolveRound(context.G, context.events, context.random);
       },
       moves: {
+        pass: wrapMove("pass", pass),
         retrieveFleets: wrapMove("retrieveFleets", retrieveFleets),
         commitRebellionTroops: wrapMove("commitRebellionTroops", commitRebellionTroops),
         contributeToRebellion: wrapMove("contributeToRebellion", contributeToRebellion),
@@ -761,6 +773,7 @@ const MyGame: Game<MyGameState> = {
           pb.dispatchSkyshipFleet = false;
           pb.trainTroops = false;
           pb.dispatchDisabled = false;
+          player.agitatorsSentThisRound = [];
         });
 
         context.events.endPhase();

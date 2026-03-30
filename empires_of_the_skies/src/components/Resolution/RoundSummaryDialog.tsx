@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { List, ListItem, ListItemText, ListItemIcon, Divider } from "@mui/material";
 import { Gavel, AttachMoney, Shield, HowToVote, Warning } from "@mui/icons-material";
-import { GiTrumpetFlag } from "react-icons/gi";
+import { GiTrumpetFlag, GiTwoCoins } from "react-icons/gi";
 import { MyGameProps, EVENT_CARD_DEFS } from "@eots/game";
 import { DialogShell } from "@/components/atoms/DialogShell";
 import React from "react";
@@ -48,6 +48,17 @@ const RoundSummaryDialog = (props: MyGameProps) => {
     summaryItems.push({
       icon: <AttachMoney />,
       text: "Taxes will be skipped next round (Peasant Rebellion)",
+    });
+  }
+
+  const mercyEntries = Object.entries(props.G.mercyGold ?? {});
+  if (mercyEntries.length > 0) {
+    const details = mercyEntries
+      .map(([id, gold]) => `${props.G.playerInfo[id]?.kingdomName}: +${gold}`)
+      .join(", ");
+    summaryItems.push({
+      icon: <GiTwoCoins style={{ fontSize: 20 }} />,
+      text: `Mercy of the Republics — ${details}`,
     });
   }
 

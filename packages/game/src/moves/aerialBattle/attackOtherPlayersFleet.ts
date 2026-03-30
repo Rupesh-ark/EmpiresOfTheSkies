@@ -2,6 +2,18 @@ import { MoveDefinition } from "../../types";
 import { removeVPAmount } from "../../helpers/stateUtils";
 
 const attackOtherPlayersFleet: MoveDefinition = {
+  validate: (G, playerID, ...args) => {
+    const defenderID = args[0];
+    const [x, y] = G.mapState.currentBattle;
+    const playersAtTile = G.mapState.battleMap[y]?.[x] ?? [];
+    if (!defenderID || defenderID === playerID) {
+      return { code: "INVALID_TARGET", message: "Cannot attack yourself" };
+    }
+    if (!playersAtTile.includes(defenderID)) {
+      return { code: "INVALID_TARGET", message: "Defender is not at this battle tile" };
+    }
+    return null;
+  },
   fn: ({ G, playerID, events }, ...args) => {
     const defenderID: string = args[0];
 

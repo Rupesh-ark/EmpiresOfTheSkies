@@ -453,8 +453,13 @@ export const resolveBattleAndReturnWinner = (
         } catch {
           G.validRelocationTiles = [];
         }
-        G.stage = "relocate loser";
-        events.endTurn({ next: winner });
+        if (G.validRelocationTiles.length === 0) {
+          // No valid relocation destinations — skip relocate stage, advance battle
+          findNextPlayerInBattleSequence(winner, ctx, G, events);
+        } else {
+          G.stage = "relocate loser";
+          events.endTurn({ next: winner });
+        }
       }
     }
   } else {

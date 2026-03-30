@@ -607,10 +607,10 @@ export const resolveEventCard = (
       }
       for (const row of G.mapState.buildings) {
         for (const tile of row) {
-          tile.garrisonedRegiments -= Math.floor(
-            tile.garrisonedRegiments / 2
-          );
-          tile.garrisonedLevies -= Math.floor(tile.garrisonedLevies / 2);
+          const gr = tile.garrisonedRegiments ?? 0;
+          const gl = tile.garrisonedLevies ?? 0;
+          tile.garrisonedRegiments = gr - Math.floor(gr / 2);
+          tile.garrisonedLevies = gl - Math.floor(gl / 2);
         }
       }
       logEvent(G, "The Faerie Plague: all players lose half their troops (rounded down) everywhere");

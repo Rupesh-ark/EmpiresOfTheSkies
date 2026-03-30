@@ -27,6 +27,7 @@ export function buildPlayer(id: string, overrides: Partial<PlayerInfo> = {}): Pl
     prisoners: 0,
     freeDissenters: 0,
     piracyIntent: "tax" as const,
+    agitatorsSentThisRound: [],
     shipyards: 0,
     factories: 1,      // v4.2: all players start with 1 factory
     cathedrals: 1,
@@ -125,7 +126,7 @@ export function buildInitialG(
   return {
     stage: "actions",
     round: 1,
-    finalRound: 4,
+    finalRound: 10,
     firstTurnOfRound: true,
     mustContinueDiscovery: false,
     nprCathedrals: {},
@@ -175,6 +176,7 @@ export function buildInitialG(
     infidelFleetCombat: null,
     pendingDeal: undefined,
     currentDeferredBattle: null,
+    mercyGold: {},
     _loopGuard: 0,
     _halted: false,
     eventState: {

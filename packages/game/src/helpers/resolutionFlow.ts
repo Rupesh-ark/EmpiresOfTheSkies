@@ -19,10 +19,16 @@ import { EventsAPI } from "boardgame.io/dist/types/src/plugins/events/events";
  * Set up the next non-rebellion deferred battle for interactive resolution.
  * If one exists, transitions to deferred_battle stage and pauses.
  * If none remain, continues to rebellions → invasion → retrieve fleets.
+ *
+ * @param skipEndTurn — if true, sets G.stage but does NOT call endTurn.
+ *   Used when called from phase onBegin where endTurn is silently discarded
+ *   by boardgame.io (see docs/BOARDGAMEIO_ENDTURN_ONBEGIN.md).
+ *   The turn.onBegin hook handles redirection via getResolutionTarget().
  */
 export const setupNextDeferredBattle = (
   G: MyGameState,
-  events: EventsAPI
+  events: EventsAPI,
+  skipEndTurn = false
 ): void => {
   // Find next non-rebellion deferred event
   const idx = G.eventState.deferredEvents.findIndex(
@@ -36,12 +42,12 @@ export const setupNextDeferredBattle = (
       description: getDeferredBattleDescription(G, event),
     };
     G.stage = "deferred_battle";
-    events.endTurn({ next: event.targetPlayerID });
+    if (!skipEndTurn) events.endTurn({ next: event.targetPlayerID });
     return;
   }
 
   // No more deferred battles — continue to rebellions → invasion
-  continueAfterDeferredBattles(G, events);
+  continueAfterDeferredBattles(G, events, skipEndTurn);
 };
 
 /**
@@ -49,12 +55,13 @@ export const setupNextDeferredBattle = (
  */
 const continueAfterDeferredBattles = (
   G: MyGameState,
-  events: EventsAPI
+  events: EventsAPI,
+  skipEndTurn = false
 ): void => {
   // Interactive rebellions
   if (G.eventState.deferredEvents.length > 0 && setupNextRebellion(G)) {
     G.stage = "rebellion";
-    events.endTurn({ next: G.currentRebellion!.event.targetPlayerID });
+    if (!skipEndTurn) events.endTurn({ next: G.currentRebellion!.event.targetPlayerID });
     return;
   }
 
@@ -64,24 +71,53 @@ const continueAfterDeferredBattles = (
     const archprelate = getArchprelateForNomination(G);
     if (archprelate) {
       G.stage = "invasion_nominate";
-      events.endTurn({ next: archprelate });
+      if (!skipEndTurn) events.endTurn({ next: archprelate });
       return;
     }
   }
 
   // Nothing interactive left — retrieve fleets
   G.stage = "retrieve fleets";
-  events.endTurn({ next: G.turnOrder[0] });
+  if (!skipEndTurn) events.endTurn({ next: G.turnOrder[0] });
 };
 
 /**
  * Continue the Resolution flow from the current point.
  * Entry point called from Resolution onBegin and after Fleet combat.
+ *
+ * @param skipEndTurn — pass true when called from phase onBegin
  */
 export const continueResolution = (
   G: MyGameState,
-  events: EventsAPI
+  events: EventsAPI,
+  skipEndTurn = false
 ): void => {
   // Try to set up first deferred battle (interactive)
-  setupNextDeferredBattle(G, events);
+  setupNextDeferredBattle(G, events, skipEndTurn);
+};
+
+/**
+ * Determine which player should have the turn for the current resolution stage.
+ * Pure read — no side effects. Used by turn.onBegin to redirect the turn
+ * when phase onBegin couldn't (see docs/BOARDGAMEIO_ENDTURN_ONBEGIN.md).
+ *
+ * Returns the target playerID, or null if normal turn order is fine.
+ */
+export const getResolutionTarget = (G: MyGameState): string | null => {
+  switch (G.stage) {
+    case "infidel_fleet_combat":
+      return G.infidelFleetCombat?.targetPlayerID ?? null;
+
+    case "deferred_battle":
+      return G.currentDeferredBattle?.event.targetPlayerID ?? null;
+
+    case "rebellion":
+      return G.currentRebellion?.event.targetPlayerID ?? null;
+
+    case "invasion_nominate":
+      return Object.values(G.playerInfo).find((p) => p.isArchprelate)?.id ?? null;
+
+    default:
+      return null; // retrieve fleets, rebellion_rival_support, etc. use normal turn order
+  }
 };

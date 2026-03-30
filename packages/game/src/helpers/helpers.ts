@@ -227,13 +227,62 @@ export const checkIfCurrentPlayerIsInCurrentBattle = (
   events: EventsAPI
 ) => {
   const [x, y] = G.mapState.currentBattle;
+
   if (G.mapState.battleMap[y][x].length > 0) {
+    // ── Battle sub-stage routing ──────────────────────────────────────
+    // Each sub-stage has a specific player who should act. Route to them.
+    // Uses ctx.phase to disambiguate shared G.stage values, and
+    // G.battleState to identify attacker/defender/victor.
+    const bs = G.battleState;
+    if (bs && (ctx.phase === "aerial_battle" || ctx.phase === "ground_battle")) {
+      let target: string | undefined;
+
+      switch (G.stage) {
+        case "attack or pass":
+          // Normal turn order — attacker picks target or passes
+          break;
+
+        case "attack or evade":   // aerial: defender decides to evade or fight
+        case "defend or yield":   // ground: defender decides to defend or yield
+          target = bs.defender?.id;
+          break;
+
+        case "resolve battle":
+          // Both sides commit FoW cards — route to whoever hasn't committed yet
+          if (!bs.attacker?.fowCard) target = bs.attacker?.id;
+          else if (!bs.defender?.fowCard) target = bs.defender?.id;
+          break;
+
+        case "relocate loser":
+          // After evasion: attacker relocates the evader
+          // After battle: victor relocates the loser
+          if (bs.defender?.decision === "evade") {
+            target = bs.attacker?.id;
+          } else {
+            target = bs.attacker?.victorious ? bs.attacker.id : bs.defender?.id;
+          }
+          break;
+
+        case "garrison troops":
+          // Victor garrisons troops at the captured building
+          target = bs.attacker?.victorious ? bs.attacker.id : bs.defender?.id;
+          break;
+      }
+
+      if (target && target !== ctx.currentPlayer) {
+        events.endTurn({ next: target });
+        return;
+      }
+    }
+
+    // Fallback: if current player isn't on this tile at all, redirect to first player there
     if (!G.mapState.battleMap[y][x].includes(ctx.currentPlayer)) {
       events.endTurn({
         next: G.mapState.battleMap[y][x][0],
       });
     }
   } else {
+    // No players on this tile — advance to next battle/conquest
     switch (ctx.phase) {
       case "aerial_battle":
         findNextBattle(G, events);

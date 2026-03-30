@@ -553,10 +553,19 @@ const TileDetailContent = ({
       );
 
     case "land":
-    default:
+    default: {
+      const bld = G.mapState.buildings[y]?.[x];
+      const isColony = bld?.buildings === "colony";
+      const garSwords = isColony
+        ? (bld.garrisonedRegiments ?? 0) * 2 + (bld.garrisonedLevies ?? 0) + (bld.garrisonedEliteRegiments ?? 0) * 3
+        : tile.sword;
+      const garShields = isColony
+        ? (bld.fort ? (bld.garrisonedRegiments ?? 0) + (bld.garrisonedLevies ?? 0) + (bld.garrisonedEliteRegiments ?? 0) : 0)
+        : tile.shield;
+
       return (
         <>
-          {/* Combat stats */}
+          {/* Combat stats — garrison strength for colonies, native values otherwise */}
           <Box sx={{
             display: "flex", gap: 1.5, mb: 1.5,
           }}>
@@ -568,8 +577,8 @@ const TileDetailContent = ({
               border: "1px solid rgba(139,0,0,0.15)",
             }}>
               <Sword size={15} />
-              <Typography sx={{ fontSize: "0.9rem", fontWeight: 800, color: "#8B0000" }}>{tile.sword}</Typography>
-              <Typography sx={{ fontSize: "0.72rem", color: "rgba(0,0,0,0.4)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em" }}>ATK</Typography>
+              <Typography sx={{ fontSize: "0.9rem", fontWeight: 800, color: "#8B0000" }}>{garSwords}</Typography>
+              <Typography sx={{ fontSize: "0.72rem", color: "rgba(0,0,0,0.4)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em" }}>{isColony ? "GAR" : "ATK"}</Typography>
             </Box>
             <Box sx={{
               flex: 1,
@@ -579,8 +588,8 @@ const TileDetailContent = ({
               border: "1px solid rgba(74,103,65,0.15)",
             }}>
               <Shield size={15} />
-              <Typography sx={{ fontSize: "0.9rem", fontWeight: 800, color: "#4A6741" }}>{tile.shield}</Typography>
-              <Typography sx={{ fontSize: "0.72rem", color: "rgba(0,0,0,0.4)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em" }}>DEF</Typography>
+              <Typography sx={{ fontSize: "0.9rem", fontWeight: 800, color: "#4A6741" }}>{garShields}</Typography>
+              <Typography sx={{ fontSize: "0.72rem", color: "rgba(0,0,0,0.4)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em" }}>{isColony ? "GAR" : "DEF"}</Typography>
             </Box>
           </Box>
 
@@ -618,6 +627,7 @@ const TileDetailContent = ({
           <TilePresence G={G} x={x} y={y} />
         </>
       );
+    }
   }
 };
 

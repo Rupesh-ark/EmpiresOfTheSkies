@@ -124,6 +124,8 @@ export interface MyGameState {
     event: DeferredEvent;
     description: string;
   } | null;
+  /** Maps playerID to mercy gold received this round — read by RoundSummaryDialog */
+  mercyGold: Record<string, number>;
   _loopGuard: number;
   _halted: boolean;
 }
@@ -232,6 +234,8 @@ export type PlayerInfo = {
   freeDissenters: number;
   /** Piracy intent for this round: "tax" (default) or "cut" (remove a skyship instead) */
   piracyIntent: "tax" | "cut";
+  /** Rival player IDs already targeted by Send Agitators this round */
+  agitatorsSentThisRound: string[];
   shipyards: number;
   factories: number;
   troopsToGarrison?: TroopInfo;
