@@ -1,0 +1,44 @@
+{
+  "name": "empires_of_the_skies",
+  "private": false,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "pnpm --filter @eots/game build && vite build",
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@boardgame.io/p2p": "^0.4.4",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "@mui/icons-material": "^7.3.8",
+    "@mui/lab": "7.0.1-beta.22",
+    "@mui/material": "^7.3.8",
+    "boardgame.io": "^0.50.2",
+    "react": "^18.3.1",
+    "react-card-flip": "^1.2.3",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^7.13.0",
+    "react-zoom-pan-pinch": "^3.7.0",
+    "use-long-press": "^3.3.0",
+    "@eots/game": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.19.11",
+    "@types/react": "^18.3.28",
+    "@types/react-dom": "^18.3.7",
+    "@typescript-eslint/eslint-plugin": "^8.56.0",
+    "@typescript-eslint/parser": "^8.56.0",
+    "@vitejs/plugin-react": "^4.7.0",
+    "eslint": "^9.39.2",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-react-refresh": "^0.4.26",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3",
+    "vite": "^5.4.21"
+  }
+}
