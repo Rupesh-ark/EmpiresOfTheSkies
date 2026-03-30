@@ -1,5 +1,6 @@
 import { MoveDefinition, MyGameState, MoveError } from "../../types";
 import { FOW_HAND_MAX } from "../../data/gameData";
+import { setStage } from "../../helpers/stageUtils";
 
 const validateDiscardFoWCard = (G: MyGameState, playerID: string, cardIndex: number): MoveError | null => {
   const hand = G.playerInfo[playerID].resources.fortuneCards;
@@ -17,7 +18,7 @@ const discardFoWCard: MoveDefinition = {
     hand.splice(cardIndex, 1);
 
     if (hand.length <= FOW_HAND_MAX) {
-      G.stage = "actions";
+      setStage(G, "actions", "default");
       events.endTurn();
     }
   },

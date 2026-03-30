@@ -205,7 +205,7 @@ describe("commitRebellionTroops — flow control", () => {
     ]);
     G.currentRebellion = buildRebellion("0");
     const { events } = callCommit(G, "0", 3, 0, undefined, ["0", "1"]);
-    expect(G.stage).toBe("rebellion_rival_support");
+    expect(G.stage).toEqual({ phase: "resolution", sub: "rebellion_rival_support" });
     expect(events.endTurn).toHaveBeenCalledWith({ next: "1" });
   });
 
@@ -388,7 +388,7 @@ function buildBuildingsGrid(): MapBuildingInfo[][] {
   const COLS = 8;
   const row: MapBuildingInfo[] = [];
   for (let c = 0; c < COLS; c++) {
-    row.push({ fort: false, garrisonedRegiments: 0, garrisonedLevies: 0, garrisonedEliteRegiments: 0 });
+    row.push({ fort: [], garrisonedRegiments: 0, garrisonedLevies: 0, garrisonedEliteRegiments: 0 });
   }
   return [row];
 }
@@ -414,7 +414,7 @@ describe("resolveRebellionWithTroops — fort bonus at Kingdom location", () => 
     ]);
     G.mapState.buildings = buildBuildingsGrid();
     // Place fort at KINGDOM_LOCATION [4,0] → buildings[0][4]
-    G.mapState.buildings[0][4].fort = true;
+    G.mapState.buildings[0][4].fort = ["0"];
 
     // Rebel: 6 swords, FoW gives rebel 2S/0Sh, defender 0S/0Sh
     // Defender: 3 reg = 6S, fort shields = 3 (one per reg)
@@ -454,7 +454,7 @@ describe("resolveRebellionWithTroops — fort bonus at Kingdom location", () => 
     ]);
     G.mapState.buildings = buildBuildingsGrid();
     // No fort at Kingdom location
-    G.mapState.buildings[0][4].fort = false;
+    G.mapState.buildings[0][4].fort = [];
 
     seedFowDeck(G, [
       { sword: 2, shield: 0 },  // rebel FoW

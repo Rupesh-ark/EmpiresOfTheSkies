@@ -15,6 +15,7 @@ import {
   increaseOrthodoxyWithinMove,
   logEvent,
 } from "./stateUtils";
+import { calculateCombat } from "./combatMath";
 import { drawFortuneOfWarCard } from "./helpers";
 import {
   INFIDEL_EMPIRE_LOCATION,
@@ -173,13 +174,10 @@ export const resolveGrandArmyBattle = (G: MyGameState, shuffle: <T>(arr: T[]) =>
   const fowArmy = drawFortuneOfWarCard(G, shuffle);
   const fowInfidel = drawFortuneOfWarCard(G, shuffle);
 
-  const hitsOnInfidel = Math.max(
-    0,
-    grandArmySwords + fowArmy.sword - infidelShields - fowInfidel.shield
-  );
-  const hitsOnArmy = Math.max(
-    0,
-    infidelSwords + fowInfidel.sword - grandArmyShields - fowArmy.shield
+  // Grand Army = attacker, Infidel = defender
+  const { hitsOnDefender: hitsOnInfidel, hitsOnAttacker: hitsOnArmy } = calculateCombat(
+    { swords: grandArmySwords, shields: grandArmyShields, fowSword: fowArmy.sword, fowShield: fowArmy.shield },
+    { swords: infidelSwords, shields: infidelShields, fowSword: fowInfidel.sword, fowShield: fowInfidel.shield },
   );
 
   const grandArmyWins = hitsOnInfidel >= infidelSwords;

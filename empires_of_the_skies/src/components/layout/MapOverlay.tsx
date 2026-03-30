@@ -39,7 +39,7 @@ export const MapOverlay = (props: MyGameProps) => {
   const shouldPulse = PULSING_MOODS.has(mood);
 
   const phase = GAME_PHASES.find((p) => p.key === props.ctx.phase);
-  const phaseName = phase?.label ?? props.G.stage;
+  const phaseName = phase?.label ?? props.G.stage.sub;
   const phaseHint = phase?.hint ?? "";
   const currentPlayerName =
     props.matchData?.find((p) => String(p.id) === props.ctx.currentPlayer)

@@ -51,9 +51,9 @@ const garrisonTroops: MoveDefinition = {
 
     G.playerInfo[playerID].troopsToGarrison = undefined;
 
-    if (ctx.phase === "ground_battle") {
+    if (G.stage.sub === "ground_garrison") {
       findNextGroundBattle(G, events);
-    } else if (ctx.phase === "conquest") {
+    } else if (G.stage.sub === "conquest_garrison") {
       findNextConquest(G, events);
     }
   },

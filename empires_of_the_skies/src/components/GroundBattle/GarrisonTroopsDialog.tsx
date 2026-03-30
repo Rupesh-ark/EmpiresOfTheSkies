@@ -198,19 +198,19 @@ const GarrisonTroopsDialog = (props: MyGameProps) => {
 
   // Auto-skip if no troops to garrison
   if (
-    props.G.stage === "garrison troops" &&
+    (props.G.stage.sub === "ground_garrison" || props.G.stage.sub === "conquest_garrison") &&
     props.ctx.currentPlayer === props.playerID &&
     !(
-      props.ctx.phase === "ground_battle" &&
+      props.G.stage.sub === "ground_garrison" &&
       inCurrentBattle &&
       props.G.battleState?.attacker.id === props.playerID &&
       props.G.battleState.attacker.victorious === true &&
       hasTroopsToGarrison
     ) &&
-    !(props.ctx.phase === "conquest" && inCurrentBattle && hasTroopsToGarrison)
+    !(props.G.stage.sub === "conquest_garrison" && inCurrentBattle && hasTroopsToGarrison)
   ) {
     log.info("garrison dialog", { phase: props.ctx.phase });
-    props.ctx.phase === "ground_battle"
+    props.G.stage.sub === "ground_garrison"
       ? props.moves.doNotGroundAttack()
       : props.moves.doNothing();
   }
@@ -278,13 +278,13 @@ const GarrisonTroopsDialog = (props: MyGameProps) => {
 
   const isOpen =
     props.ctx.currentPlayer === props.playerID &&
-    props.G.stage === "garrison troops" &&
-    ((props.ctx.phase === "ground_battle" &&
+    (props.G.stage.sub === "ground_garrison" || props.G.stage.sub === "conquest_garrison") &&
+    ((props.G.stage.sub === "ground_garrison" &&
       inCurrentBattle &&
       props.G.battleState?.attacker.id === props.playerID &&
       props.G.battleState.attacker.victorious === true &&
       hasTroopsToGarrison) ||
-      (props.ctx.phase === "conquest" &&
+      (props.G.stage.sub === "conquest_garrison" &&
         inCurrentBattle &&
         hasTroopsToGarrison));
 
@@ -313,7 +313,7 @@ const GarrisonTroopsDialog = (props: MyGameProps) => {
       cancelLabel="Pass"
       cancelColor="error"
       onCancel={() => {
-        props.ctx.phase === "ground_battle"
+        props.G.stage.sub === "ground_garrison"
           ? props.moves.doNotGroundAttack()
           : props.moves.doNothing();
       }}

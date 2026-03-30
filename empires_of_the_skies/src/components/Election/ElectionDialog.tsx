@@ -15,13 +15,13 @@ const ElectionDialog = (props: ElectionDialogProps) => {
   const { immediate = false } = props;
 
   const isVoting = immediate
-    ? props.G.stage === "immediate_election" &&
+    ? props.G.stage.sub === "immediate_election" &&
       props.playerID != null &&
       props.ctx.currentPlayer === props.playerID &&
       !props.G.hasVoted.includes(props.playerID)
-    : props.ctx.phase === "election" &&
+    : props.G.stage.sub === "election" &&
       props.playerID != null &&
-      props.ctx.activePlayers?.[props.playerID] === "voting" &&
+      props.ctx.currentPlayer === props.playerID &&
       !props.G.hasVoted.includes(props.playerID);
 
   const buttons = props.ctx.playOrder.map((id) => {

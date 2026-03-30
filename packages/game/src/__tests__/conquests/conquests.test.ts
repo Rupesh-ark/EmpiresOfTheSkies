@@ -102,7 +102,7 @@ describe("constructOutpost — placing an outpost", () => {
     G.mapState.currentBattle = [0, 0];
     const ctx = { ...buildCtx("0"), currentPlayer: "0" };
     constructOutpost.fn({ G, ctx, playerID: "0", events: stubEvents, random: buildRandom() });
-    expect(G.stage).toBe("garrison troops");
+    expect(G.stage).toEqual({ phase: "resolution", sub: "conquest_garrison" });
   });
 
   it("decreases mithril price marker by loot quantity (min 1)", () => {
@@ -156,7 +156,7 @@ describe("coloniseLand — initiating a colonisation attempt", () => {
     G.mapState.currentBattle = [0, 0];
     const ctx = { ...buildCtx("0"), currentPlayer: "0" };
     coloniseLand.fn({ G, ctx, playerID: "0", events: stubEvents, random: buildRandom() });
-    expect(G.stage).toBe("conquest draw or pick card");
+    expect(G.stage).toEqual({ phase: "resolution", sub: "conquest_draw_or_pick" });
   });
 
   it("returns INVALID_MOVE if another player owns a building at the tile", () => {
@@ -178,7 +178,7 @@ describe("coloniseLand — initiating a colonisation attempt", () => {
     G.mapState.buildings[0][0].player = G.playerInfo["0"];
     const ctx = { ...buildCtx("0"), currentPlayer: "0" };
     coloniseLand.fn({ G, ctx, playerID: "0", events: stubEvents, random: buildRandom() });
-    expect(G.stage).toBe("conquest draw or pick card");
+    expect(G.stage).toEqual({ phase: "resolution", sub: "conquest_draw_or_pick" });
   });
 
   it("returns INVALID_MOVE if player already failed conquest at this tile this round", () => {
@@ -198,6 +198,6 @@ describe("coloniseLand — initiating a colonisation attempt", () => {
     G.failedConquests = [{ playerId: "1", tile: [0, 0] }];
     const ctx = { ...buildCtx("0"), currentPlayer: "0" };
     coloniseLand.fn({ G, ctx, playerID: "0", events: stubEvents, random: buildRandom() });
-    expect(G.stage).toBe("conquest draw or pick card");
+    expect(G.stage).toEqual({ phase: "resolution", sub: "conquest_draw_or_pick" });
   });
 });

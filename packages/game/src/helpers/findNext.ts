@@ -2,6 +2,7 @@ import { Ctx } from "boardgame.io";
 import { MyGameState } from "../types";
 import { sortPlayersInPlayerOrder } from "./helpers";
 import { EventsAPI } from "boardgame.io/dist/types/src/plugins/events/events";
+import { setStage } from "./stageUtils";
 
 /** Compute the list of other players at the current battle tile (possible defenders). */
 const computeDefendersAtBattle = (G: MyGameState, nextPlayer: string): void => {
@@ -11,7 +12,12 @@ const computeDefendersAtBattle = (G: MyGameState, nextPlayer: string): void => {
   );
 };
 
-export const findNextBattle = (G: MyGameState, events: EventsAPI) => {
+export const findNextBattle = (
+  G: MyGameState,
+  events: EventsAPI,
+  skipEndTurn = false,
+  onExhausted?: (G: MyGameState, events: EventsAPI) => void
+) => {
   for (let y = G.mapState.currentBattle[1]; y < 4; y++) {
     for (let x = 0; x < 8; x++) {
       if (
@@ -25,18 +31,26 @@ export const findNextBattle = (G: MyGameState, events: EventsAPI) => {
         const nextPlayer = sortPlayersInPlayerOrder(playerIDs, G)[0];
         G.mapState.currentBattle = [x, y];
         G.battleState = undefined;
-        G.stage = "attack or pass";
+        setStage(G, "resolution", "aerial_attack_or_pass");
         computeDefendersAtBattle(G, nextPlayer);
-        events.endTurn({ next: nextPlayer });
+        if (!skipEndTurn) events.endTurn({ next: nextPlayer });
         return;
       }
     }
   }
   G.mapState.currentBattle = [0, 0];
-  events.endPhase();
+  if (onExhausted) {
+    onExhausted(G, events);
+  } else {
+    events.endPhase();
+  }
 };
 
-export const findNextPlunder = (G: MyGameState, events: EventsAPI): void => {
+export const findNextPlunder = (
+  G: MyGameState,
+  events: EventsAPI,
+  onExhausted?: (G: MyGameState, events: EventsAPI) => void
+): void => {
   for (let y = G.mapState.currentBattle[1]; y < 4; y++) {
     for (let x = 0; x < 8; x++) {
       if (
@@ -50,19 +64,23 @@ export const findNextPlunder = (G: MyGameState, events: EventsAPI): void => {
       ) {
         const nextPlayer = G.mapState.battleMap[y][x][0];
         G.mapState.currentBattle = [x, y];
-        G.stage = "plunder legends";
+        setStage(G, "resolution", "plunder_legends");
         events.endTurn({ next: nextPlayer });
         return;
       }
     }
   }
   G.mapState.currentBattle = [0, 0];
-  G.stage = "attack or pass";
-  events.endPhase();
+  if (onExhausted) {
+    onExhausted(G, events);
+  } else {
+    events.endPhase();
+  }
 };
 export const findNextGroundBattle = (
   G: MyGameState,
-  events: EventsAPI
+  events: EventsAPI,
+  onExhausted?: (G: MyGameState, events: EventsAPI) => void
 ): void => {
   for (let y = G.mapState.currentBattle[1]; y < 4; y++) {
     for (let x = 0; x < 8; x++) {
@@ -79,7 +97,7 @@ export const findNextGroundBattle = (
       ) {
         const nextPlayer = G.mapState.battleMap[y][x][0];
         G.mapState.currentBattle = [x, y];
-        G.stage = "attack or pass";
+        setStage(G, "resolution", "ground_attack_or_pass");
         computeDefendersAtBattle(G, nextPlayer);
         events.endTurn({ next: nextPlayer });
         return;
@@ -87,11 +105,18 @@ export const findNextGroundBattle = (
     }
   }
   G.mapState.currentBattle = [0, 0];
-  G.stage = "conquest";
-  events.endPhase();
+  if (onExhausted) {
+    onExhausted(G, events);
+  } else {
+    events.endPhase();
+  }
 };
 
-export const findNextConquest = (G: MyGameState, events: EventsAPI) => {
+export const findNextConquest = (
+  G: MyGameState,
+  events: EventsAPI,
+  onExhausted?: (G: MyGameState, events: EventsAPI) => void
+) => {
   for (let y = G.mapState.currentBattle[1]; y < 4; y++) {
     for (let x = 0; x < 8; x++) {
       if (
@@ -110,20 +135,23 @@ export const findNextConquest = (G: MyGameState, events: EventsAPI) => {
       ) {
         const nextPlayer = G.mapState.battleMap[y][x][0];
         G.mapState.currentBattle = [x, y];
-        G.stage = "conquest";
+        setStage(G, "resolution", "conquest");
         events.endTurn({ next: nextPlayer });
         return;
       }
     }
   }
   G.mapState.currentBattle = [0, 0];
-  G.stage = "election";
-  events.endPhase();
+  if (onExhausted) {
+    onExhausted(G, events);
+  } else {
+    events.endPhase();
+  }
 };
 
 export const findNextPlayerInBattleSequence = (
   playerID: string,
-  _ctx: Ctx,
+  ctx: Ctx,
   G: MyGameState,
   events: EventsAPI
 ): void => {
@@ -146,7 +174,9 @@ export const findNextPlayerInBattleSequence = (
     findNextBattle(G, events);
   } else {
     events.endTurn({ next: nextPlayer });
-    G.stage = "attack or pass";
+    // Determine aerial vs ground from current stage context
+    const isGround = G.stage.sub.startsWith("ground_");
+    setStage(G, "resolution", isGround ? "ground_attack_or_pass" : "aerial_attack_or_pass");
     computeDefendersAtBattle(G, nextPlayer);
   }
 };

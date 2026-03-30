@@ -82,6 +82,11 @@ const Trade = (props: MyGameProps) => {
         .map(([id, p]) => ({ id, name: p.kingdomName, colour: p.colour }))
     : [];
 
+  const agitatorsSentThisRound = playerInfo?.agitatorsSentThisRound ?? [];
+  const freeDissenters = playerInfo?.freeDissenters ?? 0;
+  const untargetedRivals = rivals.filter((r) => !agitatorsSentThisRound.includes(r.id));
+  const allRivalsTargeted = rivals.length > 0 && untargetedRivals.length === 0;
+
   return (
     <Box sx={{ p: `${tokens.spacing.sm}px`, height: "100%" }}>
       <Box sx={{ display: "flex", gap: `${tokens.spacing.md}px`, height: "100%" }}>
@@ -126,12 +131,30 @@ const Trade = (props: MyGameProps) => {
             />
           )}
 
-          {gold >= 2 && (
-            <CompactAction
-              label="Send Agitators"
-              price="2g"
-              onClick={() => { setAgitatorTarget(null); setAgitatorsOpen(true); }}
-            />
+          {(gold >= 2 || allRivalsTargeted) && (
+            <>
+              <CompactAction
+                label="Send Agitators"
+                price="2g"
+                disabled={allRivalsTargeted}
+                disabledReason="All sent this round"
+                onClick={() => { setAgitatorTarget(null); setAgitatorsOpen(true); }}
+              />
+              {freeDissenters > 0 && (
+                <Typography
+                  sx={{
+                    fontFamily: tokens.font.body,
+                    fontSize: 10,
+                    color: tokens.ui.danger,
+                    fontWeight: 600,
+                    pl: `${tokens.spacing.xs}px`,
+                    lineHeight: 1.3,
+                  }}
+                >
+                  {freeDissenters} free dissenter{freeDissenters !== 1 ? "s" : ""} active
+                </Typography>
+              )}
+            </>
           )}
 
           {hasFleets && (
@@ -235,22 +258,28 @@ const Trade = (props: MyGameProps) => {
           Choose a rival to place a free dissenter on:
         </Typography>
         <Box sx={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-          {rivals.map((r) => (
-            <Button
-              key={r.id}
-              onClick={() => setAgitatorTarget(r.id)}
-              sx={{
-                backgroundColor: r.colour,
-                border: agitatorTarget === r.id ? "2px solid black" : "none",
-                color: "#000",
-                textTransform: "none",
-                fontWeight: 600,
-                "&:hover": { backgroundColor: r.colour, opacity: 0.85 },
-              }}
-            >
-              {r.name}
-            </Button>
-          ))}
+          {rivals.map((r) => {
+            const alreadySent = agitatorsSentThisRound.includes(r.id);
+            return (
+              <Button
+                key={r.id}
+                disabled={alreadySent}
+                onClick={() => setAgitatorTarget(r.id)}
+                sx={{
+                  backgroundColor: r.colour,
+                  border: agitatorTarget === r.id ? "2px solid black" : "none",
+                  color: "#000",
+                  textTransform: "none",
+                  fontWeight: 600,
+                  opacity: alreadySent ? 0.4 : 1,
+                  "&:hover": { backgroundColor: r.colour, opacity: alreadySent ? 0.4 : 0.85 },
+                  "&.Mui-disabled": { backgroundColor: r.colour, color: "#000" },
+                }}
+              >
+                {r.name}{alreadySent ? " (Sent)" : ""}
+              </Button>
+            );
+          })}
         </Box>
       </DialogShell>
     </Box>

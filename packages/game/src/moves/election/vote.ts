@@ -1,6 +1,7 @@
 import { INVALID_MOVE } from "boardgame.io/core";
 import { MoveDefinition, MyGameState } from "../../types";
 import { HERESY_MIN, logEvent } from "../../helpers/stateUtils";
+import { advanceFromElection } from "../../helpers/resolutionFlow";
 
 const kingdomToNumberMap: Record<string, number> = {
   Angland: 1,
@@ -183,9 +184,12 @@ const vote: MoveDefinition = {
         }
       });
 
-      events.endPhase();
+      // Election complete — advance to post-election (infidel fleet, deferred, rebellion, invasion, retrieve)
+      advanceFromElection(G, events);
+    } else {
+      // Sequential voting — advance to next player
+      events.endTurn();
     }
-    // No else branch: activePlayers with moveLimit:1 handles per-player turn management
   },
   errorMessage: "Cannot cast vote right now",
 };

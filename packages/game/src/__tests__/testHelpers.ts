@@ -124,7 +124,7 @@ export function buildInitialG(
   }
 
   return {
-    stage: "actions",
+    stage: { phase: "actions", sub: "default" },
     round: 1,
     finalRound: 10,
     firstTurnOfRound: true,
@@ -179,6 +179,7 @@ export function buildInitialG(
     mercyGold: {},
     _loopGuard: 0,
     _halted: false,
+    _turnEndingCount: 0,
     eventState: {
       deck: [],
       lateDeck: [],

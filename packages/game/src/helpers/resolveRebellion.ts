@@ -14,6 +14,7 @@ import {
   increaseOrthodoxyWithinMove,
   logEvent,
 } from "./stateUtils";
+import { calculateCombat } from "./combatMath";
 import { drawFortuneOfWarCard, hasFortAt } from "./helpers";
 import { CARD_RESOLVERS, resolveCardWithAlignmentPenalty } from "./legacyCardDefinitions";
 import { KINGDOM_LOCATION } from "../data/gameData";
@@ -43,19 +44,15 @@ const calculateBattle = (
   fowRebel: { sword: number; shield: number },
   fowDefender: { sword: number; shield: number }
 ): BattleResult => {
-  // Rebel attack strength
-  const totalRebelSwords = rebelSwords + fowRebel.sword;
-  const totalRebelShields = fowRebel.shield; // counter has 0 base shields
-
   // Defender attack strength
   const defenderBaseSwords = defenderRegiments * 2 + defenderLevies * 1;
   const defenderBaseShields = hasFort ? defenderRegiments + defenderLevies : 0;
-  const totalDefenderSwords = defenderBaseSwords + fowDefender.sword;
-  const totalDefenderShields = defenderBaseShields + fowDefender.shield;
 
-  // Hits = swords - shields (min 0)
-  const hitsOnDefender = Math.max(0, totalRebelSwords - totalDefenderShields);
-  const hitsOnRebel = Math.max(0, totalDefenderSwords - totalRebelShields);
+  // Rebel = attacker, Defender = defender
+  const { hitsOnDefender, hitsOnAttacker: hitsOnRebel } = calculateCombat(
+    { swords: rebelSwords, shields: 0, fowSword: fowRebel.sword, fowShield: fowRebel.shield },
+    { swords: defenderBaseSwords, shields: defenderBaseShields, fowSword: fowDefender.sword, fowShield: fowDefender.shield },
+  );
 
   // Defender total HP (each regiment absorbs 2 hits, each levy absorbs 1)
   const defenderHP = defenderRegiments * 2 + defenderLevies;
@@ -454,11 +451,9 @@ export const resolveRebellionWithTroopsAndRivals = (
 
   // Use combined swords for battle calculation
   const totalDefShields = fortPresent ? defReg + defLev : 0;
-  const hitsOnDefender = Math.max(0,
-    totalRebelSwords + fowRebel.sword - totalDefShields - fowDefender.shield
-  );
-  const hitsOnRebel = Math.max(0,
-    totalDefenderSwords + fowDefender.sword - fowRebel.shield
+  const { hitsOnDefender, hitsOnAttacker: hitsOnRebel } = calculateCombat(
+    { swords: totalRebelSwords, shields: 0, fowSword: fowRebel.sword, fowShield: fowRebel.shield },
+    { swords: totalDefenderSwords, shields: totalDefShields, fowSword: fowDefender.sword, fowShield: fowDefender.shield },
   );
 
   const defenderHP = defReg * 2 + defLev + rivalDefenderSwords;

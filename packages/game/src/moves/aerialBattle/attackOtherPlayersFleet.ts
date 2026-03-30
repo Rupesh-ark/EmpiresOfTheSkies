@@ -1,5 +1,6 @@
 import { MoveDefinition } from "../../types";
 import { removeVPAmount } from "../../helpers/stateUtils";
+import { setStage } from "../../helpers/stageUtils";
 
 const attackOtherPlayersFleet: MoveDefinition = {
   validate: (G, playerID, ...args) => {
@@ -39,7 +40,7 @@ const attackOtherPlayersFleet: MoveDefinition = {
       defender: { decision: "undecided", ...G.playerInfo[defenderID] },
     };
     events.endTurn({ next: defenderID });
-    G.stage = "attack or evade";
+    setStage(G, "resolution", "aerial_attack_or_evade");
   },
   errorMessage: "Cannot attack this fleet",
 };

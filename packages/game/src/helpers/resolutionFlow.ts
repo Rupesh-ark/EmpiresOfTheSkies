@@ -1,19 +1,29 @@
 /**
  * resolutionFlow.ts
  *
- * Shared helper that advances through the Resolution phase stages:
- * Fleet combat → deferred battles → rebellions → invasion → retrieve fleets
+ * Walker that advances through the unified Resolution phase:
  *
- * Called from Resolution onBegin and from interactive moves
- * (respondToInfidelFleet, commitDeferredBattleCard, commitRebellionTroops,
- * contributeToGrandArmy, etc.) to determine what comes next.
+ *   Rulebook order (v4.2 Phase 5):
+ *   1. Rebellions
+ *   2. Encounters: aerial → plunder → ground → conquest
+ *   3-6. Trade/Piracy/Factories (auto, handled in resolveRound)
+ *   7. Election
+ *   8. Infidel invasion check
+ *   9. Retrieve fleets
+ *
+ * Each step either finds interactive work (sets stage, pauses) or chains
+ * to the next step. The phase only ends after retrieve fleets.
  */
 
 import { MyGameState } from "../types";
+import { setStage } from "./stageUtils";
 import { setupNextRebellion } from "./resolveRebellion";
 import { getDeferredBattleDescription } from "./resolveDeferredBattles";
 import { checkForInvasion, getArchprelateForNomination } from "./resolveInvasion";
+import { prepareInfidelFleetCombat } from "./resolveInfidelFleet";
+import { findNextBattle, findNextPlunder, findNextGroundBattle, findNextConquest } from "./findNext";
 import { EventsAPI } from "boardgame.io/dist/types/src/plugins/events/events";
+import { sortPlayersInPlayerOrder } from "./helpers";
 
 /**
  * Set up the next non-rebellion deferred battle for interactive resolution.
@@ -41,7 +51,7 @@ export const setupNextDeferredBattle = (
       event,
       description: getDeferredBattleDescription(G, event),
     };
-    G.stage = "deferred_battle";
+    setStage(G, "resolution", "deferred_battle");
     if (!skipEndTurn) events.endTurn({ next: event.targetPlayerID });
     return;
   }
@@ -60,7 +70,7 @@ const continueAfterDeferredBattles = (
 ): void => {
   // Interactive rebellions
   if (G.eventState.deferredEvents.length > 0 && setupNextRebellion(G)) {
-    G.stage = "rebellion";
+    setStage(G, "resolution", "rebellion");
     if (!skipEndTurn) events.endTurn({ next: G.currentRebellion!.event.targetPlayerID });
     return;
   }
@@ -70,14 +80,14 @@ const continueAfterDeferredBattles = (
   if (invasionTriggered) {
     const archprelate = getArchprelateForNomination(G);
     if (archprelate) {
-      G.stage = "invasion_nominate";
+      setStage(G, "resolution", "invasion_nominate");
       if (!skipEndTurn) events.endTurn({ next: archprelate });
       return;
     }
   }
 
   // Nothing interactive left — retrieve fleets
-  G.stage = "retrieve fleets";
+  setStage(G, "resolution", "retrieve_fleets");
   if (!skipEndTurn) events.endTurn({ next: G.turnOrder[0] });
 };
 
@@ -104,7 +114,7 @@ export const continueResolution = (
  * Returns the target playerID, or null if normal turn order is fine.
  */
 export const getResolutionTarget = (G: MyGameState): string | null => {
-  switch (G.stage) {
+  switch (G.stage.sub) {
     case "infidel_fleet_combat":
       return G.infidelFleetCombat?.targetPlayerID ?? null;
 
@@ -120,4 +130,89 @@ export const getResolutionTarget = (G: MyGameState): string | null => {
     default:
       return null; // retrieve fleets, rebellion_rival_support, etc. use normal turn order
   }
+};
+
+// ── Resolution Walker ─────────────────────────────────────────────────────
+// Each "advance" function is called when its step is exhausted.
+// It tries the NEXT step; if that step has no work, it chains further.
+
+/**
+ * Begin the resolution phase. Entry point from resolution.onBegin.
+ * Walks: aerial → plunder → ground → conquest → election → post-election
+ *
+ * @param skipEndTurn — true when called from phase onBegin (boardgame.io discards endTurn there)
+ */
+export const beginResolution = (
+  G: MyGameState,
+  events: EventsAPI,
+  skipEndTurn = false
+): void => {
+  // Reset battle scan position
+  G.mapState.currentBattle = [0, 0];
+  // Start with aerial battles (step 2a in rulebook)
+  findNextBattle(G, events, skipEndTurn, advanceFromAerial);
+};
+
+/** Called when aerial battles are exhausted → try plunder */
+export const advanceFromAerial = (G: MyGameState, events: EventsAPI): void => {
+  G.mapState.currentBattle = [0, 0];
+  findNextPlunder(G, events, advanceFromPlunder);
+};
+
+/** Called when plunder is exhausted → try ground battles */
+export const advanceFromPlunder = (G: MyGameState, events: EventsAPI): void => {
+  G.mapState.currentBattle = [0, 0];
+  findNextGroundBattle(G, events, advanceFromGround);
+};
+
+/** Called when ground battles are exhausted → try conquest */
+export const advanceFromGround = (G: MyGameState, events: EventsAPI): void => {
+  G.mapState.currentBattle = [0, 0];
+  findNextConquest(G, events, advanceFromConquest);
+};
+
+/** Called when conquests are exhausted → enter election */
+export const advanceFromConquest = (G: MyGameState, events: EventsAPI): void => {
+  enterElection(G, events);
+};
+
+/** Set up sequential election — each player votes in turn order */
+export const enterElection = (G: MyGameState, events: EventsAPI): void => {
+  G.electionResults = {};
+  G.hasVoted = [];
+  G.voteSubmitted = {};
+  setStage(G, "resolution", "election");
+  events.endTurn({ next: G.turnOrder[0] });
+};
+
+/**
+ * Called when election is complete → post-election sequence.
+ * Rulebook order: infidel invasion (step 8) → deferred battles → rebellions → invasion → retrieve fleets
+ */
+export const advanceFromElection = (
+  G: MyGameState,
+  events: EventsAPI,
+  skipEndTurn = false
+): void => {
+  // Infidel Fleet targeting + movement
+  const hasCombat = prepareInfidelFleetCombat(G);
+  if (hasCombat) {
+    setStage(G, "resolution", "infidel_fleet_combat");
+    if (!skipEndTurn) events.endTurn({ next: G.infidelFleetCombat!.targetPlayerID });
+    return;
+  }
+  // No fleet combat — continue to deferred battles / rebellions / invasion / retrieve
+  continuePostElection(G, events, skipEndTurn);
+};
+
+/**
+ * Continue post-election flow (after infidel fleet combat if any).
+ * Deferred battles → rebellions → invasion → retrieve fleets.
+ */
+export const continuePostElection = (
+  G: MyGameState,
+  events: EventsAPI,
+  skipEndTurn = false
+): void => {
+  setupNextDeferredBattle(G, events, skipEndTurn);
 };

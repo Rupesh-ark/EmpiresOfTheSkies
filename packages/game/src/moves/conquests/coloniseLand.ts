@@ -1,5 +1,6 @@
 import { INVALID_MOVE } from "boardgame.io/core/";
 import { MoveDefinition } from "../../types";
+import { setStage } from "../../helpers/stageUtils";
 
 const coloniseLand: MoveDefinition = {
   fn: ({ G, playerID }) => {
@@ -25,7 +26,7 @@ const coloniseLand: MoveDefinition = {
       decision: "fight",
       ...G.playerInfo[playerID],
     };
-    G.stage = "conquest draw or pick card";
+    setStage(G, "resolution", "conquest_draw_or_pick");
   },
   errorMessage: "Cannot colonise this land",
 };

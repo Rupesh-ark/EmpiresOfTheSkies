@@ -8,6 +8,7 @@ import {
   EVENT_CARD_DEFS,
 } from "../../helpers/eventCardDefinitions";
 import { logEvent } from "../../helpers/stateUtils";
+import { setStage } from "../../helpers/stageUtils";
 
 const chooseEventCard: MoveDefinition = {
   fn: ({ G, ctx, playerID, events, random }, ...args) => {
@@ -101,7 +102,7 @@ const chooseEventCard: MoveDefinition = {
         events.endTurn({ next: G.eventState.pendingChoice.targetPlayerID });
       } else if (G.eventState.immediateElectionPending) {
         // Archprelate Dies — enter interactive election within events phase
-        G.stage = "immediate_election";
+        setStage(G, "events", "immediate_election");
         G.electionResults = {};
         G.hasVoted = [];
         G.voteSubmitted = {};

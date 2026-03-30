@@ -2,6 +2,7 @@ import { MyGameState, MoveError, MoveDefinition } from "../../types";
 import { validateMove } from "../moveValidation";
 import { INVALID_MOVE } from "boardgame.io/core";
 import { removeOneCounsellor } from "../../helpers/stateUtils";
+import { setStage } from "../../helpers/stageUtils";
 
 const validateTrainTroops = (
   G: MyGameState,
@@ -23,7 +24,7 @@ const trainTroops: MoveDefinition = {
     const playerBoard = G.playerInfo[playerID].playerBoardCounsellorLocations;
     removeOneCounsellor(G, playerID);
     playerBoard.trainTroops = true;
-    G.stage = "confirm_fow_draw";
+    setStage(G, "actions", "confirm_fow_draw");
   },
   errorMessage: "Cannot train troops right now",
   validate: validateTrainTroops,

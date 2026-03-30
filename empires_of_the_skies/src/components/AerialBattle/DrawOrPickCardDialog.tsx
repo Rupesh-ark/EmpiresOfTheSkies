@@ -24,15 +24,14 @@ const DrawOrPickCardDialog = (props: MyGameProps) => {
     !props.G.battleState?.defender.victorious;
 
   const isConquestDraw =
-    props.G.stage === "conquest draw or pick card" &&
-    props.ctx.phase === "conquest" &&
+    props.G.stage.sub === "conquest_draw_or_pick" &&
     props.G.conquestState !== undefined &&
     props.G.conquestState.id === props.playerID;
 
   const isOpen = isMyTurn && (isBattleReady || isConquestDraw);
 
   // ── Move dispatch ──────────────────────────────────────────────────────
-  const isConquest = props.ctx.phase === "conquest";
+  const isConquest = props.G.stage.sub === "conquest_draw_or_pick";
   const handlePick = () =>
     isConquest ? props.moves.pickCardConquest(currentCard) : props.moves.pickCard(currentCard);
   const handleDraw = () =>

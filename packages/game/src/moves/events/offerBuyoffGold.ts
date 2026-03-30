@@ -1,6 +1,7 @@
 import { INVALID_MOVE } from "boardgame.io/core";
 import { MoveDefinition } from "../../types";
 import { logEvent } from "../../helpers/stateUtils";
+import { setStage } from "../../helpers/stageUtils";
 import { applyBuyoff } from "../../helpers/resolveInvasion";
 
 const offerBuyoffGold: MoveDefinition = {
@@ -37,7 +38,7 @@ const offerBuyoffGold: MoveDefinition = {
       applyBuyoff(G);
 
       // Proceed to retrieve fleets
-      G.stage = "retrieve fleets";
+      setStage(G, "resolution", "retrieve_fleets");
       events.endTurn();
     } else {
       // Next player in IPO who hasn't offered

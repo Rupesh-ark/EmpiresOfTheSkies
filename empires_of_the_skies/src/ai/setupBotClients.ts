@@ -81,11 +81,11 @@ export function setupBotClients(
           const move = bot.chooseMove(state.G, state.ctx, playerID);
           if (move) {
             const personality = bot.getPersonality()?.name ?? "?";
-            const line = `[R${state.G.round}] P${playerID} (${personality}) ${state.ctx.phase}/${state.G.stage} → ${move.move}(${JSON.stringify(move.args)})`;
+            const line = `[R${state.G.round}] P${playerID} (${personality}) ${state.G.stage.phase}/${state.G.stage.sub} → ${move.move}(${JSON.stringify(move.args)})`;
             sendLogLine(line);
             (botClient as any).moves[move.move]?.(...move.args);
           } else {
-            const line = `[R${state.G.round}] P${playerID} ${state.ctx.phase}/${state.G.stage} → NO MOVE`;
+            const line = `[R${state.G.round}] P${playerID} ${state.G.stage.phase}/${state.G.stage.sub} → NO MOVE`;
             sendLogLine(line);
           }
           bot.setThinking(false);

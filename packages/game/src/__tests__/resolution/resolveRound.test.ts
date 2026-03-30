@@ -107,8 +107,8 @@ describe("resolveRound — D2: trade VP by round", () => {
     // Give both players outposts so they qualify for trade VP
     G.mapState.buildings = [
       [
-        { player: G.playerInfo["0"], buildings: "outpost", fort: false, garrisonedRegiments: 0, garrisonedLevies: 0, garrisonedEliteRegiments: 0 },
-        { player: G.playerInfo["1"], buildings: "outpost", fort: false, garrisonedRegiments: 0, garrisonedLevies: 0, garrisonedEliteRegiments: 0 },
+        { player: G.playerInfo["0"], buildings: "outpost", fort: [], garrisonedRegiments: 0, garrisonedLevies: 0, garrisonedEliteRegiments: 0 },
+        { player: G.playerInfo["1"], buildings: "outpost", fort: [], garrisonedRegiments: 0, garrisonedLevies: 0, garrisonedEliteRegiments: 0 },
       ],
     ];
   }
@@ -178,11 +178,11 @@ describe("resolveRound — GAP-12: tied trade VP splits round up", () => {
     // [3,0] and would cause piracy to crash on a missing currentTileArray entry.
     G.mapState.buildings = [
       [
-        { player: G.playerInfo["0"], buildings: "outpost" as const, fort: false, garrisonedRegiments: 0, garrisonedLevies: 0 },
-        { player: G.playerInfo["1"], buildings: "outpost" as const, fort: false, garrisonedRegiments: 0, garrisonedLevies: 0 },
+        { player: G.playerInfo["0"], buildings: "outpost" as const, fort: [], garrisonedRegiments: 0, garrisonedLevies: 0 },
+        { player: G.playerInfo["1"], buildings: "outpost" as const, fort: [], garrisonedRegiments: 0, garrisonedLevies: 0 },
       ],
       [
-        { player: G.playerInfo["2"], buildings: "outpost" as const, fort: false, garrisonedRegiments: 0, garrisonedLevies: 0 },
+        { player: G.playerInfo["2"], buildings: "outpost" as const, fort: [], garrisonedRegiments: 0, garrisonedLevies: 0 },
       ],
     ] as any;
 
@@ -208,7 +208,7 @@ describe("resolveRound — D3: only players with outpost/colony score trade VP",
     G.mapState.buildings = [[{
       player: G.playerInfo["1"],
       buildings: "outpost",
-      fort: false,
+      fort: [],
       garrisonedRegiments: 0,
       garrisonedLevies: 0,
       garrisonedEliteRegiments: 0,
@@ -268,14 +268,14 @@ describe("resolveRound — D5: factory income", () => {
   // Helper: create a buildings grid with settlements owned by players and
   // connected to Faithdom. Settlements are placed at Faithdom-adjacent tiles
   // so a single skyship at the tile creates a valid trade route.
-  const emptyCell = { buildings: null, player: null, fort: false, garrisonedRegiments: 0, garrisonedLevies: 0 };
+  const emptyCell = { buildings: null, player: null, fort: [], garrisonedRegiments: 0, garrisonedLevies: 0 };
   const emptyLoot = { gold: 0, mithril: 0, dragonScales: 0, krakenSkin: 0, magicDust: 0, stickyIchor: 0, pipeweed: 0, victoryPoints: 0 };
   const emptyTile = { name: "Test", blocked: [], sword: 0, shield: 0, type: "land", loot: { outpost: { ...emptyLoot }, colony: { ...emptyLoot } } };
   const makeTileRow = () => Array.from({ length: 8 }, () => ({ ...emptyTile, loot: { outpost: { ...emptyLoot }, colony: { ...emptyLoot } } }));
   const makeSettlement = (type: "outpost" | "colony", playerID: string) => ({
     buildings: type,
     player: { id: playerID },
-    fort: false,
+    fort: [],
     garrisonedRegiments: 0,
     garrisonedLevies: 0,
   });

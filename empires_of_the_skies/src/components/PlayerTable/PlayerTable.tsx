@@ -49,6 +49,7 @@ const PlayerTable = (props: PlayerTableProps) => {
               <TableCell align="right" sx={colHeaderCellSx}>Levies</TableCell>
               <TableCell align="right" sx={colHeaderCellSx}>Fortune Cards</TableCell>
               <TableCell align="right" sx={colHeaderCellSx}>Prisoners</TableCell>
+              <TableCell align="right" sx={colHeaderCellSx}>Dissenters</TableCell>
               <TableCell align="right" sx={colHeaderCellSx}>Cathedrals</TableCell>
               <TableCell align="right" sx={colHeaderCellSx}>Palaces</TableCell>
               <TableCell align="right" sx={colHeaderCellSx}>Shipyards</TableCell>
@@ -153,6 +154,9 @@ const PlayerTable = (props: PlayerTableProps) => {
                 <TableCell align="right">{value.resources.levies}</TableCell>
                 <TableCell align="right">{value.resources.fortuneCards.length}</TableCell>
                 <TableCell align="right">{value.prisoners}</TableCell>
+                <TableCell align="right" sx={value.freeDissenters > 0 ? { color: "#A82E22", fontWeight: 700 } : {}}>
+                  {value.freeDissenters}
+                </TableCell>
                 <TableCell align="right">{value.cathedrals}</TableCell>
                 <TableCell align="right">{value.palaces}</TableCell>
                 <TableCell align="right">{value.shipyards}</TableCell>

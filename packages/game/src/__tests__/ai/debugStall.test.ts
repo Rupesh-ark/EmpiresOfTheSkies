@@ -41,7 +41,7 @@ describe("debug stall v3", () => {
       const ctx = state.ctx;
       const G = state.G as MyGameState;
       const phase = ctx.phase ?? "?";
-      const stage = G.stage ?? "?";
+      const stage = G.stage ? `${G.stage.phase}/${G.stage.sub}` : "?";
       const cp = ctx.currentPlayer;
 
       // Detect phase/stage transitions

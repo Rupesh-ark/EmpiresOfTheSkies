@@ -165,6 +165,6 @@ describe("pickCardConquest — successful conquest resolution", () => {
     );
 
     expect(G.conquestState).toBeUndefined();
-    expect(G.stage).toBe("garrison troops");
+    expect(G.stage).toEqual({ phase: "resolution", sub: "conquest_garrison" });
   });
 });

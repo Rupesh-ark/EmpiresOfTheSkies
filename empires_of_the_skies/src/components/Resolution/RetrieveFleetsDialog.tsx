@@ -24,8 +24,7 @@ const RetrieveFleetsDialog = (props: MyGameProps) => {
   };
 
   const isOpen =
-    props.ctx.phase === "resolution" &&
-    props.G.stage === "retrieve fleets" &&
+    props.G.stage.sub === "retrieve_fleets" &&
     props.ctx.currentPlayer === props.playerID;
 
   return (

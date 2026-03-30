@@ -5,6 +5,7 @@ import { CloseFullscreen, OpenInFull } from "@mui/icons-material";
 import { tokens, backgrounds } from "@/theme";
 import { getMood } from "@/theme";
 import { PanelSlot, getPhaseLayout, MapSize } from "./phaseLayouts";
+import type { GameStage } from "@eots/game";
 import {
   GiScrollUnfurled, GiBarracks, GiSwapBag, GiConversation,
 } from "react-icons/gi";
@@ -23,10 +24,8 @@ const MOOD_BACKGROUNDS: Record<string, string> = {
 };
 
 interface GameLayoutProps {
-  /** ctx.phase — authoritative for phase identity (checked first) */
-  phase: string;
-  /** G.stage — sub-phase granularity (checked second) */
-  stage: string;
+  /** G.stage — discriminated union with phase + sub */
+  stage: GameStage;
   /** Whether it's this player's turn */
   isMyTurn: boolean;
   /** Render function for named panel slots */
@@ -117,7 +116,6 @@ const IconTabStrip = ({
 );
 
 export const GameLayout = ({
-  phase,
   stage,
   isMyTurn,
   renderSlot,
@@ -125,7 +123,7 @@ export const GameLayout = ({
   heresyTracker,
   children,
 }: GameLayoutProps) => {
-  const config = getPhaseLayout(phase, stage, isMyTurn);
+  const config = getPhaseLayout(stage, isMyTurn);
   const mood = getMood(stage);
   const moodBg = MOOD_BACKGROUNDS[mood] ?? MOOD_BACKGROUNDS.peacetime;
   const [mapExpanded, setMapExpanded] = useState(false);

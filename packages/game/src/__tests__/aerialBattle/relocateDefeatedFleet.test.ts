@@ -130,7 +130,7 @@ describe("relocateDefeatedFleet — evade branch", () => {
 
     // After relocation: "0" and "2" remain at [1,1] (length=2), defender evaded → else branch
     expect(G.battleState).toBeUndefined();
-    expect(G.stage).toBe("attack or pass");
+    expect(G.stage).toEqual({ phase: "resolution", sub: "aerial_attack_or_pass" });
   });
 });
 

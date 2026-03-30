@@ -125,7 +125,7 @@ function buildBattleMap(player0: ReturnType<typeof buildPlayer>, player1: Return
           },
         },
       };
-      discoveredTiles[r][c] = r === 0 && c === 0;
+      discoveredTiles[r][c] = true;
     }
   }
 
@@ -150,7 +150,7 @@ function buildBattleG() {
     fleetInfo: [buildFleet(1, { location: [0, 0], skyships: 3, regiments: 5 })],
   });
 
-  const G = buildInitialG([player0, player1], { stage: "attack or pass" });
+  const G = buildInitialG([player0, player1], { stage: { phase: "resolution", sub: "aerial_attack_or_pass" } });
   const mapParts = buildBattleMap(G.playerInfo["0"], G.playerInfo["1"]);
   G.mapState = { ...G.mapState, ...mapParts };
   G.mapState.currentBattle = [0, 0];
@@ -171,7 +171,7 @@ describe("aerial: attacker initiates → defender retaliates → battle resolves
     expect(G.battleState?.attacker.decision).toBe("fight");
     expect(G.battleState?.defender.id).toBe("1");
     expect(G.battleState?.defender.decision).toBe("undecided");
-    expect(G.stage).toBe("attack or evade");
+    expect(G.stage).toEqual({ phase: "resolution", sub: "aerial_attack_or_evade" });
   });
 
   it("retaliate sets defender.decision to 'fight'", () => {
@@ -242,7 +242,7 @@ describe("aerial: defender evades → stage becomes 'relocate loser'", () => {
     );
 
     expect(G.battleState?.defender.decision).toBe("evade");
-    expect(G.stage).toBe("relocate loser");
+    expect(G.stage).toEqual({ phase: "resolution", sub: "relocate_loser" });
   });
 
   it("evade calls endTurn with next=attacker (attacker directs relocation)", () => {
@@ -279,7 +279,7 @@ describe("ground: attacker attacks building → defender yields → ownership tr
 
     expect(G.battleState?.attacker.id).toBe("0");
     expect(G.battleState?.defender.id).toBe("1");
-    expect(G.stage).toBe("defend or yield");
+    expect(G.stage).toEqual({ phase: "resolution", sub: "ground_defend_or_yield" });
   });
 
   it("yieldToAttacker returns garrisoned regiments to the defender", () => {
@@ -440,7 +440,7 @@ describe("ground: after ground win → constructOutpost + garrisonTroops", () =>
       random: buildRandom(),
     });
 
-    expect(G.stage).toBe("garrison troops");
+    expect(G.stage).toEqual({ phase: "resolution", sub: "conquest_garrison" });
   });
 
   it("garrisonTroops moves regiments from fleet into building garrison", () => {
@@ -478,7 +478,7 @@ describe("full chain: aerial attack → retaliate → resolve → ground attack 
       { G, ctx: buildCtxForPhase("0"), playerID: "0", events, random: buildRandom() },
       "1"
     );
-    expect(G.stage).toBe("attack or evade");
+    expect(G.stage).toEqual({ phase: "resolution", sub: "aerial_attack_or_evade" });
 
     // Defender (1) retaliates
     retaliate.fn(
@@ -518,7 +518,7 @@ describe("full chain: aerial attack → retaliate → resolve → ground attack 
       events,
       random: buildRandom(),
     });
-    expect(G.stage).toBe("defend or yield");
+    expect(G.stage).toEqual({ phase: "resolution", sub: "ground_defend_or_yield" });
 
     // Defender yields
     yieldToAttacker.fn({
@@ -551,7 +551,7 @@ describe("full chain: aerial attack → retaliate → resolve → ground attack 
     });
     expect(G.mapState.buildings[0][0].buildings).toBe("outpost");
     expect(G.playerInfo["0"].resources.victoryPoints).toBe(vp0BeforeOutpost + 1);
-    expect(G.stage).toBe("garrison troops");
+    expect(G.stage).toEqual({ phase: "resolution", sub: "conquest_garrison" });
 
     // Garrison 2 regiments
     garrisonTroops.fn(

@@ -19,15 +19,15 @@ export class ActionsStrategy implements PhaseStrategy {
     personality: AIPersonality
   ): AIMove {
     // ── Sub-stage handling ─────────────────────────────────────────────
-    if (G.stage === "confirm_fow_draw") {
+    if (G.stage.sub === "confirm_fow_draw") {
       return { move: "drawFoWCards", args: [] };
     }
 
-    if (G.stage === "discard_fow") {
+    if (G.stage.sub === "discard_fow") {
       return this.discardWorstCard(G, playerID);
     }
 
-    if (G.stage === "attack or pass") {
+    if (G.stage.sub === "aerial_attack_or_pass") {
       return { move: "pass", args: [] };
     }
 

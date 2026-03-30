@@ -35,7 +35,7 @@ function countPlayerBuildings(
       if (cell.player?.id !== playerID) return;
       if (cell.buildings === "outpost") outposts++;
       if (cell.buildings === "colony") colonies++;
-      if (cell.fort) forts++;
+      if (cell.fort.includes(playerID)) forts++;
     })
   );
   return { outposts, colonies, forts };
@@ -199,7 +199,7 @@ function normalizedThreats(G: MyGameState, playerID: string): number {
             (cell.garrisonedLevies ?? 0) +
             (cell.garrisonedEliteRegiments ?? 0) >
           0;
-        const hasFort = cell.fort;
+        const hasFort = cell.fort.includes(playerID);
         const hasFleet = player.fleetInfo.some(
           (f) => f.skyships > 0 && f.location[0] === x && f.location[1] === y
         );

@@ -14,7 +14,7 @@ const PickEventCardDialog = (props: MyGameProps) => {
 
   const isOpen =
     open &&
-    props.G.stage === "events" &&
+    props.G.stage.phase === "events" && props.G.stage.sub === "default" &&
     props.ctx.currentPlayer === props.playerID;
 
   return (

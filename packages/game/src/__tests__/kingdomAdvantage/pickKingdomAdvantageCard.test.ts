@@ -17,10 +17,11 @@ import { buildInitialG, buildPlayer, buildCtx, buildResources } from "../testHel
 import type { KingdomAdvantageCard } from "../../types";
 
 const stubEvents = { endTurn: () => {}, endPhase: () => {} } as any;
+const stubRandom = { Shuffle: <T>(arr: T[]) => [...arr] } as any;
 
 function callMove(G: ReturnType<typeof buildInitialG>, playerID: string, card: KingdomAdvantageCard) {
   const ctx = buildCtx(playerID);
-  return pickKingdomAdvantageCard.fn({ G, ctx, playerID, events: stubEvents }, card);
+  return pickKingdomAdvantageCard.fn({ G, ctx, playerID, events: stubEvents, random: stubRandom }, card);
 }
 
 describe("pickKingdomAdvantageCard — card assignment", () => {

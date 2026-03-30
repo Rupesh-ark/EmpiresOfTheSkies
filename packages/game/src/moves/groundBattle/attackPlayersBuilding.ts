@@ -1,5 +1,6 @@
 import { MoveDefinition } from "../../types";
 import { removeVPAmount } from "../../helpers/stateUtils";
+import { setStage } from "../../helpers/stageUtils";
 
 const attackPlayersBuilding: MoveDefinition = {
   fn: ({ G, playerID, events }, ...args) => {
@@ -28,7 +29,7 @@ const attackPlayersBuilding: MoveDefinition = {
         defender: { decision: "undecided", ...G.playerInfo[defender.id] },
       };
       events.endTurn({ next: defender.id });
-      G.stage = "defend or yield";
+      setStage(G, "resolution", "ground_defend_or_yield");
     }
   },
   errorMessage: "Cannot attack this building",

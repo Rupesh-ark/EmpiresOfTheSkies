@@ -2,8 +2,8 @@ import type { Game, Ctx } from "boardgame.io";
 
 import { LegacyCardInfo, MyGameState, MapState } from "./types";
 
-import { ALL_KA_CARDS, CONTINGENT_COUNTERS, EVENT_HAND_SIZE, MAX_ROUNDS, INFIDEL_HOST_COUNTERS, LEGACY_CARDS } from "./data/gameData";
-import { filterKAPool, seedLegacyDeal, classifyEventDeck } from "./helpers/manufacturedFunSeed";
+import { ALL_KA_CARDS, CONTINGENT_COUNTERS, EVENT_HAND_SIZE, MAX_ROUNDS, INFIDEL_HOST_COUNTERS } from "./data/gameData";
+import { filterKAPool, classifyEventDeck } from "./helpers/manufacturedFunSeed";
 import { initialBoardState, initialBattleMapState } from "./setup/boardSetup";
 import {
   getRandomisedMapTileArray,
@@ -73,7 +73,7 @@ import vote from "./moves/election/vote";
 import retrieveFleets from "./moves/resolution/retrieveFleets";
 
 
-import { findNextBattle, findNextGroundBattle, findNextPlunder } from "./helpers/findNext";
+// findNext functions now called via resolutionFlow walker
 import { TurnOrder } from "boardgame.io/core";
 import resolveRound from "./helpers/resolveRound";
 import pickLegacyCard from "./moves/pickLegacyCard";
@@ -82,8 +82,8 @@ import chooseEventCard from "./moves/events/chooseEventCard";
 import resolveEventChoice from "./moves/events/resolveEventChoice";
 import immediateElectionVote from "./moves/events/immediateElectionVote";
 import { ALL_EVENT_CARD_NAMES } from "./helpers/eventCardDefinitions";
-import { prepareInfidelFleetCombat } from "./helpers/resolveInfidelFleet";
-import { continueResolution, getResolutionTarget } from "./helpers/resolutionFlow";
+// prepareInfidelFleetCombat now called via resolutionFlow walker
+import { beginResolution, getResolutionTarget } from "./helpers/resolutionFlow";
 import respondToInfidelFleet from "./moves/events/respondToInfidelFleet";
 import commitRebellionTroops from "./moves/events/commitRebellionTroops";
 import contributeToRebellion from "./moves/events/contributeToRebellion";
@@ -93,9 +93,130 @@ import commitDeferredBattleCard from "./moves/events/commitDeferredBattleCard";
 import contributeToGrandArmy from "./moves/events/contributeToGrandArmy";
 import { logEvent, allPlayersPassed, calculateMercy } from "./helpers/stateUtils";
 import { wrapMove, withPhaseGuard, withPhaseReset, checkLoopGuard } from "./helpers/moveWrapper";
+
+import { setStage, isStage } from "./helpers/stageUtils";
+import type { GameStage } from "./types";
 import { createLogger } from "./helpers/logger";
 
 const phaseLog = createLogger("phase");
+const budgetLog = createLogger("turn-budget");
+
+// ── Turn-ending budget tracker ──────────────────────────────────────────────
+// Module-level counter — avoids Immer frozen-object issues.
+// Reset each round in discovery.onBegin. Logged at milestones.
+const TURN_ENDING_LIMIT = 550; // bail before boardgame.io's 600 (numPlayers * 100)
+let _turnEndingCounter = 0;
+let _turnEndingRound = 0;
+
+const turnBudgetPlugin = {
+  name: "turn-budget",
+  fnWrap: (fn: (...args: any[]) => any, methodType: string) =>
+    (context: any, ...args: any[]) => {
+      const events = context.events;
+
+      if (events && !events._budgetWrapped) {
+        const origEndTurn = events.endTurn?.bind(events);
+        const origEndPhase = events.endPhase?.bind(events);
+
+        if (origEndTurn) {
+          events.endTurn = (endTurnArgs?: any) => {
+            _turnEndingCounter++;
+            const phase = context.ctx?.phase ?? "?";
+            const G = context.G;
+            const stage = G?.stage ? `${G.stage.phase}/${G.stage.sub}` : "?";
+
+            if (_turnEndingCounter >= TURN_ENDING_LIMIT) {
+              budgetLog.error("BUDGET EXCEEDED — halting game", {
+                count: _turnEndingCounter,
+                type: "endTurn",
+                method: methodType,
+                phase,
+                stage,
+                round: _turnEndingRound,
+                turn: context.ctx?.turn,
+                next: endTurnArgs?.next,
+              });
+              return;
+            }
+
+            if (_turnEndingCounter % 50 === 0) {
+              budgetLog.warn("endTurn milestone", {
+                count: _turnEndingCounter,
+                method: methodType,
+                phase,
+                stage,
+                round: _turnEndingRound,
+                turn: context.ctx?.turn,
+                next: endTurnArgs?.next,
+              });
+            }
+
+            return origEndTurn(endTurnArgs);
+          };
+        }
+
+        if (origEndPhase) {
+          events.endPhase = (...phaseArgs: any[]) => {
+            _turnEndingCounter++;
+            const phase = context.ctx?.phase ?? "?";
+            const G = context.G;
+            const stage = G?.stage ? `${G.stage.phase}/${G.stage.sub}` : "?";
+
+            if (_turnEndingCounter >= TURN_ENDING_LIMIT) {
+              budgetLog.error("BUDGET EXCEEDED — halting game", {
+                count: _turnEndingCounter,
+                type: "endPhase",
+                method: methodType,
+                phase,
+                stage,
+                round: _turnEndingRound,
+                turn: context.ctx?.turn,
+              });
+              return;
+            }
+
+            if (_turnEndingCounter % 50 === 0) {
+              budgetLog.warn("endPhase milestone", {
+                count: _turnEndingCounter,
+                method: methodType,
+                phase,
+                stage,
+                round: _turnEndingRound,
+                turn: context.ctx?.turn,
+              });
+            }
+
+            return origEndPhase(...phaseArgs);
+          };
+        }
+
+        events._budgetWrapped = true;
+      }
+
+      const result = fn(context, ...args);
+
+      if (events) events._budgetWrapped = false;
+
+      return result;
+    },
+};
+
+/** Call from discovery.onBegin to reset the per-round budget counter. */
+export function resetTurnEndingBudget(round: number): void {
+  if (_turnEndingCounter > 0) {
+    budgetLog.info("round budget summary", {
+      count: _turnEndingCounter,
+      round: _turnEndingRound,
+    });
+  }
+  _turnEndingCounter = 0;
+  _turnEndingRound = round;
+}
+
+/** Read-only access for tests / diagnostics. */
+export function getTurnEndingCount(): number {
+  return _turnEndingCounter;
+}
 
 const MyGame: Game<MyGameState> = {
   turn: { minMoves: 1 },
@@ -159,7 +280,7 @@ const MyGame: Game<MyGameState> = {
         kingdomAdvantagePool: [...ALL_KA_CARDS],
         legacyDeck: [],
       },
-      stage: "discovery",
+      stage: { phase: "setup", sub: "kingdom_advantage" } as GameStage,
       electionResults: {},
       hasVoted: [],
       voteSubmitted: {},
@@ -189,6 +310,7 @@ const MyGame: Game<MyGameState> = {
       mercyGold: {},
       _loopGuard: 0,
       _halted: false,
+      _turnEndingCount: 0,
       eventState: {
         deck: earlyDeck,
         lateDeck,
@@ -262,12 +384,16 @@ const MyGame: Game<MyGameState> = {
     offerBuyoffGold: wrapMove("offerBuyoffGold", offerBuyoffGold),
   },
   phases: {
-    kingdom_advantage: {
+    setup: {
       start: true,
-      moves: { pickKingdomAdvantageCard: wrapMove("pickKingdomAdvantageCard", pickKingdomAdvantageCard) },
-      next: "legacy_card",
-      onBegin: withPhaseGuard("kingdom_advantage", (context) => {
-        phaseLog.info("kingdom_advantage", { round: context.G.round });
+      moves: {
+        pickKingdomAdvantageCard: wrapMove("pickKingdomAdvantageCard", pickKingdomAdvantageCard),
+        pickLegacyCard: wrapMove("pickLegacyCard", pickLegacyCard),
+      },
+      next: "events",
+      onBegin: (context) => {
+        phaseLog.info("setup", { round: context.G.round });
+        setStage(context.G, "setup", "kingdom_advantage");
         const { pool: filteredPool, log: kaLog } = filterKAPool(
           context.G.cardDecks.kingdomAdvantagePool,
           context.ctx.numPlayers,
@@ -275,7 +401,7 @@ const MyGame: Game<MyGameState> = {
         );
         context.G.cardDecks.kingdomAdvantagePool = context.random.Shuffle(filteredPool);
         for (const msg of kaLog) logEvent(context.G, msg);
-      }),
+      },
       turn: {
         order: {
           first: () => 0,
@@ -287,34 +413,13 @@ const MyGame: Game<MyGameState> = {
         },
       },
     },
-    legacy_card: {
-      moves: { pickLegacyCard: wrapMove("pickLegacyCard", pickLegacyCard) },
-      next: "events",
-      onBegin: withPhaseGuard("legacy_card", (context) => {
-        phaseLog.info("legacy_card", { round: context.G.round });
-        context.G.stage = "pick legacy card";
-        const { hands, remainder, log: legacyLog } = seedLegacyDeal(
-          LEGACY_CARDS,
-          context.ctx.playOrder,
-          Object.fromEntries(
-            context.ctx.playOrder.map((id) => [id, context.G.playerInfo[id].resources.advantageCard]),
-          ),
-          context.random.Shuffle,
-        );
-        for (const id of context.ctx.playOrder) {
-          context.G.playerInfo[id].legacyCardOptions = hands[id];
-        }
-        context.G.cardDecks.legacyDeck = remainder;
-        for (const msg of legacyLog) logEvent(context.G, msg);
-      }),
-    },
     events: {
       turn: {
         order: TurnOrder.CUSTOM_FROM("turnOrder"),
       },
       onBegin: withPhaseGuard("events", (context) => {
         phaseLog.info("events", { round: context.G.round });
-        context.G.stage = "events";
+        setStage(context.G, "events", "default");
         context.G.eventState.taxModifier = 0;
         context.G.eventState.chosenCards = [];
         context.G.eventState.eventContributions = {};
@@ -344,11 +449,12 @@ const MyGame: Game<MyGameState> = {
         // Reset the loop guard at the start of each new round, then check.
         context.G._loopGuard = 0;
         context.G._halted = false;
+        resetTurnEndingBudget(context.G.round + 1);
         if (checkLoopGuard(context, "discovery")) return;
         phaseLog.info("discovery", { round: context.G.round + 1 });
         context.G.round += 1;
         context.ctx.playOrderPos = 0;
-        context.G.stage = "discovery";
+        setStage(context.G, "discovery", "default");
 
         context.G.firstTurnOfRound = true;
 
@@ -419,7 +525,7 @@ const MyGame: Game<MyGameState> = {
         if (context.G._halted) return;
         if (checkLoopGuard(context, "taxes")) return;
         phaseLog.info("taxes", { round: context.G.round });
-        context.G.stage = "taxes";
+        setStage(context.G, "taxes", "default");
 
         // Peasant REBELLION loss: skip taxes this round
         if (context.G.eventState.skipTaxesNextRound) {
@@ -450,7 +556,7 @@ const MyGame: Game<MyGameState> = {
         if (checkLoopGuard(context, "actions")) return;
         phaseLog.info("actions", { round: context.G.round });
         context.G.firstTurnOfRound = true;
-        context.G.stage = "actions";
+        setStage(context.G, "actions", "default");
       },
       turn: {
         onBegin: (context) => {
@@ -471,7 +577,7 @@ const MyGame: Game<MyGameState> = {
 
           if (currentPlayer.passed) {
             if (allPlayersPassed(context.G)) {
-              context.G.stage = "attack or pass";
+              setStage(context.G, "actions", "default");
               context.events.endPhase();
             } else {
               context.events.endTurn();
@@ -522,143 +628,30 @@ const MyGame: Game<MyGameState> = {
           playerInfo.passed = false;
         });
       },
-      next: "aerial_battle",
-    },
-    aerial_battle: {
-      onBegin: (context) => {
-        if (context.G._halted) return;
-        if (checkLoopGuard(context, "aerial_battle")) return;
-        phaseLog.info("aerial_battle", { round: context.G.round });
-        findNextBattle(context.G, context.events);
-      },
-      turn: {
-        onBegin: (context) => {
-          checkIfCurrentPlayerIsInCurrentBattle(
-            context.G,
-            context.ctx,
-            context.events
-          );
-        },
-      },
-      next: "plunder_legends",
-      moves: {
-        doNotAttack: wrapMove("doNotAttack", doNotAttack),
-        attackOtherPlayersFleet: wrapMove("attackOtherPlayersFleet", attackOtherPlayersFleet),
-        retaliate: wrapMove("retaliate", retaliate),
-        evadeAttackingFleet: wrapMove("evadeAttackingFleet", evadeAttackingFleet),
-        drawCard: wrapMove("drawCard", drawCard),
-        pickCard: wrapMove("pickCard", pickCard),
-        relocateDefeatedFleet: wrapMove("relocateDefeatedFleet", relocateDefeatedFleet),
-          },
-    },
-    ground_battle: {
-      onBegin: (context) => {
-        if (context.G._halted) return;
-        if (checkLoopGuard(context, "ground_battle")) return;
-        phaseLog.info("ground_battle", { round: context.G.round });
-        findNextGroundBattle(context.G, context.events);
-      },
-      turn: {
-        onBegin: (context) => {
-          checkIfCurrentPlayerIsInCurrentBattle(
-            context.G,
-            context.ctx,
-            context.events
-          );
-        },
-      },
-      next: "conquest",
-      moves: {
-        attackPlayersBuilding: wrapMove("attackPlayersBuilding", attackPlayersBuilding),
-        doNotGroundAttack: wrapMove("doNotGroundAttack", doNotGroundAttack),
-        defendGroundAttack: wrapMove("defendGroundAttack", defendGroundAttack),
-        garrisonTroops: wrapMove("garrisonTroops", garrisonTroops),
-        yieldToAttacker: wrapMove("yieldToAttacker", yieldToAttacker),
-        drawCard: wrapMove("drawCard", drawCard),
-        pickCard: wrapMove("pickCard", pickCard),
-          },
-    },
-    plunder_legends: {
-      onBegin: (context) => {
-        if (checkLoopGuard(context, "plunder_legends")) return;
-        phaseLog.info("plunder_legends", { round: context.G.round });
-        context.G.stage = "plunder legends";
-        findNextPlunder(context.G, context.events);
-      },
-      moves: {
-        plunder: wrapMove("plunder", plunder),
-        doNotPlunder: wrapMove("doNotPlunder", doNotPlunder),
-          },
-      next: "ground_battle",
-      turn: {
-        onBegin: (context) => {
-          checkIfCurrentPlayerIsInCurrentBattle(
-            context.G,
-            context.ctx,
-            context.events
-          );
-        },
-      },
-    },
-    conquest: {
-      onBegin: (context) => {
-        if (checkLoopGuard(context, "conquest")) return;
-        phaseLog.info("conquest", { round: context.G.round });
-        context.G.stage = "attack or pass";
-      },
-      turn: {
-        onBegin: (context) => {
-          checkIfCurrentPlayerIsInCurrentBattle(
-            context.G,
-            context.ctx,
-            context.events
-          );
-        },
-      },
-      moves: {
-        coloniseLand: wrapMove("coloniseLand", coloniseLand),
-        constructOutpost: wrapMove("constructOutpost", constructOutpost),
-        doNothing: wrapMove("doNothing", doNothing),
-        drawCardConquest: wrapMove("drawCardConquest", drawCardConquest),
-        pickCardConquest: wrapMove("pickCardConquest", pickCardConquest),
-        garrisonTroops: wrapMove("garrisonTroops", garrisonTroops),
-          },
-      next: "election",
-    },
-    election: {
-      turn: {
-        activePlayers: { all: "voting", moveLimit: 1 },
-        stages: {
-          voting: {
-            moves: { vote: wrapMove("vote", vote) },
-          },
-        },
-      },
-      onBegin: (context) => {
-        if (checkLoopGuard(context, "election")) return;
-        phaseLog.info("election", { round: context.G.round });
-        context.G.electionResults = {};
-        context.G.hasVoted = [];
-        context.G.voteSubmitted = {};
-      },
       next: "resolution",
     },
     resolution: {
       turn: {
         order: TurnOrder.CUSTOM_FROM("turnOrder"),
         onBegin: (context) => {
-          // Redirect turn to the correct player for the current stage.
-          // Phase onBegin sets up G.stage but cannot call endTurn (boardgame.io
-          // silently discards it — see docs/BOARDGAMEIO_ENDTURN_ONBEGIN.md).
-          // This hook runs AFTER the turn is initialized, so endTurn works here.
+          if (context.G._halted) return;
+
+          // Redirect turn to the correct player for the current stage
           const target = getResolutionTarget(context.G);
           if (target && target !== context.ctx.currentPlayer) {
             context.events.endTurn({ next: target });
             return;
           }
 
-          // Auto-skip players with no retrievable fleets during retrieve fleets stage
-          if (context.G.stage !== "retrieve fleets") return;
+          // Battle sub-stage routing
+          checkIfCurrentPlayerIsInCurrentBattle(
+            context.G,
+            context.ctx,
+            context.events
+          );
+
+          // Auto-skip players with no retrievable fleets
+          if (!isStage(context.G, "resolution", "retrieve_fleets")) return;
           const playerID = context.ctx.currentPlayer;
           const player = context.G.playerInfo[playerID];
           const hasRetrievableFleets = player.fleetInfo.some(
@@ -675,25 +668,42 @@ const MyGame: Game<MyGameState> = {
         },
       },
       onBegin: (context) => {
+        if (context.G._halted) return;
         if (checkLoopGuard(context, "resolution")) return;
         phaseLog.info("resolution", { round: context.G.round });
-        // Step 1: Infidel Fleet targeting + movement
-        const hasCombat = prepareInfidelFleetCombat(context.G);
-
-        if (hasCombat) {
-          // State setup only — turn.onBegin handles the endTurn redirect
-          context.G.stage = "infidel_fleet_combat";
-        } else {
-          // No Fleet combat — set up deferred events, rebellions, invasion
-          // skipEndTurn=true: endTurn is discarded in phase onBegin (boardgame.io bug)
-          // turn.onBegin will redirect via getResolutionTarget()
-          continueResolution(context.G, context.events, true);
-        }
+        // Walk the full resolution sequence: aerial → plunder → ground → conquest → election → post-election → retrieve
+        beginResolution(context.G, context.events, true);
       },
       onEnd: (context) => {
         resolveRound(context.G, context.events, context.random);
       },
       moves: {
+        // Aerial battle
+        doNotAttack: wrapMove("doNotAttack", doNotAttack),
+        attackOtherPlayersFleet: wrapMove("attackOtherPlayersFleet", attackOtherPlayersFleet),
+        retaliate: wrapMove("retaliate", retaliate),
+        evadeAttackingFleet: wrapMove("evadeAttackingFleet", evadeAttackingFleet),
+        drawCard: wrapMove("drawCard", drawCard),
+        pickCard: wrapMove("pickCard", pickCard),
+        relocateDefeatedFleet: wrapMove("relocateDefeatedFleet", relocateDefeatedFleet),
+        // Plunder
+        plunder: wrapMove("plunder", plunder),
+        doNotPlunder: wrapMove("doNotPlunder", doNotPlunder),
+        // Ground battle
+        attackPlayersBuilding: wrapMove("attackPlayersBuilding", attackPlayersBuilding),
+        doNotGroundAttack: wrapMove("doNotGroundAttack", doNotGroundAttack),
+        defendGroundAttack: wrapMove("defendGroundAttack", defendGroundAttack),
+        yieldToAttacker: wrapMove("yieldToAttacker", yieldToAttacker),
+        // Conquest
+        coloniseLand: wrapMove("coloniseLand", coloniseLand),
+        constructOutpost: wrapMove("constructOutpost", constructOutpost),
+        doNothing: wrapMove("doNothing", doNothing),
+        drawCardConquest: wrapMove("drawCardConquest", drawCardConquest),
+        pickCardConquest: wrapMove("pickCardConquest", pickCardConquest),
+        garrisonTroops: wrapMove("garrisonTroops", garrisonTroops),
+        // Election
+        vote: wrapMove("vote", vote),
+        // Post-election resolution
         pass: wrapMove("pass", pass),
         retrieveFleets: wrapMove("retrieveFleets", retrieveFleets),
         commitRebellionTroops: wrapMove("commitRebellionTroops", commitRebellionTroops),
@@ -703,7 +713,7 @@ const MyGame: Game<MyGameState> = {
         respondToInfidelFleet: wrapMove("respondToInfidelFleet", respondToInfidelFleet),
         offerBuyoffGold: wrapMove("offerBuyoffGold", offerBuyoffGold),
         commitDeferredBattleCard: wrapMove("commitDeferredBattleCard", commitDeferredBattleCard),
-          },
+      },
       next: "reset",
     },
     reset: {
@@ -784,6 +794,7 @@ const MyGame: Game<MyGameState> = {
   },
   maxPlayers: 6,
   minPlayers: 1,
+  plugins: [turnBudgetPlugin],
 };
 
 export { MyGame };

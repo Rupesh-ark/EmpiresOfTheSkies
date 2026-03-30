@@ -21,7 +21,7 @@ export class ConquestStrategy implements PhaseStrategy {
     if (moves.length === 1) return moves[0];
 
     // Handle card draw/pick sub-stages
-    if (G.stage === "conquest draw or pick card") {
+    if (G.stage.sub === "conquest_draw_or_pick") {
       return this.pickConquestCard(G, playerID, moves);
     }
 
@@ -38,7 +38,7 @@ export class ConquestStrategy implements PhaseStrategy {
         if (cell.player?.id !== playerID) return;
         if (cell.buildings !== "outpost") return;
         const hasDefense =
-          (cell.garrisonedRegiments ?? 0) + (cell.garrisonedLevies ?? 0) > 0 || cell.fort;
+          (cell.garrisonedRegiments ?? 0) + (cell.garrisonedLevies ?? 0) > 0 || cell.fort.length > 0;
         if (!hasDefense) undefendedOutposts++;
       })
     );

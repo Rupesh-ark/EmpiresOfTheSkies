@@ -88,7 +88,7 @@ describe("attackPlayersBuilding — initiating ground attack", () => {
 
     const ctx = buildCtxWithPhase("0");
     attackPlayersBuilding.fn({ G, ctx, playerID: "0", events: stubEvents, random: buildRandom() });
-    expect(G.stage).toBe("defend or yield");
+    expect(G.stage).toEqual({ phase: "resolution", sub: "ground_defend_or_yield" });
   });
 });
 

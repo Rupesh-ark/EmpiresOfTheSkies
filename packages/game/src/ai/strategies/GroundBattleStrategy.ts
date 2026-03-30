@@ -18,18 +18,17 @@ export class GroundBattleStrategy implements PhaseStrategy {
     if (moves.length === 0) return { move: "doNotGroundAttack", args: [] };
     if (moves.length === 1) return moves[0];
 
-    switch (G.stage) {
-      case "attack or pass":
-      case "ground battle":
+    switch (G.stage.sub) {
+      case "ground_attack_or_pass":
         return this.decideGroundAttack(G, playerID, personality, moves);
 
-      case "defend or yield":
+      case "ground_defend_or_yield":
         return this.decideDefend(G, playerID, personality, moves);
 
-      case "garrison troops":
+      case "ground_garrison":
         return this.decideGarrison(G, playerID, personality, moves);
 
-      case "conquest draw or pick card":
+      case "conquest_draw_or_pick":
         return this.pickFoWCard(G, playerID, moves);
 
       default:
@@ -63,7 +62,7 @@ export class GroundBattleStrategy implements PhaseStrategy {
         (building?.garrisonedRegiments ?? 0) +
         (building?.garrisonedLevies ?? 0) * 0.5 +
         (building?.garrisonedEliteRegiments ?? 0) * 1.5;
-      const hasFort = building?.fort ? 2 : 0; // fort adds defensive bonus
+      const hasFort = (building?.fort?.length ?? 0) > 0 ? 2 : 0; // fort adds defensive bonus
 
       const defenseStrength = garrisonStrength + hasFort;
       if (defenseStrength === 0) return m; // undefended — free capture
@@ -110,7 +109,7 @@ export class GroundBattleStrategy implements PhaseStrategy {
       (building?.garrisonedRegiments ?? 0) +
       (building?.garrisonedLevies ?? 0) * 0.5 +
       (building?.garrisonedEliteRegiments ?? 0) * 1.5;
-    const fortBonus = building?.fort ? 2 : 0;
+    const fortBonus = (building?.fort?.length ?? 0) > 0 ? 2 : 0;
     const defenseTotal = garrisonStrength + fortBonus;
 
     // Attacker strength: their troops at this tile

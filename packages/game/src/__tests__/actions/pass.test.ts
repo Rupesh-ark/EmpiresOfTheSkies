@@ -61,7 +61,7 @@ describe("pass — discovery phase", () => {
 
     expect(events.endTurn).toHaveBeenCalled();
     expect(events.endPhase).not.toHaveBeenCalled();
-    expect(G.stage).toBe("actions"); // stage unchanged from default? No — only set on endPhase branch
+    expect(G.stage).toEqual({ phase: "actions", sub: "default" }); // stage unchanged from default? No — only set on endPhase branch
   });
 
   it("sets stage='actions' and calls endPhase when all players have passed", () => {
@@ -72,7 +72,7 @@ describe("pass — discovery phase", () => {
 
     pass.fn({ G, ctx, playerID: "0", events });
 
-    expect(G.stage).toBe("actions");
+    expect(G.stage).toEqual({ phase: "discovery", sub: "default" });
     expect(events.endPhase).toHaveBeenCalled();
     expect(events.endTurn).not.toHaveBeenCalled();
   });
@@ -103,7 +103,7 @@ describe("pass — actions phase", () => {
     pass.fn({ G, ctx, playerID: "0", events });
 
     expect(G.playerInfo["0"].passed).toBe(true);
-    expect(G.stage).toBe("attack or pass");
+    expect(G.stage).toEqual({ phase: "actions", sub: "default" });
     expect(events.endPhase).toHaveBeenCalled();
     expect(events.endTurn).not.toHaveBeenCalled();
   });

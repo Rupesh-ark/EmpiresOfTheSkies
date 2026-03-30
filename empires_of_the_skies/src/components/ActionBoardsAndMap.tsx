@@ -289,7 +289,6 @@ const ActionBoardsAndMapInner = (props: MyGameProps) => {
         <PiracyIntentProvider round={props.G.round}>
         <Box sx={{ display: "flex", flexDirection: "column", height: "100vh" }}>
           <GameLayout
-            phase={props.ctx.phase ?? ""}
             stage={props.G.stage}
             isMyTurn={props.ctx.currentPlayer === props.playerID}
             renderSlot={renderSlot}
