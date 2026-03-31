@@ -27,7 +27,8 @@ const createMatch = async (
   lobbyClient: LobbyClient,
   numHumans: number,
   numBots: number,
-  setMatchReady: React.Dispatch<React.SetStateAction<string | undefined>>
+  setMatchReady: React.Dispatch<React.SetStateAction<string | undefined>>,
+  botNames: string[] = [],
 ) => {
   const totalPlayers = numHumans + numBots;
   const response = await lobbyClient.createMatch("empires-of-the-skies", {
@@ -44,7 +45,7 @@ const createMatch = async (
     const botCredentials: Record<string, string> = {};
     const botPlayerIDs: string[] = [];
     for (let i = 0; i < numBots; i++) {
-      const botName = `Bot ${i + 1}`;
+      const botName = botNames[i] ?? `Bot ${i + 1}`;
       const botResponse = await lobbyClient.joinMatch(
         "empires-of-the-skies",
         response.matchID,
@@ -100,6 +101,12 @@ const HomePageComponent = (props: HomePageComponentProps) => {
   const [matchIDInput, setMatchIDInput] = useState("");
   const [numBots, setNumBots] = useState(0);
   const navigate = useNavigate();
+
+  const BOT_NAMES = ["Aldric", "Isolde", "Theron", "Seraphina", "Cassius", "Elara"];
+  const pickBotNames = (count: number) => {
+    const shuffled = [...BOT_NAMES].sort(() => Math.random() - 0.5);
+    return shuffled.slice(0, count);
+  };
 
   return (
     <Box
@@ -280,6 +287,25 @@ const HomePageComponent = (props: HomePageComponentProps) => {
             </Typography>
           </Box>
 
+          <Button
+            size="small"
+            variant="text"
+            onClick={() => navigate("/rules")}
+            sx={{
+              alignSelf: "center",
+              fontFamily: fonts.accent,
+              fontSize: "0.82rem",
+              letterSpacing: "0.06em",
+              color: colors.home.text,
+              opacity: 0.8,
+              textDecoration: "underline",
+              textUnderlineOffset: "3px",
+              "&:hover": { opacity: 1, backgroundColor: "transparent" },
+            }}
+          >
+            How to Play &rarr;
+          </Button>
+
           <ToggleButtonGroup
             color="secondary"
             value={joinOrCreate}
@@ -426,7 +452,7 @@ const HomePageComponent = (props: HomePageComponentProps) => {
             }}
             onClick={() => {
               if (joinOrCreate === "create") {
-                createMatch(props.lobbyClient, props.numPlayers, numBots, props.setMatchReady);
+                createMatch(props.lobbyClient, props.numPlayers, numBots, props.setMatchReady, pickBotNames(numBots));
               } else {
                 navigate(`/match/${matchIDInput}/${playerName}`);
               }

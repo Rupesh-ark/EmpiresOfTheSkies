@@ -68,12 +68,10 @@ const variantStyleMap = {
       background: `linear-gradient(180deg, ${tokens.ui.surfaceHover} 0%, ${tokens.ui.surface} 100%)`,
       borderColor: `${tokens.ui.gold}55`,
       boxShadow: `0 3px 8px rgba(80,60,30,0.18), inset 0 1px 0 rgba(255,255,255,0.3)`,
-      transform: "translateY(-1px)",
     },
     "&:active": {
       background: `linear-gradient(180deg, ${tokens.ui.surface} 0%, ${tokens.ui.surfaceHover} 100%)`,
       boxShadow: `inset 0 2px 4px rgba(0,0,0,0.08)`,
-      transform: "translateY(0px)",
     },
   },
   danger: {
@@ -99,6 +97,7 @@ const variantStyleMap = {
     background: "transparent",
     color: tokens.ui.textMuted,
     border: `1px solid ${tokens.ui.border}`,
+    borderTop: `1px solid ${tokens.ui.border}`,
     borderBottom: `1px solid ${tokens.ui.borderMedium}`,
     boxShadow: "none",
     fontWeight: 600,

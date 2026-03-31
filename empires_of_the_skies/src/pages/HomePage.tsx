@@ -8,6 +8,7 @@ import ClientComponent from "./Client";
 import HomePageComponent from "./HomePageComponent";
 import LobbyPage from "./LobbyPage";
 
+const RulesPage = lazy(() => import("./RulesPage"));
 const AITunerPage = lazy(() => import("./AITuner"));
 const AITournamentPage = lazy(() => import("./AITournamentPage"));
 
@@ -43,6 +44,10 @@ const HomePage = () => {
           <Route
             path="/game/:matchID/:playerName"
             element={<ClientComponent server={server} />}
+          />
+          <Route
+            path="/rules"
+            element={<Suspense fallback={<div>Loading Rules...</div>}><RulesPage /></Suspense>}
           />
           <Route
             path="/ai-tuner"

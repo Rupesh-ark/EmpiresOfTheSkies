@@ -67,7 +67,6 @@ export const GamePanel = ({
         borderRadius: `${tokens.radius.lg}px`,
         ...variantStyles,
         ...(moodBorder && { borderLeft: `4px solid ${moodBorder}` }),
-        overflow: "hidden",
         ...sx,
       }}
     >

@@ -15,6 +15,15 @@ import {
   Tooltip,
 } from "@mui/material";
 import { ContentCopy, CheckCircle, RadioButtonUnchecked } from "@mui/icons-material";
+import {
+  GiCastle,
+  GiLightningStorm,
+  GiCompass,
+  GiScrollUnfurled,
+  GiCrossedSwords,
+  GiChurch,
+  GiLaurelsTrophy,
+} from "react-icons/gi";
 import { LobbyClient } from "boardgame.io/client";
 import { createLogger } from "@eots/game";
 import { BG_DESKTOP as bgDesktop, BG_TABLET as bgTablet, BG_MOBILE as bgMobile } from "../assets/homePage";
@@ -46,21 +55,23 @@ interface PlayerSlot {
 
 // Styling constants
 const CREAM = "#F5ECD8";
-const CREAM_DIM = "rgba(245,236,216,0.65)";
+const CREAM_DIM = "rgba(245,236,216,0.78)";
 const GOLD = "#E8C860";
-const PANEL_BG = "rgba(20,16,10,0.75)";
-const PANEL_BORDER = "rgba(200,170,120,0.25)";
+const PANEL_BG = "rgba(20,16,10,0.92)";
+const PANEL_BORDER = "rgba(200,170,120,0.18)";
 const DIVIDER = "rgba(200,170,120,0.18)";
 
-const GUIDE_ITEMS = [
-  ["Kingdom Advantage", "Pick a unique ability card that shapes your strategy — elite troops, smuggling networks, extra prisons, or church influence."],
-  ["Event Cards", "Each round begins with events — rebellions, plagues, invasions, marriages, or bumper crops. You choose which to play from your hand."],
-  ["Discovery", "Flip map tiles to reveal oceans, new races, and legendary places. Discoveries spread heresy as they challenge Church doctrine."],
-  ["Actions", "Place counsellors on the action board to recruit troops, buy skyships, build cathedrals, found factories, or influence the Church."],
-  ["Battles", "Send fleets across the map. Aerial battles use skyships and Fortune of War cards. Ground battles follow to conquer territories."],
-  ["Elections", "Elect an Archprelate who can bless or curse kingdoms. Control the Church, or turn heretic and defy it."],
-  ["Legacy", "Earn permanent titles like 'The Great' or 'The Conqueror' that score Victory Points at game end."],
-] as const;
+const GUIDE_ITEMS: { icon: React.ComponentType<{ size?: number }>; title: string; desc: string }[] = [
+  { icon: GiCastle,          title: "Kingdom Advantage", desc: "Pick a unique ability card at setup — elite troops, smuggling, extra prisons, or church influence." },
+  { icon: GiLightningStorm,  title: "Events",            desc: "Each round starts with a random event — rebellions, plagues, invasions, or bumper crops. You choose which card to submit." },
+  { icon: GiCompass,         title: "Discovery",         desc: "Flip map tiles to reveal new lands, races, and legendary places. Discoveries push heresy upward." },
+  { icon: GiScrollUnfurled,  title: "Actions",           desc: "Place counsellors to recruit troops, buy skyships, build cathedrals, found factories, or influence the Church." },
+  { icon: GiCrossedSwords,   title: "Battles",           desc: "Send fleets across the map. Aerial battles use skyships; ground battles conquer territories." },
+  { icon: GiChurch,          title: "Elections",          desc: "Elect an Archprelate who can bless or curse kingdoms. Control the Church, or turn heretic and defy it." },
+  { icon: GiLaurelsTrophy,   title: "Legacy",            desc: "Earn titles like 'The Conqueror' or 'The Pious' — secret goals that score Victory Points at game end." },
+];
+
+const ROUND_PHASES = ["Events", "Discovery", "Taxes", "Actions", "Resolution", "Scoring", "Reset"];
 
 const LobbyPage = ({ lobbyClient }: { lobbyClient: LobbyClient }) => {
   const { matchID, playerName } = useParams();
@@ -183,7 +194,6 @@ const LobbyPage = ({ lobbyClient }: { lobbyClient: LobbyClient }) => {
           overflow: "hidden",
         }}
       >
-        {/* Title */}
         <Typography
           sx={{
             fontFamily: fonts.accent,
@@ -192,17 +202,31 @@ const LobbyPage = ({ lobbyClient }: { lobbyClient: LobbyClient }) => {
             color: GOLD,
             letterSpacing: "0.1em",
             textTransform: "uppercase",
-            mb: 2.5,
+            mb: 1,
           }}
         >
           Empires of the Sky
         </Typography>
+        <Typography
+          sx={{
+            fontFamily: fonts.system,
+            fontSize: "clamp(0.95rem, 1.15vw, 1.08rem)",
+            lineHeight: 1.7,
+            color: CREAM_DIM,
+            mb: 2,
+          }}
+        >
+          You are the Monarch of a kingdom. Purchase skyships, send fleets to discover and
+          conquer new lands, control the Church, and build the greatest empire. The player with
+          the most Victory Points after 6–8 rounds wins.
+        </Typography>
 
-        {/* World lore */}
+        <Box sx={{ height: "1px", background: DIVIDER, mb: 2 }} />
+
         <Typography
           sx={{
             fontFamily: fonts.accent,
-            fontSize: "clamp(0.9rem, 1.2vw, 1.1rem)",
+            fontSize: "clamp(0.95rem, 1.15vw, 1.05rem)",
             fontWeight: 700,
             color: CREAM,
             letterSpacing: "0.06em",
@@ -210,33 +234,69 @@ const LobbyPage = ({ lobbyClient }: { lobbyClient: LobbyClient }) => {
             mb: 1,
           }}
         >
-          The World of Faithdom
+          Each Round
         </Typography>
-        <Typography
+        <Box
           sx={{
-            fontFamily: fonts.system,
-            fontSize: "clamp(0.85rem, 1.05vw, 1rem)",
-            lineHeight: 1.7,
-            color: CREAM_DIM,
+            display: "flex",
+            flexWrap: "wrap",
+            gap: "8px",
             mb: 2.5,
           }}
         >
-          You are the Monarch of a kingdom in Faithdom — a land hemmed in by icy wastes,
-          mountains, the hostile Infidel Empire, and the stormy Ocean Sea. Alchemists have
-          discovered the secret of flight, and bold aviators are venturing beyond in skyships
-          to discover new lands filled with strange beings and fabulous wealth. Purchase skyships,
-          send fleets to claim outposts, conquer distant lands, and use their riches to build
-          the greatest empire.
-        </Typography>
+          {ROUND_PHASES.map((phase, i) => (
+            <Box
+              key={phase}
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 0.75,
+                px: 1.5,
+                py: 0.6,
+                borderRadius: "14px",
+                backgroundColor: "rgba(232,200,96,0.08)",
+                border: `1px solid rgba(232,200,96,0.2)`,
+              }}
+            >
+              <Box
+                sx={{
+                  width: 22,
+                  height: 22,
+                  borderRadius: "50%",
+                  backgroundColor: "rgba(232,200,96,0.15)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontFamily: fonts.accent,
+                  fontSize: "0.75rem",
+                  fontWeight: 800,
+                  color: GOLD,
+                  flexShrink: 0,
+                }}
+              >
+                {i + 1}
+              </Box>
+              <Typography
+                sx={{
+                  fontFamily: fonts.system,
+                  fontSize: "clamp(0.85rem, 1vw, 0.95rem)",
+                  color: CREAM_DIM,
+                  fontWeight: 500,
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {phase}
+              </Typography>
+            </Box>
+          ))}
+        </Box>
 
-        {/* Divider */}
         <Box sx={{ height: "1px", background: DIVIDER, mb: 2 }} />
 
-        {/* What to expect */}
         <Typography
           sx={{
             fontFamily: fonts.accent,
-            fontSize: "clamp(0.9rem, 1.2vw, 1.1rem)",
+            fontSize: "clamp(0.95rem, 1.15vw, 1.05rem)",
             fontWeight: 700,
             color: CREAM,
             letterSpacing: "0.06em",
@@ -244,45 +304,86 @@ const LobbyPage = ({ lobbyClient }: { lobbyClient: LobbyClient }) => {
             mb: 1.5,
           }}
         >
-          What to Expect
+          Key Concepts
         </Typography>
         <Box
           sx={{
-            display: "grid",
-            gridTemplateColumns: { xs: "1fr", lg: "1fr 1fr" },
-            gap: { xs: "8px", lg: "10px 32px" },
-            mb: 2.5,
+            display: "flex",
+            flexDirection: "column",
+            gap: 1.5,
+            mb: 2,
+            overflowY: "auto",
+            flex: 1,
+            minHeight: 0,
           }}
         >
-          {GUIDE_ITEMS.map(([title, desc]) => (
-            <Typography
-              key={title}
-              sx={{
-                fontFamily: fonts.system,
-                fontSize: "clamp(0.8rem, 1vw, 0.92rem)",
-                lineHeight: 1.6,
-                color: CREAM_DIM,
-              }}
-            >
-              <Box component="span" sx={{ color: GOLD, fontWeight: 700 }}>{title}:</Box>{" "}
-              {desc}
-            </Typography>
+          {GUIDE_ITEMS.map(({ icon: Icon, title, desc }) => (
+            <Box key={title} sx={{ display: "flex", gap: 1.5, alignItems: "flex-start" }}>
+              <Box
+                sx={{
+                  flexShrink: 0,
+                  width: 32,
+                  height: 32,
+                  borderRadius: "6px",
+                  backgroundColor: "rgba(232,200,96,0.08)",
+                  border: `1px solid rgba(232,200,96,0.15)`,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color: GOLD,
+                  mt: "2px",
+                }}
+              >
+                <Icon size={17} />
+              </Box>
+              <Box>
+                <Typography
+                  component="span"
+                  sx={{
+                    fontFamily: fonts.accent,
+                    fontSize: "clamp(0.92rem, 1.1vw, 1.02rem)",
+                    fontWeight: 700,
+                    color: GOLD,
+                    mr: 0.75,
+                  }}
+                >
+                  {title}
+                </Typography>
+                <Typography
+                  component="span"
+                  sx={{
+                    fontFamily: fonts.system,
+                    fontSize: "clamp(0.92rem, 1.1vw, 1.02rem)",
+                    lineHeight: 1.7,
+                    color: CREAM_DIM,
+                  }}
+                >
+                  {desc}
+                </Typography>
+              </Box>
+            </Box>
           ))}
         </Box>
 
-        {/* Win condition */}
-        <Box sx={{ height: "1px", background: DIVIDER, mb: 1.5 }} />
+        <Box sx={{ height: "1px", background: DIVIDER, mb: 1.5, flexShrink: 0 }} />
         <Typography
+          component="a"
+          href="/rules"
+          target="_blank"
+          rel="noopener"
           sx={{
-            fontFamily: fonts.system,
-            fontSize: "clamp(0.8rem, 1vw, 0.92rem)",
-            lineHeight: 1.6,
-            color: CREAM_DIM,
-            fontStyle: "italic",
+            flexShrink: 0,
+            fontFamily: fonts.accent,
+            fontSize: "clamp(0.92rem, 1.1vw, 1rem)",
+            fontWeight: 700,
+            color: GOLD,
+            cursor: "pointer",
+            textDecoration: "underline",
+            textUnderlineOffset: "3px",
+            "&:hover": { color: CREAM },
           }}
         >
-          The game lasts 8 rounds. The player with the most Victory Points — from buildings,
-          conquests, legacy cards, trade, and church influence — wins.
+          Read Full Rules &rarr;
         </Typography>
       </Box>
 

@@ -22,7 +22,7 @@ const CounsellorDot = ({ placed, colour }: CounsellorDotProps) => (
       backgroundColor: placed ? colour : "transparent",
       boxShadow: placed ? `0 0 6px ${colour}88` : "none",
       flexShrink: 0,
-      transition: `all ${tokens.transition.fast}`,
+      transition: `background-color ${tokens.transition.fast}, box-shadow ${tokens.transition.fast}`,
     }}
   />
 );

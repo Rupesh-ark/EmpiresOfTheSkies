@@ -31,6 +31,14 @@ server.app.use(
   })
 );
 
+server.app.use(async (ctx: any, next: any) => {
+  if (ctx.path === "/" && ctx.method === "GET") {
+    ctx.body = "Empires of the Skies server is running. See /games/empires-of-the-skies";
+    return;
+  }
+  await next();
+});
+
 // Bot log endpoint: POST /api/bot-log
 const BOT_LOGS_DIR = path.resolve(__dirname, "../../bot-logs");
 if (!fs.existsSync(BOT_LOGS_DIR)) fs.mkdirSync(BOT_LOGS_DIR, { recursive: true });
