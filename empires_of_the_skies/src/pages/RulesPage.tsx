@@ -41,7 +41,7 @@ const BORDER     = "rgba(200,170,120,0.15)";
 const DIVIDER    = "rgba(200,170,120,0.18)";
 const CALLOUT_BG = "rgba(232,200,96,0.07)";
 const CALLOUT_BORDER = "rgba(232,200,96,0.22)";
-const MAX_CONTENT_W = "720px";
+const MAX_CONTENT_W = "960px";
 
 const fonts = {
   accent:  '"Cinzel", serif',
