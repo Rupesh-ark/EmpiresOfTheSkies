@@ -64,7 +64,7 @@ export function setupBotClients(
         bot.setThinking(true);
 
         // Small delay for natural pacing (200-800ms)
-        const delay = 200 + Math.random() * 600;
+        const delay = 1500 + Math.random() * 1000;
         setTimeout(() => {
           const move = bot.chooseMove(state.G, state.ctx, playerID);
           if (move) {

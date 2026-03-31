@@ -1,5 +1,6 @@
-import { useState } from "react";
-import { Box, Tabs, Tab, Typography } from "@mui/material";
+import { useRef, useState } from "react";
+import { Box, Tabs, Tab, Typography, Button } from "@mui/material";
+import DownloadIcon from "@mui/icons-material/Download";
 import { ThemeProvider } from "@mui/material/styles";
 import { baseTheme } from "../../theme/baseTheme";
 import { tokens } from "../../theme/tokens";
@@ -9,12 +10,15 @@ import GameOverviewTab from "./tabs/GameOverviewTab";
 import DecisionsTab from "./tabs/DecisionsTab";
 import HeuristicsTab from "./tabs/HeuristicsTab";
 import MCTSPatternsTab from "./tabs/MCTSPatternsTab";
+import { exportChartsAsZip } from "./exportCharts";
 
 export default function AITunerPage() {
   const [gameRecord, setGameRecord] = useState<GameRecord | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [selectedPlayer, setSelectedPlayer] = useState<string>("all");
   const [resultTab, setResultTab] = useState(0);
+  const [exporting, setExporting] = useState(false);
+  const chartAreaRef = useRef<HTMLDivElement>(null);
 
   const loadRecord = (file: File) => {
     const reader = new FileReader();
@@ -29,6 +33,19 @@ export default function AITunerPage() {
       }
     };
     reader.readAsText(file);
+  };
+
+  const TAB_NAMES = ["game_overview", "decisions", "heuristics", "mcts_patterns"];
+
+  const handleExportCharts = async () => {
+    if (!chartAreaRef.current || !gameRecord) return;
+    setExporting(true);
+    try {
+      const tabName = TAB_NAMES[resultTab] ?? "charts";
+      await exportChartsAsZip(chartAreaRef.current, `${gameRecord.gameId}_${tabName}`);
+    } finally {
+      setExporting(false);
+    }
   };
 
   const exportRecord = () => {
@@ -71,13 +88,25 @@ export default function AITunerPage() {
             </Box>
           ) : (
             <>
-              <Tabs value={resultTab} onChange={(_, v) => setResultTab(v)} sx={{ mb: 2 }}>
-                <Tab label="Game Overview" />
-                <Tab label="Decisions" />
-                <Tab label="Heuristics" />
-                <Tab label="MCTS & Patterns" />
-              </Tabs>
+              <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+                <Tabs value={resultTab} onChange={(_, v) => setResultTab(v)} sx={{ flex: 1 }}>
+                  <Tab label="Game Overview" />
+                  <Tab label="Decisions" />
+                  <Tab label="Heuristics" />
+                  <Tab label="MCTS & Patterns" />
+                </Tabs>
+                <Button
+                  size="small"
+                  startIcon={<DownloadIcon />}
+                  onClick={handleExportCharts}
+                  disabled={exporting}
+                  sx={{ whiteSpace: "nowrap", ml: 1 }}
+                >
+                  {exporting ? "Exporting…" : "Export Charts"}
+                </Button>
+              </Box>
 
+              <Box ref={chartAreaRef}>
               {resultTab === 0 && (
                 <GameOverviewTab gameRecord={gameRecord} selectedPlayer={selectedPlayer} />
               )}
@@ -94,6 +123,7 @@ export default function AITunerPage() {
               {resultTab === 3 && (
                 <MCTSPatternsTab gameRecord={gameRecord} selectedPlayer={selectedPlayer} />
               )}
+              </Box>
             </>
           )}
         </Box>

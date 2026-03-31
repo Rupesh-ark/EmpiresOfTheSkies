@@ -27,7 +27,7 @@ export default function HeuristicsTab({ gameRecord, selectedPlayer }: Heuristics
 
   return (
     <Box>
-      <Paper sx={{ p: 2, mb: 2 }}>
+      <Paper data-chart-name="eval_vs_mcts" sx={{ p: 2, mb: 2 }}>
         <Typography variant="subtitle2" gutterBottom>
           Evaluator vs MCTS Top Picks
           {selectedPlayer !== "all" ? ` (P${selectedPlayer})` : " (All Players)"}
@@ -62,7 +62,7 @@ export default function HeuristicsTab({ gameRecord, selectedPlayer }: Heuristics
         </Box>
       </Paper>
 
-      <Paper sx={{ p: 2, mb: 2 }}>
+      <Paper data-chart-name="quality_distribution" sx={{ p: 2, mb: 2 }}>
         <Typography variant="subtitle2" gutterBottom>
           Quality Score Distribution (All MCTS Children)
           {selectedPlayer !== "all" ? ` (P${selectedPlayer})` : " (All Players)"}

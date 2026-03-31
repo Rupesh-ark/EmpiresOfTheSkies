@@ -28,7 +28,7 @@ export default function MCTSPatternsTab({ gameRecord, selectedPlayer }: MCTSPatt
 
   return (
     <Box>
-      <Paper sx={{ p: 2, mb: 2 }}>
+      <Paper data-chart-name="move_frequency" sx={{ p: 2, mb: 2 }}>
         <Typography variant="subtitle2" gutterBottom>
           Move Frequency by Round
           {selectedPlayer !== "all" ? ` (P${selectedPlayer})` : " (All)"}
@@ -47,7 +47,7 @@ export default function MCTSPatternsTab({ gameRecord, selectedPlayer }: MCTSPatt
         )}
       </Paper>
 
-      <Paper sx={{ p: 2, mb: 2 }}>
+      <Paper data-chart-name="decision_quality" sx={{ p: 2, mb: 2 }}>
         <Typography variant="subtitle2" gutterBottom>
           Decision Quality Over Time
           {selectedPlayer !== "all" ? ` (P${selectedPlayer})` : " (All Players)"}

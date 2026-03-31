@@ -25,11 +25,13 @@ const fonts = { accent: tokens.font.accent, primary: tokens.font.display, system
 
 const createMatch = async (
   lobbyClient: LobbyClient,
-  numPlayers: number,
+  numHumans: number,
+  numBots: number,
   setMatchReady: React.Dispatch<React.SetStateAction<string | undefined>>
 ) => {
+  const totalPlayers = numHumans + numBots;
   const response = await lobbyClient.createMatch("empires-of-the-skies", {
-    numPlayers,
+    numPlayers: totalPlayers,
   });
 
   if (!response.matchID) {
@@ -37,8 +39,27 @@ const createMatch = async (
     return;
   }
 
-  const enquiry = await lobbyClient.getMatch("empires-of-the-skies", response.matchID);
-  log.info("match created", { matchID: enquiry.matchID });
+  // Auto-join bots into the last N slots
+  if (numBots > 0) {
+    const botCredentials: Record<string, string> = {};
+    const botPlayerIDs: string[] = [];
+    for (let i = 0; i < numBots; i++) {
+      const botName = `Bot ${i + 1}`;
+      const botResponse = await lobbyClient.joinMatch(
+        "empires-of-the-skies",
+        response.matchID,
+        { playerName: botName, playerID: String(i) }
+      );
+      botCredentials[String(i)] = botResponse.playerCredentials;
+      botPlayerIDs.push(String(i));
+    }
+    localStorage.setItem(`eots_bots_${response.matchID}`, JSON.stringify({
+      botPlayerIDs,
+      botCredentials,
+    }));
+  }
+
+  log.info("match created", { matchID: response.matchID, numHumans, numBots });
   setMatchReady(response.matchID);
 };
 
@@ -74,52 +95,11 @@ const TAGLINES = [
 ] as const;
 
 const HomePageComponent = (props: HomePageComponentProps) => {
-  const [joinOrCreate, setJoinOrCreate] = useState<"join" | "create" | "ai">("join");
+  const [joinOrCreate, setJoinOrCreate] = useState<"join" | "create">("join");
   const [playerName, setName] = useState("");
   const [matchIDInput, setMatchIDInput] = useState("");
-  const [numBots, setNumBots] = useState(5);
+  const [numBots, setNumBots] = useState(0);
   const navigate = useNavigate();
-
-  const startAIGame = async () => {
-    const totalPlayers = 1 + numBots;
-
-    const { matchID } = await props.lobbyClient.createMatch("empires-of-the-skies", {
-      numPlayers: totalPlayers,
-    });
-    if (!matchID) { alert("Failed to create match"); return; }
-
-    const humanResponse = await props.lobbyClient.joinMatch(
-      "empires-of-the-skies",
-      matchID,
-      { playerName, playerID: "0" }
-    );
-
-    const storageKey = `eots_${matchID}_${playerName}`;
-    localStorage.setItem(storageKey, JSON.stringify({
-      playerID: humanResponse.playerID,
-      credentials: humanResponse.playerCredentials,
-    }));
-
-    const botCredentials: Record<string, string> = {};
-    const botPlayerIDs: string[] = [];
-    for (let i = 1; i <= numBots; i++) {
-      const botName = `Bot ${i}`;
-      const botResponse = await props.lobbyClient.joinMatch(
-        "empires-of-the-skies",
-        matchID,
-        { playerName: botName, playerID: String(i) }
-      );
-      botCredentials[String(i)] = botResponse.playerCredentials;
-      botPlayerIDs.push(String(i));
-    }
-
-    localStorage.setItem(`eots_bots_${matchID}`, JSON.stringify({
-      botPlayerIDs,
-      botCredentials,
-    }));
-
-    navigate(`/game/${matchID}/${playerName}`);
-  };
 
   return (
     <Box
@@ -327,7 +307,6 @@ const HomePageComponent = (props: HomePageComponentProps) => {
           >
             <ToggleButton value="join">Join</ToggleButton>
             <ToggleButton value="create">Create</ToggleButton>
-            <ToggleButton value="ai">Play vs AI</ToggleButton>
           </ToggleButtonGroup>
 
           <Typography sx={{ ...labelSx, mt: 1 }}>Player Name</Typography>
@@ -356,12 +335,16 @@ const HomePageComponent = (props: HomePageComponentProps) => {
 
           {joinOrCreate === "create" && (
             <>
-              <Typography sx={labelSx}>Number of Players</Typography>
+              <Typography sx={labelSx}>Human Players</Typography>
               <Select
                 size="small"
                 fullWidth
                 value={props.numPlayers}
-                onChange={(event) => props.setNumPlayers(Number(event.target.value))}
+                onChange={(event) => {
+                  const humans = Number(event.target.value);
+                  props.setNumPlayers(humans);
+                  if (humans + numBots > 6) setNumBots(6 - humans);
+                }}
                 sx={{
                   fontFamily: fonts.accent,
                   color: colors.home.text,
@@ -374,17 +357,13 @@ const HomePageComponent = (props: HomePageComponentProps) => {
                 }}
               >
                 {[1, 2, 3, 4, 5, 6].map((n) => (
-                  <MenuItem key={n} value={n}>
+                  <MenuItem key={n} value={n} disabled={n + numBots > 6}>
                     {n}
                   </MenuItem>
                 ))}
               </Select>
-            </>
-          )}
 
-          {joinOrCreate === "ai" && (
-            <>
-              <Typography sx={labelSx}>Number of AI Opponents</Typography>
+              <Typography sx={labelSx}>AI Bots</Typography>
               <Select
                 size="small"
                 fullWidth
@@ -401,12 +380,16 @@ const HomePageComponent = (props: HomePageComponentProps) => {
                   "& .MuiOutlinedInput-notchedOutline": { border: "none" },
                 }}
               >
-                {[1, 2, 3, 4, 5].map((n) => (
+                {Array.from({ length: 7 - props.numPlayers }, (_, i) => i).map((n) => (
                   <MenuItem key={n} value={n}>
-                    {n}
+                    {n === 0 ? "0 (humans only)" : n}
                   </MenuItem>
                 ))}
               </Select>
+
+              <Typography sx={{ fontFamily: fonts.system, fontSize: "0.78rem", color: colors.home.text, opacity: 0.6, textAlign: "center" }}>
+                Total: {props.numPlayers + numBots} players ({props.numPlayers} human, {numBots} bot{numBots !== 1 ? "s" : ""})
+              </Typography>
             </>
           )}
 
@@ -443,15 +426,13 @@ const HomePageComponent = (props: HomePageComponentProps) => {
             }}
             onClick={() => {
               if (joinOrCreate === "create") {
-                createMatch(props.lobbyClient, props.numPlayers, props.setMatchReady);
-              } else if (joinOrCreate === "ai") {
-                startAIGame();
+                createMatch(props.lobbyClient, props.numPlayers, numBots, props.setMatchReady);
               } else {
                 navigate(`/match/${matchIDInput}/${playerName}`);
               }
             }}
           >
-            {joinOrCreate === "join" ? "JOIN" : joinOrCreate === "create" ? "CREATE" : "START"} GAME
+            {joinOrCreate === "join" ? "JOIN" : "CREATE"} GAME
           </Button>
         </Paper>
 

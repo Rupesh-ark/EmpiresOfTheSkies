@@ -14,7 +14,6 @@ import {
   Alert,
   IconButton,
   Tooltip,
-  TextField,
   Accordion,
   AccordionSummary,
   AccordionDetails,
@@ -29,14 +28,6 @@ import { tokens } from "../../theme/tokens";
 import type { GameRecord } from "@eots/game";
 import { getV2Config, setV2Config, resetV2Config } from "@eots/game";
 import { PLAYER_COLORS } from "./aiTunerHelpers";
-
-const DEFAULT_MCTS_CONFIG = {
-  simulationsPerMove: 20,
-  rolloutDepth: 1,
-  explorationConstant: 1.4,
-};
-
-type MCTSConfigKey = keyof typeof DEFAULT_MCTS_CONFIG;
 
 interface AITunerSidebarProps {
   gameRecord: GameRecord | null;
@@ -57,16 +48,7 @@ export default function AITunerSidebar({
 }: AITunerSidebarProps) {
   const navigate = useNavigate();
 
-  const [mctsConfig, setMctsConfig] = useState({ ...DEFAULT_MCTS_CONFIG });
   const [v2Config, setV2ConfigState] = useState(() => getV2Config());
-
-  const handleMctsChange = (key: MCTSConfigKey, value: number) => {
-    setMctsConfig((prev) => ({ ...prev, [key]: value }));
-  };
-
-  const resetMctsConfig = () => {
-    setMctsConfig({ ...DEFAULT_MCTS_CONFIG });
-  };
 
   const handleV2Change = (path: string, value: number) => {
     const parts = path.split(".");
@@ -203,108 +185,6 @@ export default function AITunerSidebar({
           ))}
         </Select>
       </FormControl>
-
-      <Divider />
-
-      <Typography variant="subtitle2">MCTS Configuration</Typography>
-      <Box sx={{ px: 1 }}>
-        <Typography variant="caption" sx={{ fontWeight: 600 }}>Simulations per Move</Typography>
-        <Typography variant="caption" sx={{ display: "block", color: tokens.ui.textMuted, fontSize: 10, mb: 0.5 }}>
-          How many rollouts per candidate move. More = better decisions, slower turns.
-        </Typography>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          <Slider
-            size="small"
-            value={mctsConfig.simulationsPerMove}
-            min={5}
-            max={200}
-            step={5}
-            onChange={(_, v) => handleMctsChange("simulationsPerMove", v as number)}
-            sx={{ flex: 1 }}
-          />
-          <TextField
-            size="small"
-            type="number"
-            value={mctsConfig.simulationsPerMove}
-            onChange={(e) => {
-              const v = parseInt(e.target.value);
-              if (!isNaN(v) && v >= 1 && v <= 500) handleMctsChange("simulationsPerMove", v);
-            }}
-            slotProps={{ htmlInput: { step: 5, min: 1, max: 500 } }}
-            sx={{ width: 72, "& input": { py: 0.5, px: 0.5, fontSize: 12, textAlign: "right" } }}
-          />
-        </Box>
-      </Box>
-      <Box sx={{ px: 1 }}>
-        <Typography variant="caption" sx={{ fontWeight: 600 }}>Rollout Depth</Typography>
-        <Typography variant="caption" sx={{ display: "block", color: tokens.ui.textMuted, fontSize: 10, mb: 0.5 }}>
-          How many future rounds each simulation plays out. Higher = more foresight, much slower.
-        </Typography>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          <Slider
-            size="small"
-            value={mctsConfig.rolloutDepth}
-            min={1}
-            max={6}
-            step={1}
-            onChange={(_, v) => handleMctsChange("rolloutDepth", v as number)}
-            sx={{ flex: 1 }}
-          />
-          <TextField
-            size="small"
-            type="number"
-            value={mctsConfig.rolloutDepth}
-            onChange={(e) => {
-              const v = parseInt(e.target.value);
-              if (!isNaN(v) && v >= 1 && v <= 10) handleMctsChange("rolloutDepth", v);
-            }}
-            slotProps={{ htmlInput: { step: 1, min: 1, max: 10 } }}
-            sx={{ width: 72, "& input": { py: 0.5, px: 0.5, fontSize: 12, textAlign: "right" } }}
-          />
-        </Box>
-      </Box>
-      <Box sx={{ px: 1 }}>
-        <Typography variant="caption" sx={{ fontWeight: 600 }}>Exploration Constant (C)</Typography>
-        <Typography variant="caption" sx={{ display: "block", color: tokens.ui.textMuted, fontSize: 10, mb: 0.5 }}>
-          UCB1 exploration vs exploitation. Higher = tries more moves, lower = exploits best known.
-        </Typography>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          <Slider
-            size="small"
-            value={mctsConfig.explorationConstant}
-            min={0.1}
-            max={3.0}
-            step={0.1}
-            onChange={(_, v) => handleMctsChange("explorationConstant", v as number)}
-            sx={{ flex: 1 }}
-          />
-          <TextField
-            size="small"
-            type="number"
-            value={mctsConfig.explorationConstant}
-            onChange={(e) => {
-              const v = parseFloat(e.target.value);
-              if (!isNaN(v) && v >= 0.1 && v <= 5) handleMctsChange("explorationConstant", v);
-            }}
-            slotProps={{ htmlInput: { step: 0.1, min: 0.1, max: 5 } }}
-            sx={{ width: 72, "& input": { py: 0.5, px: 0.5, fontSize: 12, textAlign: "right" } }}
-          />
-        </Box>
-      </Box>
-
-      <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
-        <Button size="small" startIcon={<RestartAltIcon />} onClick={resetMctsConfig}>
-          Reset
-        </Button>
-        <Button
-          size="small"
-          startIcon={<DownloadIcon />}
-          onClick={onExportRecord}
-          disabled={!gameRecord}
-        >
-          Export
-        </Button>
-      </Box>
 
       <Divider />
 

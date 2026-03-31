@@ -23,7 +23,7 @@ export default function GameOverviewTab({ gameRecord, selectedPlayer }: GameOver
 
   return (
     <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
-      <Paper sx={{ p: 2 }}>
+      <Paper data-chart-name="vp_progression" sx={{ p: 2 }}>
         <Typography variant="subtitle2" gutterBottom>
           VP Progression
         </Typography>
@@ -39,7 +39,7 @@ export default function GameOverviewTab({ gameRecord, selectedPlayer }: GameOver
         )}
       </Paper>
 
-      <Paper sx={{ p: 2 }}>
+      <Paper data-chart-name="economy" sx={{ p: 2 }}>
         <Typography variant="subtitle2" gutterBottom>
           Economy
           {selectedPlayer !== "all" ? ` (P${selectedPlayer})` : " (P0)"}
@@ -56,7 +56,7 @@ export default function GameOverviewTab({ gameRecord, selectedPlayer }: GameOver
         )}
       </Paper>
 
-      <Paper sx={{ p: 2 }}>
+      <Paper data-chart-name="territory_buildings" sx={{ p: 2 }}>
         <Typography variant="subtitle2" gutterBottom>
           Territory & Buildings
           {selectedPlayer !== "all" ? ` (P${selectedPlayer})` : " (P0)"}
@@ -73,7 +73,7 @@ export default function GameOverviewTab({ gameRecord, selectedPlayer }: GameOver
         )}
       </Paper>
 
-      <Paper sx={{ p: 2 }}>
+      <Paper data-chart-name="military_heresy" sx={{ p: 2 }}>
         <Typography variant="subtitle2" gutterBottom>
           Military & Heresy
           {selectedPlayer !== "all" ? ` (P${selectedPlayer})` : " (P0)"}
