@@ -25,11 +25,11 @@ export const findPossibleDestinations = (
   G: MyGameState,
   startingCoords: number[],
   unlaiden: boolean
-): number[][][] => {
-  let availableGridLocations: number[][] = [];
+): [number, number][][] => {
+  let availableGridLocations: [number, number][] = [];
   let coordinatesToSearch: number[][] = [startingCoords];
-  let coordinatesToSearchNext: number[][] = [];
-  let coordsGroupedByCost: number[][][] = [];
+  let coordinatesToSearchNext: [number, number][] = [];
+  let coordsGroupedByCost: [number, number][][] = [];
   for (let i = 0; i < 3; i++) {
     coordinatesToSearch.forEach((coords) => {
       const [x, y] = coords;

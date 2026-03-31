@@ -3,7 +3,7 @@ export interface FleetDragState {
   playerId: string;
   fleetIndex: number;
   sourceLocation: [number, number];
-  validDestinations: number[][];
+  validDestinations: [number, number][];
   costMap: Map<string, number>;
   isLaden: boolean;
 }
