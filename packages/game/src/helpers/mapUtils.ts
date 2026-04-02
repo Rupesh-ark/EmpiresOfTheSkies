@@ -48,8 +48,6 @@ const isEdgeBlocked = (
          (dstTile?.blocked.includes(reverseDir) ?? false);
 };
 
-// Adjacency
-
 // Adjacency with east-west wrap. edgesOnly=true gives 4 cardinal directions only.
 export const getNeighbors = (x: number, y: number, edgesOnly = false): [number, number][] => {
   const result: [number, number][] = [];
@@ -78,8 +76,6 @@ export const getPassableNeighbors = (
     ([nx, ny]) => !isEdgeBlocked(x, y, nx, ny, tileArray)
   );
 };
-
-// BFS
 
 // BFS from start tiles through a network of allowed tiles.
 // When tileArray is provided, mountain edges are respected.

@@ -215,16 +215,16 @@ export const hasAnyColony = (G: MyGameState, playerID?: string): boolean => {
   return false;
 };
 
-let _battleCheckCount = 0;
+let battleCheckCount = 0;
 export const checkIfCurrentPlayerIsInCurrentBattle = (
   G: MyGameState,
   ctx: Ctx,
   events: EventsAPI
 ) => {
-  _battleCheckCount++;
-  if (_battleCheckCount > 50) {
-    console.error('[BATTLE-CHECK] called ' + _battleCheckCount + 'x P' + ctx.currentPlayer + ' sub=' + G.stage?.sub + ' battle=' + JSON.stringify(G.mapState.currentBattle));
-    if (_battleCheckCount > 100) return; // break the loop
+  battleCheckCount++;
+  if (battleCheckCount > 50) {
+    console.error('[BATTLE-CHECK] called ' + battleCheckCount + 'x P' + ctx.currentPlayer + ' sub=' + G.stage?.sub + ' battle=' + JSON.stringify(G.mapState.currentBattle));
+    if (battleCheckCount > 100) return; // break the loop
   }
   const [x, y] = G.mapState.currentBattle;
 

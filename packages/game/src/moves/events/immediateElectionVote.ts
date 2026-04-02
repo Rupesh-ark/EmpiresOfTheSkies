@@ -2,7 +2,6 @@ import { INVALID_MOVE } from "boardgame.io/core";
 import { MoveDefinition } from "../../types";
 import { HERESY_MIN, logEvent } from "../../helpers/stateUtils";
 
-/** Emergency election vote (Archprelate Dies event). */
 const immediateElectionVote: MoveDefinition = {
   fn: ({ G, ctx, playerID, events }, ...args) => {
     if (!G.eventState.immediateElectionPending) return INVALID_MOVE;

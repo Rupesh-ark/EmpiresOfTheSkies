@@ -55,11 +55,9 @@ export interface MyGameState {
   boardState: ActionBoardInfo;
   cardDecks: CardDeckInfo;
   battleState?: BattleState;
-  /** Last resolved battle summary — shown by BattleResultDialog, cleared on dismiss */
   battleResult: BattleResult | null;
   conquestState?: BattlePlayerInfo;
   pendingDeal?: DealProposal;
-  /** Pre-computed by backend for frontend display — avoids duplicating game logic */
   possibleDefenders: string[];
   validRelocationTiles: number[][];
   troopsAvailableForGarrison: { regiments: number; elites: number; levies: number };
@@ -67,7 +65,6 @@ export interface MyGameState {
   electionResults: Record<string, number>;
   hasVoted: string[];
   voteSubmitted: Record<string, string>;
-  /** Archprelate Fatigue: consecutive wins by the same player */
   consecutiveArchprelateWins: number;
   round: number;
   finalRound: number;
@@ -91,10 +88,8 @@ export interface MyGameState {
   currentRebellion: {
     event: DeferredEvent;
     counterSwords: number;
-    /** Set after defender commits — used for rival support stage */
-    defenderRegiments?: number;
+      defenderRegiments?: number;
     defenderLevies?: number;
-    /** FoW card chosen by defender from hand (undefined = draw from deck) */
     fowCard?: FortuneOfWarCardInfo;
     rivalContributions?: Record<string, {
       side: "defender" | "rebel";
@@ -110,24 +105,20 @@ export interface MyGameState {
     buyoffOffered?: Record<string, number>;
     eligibleCaptainGenerals: string[];
   } | null;
-  /** Infidel Fleet combat: targeted player must choose fight or evade */
   infidelFleetCombat: {
     targetPlayerID: string;
     fleetIndex: number;
   } | null;
-  /** Deferred battle: player chooses FoW card before resolution */
   currentDeferredBattle: {
     event: DeferredEvent;
     description: string;
   } | null;
-  /** Maps playerID to mercy gold received this round — read by RoundSummaryDialog */
   mercyGold: Record<string, number>;
   _loopGuard: number;
   _halted: boolean;
   _turnEndingCount: number;
 }
 
-/** Frontend-readable summary of the most recent battle resolution */
 export type BattleResult = {
   battleType: string;
   attackerName: string;
@@ -189,7 +180,6 @@ export type MapState = {
   battleMap: string[][][];
   currentBattle: number[];
   goodsPriceMarkers: GoodsPriceMarkers;
-  /** Trade route skyship discs placed on map tiles. Key = "x,y", value = playerID[] (one per player per tile). */
   routeSkyships: Record<string, string[]>;
 };
 export type GoodKey = "mithril" | "dragonScales" | "krakenSkin" | "magicDust" | "stickyIchor" | "pipeweed";
@@ -209,7 +199,6 @@ export type MapBuildingInfo = {
   garrisonedRegiments: number;
   garrisonedLevies: number;
   garrisonedEliteRegiments: number;
-  /** Contingent counter occupying this colony (Colonial REBELLION loss) */
   rebelCounter?: number;
 };
 
@@ -229,11 +218,8 @@ export type PlayerInfo = {
   palaces: number;
   heresyTracker: number;
   prisoners: number;
-  /** Agitator dissenters not yet imprisoned — shift heresy at end of round if unhandled */
   freeDissenters: number;
-  /** Piracy intent for this round: "tax" (default) or "cut" (remove a skyship instead) */
   piracyIntent: "tax" | "cut";
-  /** Rival player IDs already targeted by Send Agitators this round */
   agitatorsSentThisRound: string[];
   shipyards: number;
   factories: number;
@@ -350,22 +336,16 @@ export type InfidelHostCounter = {
 export type DeferredEvent = {
   card: EventCardName;
   targetPlayerID: string;
-  /** Colony tile coordinates (Colonial REBELLION only) */
   targetTile?: [number, number];
 };
 
 export type EventChoice = {
   card: EventCardName;
   targetPlayerID: string;
-  /** Royal Succession: 2 drawn legacy cards to pick from */
   legacyOptions?: LegacyCardInfo[];
-  /** The Great Fire: tied building types to choose from */
   buildingOptions?: ("cathedral" | "palace" | "shipyard")[];
-  /** Dynastic Marriage: eligible ally player IDs */
   allyOptions?: string[];
-  /** Guild Revolt / Corruption Scandal: binary choice options */
   binaryOptions?: [string, string];
-  /** Colonial Rebellion: eligible colony tile coordinates */
   colonyOptions?: [number, number][];
 };
 
@@ -373,7 +353,6 @@ export type EventState = {
   deck: EventCardName[];
   lateDeck: EventCardName[];
   chosenCards: EventCardName[];
-  /** Who chose what: playerID → card chosen this round (persists after resolution) */
   eventContributions: Record<string, EventCardName>;
   resolvedEvent: EventCardName | null;
   deferredEvents: DeferredEvent[];
@@ -388,11 +367,8 @@ export type EventState = {
   skipTaxesNextRound: boolean;
   cannotConvertThisRound: string[];
   grandInfidelDies: boolean;
-  /** Royal Patronage: first player to claim land this round gets +2 VP and 2g */
   royalPatronageActive: boolean;
-  /** Race to Discovery: per-player tile discovery count (keys = playerIDs) */
   raceToDiscoveryCounters: Record<string, number> | null;
-  /** Archprelate Dies: deferred interactive election within events phase */
   immediateElectionPending: boolean;
 };
 

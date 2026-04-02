@@ -56,8 +56,6 @@ function totalMilitaryStrength(player: PlayerInfo): number {
   return strength;
 }
 
-// Dimensions
-
 function normalizedTerritory(G: MyGameState, playerID: string): number {
   const t = AI_CONFIG.eval.territory;
   const players = getAllPlayers(G);

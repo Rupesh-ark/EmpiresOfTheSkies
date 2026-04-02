@@ -120,8 +120,6 @@ const CHOICE_HANDLERS: Partial<Record<EventCardName, ChoiceHandler>> = {
   },
 };
 
-// Move
-
 const resolveEventChoice: MoveDefinition = {
   fn: ({ G, ctx, playerID, events }, ...args) => {
     const choiceValue = args[0];

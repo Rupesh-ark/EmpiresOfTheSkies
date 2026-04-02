@@ -221,8 +221,6 @@ const resolveInfidelsInvadeFaerie = (
   };
 };
 
-// Dispatchers
-
 /**
  * Resolve a deferred battle with an optional player FoW card.
  * Called from commitDeferredBattleCard move after player makes their choice.

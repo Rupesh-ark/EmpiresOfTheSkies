@@ -1,16 +1,7 @@
-/**
- * Pure battle math, no side effects.
- * hits = max(0, swords + fowSword - shields - fowShield)
- */
-
 export interface CombatantStats {
-  /** Base sword value (unit strength) */
   swords: number;
-  /** Base shield value (unit defense) */
   shields: number;
-  /** Fortune of War card sword bonus */
   fowSword: number;
-  /** Fortune of War card shield bonus */
   fowShield: number;
 }
 

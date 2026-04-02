@@ -18,17 +18,9 @@ const validateSendAgitators = (
   if (G.playerInfo[playerID].agitatorsSentThisRound.includes(targetID)) {
     return { code: "ALREADY_SENT", message: "Already sent agitators to this rival this round" };
   }
-  // Gold check removed — debt mechanics allow deficit spending (rules).
-  // Only Lenders Refuse Credit (checked in validateMove) blocks gold spending.
   return null;
 };
 
-/**
- * Send Agitators: pay 2 gold to place a free dissenter in a rival's kingdom.
- * The target can imprison the dissenter via Punish Dissenters. If unhandled,
- * the dissenter shifts the target's heresy +1 at end of round.
- * Anytime action — does not cost a counsellor or end the player's turn.
- */
 const sendAgitators: MoveDefinition = {
   fn: ({ G, playerID }, ...args: any[]) => {
     const targetID = args[0] as string;

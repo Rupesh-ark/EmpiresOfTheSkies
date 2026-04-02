@@ -1,31 +1,23 @@
-/** Infidel Fleet per-round resolution. */
-
 import { MyGameState } from "../types";
 import { logEvent } from "./stateUtils";
 import { drawFortuneOfWarCard } from "./helpers";
 import { calculateCombat } from "./combatMath";
 import { INFIDEL_EMPIRE_LOCATION } from "../data/gameData";
 
-// Military power calculation
-
-/** Total military power: regiments×2 + levies×1 + skyships×1 everywhere */
 const getPlayerMilitaryPower = (G: MyGameState, playerID: string): number => {
   const player = G.playerInfo[playerID];
   let power = 0;
 
-  // Kingdom reserves
   power += player.resources.regiments * 2;
   power += player.resources.levies;
   power += player.resources.skyships;
 
-  // Fleets
   for (const fleet of player.fleetInfo) {
     power += fleet.regiments * 2;
     power += fleet.levies;
     power += fleet.skyships;
   }
 
-  // Garrisoned troops on map
   for (const row of G.mapState.buildings) {
     for (const tile of row) {
       if (tile.player?.id === playerID) {
@@ -38,12 +30,6 @@ const getPlayerMilitaryPower = (G: MyGameState, playerID: string): number => {
   return power;
 };
 
-// Targeting
-
-/**
- * Find the target player: highest military power.
- * Ties: alternate per round using IPO order.
- */
 const findTarget = (G: MyGameState): string | null => {
   const turnOrder = G.turnOrder;
   if (turnOrder.length === 0) return null;
@@ -64,17 +50,10 @@ const findTarget = (G: MyGameState): string | null => {
 
   if (candidates.length === 1) return candidates[0];
 
-  // Ties: alternate by round. Pick candidate at (round % tied count) in IPO order.
   const idx = G.round % candidates.length;
   return candidates[idx];
 };
 
-// Movement
-
-/**
- * Move the Fleet to the target player's largest fleet on the map.
- * Returns the square coordinates, or Infidel Empire if no fleet found.
- */
 const findTargetFleetSquare = (
   G: MyGameState,
   targetID: string

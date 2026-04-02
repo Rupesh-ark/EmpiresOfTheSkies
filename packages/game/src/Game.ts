@@ -101,12 +101,9 @@ import { createLogger } from "./helpers/logger";
 const phaseLog = createLogger("phase");
 const budgetLog = createLogger("turn-budget");
 
-// Turn-ending budget tracker
-// Module-level counter — avoids Immer frozen-object issues.
-// Reset each round in discovery.onBegin. Logged at milestones.
-const TURN_ENDING_LIMIT = 550; // bail before boardgame.io's 600 (numPlayers * 100)
-let _turnEndingCounter = 0;
-let _turnEndingRound = 0;
+const TURN_ENDING_LIMIT = 550;
+let turnEndingCounter = 0;
+let turnEndingRound = 0;
 
 const turnBudgetPlugin = {
   name: "turn-budget",
@@ -120,32 +117,32 @@ const turnBudgetPlugin = {
 
         if (origEndTurn) {
           events.endTurn = (endTurnArgs?: any) => {
-            _turnEndingCounter++;
+            turnEndingCounter++;
             const phase = context.ctx?.phase ?? "?";
             const G = context.G;
             const stage = G?.stage ? `${G.stage.phase}/${G.stage.sub}` : "?";
 
-            if (_turnEndingCounter >= TURN_ENDING_LIMIT) {
+            if (turnEndingCounter >= TURN_ENDING_LIMIT) {
               budgetLog.error("BUDGET EXCEEDED — halting game", {
-                count: _turnEndingCounter,
+                count: turnEndingCounter,
                 type: "endTurn",
                 method: methodType,
                 phase,
                 stage,
-                round: _turnEndingRound,
+                round: turnEndingRound,
                 turn: context.ctx?.turn,
                 next: endTurnArgs?.next,
               });
               return;
             }
 
-            if (_turnEndingCounter % 50 === 0) {
+            if (turnEndingCounter % 50 === 0) {
               budgetLog.warn("endTurn milestone", {
-                count: _turnEndingCounter,
+                count: turnEndingCounter,
                 method: methodType,
                 phase,
                 stage,
-                round: _turnEndingRound,
+                round: turnEndingRound,
                 turn: context.ctx?.turn,
                 next: endTurnArgs?.next,
               });
@@ -157,31 +154,31 @@ const turnBudgetPlugin = {
 
         if (origEndPhase) {
           events.endPhase = (...phaseArgs: any[]) => {
-            _turnEndingCounter++;
+            turnEndingCounter++;
             const phase = context.ctx?.phase ?? "?";
             const G = context.G;
             const stage = G?.stage ? `${G.stage.phase}/${G.stage.sub}` : "?";
 
-            if (_turnEndingCounter >= TURN_ENDING_LIMIT) {
+            if (turnEndingCounter >= TURN_ENDING_LIMIT) {
               budgetLog.error("BUDGET EXCEEDED — halting game", {
-                count: _turnEndingCounter,
+                count: turnEndingCounter,
                 type: "endPhase",
                 method: methodType,
                 phase,
                 stage,
-                round: _turnEndingRound,
+                round: turnEndingRound,
                 turn: context.ctx?.turn,
               });
               return;
             }
 
-            if (_turnEndingCounter % 50 === 0) {
+            if (turnEndingCounter % 50 === 0) {
               budgetLog.warn("endPhase milestone", {
-                count: _turnEndingCounter,
+                count: turnEndingCounter,
                 method: methodType,
                 phase,
                 stage,
-                round: _turnEndingRound,
+                round: turnEndingRound,
                 turn: context.ctx?.turn,
               });
             }
@@ -203,19 +200,19 @@ const turnBudgetPlugin = {
 
 /** Call from discovery.onBegin to reset the per-round budget counter. */
 export function resetTurnEndingBudget(round: number): void {
-  if (_turnEndingCounter > 0) {
+  if (turnEndingCounter > 0) {
     budgetLog.info("round budget summary", {
-      count: _turnEndingCounter,
-      round: _turnEndingRound,
+      count: turnEndingCounter,
+      round: turnEndingRound,
     });
   }
-  _turnEndingCounter = 0;
-  _turnEndingRound = round;
+  turnEndingCounter = 0;
+  turnEndingRound = round;
 }
 
 /** Read-only access for tests / diagnostics. */
 export function getTurnEndingCount(): number {
-  return _turnEndingCounter;
+  return turnEndingCounter;
 }
 
 const MyGame: Game<MyGameState> = {

@@ -1,13 +1,3 @@
-/**
- * selfPlay.ts — Headless game runner for balance testing.
- *
- * Runs complete games locally (no server, no WebSocket) using boardgame.io's
- * local Client. Each game creates 6 EmpiresBot instances that derive their
- * personalities from dealt cards.
- *
- * Diagnostics are written to a GameRecorder (in-memory) instead of /tmp/ files,
- * mirroring the same pattern used by browserRunner.ts.
- */
 import { Client } from "boardgame.io/client";
 import { Local } from "boardgame.io/multiplayer";
 import { MyGame } from "../Game";
@@ -28,8 +18,6 @@ import { AerialBattleStrategy } from "./v1/strategies/AerialBattleStrategy";
 import { GroundBattleStrategy } from "./v1/strategies/GroundBattleStrategy";
 import { AI_CONFIG } from "./v1/weightsConfig";
 import { enumerateLegalMoves } from "./enumerate";
-
-// Default snapshot (used when bot has not yet set one)
 
 const DEFAULT_SNAPSHOT: PlayerSnapshot = {
   resources: {
@@ -52,8 +40,6 @@ const DEFAULT_SNAPSHOT: PlayerSnapshot = {
   fowCards: { count: 0, totalSwords: 0, totalShields: 0 },
   fleetPositions: [],
 };
-
-// NaN Detection Helpers
 
 function isInvalidNumber(val: unknown): boolean {
   return val === null || val === undefined || typeof val !== "number" || isNaN(val as number);
@@ -84,8 +70,6 @@ function hasNaNFleets(G: MyGameState): boolean {
   return false;
 }
 
-// Result types
-
 export interface BalanceReport {
   totalGames: number;
   completedGames: number;
@@ -99,8 +83,6 @@ export interface BalanceReport {
   bestCardCombo: { ka: string; legacy: string; winRate: number; games: number } | null;
   worstCardCombo: { ka: string; legacy: string; winRate: number; games: number } | null;
 }
-
-// Bounce Detection
 
 interface BounceTracker {
   iterationsAtLastTurn: number;
@@ -200,15 +182,6 @@ function checkBounce(
   }
 }
 
-// Shared game loop
-
-/**
- * Runs the boardgame.io local client loop until gameover or maxIterations.
- * Handles both activePlayers (simultaneous) and sequential turns.
- * When a bot has nothing to do (enumerate returns []), it skips — matching
- * the live game behavior (setupBotClients.ts does nothing on null moves).
- * Stops all clients before returning.
- */
 export function runGameLoop(
   clients: ReturnType<typeof Client>[],
   bots: EmpiresBot[],
@@ -225,7 +198,6 @@ export function runGameLoop(
   let phaseStart = Date.now();
   let lastSub = "";
 
-  // Bounce detection tracker
   const bounceTracker: BounceTracker = {
     iterationsAtLastTurn: 0,
     iterationsAtLastPhase: 0,
@@ -331,7 +303,6 @@ export function runGameLoop(
       });
     }
 
-    // Handle activePlayers (election — all players act simultaneously)
     if (ctx.activePlayers) {
       for (const [pid] of Object.entries(ctx.activePlayers)) {
         const pIdx = parseInt(pid);
@@ -339,7 +310,6 @@ export function runGameLoop(
         if (!botState) continue;
         const botG = botState.G as MyGameState;
 
-        // Set snapshot BEFORE chooseMove so the AILogger onEntry callback can read it
         bots[pIdx].setSnapshot(captureSnapshot(botG, pid));
 
         const move = bots[pIdx].chooseMove(botG, botState.ctx, pid);
@@ -348,7 +318,6 @@ export function runGameLoop(
         }
       }
     } else {
-      // Sequential turn: current player acts
       const currentPlayer = ctx.currentPlayer;
       const pIdx = parseInt(currentPlayer);
       const botState = clients[pIdx].getState();
@@ -356,14 +325,12 @@ export function runGameLoop(
 
       const botG = botState.G as MyGameState;
 
-      // Set snapshot BEFORE chooseMove so the AILogger onEntry callback can read it
       bots[pIdx].setSnapshot(captureSnapshot(botG, currentPlayer));
 
       lastMove = bots[pIdx].chooseMove(botG, botState.ctx, currentPlayer);
       const move = lastMove;
       if (move) {
         (clients[pIdx] as any).moves[move.move]?.(...move.args);
-        // Check NaN AFTER move execution to find the culprit
         const afterState = clients[pIdx].getState();
         if (afterState && hasNaNFleets(afterState.G as MyGameState)) {
           recorder.addDiagnostic({
@@ -389,7 +356,6 @@ export function runGameLoop(
 
     iterations++;
 
-    // Diagnostic: detect stalls — log every 100 iterations
     if (iterations % 100 === 0) {
       const s = clients[0].getState();
       if (s) {
@@ -399,7 +365,6 @@ export function runGameLoop(
       }
     }
 
-    // Hard exit if way too many iterations
     if (iterations >= 5000) {
       const s = clients[0].getState();
       if (s) {
@@ -422,7 +387,6 @@ export function runGameLoop(
     }
   }
 
-  // Log phase timing breakdown
   if (lastSub) {
     const entry = phaseTiming[lastSub] ?? { ms: 0, iters: 0 };
     entry.ms += Date.now() - phaseStart;
@@ -440,8 +404,6 @@ export function runGameLoop(
   return { finalState, iterations };
 }
 
-// Single game runner
-
 export function runSingleGame(gameNumber: number): GameRecord {
   const recorder = new GameRecorder(`game_${gameNumber}`);
   recorder.setConfig(AI_CONFIG as unknown as Record<string, unknown>);
@@ -450,7 +412,6 @@ export function runSingleGame(gameNumber: number): GameRecord {
   const clients: ReturnType<typeof Client>[] = [];
   const bots: EmpiresBot[] = [];
 
-  // Wire AILogger to capture decisions into the recorder
   const BATTLE_MOVES = new Set([
     "attackOtherPlayersFleet", "doNotAttack", "evadeFleet", "retaliateFleet",
     "groundAttack", "doNotGroundAttack", "defendGround", "yieldGround",
@@ -461,7 +422,6 @@ export function runSingleGame(gameNumber: number): GameRecord {
     const pIdx = parseInt(decisionEntry.playerID);
     const snapshot = bots[pIdx]?.getLastSnapshot();
 
-    // Build battle context from the decision if it's a battle move
     let battleContext: BattleContext | undefined;
     if (BATTLE_MOVES.has(decisionEntry.chosenMove)) {
       const targetID = decisionEntry.chosenArgs?.[0] as string ?? "?";
@@ -509,7 +469,6 @@ export function runSingleGame(gameNumber: number): GameRecord {
 
   const { finalState, iterations } = runGameLoop(clients, bots, recorder);
 
-  // Restore the previous logger
   setAILogger(origLogger);
 
   if (!finalState?.ctx.gameover) {
@@ -517,7 +476,6 @@ export function runSingleGame(gameNumber: number): GameRecord {
     return recorder.getRecord();
   }
 
-  // Populate player summaries
   const G = finalState.G as MyGameState;
   const ranking: string[] = finalState.ctx.gameover?.ranking ?? [];
 
@@ -563,8 +521,6 @@ export function runSingleGame(gameNumber: number): GameRecord {
   return recorder.getRecord();
 }
 
-// Batch runner — returns raw GameRecord[]
-
 export function runSelfPlayRecords(
   numGames: number,
   verbosity: VerbosityLevel = "silent"
@@ -590,17 +546,13 @@ export function runSelfPlayRecords(
       );
     }
 
-    // Clear logger between games to prevent memory growth
     logger.clear();
   }
 
-  // Restore default logger
   setAILogger(new AILogger("summary"));
 
   return records;
 }
-
-// Batch runner — backward-compatible BalanceReport wrapper
 
 export function runSelfPlay(
   numGames: number,
@@ -609,8 +561,6 @@ export function runSelfPlay(
   const records = runSelfPlayRecords(numGames, verbosity);
   return analyzeBalance(records, numGames);
 }
-
-// Balance analysis
 
 function analyzeBalance(records: GameRecord[], totalGames: number): BalanceReport {
   const winsByPersonality: Record<string, number> = {};
@@ -743,8 +693,6 @@ function analyzeBalance(records: GameRecord[], totalGames: number): BalanceRepor
     worstCardCombo: worstCombo,
   };
 }
-
-// Report formatter
 
 export function printBalanceReport(report: BalanceReport): void {
   console.log("\n" + "═".repeat(70));

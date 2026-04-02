@@ -63,7 +63,6 @@ export function evaluateFoundFactory(
   quality += ra.modifier;
   if (ra.reason) reasons.push(ra.reason);
 
-  // Personality
   const pb = personalityBonus(personality, FACTORY_PERSONALITY);
   quality += pb.bonus;
   reasons.push(...pb.reasons);

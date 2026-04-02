@@ -77,7 +77,6 @@ export function evaluatePurchaseSkyships(
   quality += ra.modifier;
   if (ra.reason) reasons.push(ra.reason);
 
-  // Personality
   const pb = personalityBonus(personality, SKYSHIP_PERSONALITY);
   quality += pb.bonus;
   reasons.push(...pb.reasons);

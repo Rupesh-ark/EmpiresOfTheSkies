@@ -1,6 +1,5 @@
 import { MyGameState, GameStage, StagePhase } from "../types";
 
-/** Type-safe stage setter */
 export const setStage = <P extends StagePhase>(
   G: MyGameState,
   phase: P,

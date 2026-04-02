@@ -278,8 +278,6 @@ const MERFOLK_SEA_ELVES = ["TheKingdomOfTheMerfolk", "SeaElves"];
 const CITY_FOUNTAIN = ["TheLostCityOfGold", "TheFountainOfYouth"];
 const DRAGONS_KRAKENS = ["HereBeDragons", "TheKraken"];
 
-// Helpers
-
 /** Find map coordinates of legend tiles by name */
 const findLegendTileCoords = (
   G: MyGameState,

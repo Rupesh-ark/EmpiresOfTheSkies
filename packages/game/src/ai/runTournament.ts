@@ -47,7 +47,6 @@ const BALANCED: AIWeights = {
 
 const mode = getArg("--mode", "ab");
 
-// Ensure results directory exists
 const resultsDir = path.join(__dirname, "tournament-results");
 if (!fs.existsSync(resultsDir)) {
   fs.mkdirSync(resultsDir, { recursive: true });

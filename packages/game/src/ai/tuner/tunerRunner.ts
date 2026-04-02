@@ -296,8 +296,6 @@ function evaluateCandidate(numGames: number): {
   };
 }
 
-// Main
-
 function main(): void {
   const originalLog = console.log;
   const originalWarn = console.warn;

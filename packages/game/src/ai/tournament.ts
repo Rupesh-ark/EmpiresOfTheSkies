@@ -16,8 +16,6 @@ import { AILogger, setAILogger } from "./AILogger";
 import { runGameLoop } from "./selfPlay";
 import { GameRecorder } from "./GameRecorder";
 
-// Types
-
 export interface TournamentMatchup {
   name: string;
   weightSets: Array<{ name: string; weights: AIWeights }>;
@@ -444,8 +442,6 @@ export function runLeague(config: LeagueConfig): LeagueResult {
 
   return { standings };
 }
-
-// Helpers
 
 function normalizeWeights(w: AIWeights): AIWeights {
   const result = { ...w };

@@ -3,7 +3,6 @@ import { sortPlayersInPlayerOrder } from "./helpers";
 import { EventsAPI } from "boardgame.io/dist/types/src/plugins/events/events";
 import { setStage } from "./stageUtils";
 
-/** Compute the list of other players at the current battle tile (possible defenders). */
 const computeDefendersAtBattle = (G: MyGameState, nextPlayer: string): void => {
   const [x, y] = G.mapState.currentBattle;
   G.possibleDefenders = (G.mapState.battleMap[y]?.[x] ?? []).filter(

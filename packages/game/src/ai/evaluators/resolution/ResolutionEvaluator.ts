@@ -102,8 +102,6 @@ function evaluateCardSelection(
   return simpleEval(move, quality, `play card ${cardIndex} (${card.sword}sw/${card.shield}sh)`);
 }
 
-// Plunder
-
 function evaluatePlunder(
   G: MyGameState, playerID: string, move: AIMove, personality: BotPersonality,
 ): MoveEval {
@@ -147,8 +145,6 @@ function evaluateGroundDefendOrYield(
   return simpleEval(move, V2_CONFIG.resolution.defendBase, "defend ground (fight)");
 }
 
-// Garrison
-
 function evaluateGarrisonTroops(
   _G: MyGameState, _playerID: string, move: AIMove, _personality: BotPersonality,
 ): MoveEval {
@@ -158,8 +154,6 @@ function evaluateGarrisonTroops(
   if (total === 0) return simpleEval(move, V2_CONFIG.resolution.garrisonNoneBase, "garrison none");
   return simpleEval(move, V2_CONFIG.resolution.garrisonTroopsBase, `garrison ${total} troops`);
 }
-
-// Conquest
 
 function evaluateConquest(
   G: MyGameState, playerID: string, move: AIMove, personality: BotPersonality,
@@ -207,8 +201,6 @@ function evaluateConquestCard(
   else if (value >= 4) quality += V2_CONFIG.resolution.conquestCardMidBonus;
   return simpleEval(move, quality, `play conquest card ${cardIndex} (${card.sword}sw/${card.shield}sh)`);
 }
-
-// Election
 
 function evaluateElection(
   G: MyGameState, playerID: string, move: AIMove, personality: BotPersonality,
@@ -301,8 +293,6 @@ function evaluateInfidelFleet(
   return simpleEval(move, V2_CONFIG.resolution.infidelEvadeBase, "evade infidel fleet");
 }
 
-// Rebellion
-
 function evaluateRebellion(
   _G: MyGameState, _playerID: string, move: AIMove, _personality: BotPersonality,
 ): MoveEval {
@@ -321,8 +311,6 @@ function evaluateRebellion(
   }
   return simpleEval(move, V2_CONFIG.resolution.rebellionFallbackBase, `rebellion: ${move.move}`);
 }
-
-// Invasion
 
 function evaluateInvasion(
   _G: MyGameState, _playerID: string, move: AIMove, _personality: BotPersonality,

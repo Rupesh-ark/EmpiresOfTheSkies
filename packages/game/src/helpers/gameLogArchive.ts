@@ -1,12 +1,3 @@
-/**
- * gameLogArchive.ts
- *
- * Writes trimmed game-log entries to server/logs/gamelog.log.
- * Only runs on Node.js — silently no-ops in the browser.
- * Keeps a persistent narrative history of all game events for
- * post-game analysis, while G.gameLog stays bounded for WebSocket sync.
- */
-
 const isNode =
   typeof process !== "undefined" &&
   process.versions != null &&
@@ -41,6 +32,5 @@ export function archiveGameLogEntries(
     const lines = entries.map((e) => `[R${e.round}] ${e.message}`).join("\n");
     fs.appendFileSync(fp, lines + "\n");
   } catch {
-    // Never let file I/O crash the game
   }
 }

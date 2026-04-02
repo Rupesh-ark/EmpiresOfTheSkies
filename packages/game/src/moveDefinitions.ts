@@ -1,6 +1,3 @@
-/**
- * Central registry of action-phase MoveDefinitions.
- */
 import { MoveDefinition } from "./types";
 
 import alterPlayerOrder from "./moves/actions/alterPlayerOrder";

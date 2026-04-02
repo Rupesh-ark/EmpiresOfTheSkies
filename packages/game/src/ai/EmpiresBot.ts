@@ -25,7 +25,6 @@ export class EmpiresBot {
     this.config = config;
   }
 
-  // --- Public API ---
 
   isThinking(): boolean {
     return this._thinking;
@@ -43,7 +42,6 @@ export class EmpiresBot {
     return this.config;
   }
 
-  // --- Snapshot for analytics enrichment ---
 
   setSnapshot(snapshot: PlayerSnapshot): void {
     this.lastSnapshot = snapshot;
@@ -53,7 +51,6 @@ export class EmpiresBot {
     return this.lastSnapshot;
   }
 
-  // --- Personality initialization (from cards, no v1 weights) ---
 
   private initializePersonality(G: MyGameState, playerID: string): void {
     const player = G.playerInfo[playerID];
@@ -80,7 +77,6 @@ export class EmpiresBot {
     return { kaCard: "none", legacyCard: "none", alignment: "orthodox", legacyCardColour: "none" };
   }
 
-  // --- Move selection ---
 
   chooseMove(G: MyGameState, ctx: Ctx, playerID: string): AIMove | null {
     const startTime = Date.now();
@@ -198,7 +194,6 @@ export class EmpiresBot {
     return chosen;
   }
 
-  // --- Helpers ---
 
   private getAllPersonalities(G: MyGameState): Record<string, BotPersonality> {
     const result: Record<string, BotPersonality> = {};
@@ -213,7 +208,6 @@ export class EmpiresBot {
     return result;
   }
 
-  // --- Card-picking (setup phase) ---
 
   private chooseKACard(G: MyGameState, playerID: string): AIMove | null {
     const pool = G.cardDecks.kingdomAdvantagePool;
@@ -232,7 +226,6 @@ export class EmpiresBot {
     return { move: "pickLegacyCard", args: [best] };
   }
 
-  // --- Logging ---
 
   private logDecision(
     G: MyGameState,

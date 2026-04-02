@@ -1,6 +1,5 @@
 import { MyGameState, MoveError } from "../types";
 
-/** Returns MoveError if blocked, null if allowed. */
 export const validateMove = (
   playerID: string,
   G: MyGameState,

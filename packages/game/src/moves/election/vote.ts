@@ -25,10 +25,6 @@ const numberToKingdomMap: Record<string, string> = {
   8: "Constantium",
 };
 
-/**
- * Calculates the vote power a player contributes to whomever they vote for.
- * This mirrors the tally logic in the vote move exactly.
- */
 export function calculateVotePower(G: MyGameState, playerID: string): number {
   const playerInfo = G.playerInfo[playerID];
   if (!playerInfo) return 0;

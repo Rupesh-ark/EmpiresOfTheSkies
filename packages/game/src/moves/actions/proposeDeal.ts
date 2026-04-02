@@ -1,10 +1,6 @@
 import { MyGameState, DealOffer, DealProposal, MoveDefinition, MoveError } from "../../types";
 import { validateOutpostTransfer } from "../../helpers/stateUtils";
 
-/**
- * Validates that a player can fulfil the items in their side of the deal.
- * For outposts, validates the recipient has a Fleet present.
- */
 const validateOffer = (
   G: MyGameState,
   offerorID: string,

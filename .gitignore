@@ -53,13 +53,13 @@ server/storage/
 /feedback
 /docs
 
-# AI weights local overrides (JSON, not committed)
+# Bot weights local overrides (JSON, not committed)
 packages/game/src/ai/weightsConfig.local.json
 packages/game/src/ai/tournament-results/
 bot-logs/
 bot-training/
 
-# AI analytics intermediate outputs & generated docs
+# Bot analytics intermediate outputs & generated docs
 packages/game/src/ai/analytics/*.json
 packages/game/src/ai/docs/*
 packages/game/tuner_results/*

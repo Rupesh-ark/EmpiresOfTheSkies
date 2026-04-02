@@ -8,22 +8,21 @@ interface LogEntry {
   data?: Record<string, unknown>;
 }
 
-let _logFilePath: string | null = null;
+let logFilePath: string | null = null;
 
 function getLogFilePath(): string | null {
-  if (_logFilePath !== null) return _logFilePath;
+  if (logFilePath !== null) return logFilePath;
   try {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const path = require('path') as typeof import('path');
-    _logFilePath = path.resolve(process.cwd(), 'server/logs/game.log');
-    // Ensure the directory exists
+    logFilePath = path.resolve(process.cwd(), 'server/logs/game.log');
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const fs = require('fs') as typeof import('fs');
-    fs.mkdirSync(path.dirname(_logFilePath), { recursive: true });
+    fs.mkdirSync(path.dirname(logFilePath), { recursive: true });
   } catch {
-    _logFilePath = null;
+    logFilePath = null;
   }
-  return _logFilePath;
+  return logFilePath;
 }
 
 function writeToFile(entry: LogEntry): void {
@@ -33,7 +32,6 @@ function writeToFile(entry: LogEntry): void {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const fs = require('fs') as typeof import('fs');
 
-    // Human-readable line: [timestamp] LEVEL [module] message
     let line = `[${entry.ts}] ${entry.level.toUpperCase().padEnd(5)} [${entry.mod}] ${entry.msg}`;
 
     if (entry.data !== undefined) {
@@ -49,7 +47,6 @@ function writeToFile(entry: LogEntry): void {
 
     fs.appendFileSync(filePath, line + '\n');
   } catch {
-    // Never let file I/O crash the game
   }
 }
 
@@ -85,15 +82,13 @@ export const createLogger = (mod: string) => {
   };
 };
 
-// Self-Play Game Event Logger
-
-let _traceFilePath: string | null = null;
+let traceFilePath: string | null = null;
 
 function getTraceFilePath(): string {
-  if (_traceFilePath === null) {
-    _traceFilePath = '/tmp/selfplay_trace.log';
+  if (traceFilePath === null) {
+    traceFilePath = '/tmp/selfplay_trace.log';
   }
-  return _traceFilePath;
+  return traceFilePath;
 }
 
 export function logGameEvent(category: string, message: string, data?: Record<string, unknown>): void {
@@ -102,11 +97,8 @@ export function logGameEvent(category: string, message: string, data?: Record<st
     const line = `[EVENT:${category}] ${message}` + (data ? ` ${JSON.stringify(data)}` : '');
     fs.appendFileSync(getTraceFilePath(), line + '\n');
   } catch {
-    // Never let file I/O crash the game
   }
 }
-
-// Predefined game event loggers
 
 export const logBattleEvent = (attacker: string, defender: string, type: string, result?: string) => {
   logGameEvent('BATTLE', `${attacker} vs ${defender} (${type})`, result ? { result } : undefined);

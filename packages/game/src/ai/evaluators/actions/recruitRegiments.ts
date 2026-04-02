@@ -70,7 +70,6 @@ export function evaluateRecruitRegiments(
   quality += ra.modifier;
   if (ra.reason) reasons.push(ra.reason);
 
-  // Personality
   const pb = personalityBonus(personality, REGIMENT_PERSONALITY);
   quality += pb.bonus;
   reasons.push(...pb.reasons);

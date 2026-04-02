@@ -19,9 +19,7 @@ const log = createLogger("move");
  *
  * Pipeline: dev log → validate? → fn → successLog
  */
-// Dedup: boardgame.io Local() calls moves twice (client + server).
-// Track last logged move to skip the duplicate.
-let _lastLogKey = "";
+let lastLogKey = "";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const wrapMove = (name: string, def: MoveDefinition): any => {
@@ -30,8 +28,8 @@ export const wrapMove = (name: string, def: MoveDefinition): any => {
     const { G, playerID, ctx } = context;
 
     const logKey = `${ctx.turn}:${name}:${playerID}:${JSON.stringify(args)}`;
-    if (logKey !== _lastLogKey) {
-      _lastLogKey = logKey;
+    if (logKey !== lastLogKey) {
+      lastLogKey = logKey;
       log.info(name, {
         playerID,
         phase: ctx.phase,

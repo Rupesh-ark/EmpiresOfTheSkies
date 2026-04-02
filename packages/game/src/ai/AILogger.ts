@@ -160,7 +160,6 @@ export class AILogger {
     }
   }
 
-  // --- Getters ---
 
   getEntries(): readonly AILogEntry[] {
     return this.entries;
@@ -192,7 +191,6 @@ export class AILogger {
     this.entries = [];
   }
 
-  // --- Console formatters ---
 
   private printDecision(d: DecisionLogEntry): void {
     const topCount = this.verbosity === "verbose" ? 5 : 3;
@@ -269,14 +267,12 @@ export class AILogger {
   }
 }
 
-// --- Singleton ---
-
-let _logger: AILogger = new AILogger("summary");
+let activeLogger: AILogger = new AILogger("summary");
 
 export function getAILogger(): AILogger {
-  return _logger;
+  return activeLogger;
 }
 
 export function setAILogger(logger: AILogger): void {
-  _logger = logger;
+  activeLogger = logger;
 }

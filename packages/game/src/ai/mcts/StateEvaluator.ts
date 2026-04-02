@@ -69,7 +69,6 @@ export function evaluatePosition(G: MyGameState, playerID: string): number {
 
   let score = player.resources.victoryPoints * w.vp;
 
-  // Territory
   score += colonies * w.colony;
   score += outposts * w.outpost;
   score += routes * w.route;
@@ -82,13 +81,11 @@ export function evaluatePosition(G: MyGameState, playerID: string): number {
     score -= unconnected * w.unconnectedPenalty;
   }
 
-  // Buildings
   score += player.cathedrals * w.cathedral;
   score += player.palaces * w.palace;
   score += player.shipyards * w.shipyard;
   score += forts * w.fort;
 
-  // Resources
   score += player.resources.skyships * w.skyship;
   score += player.resources.regiments * w.regiment;
   score += (player.resources.eliteRegiments ?? 0) * w.eliteRegiment;
@@ -96,7 +93,6 @@ export function evaluatePosition(G: MyGameState, playerID: string): number {
   score += Math.max(0, player.resources.gold) * w.gold;
   score += player.resources.counsellors * w.counsellor;
 
-  // Military
   const militaryStrength =
     player.resources.regiments * 2 +
     (player.resources.eliteRegiments ?? 0) * 3 +
@@ -133,7 +129,6 @@ export function evaluatePosition(G: MyGameState, playerID: string): number {
   );
   score += goodsIncome * 0.1;
 
-  // Dissenters
   score -= (player.freeDissenters ?? 0) * w.dissenterPenalty;
 
   return score;

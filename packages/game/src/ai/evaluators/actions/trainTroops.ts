@@ -50,7 +50,6 @@ export function evaluateTrainTroops(
     reasons.push("no active fleets");
   }
 
-  // Personality
   const pb = personalityBonus(personality, TRAIN_PERSONALITY);
   quality += pb.bonus;
   reasons.push(...pb.reasons);

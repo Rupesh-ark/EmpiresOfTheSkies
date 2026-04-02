@@ -2,10 +2,6 @@ import { MyGameState, DealOffer, MoveError, MoveDefinition } from "../../types";
 import { logEvent } from "../../helpers/stateUtils";
 import { validateOffer } from "./proposeDeal";
 
-/**
- * Executes one side of the deal: transfers gold, skyships, outposts,
- * and/or Archprelate token from offeror to recipient.
- */
 const executeSide = (
   G: MyGameState,
   offerorID: string,
@@ -48,7 +44,6 @@ const acceptDeal: MoveDefinition = {
   fn: ({ G }) => {
     const { proposerID, targetID, offering, requesting } = G.pendingDeal!;
 
-    // Re-validate both sides (state may have changed since proposal)
     const offerError = validateOffer(G, proposerID, targetID, offering);
     const requestError = !offerError && validateOffer(G, targetID, proposerID, requesting);
     if (offerError || requestError) {

@@ -80,9 +80,6 @@ const computeGarrisonTroops = (G: MyGameState, playerID: string): void => {
   G.troopsAvailableForGarrison = { regiments, elites, levies };
 };
 
-// ---------------------------------------------------------------------------
-// Private loss-reporting helpers
-// ---------------------------------------------------------------------------
 
 function formatLosses(losses: { levies: number; regiments: number; eliteRegiments: number; skyships: number }): string {
   const parts: string[] = [];
@@ -106,9 +103,6 @@ function snapshotFleets(fleets: FleetInfo[]): { levies: number; regiments: numbe
   return { levies, regiments, eliteRegiments, skyships };
 }
 
-// ---------------------------------------------------------------------------
-// Private battle math helpers
-// ---------------------------------------------------------------------------
 
 /**
  * Calculates sword value, shield value, and fleet list for all of a player's
@@ -293,9 +287,7 @@ export const forceRetrieveFleets = (
   logEvent(G, `${player.kingdomName}'s fleet forced to retreat home — no valid destination`);
 };
 
-// ---------------------------------------------------------------------------
-// Exported battle resolution functions
-// ---------------------------------------------------------------------------
+
 
 export const resolveBattleAndReturnWinner = (
   G: MyGameState,
@@ -304,7 +296,6 @@ export const resolveBattleAndReturnWinner = (
 ) => {
   const [x, y] = G.mapState.currentBattle;
 
-  // --- Attacker fleet combat values ---
   const attackerID = G.battleState?.attacker.id ?? ctx.currentPlayer;
   const {
     swordValue: baseAttackerSword,
@@ -324,7 +315,6 @@ export const resolveBattleAndReturnWinner = (
     if (G.battleState.attacker.fowCard.shield > 0) attackerShieldValue += 1;
   }
 
-  // --- Defender fleet combat values ---
   const defenderID = G.battleState?.defender.id ?? ctx.currentPlayer;
   const {
     swordValue: baseDefenderSword,
@@ -366,14 +356,12 @@ export const resolveBattleAndReturnWinner = (
     { swords: defenderSwordValue, shields: defenderShieldValue, fowSword: 0, fowShield: 0 },
   );
 
-  // --- Snapshot unit counts before losses (for loss reporting) ---
   const attackerSnap = snapshotFleets(attackerFleets);
   const defenderFleetSnap = snapshotFleets(defenderFleets);
   const garrisonSnapLevies = G.stage.sub === "ground_resolve" ? (G.mapState.buildings[y][x].garrisonedLevies ?? 0) : 0;
   const garrisonSnapRegiments = G.stage.sub === "ground_resolve" ? (G.mapState.buildings[y][x].garrisonedRegiments ?? 0) : 0;
   const garrisonSnapElite = G.stage.sub === "ground_resolve" ? (G.mapState.buildings[y][x].garrisonedEliteRegiments ?? 0) : 0;
 
-  // --- Apply losses ---
   applyFleetLosses(attackerFleets, attackerLosses, true);
 
   if (G.stage.sub === "ground_resolve") {
@@ -404,7 +392,6 @@ export const resolveBattleAndReturnWinner = (
     applyFleetLosses(defenderFleets, defenderLosses, true);
   }
 
-  // --- Log unit losses ---
   let attackerLossDetail: string;
   let defenderLossDetail: string;
   {
@@ -438,7 +425,6 @@ export const resolveBattleAndReturnWinner = (
     logEvent(G, `Losses — ${attackerName}: ${attackerLossDetail} | ${defenderName}: ${defenderLossDetail}`);
   }
 
-  // --- Determine winner ---
   let winner =
     attackerLosses >= defenderLosses
       ? G.battleState?.defender.id
@@ -593,7 +579,6 @@ export const resolveConquest = (
 ) => {
   const [x, y] = G.mapState.currentBattle;
 
-  // --- Attacker fleet combat values ---
   const attackerID = G.battleState?.attacker.id ?? ctx.currentPlayer;
   const {
     swordValue: baseAttackerSword,
@@ -632,7 +617,6 @@ export const resolveConquest = (
   );
   let attackerLossesCopy = attackerLosses;
 
-  // --- Snapshot unit counts before losses (for loss reporting) ---
   const conquestGarrisonSnapLevies = attackerGarrisonedLevies;
   const conquestGarrisonSnapRegiments = attackerGarrisonedRegiments;
   const conquestGarrisonSnapElite = attackerGarrisonedEliteRegiments;
@@ -662,7 +646,6 @@ export const resolveConquest = (
 
   applyFleetLosses(attackerFleets, attackerLossesCopy, false);
 
-  // --- Log conquest unit losses ---
   const conquestFleetAfter = snapshotFleets(attackerFleets);
   const conquestLossDetail = formatLosses({
     levies: (conquestGarrisonSnapLevies - attackerGarrisonedLevies) + (conquestFleetSnap.levies - conquestFleetAfter.levies),

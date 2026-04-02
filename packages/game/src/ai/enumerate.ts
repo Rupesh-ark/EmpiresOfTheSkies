@@ -195,7 +195,7 @@ export function enumerateLegalMoves(G: MyGameState, ctx: Ctx, playerID: string):
       }
 
       const moves: AIMove[] = [];
-      const _failedValidations: string[] = [];
+      const failedValidations: string[] = [];
 
       // Slot-based moves
       for (const moveName of ["recruitCounsellors", "recruitRegiments", "purchaseSkyships"] as const) {
@@ -203,7 +203,7 @@ export function enumerateLegalMoves(G: MyGameState, ctx: Ctx, playerID: string):
           if (tryValidate(moveName, G, playerID, slotIndex)) {
             moves.push({ move: moveName, args: [slotIndex] });
           } else {
-            _failedValidations.push(`${moveName}[${slotIndex}]`);
+            failedValidations.push(`${moveName}[${slotIndex}]`);
           }
         }
       }
@@ -213,7 +213,7 @@ export function enumerateLegalMoves(G: MyGameState, ctx: Ctx, playerID: string):
         if (tryValidate("foundBuildings", G, playerID, slotIndex)) {
           moves.push({ move: "foundBuildings", args: [slotIndex] });
         } else {
-          _failedValidations.push(`foundBuildings[${slotIndex}]`);
+          failedValidations.push(`foundBuildings[${slotIndex}]`);
         }
       }
 
@@ -222,7 +222,7 @@ export function enumerateLegalMoves(G: MyGameState, ctx: Ctx, playerID: string):
         if (tryValidate("foundFactory", G, playerID, slotIndex)) {
           moves.push({ move: "foundFactory", args: [slotIndex] });
         } else {
-          _failedValidations.push(`foundFactory[${slotIndex}]`);
+          failedValidations.push(`foundFactory[${slotIndex}]`);
         }
       }
 
@@ -237,7 +237,7 @@ export function enumerateLegalMoves(G: MyGameState, ctx: Ctx, playerID: string):
         if (tryValidate(moveName, G, playerID)) {
           moves.push({ move: moveName, args: [] });
         } else {
-          _failedValidations.push(moveName);
+          failedValidations.push(moveName);
         }
       }
 
@@ -456,11 +456,11 @@ export function enumerateLegalMoves(G: MyGameState, ctx: Ctx, playerID: string):
 
 
       // Diagnostic: disabled for performance — re-enable for debugging
-      // if (_failedValidations.length > 0) {
+      // if (failedValidations.length > 0) {
       //   const player = G.playerInfo[playerID];
       //   const p = player.resources;
-      //   console.log(`[ENUM] P${playerID} R${G.round} gold=${p.gold} couns=${p.counsellors} sky=${p.skyships} regs=${p.regiments} levies=${p.levies} | valid=${moves.length} failed=${_failedValidations.length}`);
-      //   console.log(`  FAILED: ${_failedValidations.join(", ")}`);
+      //   console.log(`[ENUM] P${playerID} R${G.round} gold=${p.gold} couns=${p.counsellors} sky=${p.skyships} regs=${p.regiments} levies=${p.levies} | valid=${moves.length} failed=${failedValidations.length}`);
+      //   console.log(`  FAILED: ${failedValidations.join(", ")}`);
       //   console.log(`  VALID: ${[...new Set(validNames)].join(", ")}`);
       // }
 

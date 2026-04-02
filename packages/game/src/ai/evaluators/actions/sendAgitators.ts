@@ -58,7 +58,6 @@ export function evaluateSendAgitators(
     reasons.push("too early for agitation");
   }
 
-  // Personality
   const pb = personalityBonus(personality, AGITATOR_PERSONALITY);
   quality += pb.bonus;
   reasons.push(...pb.reasons);
