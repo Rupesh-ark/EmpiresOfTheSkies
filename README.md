@@ -1,193 +1,171 @@
 # Empires of the Skies
 
-Empires of the Skies is a full-stack digital adaptation of a complex multiplayer strategy board game.
-The project implements complete rule logic, phase-based gameplay, and real-time multiplayer synchronization using boardgame.io.
+A digital adaptation of a 6-player strategy board game set in a fantasy world where kingdoms race to discover new lands via skyships, fight aerial and ground battles, trade exotic goods, and compete for religious and political dominance.
 
-Players control competing kingdoms, manage resources, resolve aerial and ground battles, and compete for political dominance across a dynamic world map.
+Built as a full-stack multiplayer web application with a shared game engine, React frontend, and server-authoritative backend using boardgame.io.
 
-This project was developed as part of research exploring digital board game implementation and multiplayer architecture.
+Developed as part of a dissertation exploring digital board game implementation, multiplayer architecture, and game-playing AI.
 
 ---
 
 ## Live Demo
 
-Frontend
-[https://empires-of-the-skies-tan.vercel.app](https://empires-of-the-skies-tan.vercel.app)
-
-Backend
-[https://empiresoftheskies.onrender.com](https://empiresoftheskies.onrender.com)
-
----
-
-## Architecture
-
-This project uses a monorepo structure with shared game logic:
-
-```
-packages/
-  game/                  Shared game rules and core logic
-empires_of_the_skies/    React frontend (Vite) — deployed to Vercel
-server/                  boardgame.io backend server — deployed to Render
-```
-
-The shared game package ensures:
-
-* Single source of truth for rules
-* Clean separation between UI and game engine
-* Server-authoritative multiplayer
-* Easier deployment and scaling
-
----
-
-## Technology Stack
-
-Frontend
-
-* React
-* TypeScript
-* Vite
-* Material UI (MUI)
-* Emotion
-
-Backend
-
-* Node.js (v22 recommended)
-* boardgame.io
-* Koa (via boardgame.io server)
-
-Infrastructure
-
-* Vercel (frontend hosting)
-* Render (backend hosting)
-* pnpm workspaces
+- **Frontend** — [empires-of-the-skies-tan.vercel.app](https://empires-of-the-skies-tan.vercel.app)
+- **Backend** — [empiresoftheskies.onrender.com](https://empiresoftheskies.onrender.com)
 
 ---
 
 ## Getting Started
 
-### Prerequisites
+**Prerequisites:** Node.js 22.x, pnpm (`npm install -g pnpm`)
 
-* Node.js 22.x recommended
-* pnpm
-
-Install pnpm if needed:
-
-```
-npm install -g pnpm
-```
-
----
-
-## Installation
-
-Clone the repository:
-
-```
+```bash
 git clone <repository-url>
 cd EmpiresOfTheSkies
-```
-
-Install dependencies:
-
-```
 pnpm install
 ```
 
----
+Run the backend and frontend in separate terminals:
 
-## Running Locally
-
-### Build 
-
-Build packages, frontend, backend:
-
+```bash
+pnpm dev:server    # http://localhost:8000
+pnpm dev:app       # http://localhost:5173
 ```
+
+Build everything for production:
+
+```bash
 pnpm build:all
 ```
 
-### Run the Backend Server
+---
+
+## Project Structure
 
 ```
-pnpm dev:server
-```
-
-Server runs on:
-
-```
-http://localhost:8000
+EmpiresOfTheSkies/
+  packages/
+    game/                   Core game engine (@eots/game, shared by client + server)
+      src/
+        Game.ts             Main game definition — phases, turn order, hooks
+        types.ts            All shared TypeScript types
+        moves/              50+ move implementations grouped by phase
+          actions/           Action board moves (recruit, build, trade, etc.)
+          aerialBattle/      Fleet combat moves
+          groundBattle/      Siege and garrison moves
+          conquests/         Territory claiming
+          election/          Archprelate voting
+          events/            Event card resolution
+          resolution/        End-of-round resolution flow
+          plunderLegends/    Legend tile plunder
+        helpers/             Game logic — battle math, map utils, resolution flow
+        setup/               Initial state construction and card seeding
+        data/                Tile definitions, game constants, card data
+        ai/                  Bot system (see AI section below)
+        __tests__/           Unit and integration tests (Vitest)
+  empires_of_the_skies/     React frontend (Vite, MUI)
+    src/
+      pages/                HomePage, LobbyPage, RulesPage, Client (game board)
+      components/           UI organised by game system:
+        WorldMap/            8x4 discovery map with tile reveal
+        ActionBoard/         Counsellor placement board
+        AerialBattle/        Fleet combat dialogs
+        GroundBattle/        Siege resolution
+        Election/            Archprelate voting UI
+        Events/              Event card selection
+        PlayerBoard/         Kingdom status panel
+        Cards/               FoW, KA, and Legacy card displays
+        Trade/               Deal proposal interface
+        Resolution/          End-of-round dialogs
+        ...
+  server/                   boardgame.io backend (Koa, FlatFile storage)
+  rulesets/                 Original board game rulebook (markdown)
 ```
 
 ---
 
-### Run the Frontend Client
+## Technology Stack
 
-In another terminal:
+| Layer | Technologies |
+|-------|-------------|
+| Frontend | React, TypeScript, Vite, Material UI, Emotion |
+| Backend | Node.js 22, boardgame.io, Koa |
+| Game Engine | boardgame.io (shared package, compiled to CJS + ESM) |
+| Multiplayer | boardgame.io server sync, @boardgame.io/p2p |
+| AI Tuning | Python, CMA-ES, Matplotlib |
+| Monorepo | pnpm workspaces |
+| Hosting | Vercel (frontend), Render (backend) |
+| Testing | Vitest |
+
+---
+
+## Game Overview
+
+Six kingdoms compete over a variable number of rounds. Each round follows this phase sequence:
 
 ```
-pnpm dev:app
+Events -> Discovery -> Taxes -> Actions -> Resolution -> Scoring -> Reset
 ```
 
-Open:
+**Discovery** — Players flip tiles on an 8x4 map to reveal new lands (Dwarves, Elves, Humans, Magical creatures, Legendary locations). Each tile has resources, combat values, and directional blocking that shapes exploration routes.
 
-```
-http://localhost:5173
+**Actions** — Players place counsellors on a shared action board to recruit troops, purchase skyships, found buildings (outposts, colonies, forts, cathedrals, palaces, shipyards, factories), influence prelates, manage heresy, dispatch fleets, trade goods, and negotiate deals with other players.
+
+**Resolution** — Aerial battles between fleets, ground sieges at contested tiles, conquest of unoccupied discoveries, Archprelate elections (religious VP), infidel fleet attacks, rebellions, and grand army invasions all resolve in a fixed sequence.
+
+**Economy** — Six tradeable goods (mithril, dragon scales, kraken skin, magic dust, sticky ichor, pipeweed) with a fluctuating price market. Income from taxes, colonies, trade routes, and factories. Piracy mechanics. Debt is allowed.
+
+**Religion** — A heresy/orthodoxy track per kingdom (-9 to +9). Players can convert their monarch, punish dissenters, influence other kingdoms' prelates, and compete for Archprelate (elected leader of the church, worth VP each round). Event cards trigger religious upheaval.
+
+**Victory** — VP from territory, buildings, military strength, the Archprelate title, legacy cards, and end-game bonuses. Highest VP after the final round wins.
+
+---
+
+## Game-Playing AI
+
+The bot system lets up to 6 AI players run a complete game with no human input. It powers balance testing, self-play tournaments, and mixed human/bot matches.
+
+**Architecture:**
+- `EmpiresBot` — top-level class that routes decisions to phase-specific evaluators
+- `enumerate.ts` — generates all legal moves for the current game state
+- Phase evaluators score each legal move based on game context:
+  - `ActionsEvaluator` — action board decisions
+  - `DiscoveryEvaluator` — tile flip choices
+  - `EventsEvaluator` — event card selection
+  - `ResolutionEvaluator` — battles, elections, conquests, rebellions
+
+**MCTS** — For the action phase, a Monte Carlo Tree Search layer runs simulations over the evaluator scores to pick moves that account for future consequences, not just immediate value.
+
+**Personality system** — Each bot derives a personality from its dealt Kingdom Advantage and Legacy cards. The archetype system maps card combinations to quality weights (territory focus, economy focus, military aggression, religious influence, etc.), so bots with different cards play differently.
+
+**Tuning pipeline:**
+- `selfPlay.ts` — runs headless games locally via boardgame.io's Local client
+- `tournament.ts` — A/B testing, hill climbing, and round-robin league formats
+- `cma_tuner.py` — CMA-ES (Covariance Matrix Adaptation) optimiser that tunes evaluator weights across batches of self-play games
+- `GameRecorder` — captures per-decision snapshots for post-game analysis
+
+---
+
+## Running Tests
+
+```bash
+cd packages/game
+pnpm test           # run all tests
+pnpm test:watch     # watch mode
 ```
 
 ---
 
-## Game Features
+## Design Decisions
 
-* Phase-based gameplay system
-* Multiplayer state synchronization
-* Aerial and ground battle resolution
-* Resource management and economy
-* Political election system
-* Modular move architecture
-* Dynamic map discovery
-* Per-turn undo functionality
-
----
-
-## Key Directories
-
-packages/game/
-Contains the core game engine:
-
-* Game definition
-* Move logic
-* Helper functions
-* Shared types
-* Rule enforcement
-
-empires_of_the_skies/
-Contains:
-
-* React UI components
-* Game board rendering
-* Battle dialogs
-* Client integration with boardgame.io
-
-server/
-Contains:
-
-* boardgame.io server
-* Multiplayer synchronization
-* CORS configuration
-* Production server configuration
-
----
-
-## Design Principles
-
-* Deterministic rule logic
-* Server-authoritative multiplayer
-* Strong TypeScript typing
-* Clear separation of UI and game state
-* Scalable monorepo architecture
+- **Shared game package** — a single `@eots/game` library used by both client and server ensures rules are never duplicated or out of sync.
+- **Discriminated union for game stage** — `GameStage` encodes the current phase and sub-phase as a type-safe union, making illegal state transitions a compile-time error.
+- **Server-authoritative multiplayer** — all game state lives on the server; clients send moves and receive validated state updates.
+- **Resolution sequencer** — a central module (`resolutionSequencer.ts`) owns the entire end-of-round transition graph (aerial -> plunder -> ground -> conquest -> election -> post-election), replacing scattered callback chains.
+- **Seeded card distribution** — `manufacturedFunSeed.ts` implements rivalry-aware dealing for Kingdom Advantage and Legacy cards so that every game has meaningful strategic counters at the table.
 
 ---
 
 ## License
 
 This project is for academic and research purposes.
-
