@@ -43,11 +43,12 @@ const RetrieveFleetsDialog = (props: MyGameProps) => {
     const costs: Record<number, number> = {};
     for (const fleet of deployedFleets) {
       if (fleetRouteOptions[fleet.fleetId] === "trail") {
-        const path = bfsShortestPath(
+        const innerPath = bfsShortestPath(
           [fleet.location[0], fleet.location[1]] as [number, number],
           FAITHDOM_TILES,
           props.G.mapState.currentTileArray,
         );
+        const path: [number, number][] = [[fleet.location[0], fleet.location[1]], ...innerPath];
         let cost = 0;
         for (const [px, py] of path) {
           const pk = tileKey(px, py);
@@ -242,8 +243,7 @@ const RetrieveFleetsDialog = (props: MyGameProps) => {
                 </Box>
               </Box>
 
-              {/* Route option toggle — shown only when fleet is selected and has a route option */}
-              {routeOption && isSelected && (
+              {routeOption && isSelected && !(routeOption === "trail" && (trailCost[fleet.fleetId] ?? 0) === 0) && (
                 <Box
                   sx={{
                     display: "flex",

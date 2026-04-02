@@ -41,7 +41,7 @@ export const useValidatedMoves = (props: BoardProps) => {
               return;
             }
 
-            if (ctx.phase !== "actions") {
+            if (moveName !== "pass" && ctx.phase !== "actions") {
               showToast("You can't do that in this phase", "warning");
               return;
             }

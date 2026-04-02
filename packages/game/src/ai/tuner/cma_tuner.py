@@ -259,8 +259,16 @@ BUCKET_I = {
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
+ARCHETYPE_SPREAD_PENALTY = 2.0
+
 # packages/game/ directory
-PACKAGES_GAME_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+PACKAGES_GAME_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+
+
+def compute_fitness(result: dict) -> float:
+    avg_vp = result["avgVP"]
+    spread = result.get("archetypeSpread", 0.0)
+    return -(avg_vp - ARCHETYPE_SPREAD_PENALTY * spread)
 
 
 def get_population_size(n_params: int) -> int:
@@ -376,9 +384,10 @@ def evaluate_batch(batch_candidates: list[dict], bucket: str, games: int,
             results = json.load(f)
 
         log(f"  {tag} OK in {format_duration(elapsed)} — "
-            f"avgVPs: {[r['avgVP'] for r in results]}")
+            f"avgVPs: {[r['avgVP'] for r in results]}, "
+            f"spreads: {[r.get('archetypeSpread', 0) for r in results]}")
 
-        return [-r["avgVP"] for r in results]
+        return [compute_fitness(r) for r in results]
 
     except subprocess.TimeoutExpired:
         log(f"  {tag} TIMEOUT after {timeout_s}s")
@@ -494,8 +503,9 @@ def evaluate_population_ordered(
                     with open(p["output_path"]) as f:
                         result = json.load(f)
                     avg_vp = result["avgVP"]
-                    fitnesses[ci] = -avg_vp
-                    log(f"  {tag} avgVP={avg_vp:.1f} ({format_duration(elapsed)})")
+                    spread = result.get("archetypeSpread", 0.0)
+                    fitnesses[ci] = compute_fitness(result)
+                    log(f"  {tag} avgVP={avg_vp:.1f} spread={spread:.1f} ({format_duration(elapsed)})")
                 else:
                     log(f"  {tag} FAILED: no output ({format_duration(elapsed)})")
 

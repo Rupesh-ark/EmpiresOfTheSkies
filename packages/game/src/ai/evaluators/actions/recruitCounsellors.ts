@@ -8,6 +8,7 @@ import type { MyGameState } from "../../../types";
 import type { AIMove } from "../../types";
 import type { MoveEval, BotPersonality } from "../types";
 import { V2_CONFIG } from "../config";
+import { getBase } from "../archetypes";
 import { goldPressure, goldPressureReason, roundAwareness, diminishingReturns } from "../common";
 import { MAX_COUNSELLORS } from "../../../data/gameData";
 
@@ -28,7 +29,7 @@ export function evaluateRecruitCounsellors(
   const gold = player.resources.gold;
   const counsellors = player.resources.counsellors;
 
-  let quality = V2_CONFIG.baseQuality.recruitCounsellors;
+  let quality = getBase(personality.baseQualities, "recruitCounsellors");
   const reasons: string[] = [];
 
   // Counsellors are compound value — more actions per round.

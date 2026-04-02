@@ -8,6 +8,7 @@ import type { MyGameState } from "../../../types";
 import type { AIMove } from "../../types";
 import type { MoveEval, BotPersonality } from "../types";
 import { V2_CONFIG } from "../config";
+import { getBase } from "../archetypes";
 import { personalityBonus } from "../common";
 
 const TRAIN_PERSONALITY = {
@@ -26,7 +27,7 @@ export function evaluateTrainTroops(
   const player = G.playerInfo[playerID];
   const fowCards = player.resources.fortuneCards?.length ?? 0;
 
-  let quality = V2_CONFIG.baseQuality.trainTroops;
+  let quality = getBase(personality.baseQualities, "trainTroops");
   const reasons: string[] = [];
 
   // Free action — always somewhat viable

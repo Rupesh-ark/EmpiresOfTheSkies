@@ -26,9 +26,6 @@ const pass: MoveDefinition = {
       G.firstTurnOfRound = false;
     }
 
-    const flags = Object.entries(G.playerInfo).map(([id, p]) => `${id}:${p.passed}`).join(" ");
-    process.stderr.write(`[PASS] P${playerID} phase=${ctx.phase} flags=[${flags}]\n`);
-
     if (allPlayersPassed(G)) {
       if (ctx.phase === "actions") setStage(G, "actions", "default");
       else if (ctx.phase === "discovery") setStage(G, "discovery", "default");

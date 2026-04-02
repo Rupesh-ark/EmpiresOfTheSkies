@@ -8,6 +8,7 @@ import type { MyGameState } from "../../../types";
 import type { AIMove } from "../../types";
 import type { MoveEval, BotPersonality } from "../types";
 import { V2_CONFIG } from "../config";
+import { getBase } from "../archetypes";
 import { goldPressure, goldPressureReason, personalityBonus, diminishingReturns, heresyPressure, tradeRouteChainValue } from "../common";
 import { countActiveTradeRoutes } from "../../../helpers/mapUtils";
 import { KINGDOM_LOCATION } from "../../../data/gameData";
@@ -28,14 +29,14 @@ export function evaluatePass(
   G: MyGameState,
   playerID: string,
   move: AIMove,
-  _personality: BotPersonality,
+  personality: BotPersonality,
 ): MoveEval {
   const player = G.playerInfo[playerID];
   const gold = player.resources.gold;
   const counsellors = player.resources.counsellors;
   const reasons: string[] = [];
 
-  let quality = V2_CONFIG.baseQuality.pass;
+  let quality = getBase(personality.baseQualities, "pass");
 
   // If broke and no counsellors left, passing is the right call
   if (gold < -5 && counsellors <= 1) {
@@ -60,11 +61,11 @@ export function evaluateConfirmAction(
   G: MyGameState,
   playerID: string,
   move: AIMove,
-  _personality: BotPersonality,
+  personality: BotPersonality,
 ): MoveEval {
   const player = G.playerInfo[playerID];
 
-  let quality = V2_CONFIG.baseQuality.confirmAction;
+  let quality = getBase(personality.baseQualities, "confirmAction");
   const reasons: string[] = [];
 
   // If there are free dissenters, maybe punish first
@@ -82,7 +83,7 @@ export function evaluateDiscardFoWCard(
   G: MyGameState,
   playerID: string,
   move: AIMove,
-  _personality: BotPersonality,
+  personality: BotPersonality,
 ): MoveEval {
   const player = G.playerInfo[playerID];
   const cardIndex = move.args[0] as number;
@@ -96,7 +97,7 @@ export function evaluateDiscardFoWCard(
 
   // Discard the weakest card — higher combined value = keep, lower = discard
   const cardValue = card.sword + card.shield;
-  let quality = V2_CONFIG.baseQuality.discardFoWCard;
+  let quality = getBase(personality.baseQualities, "discardFoWCard");
 
   // Find min and max card values in hand for relative scoring
   let minValue = Infinity;
@@ -132,7 +133,7 @@ export function evaluatePunishDissenters(
   const dissenters = player.freeDissenters;
   const reasons: string[] = [];
 
-  let quality = V2_CONFIG.baseQuality.punishDissenters;
+  let quality = getBase(personality.baseQualities, "punishDissenters");
 
   if (dissenters >= 3) {
     quality += V2_CONFIG.bonuses.urgentDissenters;
@@ -173,7 +174,7 @@ export function evaluateGarrisonTransfer(
   G: MyGameState,
   playerID: string,
   move: AIMove,
-  _personality: BotPersonality,
+  personality: BotPersonality,
 ): MoveEval {
   // Free action. Args: [fleetId, location, regs, levies, elites]
   // Positive = fleet→garrison, negative = garrison→fleet
@@ -183,7 +184,7 @@ export function evaluateGarrisonTransfer(
   const isToGarrison = regs > 0 || levies > 0 || elites > 0;
   const reasons: string[] = [];
 
-  let quality = V2_CONFIG.baseQuality.garrisonTransfer;
+  let quality = getBase(personality.baseQualities, "garrisonTransfer");
 
   if (isToGarrison) {
     const location = move.args[1] as number[];
@@ -224,7 +225,7 @@ export function evaluateMoveFleet(
   const cost = 1; // 1-3g
   const reasons: string[] = [];
 
-  let quality = V2_CONFIG.baseQuality.moveFleet;
+  let quality = getBase(personality.baseQualities, "moveFleet");
 
   // Destination analysis (similar to deployFleet but for already-deployed fleets)
   if (dest) {
@@ -306,7 +307,7 @@ export function evaluateBuildSkyships(
   const cost = shipyards; // 1g per shipyard
   const reasons: string[] = [];
 
-  let quality = V2_CONFIG.baseQuality.buildSkyships;
+  let quality = getBase(personality.baseQualities, "buildSkyships");
 
   if (shipyards === 0) {
     return clampEval(move, 0, "no shipyards");
@@ -346,7 +347,7 @@ export function evaluateConscriptLevies(
   G: MyGameState,
   playerID: string,
   move: AIMove,
-  _personality: BotPersonality,
+  personality: BotPersonality,
 ): MoveEval {
   // Free action — get 3 levies. Weaker than regiments but free.
   const player = G.playerInfo[playerID];
@@ -355,7 +356,7 @@ export function evaluateConscriptLevies(
   const activeFleets = player.fleetInfo.filter(f => f.skyships > 0).length;
   const reasons: string[] = [];
 
-  let quality = V2_CONFIG.baseQuality.conscriptLevies;
+  let quality = getBase(personality.baseQualities, "conscriptLevies");
 
   // More valuable when low on troops
   if (totalTroops < 3) {
@@ -397,7 +398,7 @@ export function evaluateConvertMonarch(
   const legacyColour = personality.legacyCardColour;
   const reasons: string[] = [];
 
-  let quality = V2_CONFIG.baseQuality.convertMonarch;
+  let quality = getBase(personality.baseQualities, "convertMonarch");
 
   // Core question: is my alignment mismatched with my legacy card?
   // If aligned → conversion is almost never worth it
@@ -457,14 +458,14 @@ export function evaluateAlterPlayerOrder(
   G: MyGameState,
   playerID: string,
   move: AIMove,
-  _personality: BotPersonality,
+  personality: BotPersonality,
 ): MoveEval {
   // Costs a counsellor. Going first matters for slot-based actions.
   const player = G.playerInfo[playerID];
   const counsellors = player.resources.counsellors;
   const reasons: string[] = [];
 
-  let quality = V2_CONFIG.baseQuality.alterPlayerOrder;
+  let quality = getBase(personality.baseQualities, "alterPlayerOrder");
 
   // Only worth it if you have spare counsellors
   if (counsellors <= 4) {
@@ -487,13 +488,13 @@ export function evaluateSellSkyships(
   G: MyGameState,
   playerID: string,
   move: AIMove,
-  _personality: BotPersonality,
+  personality: BotPersonality,
 ): MoveEval {
   const gold = G.playerInfo[playerID].resources.gold;
   const skyships = G.playerInfo[playerID].resources.skyships;
   const reasons: string[] = [];
 
-  let quality = V2_CONFIG.baseQuality.sellSkyships;
+  let quality = getBase(personality.baseQualities, "sellSkyships");
 
   // Selling skyships when deeply in debt and have many
   if (gold < -10 && skyships > 4) {
@@ -517,12 +518,12 @@ export function evaluateSellBuilding(
   G: MyGameState,
   playerID: string,
   move: AIMove,
-  _personality: BotPersonality,
+  personality: BotPersonality,
 ): MoveEval {
   const gold = G.playerInfo[playerID].resources.gold;
   const reasons: string[] = [];
 
-  let quality = V2_CONFIG.baseQuality.sellBuilding;
+  let quality = getBase(personality.baseQualities, "sellBuilding");
 
   // Only sell buildings in extreme debt
   if (gold < -15) {
@@ -539,7 +540,7 @@ export function evaluateDeclareSmugglerGood(
   G: MyGameState,
   playerID: string,
   move: AIMove,
-  _personality: BotPersonality,
+  personality: BotPersonality,
 ): MoveEval {
   const goodName = move.args[0] as string;
   const markers = G.mapState.goodsPriceMarkers as Record<string, number>;
@@ -547,7 +548,7 @@ export function evaluateDeclareSmugglerGood(
   const maxPrice = Math.max(...Object.values(markers));
   const reasons: string[] = [];
 
-  let quality = V2_CONFIG.baseQuality.declareSmugglerGood;
+  let quality = getBase(personality.baseQualities, "declareSmugglerGood");
 
   if (price === maxPrice) {
     quality += V2_CONFIG.bonuses.highGoodPrice;
@@ -590,7 +591,7 @@ export function evaluateCheckAndPlaceFort(
   G: MyGameState,
   playerID: string,
   move: AIMove,
-  _personality: BotPersonality,
+  personality: BotPersonality,
 ): MoveEval {
   // Already paid for the fort — choosing where to place it.
   // Prefer tiles that have no garrison and are at risk.
@@ -599,7 +600,7 @@ export function evaluateCheckAndPlaceFort(
   const building = G.mapState.buildings[y]?.[x];
   const reasons: string[] = [];
 
-  let quality = V2_CONFIG.baseQuality.checkAndPlaceFort; // always viable since already paid
+  let quality = getBase(personality.baseQualities, "checkAndPlaceFort"); // always viable since already paid
 
   // Prefer unprotected territories
   const garrison =
@@ -643,7 +644,7 @@ export function evaluateIssueHolyDecree(
   const gold = player.resources.gold;
   const reasons: string[] = [];
 
-  let quality = V2_CONFIG.baseQuality.issueHolyDecree;
+  let quality = getBase(personality.baseQualities, "issueHolyDecree");
 
   // More valuable when many rivals have dissenters (decree affects everyone)
   let totalRivalDissenters = 0;
@@ -677,7 +678,7 @@ export function evaluateTransferBetweenFleets(
   G: MyGameState,
   playerID: string,
   move: AIMove,
-  _personality: BotPersonality,
+  personality: BotPersonality,
 ): MoveEval {
   // Free action. Transfer troops from one fleet to another at same location.
   // Useful for consolidating forces before battle.
@@ -688,7 +689,7 @@ export function evaluateTransferBetweenFleets(
   const tgt = player.fleetInfo[tgtIdx];
   const reasons: string[] = [];
 
-  let quality = V2_CONFIG.baseQuality.transferBetweenFleets;
+  let quality = getBase(personality.baseQualities, "transferBetweenFleets");
 
   if (!src || !tgt) return clampEval(move, 0, "invalid fleet indices");
 
@@ -720,7 +721,7 @@ export function evaluateTransferOutpost(
   G: MyGameState,
   playerID: string,
   move: AIMove,
-  _personality: BotPersonality,
+  personality: BotPersonality,
 ): MoveEval {
   // Transfer outpost ownership to a rival whose fleet is on the tile.
   // Rare. Could help ally complete a trade route.
@@ -728,7 +729,7 @@ export function evaluateTransferOutpost(
   const targetID = move.args[1] as string;
   const reasons: string[] = [];
 
-  let quality = V2_CONFIG.baseQuality.transferOutpost;
+  let quality = getBase(personality.baseQualities, "transferOutpost");
 
   // Check if this outpost is useful to us (routes)
   const routes = countActiveTradeRoutes(G, playerID);

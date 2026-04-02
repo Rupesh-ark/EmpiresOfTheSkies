@@ -9,6 +9,7 @@ import type { MyGameState } from "../../../types";
 import type { AIMove } from "../../types";
 import type { MoveEval, BotPersonality } from "../types";
 import { V2_CONFIG } from "../config";
+import { getBase } from "../archetypes";
 import { goldPressure, goldPressureReason, personalityBonus, roundAwareness } from "../common";
 
 const AGITATOR_PERSONALITY = {
@@ -29,7 +30,7 @@ export function evaluateSendAgitators(
   const gold = player.resources.gold;
   const cost = 2;
 
-  let quality = V2_CONFIG.baseQuality.sendAgitators;
+  let quality = getBase(personality.baseQualities, "sendAgitators");
   const reasons: string[] = [];
 
   // Target the VP leader for maximum disruption

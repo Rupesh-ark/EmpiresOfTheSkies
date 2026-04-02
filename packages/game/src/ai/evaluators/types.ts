@@ -19,10 +19,11 @@ export interface MoveEval {
 // Bot personality (derived from dealt cards)
 
 export interface BotPersonality {
-  kaCard: string;        // "patriarch_of_the_church", "elite_regiments", etc.
-  legacyCard: string;    // "the merchant", "the conqueror", etc.
-  alignment: string;     // "heretic" | "orthodox"
-  legacyCardColour: string; // "purple" (orthodox) | "orange" (heretic) | "none"
+  kaCard: string;
+  legacyCard: string;
+  alignment: string;
+  legacyCardColour: string;
+  baseQualities?: Record<string, number>;
 }
 
 // Evaluator function signature

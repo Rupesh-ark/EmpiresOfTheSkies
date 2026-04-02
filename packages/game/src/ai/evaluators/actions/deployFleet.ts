@@ -9,6 +9,7 @@ import type { MyGameState } from "../../../types";
 import type { AIMove } from "../../types";
 import type { MoveEval, BotPersonality } from "../types";
 import { V2_CONFIG } from "../config";
+import { getBase } from "../archetypes";
 import { goldPressure, goldPressureReason, personalityBonus, roundAwareness, tradeRouteChainValue } from "../common";
 import { countActiveTradeRoutes, buildPlayerNetwork, tileKey, FAITHDOM_TILES, bfsReachable } from "../../../helpers/mapUtils";
 
@@ -62,7 +63,7 @@ export function evaluateDeployFleet(
 
   const estimatedCost = 1;
   const reasons: string[] = [];
-  let quality = V2_CONFIG.baseQuality.deployFleet;
+  let quality = getBase(personality.baseQualities, "deployFleet");
 
   // No skyships = useless deploy
   if (skyshipCount === 0) {

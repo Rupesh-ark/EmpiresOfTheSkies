@@ -56,7 +56,7 @@ export const buildPlayerInfoMap = (ctx: Ctx): { [id: string]: PlayerInfo } => {
         conscriptLevies: false,
         dispatchSkyshipFleet: false,
         trainTroops: false,
-        dispatchDisabled: true,
+        dispatchDisabled: false,
       },
       hereticOrOrthodox: "orthodox",
       fleetInfo: [

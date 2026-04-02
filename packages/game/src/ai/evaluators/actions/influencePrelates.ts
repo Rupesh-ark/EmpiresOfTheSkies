@@ -10,6 +10,7 @@ import type { MyGameState } from "../../../types";
 import type { AIMove } from "../../types";
 import type { MoveEval, BotPersonality } from "../types";
 import { V2_CONFIG } from "../config";
+import { getBase } from "../archetypes";
 import { goldPressure, goldPressureReason, personalityBonus, roundAwareness, diminishingReturns } from "../common";
 
 // Slot → kingdom colour mapping (mirrors influencePrelates.ts move code)
@@ -76,7 +77,7 @@ export function evaluateInfluencePrelates(
   const gold = player.resources.gold;
   const slotsTaken = countSlotsTakenByPlayer(G, playerID);
 
-  let quality = V2_CONFIG.baseQuality.influencePrelates;
+  let quality = getBase(personality.baseQualities, "influencePrelates");
   const reasons: string[] = [];
 
   // Slot type

@@ -8,6 +8,7 @@ import type { MyGameState } from "../../../types";
 import type { AIMove } from "../../types";
 import type { MoveEval, BotPersonality } from "../types";
 import { V2_CONFIG } from "../config";
+import { getBase } from "../archetypes";
 import { goldPressure, goldPressureReason, personalityBonus, roundAwareness, diminishingReturns } from "../common";
 
 const REGIMENT_PERSONALITY = {
@@ -34,7 +35,7 @@ export function evaluateRecruitRegiments(
   const regiments = player.resources.regiments;
   const activeFleets = player.fleetInfo.filter(f => f.skyships > 0).length;
 
-  let quality = V2_CONFIG.baseQuality.recruitRegiments;
+  let quality = getBase(personality.baseQualities, "recruitRegiments");
   const reasons: string[] = [];
 
   // Regiments are useful if you have fleets to load them onto

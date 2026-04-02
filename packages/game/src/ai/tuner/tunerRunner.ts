@@ -185,7 +185,7 @@ function injectWeights(
 
 let gameCounter = 0;
 
-function runOneGame(): number[] | null {
+function runOneGame(): { vps: number[]; archetypes: string[] } | null {
   const recorder = new GameRecorder("tune");
   const clients: ReturnType<typeof Client>[] = [];
   const bots: EmpiresBot[] = [];
@@ -233,22 +233,34 @@ function runOneGame(): number[] | null {
   if (!finalState?.ctx.gameover) return null;
 
   const G = finalState.G as MyGameState;
-  return Object.keys(G.playerInfo)
-    .sort()
-    .map((pid) => G.playerInfo[pid].resources.victoryPoints);
+  const pids = Object.keys(G.playerInfo).sort();
+  return {
+    vps: pids.map((pid) => G.playerInfo[pid].resources.victoryPoints),
+    archetypes: pids.map((pid) => G.playerInfo[pid].resources.legacyCard?.name ?? "none"),
+  };
 }
 
 // Evaluate one candidate (N games)
 
-function evaluateCandidate(numGames: number): { avgVP: number; scores: number[][] } {
+function evaluateCandidate(numGames: number): {
+  avgVP: number;
+  scores: number[][];
+  archetypeSpread: number;
+  vpByArchetype: Record<string, number>;
+} {
   const allScores: number[][] = [];
+  const archetypeVPs: Record<string, number[]> = {};
 
   for (let i = 0; i < numGames; i++) {
-    const scores = runOneGame();
-    if (scores !== null) {
-      allScores.push(scores);
+    const result = runOneGame();
+    if (result !== null) {
+      allScores.push(result.vps);
+      for (let j = 0; j < result.vps.length; j++) {
+        const arch = result.archetypes[j];
+        if (!archetypeVPs[arch]) archetypeVPs[arch] = [];
+        archetypeVPs[arch].push(result.vps[j]);
+      }
     }
-    // If a game stalled (null), just skip it — don't waste time on retries
   }
 
   let totalVP = 0;
@@ -261,7 +273,27 @@ function evaluateCandidate(numGames: number): { avgVP: number; scores: number[][
   }
   const avgVP = totalPlayers > 0 ? totalVP / totalPlayers : 0;
 
-  return { avgVP: Math.round(avgVP * 100) / 100, scores: allScores };
+  const vpByArchetype: Record<string, number> = {};
+  const archAvgs: number[] = [];
+  for (const [arch, vps] of Object.entries(archetypeVPs)) {
+    const avg = vps.reduce((a, b) => a + b, 0) / vps.length;
+    vpByArchetype[arch] = Math.round(avg * 100) / 100;
+    archAvgs.push(avg);
+  }
+
+  let archetypeSpread = 0;
+  if (archAvgs.length > 1) {
+    const mean = archAvgs.reduce((a, b) => a + b, 0) / archAvgs.length;
+    const variance = archAvgs.reduce((sum, v) => sum + (v - mean) ** 2, 0) / archAvgs.length;
+    archetypeSpread = Math.sqrt(variance);
+  }
+
+  return {
+    avgVP: Math.round(avgVP * 100) / 100,
+    scores: allScores,
+    archetypeSpread: Math.round(archetypeSpread * 100) / 100,
+    vpByArchetype,
+  };
 }
 
 // Main
@@ -310,13 +342,15 @@ function main(): void {
     const weights: Record<string, number> = Array.isArray(rawWeights) ? rawWeights[0] : rawWeights;
 
     injectWeights(bucket, weights, freezeA, freezeB, freezeD);
-    const { avgVP, scores } = evaluateCandidate(numGames);
+    const { avgVP, scores, archetypeSpread, vpByArchetype } = evaluateCandidate(numGames);
 
     resetV2Config();
     setEvalWeights(null);
 
     fs.writeFileSync(outputPath, JSON.stringify({
       avgVP,
+      archetypeSpread,
+      vpByArchetype,
       games: numGames,
       completed: scores.length,
       scores,

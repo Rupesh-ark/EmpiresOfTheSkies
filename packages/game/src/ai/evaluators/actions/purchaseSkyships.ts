@@ -8,6 +8,7 @@ import type { MyGameState } from "../../../types";
 import type { AIMove } from "../../types";
 import type { MoveEval, BotPersonality } from "../types";
 import { V2_CONFIG } from "../config";
+import { getBase } from "../archetypes";
 import { goldPressure, goldPressureReason, personalityBonus, roundAwareness, diminishingReturns } from "../common";
 import { countActiveTradeRoutes } from "../../../helpers/mapUtils";
 
@@ -34,7 +35,7 @@ export function evaluatePurchaseSkyships(
   const gold = player.resources.gold;
   const currentSkyships = player.resources.skyships;
 
-  let quality = V2_CONFIG.baseQuality.purchaseSkyships;
+  let quality = getBase(personality.baseQualities, "purchaseSkyships");
   const reasons: string[] = [];
 
   // Skyships are critical early — you need them for everything

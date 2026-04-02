@@ -34,8 +34,30 @@ const WorldMap = (props: WorldMapProps) => {
 
   const [fleetDragState, setFleetDragState] = useState<FleetDragState | null>(null);
   const [pendingDeploy, setPendingDeploy] = useState<PendingDeploy | null>(null);
-  const [zoomLevel, setZoomLevel] = useState(150);
+  const isDiscovery = props.G.stage.phase === "discoveries";
+  const isMyTurn = props.playerID === props.ctx.currentPlayer;
+
+  function defaultZoom(phase: string, myTurn: boolean) {
+    if (phase === "discoveries") return 50;
+    if (phase === "actions" && myTurn) return 150;
+    return 75;
+  }
+
+  const [zoomLevel, setZoomLevel] = useState(defaultZoom(props.G.stage.phase, isMyTurn));
   const [showHint, setShowHint] = useState(false);
+
+  const prevPhaseRef = useRef(props.G.stage.phase);
+  const prevTurnRef = useRef(isMyTurn);
+  useEffect(() => {
+    const prevPhase = prevPhaseRef.current;
+    const prevTurn = prevTurnRef.current;
+    const currPhase = props.G.stage.phase;
+    prevPhaseRef.current = currPhase;
+    prevTurnRef.current = isMyTurn;
+    if (prevPhase !== currPhase || prevTurn !== isMyTurn) {
+      setZoomLevel(defaultZoom(currPhase, isMyTurn));
+    }
+  }, [props.G.stage.phase, isMyTurn]);
 
   // Show hint when map expands, auto-hide after 4s
   useEffect(() => {

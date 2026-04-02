@@ -9,6 +9,7 @@ import type { MyGameState } from "../../../types";
 import type { AIMove } from "../../types";
 import type { MoveEval, BotPersonality } from "../types";
 import { V2_CONFIG } from "../config";
+import { getBase } from "../archetypes";
 import { goldPressure, goldPressureReason, personalityBonus, roundAwareness } from "../common";
 import { countActiveTradeRoutes } from "../../../helpers/mapUtils";
 
@@ -41,7 +42,7 @@ export function evaluateFoundFactory(
   const factories = player.factories;
   const routes = countActiveTradeRoutes(G, playerID);
 
-  let quality = V2_CONFIG.baseQuality.foundFactory;
+  let quality = getBase(personality.baseQualities, "foundFactory");
   const reasons: string[] = [];
 
   if (factories >= routes) {

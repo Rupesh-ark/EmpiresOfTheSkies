@@ -8,6 +8,7 @@ import type { MyGameState } from "../../../types";
 import type { AIMove } from "../../types";
 import type { MoveEval, BotPersonality } from "../types";
 import { V2_CONFIG } from "../config";
+import { getBase } from "../archetypes";
 import { goldPressure, goldPressureReason, personalityBonus, roundAwareness, diminishingReturns, heresyPressure } from "../common";
 import { BUILDING_BASE_COST, BuildingSlot } from "../../../data/gameData";
 import { countActiveTradeRoutes } from "../../../helpers/mapUtils";
@@ -90,7 +91,7 @@ export function evaluateFoundBuildings(
   const gold = player.resources.gold;
   const owned = getOwnedCount(player, buildingType);
 
-  let quality = V2_CONFIG.baseQuality.foundBuildings;
+  let quality = getBase(personality.baseQualities, "foundBuildings");
   const reasons: string[] = [];
 
   // Gold pressure (from common)

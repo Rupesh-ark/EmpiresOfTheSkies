@@ -12,6 +12,7 @@ import { evaluateDiscovery, pickDiscoveryMove } from "./evaluators/discovery/Dis
 import { evaluateEvents, pickEventsMove } from "./evaluators/events/EventsEvaluator";
 import { evaluateResolution, pickResolutionMove } from "./evaluators/resolution/ResolutionEvaluator";
 import type { BotPersonality } from "./evaluators/types";
+import { computeArchetypeQualities, scoreLegacySynergy } from "./evaluators/archetypes";
 import { mctsSearch } from "./mcts/MCTSSearch";
 
 export class EmpiresBot {
@@ -56,17 +57,21 @@ export class EmpiresBot {
 
   private initializePersonality(G: MyGameState, playerID: string): void {
     const player = G.playerInfo[playerID];
+    const kaCard = player.resources.advantageCard ?? "none";
+    const legacyCard = player.resources.legacyCard?.name ?? "none";
+    const legacyColour = player.resources.legacyCard?.colour ?? "none";
     this.personality = {
-      kaCard: player.resources.advantageCard ?? "none",
-      legacyCard: player.resources.legacyCard?.name ?? "none",
+      kaCard,
+      legacyCard,
       alignment: player.hereticOrOrthodox ?? "orthodox",
-      legacyCardColour: player.resources.legacyCard?.colour ?? "none",
+      legacyCardColour: legacyColour,
+      baseQualities: computeArchetypeQualities(kaCard, legacyCard, legacyColour),
     };
 
     const logger = getAILogger();
     if (logger.getVerbosity() !== "silent") {
       console.log(
-        `[AI-v2] Bot P${playerID} initialized (KA: ${this.personality.kaCard}, Legacy: ${this.personality.legacyCard}, Alignment: ${this.personality.alignment})`
+        `[AI-v2] Bot P${playerID} initialized (KA: ${kaCard}, Legacy: ${legacyCard}, Alignment: ${this.personality.alignment})`
       );
     }
   }
@@ -221,11 +226,10 @@ export class EmpiresBot {
   private chooseLegacyCard(G: MyGameState, playerID: string): AIMove | null {
     const options = G.playerInfo[playerID].legacyCardOptions;
     if (!options || options.length === 0) return null;
-    // Random pick for card selection
-    const idx = Math.floor(Math.random() * options.length);
-    // Force personality re-init after picking
+    const kaCard = G.playerInfo[playerID].resources.advantageCard ?? "none";
+    const best = scoreLegacySynergy(kaCard, options);
     this.personality = null;
-    return { move: "pickLegacyCard", args: [options[idx]] };
+    return { move: "pickLegacyCard", args: [best] };
   }
 
   // --- Logging ---
