@@ -69,6 +69,7 @@ const moveFleet: MoveDefinition = {
     });
 
     fleet.location = [x, y];
+    fleet.travelHistory.push([x, y]);
 
     // Only remove from battleMap if no other fleets of this player remain on the old tile
     const otherFleetsOnOldTile = G.playerInfo[playerID].fleetInfo.some(

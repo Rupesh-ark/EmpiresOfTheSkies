@@ -85,6 +85,7 @@ export function buildFleet(fleetId: number, overrides: Partial<FleetInfo> = {}):
     regiments: 0,
     levies: 0,
     eliteRegiments: 0,
+    travelHistory: [],
     ...overrides,
   };
 }

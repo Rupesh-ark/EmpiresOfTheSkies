@@ -1,7 +1,7 @@
 import { MoveDefinition, PlayerInfo } from "../../types";
 import { allPlayersPassed } from "../../helpers/stateUtils";
 import { KINGDOM_LOCATION } from "../../data/gameData";
-import { tileKey, bfsShortestPath, FAITHDOM_TILES } from "../../helpers/mapUtils";
+import { tileKey, FAITHDOM_TILES } from "../../helpers/mapUtils";
 
 export type RetrieveOptions = {
   placeAt?: number[];
@@ -48,16 +48,15 @@ const retrieveFleets: MoveDefinition = {
         if (options?.placeAt?.includes(fleetId)) {
           placeRouteSkyship(G, playerID, oldLocation[0], oldLocation[1], currentFleet);
         } else if (options?.trailFrom?.includes(fleetId)) {
-          const path = bfsShortestPath(
-            [oldLocation[0], oldLocation[1]] as [number, number],
-            FAITHDOM_TILES,
-            G.mapState.currentTileArray,
-          );
-          for (const [px, py] of path) {
+          for (const [px, py] of currentFleet.travelHistory) {
             if (currentFleet.skyships <= 0) break;
+            const building = G.mapState.buildings[py]?.[px];
+            if (building?.player?.id === playerID && building?.buildings) continue;
             placeRouteSkyship(G, playerID, px, py, currentFleet);
           }
         }
+
+        currentFleet.travelHistory = [];
 
         currentFleet.location = [...KINGDOM_LOCATION];
 

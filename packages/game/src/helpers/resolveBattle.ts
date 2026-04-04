@@ -227,6 +227,7 @@ const cleanupWipedFleets = (
       remaining += units;
       if (units === 0) {
         fleet.location = [...KINGDOM_LOCATION];
+        fleet.travelHistory = [];
         const tile = battleMap[y][x];
         const idx = tile.indexOf(playerID);
         if (idx !== -1) tile.splice(idx, 1);
@@ -275,6 +276,7 @@ export const forceRetrieveFleets = (
       fleet.levies = 0;
       fleet.eliteRegiments = 0;
       fleet.location = [...KINGDOM_LOCATION];
+      fleet.travelHistory = [];
     }
   });
 

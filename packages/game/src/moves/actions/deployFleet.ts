@@ -152,6 +152,7 @@ const deployFleet: MoveDefinition = {
     currentPlayer.resources.eliteRegiments -= eliteRegimentCount;
 
     G.playerInfo[playerID].fleetInfo[fleet.fleetId].location = [x, y];
+    fleet.travelHistory = [[x, y]];
 
     // Only remove from battleMap if no other fleets of this player remain on the old tile
     const otherFleetsOnOldTile = currentPlayer.fleetInfo.some(

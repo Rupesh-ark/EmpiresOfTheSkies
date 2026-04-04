@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { MyGameProps, KINGDOM_LOCATION, tileKey, wouldPlacementConnectRoute, bfsShortestPath, FAITHDOM_TILES } from "@eots/game";
+import { MyGameProps, KINGDOM_LOCATION, tileKey, wouldPlacementConnectRoute, FAITHDOM_TILES } from "@eots/game";
 import { Box, Typography, Switch } from "@mui/material";
 import { DialogShell } from "@/components/atoms/DialogShell";
 import { tokens } from "@/theme";
@@ -29,7 +29,7 @@ const RetrieveFleetsDialog = (props: MyGameProps) => {
         options[fleet.fleetId] = null;
       } else if (wouldPlacementConnectRoute(props.G, playerID, fleetTile)) {
         options[fleet.fleetId] = "placeAt";
-      } else if (fleet.skyships > 1) {
+      } else if (fleet.skyships > 1 && fleet.travelHistory.length > 0) {
         options[fleet.fleetId] = "trail";
       } else {
         options[fleet.fleetId] = null;
@@ -43,18 +43,15 @@ const RetrieveFleetsDialog = (props: MyGameProps) => {
     const costs: Record<number, number> = {};
     for (const fleet of deployedFleets) {
       if (fleetRouteOptions[fleet.fleetId] === "trail") {
-        const innerPath = bfsShortestPath(
-          [fleet.location[0], fleet.location[1]] as [number, number],
-          FAITHDOM_TILES,
-          props.G.mapState.currentTileArray,
-        );
-        const path: [number, number][] = [[fleet.location[0], fleet.location[1]], ...innerPath];
         let cost = 0;
-        for (const [px, py] of path) {
+        for (const [px, py] of fleet.travelHistory) {
+          if (FAITHDOM_TILES.some(([fx, fy]) => fx === px && fy === py)) continue;
+          const building = props.G.mapState.buildings[py]?.[px];
+          if (building?.player?.id === playerID && building?.buildings) continue;
           const pk = tileKey(px, py);
           const existing = props.G.mapState.routeSkyships[pk] ?? [];
           if (!existing.includes(playerID)) cost++;
-          if (cost >= fleet.skyships) break; // can't place more than fleet has
+          if (cost >= fleet.skyships) break;
         }
         costs[fleet.fleetId] = Math.min(cost, fleet.skyships);
       }

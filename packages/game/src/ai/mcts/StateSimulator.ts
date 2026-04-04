@@ -629,6 +629,7 @@ function retrieveFleets(G: MyGameState): void {
       fleet.levies = 0;
       fleet.eliteRegiments = 0;
       fleet.location = [...KINGDOM_LOCATION];
+      fleet.travelHistory = [];
     }
   }
 }
