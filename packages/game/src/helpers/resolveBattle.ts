@@ -58,7 +58,7 @@ function sanitizePlayerResources(player: PlayerInfo, context: string = ""): void
 }
 
 /** Compute troops available for garrisoning at a battle tile from a player's fleets. */
-const computeGarrisonTroops = (G: MyGameState, playerID: string): void => {
+export const computeGarrisonTroops = (G: MyGameState, playerID: string): void => {
   const [x, y] = G.mapState.currentBattle;
   let regiments = 0, elites = 0, levies = 0;
   
