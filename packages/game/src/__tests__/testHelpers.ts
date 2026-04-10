@@ -23,7 +23,7 @@ export function buildPlayer(id: string, overrides: Partial<PlayerInfo> = {}): Pl
     isArchprelate: false,
     isCaptainGeneral: false,
     hereticOrOrthodox: "orthodox",
-    heresyTracker: 0, // actual game starting value (playerSetup.ts)
+    heresyTracker: -9,
     prisoners: 0,
     freeDissenters: 0,
     piracyIntent: "tax" as const,
@@ -176,7 +176,7 @@ export function buildInitialG(
   return {
     stage: { phase: "actions", sub: "default" },
     round: 1,
-    finalRound: 10,
+    finalRound: 6,
     firstTurnOfRound: true,
     mustContinueDiscovery: false,
     nprCathedrals: {},

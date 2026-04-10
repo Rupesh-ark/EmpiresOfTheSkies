@@ -331,7 +331,7 @@ const ALL_PLAYER_KINGDOMS = [
   "Angland",
   "Gallois",
   "Castillia",
-  "Nordmark",
+  "Normark",
   "Ostreich",
   "Constantium",
 ];

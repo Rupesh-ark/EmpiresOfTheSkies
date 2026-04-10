@@ -224,9 +224,16 @@ export function applyMove(G: MyGameState, playerID: string, move: AIMove): void 
 
     case "punishDissenters": {
       const paymentType = move.args[1] as string;
+      const count = (move.args[2] as number) ?? 1;
       if (paymentType === "gold") player.resources.gold -= 2;
-      if (paymentType === "execute") player.resources.victoryPoints -= 1;
-      if (player.freeDissenters > 0) player.freeDissenters -= 1;
+      else if (paymentType === "counsellor") player.resources.counsellors -= 1;
+      if (paymentType === "execute") {
+        player.resources.victoryPoints -= count;
+        player.prisoners -= count;
+      } else {
+        player.prisoners += count;
+        player.freeDissenters = Math.max(0, player.freeDissenters - count);
+      }
       player.resources.counsellors -= 1;
       break;
     }

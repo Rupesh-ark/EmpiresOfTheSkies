@@ -20,7 +20,7 @@ const KINGDOMS = [
   { name: "Castillia",   color: PlayerColour.yellow, key: 3 },
   { name: "Zeeland",     color: "#FE9F10",           key: 4 },
   { name: "Venoa",       color: "#FE9ACC",           key: 5 },
-  { name: "Nordmark",    color: PlayerColour.brown,  key: 6 },
+  { name: "Normark",    color: PlayerColour.brown,  key: 6 },
   { name: "Ostreich",    color: PlayerColour.white,  key: 7 },
   { name: "Constantium", color: PlayerColour.green,  key: 8 },
 ] as const;

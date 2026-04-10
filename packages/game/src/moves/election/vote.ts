@@ -2,6 +2,7 @@ import { INVALID_MOVE } from "boardgame.io/core";
 import { MoveDefinition, MyGameState } from "../../types";
 import { HERESY_MIN, logEvent } from "../../helpers/stateUtils";
 import { advanceFromElection } from "../../helpers/resolutionFlow";
+import { countOrthodoxRealms } from "../../helpers/helpers";
 
 const kingdomToNumberMap: Record<string, number> = {
   Angland: 1,
@@ -9,7 +10,7 @@ const kingdomToNumberMap: Record<string, number> = {
   Castillia: 3,
   Zeeland: 4,
   Venoa: 5,
-  Nordmark: 6,
+  Normark: 6,
   Ostreich: 7,
   Constantium: 8,
 };
@@ -20,7 +21,7 @@ const numberToKingdomMap: Record<string, string> = {
   3: "Castillia",
   4: "Zeeland",
   5: "Venoa",
-  6: "Nordmark",
+  6: "Normark",
   7: "Ostreich",
   8: "Constantium",
 };
@@ -154,12 +155,7 @@ const vote: MoveDefinition = {
           if (player.heresyTracker > HERESY_MIN) {
             player.heresyTracker -= 1;
           }
-          let orthodoxRealms = 0;
-          Object.values(G.playerInfo).forEach((p) => {
-            if (p.hereticOrOrthodox === "orthodox") {
-              orthodoxRealms += 1;
-            }
-          });
+          const orthodoxRealms = countOrthodoxRealms(G);
 
           // Archprelate Fatigue: consecutive wins reduce VP
           if (player.id === previousArchprelateId) {

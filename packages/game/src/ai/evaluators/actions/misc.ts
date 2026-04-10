@@ -133,6 +133,7 @@ export function evaluatePunishDissenters(
   const dissenters = player.freeDissenters;
   const reasons: string[] = [];
 
+  const count = (move.args[2] as number) ?? 1;
   let quality = getBase(personality.baseQualities, "punishDissenters");
 
   if (dissenters >= 3) {
@@ -141,19 +142,21 @@ export function evaluatePunishDissenters(
   } else if (dissenters >= 1) {
     quality += V2_CONFIG.bonuses.someDissenters;
     reasons.push(`${dissenters} free dissenters`);
-  } else {
-    return clampEval(move, 0, "no free dissenters");
   }
 
-  // Payment type matters: gold (2g) vs counsellor (free but costs action) vs execute (costs VP)
+  if (count > 1) {
+    quality += 0.05 * (count - 1);
+    reasons.push(`punishing ${count}`);
+  }
+
   const paymentType = move.args[1] as string;
   if (paymentType === "gold") {
     quality += goldPressure(player.resources.gold, 2);
     const gpReason = goldPressureReason(player.resources.gold, 2);
     if (gpReason) reasons.push(gpReason);
   } else if (paymentType === "execute") {
-    quality -= V2_CONFIG.bonuses.executeVPCost * V2_CONFIG.penaltyScale;
-    reasons.push("execute costs VP");
+    quality -= V2_CONFIG.bonuses.executeVPCost * V2_CONFIG.penaltyScale * count;
+    reasons.push(`execute ${count} costs ${count} VP`);
   }
 
   const pb = personalityBonus(personality, {
@@ -165,7 +168,7 @@ export function evaluatePunishDissenters(
   quality += pb.bonus;
   reasons.push(...pb.reasons);
 
-  return clampEval(move, quality, `punish (${paymentType}). ${reasons.join(", ")}`);
+  return clampEval(move, quality, `punish ${count} (${paymentType}). ${reasons.join(", ")}`);
 }
 
 // garrisonTransfer

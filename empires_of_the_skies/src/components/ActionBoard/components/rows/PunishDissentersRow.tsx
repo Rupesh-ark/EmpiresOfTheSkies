@@ -17,22 +17,25 @@ import { clearMoves } from "@/utils/gameHelpers";
 const PunishDissentersRow = (props: ActionBoardProps) => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState<number | null>(null);
+  const [count, setCount] = useState(1);
 
   const player = props.playerID ? props.G.playerInfo[props.playerID] : null;
   const maxPrisoners =
     player?.resources.advantageCard === "more_prisons"
       ? BASE_PRISONERS + MORE_PRISONS_BONUS
       : BASE_PRISONERS;
-  const prisonFull = player ? player.prisoners >= maxPrisoners : true;
+  const prisonCapacity = player ? maxPrisoners - player.prisoners : 0;
+  const prisonFull = prisonCapacity <= 0;
   const canAffordCounsellor = player ? player.resources.counsellors >= 2 : false;
   const hasPrisoners = player ? player.prisoners > 0 : false;
 
   const handlePay = (paymentType: "gold" | "counsellor" | "execute") => {
     if (selectedSlot !== null) {
-      props.moves.punishDissenters(selectedSlot, paymentType);
+      props.moves.punishDissenters(selectedSlot, paymentType, count);
     }
     setDialogOpen(false);
     setSelectedSlot(null);
+    setCount(1);
   };
 
   return (
@@ -47,6 +50,7 @@ const PunishDissentersRow = (props: ActionBoardProps) => {
         onPlace={(slot) => {
           clearMoves(props);
           setSelectedSlot(slot);
+          setCount(1);
           setDialogOpen(true);
         }}
         playerInfo={props.G.playerInfo}
@@ -62,16 +66,28 @@ const PunishDissentersRow = (props: ActionBoardProps) => {
         cancelLabel="Cancel"
         onCancel={() => { setDialogOpen(false); setSelectedSlot(null); }}
       >
-        <Typography sx={{ mb: 1 }}>How will you pay for this action?</Typography>
+        <Typography sx={{ mb: 1 }}>How many dissenters?</Typography>
+        <Stack direction="row" spacing={1} sx={{ mb: 2, justifyContent: "center" }}>
+          {[1, 2, 3, ...(maxPrisoners > 3 ? [4] : [])].map((n) => (
+            <GameButton
+              key={n}
+              variant={count === n ? "primary" : "secondary"}
+              onClick={() => setCount(n)}
+              disabled={false}
+            >
+              {n}
+            </GameButton>
+          ))}
+        </Stack>
         <Stack spacing={1.5}>
-          <GameButton variant="secondary" fullWidth disabled={prisonFull} onClick={() => handlePay("gold")}>
-            Imprison ({PUNISH_GOLD_COST} Gold){prisonFull ? " — prison full" : ""}
+          <GameButton variant="secondary" fullWidth disabled={prisonFull || count > prisonCapacity} onClick={() => handlePay("gold")}>
+            Imprison {count} ({PUNISH_GOLD_COST} Gold){prisonFull ? " — prison full" : count > prisonCapacity ? ` — room for ${prisonCapacity}` : ""}
           </GameButton>
-          <GameButton variant="secondary" fullWidth disabled={!canAffordCounsellor || prisonFull} onClick={() => handlePay("counsellor")}>
-            Imprison (1 Counsellor){!canAffordCounsellor ? " — need 2" : prisonFull ? " — prison full" : ""}
+          <GameButton variant="secondary" fullWidth disabled={!canAffordCounsellor || prisonFull || count > prisonCapacity} onClick={() => handlePay("counsellor")}>
+            Imprison {count} (1 Counsellor){!canAffordCounsellor ? " — need 2" : prisonFull ? " — prison full" : count > prisonCapacity ? ` — room for ${prisonCapacity}` : ""}
           </GameButton>
-          <GameButton variant="danger" fullWidth disabled={!hasPrisoners} onClick={() => handlePay("execute")}>
-            Execute Prisoner (-{PUNISH_EXECUTE_VP_COST} Victory Points){!hasPrisoners ? " — no prisoners" : ""}
+          <GameButton variant="danger" fullWidth disabled={!hasPrisoners || count > (player?.prisoners ?? 0)} onClick={() => handlePay("execute")}>
+            Execute {count} (-{PUNISH_EXECUTE_VP_COST * count} VP){!hasPrisoners ? " — no prisoners" : count > (player?.prisoners ?? 0) ? ` — only ${player?.prisoners}` : ""}
           </GameButton>
         </Stack>
       </DialogShell>

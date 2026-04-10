@@ -2,7 +2,7 @@ import {
   FortuneOfWarCardInfo,
   MyGameState,
 } from "../types";
-import { fortuneOfWarCards } from "../data/gameData";
+import { fortuneOfWarCards, ASSIGNABLE_KINGDOMS } from "../data/gameData";
 import { getNeighbors, getPassableNeighbors } from "./mapUtils";
 import { Ctx } from "boardgame.io";
 import { EventsAPI } from "boardgame.io/dist/types/src/plugins/events/events";
@@ -103,15 +103,30 @@ export const findMostHereticalKingdoms = (G: MyGameState): string[] => {
   return currentHighestKingdoms;
 };
 
-export const blessingOrCurseVPAmount = (G: MyGameState): number => {
+export const countOrthodoxRealms = (G: MyGameState): number => {
+  const assignedKingdoms = new Set(
+    Object.values(G.playerInfo).map((p) => p.kingdomName)
+  );
+
   let total = 0;
   Object.values(G.playerInfo).forEach((info) => {
-    if (info.hereticOrOrthodox === "orthodox") {
+    if (info.hereticOrOrthodox === "orthodox") total += 1;
+  });
+
+  ASSIGNABLE_KINGDOMS.forEach((k) => {
+    if (!assignedKingdoms.has(k) && !G.eventState.nprHeretic.includes(k)) {
       total += 1;
     }
   });
 
-  return Math.floor(total / 3);
+  if (!G.eventState.nprHeretic.includes("Zeeland")) total += 1;
+  if (!G.eventState.nprHeretic.includes("Venoa")) total += 1;
+
+  return total;
+};
+
+export const blessingOrCurseVPAmount = (G: MyGameState): number => {
+  return Math.min(3, Math.ceil(countOrthodoxRealms(G) / 3));
 };
 
 export const sortPlayersInPlayerOrder = (

@@ -207,13 +207,13 @@ const WorldSection = () => (
     </P>
     <Callout>
       <P>
-        <Gold>Goal:</Gold> Over <Bold>6–8 rounds</Bold>, earn the most <Bold>Victory Points</Bold> through
+        <Gold>Goal:</Gold> Over <Bold>6 rounds</Bold>, earn the most <Bold>Victory Points</Bold> through
         trade, conquest, buildings, church influence, and your secret legacy card.
       </P>
     </Callout>
     <H3>The Six Kingdoms</H3>
     <P>
-      Each player takes one kingdom (Angland, Constantium, Nordmark, Gallois, Castillia, or Ostreich).
+      Each player takes one kingdom (Angland, Constantium, Normark, Gallois, Castillia, or Ostreich).
       All start equal — same gold, troops, and buildings. Your <Bold>Kingdom Advantage</Bold> card, chosen at setup,
       gives you a unique permanent ability that shapes your strategy.
     </P>

@@ -18,7 +18,7 @@ const KINGDOM_SLOT_MAP: Record<string, number> = {
   Castillia: 3,
   Zeeland: 4,
   Venoa: 5,
-  Nordmark: 6,
+  Normark: 6,
   Ostreich: 7,
   Constantium: 8,
 };

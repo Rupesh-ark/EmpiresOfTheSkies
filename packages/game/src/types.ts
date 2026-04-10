@@ -234,7 +234,7 @@ export type KingdomName =
   | "Angland"
   | "Gallois"
   | "Castillia"
-  | "Nordmark"
+  | "Normark"
   | "Ostreich"
   | "Constantium";
 

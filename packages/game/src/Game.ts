@@ -244,7 +244,7 @@ const MyGame: Game<MyGameState> = {
       Object.values(playerInfoMap).map((p) => p.kingdomName)
     );
     const ALL_PLAYER_KINGDOMS = [
-      "Angland", "Gallois", "Castillia", "Nordmark", "Ostreich", "Constantium",
+      "Angland", "Gallois", "Castillia", "Normark", "Ostreich", "Constantium",
     ];
     const nprCathedrals: Record<string, number> = {};
     ALL_PLAYER_KINGDOMS.forEach((k) => {

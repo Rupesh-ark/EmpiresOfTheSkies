@@ -106,7 +106,6 @@ describe("electionFlow — tie goes to incumbent Archprelate", () => {
 
 describe("electionFlow — new Archprelate gains VP based on orthodox count", () => {
   it("grants floor(2 × orthodoxRealms / 3) VP, capped at 6", () => {
-    // 3 orthodox realms: floor(2*3/3) = 2 VP
     const G = buildInitialG([
       buildPlayer("0", { kingdomName: "Angland", cathedrals: 5, hereticOrOrthodox: "orthodox" }),
       buildPlayer("1", { kingdomName: "Gallois", cathedrals: 1, hereticOrOrthodox: "orthodox" }),
@@ -119,18 +118,17 @@ describe("electionFlow — new Archprelate gains VP based on orthodox count", ()
     castVote(G, "1", "0", order);
     castVote(G, "2", "0", order);
 
-    // All 3 orthodox → floor(6/3) = 2 VP
-    expect(G.playerInfo["0"].resources.victoryPoints).toBe(vpBefore + 2);
+    expect(G.playerInfo["0"].resources.victoryPoints).toBe(vpBefore + 5);
     expect(G.playerInfo["0"].isArchprelate).toBe(true);
   });
 
-  it("grants max 6 VP even with many orthodox realms", () => {
-    // 6 orthodox realms (including NPRs via cathedral count): floor(12/3) = 4 but capped at 6
+  it("heretic NPRs reduce orthodox realm count and VP", () => {
     const G = buildInitialG([
       buildPlayer("0", { kingdomName: "Angland", cathedrals: 10, hereticOrOrthodox: "orthodox" }),
       buildPlayer("1", { kingdomName: "Gallois", cathedrals: 1, hereticOrOrthodox: "orthodox" }),
       buildPlayer("2", { kingdomName: "Castillia", cathedrals: 1, hereticOrOrthodox: "orthodox" }),
     ]);
+    G.eventState.nprHeretic = ["Zeeland", "Venoa", "Normark"];
     const vpBefore = G.playerInfo["0"].resources.victoryPoints;
 
     const order = ["0", "1", "2"];
@@ -138,8 +136,7 @@ describe("electionFlow — new Archprelate gains VP based on orthodox count", ()
     castVote(G, "1", "0", order);
     castVote(G, "2", "0", order);
 
-    // floor(2*3/3) = 2 (only 3 players, orthodox count is 3)
-    expect(G.playerInfo["0"].resources.victoryPoints).toBe(vpBefore + 2);
+    expect(G.playerInfo["0"].resources.victoryPoints).toBe(vpBefore + 3);
   });
 });
 
@@ -216,10 +213,8 @@ describe("electionFlow — consecutive wins tracking", () => {
     castVote(G, "0", "0", ["0", "1"]);
     castVote(G, "1", "0", ["0", "1"]);
 
-    // consecutiveArchprelateWins becomes 2 → fatigueReduction = (2-1)*2 = 2
-    // baseVP = floor(2*2/3) = 1, after fatigue: max(0, 1-2) = 0
     const vpAfter = G.playerInfo["0"].resources.victoryPoints;
-    expect(vpAfter).toBeLessThanOrEqual(vpBefore + 1);
+    expect(vpAfter).toBe(vpBefore + 3);
     expect(G.consecutiveArchprelateWins).toBe(2);
   });
 });

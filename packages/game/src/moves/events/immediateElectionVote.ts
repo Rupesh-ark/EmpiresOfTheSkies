@@ -1,6 +1,7 @@
 import { INVALID_MOVE } from "boardgame.io/core";
 import { MoveDefinition } from "../../types";
 import { HERESY_MIN, logEvent } from "../../helpers/stateUtils";
+import { countOrthodoxRealms } from "../../helpers/helpers";
 
 const immediateElectionVote: MoveDefinition = {
   fn: ({ G, ctx, playerID, events }, ...args) => {
@@ -24,7 +25,7 @@ const immediateElectionVote: MoveDefinition = {
       Castillia: 3,
       Zeeland: 4,
       Venoa: 5,
-      Nordmark: 6,
+      Normark: 6,
       Ostreich: 7,
       Constantium: 8,
     };
@@ -34,7 +35,7 @@ const immediateElectionVote: MoveDefinition = {
       3: "Castillia",
       4: "Zeeland",
       5: "Venoa",
-      6: "Nordmark",
+      6: "Normark",
       7: "Ostreich",
       8: "Constantium",
     };
@@ -146,12 +147,7 @@ const immediateElectionVote: MoveDefinition = {
         if (player.heresyTracker > HERESY_MIN) {
           player.heresyTracker -= 1;
         }
-        let orthodoxRealms = 0;
-        Object.values(G.playerInfo).forEach((p) => {
-          if (p.hereticOrOrthodox === "orthodox") {
-            orthodoxRealms += 1;
-          }
-        });
+        const orthodoxRealms = countOrthodoxRealms(G);
 
         if (player.id === previousArchprelateId) {
           G.consecutiveArchprelateWins += 1;

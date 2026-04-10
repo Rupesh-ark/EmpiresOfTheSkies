@@ -17,7 +17,7 @@ import { goldPressure, goldPressureReason, personalityBonus, roundAwareness, dim
 const SLOT_TO_COLOUR: Record<number, string | null> = {
   1: "red",    // Angland
   2: "blue",   // Gallois
-  3: "yellow", // Nordmark
+  3: "yellow", // Normark
   4: null,     // Zeeland (republic)
   5: null,     // Venoa (republic)
   6: "brown",  // Castillia

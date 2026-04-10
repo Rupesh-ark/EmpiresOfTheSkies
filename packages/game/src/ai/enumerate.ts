@@ -241,12 +241,24 @@ export function enumerateLegalMoves(G: MyGameState, ctx: Ctx, playerID: string):
         }
       }
 
-      // Punish dissenters (slot + payment type)
-      if (G.playerInfo[playerID].freeDissenters > 0) {
+      // Punish dissenters (slot + payment type + count)
+      {
+        const pInfo = G.playerInfo[playerID];
+        const maxP = pInfo.resources.advantageCard === "more_prisons" ? 4 : 3;
+        const capacity = maxP - pInfo.prisoners;
         for (let slotIndex = 0; slotIndex < ctx.numPlayers; slotIndex++) {
-          for (const paymentType of ["gold", "counsellor", "execute"] as const) {
-            if (tryValidate("punishDissenters", G, playerID, slotIndex, paymentType, ctx.numPlayers)) {
-              moves.push({ move: "punishDissenters", args: [slotIndex, paymentType] });
+          if (capacity > 0) {
+            for (const paymentType of ["gold", "counsellor"] as const) {
+              for (let c = 1; c <= capacity; c++) {
+                if (tryValidate("punishDissenters", G, playerID, slotIndex, paymentType, ctx.numPlayers, c)) {
+                  moves.push({ move: "punishDissenters", args: [slotIndex, paymentType, c] });
+                }
+              }
+            }
+          }
+          for (let c = 1; c <= pInfo.prisoners; c++) {
+            if (tryValidate("punishDissenters", G, playerID, slotIndex, "execute", ctx.numPlayers, c)) {
+              moves.push({ move: "punishDissenters", args: [slotIndex, "execute", c] });
             }
           }
         }

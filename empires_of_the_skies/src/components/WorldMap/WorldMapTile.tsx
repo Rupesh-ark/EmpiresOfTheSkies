@@ -24,7 +24,7 @@ const KINGDOM_POSITIONS: Record<string, { top: string; left: string }[]> = {
   Angland:     [{ top: "8%",  left: "14%" }, { top: "8%",  left: "28%" }, { top: "22%", left: "14%" }],
   Gallois:     [{ top: "36%", left: "14%" }, { top: "36%", left: "28%" }, { top: "50%", left: "14%" }],
   Castillia:   [{ top: "64%", left: "10%" }, { top: "64%", left: "24%" }, { top: "78%", left: "10%" }],
-  Nordmark:    [{ top: "8%",  left: "68%" }, { top: "8%",  left: "82%" }, { top: "22%", left: "68%" }],
+  Normark:    [{ top: "8%",  left: "68%" }, { top: "8%",  left: "82%" }, { top: "22%", left: "68%" }],
   Ostreich:    [{ top: "36%", left: "72%" }, { top: "36%", left: "86%" }, { top: "50%", left: "72%" }],
   Constantium: [{ top: "64%", left: "68%" }, { top: "64%", left: "82%" }, { top: "78%", left: "68%" }],
 };

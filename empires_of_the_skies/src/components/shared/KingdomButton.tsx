@@ -9,7 +9,7 @@ export const KingdomButton = (props: KingdomButtonProps) => {
     "#F5DE48": "Castillia",
     // "#FE9F10":"Zeeland",
     // "#FE9ACC":"Venoa",
-    "#A0522D": "Nordmark",
+    "#A0522D": "Normark",
     "#E6EFE9": "Ostreich",
     "#478779": "Constantium",
   };
