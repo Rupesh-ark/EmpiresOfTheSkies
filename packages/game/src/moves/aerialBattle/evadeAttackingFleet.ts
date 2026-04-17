@@ -3,11 +3,25 @@ import { findPossibleDestinations } from "../../helpers/helpers";
 import { forceRetrieveFleets } from "../../helpers/resolveBattle";
 import { setStage } from "../../helpers/stageUtils";
 import { nextAfterAerialDecision } from "../../helpers/resolutionSequencer";
+import { clonePlayerInfo } from "../../helpers/cloneUtils";
 
 const evadeAttackingFleet: MoveDefinition = {
+  validate: (G, playerID) => {
+    if (!G.battleState) {
+      return { code: "NO_BATTLE", message: "No active battle" };
+    }
+    if (G.battleState.defender?.id !== playerID) {
+      return { code: "NOT_DEFENDER", message: "Only the defender can evade" };
+    }
+    const sub = G.stage.sub;
+    if (sub !== "aerial_attack_or_evade") {
+      return { code: "WRONG_STAGE", message: "Cannot evade in this stage" };
+    }
+    return null;
+  },
   fn: ({ G, ctx, playerID, events }, ...args) => {
     if (G.battleState !== undefined) {
-      G.battleState.defender = { decision: "evade", ...G.playerInfo[playerID] };
+      G.battleState.defender = { decision: "evade", ...clonePlayerInfo(G.playerInfo[playerID]) };
       const attackerID = G.battleState.attacker.id;
 
       // Compute valid relocation tiles for the evading fleet

@@ -4,7 +4,7 @@ import { LegacyCardInfo, MyGameState, MapState } from "./types";
 
 import { ALL_KA_CARDS, CONTINGENT_COUNTERS, EVENT_HAND_SIZE, MAX_ROUNDS, INFIDEL_HOST_COUNTERS } from "./data/gameData";
 import { filterKAPool, classifyEventDeck } from "./helpers/manufacturedFunSeed";
-import { initialBoardState, initialBattleMapState } from "./setup/boardSetup";
+import { initialBoardState, initialBattleMapState, createInitialBoardState } from "./setup/boardSetup";
 import {
   getRandomisedMapTileArray,
   getInitialDiscoveredTiles,
@@ -27,6 +27,7 @@ import influencePrelates from "./moves/actions/influencePrelates";
 import {
   checkIfCurrentPlayerIsInCurrentBattle,
   fullResetFortuneOfWarCardDeck,
+  resetBattleCheckCount,
 } from "./helpers/helpers";
 import trainTroops from "./moves/actions/trainTroops";
 import confirmAction from "./moves/actions/confirmAction";
@@ -110,6 +111,7 @@ const turnBudgetPlugin = {
   fnWrap: (fn: (...args: any[]) => any, methodType: string) =>
     (context: any, ...args: any[]) => {
       const events = context.events;
+      const G: MyGameState = context.G;
 
       if (events && !events._budgetWrapped) {
         const origEndTurn = events.endTurn?.bind(events);
@@ -119,7 +121,6 @@ const turnBudgetPlugin = {
           events.endTurn = (endTurnArgs?: any) => {
             turnEndingCounter++;
             const phase = context.ctx?.phase ?? "?";
-            const G = context.G;
             const stage = G?.stage ? `${G.stage.phase}/${G.stage.sub}` : "?";
 
             if (turnEndingCounter >= TURN_ENDING_LIMIT) {
@@ -156,7 +157,6 @@ const turnBudgetPlugin = {
           events.endPhase = (...phaseArgs: any[]) => {
             turnEndingCounter++;
             const phase = context.ctx?.phase ?? "?";
-            const G = context.G;
             const stage = G?.stage ? `${G.stage.phase}/${G.stage.sub}` : "?";
 
             if (turnEndingCounter >= TURN_ENDING_LIMIT) {
@@ -270,7 +270,7 @@ const MyGame: Game<MyGameState> = {
     return {
       playerInfo: playerInfoMap,
       mapState: mapState,
-      boardState: { ...initialBoardState },
+      boardState: createInitialBoardState(),
       cardDecks: {
         fortuneOfWarCards: random.Shuffle(fullResetFortuneOfWarCardDeck()),
         discardedFortuneOfWarCards: [],
@@ -307,7 +307,6 @@ const MyGame: Game<MyGameState> = {
       mercyGold: {},
       _loopGuard: 0,
       _halted: false,
-      _turnEndingCount: 0,
       eventState: {
         deck: earlyDeck,
         lateDeck,
@@ -444,6 +443,7 @@ const MyGame: Game<MyGameState> = {
         // Reset the loop guard at the start of each new round, then check.
         context.G._loopGuard = 0;
         context.G._halted = false;
+        resetBattleCheckCount();
         resetTurnEndingBudget(context.G.round + 1);
         if (checkLoopGuard(context, "discovery")) return;
         phaseLog.info("discovery", { round: context.G.round + 1 });
@@ -775,7 +775,7 @@ const MyGame: Game<MyGameState> = {
         );
 
         // Reset action board
-        context.G.boardState = { ...initialBoardState };
+        context.G.boardState = createInitialBoardState();
 
         // Return counsellors from player board slots and reset flags
         Object.values(context.G.playerInfo).forEach((player) => {

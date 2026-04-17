@@ -190,12 +190,12 @@ const resolveRound = (G: MyGameState, events: EventsAPI, random: RandomAPI) => {
     while (tradeAmounts.includes(highestTradeAmount)) {
       tradeAmounts.splice(tradeAmounts.indexOf(highestTradeAmount), 1);
     }
-    const secondHighestTradeAmount = Math.max(...tradeAmounts);
+    const secondHighestTradeAmount = tradeAmounts.length > 0 ? Math.max(...tradeAmounts) : 0;
 
     while (tradeAmounts.includes(secondHighestTradeAmount)) {
       tradeAmounts.splice(tradeAmounts.indexOf(secondHighestTradeAmount), 1);
     }
-    const thirdHighestTradeAmount = Math.max(...tradeAmounts);
+    const thirdHighestTradeAmount = tradeAmounts.length > 0 ? Math.max(...tradeAmounts) : 0;
 
     const winners: string[] = [];
     const secondPlace: string[] = [];

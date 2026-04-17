@@ -2,6 +2,7 @@ import { MoveDefinition } from "../../types";
 import { removeVPAmount } from "../../helpers/stateUtils";
 import { setStage } from "../../helpers/stageUtils";
 import { logBattleEvent } from "../../helpers/logger";
+import { clonePlayerInfo } from "../../helpers/cloneUtils";
 
 const attackOtherPlayersFleet: MoveDefinition = {
   validate: (G, playerID, ...args) => {
@@ -41,8 +42,8 @@ const attackOtherPlayersFleet: MoveDefinition = {
     logBattleEvent(attackerName, defenderName, "AERIAL", "initiated");
 
     G.battleState = {
-      attacker: { decision: "fight", ...G.playerInfo[playerID] },
-      defender: { decision: "undecided", ...G.playerInfo[defenderID] },
+      attacker: { decision: "fight", ...clonePlayerInfo(G.playerInfo[playerID]) },
+      defender: { decision: "undecided", ...clonePlayerInfo(G.playerInfo[defenderID]) },
     };
     events.endTurn({ next: defenderID });
     setStage(G, "resolution", "aerial_attack_or_evade");

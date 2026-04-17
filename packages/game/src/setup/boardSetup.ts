@@ -72,6 +72,8 @@ export const initialBoardState: ActionBoardInfo = {
   issueHolyDecree: false,
 };
 
+export const createInitialBoardState = (): ActionBoardInfo => JSON.parse(JSON.stringify(initialBoardState));
+
 export const initialBattleMapState = (): string[][][] => {
   const eightEmptySets: string[][] = [[], [], [], [], [], [], [], []];
   return [

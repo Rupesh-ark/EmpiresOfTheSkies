@@ -1,4 +1,12 @@
 <svg width="378" height="378" viewBox="0 0 378 378" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path fill-rule="evenodd" clip-rule="evenodd" d="M0.451538 0.22354H377.955V377.727H0.451538V0.22354Z" fill="#009EE3"/>
-<path d="M0.451538 0.22354H377.955V377.727H0.451538V0.22354Z" stroke="#1A1A18" stroke-width="0.288" stroke-miterlimit="22.9256"/>
+  <rect x="0.45" y="0.22" width="377.5" height="377.5" fill="#009EE3"/>
+  <path d="M0 47 Q94 32 189 47 T378 47" stroke="#0088C7" stroke-width="2" fill="none" opacity="0.6"/>
+  <path d="M0 94 Q94 79 189 94 T378 94" stroke="#0077B5" stroke-width="1.5" fill="none" opacity="0.5"/>
+  <path d="M0 142 Q94 127 189 142 T378 142" stroke="#0088C7" stroke-width="2" fill="none" opacity="0.6"/>
+  <path d="M0 189 Q94 174 189 189 T378 189" stroke="#0077B5" stroke-width="1.5" fill="none" opacity="0.5"/>
+  <path d="M0 236 Q94 221 189 236 T378 236" stroke="#0088C7" stroke-width="2" fill="none" opacity="0.6"/>
+  <path d="M0 283 Q94 268 189 283 T378 283" stroke="#0077B5" stroke-width="1.5" fill="none" opacity="0.5"/>
+  <path d="M0 332 Q94 317 189 332 T378 332" stroke="#0088C7" stroke-width="2" fill="none" opacity="0.6"/>
+  <text x="189" y="200" text-anchor="middle" font-family="Cinzel, serif" font-size="18" fill="#004466" opacity="0.7" letter-spacing="3">OPEN OCEAN</text>
+  <rect x="0.45" y="0.22" width="377.5" height="377.5" stroke="#1A1A18" stroke-width="0.288" fill="none"/>
 </svg>

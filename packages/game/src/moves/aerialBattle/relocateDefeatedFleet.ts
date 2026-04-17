@@ -5,6 +5,23 @@ import { forceRetrieveFleets } from "../../helpers/resolveBattle";
 import { nextAfterAerialDecision } from "../../helpers/resolutionSequencer";
 
 const relocateDefeatedFleet: MoveDefinition = {
+  validate: (G, playerID, ...args) => {
+    const defeatedPlayer = args[1];
+    if (!defeatedPlayer || typeof defeatedPlayer !== "string") {
+      return { code: "INVALID_PLAYER", message: "Invalid defeated player" };
+    }
+    if (!G.playerInfo[defeatedPlayer]) {
+      return { code: "INVALID_PLAYER", message: "Defeated player does not exist" };
+    }
+    if (!G.battleState) {
+      return { code: "NO_BATTLE", message: "No active battle" };
+    }
+    const sub = G.stage.sub;
+    if (sub !== "relocate_loser") {
+      return { code: "WRONG_STAGE", message: "Cannot relocate fleet in this stage" };
+    }
+    return null;
+  },
   fn: ({ G, ctx, playerID, events }, ...args) => {
     const destination = args[0];
     const defeatedPlayer = args[1];

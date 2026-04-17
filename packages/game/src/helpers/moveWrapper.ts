@@ -19,7 +19,7 @@ const log = createLogger("move");
  *
  * Pipeline: dev log → validate? → fn → successLog
  */
-let lastLogKey = "";
+const lastLogKeys = new WeakMap<MyGameState, string>();
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const wrapMove = (name: string, def: MoveDefinition): any => {
@@ -28,8 +28,9 @@ export const wrapMove = (name: string, def: MoveDefinition): any => {
     const { G, playerID, ctx } = context;
 
     const logKey = `${ctx.turn}:${name}:${playerID}:${JSON.stringify(args)}`;
+    const lastLogKey = lastLogKeys.get(G) ?? "";
     if (logKey !== lastLogKey) {
-      lastLogKey = logKey;
+      lastLogKeys.set(G, logKey);
       log.info(name, {
         playerID,
         phase: ctx.phase,

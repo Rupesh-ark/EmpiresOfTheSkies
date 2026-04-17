@@ -325,6 +325,7 @@ export const WorldMapTile = memo((props: worldMapTileProps) => {
           ref={setDroppableRef}
           className="front"
           sx={{
+            backgroundColor: currentTile.type === "ocean" ? "#009EE3" : currentTile.type === "legend" ? "#2a1a4a" : "#3a7a4a",
             backgroundImage: `url(${svgNameToElementMap[currentTile.name]})`,
             backgroundSize: "cover",
             backgroundRepeat: "no-repeat",

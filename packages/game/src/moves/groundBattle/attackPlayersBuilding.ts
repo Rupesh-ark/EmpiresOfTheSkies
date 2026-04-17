@@ -2,8 +2,27 @@ import { MoveDefinition } from "../../types";
 import { removeVPAmount } from "../../helpers/stateUtils";
 import { setStage } from "../../helpers/stageUtils";
 import { logBattleEvent } from "../../helpers/logger";
+import { clonePlayerInfo } from "../../helpers/cloneUtils";
 
 const attackPlayersBuilding: MoveDefinition = {
+  validate: (G, playerID) => {
+    if (!G.mapState.currentBattle || G.mapState.currentBattle.length < 2) {
+      return { code: "NO_BATTLE", message: "No active battle location" };
+    }
+    const [x, y] = G.mapState.currentBattle;
+    const defender = G.mapState.buildings[y]?.[x]?.player;
+    if (!defender) {
+      return { code: "NO_BUILDING", message: "No building to attack at this location" };
+    }
+    if (defender.id === playerID) {
+      return { code: "SELF_ATTACK", message: "Cannot attack your own building" };
+    }
+    const sub = G.stage.sub;
+    if (sub !== "ground_attack_or_pass") {
+      return { code: "WRONG_STAGE", message: "Cannot attack building in this stage" };
+    }
+    return null;
+  },
   fn: ({ G, playerID, events }, ...args) => {
     const [x, y] = G.mapState.currentBattle;
     const defender = G.mapState.buildings[y][x].player;
@@ -31,8 +50,8 @@ const attackPlayersBuilding: MoveDefinition = {
       logBattleEvent(attackerName, defenderName, "GROUND", "initiated");
 
       G.battleState = {
-        attacker: { decision: "fight", ...G.playerInfo[playerID] },
-        defender: { decision: "undecided", ...G.playerInfo[defender.id] },
+        attacker: { decision: "fight", ...clonePlayerInfo(G.playerInfo[playerID]) },
+        defender: { decision: "undecided", ...clonePlayerInfo(G.playerInfo[defender.id]) },
       };
       events.endTurn({ next: defender.id });
       setStage(G, "resolution", "ground_defend_or_yield");

@@ -231,6 +231,8 @@ export const hasAnyColony = (G: MyGameState, playerID?: string): boolean => {
 };
 
 let battleCheckCount = 0;
+export const resetBattleCheckCount = (): void => { battleCheckCount = 0; };
+
 export const checkIfCurrentPlayerIsInCurrentBattle = (
   G: MyGameState,
   ctx: Ctx,

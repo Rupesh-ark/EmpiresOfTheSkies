@@ -136,6 +136,12 @@ const fleetUnitCount = (fleet: FleetInfo): number =>
  * applied.  Priority: levies first, then regiments, then elites.
  */
 const trimFleetCapacity = (fleet: FleetInfo): void => {
+  if (fleet.skyships <= 0) {
+    fleet.levies = 0;
+    fleet.regiments = 0;
+    fleet.eliteRegiments = 0;
+    return;
+  }
   while (fleet.regiments + fleet.levies + fleet.eliteRegiments > fleet.skyships) {
     if (fleet.levies > 0) {
       fleet.levies -= 1;
@@ -483,7 +489,7 @@ export const resolveBattleAndReturnWinner = (
             }
           }
           player.victorious = true;
-          player.resources.victoryPoints += 1;
+          G.playerInfo[player.id].resources.victoryPoints += 1;
         } else {
           player.victorious = false;
         }

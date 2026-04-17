@@ -213,7 +213,6 @@ export function buildInitialG(
     mercyGold: {},
     _loopGuard: 0,
     _halted: false,
-    _turnEndingCount: 0,
     eventState: {
       deck: [],
       lateDeck: [],
