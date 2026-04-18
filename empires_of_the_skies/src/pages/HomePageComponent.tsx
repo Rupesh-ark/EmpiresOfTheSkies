@@ -283,7 +283,7 @@ const HomePageComponent = (props: HomePageComponentProps) => {
               A multiplayer strategy board game for 2–6 players. Command a kingdom in a fantasy world of
               aerial fleets, religious politics, and territorial conquest. Discover new lands, build
               skyships, recruit armies, and outmanoeuvre your rivals through trade, diplomacy, and war.
-              The player with the most Victory Points after 8 rounds wins the empire.
+              The player with the most Victory Points after 6 rounds wins the empire.
             </Typography>
           </Box>
 
