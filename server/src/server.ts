@@ -1,5 +1,6 @@
 import "dotenv/config";
-import { Server, FlatFile } from "boardgame.io/server";
+import { Server } from "boardgame.io/server";
+import { PostgresStore } from "bgio-postgres";
 import cors from "@koa/cors";
 import * as fs from "fs";
 import * as path from "path";
@@ -9,7 +10,8 @@ const log = createLogger("server");
 
 const PORT = Number(process.env.PORT) || 8000;
 const BOT_SECRET = process.env.BOT_SECRET || "";
-const MAX_BODY_SIZE = 10 * 1024; // 10KB
+const BOT_LOGGING = process.env.BOT_LOGGING === "true";
+const MAX_BODY_SIZE = 10 * 1024;
 const MAX_LOG_STREAMS = 50;
 const MATCH_ID_REGEX = /^[A-Za-z0-9_-]{1,64}$/;
 
@@ -26,10 +28,12 @@ const allowOrigin = (origin?: string): string => {
   return "";
 };
 
+const db = new PostgresStore(process.env.DATABASE_URL || "postgresql://eots:eots@localhost:5432/eots");
+
 const server = Server({
   games: [MyGame],
   origins: (origin: string | undefined) => !!allowOrigin(origin || undefined),
-  db: new FlatFile({ dir: "./storage" }),
+  db,
 });
 
 server.app.use(
@@ -50,6 +54,10 @@ server.app.use(async (ctx: any, next: any) => {
 server.app.use(async (ctx: any, next: any) => {
   if (ctx.path === "/" && ctx.method === "GET") {
     ctx.body = "Empires of the Skies server is running. See /games/empires-of-the-skies";
+    return;
+  }
+  if (ctx.path === "/health" && ctx.method === "GET") {
+    ctx.body = { status: "ok", timestamp: new Date().toISOString() };
     return;
   }
   await next();
@@ -80,6 +88,10 @@ function getLogStream(matchID: string): fs.WriteStream {
 
 server.app.use(async (ctx: any, next: any) => {
   if (ctx.method === "POST" && ctx.path === "/api/bot-log") {
+    if (!BOT_LOGGING) {
+      ctx.status = 404;
+      return;
+    }
     try {
       const body = await parseBody(ctx);
       const { matchID, line } = body;

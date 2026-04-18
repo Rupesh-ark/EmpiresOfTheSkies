@@ -1,0 +1,48 @@
+services:
+  eots-server:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    container_name: eots-server
+    restart: unless-stopped
+    env_file: deploy/.env.production
+    volumes:
+      - eots_bot_logs:/app/bot-logs
+    networks:
+      - rupesh-data-workers_default
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  pg-backup:
+    image: postgres:16-alpine
+    container_name: pg-backup-eots
+    restart: unless-stopped
+    environment:
+      PGHOST: postgres
+      PGUSER: eots
+      PGPASSWORD: ${DB_PASSWORD:-eots}
+      PGDATABASE: eots
+    volumes:
+      - eots_pg_backups:/backups
+    entrypoint: >
+      sh -c "while true; do
+        pg_dump -h postgres -U eots eots | gzip > /backups/eots_$$(date +%Y%m%d_%H%M%S).sql.gz 2>/dev/null;
+        find /backups -name 'eots_*.sql.gz' -mtime +7 -delete;
+        sleep 86400;
+      done"
+    depends_on:
+      - eots-server
+    networks:
+      - rupesh-data-workers_default
+
+volumes:
+  eots_bot_logs:
+  eots_pg_backups:
+
+networks:
+  rupesh-data-workers_default:
+    external: true
