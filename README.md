@@ -11,7 +11,6 @@ Developed as part of a dissertation exploring digital board game implementation,
 ## Live Demo
 
 - **Frontend** — [empires-of-the-skies-tan.vercel.app](https://empires-of-the-skies-tan.vercel.app)
-- **Backend** — [empiresoftheskies.onrender.com](https://empiresoftheskies.onrender.com)
 
 ---
 
