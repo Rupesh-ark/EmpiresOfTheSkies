@@ -2,7 +2,7 @@
 **/node_modules/
 **/.pnpm-store/
 
-# --- boardgame.io FlatFile persistence ---
+# --- boardgame.io persistence (legacy FlatFile, now using Postgres) ---
 server/storage/
 
 # --- build outputs (Vite + server builds) ---
