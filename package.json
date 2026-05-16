@@ -7,11 +7,14 @@
     }
   },
   "engines": {
-    "node": "22.x"
+    "node": ">=22"
   },
   "scripts": {
+    "db:up": "docker compose up -d",
+    "db:down": "docker compose down",
     "dev:app": "pnpm --filter empires_of_the_skies dev",
-    "dev:server": "pnpm --filter empires-server start",
+    "dev:server": "pnpm --filter empires-server dev",
+    "start:server": "pnpm --filter empires-server start",
     "build:all": "pnpm --filter @eots/game build && pnpm --filter empires-server build && pnpm --filter empires_of_the_skies build"
   },
   "devDependencies": {

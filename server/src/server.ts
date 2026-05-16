@@ -28,7 +28,9 @@ const allowOrigin = (origin?: string): string => {
   return "";
 };
 
-const db = new PostgresStore(process.env.DATABASE_URL || "postgresql://eots:eots@localhost:5432/eots");
+const DATABASE_URL = process.env.DATABASE_URL;
+if (!DATABASE_URL) throw new Error("DATABASE_URL is required");
+const db = new PostgresStore(DATABASE_URL);
 
 const server = Server({
   games: [MyGame],

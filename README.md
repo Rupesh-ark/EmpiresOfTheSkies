@@ -16,19 +16,20 @@ Developed as part of a dissertation exploring digital board game implementation,
 
 ## Getting Started
 
-**Prerequisites:** Node.js 22.x, pnpm (`npm install -g pnpm`)
+**Prerequisites:** Node.js 22.x, pnpm (`npm install -g pnpm`), Docker
 
 ```bash
 git clone <repository-url>
 cd EmpiresOfTheSkies
 pnpm install
+pnpm db:up               # Start PostgreSQL in Docker
 ```
 
 Run the backend and frontend in separate terminals:
 
 ```bash
-pnpm dev:server    # http://localhost:8000
-pnpm dev:app       # http://localhost:5173
+pnpm dev:server          # http://localhost:8000 (tsx watch)
+pnpm dev:app             # http://localhost:5173 (Vite HMR)
 ```
 
 Build everything for production:
@@ -77,7 +78,7 @@ EmpiresOfTheSkies/
         Trade/               Deal proposal interface
         Resolution/          End-of-round dialogs
         ...
-  server/                   boardgame.io backend (Koa, FlatFile storage)
+  server/                   boardgame.io backend (Koa, PostgreSQL)
   rulesets/                 Original board game rulebook (markdown)
 ```
 
@@ -88,12 +89,12 @@ EmpiresOfTheSkies/
 | Layer | Technologies |
 |-------|-------------|
 | Frontend | React, TypeScript, Vite, Material UI, Emotion |
-| Backend | Node.js 22, boardgame.io, Koa |
+| Backend | Node.js 22, boardgame.io, Koa, PostgreSQL |
 | Game Engine | boardgame.io (shared package, compiled to CJS + ESM) |
 | Multiplayer | boardgame.io server sync, @boardgame.io/p2p |
 | AI Tuning | Python, CMA-ES, Matplotlib |
 | Monorepo | pnpm workspaces |
-| Hosting | Vercel (frontend), Render (backend) |
+| Hosting | Vercel (frontend), VPS via Docker (backend) |
 | Testing | Vitest |
 
 ---
