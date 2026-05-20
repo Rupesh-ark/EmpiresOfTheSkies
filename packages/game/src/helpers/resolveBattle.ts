@@ -2,7 +2,7 @@ import { Ctx } from "boardgame.io";
 import { EventsAPI } from "boardgame.io/dist/types/src/plugins/plugin-events";
 import { FleetInfo, GoodKey, MyGameState, PlayerInfo } from "../types";
 // findNext functions no longer called directly — resolutionSequencer handles all transitions
-import { drawFortuneOfWarCard, findPossibleDestinations } from "./helpers";
+import { drawFortuneOfWarCard, findPossibleDestinations, humanizeTileName } from "./helpers";
 import { RandomAPI } from "boardgame.io/dist/types/src/plugins/random/random";
 import { increaseHeresyWithinMove, increaseOrthodoxyWithinMove, logEvent } from "./stateUtils";
 import { PRICE_MARKER_MIN, KINGDOM_LOCATION } from "../data/gameData";
@@ -620,7 +620,7 @@ export const resolveConquest = (
     G.mapState.currentTileArray[y][x].shield + defenderCard.shield;
 
   const conquestPlayerName = G.playerInfo[attackerID].kingdomName;
-  const landName = G.mapState.currentTileArray[y][x]?.name ?? "unknown land";
+  const landName = humanizeTileName(G.mapState.currentTileArray[y][x]?.name ?? "unknown land");
   logEvent(G, `Conquest: ${conquestPlayerName} attacks ${landName} (${attackerSwordValue}S vs ${defenderSwordValue}S/${defenderShieldValue}Sh)`);
 
   const { hitsOnAttacker: attackerLosses, hitsOnDefender: attackerHits } = calculateCombat(

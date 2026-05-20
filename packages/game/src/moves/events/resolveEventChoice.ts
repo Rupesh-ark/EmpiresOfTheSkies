@@ -2,6 +2,7 @@ import { INVALID_MOVE } from "boardgame.io/core";
 import { EventCardName, LegacyCardInfo, MoveDefinition } from "../../types";
 import { getBattleEventTarget } from "../../helpers/eventCardDefinitions";
 import { addVPAmount, removeVPAmount, logEvent } from "../../helpers/stateUtils";
+import { humanizeTileName } from "../../helpers/helpers";
 import { BUILDING_SELL_PRICE } from "../../data/gameData";
 
 // Choice handlers
@@ -74,7 +75,8 @@ const CHOICE_HANDLERS: Partial<Record<EventCardName, ChoiceHandler>> = {
     }
 
     const land = G.mapState.currentTileArray[tile[1]][tile[0]];
-    logEvent(G, `Colonial Rebellion: ${G.playerInfo[choice.targetPlayerID].kingdomName} risks colony at ${land.name}`);
+    const landName = humanizeTileName(land.name);
+    logEvent(G, `Colonial Rebellion: ${G.playerInfo[choice.targetPlayerID].kingdomName} risks colony at ${landName}`);
     return true;
   },
 

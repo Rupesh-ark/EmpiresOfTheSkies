@@ -1,5 +1,6 @@
 import { MoveDefinition, GoodKey } from "../../types";
 import { increaseHeresyWithinMove, addVPAmount, logEvent } from "../../helpers/stateUtils";
+import { humanizeTileName } from "../../helpers/helpers";
 import { PRICE_MARKER_MIN } from "../../data/gameData";
 import { setStage } from "../../helpers/stageUtils";
 import { computeGarrisonTroops } from "../../helpers/resolveBattle";
@@ -41,7 +42,7 @@ const constructOutpost: MoveDefinition = {
   errorMessage: "Cannot construct an outpost here",
   successLog: (G, pid) => {
     const [x, y] = G.mapState.currentBattle;
-    const landName = G.mapState.currentTileArray[y][x]?.name ?? `[${x},${y}]`;
+    const landName = humanizeTileName(G.mapState.currentTileArray[y][x]?.name ?? `[${x},${y}]`);
     const k = G.playerInfo[pid].kingdomName;
     return `${k} constructs an outpost at ${landName}`;
   },

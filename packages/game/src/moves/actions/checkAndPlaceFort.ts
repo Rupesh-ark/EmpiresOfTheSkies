@@ -1,4 +1,5 @@
 import { MoveDefinition, MyGameState, MoveError } from "../../types";
+import { humanizeTileName } from "../../helpers/helpers";
 
 const validateCheckAndPlaceFort = (G: MyGameState, playerID: string, coords: [number, number]): MoveError | null => {
   const [x, y] = coords;
@@ -35,7 +36,7 @@ const checkAndPlaceFort: MoveDefinition = {
   validate: validateCheckAndPlaceFort,
   successLog: (G, pid, coords) => {
     const k = G.playerInfo[pid].kingdomName;
-    const landName = G.mapState.currentTileArray[coords[1]][coords[0]]?.name ?? `[${coords}]`;
+    const landName = humanizeTileName(G.mapState.currentTileArray[coords[1]][coords[0]]?.name ?? `[${coords}]`);
     return `${k} builds a Fort at ${landName}`;
   },
 };

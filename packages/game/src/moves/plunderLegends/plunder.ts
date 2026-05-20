@@ -1,6 +1,7 @@
 import { MoveDefinition, GoodKey } from "../../types";
 import { nextAfterPlunder } from "../../helpers/resolutionSequencer";
 import { increaseHeresyWithinMove, logEvent } from "../../helpers/stateUtils";
+import { humanizeTileName } from "../../helpers/helpers";
 import { PRICE_MARKER_MIN } from "../../data/gameData";
 
 const GOODS: GoodKey[] = ["mithril", "dragonScales", "krakenSkin", "magicDust", "stickyIchor", "pipeweed"];
@@ -24,7 +25,7 @@ const plunder: MoveDefinition = {
     // plundering a Legend advances the plunderer's heresy by 1
     increaseHeresyWithinMove(G, playerID);
 
-    const landName = currentTile?.name ?? "unknown land";
+    const landName = humanizeTileName(currentTile?.name ?? "unknown land");
     logEvent(G, `${currentPlayer.kingdomName} plunders ${landName} (+1 heresy)`);
     nextAfterPlunder(G, events);
   },

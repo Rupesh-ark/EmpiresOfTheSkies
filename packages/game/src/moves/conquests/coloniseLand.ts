@@ -2,6 +2,7 @@ import { INVALID_MOVE } from "boardgame.io/core/";
 import { MoveDefinition } from "../../types";
 import { setStage } from "../../helpers/stageUtils";
 import { logEvent } from "../../helpers/stateUtils";
+import { humanizeTileName } from "../../helpers/helpers";
 
 const coloniseLand: MoveDefinition = {
   fn: ({ G, playerID }) => {
@@ -19,7 +20,8 @@ const coloniseLand: MoveDefinition = {
       return INVALID_MOVE;
     }
 
-    logEvent(G, `${G.playerInfo[playerID].kingdomName} attempts to colonise [${x},${y}]`);
+    const landName = humanizeTileName(G.mapState.currentTileArray[y][x]?.name ?? `[${x},${y}]`);
+    logEvent(G, `${G.playerInfo[playerID].kingdomName} attempts to colonise ${landName}`);
 
     G.conquestState = {
       decision: "fight",
@@ -30,7 +32,7 @@ const coloniseLand: MoveDefinition = {
   errorMessage: "Cannot colonise this land",
   successLog: (G, pid) => {
     const [x, y] = G.mapState.currentBattle;
-    const landName = G.mapState.currentTileArray[y][x]?.name ?? `[${x},${y}]`;
+    const landName = humanizeTileName(G.mapState.currentTileArray[y][x]?.name ?? `[${x},${y}]`);
     const k = G.playerInfo[pid].kingdomName;
     return `${k} attempts to colonise ${landName}`;
   },

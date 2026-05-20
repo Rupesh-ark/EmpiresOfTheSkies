@@ -91,7 +91,7 @@ const ConscriptLeviesDialog = ({ open, levyCount, onClose, onConscript, onSetLev
     </DialogTitle>
     <DialogContent>
       <Typography sx={{ fontFamily: tokens.font.body, color: tokens.ui.text, fontSize: tokens.fontSize.sm, mb: 2 }}>
-        Choose how many levies to raise (in batches of 3). Costs 1 Victory Point per 10 levies.
+        Choose how many levies to raise (in batches of 3). Costs 1 Victory Point per 3 levies.
       </Typography>
       <Box sx={{ display: "flex", alignItems: "center", gap: `${tokens.spacing.md}px`, justifyContent: "center" }}>
         <GameButton

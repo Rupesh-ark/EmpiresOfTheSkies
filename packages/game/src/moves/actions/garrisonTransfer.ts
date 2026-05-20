@@ -1,5 +1,6 @@
 import { MoveDefinition, MyGameState, MoveError } from "../../types";
 import { INVALID_MOVE } from "boardgame.io/core";
+import { humanizeTileName } from "../../helpers/helpers";
 import log from "../../helpers/logger";
 
 const gLog = log.child({ mod: "garrison-transfer" });
@@ -139,7 +140,7 @@ const garrisonTransfer: MoveDefinition = {
   validate: validateGarrisonTransfer,
   successLog: (G, pid, _fleetId, tileCoords, regiments, levies, eliteRegiments) => {
     const k = G.playerInfo[pid].kingdomName;
-    const landName = G.mapState.currentTileArray[tileCoords[1]][tileCoords[0]]?.name ?? `[${tileCoords}]`;
+    const landName = humanizeTileName(G.mapState.currentTileArray[tileCoords[1]][tileCoords[0]]?.name ?? `[${tileCoords}]`);
     const parts: string[] = [];
     if (regiments > 0) parts.push(`${regiments}R`);
     if (regiments < 0) parts.push(`${-regiments}R`);

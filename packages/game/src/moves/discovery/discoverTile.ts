@@ -2,6 +2,7 @@ import { INVALID_MOVE } from "boardgame.io/core/";
 import { MoveDefinition } from "../../types";
 import { advanceAllHeresyTrackers, logEvent, allPlayersPassed } from "../../helpers/stateUtils";
 import { getNeighbors } from "../../helpers/mapUtils";
+import { humanizeTileName } from "../../helpers/helpers";
 import { MIN_ROUNDS } from "../../data/gameData";
 
 export const discoverTile: MoveDefinition = {
@@ -45,15 +46,16 @@ export const discoverTile: MoveDefinition = {
     // splits the tile name on any number
     const tileRace = currentTile.name.split(/(\d+)/)[0].toLowerCase();
 
+    const displayName = humanizeTileName(currentTile.name);
     if (currentTile.type === "legend") {
       advanceAllHeresyTrackers(G);
-      logEvent(G, `Legend discovered: ${currentTile.name} — all heresy advances`);
+      logEvent(G, `Legend discovered: ${displayName} — all heresy advances`);
     } else if (tileRace !== "ocean" && !G.mapState.discoveredRaces.includes(tileRace)) {
       advanceAllHeresyTrackers(G);
       G.mapState.discoveredRaces.push(tileRace);
-      logEvent(G, `New race discovered: ${tileRace} — all heresy advances`);
+      logEvent(G, `New race discovered: ${displayName} — all heresy advances`);
     } else if (currentTile.type !== "ocean") {
-      logEvent(G, `Tile discovered: ${currentTile.name}`);
+      logEvent(G, `Tile discovered: ${displayName}`);
     }
     G.mapState.discoveredTiles[y][x] = true;
     G.mapState.mostRecentlyDiscoveredTile = [x, y];

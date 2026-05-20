@@ -18,9 +18,9 @@ const LEGEND_LORE: Record<string, string> = {
   HereBeDragons: "Ancient wyrms circle these skies, guarding hoards of dragon scales. Only the bold claim their riches.",
   SeaElves: "The elusive Sea Elves trade in magic dust with those who earn their trust through peaceful passage.",
   TheFountainOfYouth: "Legends speak of waters that grant eternal vitality. Many have sought it; few have returned.",
-  TheKingdomOfTheMerfolk: "Beneath the waves lies a civilization older than any kingdom of Faithdom. Their mithril is beyond compare.",
+  TheKingdomOfTheMerfolk: "Beneath the waves lies a civilization older than any kingdom of Faithdom. Their kraken skin is beyond compare.",
   TheKraken: "A terror of the deep. Its hide is prized by armorers, but harvesting it demands a fleet of rare courage.",
-  TheLostCityOfGold: "Swallowed by the sea in ages past, its golden spires still gleam beneath the surface for those who dare to dive.",
+  TheLostCityOfGold: "Hidden in jungle-choked highlands, its golden spires still gleam for those bold enough to brave the overgrown paths.",
 };
 
 const TILE_TYPE_LORE: Record<string, string> = {
@@ -306,31 +306,17 @@ const LegendContent: React.FC<{ lore: string; tile: TileInfoProps; x: number; y:
         border: "1px solid rgba(184,134,11,0.12)",
       }}>
         <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
-          <GiWatchtower size={13} style={{ color: "#6B4E1E" }} />
-          <Typography sx={{ fontSize: "0.82rem", fontWeight: 600, color: "#3A2E22" }}>Outpost</Typography>
+          <GiTreasureMap size={13} style={{ color: "#6B4E1E" }} />
+          <Typography sx={{ fontSize: "0.82rem", fontWeight: 600, color: "#3A2E22" }}>Plunder Reward</Typography>
         </Box>
         <Typography sx={{ fontSize: "0.82rem", color: "#6B4E1E", fontWeight: 600 }}>
           {formatLoot(tile.loot.outpost)}
         </Typography>
       </Box>
-      <Box sx={{
-        display: "flex", alignItems: "center", justifyContent: "space-between",
-        px: 1.5, py: 0.5, borderRadius: "4px",
-        backgroundColor: "rgba(184,134,11,0.05)",
-        border: "1px solid rgba(184,134,11,0.12)",
-      }}>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
-          <GiVillage size={13} style={{ color: "#6B4E1E" }} />
-          <Typography sx={{ fontSize: "0.82rem", fontWeight: 600, color: "#3A2E22" }}>Colony</Typography>
-        </Box>
-        <Typography sx={{ fontSize: "0.82rem", color: "#6B4E1E", fontWeight: 600 }}>
-          {formatLoot(tile.loot.colony)}
-        </Typography>
-      </Box>
     </Box>
 
     <Typography sx={{ mt: 1.5, fontSize: "0.78rem", color: "rgba(0,0,0,0.35)", fontStyle: "italic" }}>
-      Fleet must be in sole occupation to plunder.
+      Legends cannot be claimed as Outposts or Colonies. Fleet must be in sole occupation to plunder.
     </Typography>
     <TilePresence G={G} x={x} y={y} />
   </>

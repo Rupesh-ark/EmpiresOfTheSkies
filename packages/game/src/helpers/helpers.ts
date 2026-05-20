@@ -57,6 +57,17 @@ export const findPossibleDestinations = (
   return [availableGridLocations, ...coordsGroupedByCost];
 };
 
+/**
+ * Convert a raw tile name (e.g. "Dwarves2", "TheKraken", "SeaElves")
+ * into a human-readable string ("Dwarves", "The Kraken", "Sea Elves").
+ * Strips trailing digits and inserts spaces between camelCase boundaries.
+ */
+export const humanizeTileName = (rawName: string): string =>
+  rawName
+    .replace(/\d+$/, "")
+    .replace(/([a-z])([A-Z])/g, "$1 $2")
+    .trim();
+
 export const findMostOrthodoxKingdoms = (G: MyGameState): string[] => {
   let currentLowestHeresyTracker: number = 12;
   let currentLowestKingdoms: string[] = [];

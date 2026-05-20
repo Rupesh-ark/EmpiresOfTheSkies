@@ -12,7 +12,7 @@
 
 import { MyGameState, DeferredEvent } from "../types";
 import { addVPAmount, logEvent } from "./stateUtils";
-import { drawFortuneOfWarCard, hasFortAt } from "./helpers";
+import { drawFortuneOfWarCard, hasFortAt, humanizeTileName } from "./helpers";
 import { calculateCombat } from "./combatMath";
 
 // Faerie Uprising
@@ -28,11 +28,12 @@ const resolveFaerieUprising = (
 
   const [x, y] = targetTile;
   const land = G.mapState.currentTileArray[y][x];
+  const landName = humanizeTileName(land.name);
   const landSwords = land.sword * 2;
   const landShields = land.shield;
   const kingdom = G.playerInfo[targetPlayerID].kingdomName;
 
-  logEvent(G, `Faerie Uprising at ${land.name}! Land attacks ${kingdom}'s colony with ${landSwords} swords`);
+  logEvent(G, `Faerie Uprising at ${landName}! Land attacks ${kingdom}'s colony with ${landSwords} swords`);
 
   const tile = G.mapState.buildings[y][x];
   const defRegiments = tile.garrisonedRegiments;
@@ -62,12 +63,12 @@ const resolveFaerieUprising = (
     tile.fort = [];
     tile.garrisonedRegiments = 0;
     tile.garrisonedLevies = 0;
-    logEvent(G, `${kingdom} loses the colony at ${land.name}!`);
+    logEvent(G, `${kingdom} loses the colony at ${landName}!`);
   }
 
   G.battleResult = {
     battleType: "Faerie Uprising",
-    attackerName: land.name,
+    attackerName: landName,
     defenderName: kingdom,
     attackerSwords: landSwords,
     attackerShields: landShields,
@@ -77,7 +78,7 @@ const resolveFaerieUprising = (
     defenderFoW: fowDefender,
     attackerLosses: "—",
     defenderLosses: hitsOnDefender > 0 ? `${hitsOnDefender} hits absorbed` : "none",
-    winner: defenderWins ? kingdom : land.name,
+    winner: defenderWins ? kingdom : landName,
     outcome: defenderWins ? `${kingdom} defends the colony! (+1 VP)` : `${kingdom} loses the colony!`,
   };
 };
@@ -95,9 +96,10 @@ const resolveHeadstrongCommander = (
 
   const [x, y] = targetTile;
   const land = G.mapState.currentTileArray[y][x];
+  const landName = humanizeTileName(land.name);
   const kingdom = G.playerInfo[targetPlayerID].kingdomName;
 
-  logEvent(G, `Headstrong Commander! ${kingdom}'s outpost at ${land.name} attempts conquest`);
+  logEvent(G, `Headstrong Commander! ${kingdom}'s outpost at ${landName} attempts conquest`);
 
   const tile = G.mapState.buildings[y][x];
   const atkRegiments = tile.garrisonedRegiments;
@@ -126,20 +128,20 @@ const resolveHeadstrongCommander = (
   if (conquestSuccess && attackerSurvives) {
     tile.buildings = "colony";
     addVPAmount(G, targetPlayerID, 1);
-    logEvent(G, `Conquest succeeds! ${kingdom} gains a colony at ${land.name} (+1 VP)`);
+    logEvent(G, `Conquest succeeds! ${kingdom} gains a colony at ${landName} (+1 VP)`);
   } else {
     tile.buildings = undefined;
     tile.player = undefined;
     tile.fort = [];
     tile.garrisonedRegiments = 0;
     tile.garrisonedLevies = 0;
-    logEvent(G, `Conquest fails! ${kingdom} loses the outpost at ${land.name}`);
+    logEvent(G, `Conquest fails! ${kingdom} loses the outpost at ${landName}`);
   }
 
   G.battleResult = {
     battleType: "Headstrong Commander",
     attackerName: kingdom,
-    defenderName: land.name,
+    defenderName: landName,
     attackerSwords: atkSwords,
     attackerShields: 0,
     defenderSwords: landSwords,
@@ -148,9 +150,9 @@ const resolveHeadstrongCommander = (
     defenderFoW: fowLand,
     attackerLosses: hitsOnAttacker > 0 ? `${hitsOnAttacker} hits absorbed` : "none",
     defenderLosses: "—",
-    winner: conquestSuccess && attackerSurvives ? kingdom : land.name,
+    winner: conquestSuccess && attackerSurvives ? kingdom : landName,
     outcome: conquestSuccess && attackerSurvives
-      ? `${kingdom} conquers ${land.name}! (+1 VP)`
+      ? `${kingdom} conquers ${landName}! (+1 VP)`
       : `Conquest fails — outpost lost`,
   };
 };
@@ -173,10 +175,11 @@ const resolveInfidelsInvadeFaerie = (
 
   const [x, y] = targetTile;
   const land = G.mapState.currentTileArray[y][x];
+  const landName = humanizeTileName(land.name);
   const kingdom = G.playerInfo[targetPlayerID].kingdomName;
 
   const host = G.infidelHostPool.pop()!;
-  logEvent(G, `Infidels attack ${kingdom}'s ${G.mapState.buildings[y][x].buildings} at ${land.name}! Host: ${host.swords} swords`);
+  logEvent(G, `Infidels attack ${kingdom}'s ${G.mapState.buildings[y][x].buildings} at ${landName}! Host: ${host.swords} swords`);
 
   const tile = G.mapState.buildings[y][x];
   const defRegiments = tile.garrisonedRegiments;
@@ -201,7 +204,7 @@ const resolveInfidelsInvadeFaerie = (
     logEvent(G, `${kingdom} repels the Infidels! +1 VP`);
   } else {
     tile.rebelCounter = host.swords;
-    logEvent(G, `Infidels seize ${kingdom}'s ${tile.buildings} at ${land.name}! Trade gains lost`);
+    logEvent(G, `Infidels seize ${kingdom}'s ${tile.buildings} at ${landName}! Trade gains lost`);
   }
 
   G.battleResult = {
@@ -217,7 +220,7 @@ const resolveInfidelsInvadeFaerie = (
     attackerLosses: "—",
     defenderLosses: hitsOnDefender > 0 ? `${hitsOnDefender} hits absorbed` : "none",
     winner: defenderWins ? kingdom : "Infidel Host",
-    outcome: defenderWins ? `${kingdom} repels the Infidels! (+1 VP)` : `Infidels seize ${land.name}!`,
+    outcome: defenderWins ? `${kingdom} repels the Infidels! (+1 VP)` : `Infidels seize ${landName}!`,
   };
 };
 
