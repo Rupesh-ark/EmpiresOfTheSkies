@@ -43,16 +43,10 @@ export const useValidatedMoves = (props: BoardProps) => {
               return;
             }
 
-            if (moveName !== "pass" && ctx.phase !== "actions") {
-              showToast("You can't do that in this phase", "warning");
-              return;
-            }
-
             const def = MOVE_DEFINITIONS[moveName];
             if (def?.validate) {
               const error = def.validate(G, playerID, ...args);
               if (error) {
-                // TURN_COMPLETE suppressed client-side; server still validates
                 if (error.code === "TURN_COMPLETE") {
                   originalMove(...args);
                   return;

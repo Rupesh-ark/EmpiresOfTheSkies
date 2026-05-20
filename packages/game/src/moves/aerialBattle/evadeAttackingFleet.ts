@@ -4,6 +4,7 @@ import { forceRetrieveFleets } from "../../helpers/resolveBattle";
 import { setStage } from "../../helpers/stageUtils";
 import { nextAfterAerialDecision } from "../../helpers/resolutionSequencer";
 import { clonePlayerInfo } from "../../helpers/cloneUtils";
+import log from "../../helpers/logger";
 
 const evadeAttackingFleet: MoveDefinition = {
   validate: (G, playerID) => {
@@ -38,7 +39,8 @@ const evadeAttackingFleet: MoveDefinition = {
           });
         }
         G.validRelocationTiles = emptyTiles;
-      } catch {
+      } catch (err) {
+        log.warn({ err, battle: G.mapState.currentBattle }, "Failed to find possible destinations for evading fleet");
         G.validRelocationTiles = [];
       }
 

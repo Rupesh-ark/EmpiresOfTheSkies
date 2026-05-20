@@ -38,7 +38,7 @@ A small `write-cjs-package.cjs` script writes `{ "type": "commonjs" }` into `dis
 ### 1. Server boots (`server/src/server.ts`)
 
 ```typescript
-const db = new PostgresStore(process.env.DATABASE_URL || "postgresql://eots:eots@localhost:5432/eots");
+const db = new PostgresStore(process.env.DATABASE_URL);
 
 const server = Server({
   games: [MyGame],

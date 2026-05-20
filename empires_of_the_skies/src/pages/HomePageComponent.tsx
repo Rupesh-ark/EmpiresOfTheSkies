@@ -27,37 +27,41 @@ const createMatch = async (
   setMatchReady: React.Dispatch<React.SetStateAction<string | undefined>>,
   botNames: string[] = [],
 ) => {
-  const totalPlayers = numHumans + numBots;
-  const response = await lobbyClient.createMatch("empires-of-the-skies", {
-    numPlayers: totalPlayers,
-  });
+  try {
+    const totalPlayers = numHumans + numBots;
+    const response = await lobbyClient.createMatch("empires-of-the-skies", {
+      numPlayers: totalPlayers,
+    });
 
-  if (!response.matchID) {
-    alert("Failed to create match, please try again.");
-    return;
-  }
-
-  // Auto-join bots into the last N slots
-  if (numBots > 0) {
-    const botCredentials: Record<string, string> = {};
-    const botPlayerIDs: string[] = [];
-    for (let i = 0; i < numBots; i++) {
-      const botName = botNames[i] ?? `Bot ${i + 1}`;
-      const botResponse = await lobbyClient.joinMatch(
-        "empires-of-the-skies",
-        response.matchID,
-        { playerName: botName, playerID: String(i) }
-      );
-      botCredentials[String(i)] = botResponse.playerCredentials;
-      botPlayerIDs.push(String(i));
+    if (!response.matchID) {
+      alert("Failed to create match, please try again.");
+      return;
     }
-    localStorage.setItem(`eots_bots_${response.matchID}`, JSON.stringify({
-      botPlayerIDs,
-      botCredentials,
-    }));
-  }
 
-  setMatchReady(response.matchID);
+    // Auto-join bots into the last N slots
+    if (numBots > 0) {
+      const botCredentials: Record<string, string> = {};
+      const botPlayerIDs: string[] = [];
+      for (let i = 0; i < numBots; i++) {
+        const botName = botNames[i] ?? `Bot ${i + 1}`;
+        const botResponse = await lobbyClient.joinMatch(
+          "empires-of-the-skies",
+          response.matchID,
+          { playerName: botName, playerID: String(i) }
+        );
+        botCredentials[String(i)] = botResponse.playerCredentials;
+        botPlayerIDs.push(String(i));
+      }
+      localStorage.setItem(`eots_bots_${response.matchID}`, JSON.stringify({
+        botPlayerIDs,
+        botCredentials,
+      }));
+    }
+
+    setMatchReady(response.matchID);
+  } catch {
+    alert("Failed to create match, please check your connection and try again.");
+  }
 };
 
 const labelSx = {

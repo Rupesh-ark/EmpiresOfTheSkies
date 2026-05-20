@@ -2,6 +2,9 @@
   "name": "empires-server",
   "private": true,
   "type": "commonjs",
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "dev:log": "mkdir -p logs && tsx watch src/server.ts 2>&1 | tee logs/game.log",
@@ -19,7 +22,7 @@
     "@types/koa": "^3.0.1",
     "@types/koa__cors": "^5.0.1",
     "@types/node": "^22.19.11",
-    "tsx": "^4.19.2",
+    "tsx": "^4.21.0",
     "typescript": "^5.9.3"
   }
 }

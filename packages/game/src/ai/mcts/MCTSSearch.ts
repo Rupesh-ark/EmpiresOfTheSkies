@@ -65,7 +65,8 @@ export function mctsSearch(
     }
 
     const reward = rollout(simState, playerID, personalities, config.rolloutDepth);
-    const normalizedReward = Math.max(0, Math.min(1, reward / 100));
+    const safeReward = Number.isFinite(reward) ? reward : 0;
+    const normalizedReward = Math.max(0, Math.min(1, safeReward / 100));
 
     const priorWeight = Math.max(0, 1 - selectedChild.visits / 10);
     const blendedReward = priorWeight * selectedChild.quality + (1 - priorWeight) * normalizedReward;

@@ -38,9 +38,13 @@ const saveSession = (matchID: string, playerName: string, playerID: string, cred
 };
 
 const loadSession = (matchID: string, playerName: string): { playerID: string; credentials: string } | null => {
-  const raw = localStorage.getItem(storageKey(matchID, playerName));
-  if (!raw) return null;
-  return JSON.parse(raw);
+  try {
+    const raw = localStorage.getItem(storageKey(matchID, playerName));
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
 };
 
 interface PlayerSlot {

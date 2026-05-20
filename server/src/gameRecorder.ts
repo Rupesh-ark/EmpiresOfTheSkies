@@ -4,7 +4,7 @@ import type { MoveObserver, MyGameState } from "@eots/game";
 import type { Ctx } from "boardgame.io";
 
 const eots = require("@eots/game") as typeof import("@eots/game");
-const { GameRecorder, setMoveObserver } = eots;
+const { GameRecorder, setMoveObserver, log } = eots;
 
 const ANALYTICS_DIR = path.resolve(__dirname, "../analytics");
 fs.mkdirSync(ANALYTICS_DIR, { recursive: true });
@@ -58,7 +58,9 @@ const observer: MoveObserver = {
         }),
       });
       const filePath = path.join(ANALYTICS_DIR, `game_${mid}.json`);
-      fs.writeFileSync(filePath, rec.toJSON());
+      fs.promises.writeFile(filePath, rec.toJSON()).catch((err) => {
+        log.error({ err, filePath }, "Failed to write game recorder file");
+      });
       recorders.delete(mid);
     }
   },

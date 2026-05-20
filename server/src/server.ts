@@ -18,7 +18,7 @@ const ALLOWED_ORIGINS = [
 const allowOrigin = (origin?: string): string => {
   if (!origin) return "";
   if (ALLOWED_ORIGINS.includes(origin)) return origin;
-  if (process.env.VERCEL_URL && origin.endsWith(process.env.VERCEL_URL)) return origin;
+  if (process.env.VERCEL_URL && new URL(origin).hostname === process.env.VERCEL_URL) return origin;
   return "";
 };
 
@@ -34,6 +34,17 @@ const server = Server({
 
 initGameRecorder();
 
+// Error handler — must be first to catch errors from all subsequent middleware
+server.app.use(async (ctx: any, next: any) => {
+  try {
+    await next();
+  } catch (err: any) {
+    log.error({ err: err?.message || err, status: err?.status || 500, path: ctx.path }, "Unhandled request error");
+    ctx.status = err.status || 500;
+    ctx.body = "Internal Server Error";
+  }
+});
+
 server.app.use(
   cors({
     origin: (ctx: any) => allowOrigin(ctx.request.header.origin) || "",
@@ -46,6 +57,8 @@ server.app.use(async (ctx: any, next: any) => {
   ctx.set("X-Content-Type-Options", "nosniff");
   ctx.set("X-Frame-Options", "DENY");
   ctx.set("Referrer-Policy", "strict-origin-when-cross-origin");
+  ctx.set("Strict-Transport-Security", "max-age=63072000; includeSubDomains; preload");
+  ctx.set("X-XSS-Protection", "1; mode=block");
   await next();
 });
 
@@ -55,18 +68,41 @@ server.app.use(async (ctx: any, next: any) => {
     return;
   }
   if (ctx.path === "/health" && ctx.method === "GET") {
-    ctx.body = { status: "ok", timestamp: new Date().toISOString() };
+    let dbStatus = "unknown";
+    try {
+      await db.client.query("SELECT 1");
+      dbStatus = "connected";
+    } catch {
+      dbStatus = "disconnected";
+    }
+    ctx.body = { status: "ok", db: dbStatus, timestamp: new Date().toISOString() };
     return;
   }
   await next();
 });
 
 const shutdown = () => {
-  log.info("Shutting down...");
-  process.exit(0);
+  log.info("Shutting down gracefully...");
+  const exit = () => {
+    log.info("Shutdown complete");
+    process.exit(0);
+  };
+  try {
+    server.app.removeAllListeners();
+  } catch {
+    // Ignore cleanup errors during shutdown
+  }
+  setTimeout(exit, 2000);
 };
 
 process.on("SIGTERM", shutdown);
 process.on("SIGINT", shutdown);
+process.on("unhandledRejection", (reason) => {
+  log.error({ err: reason }, "Unhandled promise rejection");
+});
+process.on("uncaughtException", (err) => {
+  log.error({ err }, "Uncaught exception — shutting down");
+  process.exit(1);
+});
 
 server.run(PORT, () => log.info(`Server running on port ${PORT}`));

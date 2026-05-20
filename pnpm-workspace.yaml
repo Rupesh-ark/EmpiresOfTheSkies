@@ -3,5 +3,10 @@ packages:
   - "server"
   - "packages/*"
 
+allowBuilds:
+  esbuild: true
+
+# is-generator-function pinned to 1.0.10 because 1.1.x broke koa compatibility
+# (boardgame.io depends on koa-socket-2 → koa → is-generator-function)
 overrides:
   is-generator-function: 1.0.10

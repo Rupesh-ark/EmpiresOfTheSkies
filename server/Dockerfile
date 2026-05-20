@@ -28,10 +28,13 @@ RUN corepack enable && corepack prepare pnpm@latest --activate && \
     pnpm install --frozen-lockfile --prod && \
     pnpm store prune
 
+RUN addgroup -S eots && adduser -S eots -G eots
+
 COPY --from=builder /app/packages/game/dist ./packages/game/dist
 COPY --from=builder /app/server/dist ./server/dist
 
 ENV NODE_ENV=production
 EXPOSE 8000
 
+USER eots
 CMD ["node", "server/dist/server.js"]

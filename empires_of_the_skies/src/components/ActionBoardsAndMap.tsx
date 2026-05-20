@@ -288,6 +288,25 @@ const ActionBoardsAndMapInner = (props: MyGameProps) => {
       <ActionHoverProvider>
         <PiracyIntentProvider round={props.G.round}>
         <Box sx={{ display: "flex", flexDirection: "column", height: "100vh" }}>
+          {!props.isConnected && (
+            <Box
+              sx={{
+                position: "fixed",
+                top: 0,
+                left: 0,
+                right: 0,
+                zIndex: 9999,
+                py: 0.5,
+                textAlign: "center",
+                bgcolor: "#b71c1c",
+                color: "#fff",
+                fontFamily: "monospace",
+                fontSize: "0.8rem",
+              }}
+            >
+              Connection lost — reconnecting...
+            </Box>
+          )}
           <GameLayout
             stage={props.G.stage}
             isMyTurn={props.ctx.currentPlayer === props.playerID}

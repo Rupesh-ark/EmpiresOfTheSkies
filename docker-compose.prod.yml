@@ -10,6 +10,7 @@ services:
       - "8000:8000"
     volumes:
       - eots_bot_logs:/app/bot-logs
+      - eots_analytics:/app/server/analytics
     networks:
       - rupesh-data-workers_default
     healthcheck:
@@ -26,13 +27,14 @@ services:
     environment:
       PGHOST: postgres
       PGUSER: eots
-      PGPASSWORD: ${DB_PASSWORD:-eots}
+      PGPASSWORD: ${DB_PASSWORD:?DB_PASSWORD must be set for production}
       PGDATABASE: eots
     volumes:
       - eots_pg_backups:/backups
     entrypoint: >
       sh -c "while true; do
-        pg_dump -h postgres -U eots eots | gzip > /backups/eots_$$(date +%Y%m%d_%H%M%S).sql.gz 2>/dev/null;
+        echo 'Starting backup...'; 
+        pg_dump -h postgres -U eots eots | gzip > /backups/eots_$$(date +%Y%m%d_%H%M%S).sql.gz || echo 'Backup failed!';
         find /backups -name 'eots_*.sql.gz' -mtime +7 -delete;
         sleep 86400;
       done"
@@ -44,6 +46,7 @@ services:
 volumes:
   eots_bot_logs:
   eots_pg_backups:
+  eots_analytics:
 
 networks:
   rupesh-data-workers_default:

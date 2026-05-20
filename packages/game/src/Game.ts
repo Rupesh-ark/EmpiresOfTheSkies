@@ -103,8 +103,20 @@ const phaseLog = log.child({ mod: "phase" });
 const budgetLog = log.child({ mod: "turn-budget" });
 
 const TURN_ENDING_LIMIT = 550;
-let turnEndingCounter = 0;
-let turnEndingRound = 0;
+const turnEndingCounters = new Map<string, number>();
+const turnEndingRounds = new Map<string, number>();
+
+function budgetFor(G: MyGameState) {
+  const mid = G._matchID ?? "unknown";
+  return { counter: turnEndingCounters.get(mid) ?? 0, round: turnEndingRounds.get(mid) ?? 0, mid };
+}
+
+function incrBudget(G: MyGameState) {
+  const mid = G._matchID ?? "unknown";
+  const next = (turnEndingCounters.get(mid) ?? 0) + 1;
+  turnEndingCounters.set(mid, next);
+  return next;
+}
 
 const turnBudgetPlugin = {
   name: "turn-budget",
@@ -119,31 +131,32 @@ const turnBudgetPlugin = {
 
         if (origEndTurn) {
           events.endTurn = (endTurnArgs?: any) => {
-            turnEndingCounter++;
+            const counter = incrBudget(G);
             const phase = context.ctx?.phase ?? "?";
             const stage = G?.stage ? `${G.stage.phase}/${G.stage.sub}` : "?";
+            const { round } = budgetFor(G);
 
-            if (turnEndingCounter >= TURN_ENDING_LIMIT) {
+            if (counter >= TURN_ENDING_LIMIT) {
               budgetLog.error({
-                count: turnEndingCounter,
+                count: counter,
                 type: "endTurn",
                 method: methodType,
                 phase,
                 stage,
-                round: turnEndingRound,
+                round,
                 turn: context.ctx?.turn,
                 next: endTurnArgs?.next,
               }, "BUDGET EXCEEDED — halting game");
               return;
             }
 
-            if (turnEndingCounter % 50 === 0) {
+            if (counter % 50 === 0) {
               budgetLog.warn({
-                count: turnEndingCounter,
+                count: counter,
                 method: methodType,
                 phase,
                 stage,
-                round: turnEndingRound,
+                round,
                 turn: context.ctx?.turn,
                 next: endTurnArgs?.next,
               }, "endTurn milestone");
@@ -155,30 +168,31 @@ const turnBudgetPlugin = {
 
         if (origEndPhase) {
           events.endPhase = (...phaseArgs: any[]) => {
-            turnEndingCounter++;
+            const counter = incrBudget(G);
             const phase = context.ctx?.phase ?? "?";
             const stage = G?.stage ? `${G.stage.phase}/${G.stage.sub}` : "?";
+            const { round } = budgetFor(G);
 
-            if (turnEndingCounter >= TURN_ENDING_LIMIT) {
+            if (counter >= TURN_ENDING_LIMIT) {
               budgetLog.error({
-                count: turnEndingCounter,
+                count: counter,
                 type: "endPhase",
                 method: methodType,
                 phase,
                 stage,
-                round: turnEndingRound,
+                round,
                 turn: context.ctx?.turn,
               }, "BUDGET EXCEEDED — halting game");
               return;
             }
 
-            if (turnEndingCounter % 50 === 0) {
+            if (counter % 50 === 0) {
               budgetLog.warn({
-                count: turnEndingCounter,
+                count: counter,
                 method: methodType,
                 phase,
                 stage,
-                round: turnEndingRound,
+                round,
                 turn: context.ctx?.turn,
               }, "endPhase milestone");
             }
@@ -199,20 +213,22 @@ const turnBudgetPlugin = {
 };
 
 /** Call from discovery.onBegin to reset the per-round budget counter. */
-export function resetTurnEndingBudget(round: number): void {
-  if (turnEndingCounter > 0) {
+export function resetTurnEndingBudget(G: MyGameState, round: number): void {
+  const mid = G._matchID ?? "unknown";
+  const counter = turnEndingCounters.get(mid) ?? 0;
+  if (counter > 0) {
     budgetLog.info({
-      count: turnEndingCounter,
-      round: turnEndingRound,
+      count: counter,
+      round: turnEndingRounds.get(mid) ?? 0,
     }, "round budget summary");
   }
-  turnEndingCounter = 0;
-  turnEndingRound = round;
+  turnEndingCounters.set(mid, 0);
+  turnEndingRounds.set(mid, round);
 }
 
 /** Read-only access for tests / diagnostics. */
-export function getTurnEndingCount(): number {
-  return turnEndingCounter;
+export function getTurnEndingCount(G: MyGameState): number {
+  return turnEndingCounters.get(G._matchID ?? "unknown") ?? 0;
 }
 
 const MyGame: Game<MyGameState> = {
@@ -445,7 +461,7 @@ const MyGame: Game<MyGameState> = {
         context.G._loopGuard = 0;
         context.G._halted = false;
         resetBattleCheckCount();
-        resetTurnEndingBudget(context.G.round + 1);
+        resetTurnEndingBudget(context.G, context.G.round + 1);
         if (checkLoopGuard(context, "discovery")) return;
         phaseLog.info({ round: context.G.round + 1 }, "discovery");
         context.G.round += 1;

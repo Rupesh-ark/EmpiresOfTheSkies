@@ -16,10 +16,13 @@ const storageKey = (matchID: string, playerName: string) =>
   `eots_${matchID}_${playerName}`;
 
 const loadSession = (matchID: string, playerName: string): { playerID: string; credentials: string } | null => {
-  const raw = localStorage.getItem(storageKey(matchID, playerName));
-  if (!raw) return null;
-  const parsed = JSON.parse(raw);
-  return parsed;
+  try {
+    const raw = localStorage.getItem(storageKey(matchID, playerName));
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
 };
 
 const ClientComponent = ({ server }: { server: string }) => {
@@ -34,7 +37,13 @@ const ClientComponent = ({ server }: { server: string }) => {
   useEffect(() => {
     if (!botInfoRaw || botCleanupRef.current) return;
 
-    const { botPlayerIDs, botCredentials } = JSON.parse(botInfoRaw);
+    let botData: { botPlayerIDs: string[]; botCredentials: Record<string, string> } | null = null;
+    try {
+      botData = JSON.parse(botInfoRaw);
+    } catch {
+      return;
+    }
+    const { botPlayerIDs, botCredentials } = botData;
     const { stop } = setupBotClients(
       server,
       matchID!,

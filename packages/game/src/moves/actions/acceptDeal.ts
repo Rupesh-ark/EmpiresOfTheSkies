@@ -1,6 +1,7 @@
 import { MyGameState, DealOffer, MoveError, MoveDefinition } from "../../types";
 import { logEvent } from "../../helpers/stateUtils";
 import { validateOffer } from "./proposeDeal";
+import { INVALID_MOVE } from "boardgame.io/core";
 
 const executeSide = (
   G: MyGameState,
@@ -48,7 +49,7 @@ const acceptDeal: MoveDefinition = {
     const requestError = !offerError && validateOffer(G, targetID, proposerID, requesting);
     if (offerError || requestError) {
       G.pendingDeal = undefined;
-      return;
+      return INVALID_MOVE;
     }
 
     const proposerName = G.playerInfo[proposerID].kingdomName;

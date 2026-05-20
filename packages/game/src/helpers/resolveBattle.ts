@@ -543,7 +543,8 @@ export const resolveBattleAndReturnWinner = (
             });
           }
           G.validRelocationTiles = emptyTiles;
-        } catch {
+        } catch (err) {
+          log.warn({ err, battle: G.mapState.currentBattle }, "Failed to find possible destinations in battle resolution");
           G.validRelocationTiles = [];
         }
         if (G.validRelocationTiles.length === 0) {

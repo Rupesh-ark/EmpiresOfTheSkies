@@ -108,7 +108,7 @@ type PlayerContribution = {
 export const resolveGrandArmyBattle = (G: MyGameState, shuffle: <T>(arr: T[]) => T[]): number => {
   const turnOrder = G.turnOrder;
   const invasion = G.currentInvasion;
-  if (!invasion) return;
+  if (!invasion) return 0;
 
   // Find Captain-General from PlayerInfo
   const captainGeneral = turnOrder.find(

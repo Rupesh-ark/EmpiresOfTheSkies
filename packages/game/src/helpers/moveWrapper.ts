@@ -28,15 +28,14 @@ export const wrapMove = (name: string, def: MoveDefinition): any => {
   return (context: any, ...args: any[]) => {
     const { G, playerID, ctx } = context;
 
-    const logKey = `${ctx.turn}:${name}:${playerID}:${JSON.stringify(args)}`;
+    const logKey = `${ctx.turn}:${name}:${playerID}`;
     const lastLogKey = lastLogKeys.get(G) ?? "";
     if (logKey !== lastLogKey) {
       lastLogKeys.set(G, logKey);
-      moveLog.info({
+      moveLog.debug({
         playerID,
         phase: ctx.phase,
         turn: ctx.turn,
-        ...(args.length > 0 && { args }),
       }, name);
     }
 
@@ -59,7 +58,6 @@ export const wrapMove = (name: string, def: MoveDefinition): any => {
       moveLog.warn({
         playerID,
         phase: ctx.phase,
-        ...(args.length > 0 && { args }),
       }, `${name} REJECTED`);
     } else {
       if (def.successLog) {
