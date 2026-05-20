@@ -10,6 +10,7 @@ server/storage/
 **/dist-ssr/
 **/build/
 **/build-server/
+**/bundle-report.html
 
 
 # --- local overrides ---
@@ -49,6 +50,7 @@ server/storage/
 .*
 !.gitignore
 !.env.example
+!.dockerignore
 
 /research
 /feedback
