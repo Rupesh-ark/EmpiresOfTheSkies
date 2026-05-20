@@ -797,17 +797,25 @@ const MyGame: Game<MyGameState> = {
         // Return counsellors from player board slots and reset flags
         Object.values(context.G.playerInfo).forEach((player) => {
           const pb = player.playerBoardCounsellorLocations;
-          // Return 1 counsellor for each used slot (dispatchDisabled is not a counsellor slot)
+          // Return 1 counsellor for each used slot
           if (pb.buildSkyships) player.resources.counsellors += 1;
           if (pb.conscriptLevies) player.resources.counsellors += 1;
-          if (pb.dispatchSkyshipFleet) player.resources.counsellors += 1;
           if (pb.trainTroops) player.resources.counsellors += 1;
+          // Return counsellors for each fleet that was dispatched this round
+          const dispatchedCount = player.fleetInfo.filter(
+            (f) => f.dispatchedThisRound
+          ).length;
+          player.resources.counsellors += dispatchedCount;
           // Reset all flags
           pb.buildSkyships = false;
           pb.conscriptLevies = false;
           pb.dispatchSkyshipFleet = false;
           pb.trainTroops = false;
           pb.dispatchDisabled = false;
+          // Reset per-fleet dispatched state
+          player.fleetInfo.forEach((f) => {
+            f.dispatchedThisRound = false;
+          });
           player.agitatorsSentThisRound = [];
         });
 

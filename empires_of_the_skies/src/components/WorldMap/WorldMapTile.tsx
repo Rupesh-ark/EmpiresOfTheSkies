@@ -126,16 +126,14 @@ export const WorldMapTile = memo((props: worldMapTileProps) => {
         isMyTurn &&
         isMyFleet &&
         fleet.skyships > 0 &&
-        !myPlayerInfo?.playerBoardCounsellorLocations.dispatchSkyshipFleet &&
-        !myPlayerInfo?.playerBoardCounsellorLocations.dispatchDisabled;
+        !fleet.dispatchedThisRound;
 
       let element: JSX.Element;
       if (isMyFleet && !canDrag) {
         const getReason = (): string => {
           if (!isActionsPhase) return "Can only deploy during the Actions phase";
           if (!isMyTurn) return "It's not your turn";
-          if (myPlayerInfo?.playerBoardCounsellorLocations.dispatchSkyshipFleet) return "Already dispatched this round";
-          if (myPlayerInfo?.playerBoardCounsellorLocations.dispatchDisabled) return "Dispatch unavailable";
+          if (fleet.dispatchedThisRound) return "This fleet has already been dispatched this round";
           if (fleet.skyships === 0) return "Fleet has no skyships";
           return "Cannot deploy right now";
         };

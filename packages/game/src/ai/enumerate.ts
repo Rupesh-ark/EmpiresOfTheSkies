@@ -308,12 +308,10 @@ export function enumerateLegalMoves(G: MyGameState, ctx: Ctx, playerID: string):
 
       // moveFleet — move deployed fleets to new tiles
       const player = G.playerInfo[playerID];
-      if (
-        player.resources.counsellors >= 1 &&
-        !player.playerBoardCounsellorLocations.dispatchSkyshipFleet
-      ) {
+      if (player.resources.counsellors >= 1) {
         for (let fi = 0; fi < player.fleetInfo.length; fi++) {
           const fleet = player.fleetInfo[fi];
+          if (fleet.dispatchedThisRound) continue;
           const isAtHome =
             fleet.location[0] === KINGDOM_LOCATION[0] &&
             fleet.location[1] === KINGDOM_LOCATION[1];
@@ -333,11 +331,11 @@ export function enumerateLegalMoves(G: MyGameState, ctx: Ctx, playerID: string):
       // deployFleet — deploy from home with sensible loadouts
       if (
         player.resources.counsellors >= 1 &&
-        player.resources.skyships >= 1 &&
-        !player.playerBoardCounsellorLocations.dispatchSkyshipFleet
+        player.resources.skyships >= 1
       ) {
         for (let fi = 0; fi < player.fleetInfo.length; fi++) {
           const fleet = player.fleetInfo[fi];
+          if (fleet.dispatchedThisRound) continue;
           const isAtHome =
             fleet.location[0] === KINGDOM_LOCATION[0] &&
             fleet.location[1] === KINGDOM_LOCATION[1];

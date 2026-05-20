@@ -246,6 +246,7 @@ export type FleetInfo = {
   levies: number;
   eliteRegiments: number;
   travelHistory: [number, number][];
+  dispatchedThisRound?: boolean;
 };
 
 export type PlayerBoardInfo = {

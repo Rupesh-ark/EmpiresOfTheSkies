@@ -16,6 +16,7 @@ import { describe, it, expect, vi } from "vitest";
 import recruitRegiments from "../../moves/actions/recruitRegiments";
 import foundFactory from "../../moves/actions/foundFactory";
 import trainTroops from "../../moves/actions/trainTroops";
+import deployFleet from "../../moves/actions/deployFleet";
 import pass from "../../moves/pass";
 import {
   buildInitialG,
@@ -23,6 +24,7 @@ import {
   buildCtx,
   buildResources,
   buildFleet,
+  buildEvents,
 } from "../testHelpers";
 import { INVALID_MOVE } from "boardgame.io/core";
 import type { EventsAPI } from "boardgame.io/dist/types/src/plugins/events/events";
@@ -244,5 +246,76 @@ describe("actionPhase — counsellors deplete correctly across multiple actions"
     G.playerInfo["0"].turnComplete = false;
     const result = foundFactory.fn({ G, ctx, playerID: "0" }, 0);
     expect(result).toBe(INVALID_MOVE);
+  });
+});
+
+// Test 6: deployFleet — multiple fleets can be dispatched in same round
+
+describe("actionPhase — multiple fleet dispatches per round", () => {
+  it("allows dispatching fleet 0, then fleet 1 on a later turn", () => {
+    const G = buildInitialG([
+      buildPlayer("0", {
+        resources: buildResources({ counsellors: 4, gold: 10, skyships: 6, regiments: 4 }),
+        fleetInfo: [
+          buildFleet(0, { location: [4, 0], skyships: 0, regiments: 0, levies: 0 }),
+          buildFleet(1, { location: [4, 0], skyships: 0, regiments: 0, levies: 0 }),
+          buildFleet(2, { location: [4, 0], skyships: 0, regiments: 0, levies: 0 }),
+        ],
+      }),
+      buildPlayer("1"),
+    ]);
+    // Mark destination tiles as discovered so fleets can move there
+    G.mapState.discoveredTiles[0][5] = true;
+    G.mapState.discoveredTiles[0][3] = true;
+    const ctx = buildCtx("0");
+    const events = buildEvents();
+
+    // Dispatch fleet 0 to [5,0] — adjacent east of Kingdom [4,0]
+    deployFleet.fn({ G, ctx, playerID: "0", events }, 0, [5, 0], 2, 1, 0);
+    expect(G.playerInfo["0"].fleetInfo[0].location).toEqual([5, 0]);
+    expect(G.playerInfo["0"].fleetInfo[0].dispatchedThisRound).toBe(true);
+    expect(G.playerInfo["0"].resources.counsellors).toBe(3);
+
+    // Reset turnComplete so player can act again (simulating next IPO turn)
+    G.playerInfo["0"].turnComplete = false;
+
+    // Dispatch fleet 1 to [3,0] — adjacent west of Kingdom [4,0]
+    deployFleet.fn({ G, ctx, playerID: "0", events }, 1, [3, 0], 2, 1, 0);
+    expect(G.playerInfo["0"].fleetInfo[1].location).toEqual([3, 0]);
+    expect(G.playerInfo["0"].fleetInfo[1].dispatchedThisRound).toBe(true);
+    expect(G.playerInfo["0"].resources.counsellors).toBe(2);
+
+    // Fleet 0 stays dispatched, fleet 2 remains undispatched
+    expect(G.playerInfo["0"].fleetInfo[0].dispatchedThisRound).toBe(true);
+    expect(G.playerInfo["0"].fleetInfo[2].dispatchedThisRound).toBe(false);
+  });
+
+  it("blocks re-dispatching the same fleet in the same round", () => {
+    const G = buildInitialG([
+      buildPlayer("0", {
+        resources: buildResources({ counsellors: 4, gold: 10, skyships: 6, regiments: 4 }),
+        fleetInfo: [
+          buildFleet(0, { location: [4, 0], skyships: 0, regiments: 0, levies: 0 }),
+          buildFleet(1, { location: [4, 0], skyships: 0, regiments: 0, levies: 0 }),
+        ],
+      }),
+      buildPlayer("1"),
+    ]);
+    G.mapState.discoveredTiles[0][5] = true;
+    G.mapState.discoveredTiles[0][3] = true;
+    const ctx = buildCtx("0");
+    const events = buildEvents();
+
+    // Dispatch fleet 0 first
+    deployFleet.fn({ G, ctx, playerID: "0", events }, 0, [5, 0], 2, 1, 0);
+    expect(G.playerInfo["0"].fleetInfo[0].dispatchedThisRound).toBe(true);
+
+    // Reset turnComplete so player can act again
+    G.playerInfo["0"].turnComplete = false;
+
+    // Attempt to dispatch fleet 0 again — should fail validation (already dispatched)
+    const result = deployFleet.validate?.(G, "0", 0, [3, 0], 2, 1, 0, 0);
+    expect(result).not.toBeNull();
+    expect(result?.code).toBe("ALREADY_DISPATCHED");
   });
 });

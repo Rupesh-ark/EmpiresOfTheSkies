@@ -28,6 +28,10 @@ const validateDeployFleet = (
     return { code: "INVALID_FLEET", message: "No fleet found at that index" };
   }
 
+  if (fleet.dispatchedThisRound) {
+    return { code: "ALREADY_DISPATCHED", message: "This fleet has already been dispatched this round" };
+  }
+
   const atHome =
     fleet.location[0] === KINGDOM_LOCATION[0] &&
     fleet.location[1] === KINGDOM_LOCATION[1];
@@ -172,12 +176,9 @@ const deployFleet: MoveDefinition = {
     }
 
     removeGoldAmount(G, playerID, cost);
-    G.playerInfo[playerID].playerBoardCounsellorLocations.dispatchSkyshipFleet =
-      true;
+    fleet.dispatchedThisRound = true;
 
     removeOneCounsellor(G, playerID);
-    G.playerInfo[playerID].playerBoardCounsellorLocations.dispatchDisabled =
-      true;
 
     G.playerInfo[playerID].turnComplete = true;
     events.endTurn();
