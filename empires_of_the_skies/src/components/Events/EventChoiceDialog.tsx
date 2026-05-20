@@ -41,7 +41,7 @@ const ChipChoice = ({
 // Main component
 
 const EventChoiceDialog = (props: MyGameProps) => {
-  const [selected, setSelected] = useState<any>(undefined);
+  const [selected, setSelected] = useState<string | number | undefined>(undefined);
 
   const choice = props.G.eventState.pendingChoice;
   if (!choice) return null;

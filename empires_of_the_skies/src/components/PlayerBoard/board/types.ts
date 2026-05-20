@@ -1,10 +1,10 @@
-import { FleetInfo, PlayerFortuneOfWarCardInfo, EventCardName } from "@eots/game";
+import { FleetInfo, PlayerFortuneOfWarCardInfo, EventCardName, MyGameState } from "@eots/game";
 
 export type CardTab = "fow" | "legacy" | "ka" | "events";
 
 export interface BoardSectionProps {
   fleets: FleetInfo[];
-  tileMap: any[][];
+  tileMap: MyGameState["mapState"]["currentTileArray"];
   onViewLocation?: (location: number[]) => void;
 }
 

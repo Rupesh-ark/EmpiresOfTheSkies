@@ -190,7 +190,7 @@ export function runGameInBrowser(
   recorder.setConfig({ ...AI_CONFIG as unknown as Record<string, unknown>, ...configOverrides });
 
   // Wire AILogger to capture decisions into the recorder
-  const logger = new AILogger("silent", (entry) => {
+  const logger = new AILogger((entry) => {
     if (entry.type !== "decision") return;
 
     const decisionEntry = entry as DecisionLogEntry;

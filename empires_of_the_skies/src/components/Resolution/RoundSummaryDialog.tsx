@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { List, ListItem, ListItemText, ListItemIcon, Divider } from "@mui/material";
 import { Gavel, AttachMoney, Shield, HowToVote, Warning } from "@mui/icons-material";
 import { GiTrumpetFlag, GiTwoCoins } from "react-icons/gi";
@@ -9,13 +9,12 @@ import React from "react";
 const RoundSummaryDialog = (props: MyGameProps) => {
   const [open, setOpen] = useState(false);
   const [lastRound, setLastRound] = useState(0);
+  const currentRound = props.G.round;
 
-  useEffect(() => {
-    if (props.G.round > 1 && props.G.round !== lastRound) {
-      setLastRound(props.G.round);
-      setOpen(true);
-    }
-  }, [props.G.round]);
+  if (currentRound > 1 && currentRound !== lastRound) {
+    setLastRound(currentRound);
+    setOpen(true);
+  }
 
   const resolvedEvent = props.G.eventState.resolvedEvent;
   const previousRound = props.G.round - 1;

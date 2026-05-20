@@ -7,17 +7,18 @@ import { FoWCardSelector } from "@/components/atoms/FoWCardSelector";
 
 const RebellionDialog = (props: MyGameProps) => {
   const rebellion = props.G.currentRebellion;
+  const [regiments, setRegiments] = useState(0);
+  const [levies, setLevies] = useState(0);
+  const [selectedFoW, setSelectedFoW] = useState<number | undefined>(undefined);
+
   if (!rebellion) return null;
   if (rebellion.event.targetPlayerID !== props.playerID) return null;
 
   const player = props.G.playerInfo[rebellion.event.targetPlayerID];
+  if (!player) return null;
   const maxRegiments = player.resources.regiments;
   const maxLevies = player.resources.levies;
   const def = EVENT_CARD_DEFS[rebellion.event.card];
-
-  const [regiments, setRegiments] = useState(maxRegiments);
-  const [levies, setLevies] = useState(maxLevies);
-  const [selectedFoW, setSelectedFoW] = useState<number | undefined>(undefined);
 
   const totalSwords = regiments * 2 + levies;
   const fowHand = player.resources.fortuneCards;

@@ -136,7 +136,7 @@ function runConfiguredGame(slots: BotSlotConfig[]): {
 // Mode 1: A/B Test
 
 export function runTournament(matchup: TournamentMatchup): TournamentResult {
-  setAILogger(new AILogger("silent"));
+  setAILogger(new AILogger());
 
   const numSets = matchup.weightSets.length;
   const stats: Record<string, {
@@ -227,7 +227,7 @@ export function runTournament(matchup: TournamentMatchup): TournamentResult {
     }
   }
 
-  setAILogger(new AILogger("summary"));
+  setAILogger(new AILogger());
 
   return { matchupName: matchup.name, weightSetResults, bestWeightSet, confidenceLevel };
 }
@@ -235,7 +235,7 @@ export function runTournament(matchup: TournamentMatchup): TournamentResult {
 // Mode 2: Hill Climb
 
 export function runHillClimb(config: HillClimbConfig): HillClimbResult {
-  setAILogger(new AILogger("silent"));
+  setAILogger(new AILogger());
 
   let current = normalizeWeights({ ...config.baseWeights });
   let stepSize = config.stepSize;
@@ -318,7 +318,7 @@ export function runHillClimb(config: HillClimbConfig): HillClimbResult {
     );
   }
 
-  setAILogger(new AILogger("summary"));
+  setAILogger(new AILogger());
 
   return {
     startingWeights: { ...config.baseWeights },
@@ -359,7 +359,7 @@ function evaluateWeightSet(weights: AIWeights, numGames: number): { winRate: num
 // Mode 3: League
 
 export function runLeague(config: LeagueConfig): LeagueResult {
-  setAILogger(new AILogger("silent"));
+  setAILogger(new AILogger());
 
   const { entries, gamesPerPairing } = config;
 
@@ -428,7 +428,7 @@ export function runLeague(config: LeagueConfig): LeagueResult {
     }
   }
 
-  setAILogger(new AILogger("summary"));
+  setAILogger(new AILogger());
 
   const standings = Object.values(standingsMap)
     .map((s) => ({

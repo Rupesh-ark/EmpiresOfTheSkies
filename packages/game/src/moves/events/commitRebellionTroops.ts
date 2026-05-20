@@ -7,6 +7,9 @@ import {
   setupNextRebellion,
 } from "../../helpers/resolveRebellion";
 import { continueResolution } from "../../helpers/resolutionFlow";
+import log from "../../helpers/logger";
+
+const crLog = log.child({ mod: "commit-rebellion" });
 
 const commitRebellionTroops: MoveDefinition = {
   fn: ({ G, ctx, playerID, events, random }, ...args) => {
@@ -16,11 +19,11 @@ const commitRebellionTroops: MoveDefinition = {
 
     // Defensive: validate args are valid numbers
     if (typeof levies !== 'number' || isNaN(levies)) {
-      console.warn(`[commitRebellionTroops] Invalid levies arg: ${levies}`);
+      crLog.warn({ levies }, "Invalid levies arg");
       return INVALID_MOVE;
     }
     if (typeof regiments !== 'number' || isNaN(regiments)) {
-      console.warn(`[commitRebellionTroops] Invalid regiments arg: ${regiments}`);
+      crLog.warn({ regiments }, "Invalid regiments arg");
       return INVALID_MOVE;
     }
 

@@ -5,17 +5,18 @@ import { DialogShell } from "@/components/atoms/DialogShell";
 
 const InvasionBuyoffDialog = (props: MyGameProps) => {
   const invasion = props.G.currentInvasion;
-  if (!invasion || invasion.phase !== "buyoff") return null;
-  if (props.ctx.currentPlayer !== props.playerID) return null;
-  const player = props.G.playerInfo[props.playerID ?? ""];
-  if (!player) return null;
+  const isMyTurn = props.ctx.currentPlayer === props.playerID;
+  const player = props.playerID ? props.G.playerInfo[props.playerID] : null;
+
+  const [amount, setAmount] = useState(0);
+
+  if (!invasion || invasion.phase !== "buyoff" || !isMyTurn || !player) return null;
 
   const cost = invasion.buyoffCost ?? 0;
   const offered = invasion.buyoffOffered ?? {};
   const totalOffered = Object.values(offered).reduce((a, b) => a + b, 0);
   const remaining = Math.max(0, cost - totalOffered);
   const maxOffer = Math.max(0, player.resources.gold);
-  const [amount, setAmount] = useState(Math.min(remaining, maxOffer));
 
   const otherOffers = Object.entries(offered).map(([id, gold]) => ({
     kingdom: props.G.playerInfo[id].kingdomName, gold,

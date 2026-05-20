@@ -4,6 +4,9 @@ import { INVALID_MOVE } from "boardgame.io/core";
 import { removeGoldAmount, removeOneCounsellor } from "../../helpers/stateUtils";
 import { validateMove } from "../moveValidation";
 import { KINGDOM_LOCATION, MAX_SKYSHIPS_PER_FLEET } from "../../data/gameData";
+import log from "../../helpers/logger";
+
+const dLog = log.child({ mod: "deploy-fleet" });
 
 const validateDeployFleet = (
   G: MyGameState,
@@ -99,12 +102,12 @@ const deployFleet: MoveDefinition = {
 
     // Defensive: validate args are valid numbers
     if (typeof levyCount !== 'number' || isNaN(levyCount)) {
-      console.warn(`[deployFleet] Invalid levyCount arg: ${levyCount}`);
+      dLog.warn({ levyCount }, "Invalid levyCount arg");
       return INVALID_MOVE;
     }
     if (typeof skyshipCount !== 'number' || isNaN(skyshipCount) ||
         typeof regimentCount !== 'number' || isNaN(regimentCount)) {
-      console.warn(`[deployFleet] Invalid troop counts: sky=${skyshipCount} reg=${regimentCount}`);
+      dLog.warn({ skyshipCount, regimentCount }, "Invalid troop counts");
       return INVALID_MOVE;
     }
 

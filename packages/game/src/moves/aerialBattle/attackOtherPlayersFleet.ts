@@ -1,7 +1,6 @@
 import { MoveDefinition } from "../../types";
-import { removeVPAmount } from "../../helpers/stateUtils";
+import { removeVPAmount, logEvent } from "../../helpers/stateUtils";
 import { setStage } from "../../helpers/stageUtils";
-import { logBattleEvent } from "../../helpers/logger";
 import { clonePlayerInfo } from "../../helpers/cloneUtils";
 
 const attackOtherPlayersFleet: MoveDefinition = {
@@ -39,7 +38,7 @@ const attackOtherPlayersFleet: MoveDefinition = {
       }
     }
 
-    logBattleEvent(attackerName, defenderName, "AERIAL", "initiated");
+    logEvent(G, `${attackerName} attacks ${defenderName}'s fleet`);
 
     G.battleState = {
       attacker: { decision: "fight", ...clonePlayerInfo(G.playerInfo[playerID]) },

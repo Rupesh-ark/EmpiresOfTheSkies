@@ -124,7 +124,7 @@ function runSingleTournamentGame(gameNumber: number): {
   scores: Record<string, number>;
 } | null {
   const recorder = new GameRecorder();
-  const logger = new AILogger("silent");
+  const logger = new AILogger();
   const origLogger = getAILogger();
   setAILogger(logger);
 

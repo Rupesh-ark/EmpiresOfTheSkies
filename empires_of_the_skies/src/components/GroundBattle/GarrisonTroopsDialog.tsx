@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { MyGameProps, createLogger } from "@eots/game";
+import { MyGameProps } from "@eots/game";
 import {
   DndContext,
   DragOverlay,
@@ -12,8 +12,6 @@ import { Box, Typography } from "@mui/material";
 import { DialogShell } from "@/components/atoms/DialogShell";
 import { tokens } from "@/theme";
 import { IconRegiment, IconElite, IconLevy } from "@/theme";
-
-const log = createLogger("battle");
 
 // Troop types & icons (same pattern as FleetTransferDialog)
 
@@ -208,7 +206,6 @@ const GarrisonTroopsDialog = (props: MyGameProps) => {
     ) &&
     !(props.G.stage.sub === "conquest_garrison" && inCurrentBattle && hasTroopsToGarrison)
   ) {
-    log.info("garrison dialog", { phase: props.G.stage.phase, sub: props.G.stage.sub });
     props.G.stage.sub === "ground_garrison"
       ? props.moves.doNotGroundAttack()
       : props.moves.doNothing();

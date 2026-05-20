@@ -1,7 +1,7 @@
 import { INVALID_MOVE } from "boardgame.io/core/";
 import { MoveDefinition } from "../../types";
 import { setStage } from "../../helpers/stageUtils";
-import { logConquestEvent } from "../../helpers/logger";
+import { logEvent } from "../../helpers/stateUtils";
 
 const coloniseLand: MoveDefinition = {
   fn: ({ G, playerID }) => {
@@ -19,7 +19,7 @@ const coloniseLand: MoveDefinition = {
       return INVALID_MOVE;
     }
 
-    logConquestEvent(G.playerInfo[playerID].kingdomName, [x, y], "colonise_attempt");
+    logEvent(G, `${G.playerInfo[playerID].kingdomName} attempts to colonise [${x},${y}]`);
 
     G.conquestState = {
       decision: "fight",

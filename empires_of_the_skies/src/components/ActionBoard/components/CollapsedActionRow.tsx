@@ -30,7 +30,6 @@ const THUMB_W = 56;
 
 export const CollapsedActionRow = ({
   label,
-  images,
   totalSlots,
   slotState,
   onPlace,

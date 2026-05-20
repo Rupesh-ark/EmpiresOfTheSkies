@@ -1,11 +1,6 @@
 {
   "name": "empires-of-the-skies-root",
   "private": true,
-  "pnpm": {
-    "overrides": {
-      "is-generator-function": "1.0.10"
-    }
-  },
   "engines": {
     "node": ">=22"
   },

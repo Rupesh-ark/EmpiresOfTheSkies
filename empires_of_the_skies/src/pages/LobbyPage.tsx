@@ -5,7 +5,7 @@
  *   Left:  World lore & game guide (frosted dark panel)
  *   Right: Lobby controls (frosted dark panel)
  */
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   Box,
@@ -25,11 +25,8 @@ import {
   GiLaurelsTrophy,
 } from "react-icons/gi";
 import { LobbyClient } from "boardgame.io/client";
-import { createLogger } from "@eots/game";
 import { BG_DESKTOP as bgDesktop, BG_TABLET as bgTablet, BG_MOBILE as bgMobile } from "../assets/homePage";
 import { tokens } from "@/theme";
-
-const log = createLogger("lobby");
 const colors = { home: tokens.home } as const;
 const fonts = { accent: tokens.font.accent, primary: tokens.font.display, system: tokens.font.body } as const;
 
@@ -38,7 +35,6 @@ const storageKey = (matchID: string, playerName: string) =>
 
 const saveSession = (matchID: string, playerName: string, playerID: string, credentials: string) => {
   localStorage.setItem(storageKey(matchID, playerName), JSON.stringify({ playerID, credentials }));
-  log.info("session saved", { matchID, playerName, playerID });
 };
 
 const loadSession = (matchID: string, playerName: string): { playerID: string; credentials: string } | null => {
@@ -119,9 +115,7 @@ const LobbyPage = ({ lobbyClient }: { lobbyClient: LobbyClient }) => {
 
         saveSession(matchID, playerName, response.playerID, response.playerCredentials);
         setJoined(true);
-        log.info("joined match", { playerID: response.playerID });
-      } catch (e) {
-        log.error("join failed", { error: String(e) });
+      } catch {
         setError("Failed to join match. Check the Match ID and try again.");
       }
     };
@@ -129,22 +123,24 @@ const LobbyPage = ({ lobbyClient }: { lobbyClient: LobbyClient }) => {
     joinMatch();
   }, [matchID, playerName, lobbyClient]);
 
-  const pollMatch = useCallback(async () => {
-    if (!matchID) return;
-    try {
-      const match = await lobbyClient.getMatch("empires-of-the-skies", matchID);
-      setPlayers(match.players);
-      setTotalSlots(match.players.length);
-    } catch {
-      /* polling failure is non-fatal */
-    }
-  }, [matchID, lobbyClient]);
-
   useEffect(() => {
-    pollMatch();
-    const interval = setInterval(pollMatch, 2000);
-    return () => clearInterval(interval);
-  }, [pollMatch]);
+    let cancelled = false;
+    const poll = async () => {
+      if (!matchID) return;
+      try {
+        const match = await lobbyClient.getMatch("empires-of-the-skies", matchID);
+        if (!cancelled) {
+          setPlayers(match.players);
+          setTotalSlots(match.players.length);
+        }
+      } catch {
+        /* polling failure is non-fatal */
+      }
+    };
+    poll();
+    const interval = setInterval(poll, 2000);
+    return () => { cancelled = true; clearInterval(interval); };
+  }, [matchID, lobbyClient]);
 
   const joinedCount = players.filter((p) => p.name).length;
   const allJoined = joinedCount === totalSlots && totalSlots > 0;

@@ -17,7 +17,7 @@ import svgNameToElementMap from "./nameToElementMap";
 import { getLocationPresentation } from "@/utils/locationLabels";
 import FleetTransferDialog from "./FleetTransferDialog";
 import { GiCrossedSwords, GiZeppelin } from "react-icons/gi";
-import { TilePresence, TileDetailContent, DraggableFleetIcon } from "./tiles";
+import { TileDetailContent, DraggableFleetIcon } from "./tiles";
 
 // Kingdom fleet positions on Home Waters tile
 const KINGDOM_POSITIONS: Record<string, { top: string; left: string }[]> = {
@@ -165,34 +165,15 @@ export const WorldMapTile = memo((props: worldMapTileProps) => {
     });
   });
 
-  // Tooltip text
+  // Tile data
   const currentTile = props.G.mapState.currentTileArray[yLocation][xLocation];
-  const lootNameMap: Record<string, string> = {
-    gold: "Gold", mithril: "Mithril", dragonScales: "Dragon Scales",
-    krakenSkin: "Kraken Skin", magicDust: "Magic Dust",
-    stickyIchor: "Sticky Ichor", pipeweed: "Pipeweed", victoryPoints: "Victory Points",
-  };
-  const outpostLoot = () => {
-    let text = "";
-    Object.entries(currentTile.loot.outpost).forEach(([key, value]) => {
-      if (value > 0) text += `\t\t${lootNameMap[key]}: ${value}\n`;
-    });
-    return text;
-  };
-  const colonyLoot = () => {
-    let text = "";
-    Object.entries(currentTile.loot.colony).forEach(([key, value]) => {
-      if (value > 0) text += `\t\t${lootNameMap[key]}: ${value}\n`;
-    });
-    return text;
-  };
-  const tooltipText = `Attack: ${currentTile.sword}\nDefence: ${currentTile.shield}\nLoot:\n\t Outpost:\n ${outpostLoot()}\n\t Colony:\n ${colonyLoot()}`;
 
   // Event handlers
   const longPressEvent = useLongPress(longPressCallback, {
     cancelOnMovement: true,
     cancelOutsideElement: true,
     threshold: 150,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onStart: useCallback((event: any) => {
       xPosition.current = event.clientX;
       yPosition.current = event.clientY;
@@ -200,10 +181,11 @@ export const WorldMapTile = memo((props: worldMapTileProps) => {
   });
   const bind = longPressEvent("test context");
 
-  const [flip, setFlip] = useState(props.G.mapState.discoveredTiles[yLocation][xLocation]);
+  const discoveredTile = props.G.mapState.discoveredTiles[yLocation][xLocation];
+  const [flip, setFlip] = useState(discoveredTile);
   useEffect(() => {
-    setFlip(props.G.mapState.discoveredTiles[yLocation][xLocation]);
-  }, [props.G.mapState.discoveredTiles[yLocation][xLocation]]);
+    setFlip(discoveredTile);
+  }, [discoveredTile]);
 
   const [detailOpen, setDetailOpen] = useState(false);
   const [fleetTransferOpen, setFleetTransferOpen] = useState(false);
@@ -239,12 +221,13 @@ export const WorldMapTile = memo((props: worldMapTileProps) => {
     }
   };
 
+  const { detailRequestKey, onDetailRequestHandled } = props;
   useEffect(() => {
-    if (props.detailRequestKey !== undefined && flip) {
+    if (detailRequestKey !== undefined && flip) {
       setDetailOpen(true);
-      props.onDetailRequestHandled?.(props.detailRequestKey);
+      onDetailRequestHandled?.(detailRequestKey);
     }
-  }, [flip, props.detailRequestKey, props.onDetailRequestHandled]);
+  }, [flip, detailRequestKey, onDetailRequestHandled]);
 
   // Render
   return (

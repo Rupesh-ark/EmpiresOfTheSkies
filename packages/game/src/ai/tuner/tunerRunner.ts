@@ -190,7 +190,7 @@ function runOneGame(): { vps: number[]; archetypes: string[] } | null {
   const clients: ReturnType<typeof Client>[] = [];
   const bots: EmpiresBot[] = [];
 
-  setAILogger(new AILogger("silent"));
+  setAILogger(new AILogger());
 
   // Unique matchID per game ensures different PRNG seeds
   const matchID = `tune_${Date.now()}_${gameCounter++}`;
@@ -297,67 +297,49 @@ function evaluateCandidate(numGames: number): {
 }
 
 function main(): void {
-  const originalLog = console.log;
-  const originalWarn = console.warn;
-  const originalError = console.error;
-  console.log = (...args: any[]) => {
-    const msg = args.join(" ");
-    if (msg.includes("[DIAG]") || msg.includes("[STUCK]") || msg.includes("BOUNCE")) {
-      process.stderr.write(msg + "\n");
-    }
-  };
-  console.warn = () => {};
-  console.error = () => {};
+  const bucket = process.env.TUNER_BUCKET ?? "A";
+  const numGames = parseInt(process.env.TUNER_GAMES ?? "20", 10);
+  const outputPath = process.env.TUNER_OUTPUT;
+  const batchPath = process.env.TUNER_BATCH;
+  const singlePath = process.env.TUNER_WEIGHTS;
+  const freezeAPath = process.env.TUNER_FREEZE_A;
+  const freezeBPath = process.env.TUNER_FREEZE_B;
+  const freezeDPath = process.env.TUNER_FREEZE_D;
 
-  try {
-    const bucket = process.env.TUNER_BUCKET ?? "A";
-    const numGames = parseInt(process.env.TUNER_GAMES ?? "20", 10);
-    const outputPath = process.env.TUNER_OUTPUT;
-    const batchPath = process.env.TUNER_BATCH;
-    const singlePath = process.env.TUNER_WEIGHTS;
-    const freezeAPath = process.env.TUNER_FREEZE_A;
-    const freezeBPath = process.env.TUNER_FREEZE_B;
-    const freezeDPath = process.env.TUNER_FREEZE_D;
-
-    if (!outputPath) {
-      process.exit(1);
-    }
-
-    const freezeA = freezeAPath ? readJSON(freezeAPath) : undefined;
-    const freezeB = freezeBPath ? readJSON(freezeBPath) : undefined;
-    const freezeD = freezeDPath ? readJSON(freezeDPath) : undefined;
-
-    // SINGLE candidate mode only — Python handles batching by launching
-    // one Node process per candidate (avoids boardgame.io state leaks)
-    const weightsPath = batchPath ?? singlePath;
-    if (!weightsPath) {
-      process.exit(1);
-    }
-
-    const rawWeights = readJSON(weightsPath);
-
-    // Support both single object and array (take first element if array)
-    const weights: Record<string, number> = Array.isArray(rawWeights) ? rawWeights[0] : rawWeights;
-
-    injectWeights(bucket, weights, freezeA, freezeB, freezeD);
-    const { avgVP, scores, archetypeSpread, vpByArchetype } = evaluateCandidate(numGames);
-
-    resetV2Config();
-    setEvalWeights(null);
-
-    fs.writeFileSync(outputPath, JSON.stringify({
-      avgVP,
-      archetypeSpread,
-      vpByArchetype,
-      games: numGames,
-      completed: scores.length,
-      scores,
-    }));
-  } finally {
-    console.log = originalLog;
-    console.warn = originalWarn;
-    console.error = originalError;
+  if (!outputPath) {
+    process.exit(1);
   }
+
+  const freezeA = freezeAPath ? readJSON(freezeAPath) : undefined;
+  const freezeB = freezeBPath ? readJSON(freezeBPath) : undefined;
+  const freezeD = freezeDPath ? readJSON(freezeDPath) : undefined;
+
+  // SINGLE candidate mode only — Python handles batching by launching
+  // one Node process per candidate (avoids boardgame.io state leaks)
+  const weightsPath = batchPath ?? singlePath;
+  if (!weightsPath) {
+    process.exit(1);
+  }
+
+  const rawWeights = readJSON(weightsPath);
+
+  // Support both single object and array (take first element if array)
+  const weights: Record<string, number> = Array.isArray(rawWeights) ? rawWeights[0] : rawWeights;
+
+  injectWeights(bucket, weights, freezeA, freezeB, freezeD);
+  const { avgVP, scores, archetypeSpread, vpByArchetype } = evaluateCandidate(numGames);
+
+  resetV2Config();
+  setEvalWeights(null);
+
+  fs.writeFileSync(outputPath, JSON.stringify({
+    avgVP,
+    archetypeSpread,
+    vpByArchetype,
+    games: numGames,
+    completed: scores.length,
+    scores,
+  }));
 }
 
 main();

@@ -5,6 +5,7 @@ import { enumerateLegalMoves } from "./enumerate";
 import { getAILogger } from "./AILogger";
 import type { MCTSStats } from "./AILogger";
 import type { PlayerSnapshot } from "./GameRecorder";
+import log from "../helpers/logger";
 
 // Phase evaluators
 import { evaluateActions } from "./evaluators/ActionsEvaluator";
@@ -64,13 +65,6 @@ export class EmpiresBot {
       legacyCardColour: legacyColour,
       baseQualities: computeArchetypeQualities(kaCard, legacyCard, legacyColour),
     };
-
-    const logger = getAILogger();
-    if (logger.getVerbosity() !== "silent") {
-      console.log(
-        `[AI-v2] Bot P${playerID} initialized (KA: ${kaCard}, Legacy: ${legacyCard}, Alignment: ${this.personality.alignment})`
-      );
-    }
   }
 
   private defaultPersonality(): BotPersonality {

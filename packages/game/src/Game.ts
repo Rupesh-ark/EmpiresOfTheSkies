@@ -97,10 +97,10 @@ import { wrapMove, withPhaseGuard, withPhaseReset, checkLoopGuard } from "./help
 
 import { setStage, isStage } from "./helpers/stageUtils";
 import type { GameStage } from "./types";
-import { createLogger } from "./helpers/logger";
+import log from "./helpers/logger";
 
-const phaseLog = createLogger("phase");
-const budgetLog = createLogger("turn-budget");
+const phaseLog = log.child({ mod: "phase" });
+const budgetLog = log.child({ mod: "turn-budget" });
 
 const TURN_ENDING_LIMIT = 550;
 let turnEndingCounter = 0;
@@ -124,7 +124,7 @@ const turnBudgetPlugin = {
             const stage = G?.stage ? `${G.stage.phase}/${G.stage.sub}` : "?";
 
             if (turnEndingCounter >= TURN_ENDING_LIMIT) {
-              budgetLog.error("BUDGET EXCEEDED — halting game", {
+              budgetLog.error({
                 count: turnEndingCounter,
                 type: "endTurn",
                 method: methodType,
@@ -133,12 +133,12 @@ const turnBudgetPlugin = {
                 round: turnEndingRound,
                 turn: context.ctx?.turn,
                 next: endTurnArgs?.next,
-              });
+              }, "BUDGET EXCEEDED — halting game");
               return;
             }
 
             if (turnEndingCounter % 50 === 0) {
-              budgetLog.warn("endTurn milestone", {
+              budgetLog.warn({
                 count: turnEndingCounter,
                 method: methodType,
                 phase,
@@ -146,7 +146,7 @@ const turnBudgetPlugin = {
                 round: turnEndingRound,
                 turn: context.ctx?.turn,
                 next: endTurnArgs?.next,
-              });
+              }, "endTurn milestone");
             }
 
             return origEndTurn(endTurnArgs);
@@ -160,7 +160,7 @@ const turnBudgetPlugin = {
             const stage = G?.stage ? `${G.stage.phase}/${G.stage.sub}` : "?";
 
             if (turnEndingCounter >= TURN_ENDING_LIMIT) {
-              budgetLog.error("BUDGET EXCEEDED — halting game", {
+              budgetLog.error({
                 count: turnEndingCounter,
                 type: "endPhase",
                 method: methodType,
@@ -168,19 +168,19 @@ const turnBudgetPlugin = {
                 stage,
                 round: turnEndingRound,
                 turn: context.ctx?.turn,
-              });
+              }, "BUDGET EXCEEDED — halting game");
               return;
             }
 
             if (turnEndingCounter % 50 === 0) {
-              budgetLog.warn("endPhase milestone", {
+              budgetLog.warn({
                 count: turnEndingCounter,
                 method: methodType,
                 phase,
                 stage,
                 round: turnEndingRound,
                 turn: context.ctx?.turn,
-              });
+              }, "endPhase milestone");
             }
 
             return origEndPhase(...phaseArgs);
@@ -201,10 +201,10 @@ const turnBudgetPlugin = {
 /** Call from discovery.onBegin to reset the per-round budget counter. */
 export function resetTurnEndingBudget(round: number): void {
   if (turnEndingCounter > 0) {
-    budgetLog.info("round budget summary", {
+    budgetLog.info({
       count: turnEndingCounter,
       round: turnEndingRound,
-    });
+    }, "round budget summary");
   }
   turnEndingCounter = 0;
   turnEndingRound = round;
@@ -307,6 +307,7 @@ const MyGame: Game<MyGameState> = {
       mercyGold: {},
       _loopGuard: 0,
       _halted: false,
+      _matchID: `game_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
       eventState: {
         deck: earlyDeck,
         lateDeck,
@@ -388,7 +389,7 @@ const MyGame: Game<MyGameState> = {
       },
       next: "events",
       onBegin: (context) => {
-        phaseLog.info("setup", { round: context.G.round });
+        phaseLog.info({ round: context.G.round }, "setup");
         setStage(context.G, "setup", "kingdom_advantage");
         const { pool: filteredPool, log: kaLog } = filterKAPool(
           context.G.cardDecks.kingdomAdvantagePool,
@@ -412,7 +413,7 @@ const MyGame: Game<MyGameState> = {
         order: TurnOrder.CUSTOM_FROM("turnOrder"),
       },
       onBegin: withPhaseGuard("events", (context) => {
-        phaseLog.info("events", { round: context.G.round });
+        phaseLog.info({ round: context.G.round }, "events");
         setStage(context.G, "events", "default");
         context.G.eventState.taxModifier = 0;
         context.G.eventState.chosenCards = [];
@@ -446,7 +447,7 @@ const MyGame: Game<MyGameState> = {
         resetBattleCheckCount();
         resetTurnEndingBudget(context.G.round + 1);
         if (checkLoopGuard(context, "discovery")) return;
-        phaseLog.info("discovery", { round: context.G.round + 1 });
+        phaseLog.info({ round: context.G.round + 1 }, "discovery");
         context.G.round += 1;
         context.ctx.playOrderPos = 0;
         setStage(context.G, "discovery", "default");
@@ -520,7 +521,7 @@ const MyGame: Game<MyGameState> = {
       onBegin: (context) => {
         if (context.G._halted) return;
         if (checkLoopGuard(context, "taxes")) return;
-        phaseLog.info("taxes", { round: context.G.round });
+        phaseLog.info({ round: context.G.round }, "taxes");
         setStage(context.G, "taxes", "default");
 
         // Peasant REBELLION loss: skip taxes this round
@@ -550,7 +551,7 @@ const MyGame: Game<MyGameState> = {
       onBegin: (context) => {
         if (context.G._halted) return;
         if (checkLoopGuard(context, "actions")) return;
-        phaseLog.info("actions", { round: context.G.round });
+        phaseLog.info({ round: context.G.round }, "actions");
         context.G.firstTurnOfRound = true;
         setStage(context.G, "actions", "default");
       },
@@ -678,7 +679,7 @@ const MyGame: Game<MyGameState> = {
       onBegin: (context) => {
         if (context.G._halted) return;
         if (checkLoopGuard(context, "resolution")) return;
-        phaseLog.info("resolution", { round: context.G.round });
+        phaseLog.info({ round: context.G.round }, "resolution");
         // Walk the full resolution sequence: aerial → plunder → ground → conquest → election → post-election → retrieve
         beginResolution(context.G, context.events, true);
       },
@@ -728,7 +729,7 @@ const MyGame: Game<MyGameState> = {
       turn: { order: TurnOrder.ONCE },
       onBegin: (context) => {
         if (checkLoopGuard(context, "reset")) return;
-        phaseLog.info("reset", { round: context.G.round });
+        phaseLog.info({ round: context.G.round }, "reset");
         // Recompute turn order from alterPlayerOrder choices
         const currentTurnOrder = [...context.ctx.playOrder];
         let newTurnOrder: string[] = [];

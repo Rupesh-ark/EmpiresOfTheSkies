@@ -1,4 +1,4 @@
-import React, { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react";
+import React, { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { MyGameProps, EVENT_CARD_DEFS, PlayerInfo } from "@eots/game";
 const ActionBoard = lazy(() => import("./ActionBoard/ActionBoard").then(m => ({ default: m.ActionBoard })));
@@ -161,7 +161,7 @@ export const ActionBoardsAndMap = (props: MyGameProps) => {
 
 const ActionBoardsAndMapInner = (props: MyGameProps) => {
   const validatedMoves = useValidatedMoves(props);
-  const validatedProps = { ...props, moves: validatedMoves };
+  const validatedProps = useMemo(() => ({ ...props, moves: validatedMoves }), [props, validatedMoves]);
   const theme = useGameTheme(props.G.stage);
   const { showToast } = useToast();
 
@@ -189,7 +189,7 @@ const ActionBoardsAndMapInner = (props: MyGameProps) => {
       }
     }
     prevLogLen.current = logLen;
-  }, [props.G.gameLog.length, props.G.stage.phase, props.ctx.currentPlayer, props.playerID, props.G.playerInfo, showToast]);
+  }, [props.G.gameLog, props.G.stage.phase, props.ctx.currentPlayer, props.playerID, props.G.playerInfo, showToast]);
 
   // Event toast: notify all players when an event card is resolved
   const prevResolvedEvent = useRef(props.G.eventState.resolvedEvent);

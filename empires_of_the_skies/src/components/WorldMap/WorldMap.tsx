@@ -34,7 +34,6 @@ const WorldMap = (props: WorldMapProps) => {
 
   const [fleetDragState, setFleetDragState] = useState<FleetDragState | null>(null);
   const [pendingDeploy, setPendingDeploy] = useState<PendingDeploy | null>(null);
-  const isDiscovery = props.G.stage.phase === "discoveries";
   const isMyTurn = props.playerID === props.ctx.currentPlayer;
 
   function defaultZoom(phase: string, myTurn: boolean) {
@@ -143,19 +142,6 @@ const WorldMap = (props: WorldMapProps) => {
     for (const [x, y] of within3) costMap.set(`${x},${y}`, 3);
     for (const [x, y] of within2) costMap.set(`${x},${y}`, 2);
     for (const [x, y] of within1) costMap.set(`${x},${y}`, 1);
-
-    // DEBUG: log BFS results and blocked edges for ALL reachable tiles
-    console.group(`[Fleet Cost Debug] Fleet ${fleetId} at [${fleet.location}], laden=${isLaden}`);
-    console.log("Source tile blocked:", props.G.mapState.currentTileArray[fleet.location[1]][fleet.location[0]].blocked);
-    const allUniqueKeys = new Set<string>();
-    [...within1, ...within2, ...within3].forEach(([x,y]) => allUniqueKeys.add(`${x},${y}`));
-    allUniqueKeys.forEach((key) => {
-      const [x, y] = key.split(",").map(Number);
-      const t = props.G.mapState.currentTileArray[y]?.[x];
-      const cost = costMap.get(key);
-      console.log(`  [${x},${y}] "${t?.name}" cost=${cost}g blocked=[${t?.blocked?.join(", ") ?? ""}]`);
-    });
-    console.groupEnd();
 
     setFleetDragState({
       fleetId,

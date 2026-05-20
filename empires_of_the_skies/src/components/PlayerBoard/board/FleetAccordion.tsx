@@ -1,6 +1,6 @@
 import { Box, Typography } from "@mui/material";
 import { tokens } from "@/theme";
-import { FleetInfo } from "@eots/game";
+import { FleetInfo, MyGameState } from "@eots/game";
 import { IconSkyship, IconRegiment, IconElite, IconLevy } from "@/theme";
 import { GamePanel } from "@/components/atoms/GamePanel";
 import { SectionHeader } from "./SectionHeader";
@@ -8,7 +8,7 @@ import { getLocationPresentation } from "@/utils/locationLabels";
 
 interface FleetAccordionProps {
   fleets: FleetInfo[];
-  tileMap: any[][];
+  tileMap: MyGameState["mapState"]["currentTileArray"];
   onViewLocation?: (location: number[]) => void;
 }
 

@@ -15,6 +15,10 @@ const MAX_RIVAL_TROOPS = 3;
 
 const RebellionRivalSupportDialog = (props: MyGameProps) => {
   const rebellion = props.G.currentRebellion;
+  const [side, setSide] = useState<"defender" | "rebel" | null>(null);
+  const [regiments, setRegiments] = useState(0);
+  const [levies, setLevies] = useState(0);
+
   if (!rebellion) return null;
   if (rebellion.event.targetPlayerID === props.playerID) return null;
   if (props.ctx.currentPlayer !== props.playerID) return null;
@@ -28,10 +32,6 @@ const RebellionRivalSupportDialog = (props: MyGameProps) => {
 
   const maxRegiments = Math.min(MAX_RIVAL_TROOPS, player.resources.regiments);
   const maxLevies = Math.min(MAX_RIVAL_TROOPS, player.resources.levies);
-
-  const [side, setSide] = useState<"defender" | "rebel" | null>(null);
-  const [regiments, setRegiments] = useState(0);
-  const [levies, setLevies] = useState(0);
 
   const total = regiments + levies;
   const adjustedMaxReg = Math.min(maxRegiments, MAX_RIVAL_TROOPS - levies);

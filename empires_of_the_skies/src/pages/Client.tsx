@@ -8,11 +8,9 @@ import { Client } from "boardgame.io/react";
 import { SocketIO } from "boardgame.io/multiplayer";
 import { useMemo, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { MyGame, createLogger } from "@eots/game";
+import { MyGame } from "@eots/game";
 import { ActionBoardsAndMap } from "../components/ActionBoardsAndMap";
 import { setupBotClients } from "../ai/setupBotClients";
-
-const log = createLogger("client");
 
 const storageKey = (matchID: string, playerName: string) =>
   `eots_${matchID}_${playerName}`;
@@ -21,7 +19,6 @@ const loadSession = (matchID: string, playerName: string): { playerID: string; c
   const raw = localStorage.getItem(storageKey(matchID, playerName));
   if (!raw) return null;
   const parsed = JSON.parse(raw);
-  log.info("session loaded", parsed);
   return parsed;
 };
 
@@ -65,7 +62,6 @@ const ClientComponent = ({ server }: { server: string }) => {
 
   if (!session) {
     // No session — redirect to home (shouldn't normally happen)
-    log.warn("no session found, redirecting");
     navigate("/");
     return null;
   }

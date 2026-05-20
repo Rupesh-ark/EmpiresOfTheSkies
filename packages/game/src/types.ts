@@ -116,6 +116,7 @@ export interface MyGameState {
   mercyGold: Record<string, number>;
   _loopGuard: number;
   _halted: boolean;
+  _matchID?: string;
 }
 
 export type BattleResult = {

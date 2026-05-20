@@ -44,7 +44,6 @@ export default function AITunerSidebar({
   selectedPlayer,
   onPlayerChange,
   onLoadRecord,
-  onExportRecord,
 }: AITunerSidebarProps) {
   const navigate = useNavigate();
 
@@ -52,6 +51,7 @@ export default function AITunerSidebar({
 
   const handleV2Change = (path: string, value: number) => {
     const parts = path.split(".");
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const override: Record<string, any> = {};
     if (parts.length === 1) {
       override[parts[0]] = value;

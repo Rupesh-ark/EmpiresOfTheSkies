@@ -12,9 +12,6 @@ import {
 import { LobbyClient } from "boardgame.io/dist/types/packages/client";
 import { useState } from "react";
 import React from "react";
-import { createLogger } from "@eots/game";
-
-const log = createLogger("lobby");
 import { useNavigate } from "react-router-dom";
 import { BG_DESKTOP as bgDesktop, BG_TABLET as bgTablet, BG_MOBILE as bgMobile } from "../assets/homePage";
 import { BG_PARCHMENT_PANEL } from "../assets/backgrounds";
@@ -60,7 +57,6 @@ const createMatch = async (
     }));
   }
 
-  log.info("match created", { matchID: response.matchID, numHumans, numBots });
   setMatchReady(response.matchID);
 };
 

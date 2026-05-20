@@ -2,3 +2,6 @@ packages:
   - "empires_of_the_skies"
   - "server"
   - "packages/*"
+
+overrides:
+  is-generator-function: 1.0.10

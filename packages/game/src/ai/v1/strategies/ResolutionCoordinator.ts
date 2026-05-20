@@ -7,7 +7,7 @@ import { ConquestStrategy } from "./ConquestStrategy";
 import { PlunderStrategy } from "./PlunderStrategy";
 import { ElectionStrategy } from "./ElectionStrategy";
 import { ResolutionStrategy } from "./ResolutionStrategy";
-import { getAILogger } from "../../AILogger";
+import log from "../../../helpers/logger";
 
 export class ResolutionCoordinator implements PhaseStrategy {
   private aerial = new AerialBattleStrategy();
@@ -19,7 +19,6 @@ export class ResolutionCoordinator implements PhaseStrategy {
 
   selectMove(G: MyGameState, ctx: Ctx, playerID: string, personality: AIPersonality, availableMoves?: AIMove[]): ScoredAIMove {
     const sub = G.stage.sub;
-    const logger = getAILogger();
 
     let result: ScoredAIMove;
     let strategyName: string;
@@ -46,9 +45,7 @@ export class ResolutionCoordinator implements PhaseStrategy {
       strategyName = "ResolutionStrategy";
     }
 
-    if (logger.getVerbosity() === "verbose") {
-      console.log(`[AI] ResolutionCoordinator: ${sub} → ${strategyName} → ${result.move.move} (score=${result.score.toFixed(3)})`);
-    }
+    log.info({ sub, strategyName, move: result.move.move, score: result.score }, "ResolutionCoordinator decision");
 
     return result;
   }

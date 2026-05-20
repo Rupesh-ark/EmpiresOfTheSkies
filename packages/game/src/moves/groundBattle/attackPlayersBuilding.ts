@@ -1,7 +1,6 @@
 import { MoveDefinition } from "../../types";
-import { removeVPAmount } from "../../helpers/stateUtils";
+import { removeVPAmount, logEvent } from "../../helpers/stateUtils";
 import { setStage } from "../../helpers/stageUtils";
-import { logBattleEvent } from "../../helpers/logger";
 import { clonePlayerInfo } from "../../helpers/cloneUtils";
 
 const attackPlayersBuilding: MoveDefinition = {
@@ -47,7 +46,7 @@ const attackPlayersBuilding: MoveDefinition = {
         }
       }
 
-      logBattleEvent(attackerName, defenderName, "GROUND", "initiated");
+      logEvent(G, `${attackerName} attacks ${defenderName}'s building`);
 
       G.battleState = {
         attacker: { decision: "fight", ...clonePlayerInfo(G.playerInfo[playerID]) },

@@ -1,12 +1,15 @@
 import { MoveDefinition } from "../../types";
 import { nextAfterGroundDecision, nextAfterConquest } from "../../helpers/resolutionSequencer";
 import { INVALID_MOVE } from "boardgame.io/core";
+import log from "../../helpers/logger";
+
+const gtLog = log.child({ mod: "garrison-troops" });
 
 const garrisonTroops: MoveDefinition = {
   fn: ({ G, ctx, playerID, events }, ...args) => {
     // Defensive: validate args
     if (!Array.isArray(args[0]) || args[0].length < 1) {
-      console.warn(`[garrisonTroops] Invalid args: ${JSON.stringify(args)}`);
+      gtLog.warn({ args }, "Invalid args");
       return INVALID_MOVE;
     }
     

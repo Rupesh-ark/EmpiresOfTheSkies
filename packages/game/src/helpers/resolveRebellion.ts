@@ -18,7 +18,6 @@ import { calculateCombat } from "./combatMath";
 import { drawFortuneOfWarCard, hasFortAt } from "./helpers";
 import { CARD_RESOLVERS, resolveCardWithAlignmentPenalty } from "./legacyCardDefinitions";
 import { KINGDOM_LOCATION } from "../data/gameData";
-import { logRebellionEvent } from "./logger";
 
 // Battle math
 
@@ -320,9 +319,6 @@ export const setupNextRebellion = (G: MyGameState): boolean => {
   const counterSwords = G.contingentPool.pop()!;
   const kingdom = G.playerInfo[event.targetPlayerID].kingdomName;
   logEvent(G, `Rebellion in ${kingdom}! Rebel force: ${counterSwords} swords`);
-
-  // Log to trace for self-play analysis
-  logRebellionEvent(kingdom, `REBELLION_START`);
 
   G.currentRebellion = { event, counterSwords };
   return true;

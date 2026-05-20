@@ -132,6 +132,16 @@ export interface DiagnosticEntry {
   details: string;
 }
 
+export interface MoveRecord {
+  moveName: string;
+  playerID: string;
+  args: unknown[];
+  round: number;
+  turn: number;
+  phase: string;
+  timestamp: string;
+}
+
 // Complete game record
 
 export interface GameRecord {
@@ -141,6 +151,7 @@ export interface GameRecord {
   configSnapshot: Record<string, unknown>;
   players: Record<string, PlayerGameSummary>;
   decisions: EnrichedDecision[];
+  moves: MoveRecord[];
   roundSummaries: RoundSummaryEntry[];
   diagnostics: DiagnosticEntry[];
   result: {
@@ -164,6 +175,7 @@ export class GameRecorder {
       configSnapshot: {},
       players: {},
       decisions: [],
+      moves: [],
       roundSummaries: [],
       diagnostics: [],
       result: null,
@@ -180,6 +192,25 @@ export class GameRecorder {
 
   addDecision(decision: EnrichedDecision): void {
     this.record.decisions.push(decision);
+  }
+
+  recordMove(
+    moveName: string,
+    playerID: string,
+    args: unknown[],
+    round: number,
+    turn: number,
+    phase: string
+  ): void {
+    this.record.moves.push({
+      moveName,
+      playerID,
+      args,
+      round,
+      turn,
+      phase,
+      timestamp: new Date().toISOString(),
+    });
   }
 
   addRoundSummary(summary: RoundSummaryEntry): void {

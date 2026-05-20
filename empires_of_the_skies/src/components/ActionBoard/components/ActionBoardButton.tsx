@@ -1,8 +1,6 @@
 import { ReactElement, useState } from "react";
 import { tokens } from "@/theme";
-import { MyGameProps, PlayerColour, createLogger } from "@eots/game";
-
-const log = createLogger("ui");
+import { MyGameProps, PlayerColour } from "@eots/game";
 import {
   Box,
   Button,
@@ -160,7 +158,6 @@ export const ActionBoardButtonLarge = (props: ActionBoardButtonProps) => {
           if (props.value !== 1) {
             props.onClickFunction(props.value);
           }
-          log.debug("button click", { value: props.value });
           if (props.value === 1) {
             setHeresyOrOrthodoxyDialogOpen(true);
           }

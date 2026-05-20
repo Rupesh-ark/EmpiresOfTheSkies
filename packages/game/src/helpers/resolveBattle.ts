@@ -9,6 +9,9 @@ import { PRICE_MARKER_MIN, KINGDOM_LOCATION } from "../data/gameData";
 import { nextAfterAerialDecision, nextAfterGroundDecision, nextAfterConquest } from "./resolutionSequencer";
 import { setStage } from "./stageUtils";
 import { calculateCombat } from "./combatMath";
+import log from "./logger";
+
+const battleLog = log.child({ mod: "resolve-battle" });
 
 const GOODS: GoodKey[] = ["mithril", "dragonScales", "krakenSkin", "magicDust", "stickyIchor", "pipeweed"];
 
@@ -20,14 +23,14 @@ function sanitizeFleet(fleet: FleetInfo, context: string = ""): FleetInfo {
                  typeof fleet.skyships !== 'number' || isNaN(fleet.skyships) ||
                  typeof fleet.eliteRegiments !== 'number' || isNaN(fleet.eliteRegiments);
   if (hasNaN) {
-    console.warn(`[resolveBattle] Invalid value detected in fleet${context ? ` at ${context}` : ""}:`, {
+    battleLog.warn({
       fleetId: fleet.fleetId,
       location: fleet.location,
       skyships: fleet.skyships,
       regiments: fleet.regiments,
       levies: fleet.levies,
       eliteRegiments: fleet.eliteRegiments,
-    });
+    }, `Invalid value detected in fleet${context ? ` at ${context}` : ""}`);
     fleet.levies = typeof fleet.levies === 'number' && !isNaN(fleet.levies) ? fleet.levies : 0;
     fleet.regiments = typeof fleet.regiments === 'number' && !isNaN(fleet.regiments) ? fleet.regiments : 0;
     fleet.skyships = typeof fleet.skyships === 'number' && !isNaN(fleet.skyships) ? fleet.skyships : 0;
@@ -53,7 +56,7 @@ function sanitizePlayerResources(player: PlayerInfo, context: string = ""): void
     r.skyships = typeof r.skyships === 'number' && !isNaN(r.skyships) ? r.skyships : 0;
   }
   if (issues.length > 0) {
-    console.warn(`[resolveBattle] Invalid player resources${context ? ` at ${context}` : ""}: ${issues.join(", ")}`);
+    battleLog.warn({ issues: issues.join(", ") }, `Invalid player resources${context ? ` at ${context}` : ""}`);
   }
 }
 
@@ -245,7 +248,7 @@ const cleanupWipedFleets = (
 
 function sanitizeFleetValue(val: unknown, fallback = 0): number {
   if (typeof val !== 'number' || isNaN(val)) {
-    console.warn(`[forceRetrieveFleets] Invalid fleet value: ${val}, defaulting to ${fallback}`);
+    battleLog.warn({ val, fallback }, "Invalid fleet value, defaulting");
     return fallback;
   }
   return val;

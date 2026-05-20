@@ -4,9 +4,6 @@ import type {
   Reserves,
   GarrisonInfo,
   SlotState,
-  FleetLocalState,
-  ReservesLocalState,
-  GarrisonLocalState,
   DialogState,
   TroopKind,
 } from "./types";

@@ -16,7 +16,6 @@ export {
   setAILogger,
 } from "./AILogger";
 export type {
-  VerbosityLevel,
   ResourceSnapshot,
   ScoredMove,
   DecisionReason,

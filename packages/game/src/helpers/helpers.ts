@@ -6,6 +6,7 @@ import { fortuneOfWarCards, ASSIGNABLE_KINGDOMS } from "../data/gameData";
 import { getNeighbors, getPassableNeighbors } from "./mapUtils";
 import { Ctx } from "boardgame.io";
 import { EventsAPI } from "boardgame.io/dist/types/src/plugins/events/events";
+import log from "./logger";
 
 export const fullResetFortuneOfWarCardDeck = (): FortuneOfWarCardInfo[] => {
   return [...fortuneOfWarCards];
@@ -240,7 +241,7 @@ export const checkIfCurrentPlayerIsInCurrentBattle = (
 ) => {
   battleCheckCount++;
   if (battleCheckCount > 50) {
-    console.error('[BATTLE-CHECK] called ' + battleCheckCount + 'x P' + ctx.currentPlayer + ' sub=' + G.stage?.sub + ' battle=' + JSON.stringify(G.mapState.currentBattle));
+    log.error({ battleCheckCount, player: ctx.currentPlayer, sub: G.stage?.sub, battle: G.mapState.currentBattle }, 'battle-check called 50+ times');
     if (battleCheckCount > 100) return; // break the loop
   }
   const [x, y] = G.mapState.currentBattle;

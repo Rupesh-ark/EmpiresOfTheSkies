@@ -1,5 +1,7 @@
 export { MyGame } from "./Game";
-export { createLogger } from "./helpers/logger";
+export { default as log } from "./helpers/logger";
+export { setMoveObserver, getMoveObserver } from "./recorder";
+export type { MoveObserver } from "./recorder";
 
 
 export * from "./helpers/helpers";

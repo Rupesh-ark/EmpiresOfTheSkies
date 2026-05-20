@@ -2,6 +2,9 @@ import { MoveDefinition, PlayerInfo } from "../../types";
 import { allPlayersPassed } from "../../helpers/stateUtils";
 import { KINGDOM_LOCATION } from "../../data/gameData";
 import { tileKey, FAITHDOM_TILES } from "../../helpers/mapUtils";
+import log from "../../helpers/logger";
+
+const retLog = log.child({ mod: "retrieve-fleets" });
 
 export type RetrieveOptions = {
   placeAt?: number[];
@@ -10,7 +13,7 @@ export type RetrieveOptions = {
 
 function sanitizeFleetValue(val: unknown, fallback = 0): number {
   if (typeof val !== 'number' || isNaN(val)) {
-    console.warn(`[retrieveFleets] Invalid fleet value: ${val}, defaulting to ${fallback}`);
+    retLog.warn({ val, fallback }, "Invalid fleet value, defaulting");
     return fallback;
   }
   return val;
@@ -94,10 +97,10 @@ const retrieveFleets: MoveDefinition = {
     G.playerInfo[playerID].passed = true;
     const flags = Object.entries(G.playerInfo).map(([id, p]) => `${id}:${p.passed}`).join(" ");
     if (allPlayersPassed(G)) {
-      console.log(`[RET] P${playerID} ALL PASSED → endPhase [${flags}]`);
+      retLog.info({ playerID, flags }, "ALL PASSED → endPhase");
       events.endPhase();
     } else {
-      console.log(`[RET] P${playerID} not all → endTurn [${flags}]`);
+      retLog.info({ playerID, flags }, "not all → endTurn");
       events.endTurn();
     }
   },

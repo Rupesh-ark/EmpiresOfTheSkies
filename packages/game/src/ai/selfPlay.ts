@@ -4,7 +4,7 @@ import { MyGame } from "../Game";
 import type { MyGameState } from "../types";
 import { EmpiresBot } from "./EmpiresBot";
 import { AILogger, getAILogger, setAILogger } from "./AILogger";
-import type { DecisionLogEntry, VerbosityLevel } from "./AILogger";
+import type { DecisionLogEntry } from "./AILogger";
 import type { AIMove } from "./types";
 import {
   GameRecorder,
@@ -18,6 +18,9 @@ import { AerialBattleStrategy } from "./v1/strategies/AerialBattleStrategy";
 import { GroundBattleStrategy } from "./v1/strategies/GroundBattleStrategy";
 import { AI_CONFIG } from "./v1/weightsConfig";
 import { enumerateLegalMoves } from "./enumerate";
+import log from "../helpers/logger";
+
+const spLog = log.child({ mod: "selfplay" });
 
 const DEFAULT_SNAPSHOT: PlayerSnapshot = {
   resources: {
@@ -361,7 +364,7 @@ export function runGameLoop(
       if (s) {
         const diagG = s.G as MyGameState;
         const moveStr = lastMove ? `${lastMove.move}(${JSON.stringify(lastMove.args).slice(0, 60)})` : "null";
-        console.log(`[DIAG] iter=${iterations} R${diagG.round} phase=${s.ctx.phase} stage=${diagG.stage.phase}:${diagG.stage.sub} turn=${s.ctx.turn} P${s.ctx.currentPlayer} move=${moveStr}`);
+        spLog.info({ iterations, round: diagG.round, phase: s.ctx.phase, stage: `${diagG.stage.phase}:${diagG.stage.sub}`, turn: s.ctx.turn, currentPlayer: s.ctx.currentPlayer, move: moveStr }, "diag");
       }
     }
 
@@ -373,7 +376,7 @@ export function runGameLoop(
         const botState = clients[pIdx]?.getState();
         const availableMoves = botState ? enumerateLegalMoves(botState.G as MyGameState, botState.ctx, s.ctx.currentPlayer) : [];
         const lastMove = botState ? bots[pIdx].chooseMove(botState.G as MyGameState, botState.ctx, s.ctx.currentPlayer) : null;
-        console.log(`[STUCK] iter=${iterations} R${stuckG.round} phase=${s.ctx.phase} stage=${stuckG.stage.phase}:${stuckG.stage.sub} turn=${s.ctx.turn} P${s.ctx.currentPlayer} moves=${availableMoves.length} chosen=${lastMove ? lastMove.move : 'null'}`);
+        spLog.warn({ iterations, round: stuckG.round, phase: s.ctx.phase, stage: `${stuckG.stage.phase}:${stuckG.stage.sub}`, turn: s.ctx.turn, currentPlayer: s.ctx.currentPlayer, availableMoves: availableMoves.length, chosen: lastMove?.move ?? 'null' }, "stuck");
         recorder.addDiagnostic({
           type: "stall",
           iteration: iterations,
@@ -393,10 +396,7 @@ export function runGameLoop(
     phaseTiming[lastSub] = entry;
   }
   const sorted = Object.entries(phaseTiming).sort((a, b) => b[1].ms - a[1].ms);
-  console.log(`[TIMING] iters=${iterations} breakdown:`);
-  for (const [sub, { ms, iters }] of sorted.slice(0, 10)) {
-    console.log(`  ${sub}: ${ms}ms (${iters} iters)`);
-  }
+  spLog.info({ iterations, timing: Object.fromEntries(sorted.slice(0, 10)) }, "timing breakdown");
 
   const finalState = clients[0].getState();
   for (const c of clients) c.stop();
@@ -416,7 +416,7 @@ export function runSingleGame(gameNumber: number): GameRecord {
     "attackOtherPlayersFleet", "doNotAttack", "evadeFleet", "retaliateFleet",
     "groundAttack", "doNotGroundAttack", "defendGround", "yieldGround",
   ]);
-  const logger = new AILogger("silent", (entry) => {
+  const logger = new AILogger((entry) => {
     if (entry.type !== "decision") return;
     const decisionEntry = entry as DecisionLogEntry;
     const pIdx = parseInt(decisionEntry.playerID);
@@ -472,7 +472,7 @@ export function runSingleGame(gameNumber: number): GameRecord {
   setAILogger(origLogger);
 
   if (!finalState?.ctx.gameover) {
-    console.warn(`Game ${gameNumber}: did not complete (${iterations} iterations)`);
+    spLog.warn({ gameNumber, iterations }, "game did not complete");
     return recorder.getRecord();
   }
 
@@ -523,42 +523,40 @@ export function runSingleGame(gameNumber: number): GameRecord {
 
 export function runSelfPlayRecords(
   numGames: number,
-  verbosity: VerbosityLevel = "silent"
+  quiet = false
 ): GameRecord[] {
-  const logger = new AILogger(verbosity);
+  const logger = new AILogger();
   setAILogger(logger);
 
   const records: GameRecord[] = [];
 
   for (let i = 0; i < numGames; i++) {
-    if (verbosity !== "silent" && i % 10 === 0) {
-      console.log(`Running game ${i + 1}/${numGames}...`);
+    if (!quiet && i % 10 === 0) {
+      spLog.info({ game: i + 1, total: numGames }, "running game");
     }
 
     const record = runSingleGame(i + 1);
     records.push(record);
 
-    if (verbosity !== "silent" && record.result) {
+    if (!quiet && record.result) {
       const r = record.result;
       const winnerVP = r.scores[r.winner] ?? 0;
-      console.log(
-        `  Game ${i + 1}: Winner P${r.winner} (${r.winnerPersonality}) — ${winnerVP} VP`
-      );
+      spLog.info({ game: i + 1, winner: r.winner, winnerVP, avgVP: (Object.values(r.scores).reduce((a, b) => a + b, 0) / Object.values(r.scores).length).toFixed(1) }, "game completed");
     }
 
     logger.clear();
   }
 
-  setAILogger(new AILogger("summary"));
+  setAILogger(new AILogger());
 
   return records;
 }
 
 export function runSelfPlay(
   numGames: number,
-  verbosity: VerbosityLevel = "silent"
+  quiet = false
 ): BalanceReport {
-  const records = runSelfPlayRecords(numGames, verbosity);
+  const records = runSelfPlayRecords(numGames, quiet);
   return analyzeBalance(records, numGames);
 }
 

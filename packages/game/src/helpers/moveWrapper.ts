@@ -1,10 +1,11 @@
 import { INVALID_MOVE } from "boardgame.io/core";
 import type { Ctx } from "boardgame.io";
-import { createLogger } from "./logger";
+import log from "./logger";
 import { MyGameState, MoveDefinition } from "../types";
 import { logEvent } from "./stateUtils";
+import { getMoveObserver } from "../recorder";
 
-const log = createLogger("move");
+const moveLog = log.child({ mod: "move" });
 
 // Move wrapper
 
@@ -31,22 +32,22 @@ export const wrapMove = (name: string, def: MoveDefinition): any => {
     const lastLogKey = lastLogKeys.get(G) ?? "";
     if (logKey !== lastLogKey) {
       lastLogKeys.set(G, logKey);
-      log.info(name, {
+      moveLog.info({
         playerID,
         phase: ctx.phase,
         turn: ctx.turn,
         ...(args.length > 0 && { args }),
-      });
+      }, name);
     }
 
     // Server-side validation safety net
     if (def.validate) {
       const error = def.validate(G, playerID, ...args);
       if (error) {
-        log.warn(`${name} REJECTED (validate)`, {
+        moveLog.warn({
           playerID,
           error: error.message,
-        });
+        }, `${name} REJECTED (validate)`);
         return INVALID_MOVE;
       }
     }
@@ -55,18 +56,21 @@ export const wrapMove = (name: string, def: MoveDefinition): any => {
     const result = def.fn(context, ...args);
 
     if (result === INVALID_MOVE) {
-      log.warn(`${name} REJECTED`, {
+      moveLog.warn({
         playerID,
         phase: ctx.phase,
         ...(args.length > 0 && { args }),
-      });
+      }, `${name} REJECTED`);
     } else {
-      // Move succeeded — log to game log if formatter exists
       if (def.successLog) {
         const message = def.successLog(G, playerID, ...args);
         if (message) {
           logEvent(G, message);
         }
+      }
+      const obs = getMoveObserver();
+      if (obs) {
+        obs.recordMove(name, playerID, args, G, ctx);
       }
     }
 
@@ -77,7 +81,7 @@ export const wrapMove = (name: string, def: MoveDefinition): any => {
 // Phase onBegin wrappers
 
 const LOOP_GUARD_LIMIT = 200;
-const circuitLog = createLogger("circuit-breaker");
+const circuitLog = log.child({ mod: "circuit-breaker" });
 
 /**
  * Minimal shape of a boardgame.io onBegin context that we need for guarding.
@@ -100,13 +104,13 @@ export function checkLoopGuard(context: PhaseContext, phaseName: string): boolea
   if (context.G._halted) return true;
   context.G._loopGuard++;
   if (context.G._loopGuard > LOOP_GUARD_LIMIT) {
-    circuitLog.error(`CIRCUIT BREAKER TRIPPED in phase "${phaseName}"`, {
+    circuitLog.error({
       phase: phaseName,
       loopCount: context.G._loopGuard as unknown as number,
       round: context.G.round as unknown as number,
       turn: context.ctx.turn as unknown as number,
       G: context.G as unknown as Record<string, unknown>,
-    });
+    }, `CIRCUIT BREAKER TRIPPED in phase "${phaseName}"`);
     context.G._halted = true;
     return true;
   }
@@ -121,12 +125,12 @@ export const withPhaseGuard = <C extends PhaseContext>(
     if (context.G._halted) return;
     context.G._loopGuard++;
     if (context.G._loopGuard > LOOP_GUARD_LIMIT) {
-      circuitLog.error(`CIRCUIT BREAKER TRIPPED in phase "${phaseName}"`, {
+      circuitLog.error({
         phase: phaseName,
         loopCount: context.G._loopGuard as unknown as number,
         round: context.G.round as unknown as number,
         turn: context.ctx.turn as unknown as number,
-      });
+      }, `CIRCUIT BREAKER TRIPPED in phase "${phaseName}"`);
       context.G._halted = true;
       return;
     }
@@ -149,12 +153,12 @@ export const withPhaseReset = <C extends PhaseContext>(
     context.G._loopGuard++;          // count this call (should always be 1)
     if (context.G._loopGuard > LOOP_GUARD_LIMIT) {
       // Extremely unlikely, but keeps the logic symmetric
-      circuitLog.error(`CIRCUIT BREAKER TRIPPED in phase "${phaseName}"`, {
+      circuitLog.error({
         phase: phaseName,
         loopCount: context.G._loopGuard as unknown as number,
         round: context.G.round as unknown as number,
         turn: context.ctx.turn as unknown as number,
-      });
+      }, `CIRCUIT BREAKER TRIPPED in phase "${phaseName}"`);
       context.G._halted = true;
       return;
     }

@@ -15,9 +15,10 @@ const RetrieveFleetsDialog = (props: MyGameProps) => {
   const playerID = props.playerID ?? props.ctx.currentPlayer;
   const player = props.G.playerInfo[playerID];
   const [homeX, homeY] = KINGDOM_LOCATION;
-  const deployedFleets = player?.fleetInfo.filter(
-    (f) => f.location[0] !== homeX || f.location[1] !== homeY
-  ) ?? [];
+  const deployedFleets = useMemo(() =>
+    player?.fleetInfo.filter(
+      (f) => f.location[0] !== homeX || f.location[1] !== homeY
+    ) ?? [], [player, homeX, homeY]);
 
   // Compute which route option each fleet gets
   const fleetRouteOptions = useMemo(() => {

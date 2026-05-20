@@ -1,5 +1,8 @@
 import { MoveDefinition, MyGameState, MoveError } from "../../types";
 import { INVALID_MOVE } from "boardgame.io/core";
+import log from "../../helpers/logger";
+
+const gLog = log.child({ mod: "garrison-transfer" });
 
 export const validateGarrisonTransfer = (
   G: MyGameState,
@@ -106,11 +109,11 @@ const garrisonTransfer: MoveDefinition = {
 
     // Defensive: validate args are valid numbers
     if (typeof levies !== 'number' || isNaN(levies)) {
-      console.warn(`[garrisonTransfer] Invalid levies arg: ${levies}`);
+      gLog.warn({ levies }, "Invalid levies arg");
       return INVALID_MOVE;
     }
     if (typeof regiments !== 'number' || isNaN(regiments)) {
-      console.warn(`[garrisonTransfer] Invalid regiments arg: ${regiments}`);
+      gLog.warn({ regiments }, "Invalid regiments arg");
       return INVALID_MOVE;
     }
 

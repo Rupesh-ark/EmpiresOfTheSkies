@@ -6,6 +6,7 @@ type BoardProps = {
   G: MyGameState;
   ctx: { currentPlayer: string; phase: string | null };
   playerID: string | null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   moves: Record<string, (...args: any[]) => void>;
 };
 
@@ -30,6 +31,7 @@ export const useValidatedMoves = (props: BoardProps) => {
         const originalMove = target[moveName];
         if (typeof originalMove !== "function") return originalMove;
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         return (...args: any[]) => {
           if (!playerID) return;
 

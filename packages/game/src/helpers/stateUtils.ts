@@ -1,6 +1,5 @@
 import { MyGameState } from "../types";
 import { MAX_SKYSHIPS, MAX_REGIMENTS, HERESY_MAX, HERESY_MIN } from "../data/gameData";
-import { archiveGameLogEntries } from "./gameLogArchive";
 import { getRepublicInfluence } from "./republicUtils";
 
 export { HERESY_MAX, HERESY_MIN };
@@ -144,8 +143,7 @@ const MAX_LOG_ENTRIES = 200;
 export const logEvent = (G: MyGameState, message: string) => {
   G.gameLog.push({ round: G.round, message });
   if (G.gameLog.length > MAX_LOG_ENTRIES) {
-    const trimmed = G.gameLog.splice(0, G.gameLog.length - MAX_LOG_ENTRIES);
-    archiveGameLogEntries(trimmed);
+    G.gameLog.splice(0, G.gameLog.length - MAX_LOG_ENTRIES);
   }
 };
 

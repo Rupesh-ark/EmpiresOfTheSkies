@@ -16,6 +16,7 @@
  */
 
 import { MyGameState } from "../types";
+import log from "./logger";
 import { setStage } from "./stageUtils";
 import { setupNextRebellion } from "./resolveRebellion";
 import { getDeferredBattleDescription } from "./resolveDeferredBattles";
@@ -144,24 +145,26 @@ export const getResolutionTarget = (G: MyGameState): string | null => {
  *
  * @param skipEndTurn — true when called from phase onBegin (boardgame.io discards endTurn there)
  */
+const resLog = log.child({ mod: "res-flow" });
+
 export const beginResolution = (
   G: MyGameState,
   events: EventsAPI,
   skipEndTurn = false
 ): void => {
-  console.log('[RES-FLOW] beginResolution R' + G.round);
+  resLog.info({ round: G.round }, "beginResolution");
   // Reset battle scan position
   G.mapState.currentBattle = [0, 0];
   // Start with aerial battles (step 2a in rulebook)
   findNextBattle(G, events, skipEndTurn, advanceFromAerial);
-  console.log('[RES-FLOW] beginResolution done');
+  resLog.info({ round: G.round }, "beginResolution done");
 };
 
 /** Called when aerial battles are exhausted → try plunder */
 export const advanceFromAerial = (G: MyGameState, events: EventsAPI): void => {
   // DEBUG: detect infinite recursion in resolution chain
   (G as any)._resFlowDepth = ((G as any)._resFlowDepth ?? 0) + 1;
-  if ((G as any)._resFlowDepth > 20) { console.error('[RES-FLOW] infinite recursion detected at advanceFromAerial depth=' + (G as any)._resFlowDepth); return; }
+  if ((G as any)._resFlowDepth > 20) { resLog.error({ depth: (G as any)._resFlowDepth }, "infinite recursion detected at advanceFromAerial"); return; }
   G.mapState.currentBattle = [0, 0];
   findNextPlunder(G, events, advanceFromPlunder);
 };

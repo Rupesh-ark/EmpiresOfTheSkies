@@ -1,4 +1,4 @@
-import { FleetInfo, MAX_SKYSHIPS_PER_FLEET } from "@eots/game";
+import { FleetInfo, MyGameState } from "@eots/game";
 
 export interface Reserves {
   skyships: number;
@@ -22,8 +22,8 @@ export interface FleetTransferDialogProps {
   reserves: Reserves;
   isKingdom: boolean;
   garrison: GarrisonInfo | null;
-  tileArray: any[][];
-  moves: Record<string, (...args: any[]) => void>;
+  tileArray: MyGameState["mapState"]["currentTileArray"];
+  moves: Record<string, (...args: unknown[]) => void>;
 }
 
 export type TroopKind = "regiment" | "elite" | "levy";

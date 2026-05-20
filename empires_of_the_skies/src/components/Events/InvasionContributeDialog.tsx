@@ -5,15 +5,16 @@ import { DialogShell } from "@/components/atoms/DialogShell";
 
 const InvasionContributeDialog = (props: MyGameProps) => {
   const invasion = props.G.currentInvasion;
-  if (!invasion || invasion.phase !== "contribute") return null;
-  if (props.ctx.currentPlayer !== props.playerID) return null;
-  const player = props.G.playerInfo[props.playerID ?? ""];
-  if (!player) return null;
+  const isMyTurn = props.ctx.currentPlayer === props.playerID;
+  const player = props.playerID ? props.G.playerInfo[props.playerID] : null;
+
+  const [regiments, setRegiments] = useState(0);
+  const [levies, setLevies] = useState(0);
+
+  if (!invasion || invasion.phase !== "contribute" || !isMyTurn || !player) return null;
 
   const maxRegiments = player.resources.regiments;
   const maxLevies = player.resources.levies;
-  const [regiments, setRegiments] = useState(maxRegiments);
-  const [levies, setLevies] = useState(maxLevies);
   const totalSwords = regiments * 2 + levies;
 
   const otherContributions = Object.entries(invasion.contributions).map(

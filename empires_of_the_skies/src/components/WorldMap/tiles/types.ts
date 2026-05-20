@@ -24,6 +24,7 @@ export interface worldMapTileProps {
   onFleetDragAttempt?: (reason: string) => void;
   G: MyGameState;
   ctx: { currentPlayer: string; numPlayers?: number };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   moves: Record<string, (...args: any[]) => void>;
   playerID?: string;
 }

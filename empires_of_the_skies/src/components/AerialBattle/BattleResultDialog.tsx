@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useRef } from "react";
 import { MyGameProps } from "@eots/game";
 import { Box, Typography } from "@mui/material";
 import { DialogShell } from "@/components/atoms/DialogShell";
@@ -6,16 +6,17 @@ import { tokens } from "@/theme";
 
 /** Shows a battle result summary after any battle resolves. Dismisses on "Continue". */
 const BattleResultDialog = ({ G, playerID, ctx }: MyGameProps) => {
-  const [dismissed, setDismissed] = useState(false);
+const [dismissed, setDismissed] = useState(false);
 
-  // Reset dismissed state when a new battle result appears
   const resultKey = G.battleResult
     ? `${G.battleResult.battleType}-${G.battleResult.attackerName}-${G.battleResult.defenderName}-${G.battleResult.outcome}`
     : null;
 
-  useEffect(() => {
+  const prevKeyRef = useRef<string | null>(null);
+  if (resultKey !== prevKeyRef.current) {
+    prevKeyRef.current = resultKey;
     setDismissed(false);
-  }, [resultKey]);
+  }
 
   const result = G.battleResult;
   if (!result || dismissed) return null;

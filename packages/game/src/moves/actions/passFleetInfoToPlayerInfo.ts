@@ -1,10 +1,13 @@
 import { MyGameState, MoveError, MoveDefinition } from "../../types";
 import { INVALID_MOVE } from "boardgame.io/core";
 import { KINGDOM_LOCATION } from "../../data/gameData";
+import log from "../../helpers/logger";
+
+const pfLog = log.child({ mod: "pass-fleet-info" });
 
 function sanitizeFleetValue(val: unknown, fallback = 0): number {
   if (typeof val !== 'number' || isNaN(val)) {
-    console.warn(`[passFleetInfoToPlayerInfo] Invalid fleet value: ${val}, defaulting to ${fallback}`);
+    pfLog.warn({ val, fallback }, "Invalid fleet value, defaulting");
     return fallback;
   }
   return val;
@@ -91,12 +94,12 @@ const passFleetInfoToPlayerInfo: MoveDefinition = {
 
     // Defensive: validate args are valid numbers
     if (typeof levyCount !== 'number' || isNaN(levyCount)) {
-      console.warn(`[passFleetInfoToPlayerInfo] Invalid levyCount arg: ${levyCount}`);
+      pfLog.warn({ levyCount }, "Invalid levyCount arg");
       return INVALID_MOVE;
     }
     if (typeof skyshipCount !== 'number' || isNaN(skyshipCount) ||
         typeof regimentCount !== 'number' || isNaN(regimentCount)) {
-      console.warn(`[passFleetInfoToPlayerInfo] Invalid troop counts: sky=${skyshipCount} reg=${regimentCount}`);
+      pfLog.warn({ skyshipCount, regimentCount }, "Invalid troop counts");
       return INVALID_MOVE;
     }
 

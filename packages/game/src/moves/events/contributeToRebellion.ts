@@ -7,6 +7,9 @@ import {
   setupNextRebellion,
 } from "../../helpers/resolveRebellion";
 import { continueResolution } from "../../helpers/resolutionFlow";
+import log from "../../helpers/logger";
+
+const conLog = log.child({ mod: "contribute-rebellion" });
 
 const MAX_RIVAL_TROOPS = 3;
 
@@ -18,11 +21,11 @@ const contributeToRebellion: MoveDefinition = {
 
     // Defensive: validate args are valid numbers
     if (typeof levies !== 'number' || isNaN(levies)) {
-      console.warn(`[contributeToRebellion] Invalid levies arg: ${levies}`);
+      conLog.warn({ levies }, "Invalid levies arg");
       return INVALID_MOVE;
     }
     if (typeof regiments !== 'number' || isNaN(regiments)) {
-      console.warn(`[contributeToRebellion] Invalid regiments arg: ${regiments}`);
+      conLog.warn({ regiments }, "Invalid regiments arg");
       return INVALID_MOVE;
     }
 

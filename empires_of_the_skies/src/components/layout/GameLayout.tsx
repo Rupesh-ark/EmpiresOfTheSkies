@@ -129,10 +129,13 @@ export const GameLayout = ({
   const [mapExpanded, setMapExpanded] = useState(false);
   const [extraTab, setExtraTab] = useState<PanelSlot | null>("game-log");
 
+  // Synchronize extraTab with phase changes — reset to null if current tab no longer exists
   useEffect(() => {
-    if (extraTab !== null && !config.tabExtras.includes(extraTab)) {
-      setExtraTab(null);
-    }
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional: sync tab state to layout changes
+    setExtraTab((prev) => {
+      if (prev !== null && !config.tabExtras.includes(prev)) return null;
+      return prev;
+    });
   }, [config.tabExtras, extraTab]);
 
   const hasLeft = config.left.length > 0;

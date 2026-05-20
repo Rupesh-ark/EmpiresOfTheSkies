@@ -9,7 +9,6 @@
  *   --json           Output raw JSON instead of formatted report
  */
 import { runSelfPlay, printBalanceReport } from "./selfPlay";
-import type { VerbosityLevel } from "./AILogger";
 
 const args = process.argv.slice(2);
 
@@ -20,15 +19,13 @@ function getArg(name: string, defaultValue: string): string {
 }
 
 const numGames = parseInt(getArg("--games", "10"));
-const verbose = args.includes("--verbose");
+const quiet = !args.includes("--verbose");
 const jsonOutput = args.includes("--json");
-
-const verbosity: VerbosityLevel = verbose ? "summary" : "silent";
 
 console.log(`\nRunning ${numGames} self-play games (6 bots each)...\n`);
 
 const startTime = Date.now();
-const report = runSelfPlay(numGames, verbosity);
+const report = runSelfPlay(numGames, quiet);
 const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
 
 console.log(`Completed in ${elapsed}s (${(parseFloat(elapsed) / numGames).toFixed(2)}s/game)`);

@@ -8,7 +8,6 @@ import { tokens } from "@/theme";
 import { MyGameProps, SKYSHIP_SELL_PRICE, BUILDING_SELL_PRICE } from "@eots/game";
 import { usePiracyIntent } from "@/contexts/PiracyIntentContext";
 import { DialogShell } from "@/components/atoms/DialogShell";
-import { GameButton } from "@/components/atoms/GameButton";
 import { GoodsValue } from "@/components/Stats/GoodsValue";
 
 // Compact action row

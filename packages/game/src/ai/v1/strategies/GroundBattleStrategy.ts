@@ -3,6 +3,7 @@ import type { PhaseStrategy, AIPersonality, AIMove, ScoredAIMove } from "../../t
 import type { MyGameState } from "../../../types";
 import type { Ctx } from "boardgame.io";
 import type { BattleContext } from "../../GameRecorder";
+import log from "../../../helpers/logger";
 
 /**
  * Ground battle strategy: decide whether to attack buildings,
@@ -193,7 +194,7 @@ export class GroundBattleStrategy implements PhaseStrategy {
         typeof available.levies !== 'number' || isNaN(available.levies) ||
         typeof available.regiments !== 'number' || isNaN(available.regiments) ||
         typeof available.elites !== 'number' || isNaN(available.elites)) {
-      console.warn(`[GroundBattleStrategy] Invalid troopsAvailableForGarrison: ${JSON.stringify(available)}`);
+      log.warn({ available }, "Invalid troopsAvailableForGarrison");
       return garrisonMoves[0];
     }
 

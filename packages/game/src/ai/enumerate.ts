@@ -6,6 +6,9 @@ import { getNeighbors, isValidRetreatDestination, tileKey, wouldPlacementConnect
 import { MAP_WIDTH, MAP_HEIGHT, KINGDOM_LOCATION, MAX_SKYSHIPS_PER_FLEET } from "../data/gameData";
 import { findPossibleDestinations } from "../helpers/helpers";
 import { isStage } from "../helpers/stageUtils";
+import log from "../helpers/logger";
+
+const enumLog = log.child({ mod: "enumerate" });
 
 function tryValidate(moveName: string, G: MyGameState, playerID: string, ...args: any[]): boolean {
   try {
@@ -467,15 +470,6 @@ export function enumerateLegalMoves(G: MyGameState, ctx: Ctx, playerID: string):
       }
 
 
-      // Diagnostic: disabled for performance — re-enable for debugging
-      // if (failedValidations.length > 0) {
-      //   const player = G.playerInfo[playerID];
-      //   const p = player.resources;
-      //   console.log(`[ENUM] P${playerID} R${G.round} gold=${p.gold} couns=${p.counsellors} sky=${p.skyships} regs=${p.regiments} levies=${p.levies} | valid=${moves.length} failed=${failedValidations.length}`);
-      //   console.log(`  FAILED: ${failedValidations.join(", ")}`);
-      //   console.log(`  VALID: ${[...new Set(validNames)].join(", ")}`);
-      // }
-
       moves.push({ move: "pass", args: [] });
       // confirmAction only valid after a counsellor action (turnComplete = true)
       if (G.playerInfo[playerID].turnComplete) {
@@ -566,7 +560,7 @@ export function enumerateLegalMoves(G: MyGameState, ctx: Ctx, playerID: string):
             typeof avail.regiments !== 'number' || isNaN(avail.regiments) ||
             typeof avail.levies !== 'number' || isNaN(avail.levies) ||
             typeof avail.elites !== 'number' || isNaN(avail.elites)) {
-          console.warn(`[enumerate] Invalid troopsAvailableForGarrison at ground_garrison: ${JSON.stringify(avail)}`);
+          enumLog.warn({ avail }, "Invalid troopsAvailableForGarrison at ground_garrison");
           return moves;
         }
         // All available troops
@@ -597,7 +591,7 @@ export function enumerateLegalMoves(G: MyGameState, ctx: Ctx, playerID: string):
             typeof avail.regiments !== 'number' || isNaN(avail.regiments) ||
             typeof avail.levies !== 'number' || isNaN(avail.levies) ||
             typeof avail.elites !== 'number' || isNaN(avail.elites)) {
-          console.warn(`[enumerate] Invalid troopsAvailableForGarrison at conquest_garrison: ${JSON.stringify(avail)}`);
+          enumLog.warn({ avail }, "Invalid troopsAvailableForGarrison at conquest_garrison");
           return moves;
         }
         return [
@@ -792,7 +786,7 @@ export function enumerateLegalMoves(G: MyGameState, ctx: Ctx, playerID: string):
 
       // DEBUG: catch empty resolution moves
       if (moves.length === 0) {
-        console.log(`[ENUM-EMPTY] P${playerID} sub=${G.stage?.sub} att=${G.battleState?.attacker?.id} def=${G.battleState?.defender?.id}`);
+        enumLog.info({ playerID, sub: G.stage?.sub, attacker: G.battleState?.attacker?.id, defender: G.battleState?.defender?.id }, "empty resolution moves");
       }
       return moves;
     }
