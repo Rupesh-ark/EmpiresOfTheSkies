@@ -1,7 +1,7 @@
 import { MyGameState, MoveError, MoveDefinition } from "../../types";
 import { INVALID_MOVE } from "boardgame.io/core";
 import { validateMove } from "../moveValidation";
-import { removeOneCounsellor, HERESY_MAX, HERESY_MIN } from "../../helpers/stateUtils";
+import { incrementActionsTaken, HERESY_MAX, HERESY_MIN } from "../../helpers/stateUtils";
 import {
   BuildingSlot,
   BUILDING_BASE_COST,
@@ -125,7 +125,7 @@ const foundCathedral = (
     G.playerInfo[playerID].heresyTracker -= 1;
   }
   G.boardState.foundBuildings[BuildingSlot.Cathedral].push(playerID);
-  removeOneCounsellor(G, playerID);
+  incrementActionsTaken(G, playerID);
   G.playerInfo[playerID].turnComplete = true;
 };
 const foundPalace = (
@@ -133,8 +133,6 @@ const foundPalace = (
   playerID: string,
   args: any[]
 ): void => {
-  // args[1] is the heresy direction chosen by the player ("advance" or "retreat")
-  // validateFoundBuildings already confirmed this is "advance" or "retreat"
   const heresyDirection: "advance" | "retreat" = args[1];
 
   const cost = BUILDING_BASE_COST.palace + G.boardState.foundBuildings[BuildingSlot.Palace].length + 1;
@@ -147,7 +145,6 @@ const foundPalace = (
     G.playerInfo[playerID].resources.victoryPoints += PALACE_VP_ORTHODOX;
   }
 
-  // Rule: founding a Palace moves the heresy tracker one space in the player's chosen direction
   const tracker = G.playerInfo[playerID].heresyTracker;
   if (heresyDirection === "advance" && tracker < HERESY_MAX) {
     G.playerInfo[playerID].heresyTracker += 1;
@@ -156,7 +153,7 @@ const foundPalace = (
   }
 
   G.boardState.foundBuildings[BuildingSlot.Palace].push(playerID);
-  removeOneCounsellor(G, playerID);
+  incrementActionsTaken(G, playerID);
 
   G.playerInfo[playerID].turnComplete = true;
 };
@@ -171,26 +168,22 @@ const foundShipyard = (
   G.playerInfo[playerID].resources.gold -= cost;
   G.playerInfo[playerID].shipyards += 1;
   G.boardState.foundBuildings[BuildingSlot.Shipyard].push(playerID);
-  removeOneCounsellor(G, playerID);
+  incrementActionsTaken(G, playerID);
 
   G.playerInfo[playerID].turnComplete = true;
 };
-// Fort placement: pays cost here, then player picks a tile via checkAndPlaceFort move.
-// Valid locations are computed here and written to G.validFortLocations so the
-// frontend just reads them instead of duplicating the eligibility logic.
+
 const foundFort = (
   G: MyGameState,
   playerID: string,
   _args: any[]
 ): void => {
-  // validateFoundBuildings already confirmed a valid tile exists before we charge.
   const cost = BUILDING_BASE_COST.fort + G.boardState.foundBuildings[BuildingSlot.Fort].length + 1;
 
   G.playerInfo[playerID].resources.gold -= cost;
   G.boardState.foundBuildings[BuildingSlot.Fort].push(playerID);
-  removeOneCounsellor(G, playerID);
+  incrementActionsTaken(G, playerID);
 
-  // Compute valid fort locations for the frontend to display
   const locations: [number, number][] = [];
   G.mapState.buildings.forEach((row, y) => {
     row.forEach((tile, x) => {

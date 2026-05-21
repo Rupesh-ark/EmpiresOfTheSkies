@@ -4,7 +4,7 @@ import { INVALID_MOVE } from "boardgame.io/core";
 import {
   addSkyship,
   removeGoldAmount,
-  removeOneCounsellor,
+  incrementActionsTaken,
 } from "../../helpers/stateUtils";
 
 const validateBuildSkyships = (
@@ -36,7 +36,7 @@ const buildSkyships: MoveDefinition = {
     if (validateBuildSkyships(G, playerID, perShipyard)) return INVALID_MOVE;
     const total = perShipyard * G.playerInfo[playerID].shipyards;
 
-    removeOneCounsellor(G, playerID);
+    incrementActionsTaken(G, playerID);
     removeGoldAmount(G, playerID, total);
     for (let i = 0; i < total; i++) {
       addSkyship(G, playerID);

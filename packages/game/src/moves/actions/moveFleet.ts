@@ -1,7 +1,7 @@
 import { MyGameState, MoveError, MoveDefinition } from "../../types";
 import { findPossibleDestinations } from "../../helpers/helpers";
 import { INVALID_MOVE } from "boardgame.io/core";
-import { removeGoldAmount, removeOneCounsellor } from "../../helpers/stateUtils";
+import { removeGoldAmount, incrementActionsTaken } from "../../helpers/stateUtils";
 import { validateMove } from "../moveValidation";
 
 const validateMoveFleet = (
@@ -75,7 +75,6 @@ const moveFleet: MoveDefinition = {
     fleet.location = [x, y];
     fleet.travelHistory.push([x, y]);
 
-    // Only remove from battleMap if no other fleets of this player remain on the old tile
     const otherFleetsOnOldTile = G.playerInfo[playerID].fleetInfo.some(
       (f) => f !== fleet && f.location[0] === startingCoords[0] && f.location[1] === startingCoords[1] && f.skyships > 0
     );
@@ -92,7 +91,7 @@ const moveFleet: MoveDefinition = {
     removeGoldAmount(G, playerID, cost);
     fleet.dispatchedThisRound = true;
 
-    removeOneCounsellor(G, playerID);
+    incrementActionsTaken(G, playerID);
 
     G.playerInfo[playerID].turnComplete = true;
     events.endTurn();

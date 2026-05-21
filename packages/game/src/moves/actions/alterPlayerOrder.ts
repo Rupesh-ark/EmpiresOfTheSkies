@@ -1,7 +1,7 @@
 import { PlayerOrder, MyGameState, MoveError, MoveDefinition } from "../../types";
 import { validateMove } from "../moveValidation";
 import { INVALID_MOVE } from "boardgame.io/core";
-import { removeOneCounsellor } from "../../helpers/stateUtils";
+import { incrementActionsTaken } from "../../helpers/stateUtils";
 
 const validateAlterPlayerOrder = (
   G: MyGameState,
@@ -48,7 +48,7 @@ const alterPlayerOrder: MoveDefinition = {
         return INVALID_MOVE;
       }
     }
-    removeOneCounsellor(G, playerID);
+    incrementActionsTaken(G, playerID);
     G.boardState.pendingPlayerOrder[newPosition] = playerID;
     G.playerInfo[playerID].turnComplete = true;
   },

@@ -4,7 +4,7 @@ import { INVALID_MOVE } from "boardgame.io/core";
 import {
   addGoldAmount,
   removeGoldAmount,
-  removeOneCounsellor,
+  incrementActionsTaken,
 } from "../../helpers/stateUtils";
 
 const validateInfluencePrelates = (
@@ -62,7 +62,7 @@ const influencePrelates: MoveDefinition = {
     }
     removeGoldAmount(G, playerID, cost);
 
-    removeOneCounsellor(G, playerID);
+    incrementActionsTaken(G, playerID);
 
     G.boardState.influencePrelates[value] = playerID;
     G.playerInfo[playerID].turnComplete = true;

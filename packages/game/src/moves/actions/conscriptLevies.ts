@@ -3,7 +3,7 @@ import { INVALID_MOVE } from "boardgame.io/core";
 import { validateMove } from "../moveValidation";
 import {
   addLevyAmount,
-  removeOneCounsellor,
+  incrementActionsTaken,
   removeVPAmount,
   sanitizeValue,
 } from "../../helpers/stateUtils";
@@ -42,12 +42,10 @@ const conscriptLevies: MoveDefinition = {
     const rawLevyAmount = args[0];
     const levyAmount = sanitizeValue(rawLevyAmount, 0);
 
-    // B4: enforce MAX_LEVIES cap
     if (validateConscriptLevies(G, playerID, levyAmount)) return INVALID_MOVE;
 
-    // B4: ceil so a partial final group still costs 1 VP
     const cost = Math.ceil(levyAmount / LEVY_GROUP_SIZE);
-    removeOneCounsellor(G, playerID);
+    incrementActionsTaken(G, playerID);
     removeVPAmount(G, playerID, cost);
     addLevyAmount(G, playerID, levyAmount);
     G.playerInfo[playerID].playerBoardCounsellorLocations.conscriptLevies = true;

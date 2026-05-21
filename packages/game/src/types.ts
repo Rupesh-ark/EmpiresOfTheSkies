@@ -226,6 +226,7 @@ export type PlayerInfo = {
   troopsToGarrison?: TroopInfo;
   turnComplete: boolean;
   legacyCardOptions: LegacyCardInfo[];
+  actionsTakenThisRound: number;
 };
 
 type TroopInfo = { regiments: number; levies: number };
@@ -424,39 +425,17 @@ export type ActionBoardInfo = {
     5: string | undefined;
     6: string | undefined;
   };
-  recruitCounsellors: {
-    1: string | undefined;
-    2: string | undefined;
-    3: string | undefined;
-  };
-  recruitRegiments: {
-    1: string | undefined;
-    2: string | undefined;
-    3: string | undefined;
-    4: string | undefined;
-    5: string | undefined;
-    6: string | undefined;
-  };
-  purchaseSkyshipsZeeland: {
-    1: string | undefined;
-    2: string | undefined;
-  };
-  purchaseSkyshipsVenoa: {
-    1: string | undefined;
-    2: string | undefined;
-  };
+  recruitCounsellors: string[];
+  recruitRegiments: string[];
+  purchaseSkyshipsZeeland: string[];
+  purchaseSkyshipsVenoa: string[];
   foundBuildings: {
     1: string[];
     2: string[];
     3: string[];
     4: string[];
   };
-  foundFactories: {
-    1: string | undefined;
-    2: string | undefined;
-    3: string | undefined;
-    4: string | undefined;
-  };
+  foundFactories: string[];
   influencePrelates: {
     1: string | undefined;
     2: string | undefined;
@@ -467,22 +446,8 @@ export type ActionBoardInfo = {
     7: string | undefined;
     8: string | undefined;
   };
-  punishDissenters: {
-    1: string | undefined;
-    2: string | undefined;
-    3: string | undefined;
-    4: string | undefined;
-    5: string | undefined;
-    6: string | undefined;
-  };
-  convertMonarch: {
-    1: string | undefined;
-    2: string | undefined;
-    3: string | undefined;
-    4: string | undefined;
-    5: string | undefined;
-    6: string | undefined;
-  };
+  punishDissenters: string[];
+  convertMonarch: string[];
   issueHolyDecree: boolean;
 };
 

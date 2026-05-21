@@ -22,12 +22,7 @@ const FACTORY_PERSONALITY = {
 
 function getSlotCost(G: MyGameState): number {
   // Cost = 1 + factories already built this round + 1
-  const slots = G.boardState.foundFactories;
-  let occupants = 0;
-  for (const v of Object.values(slots)) {
-    if (v !== undefined) occupants++;
-  }
-  return occupants + 2;
+  return G.boardState.foundFactories.length + 2;
 }
 
 export function evaluateFoundFactory(

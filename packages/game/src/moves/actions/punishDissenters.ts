@@ -5,7 +5,8 @@ import {
   increaseHeresyWithinMove,
   increaseOrthodoxyWithinMove,
   removeGoldAmount,
-  removeOneCounsellor,
+  incrementActionsTaken,
+  spendCounsellor,
   removeVPAmount,
 } from "../../helpers/stateUtils";
 import { PUNISH_EXECUTE_VP_COST, BASE_PRISONERS, MORE_PRISONS_BONUS, PUNISH_GOLD_COST } from "../../data/gameData";
@@ -13,31 +14,16 @@ import { PUNISH_EXECUTE_VP_COST, BASE_PRISONERS, MORE_PRISONS_BONUS, PUNISH_GOLD
 const validatePunishDissenters = (
   G: MyGameState,
   playerID: string,
-  slotIndex: number,
   paymentType: "gold" | "counsellor" | "execute",
-  numPlayers: number,
   count: number = 1
 ): MoveError | null => {
-  const value: keyof typeof G.boardState.punishDissenters = (slotIndex + 1) as
-    | 1 | 2 | 3 | 4 | 5 | 6;
-
   const base = validateMove(playerID, G, {
     costsCounsellor: true,
     costsGold: paymentType === "gold",
   });
   if (base) return base;
 
-  if (value > numPlayers) {
-    return { code: "SLOT_OUT_OF_RANGE", message: "That Dissenters slot does not exist in this game" };
-  }
-
-  if (G.boardState.punishDissenters[value] !== undefined) {
-    return { code: "SLOT_TAKEN", message: "That Dissenters slot is already taken" };
-  }
-
-  const alreadyPunishing = Object.values(G.boardState.punishDissenters).some(
-    (id) => id === playerID
-  );
+  const alreadyPunishing = G.boardState.punishDissenters.includes(playerID);
   if (alreadyPunishing) {
     return { code: "ALREADY_PUNISHING", message: "Your Kingdom is already punishing Dissenters this round" };
   }
@@ -72,11 +58,7 @@ const validatePunishDissenters = (
   }
 
   if (paymentType === "gold") {
-    // Gold check removed — rules allow debt (VP penalty at end of round)
   } else if (paymentType === "counsellor") {
-    if (playerInfo.resources.counsellors < 2) {
-      return { code: "INSUFFICIENT_COUNSELLORS", message: "Need 2 Counsellors to pay by Counsellor" };
-    }
   } else {
     return { code: "INVALID_PAYMENT_TYPE", message: "Invalid payment type" };
   }
@@ -85,12 +67,11 @@ const validatePunishDissenters = (
 };
 
 const punishDissenters: MoveDefinition = {
-  fn: ({ G, ctx, playerID }, ...args: any[]) => {
-    const value: keyof typeof G.boardState.punishDissenters = args[0] + 1;
+  fn: ({ G, playerID }, ...args: any[]) => {
     const paymentType: "gold" | "counsellor" | "execute" = args[1];
     const count: number = args[2] ?? 1;
 
-    if (validatePunishDissenters(G, playerID, args[0], paymentType, ctx.numPlayers, count)) return INVALID_MOVE;
+    if (validatePunishDissenters(G, playerID, paymentType, count)) return INVALID_MOVE;
 
     const playerInfo = G.playerInfo[playerID];
 
@@ -104,8 +85,8 @@ const punishDissenters: MoveDefinition = {
           increaseHeresyWithinMove(G, playerID);
         }
       }
-      removeOneCounsellor(G, playerID);
-      G.boardState.punishDissenters[value] = playerID;
+      incrementActionsTaken(G, playerID);
+      G.boardState.punishDissenters.push(playerID);
       G.playerInfo[playerID].turnComplete = true;
       return;
     }
@@ -113,15 +94,12 @@ const punishDissenters: MoveDefinition = {
     if (paymentType === "gold") {
       removeGoldAmount(G, playerID, PUNISH_GOLD_COST);
     } else if (paymentType === "counsellor") {
-      if (playerInfo.resources.counsellors < 2) {
-        return INVALID_MOVE;
-      }
-      removeOneCounsellor(G, playerID);
+      spendCounsellor(G, playerID);
     } else {
       return INVALID_MOVE;
     }
 
-    removeOneCounsellor(G, playerID);
+    incrementActionsTaken(G, playerID);
 
     for (let i = 0; i < count; i++) {
       playerInfo.prisoners += 1;
@@ -135,11 +113,11 @@ const punishDissenters: MoveDefinition = {
       }
     }
 
-    G.boardState.punishDissenters[value] = playerID;
+    G.boardState.punishDissenters.push(playerID);
     G.playerInfo[playerID].turnComplete = true;
   },
   errorMessage: "Cannot punish Dissenters right now",
-  validate: (G, playerID, slotIndex, paymentType, count) => validatePunishDissenters(G, playerID, slotIndex, paymentType, Object.keys(G.playerInfo).length, count),
+  validate: (G, playerID, _slotIndex, paymentType, count) => validatePunishDissenters(G, playerID, paymentType, count),
   successLog: (G, pid, _slot, paymentType, count) => {
     const k = G.playerInfo[pid].kingdomName;
     const n = count ?? 1;

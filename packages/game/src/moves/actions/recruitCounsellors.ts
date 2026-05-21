@@ -1,25 +1,15 @@
 import { MyGameState, MoveError, MoveDefinition } from "../../types";
 import { validateMove } from "../moveValidation";
-import { addOneCounsellor, removeOneCounsellor, removeGoldAmount } from "../../helpers/stateUtils";
+import { recruitCounsellor, incrementActionsTaken, removeGoldAmount } from "../../helpers/stateUtils";
 import { INVALID_MOVE } from "boardgame.io/core";
-import { CounsellorSlot, MAX_COUNSELLORS } from "../../data/gameData";
+import { MAX_COUNSELLORS } from "../../data/gameData";
 
 const validateRecruitCounsellors = (
   G: MyGameState,
-  playerID: string,
-  slotIndex: number
+  playerID: string
 ): MoveError | null => {
   const base = validateMove(playerID, G, { costsCounsellor: true, costsGold: true });
   if (base) return base;
-
-  const value: keyof typeof G.boardState.recruitCounsellors = (slotIndex + 1) as
-    | typeof CounsellorSlot.First
-    | typeof CounsellorSlot.Second
-    | typeof CounsellorSlot.Third;
-
-  if (G.boardState.recruitCounsellors[value] !== undefined) {
-    return { code: "SLOT_TAKEN", message: "That Counsellor slot is already taken" };
-  }
 
   if (G.playerInfo[playerID].resources.counsellors >= MAX_COUNSELLORS) {
     return {
@@ -32,20 +22,15 @@ const validateRecruitCounsellors = (
 };
 
 const recruitCounsellors: MoveDefinition = {
-  fn: ({ G, playerID }, ...args: any[]) => {
-    const value: keyof typeof G.boardState.recruitCounsellors = args[0] + 1;
-    if (validateRecruitCounsellors(G, playerID, args[0])) return INVALID_MOVE;
+  fn: ({ G, playerID }) => {
+    if (validateRecruitCounsellors(G, playerID)) return INVALID_MOVE;
 
-    const costs = {
-      [CounsellorSlot.First]:  1,
-      [CounsellorSlot.Second]: 1,
-      [CounsellorSlot.Third]:  2,
-    };
+    const cost = 1 + G.boardState.recruitCounsellors.length;
 
-    removeOneCounsellor(G, playerID);
-    addOneCounsellor(G, playerID);
-    G.boardState.recruitCounsellors[value] = playerID;
-    removeGoldAmount(G, playerID, costs[value]);
+    incrementActionsTaken(G, playerID);
+    recruitCounsellor(G, playerID);
+    G.boardState.recruitCounsellors.push(playerID);
+    removeGoldAmount(G, playerID, cost);
     G.playerInfo[playerID].turnComplete = true;
   },
   errorMessage: "Cannot recruit a Counsellor right now",

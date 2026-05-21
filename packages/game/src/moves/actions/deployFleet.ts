@@ -1,7 +1,7 @@
 import { MyGameState, MoveError, MoveDefinition } from "../../types";
 import { findPossibleDestinations } from "../../helpers/helpers";
 import { INVALID_MOVE } from "boardgame.io/core";
-import { removeGoldAmount, removeOneCounsellor } from "../../helpers/stateUtils";
+import { removeGoldAmount, incrementActionsTaken } from "../../helpers/stateUtils";
 import { validateMove } from "../moveValidation";
 import { KINGDOM_LOCATION, MAX_SKYSHIPS_PER_FLEET } from "../../data/gameData";
 import log from "../../helpers/logger";
@@ -96,7 +96,6 @@ const validateDeployFleet = (
 
 const deployFleet: MoveDefinition = {
   fn: ({ G, playerID, events }, ...args: any[]) => {
-    // Validate numeric args
     const selectedFleetIndex = args[0];
     const [x, y] = args[1];
     const skyshipCount = args[2];
@@ -104,7 +103,6 @@ const deployFleet: MoveDefinition = {
     const levyCount = args[4];
     const eliteRegimentCount = args[5] ?? 0;
 
-    // Defensive: validate args are valid numbers
     if (typeof levyCount !== 'number' || isNaN(levyCount)) {
       dLog.warn({ levyCount }, "Invalid levyCount arg");
       return INVALID_MOVE;
@@ -161,7 +159,6 @@ const deployFleet: MoveDefinition = {
     G.playerInfo[playerID].fleetInfo[fleet.fleetId].location = [x, y];
     fleet.travelHistory = [[x, y]];
 
-    // Only remove from battleMap if no other fleets of this player remain on the old tile
     const otherFleetsOnOldTile = currentPlayer.fleetInfo.some(
       (f) => f.fleetId !== fleet.fleetId && f.location[0] === startingCoords[0] && f.location[1] === startingCoords[1] && f.skyships > 0
     );
@@ -178,7 +175,7 @@ const deployFleet: MoveDefinition = {
     removeGoldAmount(G, playerID, cost);
     fleet.dispatchedThisRound = true;
 
-    removeOneCounsellor(G, playerID);
+    incrementActionsTaken(G, playerID);
 
     G.playerInfo[playerID].turnComplete = true;
     events.endTurn();

@@ -9,18 +9,10 @@ import { ActionBoardProps } from "../shared";
 import { BTN_BG } from "@/assets/actionBoard";
 import { CollapsedActionRow } from "../CollapsedActionRow";
 import { clearMoves } from "@/utils/gameHelpers";
-import {
-  SLOTS_RECRUIT_COUNSELLORS,
-  SLOTS_RECRUIT_REGIMENTS,
-  SLOTS_PURCHASE_SKYSHIPS,
-  SLOTS_FOUND_FACTORIES,
-  SLOTS_CONVERT_MONARCH,
-} from "@eots/game";
 
 type RowConfig = {
   label: string;
   actionId: string;
-  totalSlots: number;
   boardStateKey: string;
   moveName: string;
   moveExtraArgs?: unknown[];
@@ -37,12 +29,11 @@ const createRow = (config: RowConfig) => {
         cost=""
         actionId={config.actionId}
         images={[]}
-        totalSlots={config.totalSlots}
-        slotState={slotState as Record<number, string | string[] | undefined>}
-        onPlace={(slot) => {
+        slotState={slotState as string[]}
+        onPlace={() => {
           clearMoves(props);
           const move = (props.moves as Record<string, (...args: unknown[]) => void>)[config.moveName];
-          move(slot, ...(config.moveExtraArgs ?? []));
+          move(...(config.moveExtraArgs ?? []));
         }}
         playerInfo={props.G.playerInfo}
         accent={config.accent}
@@ -57,7 +48,6 @@ const createRow = (config: RowConfig) => {
 export const RecruitCounsellorsRow = createRow({
   label: "Recruit Counsellors",
   actionId: "recruit-counsellors",
-  totalSlots: SLOTS_RECRUIT_COUNSELLORS,
   boardStateKey: "recruitCounsellors",
   moveName: "recruitCounsellors",
   accent: "#6b7280",
@@ -67,7 +57,6 @@ export const RecruitCounsellorsRow = createRow({
 export const RecruitRegimentsRow = createRow({
   label: "Recruit Regiments",
   actionId: "recruit-regiments",
-  totalSlots: SLOTS_RECRUIT_REGIMENTS,
   boardStateKey: "recruitRegiments",
   moveName: "recruitRegiments",
   accent: "#4b5563",
@@ -77,7 +66,6 @@ export const RecruitRegimentsRow = createRow({
 export const PurchaseSkyshipsZeelandRow = createRow({
   label: "Skyships (Zeeland)",
   actionId: "skyships-zeeland",
-  totalSlots: SLOTS_PURCHASE_SKYSHIPS,
   boardStateKey: "purchaseSkyshipsZeeland",
   moveName: "purchaseSkyships",
   moveExtraArgs: ["zeeland"],
@@ -88,7 +76,6 @@ export const PurchaseSkyshipsZeelandRow = createRow({
 export const PurchaseSkyshipsVenoaRow = createRow({
   label: "Skyships (Venoa)",
   actionId: "skyships-venoa",
-  totalSlots: SLOTS_PURCHASE_SKYSHIPS,
   boardStateKey: "purchaseSkyshipsVenoa",
   moveName: "purchaseSkyships",
   moveExtraArgs: ["venoa"],
@@ -99,7 +86,6 @@ export const PurchaseSkyshipsVenoaRow = createRow({
 export const FoundFactoriesRow = createRow({
   label: "Found Factories",
   actionId: "found-factories",
-  totalSlots: SLOTS_FOUND_FACTORIES,
   boardStateKey: "foundFactories",
   moveName: "foundFactory",
   accent: "#8f6f34",
@@ -109,7 +95,6 @@ export const FoundFactoriesRow = createRow({
 export const ConvertMonarchRow = createRow({
   label: "Convert Monarch",
   actionId: "convert-monarch",
-  totalSlots: SLOTS_CONVERT_MONARCH,
   boardStateKey: "convertMonarch",
   moveName: "convertMonarch",
   accent: "#1e6091",

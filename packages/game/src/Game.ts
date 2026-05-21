@@ -583,7 +583,7 @@ const MyGame: Game<MyGameState> = {
           const currentPlayer = context.G.playerInfo[context.ctx.currentPlayer];
           currentPlayer.turnComplete = false;
 
-          if (currentPlayer.resources.counsellors === 0 && !currentPlayer.passed) {
+          if (currentPlayer.actionsTakenThisRound >= currentPlayer.resources.counsellors && !currentPlayer.passed) {
             currentPlayer.passed = true;
             logEvent(context.G, `${currentPlayer.kingdomName} has no counsellors remaining — auto-passed`);
           }
@@ -770,43 +770,16 @@ const MyGame: Game<MyGameState> = {
           context.G.turnOrder = newTurnOrder;
         }
 
-        // Return counsellors from action board slots
-        Object.entries(context.G.boardState).forEach(
-          ([key, gameStateObject]: [string, any]) => {
-            if (key === "foundBuildings") {
-              Object.values(gameStateObject).forEach((idArray: any) => {
-                idArray.forEach((id: string) => {
-                  context.G.playerInfo[id].resources.counsellors += 1;
-                });
-              });
-            } else if (key === "issueHolyDecree") {
-              context.G.boardState[key] = false;
-            } else {
-              Object.values(gameStateObject).forEach((id: any) => {
-                if (id) {
-                  context.G.playerInfo[id].resources.counsellors += 1;
-                }
-              });
-            }
-          }
-        );
-
         // Reset action board
         context.G.boardState = createInitialBoardState();
 
-        // Return counsellors from player board slots and reset flags
+        // Reset player state for new round
         Object.values(context.G.playerInfo).forEach((player) => {
+          // Reset action counter (counsellors stay as-is — they only change via recruit/spend)
+          player.actionsTakenThisRound = 0;
+
           const pb = player.playerBoardCounsellorLocations;
-          // Return 1 counsellor for each used slot
-          if (pb.buildSkyships) player.resources.counsellors += 1;
-          if (pb.conscriptLevies) player.resources.counsellors += 1;
-          if (pb.trainTroops) player.resources.counsellors += 1;
-          // Return counsellors for each fleet that was dispatched this round
-          const dispatchedCount = player.fleetInfo.filter(
-            (f) => f.dispatchedThisRound
-          ).length;
-          player.resources.counsellors += dispatchedCount;
-          // Reset all flags
+          // Reset all player board flags
           pb.buildSkyships = false;
           pb.conscriptLevies = false;
           pb.dispatchSkyshipFleet = false;

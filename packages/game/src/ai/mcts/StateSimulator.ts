@@ -62,7 +62,7 @@ export function applyMove(G: MyGameState, playerID: string, move: AIMove): void 
       player.resources.levies -= levs;
       player.resources.eliteRegiments -= elites;
       player.resources.gold -= 1; // approximate 1-3g
-      player.resources.counsellors -= 1;
+      player.actionsTakenThisRound += 1;
       const fleet = player.fleetInfo[fleetIdx];
       if (fleet) {
         // Remove from old battle map position
@@ -83,7 +83,7 @@ export function applyMove(G: MyGameState, playerID: string, move: AIMove): void 
       const fleetIdx = move.args[0] as number;
       const dest = move.args[1] as [number, number];
       player.resources.gold -= 1;
-      player.resources.counsellors -= 1;
+      player.actionsTakenThisRound += 1;
       const fleet = player.fleetInfo[fleetIdx];
       if (fleet) {
         const [oldX, oldY] = fleet.location;
@@ -104,7 +104,7 @@ export function applyMove(G: MyGameState, playerID: string, move: AIMove): void 
       const buildingType = typeMap[slot] ?? "cathedral";
       const cost = BUILDING_BASE_COST[buildingType] + occupants + 1;
       player.resources.gold -= cost;
-      player.resources.counsellors -= 1;
+      player.actionsTakenThisRound += 1;
 
       // Track action board slot
       const arr = G.boardState.foundBuildings[boardSlot];
@@ -131,44 +131,45 @@ export function applyMove(G: MyGameState, playerID: string, move: AIMove): void 
     }
 
     case "foundFactory": {
-      let occupants = 0;
-      for (const v of Object.values(G.boardState.foundFactories)) {
-        if (v !== undefined) occupants++;
-      }
-      player.resources.gold -= (occupants + 2);
-      player.resources.counsellors -= 1;
+      const ffLen = G.boardState.foundFactories.length;
+      player.resources.gold -= (ffLen + 2);
+      player.actionsTakenThisRound += 1;
       player.factories += 1;
-
-      // Track action board slot
-      for (const key of [1, 2, 3, 4] as const) {
-        if (G.boardState.foundFactories[key] === undefined) {
-          G.boardState.foundFactories[key] = playerID;
-          break;
-        }
-      }
+      G.boardState.foundFactories.push(playerID);
       break;
     }
 
     case "recruitCounsellors": {
-      const slot = (move.args[0] as number) ?? 0;
-      const cost = slot >= 2 ? 2 : 1;
-      player.resources.gold -= cost;
-      player.resources.counsellors -= 1;
+      const rcLen = G.boardState.recruitCounsellors.length;
+      player.resources.gold -= (1 + rcLen);
+      player.actionsTakenThisRound += 1;
       player.resources.counsellors += 1;
+      G.boardState.recruitCounsellors.push(playerID);
       break;
     }
 
     case "recruitRegiments": {
-      player.resources.gold -= (2 + ((move.args[0] as number) ?? 0));
+      const rrLen = G.boardState.recruitRegiments.length;
+      player.resources.gold -= (2 + rrLen);
       player.resources.regiments += RECRUIT_REGIMENTS_REWARD;
-      player.resources.counsellors -= 1;
+      player.actionsTakenThisRound += 1;
+      G.boardState.recruitRegiments.push(playerID);
       break;
     }
 
     case "purchaseSkyships": {
-      player.resources.gold -= (3 + ((move.args[0] as number) ?? 0));
+      const psLen =
+        move.args[0] === "zeeland"
+          ? G.boardState.purchaseSkyshipsZeeland.length
+          : G.boardState.purchaseSkyshipsVenoa.length;
+      player.resources.gold -= (3 + psLen);
       player.resources.skyships += 2;
-      player.resources.counsellors -= 1;
+      player.actionsTakenThisRound += 1;
+      if (move.args[0] === "zeeland") {
+        G.boardState.purchaseSkyshipsZeeland.push(playerID);
+      } else {
+        G.boardState.purchaseSkyshipsVenoa.push(playerID);
+      }
       break;
     }
 
@@ -218,7 +219,7 @@ export function applyMove(G: MyGameState, playerID: string, move: AIMove): void 
           player.resources.gold -= G.playerInfo[targetPID].cathedrals || 1;
         }
       }
-      player.resources.counsellors -= 1;
+      player.actionsTakenThisRound += 1;
       break;
     }
 
@@ -234,7 +235,8 @@ export function applyMove(G: MyGameState, playerID: string, move: AIMove): void 
         player.prisoners += count;
         player.freeDissenters = Math.max(0, player.freeDissenters - count);
       }
-      player.resources.counsellors -= 1;
+      player.actionsTakenThisRound += 1;
+      G.boardState.punishDissenters.push(playerID);
       break;
     }
 
@@ -283,13 +285,12 @@ export function applyMove(G: MyGameState, playerID: string, move: AIMove): void 
     }
 
     case "alterPlayerOrder": {
-      if (player.resources.counsellors > 0) player.resources.counsellors -= 1;
+      player.actionsTakenThisRound += 1;
       break;
     }
 
     case "issueHolyDecree": {
       player.resources.gold -= 2;
-      player.resources.counsellors -= 1;
       break;
     }
 
@@ -756,9 +757,7 @@ function resetActionBoard(G: MyGameState): void {
   for (const key of [1, 2, 3, 4] as const) {
     G.boardState.foundBuildings[key] = [];
   }
-  for (const key of [1, 2, 3, 4] as const) {
-    G.boardState.foundFactories[key] = undefined;
-  }
+  G.boardState.foundFactories = [];
 }
 
 function applyTaxes(G: MyGameState, allRoutes: Record<string, number>): void {
@@ -917,7 +916,7 @@ const ROLLOUT_ACTIONS: AIMove[] = [
 function simulateActions(G: MyGameState, _personalities: Record<string, BotPersonality>): void {
   for (const [pid, player] of Object.entries(G.playerInfo)) {
     for (const action of ROLLOUT_ACTIONS) {
-      if (player.resources.counsellors <= 0) break;
+      if (player.actionsTakenThisRound >= player.resources.counsellors) break;
       applyMove(G, pid, action);
     }
   }
@@ -931,12 +930,6 @@ export function simulateRound(
   G: MyGameState,
   personalities: Record<string, BotPersonality>,
 ): void {
-  // Save counsellor counts for reset at end of round
-  const counsellorCounts: Record<string, number> = {};
-  for (const [pid, player] of Object.entries(G.playerInfo)) {
-    counsellorCounts[pid] = player.resources.counsellors;
-  }
-
   // Discovery phase (sampled from remaining tile pool)
   simulateDiscovery(G);
 
@@ -961,9 +954,9 @@ export function simulateRound(
   applyTaxes(G, allRoutes);
   resetActionBoard(G);
 
-  // Restore counsellors (board returns them at round end)
-  for (const [pid, count] of Object.entries(counsellorCounts)) {
-    G.playerInfo[pid].resources.counsellors = count;
+  // Reset action counters for next round
+  for (const player of Object.values(G.playerInfo)) {
+    player.actionsTakenThisRound = 0;
   }
 
   // Final round bonuses and penalties

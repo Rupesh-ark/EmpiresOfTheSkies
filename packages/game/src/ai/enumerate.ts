@@ -308,7 +308,7 @@ export function enumerateLegalMoves(G: MyGameState, ctx: Ctx, playerID: string):
 
       // moveFleet — move deployed fleets to new tiles
       const player = G.playerInfo[playerID];
-      if (player.resources.counsellors >= 1) {
+      if (player.actionsTakenThisRound < player.resources.counsellors) {
         for (let fi = 0; fi < player.fleetInfo.length; fi++) {
           const fleet = player.fleetInfo[fi];
           if (fleet.dispatchedThisRound) continue;
@@ -330,7 +330,7 @@ export function enumerateLegalMoves(G: MyGameState, ctx: Ctx, playerID: string):
 
       // deployFleet — deploy from home with sensible loadouts
       if (
-        player.resources.counsellors >= 1 &&
+        player.actionsTakenThisRound < player.resources.counsellors &&
         player.resources.skyships >= 1
       ) {
         for (let fi = 0; fi < player.fleetInfo.length; fi++) {

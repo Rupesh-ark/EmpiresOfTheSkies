@@ -9,11 +9,23 @@ function sanitizeValue(val: unknown, fallback = 0): number {
   return val;
 }
 
-export const removeOneCounsellor = (G: MyGameState, playerID: string) => {
-  G.playerInfo[playerID].resources.counsellors -= 1;
+// New counsellor/action system — counsellors = max actions per round
+// Actions taken are tracked separately and reset each round
+
+export const incrementActionsTaken = (G: MyGameState, playerID: string) => {
+  G.playerInfo[playerID].actionsTakenThisRound += 1;
 };
-export const addOneCounsellor = (G: MyGameState, playerID: string) => {
+
+export const assertHasActionsAvailable = (G: MyGameState, playerID: string): boolean => {
+  return G.playerInfo[playerID].actionsTakenThisRound < G.playerInfo[playerID].resources.counsellors;
+};
+
+export const recruitCounsellor = (G: MyGameState, playerID: string) => {
   G.playerInfo[playerID].resources.counsellors += 1;
+};
+
+export const spendCounsellor = (G: MyGameState, playerID: string) => {
+  G.playerInfo[playerID].resources.counsellors -= 1;
 };
 export const removeVPAmount = (
   G: MyGameState,

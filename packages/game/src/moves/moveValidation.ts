@@ -10,8 +10,8 @@ export const validateMove = (
     return { code: "TURN_COMPLETE", message: "You have already taken your action this turn" };
   }
 
-  // Counsellor placement check
-  if (opts.costsCounsellor && G.playerInfo[playerID].resources.counsellors === 0) {
+  // Action availability check: actionsTaken < counsellors
+  if (opts.costsCounsellor && G.playerInfo[playerID].actionsTakenThisRound >= G.playerInfo[playerID].resources.counsellors) {
     return { code: "NO_COUNSELLORS", message: "No Counsellors available to place" };
   }
 

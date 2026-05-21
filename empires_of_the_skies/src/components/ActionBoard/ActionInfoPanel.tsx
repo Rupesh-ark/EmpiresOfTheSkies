@@ -7,11 +7,11 @@ import { tokens } from "@/theme";
 import { useActionHover, ACTION_INFO } from "./ActionHoverContext";
 import type { ActionBoardInfo } from "@eots/game";
 
-/** Count occupied slots in a boardState row object */
-const countOccupied = (row: Record<number, string | undefined>): number =>
-  Object.values(row).filter((v) => v !== undefined).length;
+/** Count entries in a boardState row (handles both arrays and record objects) */
+const countOccupied = (row: Record<number, string | undefined> | string[]): number =>
+  Array.isArray(row) ? row.length : Object.values(row).filter((v) => v !== undefined).length;
 
-/** Compute the actual gold cost for the next available slot in a row */
+/** Compute the actual gold cost for the next placement in a row */
 const computeRowCost = (
   actionKey: string,
   boardState: ActionBoardInfo | undefined
@@ -21,32 +21,28 @@ const computeRowCost = (
   switch (actionKey) {
     case "recruit-counsellors": {
       const filled = countOccupied(boardState.recruitCounsellors);
-      if (filled >= 3) return "Full";
       const costs = [1, 1, 2];
-      return `${costs[filled]}g + 1 Counsellor`;
+      const cost = costs[Math.min(filled, costs.length - 1)];
+      return `${cost}g + 1 Counsellor`;
     }
     case "recruit-regiments": {
       const filled = countOccupied(boardState.recruitRegiments);
-      if (filled >= 6) return "Full";
-      const cost = 1 + (filled + 1);
+      const cost = 1 + filled + 1;
       return `${cost}g + 1 Counsellor`;
     }
     case "skyships-zeeland": {
       const filled = countOccupied(boardState.purchaseSkyshipsZeeland);
-      if (filled >= 6) return "Full";
-      const cost = 2 + (filled + 1);
+      const cost = 2 + filled + 1;
       return `${cost}g + 1 Counsellor`;
     }
     case "skyships-venoa": {
       const filled = countOccupied(boardState.purchaseSkyshipsVenoa);
-      if (filled >= 6) return "Full";
-      const cost = 2 + (filled + 1);
+      const cost = 2 + filled + 1;
       return `${cost}g + 1 Counsellor`;
     }
     case "found-factories": {
       const filled = countOccupied(boardState.foundFactories);
-      if (filled >= 4) return "Full";
-      const cost = 1 + (filled + 1);
+      const cost = 1 + filled + 1;
       return `${cost}g + 1 Counsellor`;
     }
     case "cathedral": {
@@ -124,12 +120,12 @@ export const ActionInfoPanel = ({ boardState }: ActionInfoPanelProps) => {
           sx={{
             fontFamily: tokens.font.body,
             fontSize: tokens.fontSize.sm,
-            color: computedCost === "Full" ? tokens.ui.danger : tokens.ui.gold,
+            color: tokens.ui.gold,
             fontWeight: 600,
             mb: 1,
           }}
         >
-          {computedCost === "Full" ? "Row Full" : `Cost: ${displayCost}`}
+          Cost: {displayCost}
         </Typography>
       )}
 

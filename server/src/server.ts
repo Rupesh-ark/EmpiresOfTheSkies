@@ -70,7 +70,7 @@ server.app.use(async (ctx: any, next: any) => {
   if (ctx.path === "/health" && ctx.method === "GET") {
     let dbStatus = "unknown";
     try {
-      await db.client.query("SELECT 1");
+      await (db as any).client.query("SELECT 1");
       dbStatus = "connected";
     } catch {
       dbStatus = "disconnected";

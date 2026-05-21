@@ -14,8 +14,8 @@ export interface CollapsedActionRowProps {
   label: string;
   cost: string;
   images: string[];
-  totalSlots: number;
-  slotState: Record<number, string | undefined>;
+  totalSlots?: number;
+  slotState: Record<number, string | undefined> | string[];
   onPlace: (slotIndex: number) => void;
   disabled?: boolean;
   disabledReason?: string;
@@ -41,21 +41,17 @@ export const CollapsedActionRow = ({
 }: CollapsedActionRowProps) => {
   const { setHoveredAction } = useActionHover();
 
-  let nextSlot: number | null = null;
-  for (let i = 0; i < totalSlots; i++) {
-    if (!slotState[i + 1]) {
-      nextSlot = i;
-      break;
-    }
-  }
+  // Normalize slotState to array of player IDs
+  const isArray = Array.isArray(slotState);
+  const placedIds: string[] = isArray
+    ? slotState
+    : Object.values(slotState).filter((v): v is string => v !== undefined);
 
-  const allFilled = nextSlot === null;
-  const isDisabled = disabled || allFilled;
-
-  const placedCount = Object.values(slotState).filter(Boolean).length;
+  const hasSlots = totalSlots !== undefined && totalSlots > 0;
+  const isDisabled = disabled;
 
   const handleClick = () => {
-    if (!isDisabled && nextSlot !== null) onPlace(nextSlot);
+    if (!isDisabled) onPlace(0);
   };
 
   const row = (
@@ -149,7 +145,7 @@ export const CollapsedActionRow = ({
         </Typography>
       </Box>
 
-      {/* Slot count + counsellor dots */}
+      {/* Counsellor dots + count */}
       <Box
         sx={{
           display: "flex",
@@ -159,19 +155,20 @@ export const CollapsedActionRow = ({
           pr: `${tokens.spacing.sm}px`,
         }}
       >
-        <Typography
-          sx={{
-            fontFamily: tokens.font.body,
-            fontSize: 10,
-            color: tokens.ui.textMuted,
-            fontWeight: 600,
-          }}
-        >
-          {placedCount}/{totalSlots}
-        </Typography>
-        {Array.from({ length: totalSlots }).map((_, i) => {
-          const slotPid = slotState[i + 1];
-          const info = slotPid ? playerInfo[slotPid] : null;
+        {placedIds.length > 0 && (
+          <Typography
+            sx={{
+              fontFamily: tokens.font.body,
+              fontSize: 10,
+              color: tokens.ui.textMuted,
+              fontWeight: 600,
+            }}
+          >
+            {placedIds.length}
+          </Typography>
+        )}
+        {placedIds.slice(0, 6).map((pid, i) => {
+          const info = playerInfo[pid];
           return info ? (
             <PlayerDot
               key={i}
@@ -180,9 +177,26 @@ export const CollapsedActionRow = ({
               size="sm"
               tooltip={info.kingdomName}
             />
-          ) : (
+          ) : null;
+        })}
+        {placedIds.length > 6 && (
+          <Typography
+            sx={{
+              fontFamily: tokens.font.body,
+              fontSize: 9,
+              color: tokens.ui.textMuted,
+              fontWeight: 700,
+            }}
+          >
+            +{placedIds.length - 6}
+          </Typography>
+        )}
+        {/* Empty placeholders only for fixed-slot rows */}
+        {hasSlots &&
+          placedIds.length < totalSlots! &&
+          Array.from({ length: Math.min(totalSlots! - placedIds.length, 3) }).map((_, i) => (
             <Box
-              key={i}
+              key={`empty-${i}`}
               sx={{
                 width: 10,
                 height: 10,
@@ -191,8 +205,7 @@ export const CollapsedActionRow = ({
                 backgroundColor: `${tokens.ui.surface}88`,
               }}
             />
-          );
-        })}
+          ))}
       </Box>
     </Box>
   );
@@ -213,20 +226,15 @@ export const CollapsedActionRow = ({
         {actionInfo.description}
       </Typography>
       <Typography sx={{ fontFamily: tokens.font.body, fontSize: 10, color: tokens.ui.textMuted, mt: 0.5 }}>
-        {placedCount} of {totalSlots} slots filled{totalSlots > 1 ? " — cost increases per slot" : ""}
+        {placedIds.length} counsellor{placedIds.length !== 1 ? "s" : ""} placed{hasSlots ? ` — ${totalSlots!} slots` : ""}
       </Typography>
       {isDisabled && disabledReason && (
         <Typography sx={{ fontFamily: tokens.font.body, fontSize: 11, color: tokens.ui.danger, fontWeight: 600, mt: 0.5 }}>
           {disabledReason}
         </Typography>
       )}
-      {isDisabled && allFilled && !disabledReason && (
-        <Typography sx={{ fontFamily: tokens.font.body, fontSize: 11, color: tokens.ui.danger, fontWeight: 600, mt: 0.5 }}>
-          All slots filled
-        </Typography>
-      )}
     </Box>
-  ) : (isDisabled ? (disabledReason ?? "All slots filled") : "");
+  ) : (isDisabled ? (disabledReason ?? "") : "");
 
   if (richTooltip) {
     return (

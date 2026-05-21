@@ -59,15 +59,15 @@ describe("actionPhase — recruitRegiments changes all state correctly", () => {
     const ctx = buildCtx("0");
 
     const goldBefore = G.playerInfo["0"].resources.gold;
-    const counsellorsBefore = G.playerInfo["0"].resources.counsellors;
+    const actionsBefore = G.playerInfo["0"].actionsTakenThisRound;
     const regsBefore = G.playerInfo["0"].resources.regiments;
 
-    recruitRegiments.fn({ G, ctx, playerID: "0" }, 0); // slot index 0 → slot position 1 → cost = 2G
+    recruitRegiments.fn({ G, ctx, playerID: "0" }, 0);
 
     expect(G.playerInfo["0"].resources.regiments).toBe(regsBefore + 4);
-    expect(G.playerInfo["0"].resources.gold).toBe(goldBefore - 2); // cost = 1 + slot = 2
-    expect(G.playerInfo["0"].resources.counsellors).toBe(counsellorsBefore - 1);
-    expect(G.boardState.recruitRegiments[1]).toBe("0");
+    expect(G.playerInfo["0"].resources.gold).toBe(goldBefore - 2); // cost = 1 + array.length + 1 = 2
+    expect(G.playerInfo["0"].actionsTakenThisRound).toBe(actionsBefore + 1);
+    expect(G.boardState.recruitRegiments[0]).toBe("0");
     expect(G.playerInfo["0"].turnComplete).toBe(true);
   });
 });
@@ -121,10 +121,10 @@ describe("actionPhase — trainTroops deducts counsellor and changes stage", () 
     ]);
     const ctx = buildCtx("0");
 
-    const counsellorsBefore = G.playerInfo["0"].resources.counsellors;
+    const actionsBefore = G.playerInfo["0"].actionsTakenThisRound;
     trainTroops.fn({ G, ctx, playerID: "0" });
 
-    expect(G.playerInfo["0"].resources.counsellors).toBe(counsellorsBefore - 1);
+    expect(G.playerInfo["0"].actionsTakenThisRound).toBe(actionsBefore + 1);
     expect(G.playerInfo["0"].playerBoardCounsellorLocations.trainTroops).toBe(true);
     expect(G.stage).toEqual({ phase: "actions", sub: "confirm_fow_draw" });
   });
@@ -227,22 +227,22 @@ describe("actionPhase — counsellors deplete correctly across multiple actions"
     const ctx = buildCtx("0");
 
     // Reset turnComplete between actions (in real game, each action is a separate turn)
-    recruitRegiments.fn({ G, ctx, playerID: "0" }, 0); // costs 1 counsellor
+    recruitRegiments.fn({ G, ctx, playerID: "0" }, 0);
     G.playerInfo["0"].turnComplete = false;
-    expect(G.playerInfo["0"].resources.counsellors).toBe(3);
+    expect(G.playerInfo["0"].actionsTakenThisRound).toBe(1);
 
-    recruitRegiments.fn({ G, ctx, playerID: "0" }, 1); // costs 1 counsellor
+    recruitRegiments.fn({ G, ctx, playerID: "0" }, 1);
     G.playerInfo["0"].turnComplete = false;
-    expect(G.playerInfo["0"].resources.counsellors).toBe(2);
+    expect(G.playerInfo["0"].actionsTakenThisRound).toBe(2);
 
     recruitRegiments.fn({ G, ctx, playerID: "0" }, 2);
     G.playerInfo["0"].turnComplete = false;
-    expect(G.playerInfo["0"].resources.counsellors).toBe(1);
+    expect(G.playerInfo["0"].actionsTakenThisRound).toBe(3);
 
     recruitRegiments.fn({ G, ctx, playerID: "0" }, 3);
-    expect(G.playerInfo["0"].resources.counsellors).toBe(0);
+    expect(G.playerInfo["0"].actionsTakenThisRound).toBe(4);
 
-    // Now at 0 counsellors — any counsellor action should fail
+    // Now at max actions (counsellors = 4, actionsTaken = 4) — any counsellor action should fail
     G.playerInfo["0"].turnComplete = false;
     const result = foundFactory.fn({ G, ctx, playerID: "0" }, 0);
     expect(result).toBe(INVALID_MOVE);
@@ -274,7 +274,7 @@ describe("actionPhase — multiple fleet dispatches per round", () => {
     deployFleet.fn({ G, ctx, playerID: "0", events }, 0, [5, 0], 2, 1, 0);
     expect(G.playerInfo["0"].fleetInfo[0].location).toEqual([5, 0]);
     expect(G.playerInfo["0"].fleetInfo[0].dispatchedThisRound).toBe(true);
-    expect(G.playerInfo["0"].resources.counsellors).toBe(3);
+    expect(G.playerInfo["0"].actionsTakenThisRound).toBe(1);
 
     // Reset turnComplete so player can act again (simulating next IPO turn)
     G.playerInfo["0"].turnComplete = false;
@@ -283,7 +283,7 @@ describe("actionPhase — multiple fleet dispatches per round", () => {
     deployFleet.fn({ G, ctx, playerID: "0", events }, 1, [3, 0], 2, 1, 0);
     expect(G.playerInfo["0"].fleetInfo[1].location).toEqual([3, 0]);
     expect(G.playerInfo["0"].fleetInfo[1].dispatchedThisRound).toBe(true);
-    expect(G.playerInfo["0"].resources.counsellors).toBe(2);
+    expect(G.playerInfo["0"].actionsTakenThisRound).toBe(2);
 
     // Fleet 0 stays dispatched, fleet 2 remains undispatched
     expect(G.playerInfo["0"].fleetInfo[0].dispatchedThisRound).toBe(true);

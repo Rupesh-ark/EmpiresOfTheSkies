@@ -1,7 +1,7 @@
 import { MyGameState, MoveError, MoveDefinition } from "../../types";
 import { validateMove } from "../moveValidation";
 import { INVALID_MOVE } from "boardgame.io/core";
-import { removeOneCounsellor } from "../../helpers/stateUtils";
+import { incrementActionsTaken } from "../../helpers/stateUtils";
 import { setStage } from "../../helpers/stageUtils";
 
 const validateTrainTroops = (
@@ -22,7 +22,7 @@ const trainTroops: MoveDefinition = {
   fn: ({ G, playerID }) => {
     if (validateTrainTroops(G, playerID)) return INVALID_MOVE;
     const playerBoard = G.playerInfo[playerID].playerBoardCounsellorLocations;
-    removeOneCounsellor(G, playerID);
+    incrementActionsTaken(G, playerID);
     playerBoard.trainTroops = true;
     setStage(G, "actions", "confirm_fow_draw");
   },

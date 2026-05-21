@@ -73,6 +73,7 @@ export const buildPlayerInfoMap = (ctx: Ctx): { [id: string]: PlayerInfo } => {
       agitatorsSentThisRound: [],
       shipyards: 0,
       factories: STARTING_RESOURCES.factories,
+      actionsTakenThisRound: 0,
     };
   });
 

@@ -4,40 +4,29 @@ import { INVALID_MOVE } from "boardgame.io/core";
 import {
   addRegiments,
   removeGoldAmount,
-  removeOneCounsellor,
+  incrementActionsTaken,
 } from "../../helpers/stateUtils";
 import { RECRUIT_REGIMENTS_REWARD } from "../../data/gameData";
 
 const validateRecruitRegiments = (
   G: MyGameState,
-  playerID: string,
-  slotIndex: number
+  playerID: string
 ): MoveError | null => {
   const base = validateMove(playerID, G, { costsCounsellor: true, costsGold: true });
   if (base) return base;
-
-  const value: keyof typeof G.boardState.recruitRegiments = (slotIndex + 1) as
-    | 1 | 2 | 3 | 4 | 5 | 6;
-
-  if (G.boardState.recruitRegiments[value] !== undefined) {
-    return { code: "SLOT_TAKEN", message: "That Regiment recruitment slot is already taken" };
-  }
 
   return null;
 };
 
 const recruitRegiments: MoveDefinition = {
-  fn: ({ G, playerID }, ...args: any[]) => {
-    const value: keyof typeof G.boardState.recruitRegiments = args[0] + 1;
-    if (validateRecruitRegiments(G, playerID, args[0])) return INVALID_MOVE;
-    // cost = 1 Gold + 1 Gold per counsellor in slot (including this one)
-    // Slot position equals the count of counsellors, so cost = 1 + slot position
-    const cost = 1 + value;
-    removeOneCounsellor(G, playerID);
+  fn: ({ G, playerID }) => {
+    if (validateRecruitRegiments(G, playerID)) return INVALID_MOVE;
+
+    const cost = 1 + G.boardState.recruitRegiments.length + 1;
+    incrementActionsTaken(G, playerID);
     removeGoldAmount(G, playerID, cost);
-    // always 4 regiments per action
     addRegiments(G, playerID, RECRUIT_REGIMENTS_REWARD);
-    G.boardState.recruitRegiments[value] = playerID;
+    G.boardState.recruitRegiments.push(playerID);
     G.playerInfo[playerID].turnComplete = true;
   },
   errorMessage: "Cannot recruit Regiments right now",
