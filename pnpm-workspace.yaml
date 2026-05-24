@@ -10,3 +10,4 @@ allowBuilds:
 # (boardgame.io depends on koa-socket-2 → koa → is-generator-function)
 overrides:
   is-generator-function: 1.0.10
+  boardgame.io: "npm:@lean-poker/boardgame.io@^0.50.4"
