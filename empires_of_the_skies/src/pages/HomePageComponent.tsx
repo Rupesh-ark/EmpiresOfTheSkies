@@ -9,7 +9,7 @@ import {
   Typography,
   Box,
 } from "@mui/material";
-import { LobbyClient } from "boardgame.io/dist/types/packages/client";
+import { LobbyClient } from "boardgame.io/client";
 import { useState } from "react";
 import React from "react";
 import { useNavigate } from "react-router-dom";

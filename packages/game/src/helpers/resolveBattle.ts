@@ -1,5 +1,5 @@
 import { Ctx } from "boardgame.io";
-import { EventsAPI } from "boardgame.io/dist/types/src/plugins/plugin-events";
+import { EventsAPI } from "boardgame.io/dist/types/src/plugins/events/events";
 import { FleetInfo, GoodKey, MyGameState, PlayerInfo } from "../types";
 // findNext functions no longer called directly — resolutionSequencer handles all transitions
 import { drawFortuneOfWarCard, findPossibleDestinations, humanizeTileName } from "./helpers";

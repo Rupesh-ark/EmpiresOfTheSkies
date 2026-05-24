@@ -1,4 +1,4 @@
-import { BoardProps } from "boardgame.io/dist/types/packages/react";
+import type { BoardProps } from "boardgame.io/react";
 import type { Ctx } from "boardgame.io";
 import type { EventsAPI } from "boardgame.io/dist/types/src/plugins/events/events";
 import type { RandomAPI } from "boardgame.io/dist/types/src/plugins/random/random";
