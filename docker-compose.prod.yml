@@ -1,8 +1,6 @@
 services:
   eots-server:
-    build:
-      context: .
-      dockerfile: server/Dockerfile
+    image: ghcr.io/rupesh-ark/empiresoftheskies:latest
     container_name: eots-server
     restart: unless-stopped
     env_file: deploy/.env.production

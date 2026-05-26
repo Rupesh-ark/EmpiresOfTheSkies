@@ -51,6 +51,7 @@ server/storage/
 !.gitignore
 !.env.example
 !.dockerignore
+!.github/
 
 /research
 /feedback
