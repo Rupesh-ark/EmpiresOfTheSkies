@@ -46,14 +46,13 @@ jobs:
           cache-to: type=gha,mode=max
 
       - name: Copy docker-compose.prod.yml to VPS
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_SSH_KEY }}
-          source: "docker-compose.prod.yml"
-          target: "/opt/empires-of-the-skies"
-          strip_components: 0
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts
+          scp -i ~/.ssh/deploy_key docker-compose.prod.yml ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/opt/empires-of-the-skies/
+          rm ~/.ssh/deploy_key
 
       - name: Deploy to VPS
         uses: appleboy/ssh-action@v1
