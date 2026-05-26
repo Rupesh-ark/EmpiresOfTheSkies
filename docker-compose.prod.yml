@@ -4,8 +4,8 @@ services:
     container_name: eots-server
     restart: unless-stopped
     env_file: deploy/.env.production
-    ports:
-      - "8000:8000"
+    expose:
+      - "8000"
     volumes:
       - eots_bot_logs:/app/bot-logs
       - eots_analytics:/app/server/analytics
