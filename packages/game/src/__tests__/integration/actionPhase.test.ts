@@ -17,6 +17,7 @@ import recruitRegiments from "../../moves/actions/recruitRegiments";
 import foundFactory from "../../moves/actions/foundFactory";
 import trainTroops from "../../moves/actions/trainTroops";
 import deployFleet from "../../moves/actions/deployFleet";
+import purchaseSkyships from "../../moves/actions/purchaseSkyships";
 import pass from "../../moves/pass";
 import {
   buildInitialG,
@@ -317,5 +318,78 @@ describe("actionPhase — multiple fleet dispatches per round", () => {
     const result = deployFleet.validate?.(G, "0", 0, [3, 0], 2, 1, 0, 0);
     expect(result).not.toBeNull();
     expect(result?.code).toBe("ALREADY_DISPATCHED");
+  });
+});
+
+// Test 7: purchaseSkyships — Zeeland vs Venoa routing
+
+describe("actionPhase — purchaseSkyships routes to the correct republic", () => {
+  it("purchasing from Zeeland fills the Zeeland slot and grants 2 skyships", () => {
+    const G = buildInitialG([
+      buildPlayer("0", { resources: buildResources({ gold: 10, counsellors: 4, skyships: 0 }) }),
+      buildPlayer("1"),
+    ]);
+    const ctx = buildCtx("0");
+
+    const goldBefore = G.playerInfo["0"].resources.gold;
+    const skyshipsBefore = G.playerInfo["0"].resources.skyships;
+
+    purchaseSkyships.fn({ G, ctx, playerID: "0" }, "zeeland");
+
+    expect(G.playerInfo["0"].resources.skyships).toBe(skyshipsBefore + 2);
+    expect(G.playerInfo["0"].resources.gold).toBe(goldBefore - 3); // 2 base + 0 existing + 1 self = 3
+    expect(G.boardState.purchaseSkyshipsZeeland).toContain("0");
+    expect(G.boardState.purchaseSkyshipsVenoa).not.toContain("0");
+    expect(G.playerInfo["0"].turnComplete).toBe(true);
+  });
+
+  it("purchasing from Venoa fills the Venoa slot and grants 2 skyships", () => {
+    const G = buildInitialG([
+      buildPlayer("0", { resources: buildResources({ gold: 10, counsellors: 4, skyships: 0 }) }),
+      buildPlayer("1"),
+    ]);
+    const ctx = buildCtx("0");
+
+    const goldBefore = G.playerInfo["0"].resources.gold;
+    const skyshipsBefore = G.playerInfo["0"].resources.skyships;
+
+    purchaseSkyships.fn({ G, ctx, playerID: "0" }, "venoa");
+
+    expect(G.playerInfo["0"].resources.skyships).toBe(skyshipsBefore + 2);
+    expect(G.playerInfo["0"].resources.gold).toBe(goldBefore - 3);
+    expect(G.boardState.purchaseSkyshipsVenoa).toContain("0");
+    expect(G.boardState.purchaseSkyshipsZeeland).not.toContain("0");
+    expect(G.playerInfo["0"].turnComplete).toBe(true);
+  });
+
+  it("Venoa cost escalates independently when Zeeland is already occupied", () => {
+    const G = buildInitialG([
+      buildPlayer("0", { resources: buildResources({ gold: 10, counsellors: 4, skyships: 0 }) }),
+      buildPlayer("1", { resources: buildResources({ gold: 10, counsellors: 4, skyships: 0 }) }),
+    ]);
+
+    // Player 1 buys from Venoa first, inflating the Venoa row
+    purchaseSkyships.fn({ G, ctx: buildCtx("1"), playerID: "1" }, "venoa");
+    G.playerInfo["1"].turnComplete = false;
+
+    const goldBefore = G.playerInfo["0"].resources.gold;
+
+    // Player 0 also buys from Venoa — should pay the escalated cost
+    purchaseSkyships.fn({ G, ctx: buildCtx("0"), playerID: "0" }, "venoa");
+
+    expect(G.boardState.purchaseSkyshipsVenoa).toEqual(["1", "0"]);
+    expect(G.playerInfo["0"].resources.gold).toBe(goldBefore - 4); // 2 base + 1 existing + 1 self = 4
+    expect(G.boardState.purchaseSkyshipsZeeland).toHaveLength(0);
+  });
+
+  it("returns INVALID_MOVE for an invalid republic", () => {
+    const G = buildInitialG([
+      buildPlayer("0", { resources: buildResources({ gold: 10, counsellors: 4, skyships: 0 }) }),
+      buildPlayer("1"),
+    ]);
+    const ctx = buildCtx("0");
+
+    const result = purchaseSkyships.fn({ G, ctx, playerID: "0" }, "atlantis");
+    expect(result).toBe(INVALID_MOVE);
   });
 });

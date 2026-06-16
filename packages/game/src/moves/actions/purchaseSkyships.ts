@@ -10,19 +10,25 @@ import {
 const validatePurchaseSkyships = (
   G: MyGameState,
   playerID: string,
-  _slotIndex: number,
   republic: "zeeland" | "venoa"
 ): MoveError | null => {
   const base = validateMove(playerID, G, { costsCounsellor: true, costsGold: true });
   if (base) return base;
+
+  if (republic !== "zeeland" && republic !== "venoa") {
+    return {
+      code: "INVALID_REPUBLIC",
+      message: `Invalid republic: ${republic}. Must be 'zeeland' or 'venoa'.`,
+    };
+  }
 
   return null;
 };
 
 const purchaseSkyships: MoveDefinition = {
   fn: ({ G, playerID }, ...args: any[]) => {
-    const republic: "zeeland" | "venoa" = args[1];
-    if (validatePurchaseSkyships(G, playerID, args[0], republic)) return INVALID_MOVE;
+    const republic: "zeeland" | "venoa" = args[0];
+    if (validatePurchaseSkyships(G, playerID, republic)) return INVALID_MOVE;
 
     const boardSlots =
       republic === "venoa"

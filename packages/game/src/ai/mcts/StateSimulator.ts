@@ -908,7 +908,7 @@ function simulateEvents(G: MyGameState): void {
 const ROLLOUT_ACTIONS: AIMove[] = [
   { move: "foundBuildings", args: [0] },
   { move: "recruitRegiments", args: [0] },
-  { move: "purchaseSkyships", args: [0] },
+  { move: "purchaseSkyships", args: ["zeeland"] },
   { move: "recruitCounsellors", args: [0] },
   { move: "foundFactory", args: [0] },
 ];

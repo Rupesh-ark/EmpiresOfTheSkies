@@ -46,11 +46,12 @@ export const getInitialOutpostsAndColoniesInfo = (): MapBuildingInfo[][] => {
     garrisonedEliteRegiments: 0,
     fort: [],
   };
-  const emptyRow: MapBuildingInfo[] = Array(8).fill(emptyBuilding);
+  // Each cell must be a distinct object; otherwise claiming one tile in a row
+  // mutates the shared building object for every tile in that row.
   return [
-    [...emptyRow],
-    [...emptyRow],
-    [...emptyRow],
-    [...emptyRow],
+    Array.from({ length: 8 }, () => ({ ...emptyBuilding })),
+    Array.from({ length: 8 }, () => ({ ...emptyBuilding })),
+    Array.from({ length: 8 }, () => ({ ...emptyBuilding })),
+    Array.from({ length: 8 }, () => ({ ...emptyBuilding })),
   ];
 };

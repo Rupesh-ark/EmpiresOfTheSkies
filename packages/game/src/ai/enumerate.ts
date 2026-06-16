@@ -201,13 +201,22 @@ export function enumerateLegalMoves(G: MyGameState, ctx: Ctx, playerID: string):
       const failedValidations: string[] = [];
 
       // Slot-based moves
-      for (const moveName of ["recruitCounsellors", "recruitRegiments", "purchaseSkyships"] as const) {
+      for (const moveName of ["recruitCounsellors", "recruitRegiments"] as const) {
         for (const slotIndex of [0, 1, 2]) {
           if (tryValidate(moveName, G, playerID, slotIndex)) {
             moves.push({ move: moveName, args: [slotIndex] });
           } else {
             failedValidations.push(`${moveName}[${slotIndex}]`);
           }
+        }
+      }
+
+      // Purchase Skyships from either republic
+      for (const republic of ["zeeland", "venoa"] as const) {
+        if (tryValidate("purchaseSkyships", G, playerID, republic)) {
+          moves.push({ move: "purchaseSkyships", args: [republic] });
+        } else {
+          failedValidations.push(`purchaseSkyships[${republic}]`);
         }
       }
 

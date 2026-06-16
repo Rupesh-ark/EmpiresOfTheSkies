@@ -170,7 +170,8 @@ export const MOVE_DEFINITIONS: Record<string, MoveDefinition> = {
       const [x, y] = G.mapState.currentBattle;
       const building = G.mapState.buildings[y]?.[x];
       if (!building) return { code: "NO_TILE", message: "No tile at current battle location" };
-      if (building.player?.id !== playerID) return { code: "NOT_OWNER", message: "You do not control this tile" };
+      // Unclaimed (or yielded) lands are valid; only reject if another player owns it.
+      if (building.player && building.player.id !== playerID) return { code: "NOT_OWNER", message: "You do not control this tile" };
       return null;
     },
   },
