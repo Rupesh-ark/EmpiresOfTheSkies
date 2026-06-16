@@ -12,6 +12,7 @@ import {
 } from "@mui/material";
 import { colourToKingdomMap } from "@eots/game";
 import { tokens } from "@/theme";
+import { getAvailableActions } from "@/utils/gameHelpers";
 
 const colHeaderCellSx = {
   fontWeight: 700,
@@ -42,7 +43,7 @@ const PlayerTable = (props: PlayerTableProps) => {
           <TableHead>
             <TableRow sx={{ backgroundColor: tokens.ui.surfaceRaised }}>
               <TableCell sx={colHeaderCellSx}>Kingdom</TableCell>
-              <TableCell align="right" sx={colHeaderCellSx}>Counsellors</TableCell>
+              <TableCell align="right" sx={colHeaderCellSx}>Actions</TableCell>
               <TableCell align="right" sx={colHeaderCellSx}>Gold</TableCell>
               <TableCell align="right" sx={colHeaderCellSx}>Skyships</TableCell>
               <TableCell align="right" sx={colHeaderCellSx}>Regiments</TableCell>
@@ -147,7 +148,7 @@ const PlayerTable = (props: PlayerTableProps) => {
                     )}
                   </Box>
                 </TableCell>
-                <TableCell align="right">{value.resources.counsellors}</TableCell>
+                <TableCell align="right">{getAvailableActions(value)}</TableCell>
                 <TableCell align="right">{value.resources.gold}</TableCell>
                 <TableCell align="right">{value.resources.skyships}</TableCell>
                 <TableCell align="right">{value.resources.regiments}</TableCell>

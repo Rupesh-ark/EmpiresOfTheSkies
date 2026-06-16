@@ -14,6 +14,7 @@ import { Box, Typography, Collapse, Tooltip } from "@mui/material";
 import { ExpandMore, ExpandLess } from "@mui/icons-material";
 import { MyGameProps, PlayerInfo, colourToKingdomMap } from "@eots/game";
 import { tokens, IconCounsellor, IconGold, IconVP, IconRegiment, IconElite, IconLevy, IconSkyship, IconFoWCard } from "@/theme";
+import { getAvailableActions } from "@/utils/gameHelpers";
 import { ResourceChip } from "@/components/atoms/ResourceChip";
 import popeLogo from "@/boards_and_assets/action_board/pope_logo.webp";
 import captainGeneralLogo from "@/boards_and_assets/action_board/captain_general.webp";
@@ -205,7 +206,7 @@ const OpponentSummary = ({ props }: { props: MyGameProps }) => {
 
             {/* Row 2: Key resources */}
             <Box sx={{ display: "flex", alignItems: "center", gap: `${tokens.spacing.xs}px`, flexWrap: "wrap" }}>
-              <Tooltip title="Counsellors" placement="top" arrow><span><ResourceChip icon={<IconCounsellor />} value={player.resources.counsellors} size="sm" variant={player.resources.counsellors === 0 ? "muted" : "default"} /></span></Tooltip>
+              <Tooltip title={`Actions remaining (${getAvailableActions(player)} of ${player.resources.counsellors})`} placement="top" arrow><span><ResourceChip icon={<IconCounsellor />} value={getAvailableActions(player)} size="sm" variant={getAvailableActions(player) === 0 ? "muted" : "default"} /></span></Tooltip>
               <Tooltip title="Gold" placement="top" arrow><span><ResourceChip icon={<IconGold />} value={player.resources.gold} size="sm" variant={player.resources.gold < 0 ? "negative" : "default"} /></span></Tooltip>
               <Tooltip title="Regiments" placement="top" arrow><span><ResourceChip icon={<IconRegiment />} value={player.resources.regiments} size="sm" variant={player.resources.regiments === 0 ? "muted" : "default"} /></span></Tooltip>
               <Tooltip title="Elite Regiments" placement="top" arrow><span><ResourceChip icon={<IconElite />} value={player.resources.eliteRegiments ?? 0} size="sm" variant={(player.resources.eliteRegiments ?? 0) === 0 ? "muted" : "default"} /></span></Tooltip>

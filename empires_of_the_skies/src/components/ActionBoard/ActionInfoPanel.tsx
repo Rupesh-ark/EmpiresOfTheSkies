@@ -23,47 +23,47 @@ const computeRowCost = (
       const filled = countOccupied(boardState.recruitCounsellors);
       const costs = [1, 1, 2];
       const cost = costs[Math.min(filled, costs.length - 1)];
-      return `${cost}g + 1 Counsellor`;
+      return `${cost}g + 1 Action`;
     }
     case "recruit-regiments": {
       const filled = countOccupied(boardState.recruitRegiments);
       const cost = 1 + filled + 1;
-      return `${cost}g + 1 Counsellor`;
+      return `${cost}g + 1 Action`;
     }
     case "skyships-zeeland": {
       const filled = countOccupied(boardState.purchaseSkyshipsZeeland);
       const cost = 2 + filled + 1;
-      return `${cost}g + 1 Counsellor`;
+      return `${cost}g + 1 Action`;
     }
     case "skyships-venoa": {
       const filled = countOccupied(boardState.purchaseSkyshipsVenoa);
       const cost = 2 + filled + 1;
-      return `${cost}g + 1 Counsellor`;
+      return `${cost}g + 1 Action`;
     }
     case "found-factories": {
       const filled = countOccupied(boardState.foundFactories);
       const cost = 1 + filled + 1;
-      return `${cost}g + 1 Counsellor`;
+      return `${cost}g + 1 Action`;
     }
     case "cathedral": {
       const filled = boardState.foundBuildings[1].length;
       const cost = 5 + filled + 1;
-      return `${cost}g + 1 Counsellor`;
+      return `${cost}g + 1 Action`;
     }
     case "palace": {
       const filled = boardState.foundBuildings[2].length;
       const cost = 5 + filled + 1;
-      return `${cost}g + 1 Counsellor`;
+      return `${cost}g + 1 Action`;
     }
     case "shipyard": {
       const filled = boardState.foundBuildings[3].length;
       const cost = 3 + filled + 1;
-      return `${cost}g + 1 Counsellor`;
+      return `${cost}g + 1 Action`;
     }
     case "fort": {
       const filled = boardState.foundBuildings[4].length;
       const cost = 2 + filled + 1;
-      return `${cost}g + 1 Counsellor`;
+      return `${cost}g + 1 Action`;
     }
     default:
       return null;

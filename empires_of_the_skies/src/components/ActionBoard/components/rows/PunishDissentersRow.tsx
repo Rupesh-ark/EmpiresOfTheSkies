@@ -11,7 +11,7 @@ import {
 import { Stack, Typography } from "@mui/material";
 import { DialogShell } from "@/components/atoms/DialogShell";
 import { GameButton } from "@/components/atoms/GameButton";
-import { clearMoves } from "@/utils/gameHelpers";
+import { clearMoves, getAvailableActions } from "@/utils/gameHelpers";
 
 const PunishDissentersRow = (props: ActionBoardProps) => {
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -24,7 +24,7 @@ const PunishDissentersRow = (props: ActionBoardProps) => {
       : BASE_PRISONERS;
   const prisonCapacity = player ? maxPrisoners - player.prisoners : 0;
   const prisonFull = prisonCapacity <= 0;
-  const hasActionAvailable = player ? player.actionsTakenThisRound < player.resources.counsellors : false;
+  const hasActionAvailable = player ? getAvailableActions(player) > 0 : false;
   const canSpendCounsellor = player ? player.resources.counsellors >= 1 : false;
   const hasPrisoners = player ? player.prisoners > 0 : false;
 

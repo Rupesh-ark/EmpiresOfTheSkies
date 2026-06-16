@@ -17,6 +17,7 @@ import { GamePanel } from "@/components/atoms/GamePanel";
 import { CardFrame } from "@/components/atoms/CardFrame";
 import { CardLightbox, type EnlargedCard } from "@/components/atoms/CardLightbox";
 import { getLocationPresentation } from "@/utils/locationLabels";
+import { getAvailableActions } from "@/utils/gameHelpers";
 import {
   SWORD_CARDS,
   SHIELD_CARDS,
@@ -100,7 +101,7 @@ export const PlayerBoardCompact = memo((props: PlayerBoardCompactProps) => {
   const { regiments, eliteRegiments, levies, skyships, fortuneCards } = playerInfo.resources;
   const gold = playerInfo.resources.gold;
   const vp = playerInfo.resources.victoryPoints;
-  const counsellors = playerInfo.resources.counsellors;
+  const availableActions = getAvailableActions(playerInfo);
 
   const isHeretic = playerInfo.hereticOrOrthodox === "heretic";
   const heresyVP = isHeretic ? playerInfo.heresyTracker : -playerInfo.heresyTracker;
@@ -201,9 +202,9 @@ export const PlayerBoardCompact = memo((props: PlayerBoardCompactProps) => {
         <Box sx={{ display: "flex", flexWrap: "wrap", gap: `${tokens.spacing.xs}px` }}>
           <ResourceChip
             icon={<IconCounsellor style={{ fontSize: 14, color: tokens.ui.gold }} />}
-            value={counsellors}
+            value={availableActions}
             size="sm"
-            variant={counsellors === 0 ? "muted" : "default"}
+            variant={availableActions === 0 ? "muted" : "default"}
           />
           <ResourceChip
             icon={<IconGold style={{ fontSize: 14, color: gold < 0 ? tokens.ui.danger : tokens.ui.gold }} />}

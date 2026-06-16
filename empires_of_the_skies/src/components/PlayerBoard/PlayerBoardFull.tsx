@@ -16,6 +16,7 @@ import captainGeneralLogo from "@/boards_and_assets/action_board/captain_general
 
 import { Holdings } from "./Holdings";
 import { Treasury, AvailableForces, KingdomActions, FleetAccordion, CardDrawers } from "./board";
+import { getAvailableActions } from "@/utils/gameHelpers";
 
 interface PlayerBoardFullProps extends MyGameProps {
   onOpenFleetLocation?: (location: number[]) => void;
@@ -122,7 +123,8 @@ export const PlayerBoardFull = memo((props: PlayerBoardFullProps) => {
       </Box>
 
       <Treasury
-        counsellors={playerInfo.resources.counsellors}
+        availableActions={getAvailableActions(playerInfo)}
+        maxActions={playerInfo.resources.counsellors}
         gold={playerInfo.resources.gold}
         victoryPoints={playerInfo.resources.victoryPoints}
         heresyTracker={playerInfo.heresyTracker}

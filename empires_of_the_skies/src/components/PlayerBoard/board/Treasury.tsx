@@ -1,4 +1,4 @@
-import { Box, Typography } from "@mui/material";
+import { Box, Typography, Tooltip } from "@mui/material";
 import { tokens } from "@/theme";
 import { IconCounsellor, IconGold, IconVP } from "@/theme";
 import { ResourceChip } from "@/components/atoms/ResourceChip";
@@ -6,7 +6,8 @@ import { GamePanel } from "@/components/atoms/GamePanel";
 import { SectionHeader } from "./SectionHeader";
 
 interface TreasuryProps {
-  counsellors: number;
+  availableActions: number;
+  maxActions: number;
   gold: number;
   victoryPoints: number;
   heresyTracker: number;
@@ -14,7 +15,8 @@ interface TreasuryProps {
 }
 
 export const Treasury = ({
-  counsellors,
+  availableActions,
+  maxActions,
   gold,
   victoryPoints,
   heresyTracker,
@@ -30,13 +32,17 @@ export const Treasury = ({
     <GamePanel variant="default" padding="sm">
       <SectionHeader label="Treasury" />
       <Box sx={{ display: "flex", flexWrap: "wrap", gap: `${tokens.spacing.sm}px` }}>
-        <ResourceChip
-          icon={<IconCounsellor style={{ fontSize: 18, color: tokens.ui.gold }} />}
-          value={counsellors}
-          label="Counsel."
-          size="md"
-          variant={counsellors === 0 ? "muted" : "default"}
-        />
+        <Tooltip title={`${availableActions} of ${maxActions} actions remaining this round`} placement="top" arrow>
+          <span>
+            <ResourceChip
+              icon={<IconCounsellor style={{ fontSize: 18, color: tokens.ui.gold }} />}
+              value={availableActions}
+              label="Actions"
+              size="md"
+              variant={availableActions === 0 ? "muted" : "default"}
+            />
+          </span>
+        </Tooltip>
         <ResourceChip
           icon={<IconGold style={{ fontSize: 18, color: gold < 0 ? tokens.ui.danger : tokens.ui.gold }} />}
           value={gold}

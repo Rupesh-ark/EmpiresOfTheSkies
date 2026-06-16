@@ -8,7 +8,7 @@
 import { ActionBoardProps } from "../shared";
 import { BTN_BG } from "@/assets/actionBoard";
 import { CollapsedActionRow } from "../CollapsedActionRow";
-import { clearMoves } from "@/utils/gameHelpers";
+import { clearMoves, getAvailableActions } from "@/utils/gameHelpers";
 
 type RowConfig = {
   label: string;
@@ -23,6 +23,10 @@ type RowConfig = {
 const createRow = (config: RowConfig) => {
   const Row = (props: ActionBoardProps) => {
     const slotState = (props.G.boardState as Record<string, unknown>)[config.boardStateKey];
+    const player = props.playerID ? props.G.playerInfo[props.playerID] : undefined;
+    const availableActions = player ? getAvailableActions(player) : 0;
+    const hasActions = availableActions > 0;
+
     return (
       <CollapsedActionRow
         label={config.label}
@@ -35,6 +39,8 @@ const createRow = (config: RowConfig) => {
           const move = (props.moves as Record<string, (...args: unknown[]) => void>)[config.moveName];
           move(...(config.moveExtraArgs ?? []));
         }}
+        disabled={props.isActive && !hasActions}
+        disabledReason={props.isActive && !hasActions ? "No actions remaining" : undefined}
         playerInfo={props.G.playerInfo}
         accent={config.accent}
         bgImage={config.bgImage}
