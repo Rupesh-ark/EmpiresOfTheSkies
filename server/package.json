@@ -22,7 +22,7 @@
     "@types/koa": "^3.0.1",
     "@types/koa__cors": "^5.0.1",
     "@types/node": "^22.19.11",
-    "tsx": "^4.21.0",
+    "tsx": "^4.22.3",
     "typescript": "^5.9.3"
   }
 }
