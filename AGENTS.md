@@ -82,7 +82,6 @@ UI click → props.moves.*() → SocketIO → server validates & mutates G
 - `@eots/game` must be rebuilt after engine changes before server/frontend see them. `pnpm build:all` handles ordering.
 - The backend is CJS (`"type": "commonjs"`); frontend is ESM.
 - `pnpm-workspace.yaml` pins `is-generator-function@1.0.10` for Koa compatibility.
-- `pnpm-lock.yaml` and `server/package.json` currently have uncommitted dependency changes (tsx bump). Review before committing.
 - AI tests under `packages/game/src/__tests__/ai/` can be slow; normal dev tests skip the full self-play smoke test.
 
 ---

@@ -68,7 +68,7 @@ EmpiresOfTheSkies/
       pages/                HomePage, LobbyPage, RulesPage, Client (game board)
       components/           UI organised by game system:
         WorldMap/            8x4 discovery map with tile reveal
-        ActionBoard/         Counsellor placement board
+        ActionBoard/         Action selection board (spend actions from counsellor pool)
         AerialBattle/        Fleet combat dialogs
         GroundBattle/        Siege resolution
         Election/            Archprelate voting UI
@@ -91,7 +91,7 @@ EmpiresOfTheSkies/
 | Frontend | React, TypeScript, Vite, Material UI, Emotion |
 | Backend | Node.js 22, boardgame.io, Koa, PostgreSQL |
 | Game Engine | boardgame.io (shared package, compiled to CJS + ESM) |
-| Multiplayer | boardgame.io server sync, @boardgame.io/p2p |
+| Multiplayer | boardgame.io server sync over SocketIO |
 | AI Tuning | Python, CMA-ES, Matplotlib |
 | Monorepo | pnpm workspaces |
 | Hosting | Vercel (frontend), VPS via Docker (backend) |
@@ -109,7 +109,7 @@ Events -> Discovery -> Taxes -> Actions -> Resolution -> Scoring -> Reset
 
 **Discovery** — Players flip tiles on an 8x4 map to reveal new lands (Dwarves, Elves, Humans, Magical creatures, Legendary locations). Each tile has resources, combat values, and directional blocking that shapes exploration routes.
 
-**Actions** — Players place counsellors on a shared action board to recruit troops, purchase skyships, found buildings (outposts, colonies, forts, cathedrals, palaces, shipyards, factories), influence prelates, manage heresy, dispatch fleets, trade goods, and negotiate deals with other players.
+**Actions** — Players spend actions from their counsellor pool on a shared action board to recruit troops, purchase skyships, found buildings (outposts, colonies, forts, cathedrals, palaces, shipyards, factories), influence prelates, manage heresy, dispatch fleets, trade goods, and negotiate deals with other players. Counsellors represent the maximum number of actions a kingdom may take each round; repeated use of the same action row increases its cost.
 
 **Resolution** — Aerial battles between fleets, ground sieges at contested tiles, conquest of unoccupied discoveries, Archprelate elections (religious VP), infidel fleet attacks, rebellions, and grand army invasions all resolve in a fixed sequence.
 
@@ -163,6 +163,12 @@ pnpm test:watch     # watch mode
 - **Server-authoritative multiplayer** — all game state lives on the server; clients send moves and receive validated state updates.
 - **Resolution sequencer** — a central module (`resolutionSequencer.ts`) owns the entire end-of-round transition graph (aerial -> plunder -> ground -> conquest -> election -> post-election), replacing scattered callback chains.
 - **Seeded card distribution** — `manufacturedFunSeed.ts` implements rivalry-aware dealing for Kingdom Advantage and Legacy cards so that every game has meaningful strategic counters at the table.
+
+---
+
+## Contributing
+
+For agent/AI coding instructions, conventions, and common commands, see [`AGENTS.md`](./AGENTS.md).
 
 ---
 
