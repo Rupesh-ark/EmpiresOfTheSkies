@@ -51,7 +51,7 @@ export const MapOverlay = (props: MyGameProps) => {
   const colour = playerInfo.colour;
 
   const showClear =
-    isMyTurn && props.ctx.numMoves > 0 && props.G.stage.phase === "actions";
+    isMyTurn && (props.ctx.numMoves ?? 0) > 0 && props.G.stage.phase === "actions";
   const showActions = showClear || showConfirmEndTurn || isMyTurn;
 
   return (

@@ -1,4 +1,3 @@
-import React from "react";
 import { MyGameProps } from "@eots/game";
 
 const ShipYardDisplay = (props: MyGameProps) => {

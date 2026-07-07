@@ -58,7 +58,7 @@ const PunishDissentersRow = (props: ActionBoardProps) => {
         mood="peacetime"
         size="xs"
         cancelLabel="Cancel"
-        onCancel={() => { setDialogOpen(false); setSelectedSlot(null); }}
+        onCancel={() => { setDialogOpen(false); }}
       >
         <Typography sx={{ mb: 1 }}>How many dissenters?</Typography>
         <Stack direction="row" spacing={1} sx={{ mb: 2, justifyContent: "center" }}>

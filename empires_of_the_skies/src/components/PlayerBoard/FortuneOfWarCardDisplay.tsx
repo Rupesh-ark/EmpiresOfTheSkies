@@ -1,4 +1,3 @@
-import React from "react";
 import { MyGameProps } from "@eots/game";
 import { FOW_CARD_BACK as fortuneOfWarCardBack, SWORD_CARDS, SHIELD_CARDS, NO_EFFECT_CARD } from "@/assets/fortuneOfWarCards";
 

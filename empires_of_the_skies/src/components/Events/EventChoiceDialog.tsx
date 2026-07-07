@@ -1,10 +1,22 @@
 import { ReactNode, useState } from "react";
 import { Chip, Typography } from "@mui/material";
 import { MyGameProps, EVENT_CARD_DEFS } from "@eots/game";
+import type { LegacyCardInfo } from "@eots/game";
 import { DialogShell } from "@/components/atoms/DialogShell";
 import { GameButton } from "@/components/atoms/GameButton";
 
 // Shared wrapper for the 4 chip-selection branches
+
+type EventChoiceSelection = string | number | LegacyCardInfo | [number, number];
+
+const isLegacyCardSelection = (
+  selection: EventChoiceSelection | undefined
+): selection is LegacyCardInfo =>
+  typeof selection === "object" && selection !== null && !Array.isArray(selection);
+
+const isColonySelection = (
+  selection: EventChoiceSelection | undefined
+): selection is [number, number] => Array.isArray(selection);
 
 const ChipChoice = ({
   title,
@@ -41,7 +53,7 @@ const ChipChoice = ({
 // Main component
 
 const EventChoiceDialog = (props: MyGameProps) => {
-  const [selected, setSelected] = useState<string | number | undefined>(undefined);
+  const [selected, setSelected] = useState<EventChoiceSelection | undefined>(undefined);
 
   const choice = props.G.eventState.pendingChoice;
   if (!choice) return null;
@@ -107,7 +119,10 @@ const EventChoiceDialog = (props: MyGameProps) => {
     confirmLabel = "Choose Card";
 
     chips = choice.legacyOptions.map((card) => {
-      const isSelected = selected?.name === card.name && selected?.colour === card.colour;
+      const isSelected =
+        isLegacyCardSelection(selected) &&
+        selected.name === card.name &&
+        selected.colour === card.colour;
       return (
         <Chip
           key={`${card.name}-${card.colour}`}
@@ -156,7 +171,7 @@ const EventChoiceDialog = (props: MyGameProps) => {
 
     chips = choice.colonyOptions.map(([x, y]) => {
       const land = props.G.mapState.currentTileArray[y][x];
-      const isSelected = selected && selected[0] === x && selected[1] === y;
+      const isSelected = isColonySelection(selected) && selected[0] === x && selected[1] === y;
       return (
         <Chip
           key={`${x},${y}`}

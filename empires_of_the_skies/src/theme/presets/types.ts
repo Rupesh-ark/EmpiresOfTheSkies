@@ -8,6 +8,7 @@ export interface TokenPreset {
   description: string;
 
   ui?: {
+    textMuted?:     string;
     background?:    string;
     surface?:       string;
     surfaceRaised?: string;

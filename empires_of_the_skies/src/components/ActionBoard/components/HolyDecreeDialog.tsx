@@ -1,6 +1,7 @@
 import { Box, Typography } from "@mui/material";
 import { MyGameProps, findMostHereticalKingdoms, findMostOrthodoxKingdoms } from "@eots/game";
-import React, { useState } from "react";
+import { useState } from "react";
+import type { IconType } from "react-icons";
 import { DialogShell } from "@/components/atoms/DialogShell";
 import { tokens } from "@/theme";
 import {
@@ -20,7 +21,7 @@ interface DecreeOption {
   label: string;
   description: string;
   needsTarget: boolean;
-  icon: React.ComponentType<{ size?: number }>;
+  icon: IconType;
   accent: string;
 }
 

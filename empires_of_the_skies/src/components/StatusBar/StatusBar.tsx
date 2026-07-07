@@ -253,7 +253,7 @@ const StatusBar = (props: StatusBarProps) => {
           }}
         >
           {isMyTurn &&
-            props.ctx.numMoves > 0 &&
+            (props.ctx.numMoves ?? 0) > 0 &&
             props.G.stage.phase === "actions" && (
               <GameButton
                 variant="ghost"

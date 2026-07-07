@@ -1,4 +1,3 @@
-import React from "react";
 import { MyGameProps, PlayerColour } from "@eots/game";
 import { Button } from "@mui/material";
 import { clearMoves } from "@/utils/gameHelpers";

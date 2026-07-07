@@ -180,7 +180,7 @@ const InfluencePrelatesRow = (props: ActionBoardProps) => {
                 }}
               >
                 <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "1px" }}>
-                  <IconComponent sx={{ fontSize: 13, color: iconColor }} />
+                  <IconComponent size={13} style={{ color: iconColor }} />
                   <Typography
                     sx={{
                       fontFamily: tokens.font.body,

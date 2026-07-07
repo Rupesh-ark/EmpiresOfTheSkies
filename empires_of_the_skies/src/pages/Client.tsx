@@ -43,6 +43,8 @@ const ClientComponent = ({ server }: { server: string }) => {
     } catch {
       return;
     }
+    if (!botData) return;
+
     const { botPlayerIDs, botCredentials } = botData;
     const { stop } = setupBotClients(
       server,

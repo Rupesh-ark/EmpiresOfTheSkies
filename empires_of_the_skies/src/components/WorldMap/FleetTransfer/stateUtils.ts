@@ -1,6 +1,6 @@
 import { MAX_SKYSHIPS_PER_FLEET } from "@eots/game";
+import type { FleetInfo } from "@eots/game";
 import type {
-  FleetInfo,
   Reserves,
   GarrisonInfo,
   SlotState,

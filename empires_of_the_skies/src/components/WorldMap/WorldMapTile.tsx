@@ -1,4 +1,4 @@
-import React, { memo, useState, useRef, useCallback, useEffect } from "react";
+import { memo, useState, useRef, useCallback, useEffect } from "react";
 import { keyframes } from "@emotion/react";
 
 import ReactCardFlip from "react-card-flip";
