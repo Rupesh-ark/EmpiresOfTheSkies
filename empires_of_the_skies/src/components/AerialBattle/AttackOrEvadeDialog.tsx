@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { MyGameProps, colourToKingdomMap } from "@eots/game";
 import { Typography } from "@mui/material";
-import WorldMap from "../WorldMap/WorldMap";
 import { DialogShell } from "@/components/atoms/DialogShell";
 import { GameButton } from "@/components/atoms/GameButton";
+import { getLocationPresentation } from "@/utils/locationLabels";
 
 const AttackOrEvadeDialog = (props: AttackOrEvadeDialogProps) => {
   const [open, setOpen] = useState(true);
@@ -25,12 +25,13 @@ const AttackOrEvadeDialog = (props: AttackOrEvadeDialogProps) => {
     <DialogShell
       open={isOpen}
       title="Your fleet is under attack!"
+      subtitle={`Battle at ${getLocationPresentation(props.G.mapState.currentTileArray, [x, y]).name} — highlighted in red on the map`}
       mood="battle"
-      size="lg"
+      size="sm"
       hideActions
     >
       <Typography sx={{ mb: 2 }}>
-        Your fleet on tile [{1 + x}, {4 - y}] is under attack by{" "}
+        Your fleet at {getLocationPresentation(props.G.mapState.currentTileArray, [x, y]).name} is under attack by{" "}
         {props.G.battleState
           ? colourToKingdomMap[props.G.battleState?.attacker.colour]
           : "ERROR"}
@@ -38,7 +39,6 @@ const AttackOrEvadeDialog = (props: AttackOrEvadeDialogProps) => {
         kingdom will get to move your fleet to an adjoining tile of their
         choosing.
       </Typography>
-      <WorldMap {...props} selectableTiles={[props.G.mapState.currentBattle]} />
       <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginTop: 16 }}>
         <GameButton
           variant="ghost"

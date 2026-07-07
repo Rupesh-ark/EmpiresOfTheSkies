@@ -2,9 +2,9 @@ import { useState } from "react";
 import { MyGameProps } from "@eots/game";
 import { Typography } from "@mui/material";
 import { KingdomButton } from "../shared/KingdomButton";
-import WorldMap from "../WorldMap/WorldMap";
 import { DialogShell } from "@/components/atoms/DialogShell";
 import { GameButton } from "@/components/atoms/GameButton";
+import { getLocationPresentation } from "@/utils/locationLabels";
 
 const AttackOrPassDiaLog = (props: AerialBattleDialogProps) => {
   const [x, y] = props.G.mapState.currentBattle;
@@ -40,20 +40,16 @@ const AttackOrPassDiaLog = (props: AerialBattleDialogProps) => {
     <DialogShell
       open={isOpen}
       title="Choose your battle action"
+      subtitle={`Battle at ${getLocationPresentation(props.G.mapState.currentTileArray, [x, y]).name} — highlighted in red on the map`}
       mood="battle"
-      size="lg"
+      size="sm"
       hideActions
     >
       <Typography sx={{ mb: 2 }}>
         Choose a kingdom's fleet to attack, or pass. Decisions to attack are
         made in player order, so even if you pass you may still be attacked.
-        Current battle tile: [{1 + x}, {4 - y}]
       </Typography>
       {buttons}
-      <WorldMap
-        {...props}
-        selectableTiles={[props.G.mapState.currentBattle]}
-      />
       <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginTop: 16 }}>
         <GameButton
           variant="ghost"

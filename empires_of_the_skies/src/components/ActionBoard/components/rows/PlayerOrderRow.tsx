@@ -8,12 +8,14 @@ import { ActionBoardProps, ActionTooltipContent, TOOLTIP_DELAY } from "../shared
 import { clearMoves } from "@/utils/gameHelpers";
 import { PlayerDot } from "@/components/atoms/PlayerDot";
 import { useActionHover } from "../../ActionHoverContext";
+import { useToast } from "@/hooks/useToast";
 
 const ORDINALS = ["1st", "2nd", "3rd", "4th", "5th", "6th"];
 const THUMB_W = 80;
 
 const PlayerOrderRow = (props: ActionBoardProps) => {
   const { setHoveredAction } = useActionHover();
+  const { showToast } = useToast();
   const numPlayers = Object.keys(props.G.playerInfo).length;
 
   const alreadyPlaced = Object.values(props.G.boardState.pendingPlayerOrder).some(
@@ -110,7 +112,11 @@ const PlayerOrderRow = (props: ActionBoardProps) => {
             >
               <Box
                 onClick={() => {
-                  if (!isTaken && !alreadyPlaced) {
+                  if (alreadyPlaced) {
+                    showToast("Your Kingdom has already chosen a player order position", "warning");
+                  } else if (isTaken) {
+                    showToast(`${ORDINALS[i]} position is already taken by ${occupantInfo?.kingdomName}`, "warning");
+                  } else {
                     clearMoves(props);
                     props.moves.alterPlayerOrder(i);
                   }

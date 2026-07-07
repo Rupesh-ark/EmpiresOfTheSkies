@@ -15,6 +15,8 @@ import { useGameTheme, tokens } from "@/theme";
 import GameLog from "./GameLog";
 import { StatsPanel } from "./Stats/StatsPanel";
 import { ToastProvider, useToast } from "@/hooks/useToast";
+import { DialogQueueProvider } from "./atoms/DialogQueue";
+import { MapSelectionProvider } from "@/contexts/MapSelectionContext";
 import { useValidatedMoves } from "@/hooks/useValidatedMoves";
 import { ActionHoverProvider } from "./ActionBoard/ActionHoverContext";
 import { PiracyIntentProvider } from "@/contexts/PiracyIntentContext";
@@ -154,7 +156,11 @@ const HeresyBar = ({ playerInfo }: { playerInfo: Record<string, PlayerInfo> }) =
 export const ActionBoardsAndMap = (props: MyGameProps) => {
   return (
     <ToastProvider>
-      <ActionBoardsAndMapInner {...props} />
+      <DialogQueueProvider>
+        <MapSelectionProvider>
+          <ActionBoardsAndMapInner {...props} />
+        </MapSelectionProvider>
+      </DialogQueueProvider>
     </ToastProvider>
   );
 };

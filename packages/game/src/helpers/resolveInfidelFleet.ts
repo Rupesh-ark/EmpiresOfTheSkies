@@ -2,7 +2,7 @@ import { MyGameState } from "../types";
 import { logEvent } from "./stateUtils";
 import { drawFortuneOfWarCard } from "./helpers";
 import { calculateCombat } from "./combatMath";
-import { INFIDEL_EMPIRE_LOCATION } from "../data/gameData";
+import { INFIDEL_EMPIRE_LOCATION, KINGDOM_LOCATION } from "../data/gameData";
 
 const getPlayerMilitaryPower = (G: MyGameState, playerID: string): number => {
   const player = G.playerInfo[playerID];
@@ -144,6 +144,26 @@ const applyPlayerFleetLosses = (
   troopsToLose -= regLost;
   const levyLost = Math.min(troopsToLose, fleet.levies);
   fleet.levies -= levyLost;
+
+  if (fleet.skyships <= 0) {
+    // Fully wiped: nothing can remain aboard, and the fleet returns home so
+    // it no longer counts as deployed (mirrors cleanupWipedFleets in
+    // resolveBattle.ts).
+    fleet.regiments = 0;
+    fleet.levies = 0;
+    fleet.eliteRegiments = 0;
+    const [x, y] = fleet.location;
+    fleet.location = [...KINGDOM_LOCATION];
+    fleet.travelHistory = [];
+    const stillAtTile = G.playerInfo[playerID].fleetInfo.some(
+      (f) => f.location[0] === x && f.location[1] === y
+    );
+    if (!stillAtTile) {
+      const tile = G.mapState.battleMap[y]?.[x];
+      const idx = tile?.indexOf(playerID) ?? -1;
+      if (idx !== -1) tile.splice(idx, 1);
+    }
+  }
 };
 
 // Main entry point

@@ -200,16 +200,14 @@ export const isValidRetreatDestination = (
   return true;
 };
 
-// All tiles where a player has skyships (fleet or route disc), plus Faithdom as free waypoints
+// All tiles in a player's trade network: placed route skyship discs, plus
+// Faithdom as free waypoints. Per the ruleset a Trade Route is "a line of one
+// or more INDIVIDUAL Skyships" — deployed Fleets are not route links (they
+// return home before trade resolves, so counting them promised connections
+// that evaporated by the time goods were granted).
 export const buildPlayerNetwork = (G: MyGameState, playerID: string): Set<string> => {
   const network = new Set<string>();
   FAITHDOM_TILES.forEach(([x, y]) => network.add(tileKey(x, y)));
-  // Fleet positions
-  G.playerInfo[playerID].fleetInfo.forEach((fleet) => {
-    if (fleet.skyships > 0) {
-      network.add(tileKey(fleet.location[0], fleet.location[1]));
-    }
-  });
   // Route skyship discs on map
   for (const [key, players] of Object.entries(G.mapState.routeSkyships)) {
     if (players.includes(playerID)) {

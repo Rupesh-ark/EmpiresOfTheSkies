@@ -56,7 +56,7 @@ const alterPlayerOrder: MoveDefinition = {
   validate: (G, playerID, newPosition) => validateAlterPlayerOrder(G, playerID, newPosition, Object.keys(G.playerInfo).length),
   successLog: (G, pid, newPosition) => {
     const k = G.playerInfo[pid].kingdomName;
-    return `${k} changes to player order position ${newPosition + 1}`;
+    return `${k} claims player order position ${newPosition + 1} (takes effect next round)`;
   },
 };
 

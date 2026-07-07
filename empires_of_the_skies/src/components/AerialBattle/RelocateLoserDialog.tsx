@@ -1,54 +1,48 @@
-import { useState } from "react";
+import { useEffect } from "react";
 import { MyGameProps } from "@eots/game";
-import { DialogShell } from "@/components/atoms/DialogShell";
-import WorldMap from "../WorldMap/WorldMap";
+import { useMapSelection } from "@/contexts/MapSelectionContext";
 
+/**
+ * Relocate-loser step — the battle winner picks an empty tile to send the
+ * defeated fleet to. Headless: instead of a dialog with an embedded map, it
+ * drives the main map's selection mode (highlighted tiles + banner).
+ */
 const RelocateLoserDialog = (props: MyGameProps) => {
-  const [open, setOpen] = useState(true);
-  const [currentTile, setCurrentTile] = useState(props.G.mapState.currentBattle);
+  const { startSelection, clearSelection } = useMapSelection();
 
   let victor = "";
   let loser = "";
-
-  props.G.battleState &&
+  if (props.G.battleState) {
     Object.values(props.G.battleState).forEach((battler) => {
-      if (battler.victorious === true) {
-        victor = battler.id;
-      } else {
-        loser = battler.id;
-      }
+      if (battler.victorious === true) victor = battler.id;
+      else loser = battler.id;
     });
+  }
 
-  const emptyTiles = props.G.validRelocationTiles ?? [];
+  const shouldPick =
+    props.playerID === props.ctx.currentPlayer &&
+    (props.playerID === victor ||
+      (props.playerID === props.G.battleState?.attacker.id &&
+        props.G.battleState?.defender.decision === "evade"));
 
-  return (
-    <DialogShell
-      open={
-        open &&
-        props.playerID === props.ctx.currentPlayer &&
-        (props.playerID === victor ||
-          (props.playerID === props.G.battleState?.attacker.id &&
-            props.G.battleState?.defender.decision === "evade"))
-      }
-      title={`Choose a tile to send the loser to. Current selection: [${currentTile[0]}, ${currentTile[1]}]`}
-      mood="battle"
-      size="lg"
-      confirmLabel="Confirm"
-      confirmColor="success"
-      onConfirm={() => {
-        props.moves.relocateDefeatedFleet(currentTile, loser);
-        setOpen(false);
-      }}
-    >
-      <WorldMap
-        {...props}
-        alternateOnClick={(coords: number[]) => {
-          setCurrentTile(coords);
-        }}
-        selectableTiles={emptyTiles}
-      />
-    </DialogShell>
-  );
+  const tilesKey = JSON.stringify(props.G.validRelocationTiles ?? []);
+  const loserName = props.G.playerInfo[loser]?.kingdomName ?? "the defeated fleet";
+  const { moves } = props;
+
+  useEffect(() => {
+    if (!shouldPick) return;
+    const tiles = props.G.validRelocationTiles ?? [];
+    startSelection({
+      tiles,
+      prompt: `Choose an empty tile on the map to send ${loserName}'s defeated fleet to`,
+      confirmLabel: "Relocate",
+      onConfirm: (coords) => moves.relocateDefeatedFleet(coords, loser),
+    });
+    return () => clearSelection();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shouldPick, tilesKey, loser]);
+
+  return null;
 };
 
 export default RelocateLoserDialog;

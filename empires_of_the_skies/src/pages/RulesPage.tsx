@@ -606,6 +606,13 @@ const ScoringSection = () => (
       ]}
     />
 
+    <H3>Mercy of the Republics</H3>
+    <P>
+      A catch-up mechanic: each round, players trailing the VP leader receive Gold from the merchant
+      Republics — 1 Gold per 3 VP behind the leader. You receive the full amount if both Zeeland and
+      Venoa support you, half if only one does, and nothing if neither supports you.
+    </P>
+
     <H3>During the Game</H3>
     <P>Many actions also award or cost VP immediately:</P>
     <Table

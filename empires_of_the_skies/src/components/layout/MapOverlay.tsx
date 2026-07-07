@@ -17,6 +17,8 @@ import { DialogShell } from "@/components/atoms/DialogShell";
 import { clearMoves } from "@/utils/gameHelpers";
 import { useActionHover } from "@/components/ActionBoard/ActionHoverContext";
 import { usePiracyIntent } from "@/contexts/PiracyIntentContext";
+import { useMapSelection } from "@/contexts/MapSelectionContext";
+import { getLocationPresentation } from "@/utils/locationLabels";
 
 const PULSING_MOODS = new Set(["battle", "crisis"]);
 
@@ -24,6 +26,7 @@ export const MapOverlay = (props: MyGameProps) => {
   const [passDialogOpen, setPassDialogOpen] = useState(false);
   const { setHoveredAction } = useActionHover();
   const { intent: piracyIntent } = usePiracyIntent();
+  const mapSelection = useMapSelection();
 
   if (!props.playerID) return null;
 
@@ -136,7 +139,7 @@ export const MapOverlay = (props: MyGameProps) => {
               lineHeight: 1,
             }}
           >
-            Round {props.G.round}
+            Round {props.G.round} / {props.G.finalRound}
           </Typography>
           <Box sx={{ width: "1px", height: 14, backgroundColor: "rgba(200,170,120,0.3)" }} />
           <Typography
@@ -196,6 +199,66 @@ export const MapOverlay = (props: MyGameProps) => {
           )}
         </Box>
       </Box>
+
+      {/* Top-center: Tile selection banner */}
+      {mapSelection.selection && (
+        <Box
+          sx={{
+            position: "absolute",
+            top: 44,
+            left: "50%",
+            transform: "translateX(-50%)",
+            zIndex: 11,
+            display: "flex",
+            alignItems: "center",
+            gap: `${tokens.spacing.sm}px`,
+            px: `${tokens.spacing.md}px`,
+            py: `${tokens.spacing.sm}px`,
+            borderRadius: `${tokens.radius.lg}px`,
+            background: "rgba(30,24,16,0.92)",
+            backdropFilter: "blur(8px)",
+            border: "1px solid rgba(232,184,75,0.5)",
+            boxShadow: "0 4px 16px rgba(0,0,0,0.5), 0 0 12px rgba(232,184,75,0.2)",
+            maxWidth: "90%",
+          }}
+        >
+          <Typography
+            sx={{
+              fontFamily: tokens.font.body,
+              fontSize: tokens.fontSize.sm,
+              color: "#F5ECD8",
+              lineHeight: 1.3,
+            }}
+          >
+            {mapSelection.selection.prompt}
+            {mapSelection.selected && (
+              <span style={{ color: "#4ade80", fontWeight: 700 }}>
+                {" — "}
+                {getLocationPresentation(
+                  props.G.mapState.currentTileArray,
+                  mapSelection.selected
+                ).name}
+                {mapSelection.selection.getSelectionDetail
+                  ? ` ${mapSelection.selection.getSelectionDetail(mapSelection.selected)}`
+                  : ""}
+              </span>
+            )}
+          </Typography>
+          {mapSelection.selection.onCancel && (
+            <GameButton variant="ghost" size="sm" onClick={mapSelection.cancelSelection}>
+              Cancel
+            </GameButton>
+          )}
+          <GameButton
+            variant="primary"
+            size="sm"
+            disabled={!mapSelection.selected}
+            onClick={mapSelection.confirmSelection}
+          >
+            {mapSelection.selection.confirmLabel ?? "Confirm"}
+          </GameButton>
+        </Box>
+      )}
 
       {/* Bottom-right: Action buttons */}
       {showActions && (

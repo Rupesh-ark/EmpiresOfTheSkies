@@ -10,6 +10,7 @@ import { SxProps } from "@mui/material/styles";
 import { tokens } from "@/theme";
 import type { GameMood } from "@/theme";
 import { GameButton } from "./GameButton";
+import { useDialogSlot, DIALOG_PRIORITY } from "./DialogQueue";
 
 export interface DialogShellProps {
   open: boolean;
@@ -17,6 +18,12 @@ export interface DialogShellProps {
   subtitle?: string;
   mood?: GameMood;
   size?: "xs" | "sm" | "md" | "lg";
+  /**
+   * Queue priority — when several dialogs want to open at once, only the
+   * highest-priority one shows; the rest wait for it to close. See
+   * DIALOG_PRIORITY for the standard tiers.
+   */
+  priority?: number;
 
   children: ReactNode;
 
@@ -71,6 +78,7 @@ export const DialogShell = ({
   subtitle,
   mood,
   size = "sm",
+  priority = DIALOG_PRIORITY.default,
   children,
   confirmLabel,
   onConfirm,
@@ -84,10 +92,11 @@ export const DialogShell = ({
   sx,
 }: DialogShellProps) => {
   const moodAccent = mood ? tokens.mood[mood].accent : undefined;
+  const isActive = useDialogSlot(open, priority);
 
   return (
     <Dialog
-      open={open}
+      open={isActive}
       maxWidth={sizeMap[size]}
       fullWidth
       PaperProps={{

@@ -6,7 +6,7 @@ export type { MoveObserver } from "./recorder";
 
 export * from "./helpers/helpers";
 
-export { tileKey, wouldPlacementConnectRoute, bfsShortestPath, FAITHDOM_TILES } from "./helpers/mapUtils";
+export { tileKey, wouldPlacementConnectRoute, bfsShortestPath, buildPlayerNetwork, bfsReachable, FAITHDOM_TILES } from "./helpers/mapUtils";
 
 export * from "./helpers/eventCardDefinitions";
 

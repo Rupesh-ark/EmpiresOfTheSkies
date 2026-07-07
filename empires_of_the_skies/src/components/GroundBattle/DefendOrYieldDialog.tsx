@@ -1,6 +1,7 @@
 import { MyGameProps, colourToKingdomMap } from "@eots/game";
 import { DialogShell } from "@/components/atoms/DialogShell";
-import WorldMap from "../WorldMap/WorldMap";
+import { Typography } from "@mui/material";
+import { getLocationPresentation } from "@/utils/locationLabels";
 
 const DefendOrYieldDialog = (props: MyGameProps) => {
   const [x, y] = props.G.mapState.currentBattle;
@@ -26,9 +27,9 @@ const DefendOrYieldDialog = (props: MyGameProps) => {
     <DialogShell
       open={isOpen}
       title="Your region is under attack!"
-      subtitle={`Your fleet on tile [${1 + x}, ${4 - y}] is under attack by ${attackerName}. You can either yield the region and all its buildings or fight back. If you yield, the attacking kingdom will get control over any outposts, colonies or forts and your troops will be returned safely to your kingdom.`}
+      subtitle={`Battle at ${getLocationPresentation(props.G.mapState.currentTileArray, [x, y]).name} — highlighted in red on the map`}
       mood="battle"
-      size="lg"
+      size="sm"
       confirmLabel="Defend"
       confirmColor="success"
       onConfirm={() => props.moves.defendGroundAttack()}
@@ -36,7 +37,12 @@ const DefendOrYieldDialog = (props: MyGameProps) => {
       cancelColor="error"
       onCancel={() => props.moves.yieldToAttacker()}
     >
-      <WorldMap {...props} selectableTiles={[props.G.mapState.currentBattle]} />
+      <Typography>
+        Your region is under attack by {attackerName}. You can either yield
+        the region and all its buildings or fight back. If you yield, the
+        attacking kingdom will get control over any outposts, colonies or
+        forts and your troops will be returned safely to your kingdom.
+      </Typography>
     </DialogShell>
   );
 };

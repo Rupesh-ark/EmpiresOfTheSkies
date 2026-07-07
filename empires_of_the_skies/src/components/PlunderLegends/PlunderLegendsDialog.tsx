@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { MyGameProps } from "@eots/game";
 import { DialogShell } from "@/components/atoms/DialogShell";
-import WorldMap from "../WorldMap/WorldMap";
+import { Typography } from "@mui/material";
+import { getLocationPresentation } from "@/utils/locationLabels";
 
 const PlunderLegendsDialog = (props: MyGameProps) => {
   const [open, setOpen] = useState(true);
@@ -14,8 +15,9 @@ const PlunderLegendsDialog = (props: MyGameProps) => {
         props.G.stage.sub === "plunder_legends"
       }
       title="Would you like to plunder this legend?"
+      subtitle={`${getLocationPresentation(props.G.mapState.currentTileArray, props.G.mapState.currentBattle).name} — highlighted on the map`}
       mood="discovery"
-      size="lg"
+      size="sm"
       confirmLabel="Plunder Legend"
       confirmColor="success"
       onConfirm={() => {
@@ -29,10 +31,10 @@ const PlunderLegendsDialog = (props: MyGameProps) => {
         setOpen(false);
       }}
     >
-      <WorldMap
-        {...props}
-        selectableTiles={[props.G.mapState.currentBattle]}
-      />
+      <Typography>
+        Plundering a Legend earns its Gold and Goods rewards, but advances
+        your Heresy track marker by one space.
+      </Typography>
     </DialogShell>
   );
 };

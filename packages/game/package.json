@@ -6,7 +6,7 @@
   "engines": {
     "node": ">=22"
   },
-  "main": "./dist/cjs/index.cjs",
+  "main": "./dist/cjs/index.js",
   "module": "./dist/esm/index.js",
   "types": "./dist/types/index.d.ts",
   "exports": {

@@ -1,6 +1,7 @@
 import { MyGameProps } from "@eots/game";
 import { DialogShell } from "@/components/atoms/DialogShell";
-import WorldMap from "../WorldMap/WorldMap";
+import { Typography } from "@mui/material";
+import { getLocationPresentation } from "@/utils/locationLabels";
 
 const GroundAttackOrPassDialog = (props: MyGameProps) => {
   const [x, y] = props.G.mapState.currentBattle;
@@ -21,9 +22,9 @@ const GroundAttackOrPassDialog = (props: MyGameProps) => {
     <DialogShell
       open={isOpen}
       title="Choose your battle action"
-      subtitle={`Do you want to attack this enemy's region? You must completely wipe them out in order to take control. Current battle tile: [${1 + x}, ${4 - y}]`}
+      subtitle={`Battle at ${getLocationPresentation(props.G.mapState.currentTileArray, [x, y]).name} — highlighted in red on the map`}
       mood="battle"
-      size="lg"
+      size="sm"
       confirmLabel="Attack!"
       confirmColor="success"
       onConfirm={() => props.moves.attackPlayersBuilding()}
@@ -31,7 +32,10 @@ const GroundAttackOrPassDialog = (props: MyGameProps) => {
       cancelColor="error"
       onCancel={() => props.moves.doNotGroundAttack()}
     >
-      <WorldMap {...props} selectableTiles={[props.G.mapState.currentBattle]} />
+      <Typography>
+        Do you want to attack this enemy's region? You must completely wipe
+        them out in order to take control.
+      </Typography>
     </DialogShell>
   );
 };

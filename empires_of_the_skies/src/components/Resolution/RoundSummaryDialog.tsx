@@ -4,6 +4,7 @@ import { Gavel, AttachMoney, Shield, HowToVote, Warning } from "@mui/icons-mater
 import { GiTrumpetFlag, GiTwoCoins } from "react-icons/gi";
 import { MyGameProps, EVENT_CARD_DEFS } from "@eots/game";
 import { DialogShell } from "@/components/atoms/DialogShell";
+import { DIALOG_PRIORITY } from "@/components/atoms/DialogQueue";
 import React from "react";
 
 const RoundSummaryDialog = (props: MyGameProps) => {
@@ -49,6 +50,17 @@ const RoundSummaryDialog = (props: MyGameProps) => {
       text: "Taxes will be skipped next round (Peasant Rebellion)",
     });
   }
+
+  // Trade income lines emitted by the engine during the previous round's resolution
+  const tradeLines = props.G.gameLog.filter(
+    (e) => e.round === previousRound && (e.message.startsWith("Trade routes:") || e.message.startsWith("Trade:"))
+  );
+  tradeLines.forEach((line) => {
+    summaryItems.push({
+      icon: <GiTwoCoins style={{ fontSize: 20 }} />,
+      text: line.message,
+    });
+  });
 
   const mercyEntries = Object.entries(props.G.mercyGold ?? {});
   if (mercyEntries.length > 0) {
@@ -107,6 +119,7 @@ const RoundSummaryDialog = (props: MyGameProps) => {
       title={`Round ${previousRound} Summary`}
       mood="peacetime"
       size="sm"
+      priority={DIALOG_PRIORITY.roundSummary}
       confirmLabel="Continue"
       onConfirm={() => setOpen(false)}
     >

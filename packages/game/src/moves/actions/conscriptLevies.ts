@@ -55,7 +55,9 @@ const conscriptLevies: MoveDefinition = {
   validate: validateConscriptLevies,
   successLog: (G, pid, levyAmount) => {
     const k = G.playerInfo[pid].kingdomName;
-    return `${k} conscripts ${levyAmount} Levies`;
+    const amount = sanitizeValue(levyAmount, 0);
+    const cost = Math.ceil(amount / LEVY_GROUP_SIZE);
+    return `${k} conscripts ${amount} Levies for ${cost} VP (1 VP per ${LEVY_GROUP_SIZE})`;
   },
 };
 

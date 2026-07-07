@@ -10,6 +10,7 @@ import FleetIcon from "@/components/Icons/FleetIcon";
 import { useToast } from "@/hooks/useToast";
 import { getLocationPresentation } from "@/utils/locationLabels";
 import { GameButton } from "@/components/atoms/GameButton";
+import { useMapSelection } from "@/contexts/MapSelectionContext";
 import type { FleetDragState } from "./fleetDragTypes";
 
 const BATTLE_RESOLUTION_SUBS = new Set([
@@ -28,9 +29,18 @@ interface PendingDeploy {
 const WorldMap = (props: WorldMapProps) => {
   const currentMap = props.G.mapState.currentTileArray;
   const battleCoords = props.G.mapState.currentBattle;
-  const isBattlePhase = props.G.stage.phase === "resolution" && 
+  const isBattlePhase = props.G.stage.phase === "resolution" &&
     BATTLE_RESOLUTION_SUBS.has(props.G.stage.sub);
   const { showToast } = useToast();
+  const mapSelection = useMapSelection();
+
+  // Tile-selection mode: explicit props (embedded maps) win; otherwise an
+  // active MapSelection request drives which tiles are selectable.
+  const selectionTiles =
+    props.selectableTiles ?? mapSelection.selection?.tiles;
+  const selectionOnClick =
+    props.alternateOnClick ??
+    (mapSelection.selection ? mapSelection.selectTile : undefined);
 
   const [fleetDragState, setFleetDragState] = useState<FleetDragState | null>(null);
   const [pendingDeploy, setPendingDeploy] = useState<PendingDeploy | null>(null);
@@ -213,9 +223,14 @@ const WorldMap = (props: WorldMapProps) => {
   const tiles: ReactElement[][] = [[], [], [], []];
   for (let y = 0; y < currentMap.length; y++) {
     for (let x = 0; x < currentMap[y].length; x++) {
-      const selectable = props.selectableTiles?.some(
+      const selectable = selectionTiles?.some(
         (coord) => coord[0] === x && coord[1] === y
       ) ?? false;
+
+      const isSelected =
+        !props.alternateOnClick &&
+        mapSelection.selected?.[0] === x &&
+        mapSelection.selected?.[1] === y;
 
       const isBattleTile = isBattlePhase &&
         battleCoords &&
@@ -237,8 +252,9 @@ const WorldMap = (props: WorldMapProps) => {
           <WorldMapTile
             location={[x, y]}
             {...props}
-            alternateOnClick={props.alternateOnClick}
+            alternateOnClick={selectionOnClick}
             selectable={selectable}
+            selectionHighlight={!!isSelected}
             battleHighlight={!!isBattleTile}
             detailRequestKey={detailRequestKey}
             onDetailRequestHandled={props.onDetailRequestHandled}

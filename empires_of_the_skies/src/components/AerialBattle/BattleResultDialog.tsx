@@ -2,6 +2,7 @@ import { useState, useRef } from "react";
 import { MyGameProps } from "@eots/game";
 import { Box, Typography } from "@mui/material";
 import { DialogShell } from "@/components/atoms/DialogShell";
+import { DIALOG_PRIORITY } from "@/components/atoms/DialogQueue";
 import { tokens } from "@/theme";
 
 /** Shows a battle result summary after any battle resolves. Dismisses on "Continue". */
@@ -38,6 +39,7 @@ const [dismissed, setDismissed] = useState(false);
       title="Battle Result"
       mood="battle"
       size="sm"
+      priority={DIALOG_PRIORITY.battleResult}
       confirmLabel="Continue"
       onConfirm={() => setDismissed(true)}
     >

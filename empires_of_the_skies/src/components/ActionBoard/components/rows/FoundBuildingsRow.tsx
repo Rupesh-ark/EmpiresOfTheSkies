@@ -1,7 +1,7 @@
 /**
  * FoundBuildingsRow — 4 individual building cells in a single horizontal row.
  */
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Box,
   Button,
@@ -19,9 +19,7 @@ import { clearMoves } from "@/utils/gameHelpers";
 import { PlayerDot } from "@/components/atoms/PlayerDot";
 import { ActionBoardProps, ActionTooltipContent, TOOLTIP_DELAY } from "../shared";
 import { useActionHover } from "../../ActionHoverContext";
-import { DialogShell } from "@/components/atoms/DialogShell";
-import { IconFort } from "@/theme";
-import { getLocationPresentation } from "@/utils/locationLabels";
+import { useMapSelection } from "@/contexts/MapSelectionContext";
 
 const THUMB_W = 40;
 
@@ -189,9 +187,35 @@ const BuildingCell = ({
 
 const FoundBuildingsRow = (props: ActionBoardProps) => {
   const [palaceDialogOpen, setPalaceDialogOpen] = useState(false);
-  const [fortDialogOpen, setFortDialogOpen] = useState(false);
+  const [fortPicking, setFortPicking] = useState(false);
+  const { startSelection, clearSelection } = useMapSelection();
 
-  const possibleFortTiles = props.G.validFortLocations ?? [];
+  // Fort tile choice happens on the main map. The valid tiles arrive from the
+  // server after foundBuildings(3) lands, so keep the selection request in
+  // sync with G.validFortLocations while picking.
+  const fortTilesKey = JSON.stringify(props.G.validFortLocations ?? []);
+  useEffect(() => {
+    if (!fortPicking) return;
+    const tiles = props.G.validFortLocations ?? [];
+    startSelection({
+      tiles,
+      prompt:
+        tiles.length > 0
+          ? "Build Fort — pick a garrisoned colony or outpost on the map"
+          : "Build Fort — no garrisoned colony or outpost available",
+      confirmLabel: "Build Fort",
+      onConfirm: (coords) => {
+        props.moves.checkAndPlaceFort(coords);
+        setFortPicking(false);
+      },
+      onCancel: () => {
+        clearMoves(props);
+        setFortPicking(false);
+      },
+    });
+    return () => clearSelection();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fortPicking, fortTilesKey]);
 
   const handleClick = (index: number) => {
     if (index === 1) {
@@ -200,7 +224,7 @@ const FoundBuildingsRow = (props: ActionBoardProps) => {
     } else if (index === 3) {
       clearMoves(props);
       props.moves.foundBuildings(3);
-      setFortDialogOpen(true);
+      setFortPicking(true);
     } else {
       // Cathedral (0) and Shipyard (2): fire immediately
       clearMoves(props);
@@ -275,121 +299,6 @@ const FoundBuildingsRow = (props: ActionBoardProps) => {
         </DialogActions>
       </Dialog>
 
-      {/* Fort: location selection dialog */}
-      <DialogShell
-        open={fortDialogOpen}
-        title="Build Fort"
-        subtitle="Select a garrisoned colony or outpost to fortify."
-        mood="peacetime"
-        size="sm"
-        cancelLabel="Cancel"
-        cancelColor="error"
-        onCancel={() => {
-          clearMoves(props);
-          setFortDialogOpen(false);
-        }}
-        hideActions={false}
-      >
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-          {possibleFortTiles.map((coords) => {
-            const [cx, cy] = coords;
-            const loc = getLocationPresentation(props.G.mapState.currentTileArray, coords);
-            const building = props.G.mapState.buildings[cy]?.[cx];
-            return (
-              <Box
-                key={`${cx}-${cy}`}
-                onClick={() => {
-                  props.moves.checkAndPlaceFort(coords);
-                  setFortDialogOpen(false);
-                }}
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 1.5,
-                  p: 1.5,
-                  borderRadius: `${tokens.radius.md}px`,
-                  border: `1px solid ${tokens.ui.border}`,
-                  background: tokens.ui.surface,
-                  cursor: "pointer",
-                  transition: `all ${tokens.transition.fast}`,
-                  "&:hover": {
-                    background: tokens.ui.surfaceHover,
-                    boxShadow: tokens.shadow.md,
-                    transform: "translateY(-1px)",
-                  },
-                  "&:active": { transform: "translateY(0)" },
-                }}
-              >
-                <Box
-                  sx={{
-                    width: 40,
-                    height: 40,
-                    borderRadius: `${tokens.radius.md}px`,
-                    background: `${tokens.ui.gold}20`,
-                    border: `1.5px solid ${tokens.ui.gold}50`,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    flexShrink: 0,
-                    color: tokens.ui.gold,
-                  }}
-                >
-                  <IconFort size={20} />
-                </Box>
-                <Box sx={{ flex: 1, minWidth: 0 }}>
-                  <Box sx={{ display: "flex", alignItems: "baseline", gap: 0.75 }}>
-                    <Typography sx={{
-                      fontFamily: tokens.font.accent,
-                      fontSize: tokens.fontSize.sm,
-                      fontWeight: 700,
-                      color: tokens.ui.text,
-                    }}>
-                      {loc.name}
-                    </Typography>
-                    <Box
-                      component="span"
-                      sx={{
-                        px: 0.5, py: 0.1,
-                        borderRadius: `${tokens.radius.pill}px`,
-                        backgroundColor: `${tokens.ui.textMuted}15`,
-                        border: `1px solid ${tokens.ui.border}`,
-                        fontFamily: tokens.font.body,
-                        fontSize: 10,
-                        fontWeight: 700,
-                        letterSpacing: "0.06em",
-                        color: tokens.ui.textMuted,
-                      }}
-                    >
-                      {loc.reference}
-                    </Box>
-                  </Box>
-                  <Typography sx={{
-                    fontFamily: tokens.font.body,
-                    fontSize: tokens.fontSize.xs,
-                    color: tokens.ui.textMuted,
-                  }}>
-                    {building?.buildings === "colony" ? "Colony" : "Outpost"}
-                    {" · "}
-                    {building?.garrisonedRegiments ?? 0} reg, {building?.garrisonedLevies ?? 0} levy
-                  </Typography>
-                </Box>
-              </Box>
-            );
-          })}
-          {possibleFortTiles.length === 0 && (
-            <Typography sx={{
-              fontFamily: tokens.font.body,
-              fontSize: tokens.fontSize.xs,
-              color: tokens.ui.textMuted,
-              fontStyle: "italic",
-              textAlign: "center",
-              py: 2,
-            }}>
-              No garrisoned colonies or outposts available
-            </Typography>
-          )}
-        </Box>
-      </DialogShell>
     </>
   );
 };

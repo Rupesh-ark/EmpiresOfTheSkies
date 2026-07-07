@@ -2,13 +2,65 @@
  * Trade — Anytime actions: sell skyships, sell buildings, propose deals,
  *         send agitators, set piracy intent.
  */
-import { useState } from "react";
-import { Box, Typography, Slider, Button } from "@mui/material";
+import { useMemo, useState } from "react";
+import { Box, Typography, Slider, Button, Tooltip } from "@mui/material";
 import { tokens } from "@/theme";
-import { MyGameProps, SKYSHIP_SELL_PRICE, BUILDING_SELL_PRICE } from "@eots/game";
+import {
+  MyGameProps,
+  SKYSHIP_SELL_PRICE,
+  BUILDING_SELL_PRICE,
+  buildPlayerNetwork,
+  bfsReachable,
+  tileKey,
+  FAITHDOM_TILES,
+  GoodKey,
+} from "@eots/game";
 import { usePiracyIntent } from "@/contexts/PiracyIntentContext";
 import { DialogShell } from "@/components/atoms/DialogShell";
 import { GoodsValue } from "@/components/Stats/GoodsValue";
+import { getLocationPresentation } from "@/utils/locationLabels";
+
+const GOODS: GoodKey[] = ["mithril", "dragonScales", "krakenSkin", "magicDust", "stickyIchor", "pipeweed"];
+
+type RouteStatus = {
+  coords: number[];
+  name: string;
+  kind: "outpost" | "colony";
+  connected: boolean;
+  gold: number;
+  goods: number;
+};
+
+/** Connectivity + expected trade income for each of the player's Lands. */
+const useRouteStatuses = (props: MyGameProps): RouteStatus[] => {
+  const { G, playerID } = props;
+  return useMemo(() => {
+    if (!playerID) return [];
+    const network = buildPlayerNetwork(G, playerID);
+    const statuses: RouteStatus[] = [];
+    for (let y = 0; y < G.mapState.buildings.length; y++) {
+      for (let x = 0; x < G.mapState.buildings[y].length; x++) {
+        const building = G.mapState.buildings[y][x];
+        if (building.player?.id !== playerID) continue;
+        if (building.buildings !== "outpost" && building.buildings !== "colony") continue;
+
+        const withBuilding = new Set(network);
+        withBuilding.add(tileKey(x, y));
+        const reachable = bfsReachable(FAITHDOM_TILES, withBuilding, G.mapState.currentTileArray);
+        const loot = G.mapState.currentTileArray[y][x].loot[building.buildings];
+        statuses.push({
+          coords: [x, y],
+          name: getLocationPresentation(G.mapState.currentTileArray, [x, y]).name,
+          kind: building.buildings,
+          connected: reachable.has(tileKey(x, y)),
+          gold: loot.gold,
+          goods: GOODS.reduce((sum, g) => sum + loot[g], 0),
+        });
+      }
+    }
+    return statuses;
+  }, [G, playerID]);
+};
 
 // Compact action row
 
@@ -86,6 +138,8 @@ const Trade = (props: MyGameProps) => {
   const untargetedRivals = rivals.filter((r) => !agitatorsSentThisRound.includes(r.id));
   const allRivalsTargeted = rivals.length > 0 && untargetedRivals.length === 0;
 
+  const routeStatuses = useRouteStatuses(props);
+
   return (
     <Box sx={{ p: `${tokens.spacing.sm}px`, height: "100%" }}>
       <Box sx={{ display: "flex", gap: `${tokens.spacing.md}px`, height: "100%" }}>
@@ -162,6 +216,67 @@ const Trade = (props: MyGameProps) => {
               price={piracyIntent === "tax" ? "→ Cut" : "→ Tax"}
               onClick={() => setIntent(piracyIntent === "tax" ? "cut" : "tax")}
             />
+          )}
+        </Box>
+
+        {/* Middle: Trade Route status */}
+        <Box sx={{ minWidth: 190, maxWidth: 250, flexShrink: 0, display: "flex", flexDirection: "column", gap: `${tokens.spacing.xs}px`, overflowY: "auto" }}>
+          <Typography
+            sx={{
+              fontFamily: tokens.font.accent,
+              fontSize: tokens.fontSize.xs,
+              fontWeight: 600,
+              color: tokens.ui.gold,
+              textTransform: "uppercase",
+              letterSpacing: "0.1em",
+              lineHeight: 1,
+              mb: "2px",
+            }}
+          >
+            Trade Routes
+          </Typography>
+          {routeStatuses.map((r) => (
+            <Tooltip
+              key={`${r.coords[0]}-${r.coords[1]}`}
+              title={
+                r.connected
+                  ? `Connected to Faithdom — earns ${r.gold} Gold and ${r.goods} Goods at trade resolution`
+                  : "Not connected — place route skyships (when retrieving a fleet) to link this Land to Faithdom, or it earns nothing"
+              }
+              placement="top"
+              arrow
+            >
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: 1,
+                  px: `${tokens.spacing.sm}px`,
+                  py: `${tokens.spacing.xs + 1}px`,
+                  borderRadius: `${tokens.radius.sm}px`,
+                  border: `1px solid ${r.connected ? "rgba(74,222,128,0.4)" : "rgba(239,68,68,0.35)"}`,
+                  backgroundColor: tokens.ui.surface,
+                }}
+              >
+                <Box sx={{ minWidth: 0 }}>
+                  <Typography noWrap sx={{ fontFamily: tokens.font.body, fontSize: tokens.fontSize.xs, color: tokens.ui.text, fontWeight: 600, lineHeight: 1.2 }}>
+                    {r.name}
+                  </Typography>
+                  <Typography sx={{ fontFamily: tokens.font.body, fontSize: 10, color: tokens.ui.textMuted, lineHeight: 1.2 }}>
+                    {r.kind === "colony" ? "Colony" : "Outpost"} · {r.gold}g + {r.goods} goods
+                  </Typography>
+                </Box>
+                <Typography sx={{ fontSize: 12, fontWeight: 800, color: r.connected ? "#4ade80" : "#ef4444", whiteSpace: "nowrap" }}>
+                  {r.connected ? "✓ Linked" : "✗ No route"}
+                </Typography>
+              </Box>
+            </Tooltip>
+          ))}
+          {routeStatuses.length === 0 && (
+            <Typography sx={{ fontFamily: tokens.font.body, fontSize: 10, color: tokens.ui.textMuted, fontStyle: "italic" }}>
+              No outposts or colonies yet — claim Lands to start trading.
+            </Typography>
           )}
         </Box>
 

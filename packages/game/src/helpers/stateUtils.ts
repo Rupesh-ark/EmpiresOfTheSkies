@@ -219,7 +219,8 @@ export const calculateMercy = (G: MyGameState) => {
     if (mercyGold > 0) {
       addGoldAmount(G, playerID, mercyGold);
       G.mercyGold[playerID] = mercyGold;
-      logEvent(G, `${player.kingdomName} receives ${mercyGold} Gold (Mercy of the Republics)`);
+      const backers = supporting === 2 ? "both Republics" : republics.zeeland.supporting ? "Zeeland" : "Venoa";
+      logEvent(G, `${player.kingdomName} receives ${mercyGold} Gold — Mercy of the Republics (catch-up aid for trailing the VP leader by ${gap}, backed by ${backers})`);
     }
   }
 };

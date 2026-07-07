@@ -131,17 +131,25 @@ const resolveRound = (G: MyGameState, events: EventsAPI, random: RandomAPI) => {
 
   Object.values(G.playerInfo).forEach((player) => {
     const canTrade = hasTradeAccess(G, player.id);
+    let saleGold = 0;
+    let goodsSold = 0;
 
     goodsKeys.forEach((good) => {
       const quantity = player.resources[good];
       if (quantity > 0) {
         player.resources.gold += G.mapState.goodsPriceMarkers[good] * quantity;
+        saleGold += G.mapState.goodsPriceMarkers[good] * quantity;
+        goodsSold += quantity;
         // D3: only eligible players enter the trade VP ranking
         if (canTrade) {
           tradeGainsMap[player.id] = (tradeGainsMap[player.id] ?? 0) + quantity;
         }
       }
     });
+
+    if (goodsSold > 0) {
+      logEvent(G, `Trade: ${player.kingdomName} sells ${goodsSold} Goods for ${saleGold} Gold`);
+    }
 
     player.resources.dragonScales = 0;
     player.resources.stickyIchor = 0;

@@ -49,6 +49,8 @@ interface worldMapTileProps extends MyGameProps {
   location: number[];
   alternateOnClick?: (coords: number[]) => void;
   selectable?: boolean;
+  /** Tile currently chosen in map-selection mode */
+  selectionHighlight?: boolean;
   battleHighlight?: boolean;
   detailRequestKey?: number;
   onDetailRequestHandled?: (requestKey: number) => void;
@@ -282,8 +284,10 @@ export const WorldMapTile = memo((props: worldMapTileProps) => {
             `} 14s ease-in-out infinite`,
           },
           "&:hover": {
-            border: "1px solid rgba(232,184,75,0.3)",
-            "&::before, &::after": { opacity: 0.5 },
+            outline: "2px solid rgba(232,184,75,0.9)",
+            outlineOffset: "-2px",
+            boxShadow: "inset 0 0 18px rgba(232,184,75,0.35), 0 0 10px rgba(232,184,75,0.45)",
+            "&::before, &::after": { animationPlayState: "paused", opacity: 0.25 },
           },
         }}
         onClick={
@@ -312,8 +316,11 @@ export const WorldMapTile = memo((props: worldMapTileProps) => {
             backgroundRepeat: "no-repeat",
             width: "100%",
             aspectRatio: "1",
-            border: props.selectable ? "5px solid #ffe066" : props.battleHighlight ? "3px solid #ef4444" : isDragActive && isValidDest ? `3px solid rgba(232,184,75,${isOver ? 1 : 0.7})` : "0px",
+            border: props.selectionHighlight ? "5px solid #4ade80" : props.selectable ? "5px solid #ffe066" : props.battleHighlight ? "3px solid #ef4444" : isDragActive && isValidDest ? `3px solid rgba(232,184,75,${isOver ? 1 : 0.7})` : "0px",
             borderRadius: 0,
+            ...(props.selectionHighlight && {
+              boxShadow: "0 0 16px rgba(74,222,128,0.7), inset 0 0 12px rgba(74,222,128,0.3)",
+            }),
             ...(props.battleHighlight && {
               boxShadow: "0 0 12px rgba(239,68,68,0.5)",
               "@keyframes battlePulse": { "0%, 100%": { boxShadow: "0 0 8px rgba(239,68,68,0.3)" }, "50%": { boxShadow: "0 0 20px rgba(239,68,68,0.6)" } },
@@ -365,19 +372,28 @@ export const WorldMapTile = memo((props: worldMapTileProps) => {
             return routePlayers.map((pid, i) => {
               const colour = props.G.playerInfo[pid]?.colour ?? "#888";
               return (
-                <Tooltip key={`route-${pid}`} title={`Trade Route — ${props.G.playerInfo[pid]?.kingdomName}`}>
+                <Tooltip
+                  key={`route-${pid}`}
+                  title={`Trade Route skyship — ${props.G.playerInfo[pid]?.kingdomName}. Links this square in a chain from a Land back to Faithdom.`}
+                >
                   <Box sx={{
                     position: "absolute",
-                    bottom: 4 + i * 14,
-                    right: 4,
-                    width: 12,
-                    height: 12,
+                    bottom: 3 + i * 18,
+                    left: 3,
+                    width: 16,
+                    height: 16,
                     borderRadius: "50%",
-                    backgroundColor: `${colour}66`,
-                    border: `1.5px solid ${colour}`,
-                    zIndex: 10,
+                    backgroundColor: colour,
+                    border: "1.5px solid rgba(255,255,255,0.9)",
+                    boxShadow: "0 1px 4px rgba(0,0,0,0.6)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    zIndex: 90,
                     pointerEvents: "auto",
-                  }} />
+                  }}>
+                    <GiZeppelin size={11} style={{ color: "#fff" }} />
+                  </Box>
                 </Tooltip>
               );
             });

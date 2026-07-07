@@ -4,7 +4,7 @@ import { MOVE_DEFINITIONS, MyGameState } from "@eots/game";
 
 type BoardProps = {
   G: MyGameState;
-  ctx: { currentPlayer: string; phase: string | null };
+  ctx: { currentPlayer: string; phase: string | null; numMoves?: number };
   playerID: string | null;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   moves: Record<string, (...args: any[]) => void>;
@@ -47,7 +47,12 @@ export const useValidatedMoves = (props: BoardProps) => {
             if (def?.validate) {
               const error = def.validate(G, playerID, ...args);
               if (error) {
-                if (error.code === "TURN_COMPLETE") {
+                // TURN_COMPLETE is a false positive when the click just ran
+                // clearMoves() (undo) — the stale G closure still says
+                // turnComplete until the undo round-trips. That case always
+                // has undoable moves this turn, so only suppress then; with
+                // no moves to undo the rejection is genuine and must toast.
+                if (error.code === "TURN_COMPLETE" && (ctx.numMoves ?? 0) > 0) {
                   originalMove(...args);
                   return;
                 }

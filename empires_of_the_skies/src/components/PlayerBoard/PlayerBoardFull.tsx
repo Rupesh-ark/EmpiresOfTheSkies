@@ -7,16 +7,18 @@
  *   3. Fleets (accordion with skyship visuals)
  *   4. Cards (drawer tabs: FoW / Legacy / KA)
  */
-import { memo } from "react";
+import { memo, useState } from "react";
 import { Box, Typography } from "@mui/material";
 import { tokens } from "@/theme";
-import { MyGameProps } from "@eots/game";
+import { MyGameProps, KINGDOM_LOCATION, findPossibleDestinations } from "@eots/game";
 import popeLogo from "@/boards_and_assets/action_board/pope_logo.webp";
 import captainGeneralLogo from "@/boards_and_assets/action_board/captain_general.webp";
 
 import { Holdings } from "./Holdings";
 import { Treasury, AvailableForces, KingdomActions, FleetAccordion, CardDrawers } from "./board";
 import { getAvailableActions } from "@/utils/gameHelpers";
+import { useMapSelection } from "@/contexts/MapSelectionContext";
+import { FleetTransferDialog } from "@/components/WorldMap/FleetTransferDialog";
 
 interface PlayerBoardFullProps extends MyGameProps {
   onOpenFleetLocation?: (location: number[]) => void;
@@ -25,6 +27,45 @@ interface PlayerBoardFullProps extends MyGameProps {
 export const PlayerBoardFull = memo((props: PlayerBoardFullProps) => {
   const playerInfo = props.G.playerInfo[props.playerID ?? props.ctx.currentPlayer];
   const colour = playerInfo.colour;
+  const { startSelection } = useMapSelection();
+  const [manageFleetsOpen, setManageFleetsOpen] = useState(false);
+
+  const [homeX, homeY] = KINGDOM_LOCATION;
+  const homeFleets = playerInfo.fleetInfo.filter(
+    (f) => f.location[0] === homeX && f.location[1] === homeY
+  );
+
+  // PlayerBoardFull only renders on your own actions-phase turn, so a fleet
+  // is deployable if it has skyships and hasn't been dispatched this round.
+  const deployableFleetIds = playerInfo.fleetInfo
+    .filter((f) => f.skyships > 0 && !f.dispatchedThisRound)
+    .map((f) => f.fleetId);
+
+  const handleDeploy = (fleetId: number) => {
+    const fleetIndex = playerInfo.fleetInfo.findIndex((f) => f.fleetId === fleetId);
+    const fleet = playerInfo.fleetInfo[fleetIndex];
+    if (!fleet) return;
+
+    const isLaden = fleet.regiments > 0 || fleet.levies > 0 || fleet.eliteRegiments > 0;
+    const [allDests, within1, within2, within3] = findPossibleDestinations(
+      props.G,
+      fleet.location,
+      !isLaden
+    );
+    const costMap = new Map<string, number>();
+    for (const [x, y] of within3) costMap.set(`${x},${y}`, 3);
+    for (const [x, y] of within2) costMap.set(`${x},${y}`, 2);
+    for (const [x, y] of within1) costMap.set(`${x},${y}`, 1);
+
+    startSelection({
+      tiles: allDests,
+      prompt: `Deploy Fleet ${fleetId + 1} — pick a highlighted destination on the map`,
+      confirmLabel: "Deploy",
+      getSelectionDetail: (coords) => `(${costMap.get(`${coords[0]},${coords[1]}`) ?? 1}g)`,
+      onConfirm: (coords) => props.moves.moveFleet(fleetIndex, coords),
+      onCancel: () => {},
+    });
+  };
 
   return (
     <Box
@@ -149,7 +190,24 @@ export const PlayerBoardFull = memo((props: PlayerBoardFullProps) => {
         fleets={playerInfo.fleetInfo}
         tileMap={props.G.mapState.currentTileArray}
         onViewLocation={props.onOpenFleetLocation}
+        onManage={homeFleets.length > 0 ? () => setManageFleetsOpen(true) : undefined}
+        onDeploy={handleDeploy}
+        deployableFleetIds={deployableFleetIds}
       />
+
+      {homeFleets.length > 0 && (
+        <FleetTransferDialog
+          open={manageFleetsOpen}
+          onClose={() => setManageFleetsOpen(false)}
+          location={[homeX, homeY]}
+          fleets={homeFleets}
+          reserves={playerInfo.resources}
+          isKingdom
+          garrison={null}
+          tileArray={props.G.mapState.currentTileArray}
+          moves={props.moves}
+        />
+      )}
 
       <CardDrawers
         fortuneCards={playerInfo.resources.fortuneCards}

@@ -143,10 +143,12 @@ const InnerButton = forwardRef<HTMLButtonElement, GameButtonProps>(
         fullWidth={fullWidth}
         disableRipple
         sx={{
-          height,
+          minHeight: height,
           fontSize,
           px,
+          py: "2px",
           letterSpacing,
+          lineHeight: 1.25,
           borderRadius: `${tokens.radius.sm + 1}px`,
           textTransform: "none",
           fontFamily: tokens.font.body,
@@ -155,6 +157,7 @@ const InnerButton = forwardRef<HTMLButtonElement, GameButtonProps>(
           alignItems: "center",
           gap: icon ? `${tokens.spacing.xs + 1}px` : 0,
           minWidth: 0,
+          "& > svg, & > span": { flexShrink: 0 },
           cursor: disabled ? "not-allowed" : "pointer",
           ...variantStyles,
           // Disabled state — faded plate
