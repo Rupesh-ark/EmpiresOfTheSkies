@@ -125,6 +125,81 @@ interface worldMapTileProps extends MyGameProps {
 }
 
 // Main component
+/**
+ * Custom memo comparator: boardgame.io applies moves through immer, so
+ * unchanged subtrees of G keep reference identity. Each tile only re-renders
+ * when a slice it actually reads has changed — without this, every one of the
+ * 32 tiles re-renders on every move by any player.
+ *
+ * Intentionally NOT compared: onDetailRequestHandled / onFleetDragAttempt
+ * (inline closures with fresh identity every parent render; they only call
+ * stable setState/showToast, so a stale closure is harmless).
+ */
+const areTilePropsEqual = (
+  prev: worldMapTileProps,
+  next: worldMapTileProps
+): boolean => {
+  if (
+    prev.location[0] !== next.location[0] ||
+    prev.location[1] !== next.location[1]
+  )
+    return false;
+  const [x, y] = next.location;
+
+  if (
+    prev.selectable !== next.selectable ||
+    prev.selectionHighlight !== next.selectionHighlight ||
+    prev.battleHighlight !== next.battleHighlight ||
+    prev.detailRequestKey !== next.detailRequestKey ||
+    prev.fleetDragState !== next.fleetDragState ||
+    prev.alternateOnClick !== next.alternateOnClick ||
+    prev.moves !== next.moves ||
+    prev.playerID !== next.playerID ||
+    prev.ctx.currentPlayer !== next.ctx.currentPlayer
+  )
+    return false;
+
+  const pg = prev.G;
+  const ng = next.G;
+  if (
+    pg.stage.phase !== ng.stage.phase ||
+    pg.mapState.currentTileArray !== ng.mapState.currentTileArray ||
+    pg.mapState.discoveredTiles[y][x] !== ng.mapState.discoveredTiles[y][x] ||
+    pg.mapState.buildings[y][x] !== ng.mapState.buildings[y][x] ||
+    pg.mapState.routeSkyships[tileKeyOf(x, y)] !== ng.mapState.routeSkyships[tileKeyOf(x, y)] ||
+    pg.infidelFleet !== ng.infidelFleet ||
+    pg.accumulatedHosts !== ng.accumulatedHosts
+  )
+    return false;
+
+  // Players: any player's fleet can sit on this tile (fleetInfo identity),
+  // token styling reads colour/kingdomName, and the local player's resources
+  // feed the FleetTransferDialog reserves while it's open.
+  if (pg.playerInfo !== ng.playerInfo) {
+    const prevIds = Object.keys(pg.playerInfo);
+    const nextIds = Object.keys(ng.playerInfo);
+    if (prevIds.length !== nextIds.length) return false;
+    for (const id of nextIds) {
+      const a = pg.playerInfo[id];
+      const b = ng.playerInfo[id];
+      if (!a || !b) return false;
+      if (
+        a.fleetInfo !== b.fleetInfo ||
+        a.colour !== b.colour ||
+        a.kingdomName !== b.kingdomName
+      )
+        return false;
+    }
+    const myID = next.playerID ?? next.ctx.currentPlayer;
+    if (pg.playerInfo[myID]?.resources !== ng.playerInfo[myID]?.resources)
+      return false;
+  }
+
+  return true;
+};
+
+const tileKeyOf = (x: number, y: number): string => `${x},${y}`;
+
 export const WorldMapTile = memo((props: worldMapTileProps) => {
   const xPosition = useRef(0);
   const yPosition = useRef(0);
@@ -490,4 +565,4 @@ export const WorldMapTile = memo((props: worldMapTileProps) => {
       </ThemeProvider>
     </ReactCardFlip>
   );
-});
+}, areTilePropsEqual);
