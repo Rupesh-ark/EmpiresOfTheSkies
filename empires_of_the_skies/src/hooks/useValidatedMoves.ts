@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useRef } from "react";
 import { useToast } from "./useToast";
 import { MOVE_DEFINITIONS, MyGameState } from "@eots/game";
 
@@ -25,14 +25,24 @@ export const useValidatedMoves = (props: BoardProps) => {
   const { showToast } = useToast();
   const { G, ctx, playerID, moves } = props;
 
+  // The proxy reads game state at CALL time via refs, so its identity does
+  // not need to churn when G/ctx change every move. A stable proxy keeps
+  // `validatedProps` (and everything it's spread into) memoizable.
+  const stateRef = useRef({ G, ctx, playerID, moves });
+  stateRef.current = { G, ctx, playerID, moves };
+
   return useMemo(() => {
     return new Proxy(moves, {
-      get(target, moveName: string) {
-        const originalMove = target[moveName];
-        if (typeof originalMove !== "function") return originalMove;
+      get(_target, moveName: string) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const probe = stateRef.current.moves[moveName];
+        if (typeof probe !== "function") return probe;
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         return (...args: any[]) => {
+          const { G, ctx, playerID, moves } = stateRef.current;
+          const originalMove = moves[moveName];
+          if (typeof originalMove !== "function") return;
           if (!playerID) return;
 
           const isActionMove = moveName in MOVE_DEFINITIONS;
@@ -66,5 +76,6 @@ export const useValidatedMoves = (props: BoardProps) => {
         };
       },
     });
-  }, [moves, G, ctx, playerID, showToast]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showToast]);
 };

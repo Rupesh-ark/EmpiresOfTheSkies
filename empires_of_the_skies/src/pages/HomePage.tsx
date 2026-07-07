@@ -4,10 +4,12 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import { lazy, Suspense } from "react";
 import { LobbyClient } from "boardgame.io/client";
-import ClientComponent from "./Client";
 import HomePageComponent from "./HomePageComponent";
 import LobbyPage from "./LobbyPage";
 
+// Lazy: Client pulls in the whole game engine + bot AI — keep it out of the
+// initial home-page chunk.
+const ClientComponent = lazy(() => import("./Client"));
 const RulesPage = lazy(() => import("./RulesPage"));
 const AITunerPage = lazy(() => import("./AITuner"));
 const AITournamentPage = lazy(() => import("./AITournamentPage"));
@@ -43,7 +45,7 @@ const HomePage = () => {
           />
           <Route
             path="/game/:matchID/:playerName"
-            element={<ClientComponent server={server} />}
+            element={<Suspense fallback={<div>Loading game...</div>}><ClientComponent server={server} /></Suspense>}
           />
           <Route
             path="/rules"

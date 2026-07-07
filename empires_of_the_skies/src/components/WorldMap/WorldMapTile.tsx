@@ -29,6 +29,67 @@ const KINGDOM_POSITIONS: Record<string, { top: string; left: string }[]> = {
   Constantium: [{ top: "64%", left: "68%" }, { top: "64%", left: "82%" }, { top: "78%", left: "68%" }],
 };
 
+// Fog-tile styling is identical for all 32 tiles and every render — hoisted
+// to module scope so Emotion serializes the keyframes and sx object once.
+const cloudDriftA = keyframes`
+  0%   { transform: translateX(-5%) translateY(0); }
+  50%  { transform: translateX(5%) translateY(-3%); }
+  100% { transform: translateX(-5%) translateY(0); }
+`;
+const cloudDriftB = keyframes`
+  0%   { transform: translateX(4%) translateY(-2%); }
+  50%  { transform: translateX(-4%) translateY(2%); }
+  100% { transform: translateX(4%) translateY(-2%); }
+`;
+
+const FOG_TILE_SX = {
+  background: `
+    radial-gradient(ellipse 55% 50% at 35% 55%, rgba(160,140,100,0.2) 0%, transparent 100%),
+    radial-gradient(ellipse 40% 45% at 65% 40%, rgba(140,125,90,0.15) 0%, transparent 100%),
+    linear-gradient(180deg, rgba(46,85,112,0.4) 0%, rgba(58,112,144,0.35) 40%, rgba(45,101,133,0.4) 70%, rgba(40,85,117,0.45) 100%),
+    ${backgrounds.mapFog}
+  `,
+  width: "100%",
+  aspectRatio: "1",
+  borderRadius: 0,
+  border: "none",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  position: "relative",
+  overflow: "hidden",
+  transition: "all 0.3s ease",
+  "&::before": {
+    content: '""',
+    position: "absolute",
+    inset: "-30%",
+    background: `
+      radial-gradient(ellipse 40% 35% at 25% 45%, rgba(160,180,200,0.18) 0%, transparent 100%),
+      radial-gradient(ellipse 35% 30% at 70% 55%, rgba(160,180,200,0.14) 0%, transparent 100%),
+      radial-gradient(ellipse 45% 25% at 50% 75%, rgba(160,180,200,0.12) 0%, transparent 100%)
+    `,
+    filter: "blur(8px)",
+    animation: `${cloudDriftA} 10s ease-in-out infinite`,
+  },
+  "&::after": {
+    content: '""',
+    position: "absolute",
+    inset: "-30%",
+    background: `
+      radial-gradient(ellipse 35% 40% at 60% 35%, rgba(160,180,200,0.12) 0%, transparent 100%),
+      radial-gradient(ellipse 40% 30% at 30% 65%, rgba(160,180,200,0.10) 0%, transparent 100%)
+    `,
+    filter: "blur(10px)",
+    animation: `${cloudDriftB} 14s ease-in-out infinite`,
+  },
+  "&:hover": {
+    outline: "2px solid rgba(232,184,75,0.9)",
+    outlineOffset: "-2px",
+    boxShadow: "inset 0 0 18px rgba(232,184,75,0.35), 0 0 10px rgba(232,184,75,0.45)",
+    "&::before, &::after": { animationPlayState: "paused", opacity: 0.25 },
+  },
+} as const;
+
 const TILE_SLOTS = [
   { top: "35%", left: "35%" }, { top: "35%", left: "55%" }, { top: "55%", left: "35%" },
   { top: "55%", left: "55%" }, { top: "25%", left: "45%" }, { top: "65%", left: "45%" },
@@ -235,61 +296,7 @@ export const WorldMapTile = memo((props: worldMapTileProps) => {
       {/* Back (fog tile) */}
       <Button
         value={currentTile.name}
-        sx={{
-          background: `
-            radial-gradient(ellipse 55% 50% at 35% 55%, rgba(160,140,100,0.2) 0%, transparent 100%),
-            radial-gradient(ellipse 40% 45% at 65% 40%, rgba(140,125,90,0.15) 0%, transparent 100%),
-            linear-gradient(180deg, rgba(46,85,112,0.4) 0%, rgba(58,112,144,0.35) 40%, rgba(45,101,133,0.4) 70%, rgba(40,85,117,0.45) 100%),
-            ${backgrounds.mapFog}
-          `,
-          width: "100%",
-          aspectRatio: "1",
-          borderRadius: 0,
-          border: "none",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          position: "relative",
-          overflow: "hidden",
-          transition: "all 0.3s ease",
-          "&::before": {
-            content: '""',
-            position: "absolute",
-            inset: "-30%",
-            background: `
-              radial-gradient(ellipse 40% 35% at 25% 45%, rgba(160,180,200,0.18) 0%, transparent 100%),
-              radial-gradient(ellipse 35% 30% at 70% 55%, rgba(160,180,200,0.14) 0%, transparent 100%),
-              radial-gradient(ellipse 45% 25% at 50% 75%, rgba(160,180,200,0.12) 0%, transparent 100%)
-            `,
-            filter: "blur(8px)",
-            animation: `${keyframes`
-              0%   { transform: translateX(-5%) translateY(0); }
-              50%  { transform: translateX(5%) translateY(-3%); }
-              100% { transform: translateX(-5%) translateY(0); }
-            `} 10s ease-in-out infinite`,
-          },
-          "&::after": {
-            content: '""',
-            position: "absolute",
-            inset: "-30%",
-            background: `
-              radial-gradient(ellipse 35% 40% at 60% 35%, rgba(160,180,200,0.12) 0%, transparent 100%),
-              radial-gradient(ellipse 40% 30% at 30% 65%, rgba(160,180,200,0.10) 0%, transparent 100%)
-            `,
-            filter: "blur(10px)",
-            animation: `${keyframes`
-              0%   { transform: translateX(4%) translateY(-2%); }
-              50%  { transform: translateX(-4%) translateY(2%); }
-              100% { transform: translateX(4%) translateY(-2%); }
-            `} 14s ease-in-out infinite`,
-          },
-          "&:hover": {
-            outline: "2px solid rgba(232,184,75,0.9)",
-            outlineOffset: "-2px",
-            boxShadow: "inset 0 0 18px rgba(232,184,75,0.35), 0 0 10px rgba(232,184,75,0.45)",
-            "&::before, &::after": { animationPlayState: "paused", opacity: 0.25 },
-          },
-        }}
+        sx={FOG_TILE_SX}
         onClick={
           !props.alternateOnClick
             ? (event) => {

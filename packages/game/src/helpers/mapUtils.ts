@@ -217,28 +217,55 @@ export const buildPlayerNetwork = (G: MyGameState, playerID: string): Set<string
   return network;
 };
 
+/** All tiles holding this player's outposts or colonies. */
+export const getPlayerBuildings = (
+  G: MyGameState,
+  playerID: string,
+): [number, number][] => {
+  const result: [number, number][] = [];
+  for (let y = 0; y < G.mapState.buildings.length; y++) {
+    for (let x = 0; x < G.mapState.buildings[y].length; x++) {
+      const building = G.mapState.buildings[y][x];
+      if (
+        building.player?.id === playerID &&
+        (building.buildings === "outpost" || building.buildings === "colony")
+      ) {
+        result.push([x, y]);
+      }
+    }
+  }
+  return result;
+};
+
+/**
+ * Whether a building tile is connected to the Faithdom-reachable part of a
+ * player's route network. A building is always a chain ENDPOINT (its
+ * ownership skyship is the first link), so "add it to the network and
+ * re-BFS" reduces to: does it have a passable edge into the reachable set?
+ * This lets one BFS per player serve every building.
+ */
+export const isBuildingConnected = (
+  x: number,
+  y: number,
+  reachable: Set<string>,
+  tileArray: TileInfoProps[][],
+): boolean => {
+  if (reachable.has(tileKey(x, y))) return true;
+  return getPassableNeighbors(x, y, tileArray).some(([nx, ny]) =>
+    reachable.has(tileKey(nx, ny))
+  );
+};
+
 /**
  * Count how many of a player's outposts/colonies are connected to Faithdom
  * via their skyship chain. Used by Engaged Factories rule to cap factory income.
  */
 export const countActiveTradeRoutes = (G: MyGameState, playerID: string): number => {
-  const playerNetwork = buildPlayerNetwork(G, playerID);
-  let count = 0;
-
-  for (let y = 0; y < G.mapState.buildings.length; y++) {
-    for (let x = 0; x < G.mapState.buildings[y].length; x++) {
-      const building = G.mapState.buildings[y][x];
-      if (building.player?.id !== playerID || !building.buildings) continue;
-      if (building.buildings !== "outpost" && building.buildings !== "colony") continue;
-
-      const network = new Set(playerNetwork);
-      network.add(tileKey(x, y));
-      const reachable = bfsReachable(FAITHDOM_TILES, network, G.mapState.currentTileArray);
-      if (reachable.has(tileKey(x, y))) count++;
-    }
-  }
-
-  return count;
+  const network = buildPlayerNetwork(G, playerID);
+  const reachable = bfsReachable(FAITHDOM_TILES, network, G.mapState.currentTileArray);
+  return getPlayerBuildings(G, playerID).filter(([x, y]) =>
+    isBuildingConnected(x, y, reachable, G.mapState.currentTileArray)
+  ).length;
 };
 
 /**
@@ -248,29 +275,17 @@ export const countActiveTradeRoutes = (G: MyGameState, playerID: string): number
 export const wouldPlacementConnectRoute = (
   G: MyGameState, playerID: string, tile: string,
 ): boolean => {
+  const tileArray = G.mapState.currentTileArray;
   const baseNetwork = buildPlayerNetwork(G, playerID);
+  const baseReachable = bfsReachable(FAITHDOM_TILES, baseNetwork, tileArray);
+
   const extendedNetwork = new Set(baseNetwork);
   extendedNetwork.add(tile);
+  const extendedReachable = bfsReachable(FAITHDOM_TILES, extendedNetwork, tileArray);
 
-  for (let y = 0; y < G.mapState.buildings.length; y++) {
-    for (let x = 0; x < G.mapState.buildings[y].length; x++) {
-      const building = G.mapState.buildings[y][x];
-      if (building.player?.id !== playerID || !building.buildings) continue;
-      if (building.buildings !== "outpost" && building.buildings !== "colony") continue;
-
-      const bk = tileKey(x, y);
-      // Check if already connected WITHOUT the new tile
-      const oldNet = new Set(baseNetwork);
-      oldNet.add(bk);
-      const oldReachable = bfsReachable(FAITHDOM_TILES, oldNet, G.mapState.currentTileArray);
-      if (oldReachable.has(bk)) continue; // already connected, skip
-
-      // Check if connected WITH the new tile
-      const newNet = new Set(extendedNetwork);
-      newNet.add(bk);
-      const newReachable = bfsReachable(FAITHDOM_TILES, newNet, G.mapState.currentTileArray);
-      if (newReachable.has(bk)) return true; // this placement makes a difference
-    }
+  for (const [x, y] of getPlayerBuildings(G, playerID)) {
+    if (isBuildingConnected(x, y, baseReachable, tileArray)) continue; // already connected
+    if (isBuildingConnected(x, y, extendedReachable, tileArray)) return true;
   }
   return false;
 };

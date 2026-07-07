@@ -17,6 +17,10 @@ const RoundSummaryDialog = (props: MyGameProps) => {
     setOpen(true);
   }
 
+  // This dialog is always mounted; skip building the summary (log scan,
+  // player walks) on the every-move re-renders where it isn't visible.
+  if (!open) return null;
+
   const resolvedEvent = props.G.eventState.resolvedEvent;
   const previousRound = props.G.round - 1;
 

@@ -13,12 +13,12 @@ const ALLOWED_ORIGINS = [
   "http://localhost:5173",
   ...(process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : []),
   ...(process.env.ADDITIONAL_ORIGINS ? process.env.ADDITIONAL_ORIGINS.split(",") : []),
+  ...(process.env.VERCEL_URL ? [`https://${process.env.VERCEL_URL}`] : []),
 ];
 
 const allowOrigin = (origin?: string): string => {
   if (!origin) return "";
   if (ALLOWED_ORIGINS.includes(origin)) return origin;
-  if (process.env.VERCEL_URL && new URL(origin).hostname === process.env.VERCEL_URL) return origin;
   return "";
 };
 
@@ -26,9 +26,12 @@ const DATABASE_URL = process.env.DATABASE_URL;
 if (!DATABASE_URL) throw new Error("DATABASE_URL is required");
 const db = new PostgresStore(DATABASE_URL, { logging: false });
 
+// Static origin list (not a validator function): the array form is accepted by
+// both boardgame.io 0.50.2 and the @lean-poker fork's 0.50.4, whose SocketIO
+// CORS moved to the `cors` package callback signature.
 const server = Server({
   games: [MyGame],
-  origins: (origin: string | undefined) => !!allowOrigin(origin || undefined),
+  origins: ALLOWED_ORIGINS,
   db,
 });
 
@@ -70,7 +73,7 @@ server.app.use(async (ctx: any, next: any) => {
   if (ctx.path === "/health" && ctx.method === "GET") {
     let dbStatus = "unknown";
     try {
-      await (db as any).client.query("SELECT 1");
+      await (db as any).sequelize.query("SELECT 1");
       dbStatus = "connected";
     } catch {
       dbStatus = "disconnected";
@@ -81,18 +84,35 @@ server.app.use(async (ctx: any, next: any) => {
   await next();
 });
 
+let runningServers: { apiServer?: { close: (cb?: () => void) => void }; appServer?: { close: (cb?: () => void) => void } } | null = null;
+
 const shutdown = () => {
   log.info("Shutting down gracefully...");
-  const exit = () => {
+  // Force-exit fallback in case a socket refuses to drain
+  const fallback = setTimeout(() => process.exit(0), 2000);
+  fallback.unref();
+
+  const closeDbAndExit = async () => {
+    try {
+      await (db as any).sequelize?.close();
+    } catch (err) {
+      log.warn({ err }, "Error closing database pool");
+    }
     log.info("Shutdown complete");
     process.exit(0);
   };
+
   try {
-    server.app.removeAllListeners();
-  } catch {
-    // Ignore cleanup errors during shutdown
+    runningServers?.apiServer?.close();
+    if (runningServers?.appServer) {
+      runningServers.appServer.close(() => void closeDbAndExit());
+    } else {
+      void closeDbAndExit();
+    }
+  } catch (err) {
+    log.warn({ err }, "Error during shutdown cleanup");
+    void closeDbAndExit();
   }
-  setTimeout(exit, 2000);
 };
 
 process.on("SIGTERM", shutdown);
@@ -105,4 +125,8 @@ process.on("uncaughtException", (err) => {
   process.exit(1);
 });
 
-server.run(PORT, () => log.info(`Server running on port ${PORT}`));
+server
+  .run(PORT, () => log.info(`Server running on port ${PORT}`))
+  .then((servers) => {
+    runningServers = servers;
+  });

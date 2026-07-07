@@ -65,5 +65,5 @@ jobs:
             echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
             docker compose -f docker-compose.prod.yml pull eots-server
             docker compose -f docker-compose.prod.yml up -d eots-server
-            docker compose -f docker-compose.prod.yml up -d pg-backup-eots
+            docker compose -f docker-compose.prod.yml up -d pg-backup
             docker image prune -f

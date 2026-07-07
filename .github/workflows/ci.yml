@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build game engine
+        run: pnpm --filter @eots/game build
+
+      - name: Engine tests
+        run: pnpm --filter @eots/game test
+
+      - name: Server build (typecheck)
+        run: pnpm --filter empires-server build
+
+      - name: Frontend typecheck
+        run: pnpm --filter empires_of_the_skies exec tsc --noEmit
+
+      - name: Frontend build
+        run: pnpm --filter empires_of_the_skies build
+
+      - name: Lint
+        run: pnpm --filter empires_of_the_skies lint --max-warnings=0
+        continue-on-error: true

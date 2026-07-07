@@ -11,7 +11,8 @@ import {
   BUILDING_SELL_PRICE,
   buildPlayerNetwork,
   bfsReachable,
-  tileKey,
+  getPlayerBuildings,
+  isBuildingConnected,
   FAITHDOM_TILES,
   GoodKey,
 } from "@eots/game";
@@ -36,29 +37,21 @@ const useRouteStatuses = (props: MyGameProps): RouteStatus[] => {
   const { G, playerID } = props;
   return useMemo(() => {
     if (!playerID) return [];
+    const tileArray = G.mapState.currentTileArray;
     const network = buildPlayerNetwork(G, playerID);
-    const statuses: RouteStatus[] = [];
-    for (let y = 0; y < G.mapState.buildings.length; y++) {
-      for (let x = 0; x < G.mapState.buildings[y].length; x++) {
-        const building = G.mapState.buildings[y][x];
-        if (building.player?.id !== playerID) continue;
-        if (building.buildings !== "outpost" && building.buildings !== "colony") continue;
-
-        const withBuilding = new Set(network);
-        withBuilding.add(tileKey(x, y));
-        const reachable = bfsReachable(FAITHDOM_TILES, withBuilding, G.mapState.currentTileArray);
-        const loot = G.mapState.currentTileArray[y][x].loot[building.buildings];
-        statuses.push({
-          coords: [x, y],
-          name: getLocationPresentation(G.mapState.currentTileArray, [x, y]).name,
-          kind: building.buildings,
-          connected: reachable.has(tileKey(x, y)),
-          gold: loot.gold,
-          goods: GOODS.reduce((sum, g) => sum + loot[g], 0),
-        });
-      }
-    }
-    return statuses;
+    const reachable = bfsReachable(FAITHDOM_TILES, network, tileArray);
+    return getPlayerBuildings(G, playerID).map(([x, y]): RouteStatus => {
+      const kind = G.mapState.buildings[y][x].buildings as "outpost" | "colony";
+      const loot = tileArray[y][x].loot[kind];
+      return {
+        coords: [x, y],
+        name: getLocationPresentation(tileArray, [x, y]).name,
+        kind,
+        connected: isBuildingConnected(x, y, reachable, tileArray),
+        gold: loot.gold,
+        goods: GOODS.reduce((sum, g) => sum + loot[g], 0),
+      };
+    });
   }, [G, playerID]);
 };
 
