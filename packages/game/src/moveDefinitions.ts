@@ -32,6 +32,7 @@ import enableDispatchButtons from "./moves/actions/enableDispatchButtons";
 import issueHolyDecree from "./moves/actions/issueHolyDecree";
 import garrisonTransfer from "./moves/actions/garrisonTransfer";
 import declareSmugglerGood from "./moves/actions/declareSmugglerGood";
+import sendAgitators from "./moves/actions/sendAgitators";
 import pass from "./moves/pass";
 
 import discoverTile from "./moves/discovery/discoverTile";
@@ -129,6 +130,7 @@ export const MOVE_DEFINITIONS: Record<string, MoveDefinition> = {
   issueHolyDecree,
   garrisonTransfer,
   declareSmugglerGood,
+  sendAgitators,
   pass,
 
   discoverTile,

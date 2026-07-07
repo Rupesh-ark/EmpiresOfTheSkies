@@ -1,4 +1,4 @@
-import React, { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { lazy, memo, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { MyGameProps, EVENT_CARD_DEFS, PlayerInfo } from "@eots/game";
 const ActionBoard = lazy(() => import("./ActionBoard/ActionBoard").then(m => ({ default: m.ActionBoard })));
@@ -28,7 +28,29 @@ import type { PanelSlot, MapSize } from "./layout";
 
 const HERESY_POSITIONS = Array.from({ length: 19 }, (_, i) => i - 9);
 
-const HeresyBar = ({ playerInfo }: { playerInfo: Record<string, PlayerInfo> }) => {
+// Memoized on the fields it renders — playerInfo's identity changes on every
+// move, but the bar only cares about heresy positions and allegiance.
+const heresyBarPropsEqual = (
+  prev: { playerInfo: Record<string, PlayerInfo> },
+  next: { playerInfo: Record<string, PlayerInfo> }
+): boolean => {
+  const prevIds = Object.keys(prev.playerInfo);
+  const nextIds = Object.keys(next.playerInfo);
+  if (prevIds.length !== nextIds.length) return false;
+  return nextIds.every((id) => {
+    const a = prev.playerInfo[id];
+    const b = next.playerInfo[id];
+    return (
+      !!a && !!b &&
+      a.heresyTracker === b.heresyTracker &&
+      a.hereticOrOrthodox === b.hereticOrOrthodox &&
+      a.colour === b.colour &&
+      a.kingdomName === b.kingdomName
+    );
+  });
+};
+
+const HeresyBar = memo(({ playerInfo }: { playerInfo: Record<string, PlayerInfo> }) => {
   const players = Object.entries(playerInfo) as [string, PlayerInfo][];
 
   return (
@@ -151,7 +173,7 @@ const HeresyBar = ({ playerInfo }: { playerInfo: Record<string, PlayerInfo> }) =
       </Box>
     </Box>
   );
-};
+}, heresyBarPropsEqual);
 
 export const ActionBoardsAndMap = (props: MyGameProps) => {
   return (

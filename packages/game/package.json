@@ -24,6 +24,7 @@
     "build:esm": "tsc -p tsconfig.esm.json",
     "build:cjs": "tsc -p tsconfig.cjs.json && node write-cjs-package.cjs",
     "build": "pnpm run build:types && pnpm run build:esm && pnpm run build:cjs",
+    "watch": "tsc -p tsconfig.types.json -w --preserveWatchOutput & tsc -p tsconfig.esm.json -w --preserveWatchOutput & tsc -p tsconfig.cjs.json -w --preserveWatchOutput & wait",
     "test": "vitest run",
     "test:watch": "vitest"
   },

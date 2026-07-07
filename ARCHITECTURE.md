@@ -50,8 +50,6 @@ server.run(PORT, () => log.info(`Server running on port ${PORT}`));
 
 That's it. boardgame.io handles match creation, player joining, move validation, and state sync over SocketIO.
 
-There's also a `POST /api/bot-log` endpoint that bot clients send decision logs to. These get written to `bot-logs/game-{matchID}.txt`.
-
 ### 2. Player creates/joins a match (`LobbyPage.tsx`)
 
 The lobby uses boardgame.io's `LobbyClient` to talk to the server REST API:

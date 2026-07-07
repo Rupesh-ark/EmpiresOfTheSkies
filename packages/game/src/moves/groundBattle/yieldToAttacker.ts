@@ -1,5 +1,5 @@
 import { MoveDefinition } from "../../types";
-import { addEliteRegiments, addLevyAmount, addRegiments } from "../../helpers/stateUtils";
+import { addEliteRegiments, addLevyAmount, addRegiments, toBuildingOwner } from "../../helpers/stateUtils";
 import { nextAfterGroundDecision } from "../../helpers/resolutionSequencer";
 
 const yieldToAttacker: MoveDefinition = {
@@ -46,7 +46,7 @@ const yieldToAttacker: MoveDefinition = {
       currentBuilding.garrisonedRegiments = 0;
       currentBuilding.garrisonedLevies = 0;
       currentBuilding.garrisonedEliteRegiments = 0;
-      currentBuilding.player = G.playerInfo[G.battleState.attacker.id];
+      currentBuilding.player = toBuildingOwner(G.playerInfo[G.battleState.attacker.id]);
     }
     G.battleState = undefined;
 

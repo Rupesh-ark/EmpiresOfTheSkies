@@ -1,5 +1,5 @@
 import { MoveDefinition, GoodKey } from "../../types";
-import { increaseHeresyWithinMove, addVPAmount, logEvent } from "../../helpers/stateUtils";
+import { increaseHeresyWithinMove, addVPAmount, logEvent, toBuildingOwner } from "../../helpers/stateUtils";
 import { humanizeTileName } from "../../helpers/helpers";
 import { PRICE_MARKER_MIN } from "../../data/gameData";
 import { setStage } from "../../helpers/stageUtils";
@@ -14,7 +14,7 @@ const constructOutpost: MoveDefinition = {
     const currentBuilding = G.mapState.buildings[y][x];
     const currentTile = G.mapState.currentTileArray[y][x];
 
-    currentBuilding.player = currentPlayer;
+    currentBuilding.player = toBuildingOwner(currentPlayer);
     currentBuilding.buildings = "outpost";
 
     // Move price markers left for outpost goods ("To Claim" rule)

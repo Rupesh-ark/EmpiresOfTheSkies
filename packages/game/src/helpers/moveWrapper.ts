@@ -16,7 +16,7 @@ const moveLog = log.child({ mod: "move" });
  * 3. Player-visible game log entries for successful moves
  *
  * Note: Error feedback to the player is handled client-side — the frontend
- * calls validate() before invoking the move. See docs/TOAST_SYSTEM.md.
+ * calls validate() before invoking the move. See empires_of_the_skies/src/hooks/useValidatedMoves.ts.
  *
  * Pipeline: dev log → validate? → fn → successLog
  */

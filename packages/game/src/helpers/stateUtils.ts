@@ -1,8 +1,15 @@
-import { MyGameState } from "../types";
+import { MyGameState, MapBuildingOwner, PlayerInfo } from "../types";
 import { MAX_SKYSHIPS, MAX_REGIMENTS, HERESY_MAX, HERESY_MIN } from "../data/gameData";
 import { getRepublicInfluence } from "./republicUtils";
 
 export { HERESY_MAX, HERESY_MIN };
+
+/** Slim ownership stamp for map cells — never store the full PlayerInfo there. */
+export const toBuildingOwner = (p: PlayerInfo): MapBuildingOwner => ({
+  id: p.id,
+  colour: p.colour,
+  kingdomName: p.kingdomName,
+});
 
 function sanitizeValue(val: unknown, fallback = 0): number {
   if (typeof val !== 'number' || isNaN(val)) return fallback;

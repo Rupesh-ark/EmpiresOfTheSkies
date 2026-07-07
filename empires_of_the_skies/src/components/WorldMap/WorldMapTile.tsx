@@ -369,8 +369,8 @@ export const WorldMapTile = memo((props: worldMapTileProps) => {
   return (
     <ReactCardFlip isFlipped={flip} key={props.location.toString()}>
       {/* Back (fog tile) */}
+      {/* No `value={tile.name}` here — that leaked undiscovered tile names into the DOM */}
       <Button
-        value={currentTile.name}
         sx={FOG_TILE_SX}
         onClick={
           !props.alternateOnClick

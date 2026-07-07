@@ -9,7 +9,7 @@ import { MyGameProps } from "@eots/game";
 import { Box, Typography, Tooltip, IconButton } from "@mui/material";
 import { ContentCopy } from "@mui/icons-material";
 import { tokens } from "@/theme";
-import { useState } from "react";
+import { memo, useState } from "react";
 
 type LogIconKey =
   | "event"
@@ -248,4 +248,10 @@ const GameLog = (props: MyGameProps) => {
   );
 };
 
-export default GameLog;
+// Display-only panel: the log is appended via immer, so identity comparison
+// of G.gameLog is exact — skip the every-move re-renders the full-props
+// spread would otherwise cause.
+export default memo(
+  GameLog,
+  (prev, next) => prev.G.gameLog === next.G.gameLog && prev.matchID === next.matchID
+);

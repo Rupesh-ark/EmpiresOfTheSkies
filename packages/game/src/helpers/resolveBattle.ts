@@ -4,7 +4,7 @@ import { FleetInfo, GoodKey, MyGameState, PlayerInfo } from "../types";
 // findNext functions no longer called directly — resolutionSequencer handles all transitions
 import { drawFortuneOfWarCard, findPossibleDestinations, humanizeTileName } from "./helpers";
 import { RandomAPI } from "boardgame.io/dist/types/src/plugins/random/random";
-import { increaseHeresyWithinMove, increaseOrthodoxyWithinMove, logEvent } from "./stateUtils";
+import { increaseHeresyWithinMove, increaseOrthodoxyWithinMove, logEvent, toBuildingOwner } from "./stateUtils";
 import { PRICE_MARKER_MIN, KINGDOM_LOCATION } from "../data/gameData";
 import { nextAfterAerialDecision, nextAfterGroundDecision, nextAfterConquest } from "./resolutionSequencer";
 import { setStage } from "./stageUtils";
@@ -753,7 +753,7 @@ export const resolveConquest = (
       }
     });
 
-    currentBuilding.player = currentPlayer;
+    currentBuilding.player = toBuildingOwner(currentPlayer);
     currentBuilding.buildings = "colony";
     G.conquestState = undefined;
     setStage(G, "resolution", "conquest_garrison");

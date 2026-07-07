@@ -192,8 +192,16 @@ export type GoodsPriceMarkers = {
   stickyIchor: number;
   pipeweed: number;
 };
+/**
+ * Slim ownership reference stored on map cells. Deliberately NOT the full
+ * PlayerInfo: embedding the whole player (resources, fleets, cards) in every
+ * owned cell bloated each state broadcast, DB write, and AI state clone.
+ * Old persisted matches still load — a full PlayerInfo is a superset.
+ */
+export type MapBuildingOwner = Pick<PlayerInfo, "id" | "colour" | "kingdomName">;
+
 export type MapBuildingInfo = {
-  player?: PlayerInfo;
+  player?: MapBuildingOwner;
   buildings?: "outpost" | "colony";
   fort: string[];
   garrisonedRegiments: number;

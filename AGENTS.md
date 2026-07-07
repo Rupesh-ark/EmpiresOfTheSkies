@@ -79,10 +79,12 @@ UI click → props.moves.*() → SocketIO → server validates & mutates G
 
 ## Gotchas
 
-- `@eots/game` must be rebuilt after engine changes before server/frontend see them. `pnpm build:all` handles ordering.
+- `@eots/game` must be rebuilt after engine changes before server/frontend see them. `pnpm build:all` handles ordering, or run `pnpm dev:game` for watch mode during development.
 - The backend is CJS (`"type": "commonjs"`); frontend is ESM.
-- `pnpm-workspace.yaml` pins `is-generator-function@1.0.10` for Koa compatibility.
+- `pnpm-workspace.yaml` pins `is-generator-function@1.0.10` for Koa compatibility (droppable after the planned swap to the `@lean-poker/boardgame.io` fork, which removes koa-socket-2).
 - AI tests under `packages/game/src/__tests__/ai/` can be slow; normal dev tests skip the full self-play smoke test.
+- The `docs/` folder is NOT this project's documentation — it's local-only (gitignored) vendored material for the planned `@lean-poker/boardgame.io` fork swap. This project's architecture guide is the root `ARCHITECTURE.md`.
+- Moves are defined once in `packages/game/src/moveDefinitions.ts` (implementation + validator) — `Game.ts` registers them from there via `wrapSet(...)`. To add a move: create the move file, add it to `MOVE_DEFINITIONS`, then list its name in the right `wrapSet` call(s) in `Game.ts`.
 
 ---
 

@@ -1,5 +1,5 @@
 import { MyGameState, DealOffer, MoveError, MoveDefinition } from "../../types";
-import { logEvent } from "../../helpers/stateUtils";
+import { logEvent, toBuildingOwner } from "../../helpers/stateUtils";
 import { validateOffer } from "./proposeDeal";
 import { INVALID_MOVE } from "boardgame.io/core";
 
@@ -26,7 +26,7 @@ const executeSide = (
 
   if (offer.outposts && offer.outposts.length > 0) {
     for (const [x, y] of offer.outposts) {
-      G.mapState.buildings[y][x].player = G.playerInfo[recipientID];
+      G.mapState.buildings[y][x].player = toBuildingOwner(G.playerInfo[recipientID]);
     }
   }
 };

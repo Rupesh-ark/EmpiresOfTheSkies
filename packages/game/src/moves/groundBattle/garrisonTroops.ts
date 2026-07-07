@@ -2,6 +2,7 @@ import { MoveDefinition } from "../../types";
 import { nextAfterGroundDecision, nextAfterConquest } from "../../helpers/resolutionSequencer";
 import { INVALID_MOVE } from "boardgame.io/core";
 import log from "../../helpers/logger";
+import { toBuildingOwner } from "../../helpers/stateUtils";
 
 const gtLog = log.child({ mod: "garrison-troops" });
 
@@ -30,7 +31,7 @@ const garrisonTroops: MoveDefinition = {
     G.mapState.buildings[y][x].garrisonedLevies += troopInfo.levies;
     G.mapState.buildings[y][x].garrisonedEliteRegiments += troopInfo.eliteRegiments;
 
-    G.mapState.buildings[y][x].player = G.playerInfo[playerID];
+    G.mapState.buildings[y][x].player = toBuildingOwner(G.playerInfo[playerID]);
 
     G.playerInfo[playerID].fleetInfo.forEach((fleet) => {
       const [fleetX, fleetY] = fleet.location;

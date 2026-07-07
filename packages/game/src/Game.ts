@@ -11,89 +11,18 @@ import {
   getInitialOutpostsAndColoniesInfo,
 } from "./setup/mapSetup";
 import { buildPlayerInfoMap, getGoldIncomeForPlayer } from "./setup/playerSetup";
-import discoverTile from "./moves/discovery/discoverTile";
-import alterPlayerOrder from "./moves/actions/alterPlayerOrder";
-import recruitCounsellors from "./moves/actions/recruitCounsellors";
-import recruitRegiments from "./moves/actions/recruitRegiments";
-import purchaseSkyships from "./moves/actions/purchaseSkyships";
-import foundBuildings from "./moves/actions/foundBuildings";
-import foundFactory from "./moves/actions/foundFactory";
-import checkAndPlaceFort from "./moves/actions/checkAndPlaceFort";
-import flipCards from "./moves/actions/flipCards";
-import { increaseHeresy, increaseOrthodoxy } from "./moves/actions/heresyMoves";
-import punishDissenters from "./moves/actions/punishDissenters";
-import convertMonarch from "./moves/actions/convertMonarch";
-import influencePrelates from "./moves/actions/influencePrelates";
+import { logEvent, allPlayersPassed, calculateMercy, nextUnpassedPlayer } from "./helpers/stateUtils";
+import { wrapMove, withPhaseGuard, withPhaseReset, checkLoopGuard } from "./helpers/moveWrapper";
+import { MOVE_DEFINITIONS } from "./moveDefinitions";
 import {
   checkIfCurrentPlayerIsInCurrentBattle,
   fullResetFortuneOfWarCardDeck,
   resetBattleCheckCount,
 } from "./helpers/helpers";
-import trainTroops from "./moves/actions/trainTroops";
-import confirmAction from "./moves/actions/confirmAction";
-import discardFoWCard from "./moves/actions/discardFoWCard";
-import drawFoWCards from "./moves/actions/drawFoWCards";
-import buildSkyships from "./moves/actions/buildSkyships";
-import conscriptLevies from "./moves/actions/conscriptLevies";
-import passFleetInfoToPlayerInfo from "./moves/actions/passFleetInfoToPlayerInfo";
-import deployFleet from "./moves/actions/deployFleet";
-import moveFleet from "./moves/actions/moveFleet";
-import transferBetweenFleets from "./moves/actions/transferBetweenFleets";
-import sellSkyships from "./moves/actions/sellSkyships";
-import sellBuilding from "./moves/actions/sellBuilding";
-import transferOutpost from "./moves/actions/transferOutpost";
-import proposeDeal from "./moves/actions/proposeDeal";
-import acceptDeal from "./moves/actions/acceptDeal";
-import rejectDeal from "./moves/actions/rejectDeal";
-import enableDispatchButtons from "./moves/actions/enableDispatchButtons";
-import issueHolyDecree from "./moves/actions/issueHolyDecree";
-import garrisonTransfer from "./moves/actions/garrisonTransfer";
-import sendAgitators from "./moves/actions/sendAgitators";
-import declareSmugglerGood from "./moves/actions/declareSmugglerGood";
-import pass from "./moves/pass";
-import attackOtherPlayersFleet from "./moves/aerialBattle/attackOtherPlayersFleet";
-import evadeAttackingFleet from "./moves/aerialBattle/evadeAttackingFleet";
-import doNotAttack from "./moves/aerialBattle/doNotAttack";
-import retaliate from "./moves/aerialBattle/retaliate";
-import drawCard from "./moves/aerialBattle/drawCard";
-import pickCard from "./moves/aerialBattle/pickCard";
-import relocateDefeatedFleet from "./moves/aerialBattle/relocateDefeatedFleet";
-import plunder from "./moves/plunderLegends/plunder";
-import doNotPlunder from "./moves/plunderLegends/doNotPlunder";
-import attackPlayersBuilding from "./moves/groundBattle/attackPlayersBuilding";
-import doNotGroundAttack from "./moves/groundBattle/doNotGroundAttack";
-import defendGroundAttack from "./moves/groundBattle/defendGroundAttack";
-import garrisonTroops from "./moves/groundBattle/garrisonTroops";
-import yieldToAttacker from "./moves/groundBattle/yieldToAttacker";
-import coloniseLand from "./moves/conquests/coloniseLand";
-import constructOutpost from "./moves/conquests/constructOutpost";
-import doNothing from "./moves/conquests/doNothing";
-import drawCardConquest from "./moves/conquests/drawCardConquest";
-import pickCardConquest from "./moves/conquests/pickCardConquest";
-import vote from "./moves/election/vote";
-import retrieveFleets from "./moves/resolution/retrieveFleets";
-
-
-// findNext functions now called via resolutionFlow walker
 import { TurnOrder } from "boardgame.io/core";
 import resolveRound from "./helpers/resolveRound";
-import pickLegacyCard from "./moves/pickLegacyCard";
-import pickKingdomAdvantageCard from "./moves/kingdomAdvantage/pickKingdomAdvantageCard";
-import chooseEventCard from "./moves/events/chooseEventCard";
-import resolveEventChoice from "./moves/events/resolveEventChoice";
-import immediateElectionVote from "./moves/events/immediateElectionVote";
 import { ALL_EVENT_CARD_NAMES } from "./helpers/eventCardDefinitions";
-// prepareInfidelFleetCombat now called via resolutionFlow walker
 import { beginResolution, getResolutionTarget } from "./helpers/resolutionFlow";
-import respondToInfidelFleet from "./moves/events/respondToInfidelFleet";
-import commitRebellionTroops from "./moves/events/commitRebellionTroops";
-import contributeToRebellion from "./moves/events/contributeToRebellion";
-import offerBuyoffGold from "./moves/events/offerBuyoffGold";
-import nominateCaptainGeneral from "./moves/events/nominateCaptainGeneral";
-import commitDeferredBattleCard from "./moves/events/commitDeferredBattleCard";
-import contributeToGrandArmy from "./moves/events/contributeToGrandArmy";
-import { logEvent, allPlayersPassed, calculateMercy, nextUnpassedPlayer } from "./helpers/stateUtils";
-import { wrapMove, withPhaseGuard, withPhaseReset, checkLoopGuard } from "./helpers/moveWrapper";
 
 import { setStage, isStage } from "./helpers/stageUtils";
 import type { GameStage } from "./types";
@@ -101,6 +30,21 @@ import log from "./helpers/logger";
 
 const phaseLog = log.child({ mod: "phase" });
 const budgetLog = log.child({ mod: "turn-budget" });
+
+/**
+ * Registers a set of moves from MOVE_DEFINITIONS — the single source of truth
+ * for move implementations AND their validators (some definitions carry
+ * stricter validate() wrappers than the raw move files; the server enforces
+ * those too). Throws at load time on a typo'd name.
+ */
+const wrapSet = (...names: string[]) =>
+  Object.fromEntries(
+    names.map((name) => {
+      const def = MOVE_DEFINITIONS[name];
+      if (!def) throw new Error(`wrapSet: unknown move "${name}" — not in MOVE_DEFINITIONS`);
+      return [name, wrapMove(name, def)];
+    })
+  );
 
 const TURN_ENDING_LIMIT = 550;
 const turnEndingCounters = new Map<string, number>();
@@ -348,61 +292,11 @@ const MyGame: Game<MyGameState> = {
       },
     };
   },
-  moves: {
-    discoverTile: wrapMove("discoverTile", discoverTile),
-    alterPlayerOrder: wrapMove("alterPlayerOrder", alterPlayerOrder),
-    recruitCounsellors: wrapMove("recruitCounsellors", recruitCounsellors),
-    recruitRegiments: wrapMove("recruitRegiments", recruitRegiments),
-    purchaseSkyships: wrapMove("purchaseSkyships", purchaseSkyships),
-    foundBuildings: wrapMove("foundBuildings", foundBuildings),
-    increaseHeresy: wrapMove("increaseHeresy", increaseHeresy),
-    increaseOrthodoxy: wrapMove("increaseOrthodoxy", increaseOrthodoxy),
-    checkAndPlaceFort: wrapMove("checkAndPlaceFort", checkAndPlaceFort),
-    punishDissenters: wrapMove("punishDissenters", punishDissenters),
-    convertMonarch: wrapMove("convertMonarch", convertMonarch),
-    influencePrelates: wrapMove("influencePrelates", influencePrelates),
-    trainTroops: wrapMove("trainTroops", trainTroops),
-    drawFoWCards: wrapMove("drawFoWCards", drawFoWCards),
-    confirmAction: wrapMove("confirmAction", confirmAction),
-    flipCards: wrapMove("flipCards", flipCards),
-    buildSkyships: wrapMove("buildSkyships", buildSkyships),
-    conscriptLevies: wrapMove("conscriptLevies", conscriptLevies),
-    passFleetInfoToPlayerInfo: wrapMove("passFleetInfoToPlayerInfo", passFleetInfoToPlayerInfo),
-    deployFleet: wrapMove("deployFleet", deployFleet),
-    enableDispatchButtons: wrapMove("enableDispatchButtons", enableDispatchButtons),
-    issueHolyDecree: wrapMove("issueHolyDecree", issueHolyDecree),
-    garrisonTransfer: wrapMove("garrisonTransfer", garrisonTransfer),
-    pass: wrapMove("pass", pass),
-    attackOtherPlayersFleet: wrapMove("attackOtherPlayersFleet", attackOtherPlayersFleet),
-    evadeAttackingFleet: wrapMove("evadeAttackingFleet", evadeAttackingFleet),
-    doNotAttack: wrapMove("doNotAttack", doNotAttack),
-    retaliate: wrapMove("retaliate", retaliate),
-    drawCard: wrapMove("drawCard", drawCard),
-    pickCard: wrapMove("pickCard", pickCard),
-    relocateDefeatedFleet: wrapMove("relocateDefeatedFleet", relocateDefeatedFleet),
-    plunder: wrapMove("plunder", plunder),
-    doNotPlunder: wrapMove("doNotPlunder", doNotPlunder),
-    attackPlayersBuilding: wrapMove("attackPlayersBuilding", attackPlayersBuilding),
-    doNotGroundAttack: wrapMove("doNotGroundAttack", doNotGroundAttack),
-    defendGroundAttack: wrapMove("defendGroundAttack", defendGroundAttack),
-    garrisonTroops: wrapMove("garrisonTroops", garrisonTroops),
-    yieldToAttacker: wrapMove("yieldToAttacker", yieldToAttacker),
-    chooseEventCard: wrapMove("chooseEventCard", chooseEventCard),
-    resolveEventChoice: wrapMove("resolveEventChoice", resolveEventChoice),
-    commitRebellionTroops: wrapMove("commitRebellionTroops", commitRebellionTroops),
-    nominateCaptainGeneral: wrapMove("nominateCaptainGeneral", nominateCaptainGeneral),
-    contributeToGrandArmy: wrapMove("contributeToGrandArmy", contributeToGrandArmy),
-    respondToInfidelFleet: wrapMove("respondToInfidelFleet", respondToInfidelFleet),
-    contributeToRebellion: wrapMove("contributeToRebellion", contributeToRebellion),
-    offerBuyoffGold: wrapMove("offerBuyoffGold", offerBuyoffGold),
-  },
+  moves: wrapSet("discoverTile", "alterPlayerOrder", "recruitCounsellors", "recruitRegiments", "purchaseSkyships", "foundBuildings", "increaseHeresy", "increaseOrthodoxy", "checkAndPlaceFort", "punishDissenters", "convertMonarch", "influencePrelates", "trainTroops", "drawFoWCards", "confirmAction", "flipCards", "buildSkyships", "conscriptLevies", "passFleetInfoToPlayerInfo", "deployFleet", "enableDispatchButtons", "issueHolyDecree", "garrisonTransfer", "pass", "attackOtherPlayersFleet", "evadeAttackingFleet", "doNotAttack", "retaliate", "drawCard", "pickCard", "relocateDefeatedFleet", "plunder", "doNotPlunder", "attackPlayersBuilding", "doNotGroundAttack", "defendGroundAttack", "garrisonTroops", "yieldToAttacker", "chooseEventCard", "resolveEventChoice", "commitRebellionTroops", "nominateCaptainGeneral", "contributeToGrandArmy", "respondToInfidelFleet", "contributeToRebellion", "offerBuyoffGold"),
   phases: {
     setup: {
       start: true,
-      moves: {
-        pickKingdomAdvantageCard: wrapMove("pickKingdomAdvantageCard", pickKingdomAdvantageCard),
-        pickLegacyCard: wrapMove("pickLegacyCard", pickLegacyCard),
-      },
+      moves: wrapSet("pickKingdomAdvantageCard", "pickLegacyCard"),
       next: "events",
       onBegin: (context) => {
         phaseLog.info({ round: context.G.round }, "setup");
@@ -448,11 +342,7 @@ const MyGame: Game<MyGameState> = {
           logEvent(context.G, `Event deck: merged ${mergeCount} late-game cards into active deck`);
         }
       }),
-      moves: {
-        chooseEventCard: wrapMove("chooseEventCard", chooseEventCard),
-        resolveEventChoice: wrapMove("resolveEventChoice", resolveEventChoice),
-        immediateElectionVote: wrapMove("immediateElectionVote", immediateElectionVote),
-          },
+      moves: wrapSet("chooseEventCard", "resolveEventChoice", "immediateElectionVote"),
       next: "discovery",
     },
     discovery: {
@@ -485,10 +375,7 @@ const MyGame: Game<MyGameState> = {
         },
         order: TurnOrder.CUSTOM_FROM("turnOrder"),
       },
-      moves: {
-        discoverTile: wrapMove("discoverTile", discoverTile),
-        pass: wrapMove("pass", pass),
-          },
+      moves: wrapSet("discoverTile", "pass"),
       next: "taxes",
       onEnd: (context) => {
         context.G.mustContinueDiscovery = false;
@@ -600,43 +487,7 @@ const MyGame: Game<MyGameState> = {
         },
         order: TurnOrder.CUSTOM_FROM("turnOrder"),
       },
-      moves: {
-        alterPlayerOrder: wrapMove("alterPlayerOrder", alterPlayerOrder),
-        recruitCounsellors: wrapMove("recruitCounsellors", recruitCounsellors),
-        recruitRegiments: wrapMove("recruitRegiments", recruitRegiments),
-        purchaseSkyships: wrapMove("purchaseSkyships", purchaseSkyships),
-        foundBuildings: wrapMove("foundBuildings", foundBuildings),
-        foundFactory: wrapMove("foundFactory", foundFactory),
-        increaseHeresy: wrapMove("increaseHeresy", increaseHeresy),
-        increaseOrthodoxy: wrapMove("increaseOrthodoxy", increaseOrthodoxy),
-        checkAndPlaceFort: wrapMove("checkAndPlaceFort", checkAndPlaceFort),
-        punishDissenters: wrapMove("punishDissenters", punishDissenters),
-        convertMonarch: wrapMove("convertMonarch", convertMonarch),
-        influencePrelates: wrapMove("influencePrelates", influencePrelates),
-        trainTroops: wrapMove("trainTroops", trainTroops),
-        drawFoWCards: wrapMove("drawFoWCards", drawFoWCards),
-        confirmAction: wrapMove("confirmAction", confirmAction),
-        discardFoWCard: wrapMove("discardFoWCard", discardFoWCard),
-        flipCards: wrapMove("flipCards", flipCards),
-        buildSkyships: wrapMove("buildSkyships", buildSkyships),
-        conscriptLevies: wrapMove("conscriptLevies", conscriptLevies),
-        passFleetInfoToPlayerInfo: wrapMove("passFleetInfoToPlayerInfo", passFleetInfoToPlayerInfo),
-        deployFleet: wrapMove("deployFleet", deployFleet),
-        moveFleet: wrapMove("moveFleet", moveFleet),
-        transferBetweenFleets: wrapMove("transferBetweenFleets", transferBetweenFleets),
-        sellSkyships: wrapMove("sellSkyships", sellSkyships),
-        sellBuilding: wrapMove("sellBuilding", sellBuilding),
-        transferOutpost: wrapMove("transferOutpost", transferOutpost),
-        proposeDeal: wrapMove("proposeDeal", proposeDeal),
-        acceptDeal: wrapMove("acceptDeal", acceptDeal),
-        rejectDeal: wrapMove("rejectDeal", rejectDeal),
-        enableDispatchButtons: wrapMove("enableDispatchButtons", enableDispatchButtons),
-        issueHolyDecree: wrapMove("issueHolyDecree", issueHolyDecree),
-        garrisonTransfer: wrapMove("garrisonTransfer", garrisonTransfer),
-        sendAgitators: wrapMove("sendAgitators", sendAgitators),
-        declareSmugglerGood: wrapMove("declareSmugglerGood", declareSmugglerGood),
-        pass: wrapMove("pass", pass),
-          },
+      moves: wrapSet("alterPlayerOrder", "recruitCounsellors", "recruitRegiments", "purchaseSkyships", "foundBuildings", "foundFactory", "increaseHeresy", "increaseOrthodoxy", "checkAndPlaceFort", "punishDissenters", "convertMonarch", "influencePrelates", "trainTroops", "drawFoWCards", "confirmAction", "discardFoWCard", "flipCards", "buildSkyships", "conscriptLevies", "passFleetInfoToPlayerInfo", "deployFleet", "moveFleet", "transferBetweenFleets", "sellSkyships", "sellBuilding", "transferOutpost", "proposeDeal", "acceptDeal", "rejectDeal", "enableDispatchButtons", "issueHolyDecree", "garrisonTransfer", "sendAgitators", "declareSmugglerGood", "pass"),
       onEnd: (context) => {
         Object.values(context.G.playerInfo).forEach((playerInfo) => {
           playerInfo.passed = false;
@@ -702,43 +553,7 @@ const MyGame: Game<MyGameState> = {
       onEnd: (context) => {
         resolveRound(context.G, context.events, context.random);
       },
-      moves: {
-        // Aerial battle
-        doNotAttack: wrapMove("doNotAttack", doNotAttack),
-        attackOtherPlayersFleet: wrapMove("attackOtherPlayersFleet", attackOtherPlayersFleet),
-        retaliate: wrapMove("retaliate", retaliate),
-        evadeAttackingFleet: wrapMove("evadeAttackingFleet", evadeAttackingFleet),
-        drawCard: wrapMove("drawCard", drawCard),
-        pickCard: wrapMove("pickCard", pickCard),
-        relocateDefeatedFleet: wrapMove("relocateDefeatedFleet", relocateDefeatedFleet),
-        // Plunder
-        plunder: wrapMove("plunder", plunder),
-        doNotPlunder: wrapMove("doNotPlunder", doNotPlunder),
-        // Ground battle
-        attackPlayersBuilding: wrapMove("attackPlayersBuilding", attackPlayersBuilding),
-        doNotGroundAttack: wrapMove("doNotGroundAttack", doNotGroundAttack),
-        defendGroundAttack: wrapMove("defendGroundAttack", defendGroundAttack),
-        yieldToAttacker: wrapMove("yieldToAttacker", yieldToAttacker),
-        // Conquest
-        coloniseLand: wrapMove("coloniseLand", coloniseLand),
-        constructOutpost: wrapMove("constructOutpost", constructOutpost),
-        doNothing: wrapMove("doNothing", doNothing),
-        drawCardConquest: wrapMove("drawCardConquest", drawCardConquest),
-        pickCardConquest: wrapMove("pickCardConquest", pickCardConquest),
-        garrisonTroops: wrapMove("garrisonTroops", garrisonTroops),
-        // Election
-        vote: wrapMove("vote", vote),
-        // Post-election resolution
-        pass: wrapMove("pass", pass),
-        retrieveFleets: wrapMove("retrieveFleets", retrieveFleets),
-        commitRebellionTroops: wrapMove("commitRebellionTroops", commitRebellionTroops),
-        contributeToRebellion: wrapMove("contributeToRebellion", contributeToRebellion),
-        nominateCaptainGeneral: wrapMove("nominateCaptainGeneral", nominateCaptainGeneral),
-        contributeToGrandArmy: wrapMove("contributeToGrandArmy", contributeToGrandArmy),
-        respondToInfidelFleet: wrapMove("respondToInfidelFleet", respondToInfidelFleet),
-        offerBuyoffGold: wrapMove("offerBuyoffGold", offerBuyoffGold),
-        commitDeferredBattleCard: wrapMove("commitDeferredBattleCard", commitDeferredBattleCard),
-      },
+      moves: wrapSet("doNotAttack", "attackOtherPlayersFleet", "retaliate", "evadeAttackingFleet", "drawCard", "pickCard", "relocateDefeatedFleet", "plunder", "doNotPlunder", "attackPlayersBuilding", "doNotGroundAttack", "defendGroundAttack", "yieldToAttacker", "coloniseLand", "constructOutpost", "doNothing", "drawCardConquest", "pickCardConquest", "garrisonTroops", "vote", "pass", "retrieveFleets", "commitRebellionTroops", "contributeToRebellion", "nominateCaptainGeneral", "contributeToGrandArmy", "respondToInfidelFleet", "offerBuyoffGold", "commitDeferredBattleCard"),
       next: "reset",
     },
     reset: {

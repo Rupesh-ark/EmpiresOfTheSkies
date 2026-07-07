@@ -1,5 +1,5 @@
 import { MoveDefinition, MyGameState, MoveError } from "../../types";
-import { validateOutpostTransfer } from "../../helpers/stateUtils";
+import { validateOutpostTransfer, toBuildingOwner } from "../../helpers/stateUtils";
 
 const validateTransferOutpost = (G: MyGameState, playerID: string, tileCoords: [number, number], targetPlayerID: string): MoveError | null => {
   if (targetPlayerID === playerID) {
@@ -20,7 +20,7 @@ const transferOutpost: MoveDefinition = {
     const tileCoords: [number, number] = args[0];
     const targetPlayerID: string = args[1];
     const [x, y] = tileCoords;
-    G.mapState.buildings[y][x].player = G.playerInfo[targetPlayerID];
+    G.mapState.buildings[y][x].player = toBuildingOwner(G.playerInfo[targetPlayerID]);
   },
   errorMessage: "Cannot transfer this outpost",
   validate: validateTransferOutpost,
