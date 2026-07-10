@@ -1,28 +1,28 @@
 import { useState } from "react";
-import { List, ListItem, ListItemText, ListItemIcon, Divider } from "@mui/material";
+import { List, ListItem, ListItemText, ListItemIcon, Divider, Typography } from "@mui/material";
 import { Gavel, AttachMoney, Shield, HowToVote, Warning } from "@mui/icons-material";
 import { GiTrumpetFlag, GiTwoCoins } from "react-icons/gi";
-import { MyGameProps, EVENT_CARD_DEFS } from "@eots/game";
+import { MyGameProps, EVENT_CARD_DEFS, isStage } from "@eots/game";
 import { DialogShell } from "@/components/atoms/DialogShell";
 import { DIALOG_PRIORITY } from "@/components/atoms/DialogQueue";
 import React from "react";
 
 const RoundSummaryDialog = (props: MyGameProps) => {
-  const [open, setOpen] = useState(false);
-  const [lastRound, setLastRound] = useState(0);
+  const [spectatorClosedRound, setSpectatorClosedRound] = useState<number | null>(null);
   const currentRound = props.G.round;
-
-  if (currentRound > 1 && currentRound !== lastRound) {
-    setLastRound(currentRound);
-    setOpen(true);
-  }
+  const roundSummaryAck = props.G.roundSummaryAck ?? [];
+  const isGateOpen = isStage(props.G, "reset", "round_summary");
+  const isSpectator = !props.playerID;
+  const localPlayerAcked = !!props.playerID && roundSummaryAck.includes(props.playerID);
+  const pendingAckIDs = props.ctx.playOrder.filter((id) => !roundSummaryAck.includes(id));
+  const pendingKingdoms = pendingAckIDs.map((id) => props.G.playerInfo[id]?.kingdomName ?? `Player ${id}`);
 
   // This dialog is always mounted; skip building the summary (log scan,
   // player walks) on the every-move re-renders where it isn't visible.
-  if (!open) return null;
+  if (!isGateOpen || (isSpectator && spectatorClosedRound === currentRound)) return null;
 
   const resolvedEvent = props.G.eventState.resolvedEvent;
-  const previousRound = props.G.round - 1;
+  const summaryRound = props.G.round;
 
   const summaryItems: { icon: React.ReactNode; text: string }[] = [];
 
@@ -55,9 +55,9 @@ const RoundSummaryDialog = (props: MyGameProps) => {
     });
   }
 
-  // Trade income lines emitted by the engine during the previous round's resolution
+  // Trade income lines emitted by the engine during this round's resolution.
   const tradeLines = props.G.gameLog.filter(
-    (e) => e.round === previousRound && (e.message.startsWith("Trade routes:") || e.message.startsWith("Trade:"))
+    (e) => e.round === summaryRound && (e.message.startsWith("Trade routes:") || e.message.startsWith("Trade:"))
   );
   tradeLines.forEach((line) => {
     summaryItems.push({
@@ -119,14 +119,29 @@ const RoundSummaryDialog = (props: MyGameProps) => {
 
   return (
     <DialogShell
-      open={open}
-      title={`Round ${previousRound} Summary`}
+      open
+      title={`Round ${summaryRound} Summary`}
+      subtitle={localPlayerAcked ? "Waiting for other players..." : undefined}
       mood="peacetime"
       size="sm"
       priority={DIALOG_PRIORITY.roundSummary}
-      confirmLabel="Continue"
-      onConfirm={() => setOpen(false)}
+      confirmLabel={isSpectator ? "Close" : "Continue"}
+      confirmDisabled={!isSpectator && localPlayerAcked}
+      onConfirm={() => {
+        if (!props.playerID) {
+          setSpectatorClosedRound(currentRound);
+          return;
+        }
+        if (!localPlayerAcked) {
+          props.moves.acknowledgeRoundSummary();
+        }
+      }}
     >
+      {localPlayerAcked && pendingKingdoms.length > 0 && (
+        <Typography variant="body2" sx={{ mb: 1 }}>
+          Still waiting on: {pendingKingdoms.join(", ")}
+        </Typography>
+      )}
       <List dense>
         {summaryItems.map((item, idx) => (
           <div key={idx}>

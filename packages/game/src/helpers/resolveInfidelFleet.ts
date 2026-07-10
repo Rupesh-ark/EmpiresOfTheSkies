@@ -9,11 +9,13 @@ const getPlayerMilitaryPower = (G: MyGameState, playerID: string): number => {
   let power = 0;
 
   power += player.resources.regiments * 2;
+  power += player.resources.eliteRegiments * 3;
   power += player.resources.levies;
   power += player.resources.skyships;
 
   for (const fleet of player.fleetInfo) {
     power += fleet.regiments * 2;
+    power += fleet.eliteRegiments * 3;
     power += fleet.levies;
     power += fleet.skyships;
   }
@@ -22,6 +24,7 @@ const getPlayerMilitaryPower = (G: MyGameState, playerID: string): number => {
     for (const tile of row) {
       if (tile.player?.id === playerID) {
         power += tile.garrisonedRegiments * 2;
+        power += tile.garrisonedEliteRegiments * 3;
         power += tile.garrisonedLevies;
       }
     }
@@ -50,22 +53,22 @@ const findTarget = (G: MyGameState): string | null => {
 
   if (candidates.length === 1) return candidates[0];
 
-  const idx = G.round % candidates.length;
+  const idx = (G.round - 1) % candidates.length;
   return candidates[idx];
 };
 
 const findTargetFleetSquare = (
   G: MyGameState,
   targetID: string
-): [number, number] => {
+): [number, number] | null => {
   let maxSkyships = 0;
-  let bestLocation: [number, number] = [...INFIDEL_EMPIRE_LOCATION] as [number, number];
+  let bestLocation: [number, number] | null = null;
 
   for (const fleet of G.playerInfo[targetID].fleetInfo) {
     if (
       fleet.skyships > maxSkyships &&
       // Exclude fleets at Kingdom location (not "on the map")
-      !(fleet.location[0] === INFIDEL_EMPIRE_LOCATION[0] && fleet.location[1] === INFIDEL_EMPIRE_LOCATION[1])
+      !(fleet.location[0] === KINGDOM_LOCATION[0] && fleet.location[1] === KINGDOM_LOCATION[1])
     ) {
       maxSkyships = fleet.skyships;
       bestLocation = [fleet.location[0], fleet.location[1]];
@@ -191,16 +194,14 @@ export const prepareInfidelFleetCombat = (G: MyGameState): boolean => {
 
   // 3. Move
   const destination = findTargetFleetSquare(G, targetID);
-  G.infidelFleet.location = destination;
 
-  const atEmpire =
-    destination[0] === INFIDEL_EMPIRE_LOCATION[0] &&
-    destination[1] === INFIDEL_EMPIRE_LOCATION[1];
-
-  if (atEmpire) {
+  if (!destination) {
+    G.infidelFleet.location = [...INFIDEL_EMPIRE_LOCATION] as [number, number];
     logEvent(G, `${targetKingdom} has no fleets on the map \u2014 Infidel Fleet remains at Infidel Empire`);
     return false;
   }
+
+  G.infidelFleet.location = destination;
 
   // Find the target's largest fleet at this square
   const [fx, fy] = destination;
@@ -242,6 +243,11 @@ export const executeInfidelFleetCombat = (
   const fleet = G.playerInfo[targetPlayerID].fleetInfo[fleetIndex];
   const infidel = G.infidelFleet.counter;
   const kingdom = G.playerInfo[targetPlayerID].kingdomName;
+  const fleetSnapshot = {
+    skyships: fleet.skyships,
+    regiments: fleet.regiments,
+    levies: fleet.levies,
+  };
 
   logEvent(G, `${kingdom}'s fleet fights the Infidel Fleet (${fleet.skyships} skyships vs ${infidel.swords}S/${infidel.shields}Sh)`);
 
@@ -254,21 +260,21 @@ export const executeInfidelFleetCombat = (
     fowCard
   );
 
-  if (hitsOnPlayer > 0) {
-    const skyshipsLost = Math.min(hitsOnPlayer, fleet.skyships);
+  const skyshipsLost = Math.min(hitsOnPlayer, fleetSnapshot.skyships);
+  if (skyshipsLost > 0) {
     applyPlayerFleetLosses(G, targetPlayerID, fleetIndex, skyshipsLost);
     logEvent(G, `${kingdom} loses ${skyshipsLost} skyship(s)`);
   }
 
   let outcomeText: string;
+  let infidelFleetDestroyed = false;
   if (infidelWins) {
     logEvent(G, "Infidel Fleet wins \u2014 its losses are ignored");
     outcomeText = "Infidel Fleet wins — losses ignored";
   } else {
     if (hitsOnInfidel >= infidel.swords) {
       logEvent(G, "Infidel Fleet destroyed!");
-      G.infidelFleet.destroyed = true;
-      G.infidelFleet.active = false;
+      infidelFleetDestroyed = true;
       outcomeText = `${kingdom} destroys the Infidel Fleet!`;
     } else {
       G.infidelFleet.active = false;
@@ -277,8 +283,8 @@ export const executeInfidelFleetCombat = (
     }
   }
 
-  const playerSwords = fleet.skyships + fleet.regiments * 2 + fleet.levies;
-  const playerShields = fleet.skyships;
+  const playerSwords = fleetSnapshot.skyships + fleetSnapshot.regiments * 2 + fleetSnapshot.levies;
+  const playerShields = fleetSnapshot.skyships;
   G.battleResult = {
     battleType: "Infidel Fleet",
     attackerName: "Infidel Fleet",
@@ -290,10 +296,17 @@ export const executeInfidelFleetCombat = (
     attackerFoW: null,
     defenderFoW: fowCard ?? null,
     attackerLosses: infidelWins ? "none (ignored)" : `${hitsOnInfidel} hits`,
-    defenderLosses: hitsOnPlayer > 0 ? `${Math.min(hitsOnPlayer, fleet.skyships)} skyship(s)` : "none",
+    defenderLosses: skyshipsLost > 0 ? `${skyshipsLost} skyship(s)` : "none",
     winner: infidelWins ? "Infidel Fleet" : kingdom,
     outcome: outcomeText,
   };
+
+  if (infidelFleetDestroyed && G.infidelFleet) {
+    if (!G.infidelHostPool.some((host) => host.isFleet)) {
+      G.infidelHostPool.push(G.infidelFleet.counter);
+    }
+    G.infidelFleet = null;
+  }
 
   G.infidelFleetCombat = null;
 };

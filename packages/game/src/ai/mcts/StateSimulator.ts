@@ -419,6 +419,7 @@ export function applyMove(G: MyGameState, playerID: string, move: AIMove): void 
     case "resolveEventChoice":
     case "chooseEventCard":
     case "immediateElectionVote":
+    case "acknowledgeRoundSummary":
       break;
   }
 }

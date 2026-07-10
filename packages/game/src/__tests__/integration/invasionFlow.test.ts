@@ -20,6 +20,8 @@ import { describe, it, expect, vi } from "vitest";
 import nominateCaptainGeneral from "../../moves/events/nominateCaptainGeneral";
 import contributeToGrandArmy from "../../moves/events/contributeToGrandArmy";
 import offerBuyoffGold from "../../moves/events/offerBuyoffGold";
+import { checkForInvasion } from "../../helpers/resolveInvasion";
+import { INFIDEL_EMPIRE_LOCATION } from "../../data/gameData";
 import {
   buildInitialG,
   buildPlayer,
@@ -197,6 +199,43 @@ describe("invasionFlow — all players contribute troops", () => {
       G.currentInvasion.phase === "buyoff" ||
       G.stage.sub === "retrieve_fleets";
     expect(allContributed).toBe(true);
+  });
+
+  it("excludes the Infidel Fleet from Grand Army ground battle and pool return", () => {
+    const fleetCounter = { swords: 15, shields: 5, isFleet: true, isInvasionTrigger: false };
+    const triggerCounter = { swords: 30, shields: 0, isFleet: false, isInvasionTrigger: true };
+    const G = buildInitialG([
+      buildPlayer("0", {
+        resources: buildResources({ regiments: 20 }),
+      }),
+      buildPlayer("1", {
+        resources: buildResources({ regiments: 20 }),
+      }),
+    ]);
+    G.infidelHostPool = [triggerCounter, fleetCounter];
+    G.contingentPool = [];
+    G.cardDecks.fortuneOfWarCards = [
+      { name: "Sword1_1", sword: 1, shield: 0 },
+      { name: "Sword1_2", sword: 1, shield: 0 },
+    ];
+
+    expect(checkForInvasion(G)).toBe(false);
+    expect(G.infidelFleet?.counter).toBe(fleetCounter);
+    expect(G.accumulatedHosts).toEqual([]);
+
+    expect(checkForInvasion(G)).toBe(true);
+    expect(G.accumulatedHosts).toEqual([triggerCounter]);
+    G.accumulatedHosts.push(fleetCounter);
+    G.currentInvasion!.phase = "contribute";
+
+    callContribute(G, "0", 15, 0, ["0", "1"]);
+    callContribute(G, "1", 15, 0, ["0", "1"]);
+
+    expect(G.battleResult?.attackerSwords).toBe(30);
+    expect(G.battleResult?.attackerShields).toBe(0);
+    expect(G.infidelFleet).not.toBeNull();
+    expect(G.infidelFleet?.location).toEqual(INFIDEL_EMPIRE_LOCATION);
+    expect(G.infidelHostPool.filter((counter) => counter.isFleet)).toHaveLength(0);
   });
 });
 

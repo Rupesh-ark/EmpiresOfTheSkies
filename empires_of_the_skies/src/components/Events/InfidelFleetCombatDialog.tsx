@@ -12,7 +12,11 @@ const InfidelFleetCombatDialog = (props: MyGameProps) => {
   if (combat.targetPlayerID !== props.playerID) return null;
 
   const player = props.G.playerInfo[combat.targetPlayerID];
+  if (!player) return null;
+
   const fleet = player.fleetInfo[combat.fleetIndex];
+  if (!fleet) return null;
+
   const infidel = props.G.infidelFleet?.counter;
   if (!infidel) return null;
 

@@ -1,7 +1,7 @@
 import { MoveDefinition, PlayerInfo } from "../../types";
-import { allPlayersPassed } from "../../helpers/stateUtils";
+import { allPlayersPassed, logEvent } from "../../helpers/stateUtils";
 import { KINGDOM_LOCATION } from "../../data/gameData";
-import { tileKey, FAITHDOM_TILES } from "../../helpers/mapUtils";
+import { tileKey, getRoutePlacementTiles } from "../../helpers/mapUtils";
 import log from "../../helpers/logger";
 
 const retLog = log.child({ mod: "retrieve-fleets" });
@@ -19,24 +19,6 @@ function sanitizeFleetValue(val: unknown, fallback = 0): number {
   return val;
 }
 
-function placeRouteSkyship(
-  G: Parameters<MoveDefinition["fn"]>[0]["G"],
-  playerID: string,
-  x: number, y: number,
-  fleet: PlayerInfo["fleetInfo"][number],
-): boolean {
-  if (fleet.skyships <= 0) return false;
-  const key = tileKey(x, y);
-  // Skip Faithdom tiles — no route skyship needed there
-  if (FAITHDOM_TILES.some(([fx, fy]) => fx === x && fy === y)) return false;
-  const existing = G.mapState.routeSkyships[key] ?? [];
-  if (existing.includes(playerID)) return false; // already has one here
-  existing.push(playerID);
-  G.mapState.routeSkyships[key] = existing;
-  fleet.skyships -= 1;
-  return true;
-}
-
 const retrieveFleets: MoveDefinition = {
   fn: ({ G, playerID, events }, ...args) => {
     const fleets: number[] = args[0];
@@ -48,14 +30,33 @@ const retrieveFleets: MoveDefinition = {
         const currentFleet = currentPlayer.fleetInfo[fleetId];
         const oldLocation = currentFleet.location;
 
-        if (options?.placeAt?.includes(fleetId)) {
-          placeRouteSkyship(G, playerID, oldLocation[0], oldLocation[1], currentFleet);
-        } else if (options?.trailFrom?.includes(fleetId)) {
-          for (const [px, py] of currentFleet.travelHistory) {
-            if (currentFleet.skyships <= 0) break;
-            const building = G.mapState.buildings[py]?.[px];
-            if (building?.player?.id === playerID && building?.buildings) continue;
-            placeRouteSkyship(G, playerID, px, py, currentFleet);
+        // Sanitize BEFORE route placement: a NaN skyship count must not
+        // slip past the budget check and hand out free route markers.
+        currentFleet.skyships = sanitizeFleetValue(currentFleet.skyships);
+        currentFleet.regiments = sanitizeFleetValue(currentFleet.regiments);
+        currentFleet.levies = sanitizeFleetValue(currentFleet.levies);
+        currentFleet.eliteRegiments = sanitizeFleetValue(currentFleet.eliteRegiments);
+
+        const routeMode = options?.placeAt?.includes(fleetId)
+          ? ("placeAt" as const)
+          : options?.trailFrom?.includes(fleetId)
+            ? ("trail" as const)
+            : null;
+
+        if (routeMode) {
+          const placementTiles = getRoutePlacementTiles(G, playerID, currentFleet, routeMode);
+          for (const [px, py] of placementTiles) {
+            const key = tileKey(px, py);
+            const existing = G.mapState.routeSkyships[key] ?? [];
+            existing.push(playerID);
+            G.mapState.routeSkyships[key] = existing;
+            currentFleet.skyships -= 1;
+          }
+          if (placementTiles.length > 0) {
+            logEvent(
+              G,
+              `${currentPlayer.kingdomName} leaves ${placementTiles.length} skyship(s) on the map as trade-route markers (${currentFleet.skyships} return home)`,
+            );
           }
         }
 
@@ -63,10 +64,10 @@ const retrieveFleets: MoveDefinition = {
 
         currentFleet.location = [...KINGDOM_LOCATION];
 
-        const fleetSkyships = sanitizeFleetValue(currentFleet.skyships);
-        const fleetRegiments = sanitizeFleetValue(currentFleet.regiments);
-        const fleetLevies = sanitizeFleetValue(currentFleet.levies);
-        const fleetElite = sanitizeFleetValue(currentFleet.eliteRegiments);
+        const fleetSkyships = currentFleet.skyships;
+        const fleetRegiments = currentFleet.regiments;
+        const fleetLevies = currentFleet.levies;
+        const fleetElite = currentFleet.eliteRegiments;
 
         currentPlayer.resources.skyships += fleetSkyships;
         currentPlayer.resources.regiments += fleetRegiments;

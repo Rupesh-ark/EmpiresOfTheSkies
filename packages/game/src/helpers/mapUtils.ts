@@ -1,4 +1,4 @@
-import { MyGameState, TileInfoProps } from "../types";
+import { FleetInfo, MyGameState, TileInfoProps } from "../types";
 import { MAP_WIDTH, MAP_HEIGHT } from "../data/gameData";
 
 export const FAITHDOM_TILES: [number, number][] = [
@@ -288,4 +288,45 @@ export const wouldPlacementConnectRoute = (
     if (isBuildingConnected(x, y, extendedReachable, tileArray)) return true;
   }
   return false;
+};
+
+/**
+ * Tiles that would receive a route skyship when this fleet is retrieved with
+ * the given route option. Single source of truth for the retrieveFleets move
+ * AND the RetrieveFleetsDialog cost display — any drift between the two shows
+ * players a wrong skyship cost.
+ *
+ * Skips Faithdom tiles, tiles that already hold one of the player's route
+ * skyships (including earlier in the same trail), and — for trails — the
+ * player's own building tiles. Capped at the fleet's skyship count; a
+ * non-finite skyship value places nothing.
+ */
+export const getRoutePlacementTiles = (
+  G: MyGameState,
+  playerID: string,
+  fleet: FleetInfo,
+  mode: "placeAt" | "trail",
+): [number, number][] => {
+  const budget = Number.isFinite(fleet.skyships) ? fleet.skyships : 0;
+  const candidates: [number, number][] =
+    mode === "placeAt"
+      ? [[fleet.location[0], fleet.location[1]]]
+      : fleet.travelHistory;
+  const placed: [number, number][] = [];
+  const claimed = new Set<string>();
+
+  for (const [x, y] of candidates) {
+    if (placed.length >= budget) break;
+    if (FAITHDOM_TILES.some(([fx, fy]) => fx === x && fy === y)) continue;
+    const key = tileKey(x, y);
+    if (claimed.has(key)) continue;
+    if (mode === "trail") {
+      const building = G.mapState.buildings[y]?.[x];
+      if (building?.player?.id === playerID && building?.buildings) continue;
+    }
+    if ((G.mapState.routeSkyships[key] ?? []).includes(playerID)) continue;
+    claimed.add(key);
+    placed.push([x, y]);
+  }
+  return placed;
 };

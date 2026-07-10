@@ -44,7 +44,7 @@ export type GameStage =
       | "retrieve_fleets"
     }
   | { phase: "scoring";    sub: "default" }
-  | { phase: "reset";      sub: "default" };
+  | { phase: "reset";      sub: "default" | "round_summary" };
 
 export type StagePhase = GameStage["phase"];
 export type StageSub = GameStage["sub"];
@@ -64,6 +64,7 @@ export interface MyGameState {
   stage: GameStage;
   electionResults: Record<string, number>;
   hasVoted: string[];
+  roundSummaryAck: string[];
   voteSubmitted: Record<string, string>;
   consecutiveArchprelateWins: number;
   round: number;

@@ -184,6 +184,7 @@ export function buildInitialG(
     nprCathedrals: {},
     electionResults: {},
     hasVoted: [],
+    roundSummaryAck: [],
     voteSubmitted: {},
     consecutiveArchprelateWins: 0,
     turnOrder: players.map((p) => p.id),

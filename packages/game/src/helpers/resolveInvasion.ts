@@ -49,7 +49,6 @@ export const checkForInvasion = (G: MyGameState): boolean => {
       destroyed: false,
     };
     logEvent(G, "Infidel Fleet drawn \u2014 placed at Infidel Empire");
-    G.accumulatedHosts.push(drawn);
   } else {
     logEvent(G, `Infidel Host drawn: ${drawn.swords} Swords`);
     G.accumulatedHosts.push(drawn);
@@ -58,7 +57,7 @@ export const checkForInvasion = (G: MyGameState): boolean => {
   if (drawn.isInvasionTrigger) {
     logEvent(G, "INVASION TRIGGERED! Grand Army of the Faith is raised!");
     const totalHostSwords = G.accumulatedHosts.reduce(
-      (sum, h) => sum + h.swords, 0
+      (sum, h) => sum + (h.isFleet ? 0 : h.swords), 0
     );
     // Pre-compute eligible Captain-General candidates
     const playerIds = Object.keys(G.playerInfo);
@@ -155,11 +154,11 @@ export const resolveGrandArmyBattle = (G: MyGameState, shuffle: <T>(arr: T[]) =>
 
   // Infidel: all accumulated non-Fleet Host swords
   const infidelSwords = G.accumulatedHosts.reduce(
-    (sum, h) => sum + h.swords,
+    (sum, h) => sum + (h.isFleet ? 0 : h.swords),
     0
   );
   const infidelShields = G.accumulatedHosts.reduce(
-    (sum, h) => sum + h.shields,
+    (sum, h) => sum + (h.isFleet ? 0 : h.shields),
     0
   );
 
@@ -222,13 +221,21 @@ export const resolveGrandArmyBattle = (G: MyGameState, shuffle: <T>(arr: T[]) =>
 
   // 8. Return all Host counters to pool
   for (const host of G.accumulatedHosts) {
-    G.infidelHostPool.push(host);
+    if (!host.isFleet) {
+      G.infidelHostPool.push(host);
+    }
   }
   G.accumulatedHosts = [];
 
-  // Infidel Fleet retreats to Infidel Empire (if not destroyed)
-  if (G.infidelFleet && !G.infidelFleet.destroyed) {
-    G.infidelFleet.location = [...INFIDEL_EMPIRE_LOCATION] as [number, number];
+  if (G.infidelFleet) {
+    if (G.infidelFleet.destroyed) {
+      if (!G.infidelHostPool.some((host) => host.isFleet)) {
+        G.infidelHostPool.push(G.infidelFleet.counter);
+      }
+      G.infidelFleet = null;
+    } else {
+      G.infidelFleet.location = [...INFIDEL_EMPIRE_LOCATION] as [number, number];
+    }
   }
 
   // Return contingent counters to pool

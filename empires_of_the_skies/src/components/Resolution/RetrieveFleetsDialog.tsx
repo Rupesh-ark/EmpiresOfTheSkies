@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { MyGameProps, KINGDOM_LOCATION, tileKey, wouldPlacementConnectRoute, FAITHDOM_TILES } from "@eots/game";
+import { MyGameProps, KINGDOM_LOCATION, tileKey, wouldPlacementConnectRoute, getRoutePlacementTiles, FAITHDOM_TILES } from "@eots/game";
 import { Box, Typography, Switch } from "@mui/material";
 import { DialogShell } from "@/components/atoms/DialogShell";
 import { tokens } from "@/theme";
@@ -41,22 +41,15 @@ const RetrieveFleetsDialog = (props: MyGameProps) => {
     return options;
   }, [deployedFleets, props.G, playerID]);
 
-  // Compute trail cost (number of skyships consumed) for display
-  const trailCost = useMemo(() => {
+  // Skyships each route option would actually consume — computed by the same
+  // engine function the retrieveFleets move uses, so the displayed cost can
+  // never drift from the real deduction.
+  const routeCost = useMemo(() => {
     const costs: Record<number, number> = {};
     for (const fleet of deployedFleets) {
-      if (fleetRouteOptions[fleet.fleetId] === "trail") {
-        let cost = 0;
-        for (const [px, py] of fleet.travelHistory) {
-          if (FAITHDOM_TILES.some(([fx, fy]) => fx === px && fy === py)) continue;
-          const building = props.G.mapState.buildings[py]?.[px];
-          if (building?.player?.id === playerID && building?.buildings) continue;
-          const pk = tileKey(px, py);
-          const existing = props.G.mapState.routeSkyships[pk] ?? [];
-          if (!existing.includes(playerID)) cost++;
-          if (cost >= fleet.skyships) break;
-        }
-        costs[fleet.fleetId] = Math.min(cost, fleet.skyships);
+      const option = fleetRouteOptions[fleet.fleetId];
+      if (option) {
+        costs[fleet.fleetId] = getRoutePlacementTiles(props.G, playerID, fleet, option).length;
       }
     }
     return costs;
@@ -243,7 +236,7 @@ const RetrieveFleetsDialog = (props: MyGameProps) => {
                 </Box>
               </Box>
 
-              {routeOption && isSelected && !(routeOption === "trail" && (trailCost[fleet.fleetId] ?? 0) === 0) && (
+              {routeOption && isSelected && (routeCost[fleet.fleetId] ?? 0) > 0 && (
                 <Box
                   sx={{
                     display: "flex",
@@ -265,8 +258,8 @@ const RetrieveFleetsDialog = (props: MyGameProps) => {
                     }}
                   >
                     {routeOption === "placeAt"
-                      ? "Place Route Skyship (1 skyship)"
-                      : `Leave Trade Route (${trailCost[fleet.fleetId] ?? 0} skyships)`}
+                      ? `Place Route Skyship (${routeCost[fleet.fleetId] ?? 0} skyship)`
+                      : `Leave Trade Route (${routeCost[fleet.fleetId] ?? 0} skyships)`}
                   </Typography>
                   <Switch
                     size="small"

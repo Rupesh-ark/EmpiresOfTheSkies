@@ -240,6 +240,7 @@ const MyGame: Game<MyGameState> = {
       stage: { phase: "setup", sub: "kingdom_advantage" } as GameStage,
       electionResults: {},
       hasVoted: [],
+      roundSummaryAck: [],
       voteSubmitted: {},
       consecutiveArchprelateWins: 0,
       round: 0,
@@ -557,7 +558,15 @@ const MyGame: Game<MyGameState> = {
       next: "reset",
     },
     reset: {
-      turn: { order: TurnOrder.ONCE },
+      turn: {
+        order: TurnOrder.ONCE,
+        activePlayers: { all: "ack_summary" },
+        stages: {
+          ack_summary: {
+            moves: wrapSet("acknowledgeRoundSummary"),
+          },
+        },
+      },
       onBegin: (context) => {
         if (checkLoopGuard(context, "reset")) return;
         phaseLog.info({ round: context.G.round }, "reset");
@@ -607,7 +616,12 @@ const MyGame: Game<MyGameState> = {
           player.agitatorsSentThisRound = [];
         });
 
-        context.events.endPhase();
+        context.G.roundSummaryAck = [];
+        if (context.ctx.gameover) {
+          context.events.endPhase();
+          return;
+        }
+        setStage(context.G, "reset", "round_summary");
       },
       moves: {},
       next: "events",

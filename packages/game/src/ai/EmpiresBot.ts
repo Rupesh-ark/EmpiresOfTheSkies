@@ -90,6 +90,11 @@ export class EmpiresBot {
     if (G.stage.sub === "legacy_card") {
       return this.chooseLegacyCard(G, playerID);
     }
+    if (G.stage.phase === "reset" && G.stage.sub === "round_summary") {
+      return (G.roundSummaryAck ?? []).includes(playerID)
+        ? null
+        : { move: "acknowledgeRoundSummary", args: [] };
+    }
 
     const personality = this.personality ?? this.defaultPersonality();
     const availableMoves = enumerateLegalMoves(G, ctx, playerID);

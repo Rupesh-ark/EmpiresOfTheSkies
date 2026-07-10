@@ -18,7 +18,7 @@ const validStages = new Set<string>([
   "resolution:invasion_nominate", "resolution:invasion_contribute", "resolution:invasion_buyoff",
   "resolution:retrieve_fleets",
   "scoring:default",
-  "reset:default",
+  "reset:default", "reset:round_summary",
 ]);
 
 export const setStage = <P extends StagePhase>(

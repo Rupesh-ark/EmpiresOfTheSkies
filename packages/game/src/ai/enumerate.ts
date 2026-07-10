@@ -183,6 +183,14 @@ export function enumerateLegalMoves(G: MyGameState, ctx: Ctx, playerID: string):
       return [];
     }
 
+    case "reset": {
+      if (isStage(G, "reset", "round_summary")) {
+        const alreadyAcked = (G.roundSummaryAck ?? []).includes(playerID);
+        return alreadyAcked ? [] : [{ move: "acknowledgeRoundSummary", args: [] }];
+      }
+      return [];
+    }
+
     case "actions": {
       if (isStage(G, "actions", "confirm_fow_draw")) {
         return [{ move: "confirmAction", args: [] }];
@@ -796,10 +804,6 @@ export function enumerateLegalMoves(G: MyGameState, ctx: Ctx, playerID: string):
         enumLog.info({ playerID, sub: G.stage?.sub, attacker: G.battleState?.attacker?.id, defender: G.battleState?.defender?.id }, "empty resolution moves");
       }
       return moves;
-    }
-
-    case "reset": {
-      return [];
     }
 
     default: {

@@ -69,6 +69,7 @@ import contributeToGrandArmy from "./moves/events/contributeToGrandArmy";
 import offerBuyoffGold from "./moves/events/offerBuyoffGold";
 import respondToInfidelFleet from "./moves/events/respondToInfidelFleet";
 import commitDeferredBattleCard from "./moves/events/commitDeferredBattleCard";
+import acknowledgeRoundSummary from "./moves/reset/acknowledgeRoundSummary";
 
 const RESOLUTION_GUARD = (G: MyGameState) => {
   if (G.stage.phase !== "resolution") {
@@ -209,4 +210,5 @@ export const MOVE_DEFINITIONS: Record<string, MoveDefinition> = {
   offerBuyoffGold,
   respondToInfidelFleet,
   commitDeferredBattleCard,
+  acknowledgeRoundSummary,
 };

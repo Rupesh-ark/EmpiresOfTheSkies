@@ -4,7 +4,12 @@ import { MOVE_DEFINITIONS, MyGameState } from "@eots/game";
 
 type BoardProps = {
   G: MyGameState;
-  ctx: { currentPlayer: string; phase: string | null; numMoves?: number };
+  ctx: {
+    currentPlayer: string;
+    phase: string | null;
+    numMoves?: number;
+    activePlayers?: Record<string, string> | null;
+  };
   playerID: string | null;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   moves: Record<string, (...args: any[]) => void>;
@@ -48,7 +53,8 @@ export const useValidatedMoves = (props: BoardProps) => {
           const isActionMove = moveName in MOVE_DEFINITIONS;
 
           if (isActionMove) {
-            if (ctx.currentPlayer !== playerID) {
+            const isActivePlayer = ctx.activePlayers?.[playerID] !== undefined;
+            if (ctx.currentPlayer !== playerID && !isActivePlayer) {
               showToast("It's not your turn", "warning");
               return;
             }

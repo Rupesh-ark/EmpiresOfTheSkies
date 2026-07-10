@@ -211,11 +211,12 @@ export const WorldMapTile = memo((props: worldMapTileProps) => {
   const building = () => {
     const currentRegion = props.G.mapState.buildings[yLocation][xLocation];
     const currentBuilding = currentRegion.buildings;
+    const buildingColour = currentRegion.player?.colour ?? "#888";
     let icon;
     if (currentBuilding === "colony") {
       icon = (
         <ColonyIcon
-          colour={fortColour ?? props.G.playerInfo[props.ctx.currentPlayer].colour}
+          colour={buildingColour}
           regiments={currentRegion.garrisonedRegiments}
           levies={currentRegion.garrisonedLevies}
         />
@@ -223,7 +224,7 @@ export const WorldMapTile = memo((props: worldMapTileProps) => {
     } else if (currentBuilding === "outpost") {
       icon = (
         <OutpostIcon
-          colour={fortColour ?? props.G.playerInfo[props.ctx.currentPlayer].colour}
+          colour={buildingColour}
           regiments={currentRegion.garrisonedRegiments}
           levies={currentRegion.garrisonedLevies}
         />
@@ -415,7 +416,7 @@ export const WorldMapTile = memo((props: worldMapTileProps) => {
           onClick={props.selectable ? altOnClick : canShowDetail ? () => setDetailOpen(true) : undefined}
         >
           {building()}
-          {fort.length > 0 ? <Box sx={{ position: "absolute", bottom: 2, right: 2, width: 16, height: 8, zIndex: 10 }}><FortIcon colour={fortColour ?? "white"} /></Box> : null}
+          {fort.length > 0 ? <Box sx={{ position: "absolute", bottom: 2, right: 2, width: 18, height: 18, zIndex: 10 }}><FortIcon colour={fortColour ?? "#888"} /></Box> : null}
 
           {/* Infidel Fleet icon */}
           {props.G.infidelFleet?.active && !props.G.infidelFleet.destroyed &&

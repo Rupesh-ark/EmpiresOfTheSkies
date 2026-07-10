@@ -1,7 +1,8 @@
 import React from "react";
 import { Box, Typography } from "@mui/material";
-import { GiWatchtower, GiVillage, GiChessKnight, GiHelmet, GiShield, GiZeppelin, GiCrossedSwords, GiShieldBounces } from "react-icons/gi";
+import { GiChessKnight, GiHelmet, GiShield, GiZeppelin, GiCrossedSwords, GiShieldBounces } from "react-icons/gi";
 import type { MyGameState } from "@eots/game";
+import { IconColony, IconFort, IconOutpost } from "@/theme";
 
 interface TilePresenceProps {
   G: MyGameState;
@@ -38,8 +39,8 @@ export const TilePresence: React.FC<TilePresenceProps> = ({ G, x, y }) => {
           }}>
             <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
               {building.buildings === "outpost"
-                ? <GiWatchtower size={13} style={{ color: building.player.colour }} />
-                : <GiVillage size={13} style={{ color: building.player.colour }} />
+                ? <IconOutpost size={13} style={{ color: building.player.colour }} />
+                : <IconColony size={13} style={{ color: building.player.colour }} />
               }
               <Typography sx={{ fontSize: "0.82rem", fontWeight: 600, color: "#3A2E22" }}>
                 {building.buildings === "outpost" ? "Outpost" : "Colony"}
@@ -93,7 +94,7 @@ export const TilePresence: React.FC<TilePresenceProps> = ({ G, x, y }) => {
             backgroundColor: "rgba(120,90,50,0.05)",
             border: "1px solid rgba(120,90,50,0.12)",
           }}>
-            <GiWatchtower size={13} style={{ color: "#6B4E1E" }} />
+            <IconFort size={13} style={{ color: "#6B4E1E" }} />
             <Typography sx={{ fontSize: "0.82rem", fontWeight: 600, color: "#3A2E22" }}>Fort</Typography>
             {building.player && (
               <>

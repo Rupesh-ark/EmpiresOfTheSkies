@@ -6,7 +6,7 @@ export type { MoveObserver } from "./recorder";
 
 export * from "./helpers/helpers";
 
-export { tileKey, wouldPlacementConnectRoute, bfsShortestPath, buildPlayerNetwork, bfsReachable, getPlayerBuildings, isBuildingConnected, FAITHDOM_TILES } from "./helpers/mapUtils";
+export { tileKey, wouldPlacementConnectRoute, bfsShortestPath, buildPlayerNetwork, bfsReachable, getPlayerBuildings, isBuildingConnected, getRoutePlacementTiles, FAITHDOM_TILES } from "./helpers/mapUtils";
 
 export * from "./helpers/eventCardDefinitions";
 
@@ -14,6 +14,7 @@ export * from "./helpers/kaCardDefinitions";
 
 export * from "./helpers/legacyCardRegistry";
 
+export { setStage, isStage } from "./helpers/stageUtils";
 
 export * from "./types";
 
