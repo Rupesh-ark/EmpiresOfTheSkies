@@ -1,6 +1,7 @@
 {
   "name": "empires-of-the-skies-root",
   "private": true,
+  "packageManager": "pnpm@11.1.3",
   "engines": {
     "node": ">=22"
   },

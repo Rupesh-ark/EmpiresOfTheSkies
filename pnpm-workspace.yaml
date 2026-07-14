@@ -10,3 +10,6 @@ allowBuilds:
 # (boardgame.io depends on koa-socket-2 → koa → is-generator-function)
 overrides:
   is-generator-function: 1.0.10
+  # vendored test build from the boardgame.io repo (issue-1137 branch + main);
+  # remove this line and `pnpm install` to go back to the npm release
+  boardgame.io: file:vendor/boardgame.io-0.51.0-beta.0.tgz

@@ -1,12 +1,13 @@
 FROM node:22-alpine AS builder
 
-RUN corepack enable && corepack prepare pnpm@latest --activate
+RUN corepack enable && corepack prepare pnpm@11.1.3 --activate
 
 WORKDIR /app
 
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
 COPY packages/game/package.json ./packages/game/
 COPY server/package.json ./server/
+COPY vendor/ ./vendor/
 
 RUN pnpm install --frozen-lockfile
 
@@ -23,8 +24,9 @@ WORKDIR /app
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
 COPY packages/game/package.json ./packages/game/
 COPY server/package.json ./server/
+COPY vendor/ ./vendor/
 
-RUN corepack enable && corepack prepare pnpm@latest --activate && \
+RUN corepack enable && corepack prepare pnpm@11.1.3 --activate && \
     pnpm install --frozen-lockfile --prod && \
     pnpm store prune
 
