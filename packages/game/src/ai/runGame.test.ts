@@ -13,8 +13,8 @@
  *   MCTS_C=1.4         Exploration constant (default: 1.4)
  */
 import { describe, it } from "vitest";
-import { writeFileSync } from "fs";
-import { resolve } from "path";
+import { mkdirSync, writeFileSync } from "fs";
+import { dirname, resolve } from "path";
 import { runSingleGame } from "./selfPlay";
 import { setMCTSConfig, resetMCTSConfig } from "./mcts/config";
 
@@ -37,6 +37,7 @@ describe("generate game record", () => {
 
       // Write to packages/game/src/ai/analytics/
       const outPath = resolve(__dirname, `analytics/game_mcts_${Date.now()}.json`);
+      mkdirSync(dirname(outPath), { recursive: true });
       writeFileSync(outPath, JSON.stringify(record, null, 2));
 
       console.log(`\nGame complete in ${elapsed}s`);
