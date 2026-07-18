@@ -1,7 +1,7 @@
-import { MyGameState, MoveError, MoveDefinition } from "../../types";
+import { MyGameState, MoveError, MoveDefinition } from "../../types.js";
 import { INVALID_MOVE } from "boardgame.io/core";
-import { validateMove } from "../moveValidation";
-import { incrementActionsTaken, HERESY_MAX, HERESY_MIN } from "../../helpers/stateUtils";
+import { validateMove } from "../moveValidation.js";
+import { incrementActionsTaken, HERESY_MAX, HERESY_MIN } from "../../helpers/stateUtils.js";
 import {
   BuildingSlot,
   BUILDING_BASE_COST,
@@ -11,7 +11,7 @@ import {
   MAX_CATHEDRALS,
   MAX_PALACES,
   MAX_SHIPYARDS,
-} from "../../data/gameData";
+} from "../../data/gameData.js";
 
 const validateFoundBuildings = (
   G: MyGameState,

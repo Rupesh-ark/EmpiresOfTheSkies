@@ -1,7 +1,7 @@
-import { MyGameState } from "../types";
-import { sortPlayersInPlayerOrder } from "./helpers";
-import { EventsAPI } from "boardgame.io/dist/types/src/plugins/events/events";
-import { setStage } from "./stageUtils";
+import { MyGameState } from "../types.js";
+import { sortPlayersInPlayerOrder } from "./helpers.js";
+import type { EventsAPI } from "../types.js";
+import { setStage } from "./stageUtils.js";
 
 const computeDefendersAtBattle = (G: MyGameState, nextPlayer: string): void => {
   const [x, y] = G.mapState.currentBattle;

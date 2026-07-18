@@ -4,11 +4,11 @@
  */
 
 import * as fs from "fs";
-import { runSingleGame } from "./selfPlay";
+import { runSingleGame } from "./selfPlay.js";
 import {
   printFullAnalysis,
   printMoveAnalysis,
-} from "./analyzeGameRecord";
+} from "./analyzeGameRecord.js";
 
 const args = process.argv.slice(2);
 

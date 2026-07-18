@@ -1,12 +1,12 @@
-import { EventsAPI } from "boardgame.io/dist/types/src/plugins/plugin-events";
-import { RandomAPI } from "boardgame.io/dist/types/src/plugins/random/random";
-import { MyGameState, GoodKey } from "../types";
-import legacyResolutions from "./legacyResolutions";
-import { enactPiracy } from "./piracy";
-import { grantTradeRouteGoods } from "./tradeRouteResolver";
-import { countActiveTradeRoutes } from "./mapUtils";
-import { removeVPAmount, increaseHeresyWithinMove, logEvent } from "./stateUtils";
-import { FINAL_ROUND_GOLD_PER_VP, DEBT_PENALTY_DIVISOR, TRADE_VP_SCHEDULE, PRICE_MARKER_MAX } from "../data/gameData";
+import type { EventsAPI } from "../types.js";
+import type { RandomAPI } from "../types.js";
+import { MyGameState, GoodKey } from "../types.js";
+import legacyResolutions from "./legacyResolutions.js";
+import { enactPiracy } from "./piracy.js";
+import { grantTradeRouteGoods } from "./tradeRouteResolver.js";
+import { countActiveTradeRoutes } from "./mapUtils.js";
+import { removeVPAmount, increaseHeresyWithinMove, logEvent } from "./stateUtils.js";
+import { FINAL_ROUND_GOLD_PER_VP, DEBT_PENALTY_DIVISOR, TRADE_VP_SCHEDULE, PRICE_MARKER_MAX } from "../data/gameData.js";
 
 const ALL_GOODS: GoodKey[] = ["mithril", "dragonScales", "krakenSkin", "magicDust", "stickyIchor", "pipeweed"];
 

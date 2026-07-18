@@ -1,7 +1,7 @@
-import { PlayerOrder, MyGameState, MoveError, MoveDefinition } from "../../types";
-import { validateMove } from "../moveValidation";
+import { PlayerOrder, MyGameState, MoveError, MoveDefinition } from "../../types.js";
+import { validateMove } from "../moveValidation.js";
 import { INVALID_MOVE } from "boardgame.io/core";
-import { incrementActionsTaken } from "../../helpers/stateUtils";
+import { incrementActionsTaken } from "../../helpers/stateUtils.js";
 
 const validateAlterPlayerOrder = (
   G: MyGameState,

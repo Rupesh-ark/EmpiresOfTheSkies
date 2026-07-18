@@ -1,5 +1,5 @@
-import { MoveDefinition } from "../../types";
-import { resolveBattleAndReturnWinner } from "../../helpers/resolveBattle";
+import { MoveDefinition } from "../../types.js";
+import { resolveBattleAndReturnWinner } from "../../helpers/resolveBattle.js";
 
 const pickCard: MoveDefinition = {
   fn: ({ G, ctx, playerID, events }, ...args) => {

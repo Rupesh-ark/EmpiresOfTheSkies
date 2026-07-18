@@ -1,8 +1,8 @@
-import { INVALID_MOVE } from "boardgame.io/core/";
-import { MoveDefinition } from "../../types";
-import { setStage } from "../../helpers/stageUtils";
-import { logEvent } from "../../helpers/stateUtils";
-import { humanizeTileName } from "../../helpers/helpers";
+import { INVALID_MOVE } from "boardgame.io/core";
+import { MoveDefinition } from "../../types.js";
+import { setStage } from "../../helpers/stageUtils.js";
+import { logEvent } from "../../helpers/stateUtils.js";
+import { humanizeTileName } from "../../helpers/helpers.js";
 
 const coloniseLand: MoveDefinition = {
   fn: ({ G, playerID }) => {

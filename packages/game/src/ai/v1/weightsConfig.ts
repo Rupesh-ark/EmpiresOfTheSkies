@@ -1,5 +1,5 @@
 /** @deprecated v1 scoring system — kept for non-actions phases. See ../evaluators/ for v2. */
-import type { AIWeights } from "../types";
+import type { AIWeights } from "../types.js";
 
 // ═══════════════════════════════════════════════════════════════════════════
 // AI CONFIG — single source of truth for all AI weights and parameters.

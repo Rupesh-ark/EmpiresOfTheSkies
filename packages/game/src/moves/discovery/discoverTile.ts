@@ -1,9 +1,9 @@
-import { INVALID_MOVE } from "boardgame.io/core/";
-import { MoveDefinition } from "../../types";
-import { advanceAllHeresyTrackers, logEvent, allPlayersPassed } from "../../helpers/stateUtils";
-import { getNeighbors } from "../../helpers/mapUtils";
-import { humanizeTileName } from "../../helpers/helpers";
-import { MIN_ROUNDS } from "../../data/gameData";
+import { INVALID_MOVE } from "boardgame.io/core";
+import { MoveDefinition } from "../../types.js";
+import { advanceAllHeresyTrackers, logEvent, allPlayersPassed } from "../../helpers/stateUtils.js";
+import { getNeighbors } from "../../helpers/mapUtils.js";
+import { humanizeTileName } from "../../helpers/helpers.js";
+import { MIN_ROUNDS } from "../../data/gameData.js";
 
 export const discoverTile: MoveDefinition = {
   fn: ({ G, ctx, playerID, events }, ...args: any[]) => {

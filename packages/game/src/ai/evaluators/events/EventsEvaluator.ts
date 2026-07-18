@@ -4,10 +4,10 @@
  * Moves: chooseEventCard, immediateElectionVote, resolveEventChoice
  * Event cards are submitted simultaneously — each player picks one from hand.
  */
-import type { MyGameState } from "../../../types";
-import type { AIMove } from "../../types";
-import type { MoveEval, BotPersonality } from "../types";
-import { V2_CONFIG } from "../config";
+import type { MyGameState } from "../../../types.js";
+import type { AIMove } from "../../types.js";
+import type { MoveEval, BotPersonality } from "../types.js";
+import { V2_CONFIG } from "../config.js";
 
 function evaluateChooseEventCard(
   G: MyGameState,

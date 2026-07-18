@@ -1,20 +1,20 @@
-export * from "./types";
-export { AI_CONFIG } from "./v1/weightsConfig";
-export { AIStrategyRegistry } from "./v1/AIStrategyRegistry";
-export { RandomFallbackStrategy } from "./v1/strategies/RandomFallback";
-export { enumerateLegalMoves } from "./enumerate";
+export * from "./types.js";
+export { AI_CONFIG } from "./v1/weightsConfig.js";
+export { AIStrategyRegistry } from "./v1/AIStrategyRegistry.js";
+export { RandomFallbackStrategy } from "./v1/strategies/RandomFallback.js";
+export { enumerateLegalMoves } from "./enumerate.js";
 export {
   deriveWeightsFromCards,
   derivePersonalityFromGameState,
   reinitializeAfterLegacyPick,
   ALL_KA_CARDS_LIST,
   ALL_LEGACY_CARDS_LIST,
-} from "./v1/personalities";
+} from "./v1/personalities.js";
 export {
   AILogger,
   getAILogger,
   setAILogger,
-} from "./AILogger";
+} from "./AILogger.js";
 export type {
   ResourceSnapshot,
   ScoredMove,
@@ -25,11 +25,11 @@ export type {
   RoundSummaryEntry,
   GameSummaryEntry,
   AILogEntry,
-} from "./AILogger";
-export { evaluateState, estimateMoveValue } from "./v1/evaluate";
-export { EmpiresBot } from "./EmpiresBot";
-export { runSelfPlay, runSelfPlayRecords, runSingleGame, runGameLoop, printBalanceReport } from "./selfPlay";
-export type { BalanceReport } from "./selfPlay";
+} from "./AILogger.js";
+export { evaluateState, estimateMoveValue } from "./v1/evaluate.js";
+export { EmpiresBot } from "./EmpiresBot.js";
+export { runSelfPlay, runSelfPlayRecords, runSingleGame, runGameLoop, printBalanceReport } from "./selfPlay.js";
+export type { BalanceReport } from "./selfPlay.js";
 export {
   runTournament,
   runHillClimb,
@@ -37,7 +37,7 @@ export {
   printTournamentResult,
   printHillClimbResult,
   printLeagueResult,
-} from "./tournament";
+} from "./tournament.js";
 export type {
   TournamentMatchup,
   TournamentResult,
@@ -45,9 +45,9 @@ export type {
   HillClimbResult,
   LeagueConfig,
   LeagueResult,
-} from "./tournament";
-export { ResolutionCoordinator } from "./v1/strategies/ResolutionCoordinator";
-export { GameRecorder } from "./GameRecorder";
+} from "./tournament.js";
+export { ResolutionCoordinator } from "./v1/strategies/ResolutionCoordinator.js";
+export { GameRecorder } from "./GameRecorder.js";
 export type {
   GameRecord,
   EnrichedDecision,
@@ -55,16 +55,16 @@ export type {
   PlayerGameSummary,
   BattleContext,
   DiagnosticEntry,
-} from "./GameRecorder";
-export { runGameInBrowser } from "./browserRunner";
-export type { ProgressCallback } from "./browserRunner";
-export { V2_CONFIG, setV2Config, resetV2Config, getV2Config } from "./evaluators/config";
-export { setMCTSConfig, resetMCTSConfig } from "./mcts/config";
-export type { MCTSModeConfig } from "./mcts/config";
+} from "./GameRecorder.js";
+export { runGameInBrowser } from "./browserRunner.js";
+export type { ProgressCallback } from "./browserRunner.js";
+export { V2_CONFIG, setV2Config, resetV2Config, getV2Config } from "./evaluators/config.js";
+export { setMCTSConfig, resetMCTSConfig } from "./mcts/config.js";
+export type { MCTSModeConfig } from "./mcts/config.js";
 export {
   printGameTimeline,
   printMoveAnalysis,
   printEconomyTimeline,
   printBattleLog,
   printFullAnalysis,
-} from "./analyzeGameRecord";
+} from "./analyzeGameRecord.js";

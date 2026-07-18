@@ -1,4 +1,4 @@
-import { MyGameState, MoveError } from "../types";
+import { MyGameState, MoveError } from "../types.js";
 
 export const validateMove = (
   playerID: string,

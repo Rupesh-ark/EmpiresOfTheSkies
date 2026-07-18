@@ -1,8 +1,8 @@
 /** @deprecated v1 scoring system — kept for non-actions phases. See ../../evaluators/ for v2. */
-import type { PhaseStrategy, AIPersonality, AIMove, ScoredAIMove } from "../../types";
-import type { MyGameState } from "../../../types";
+import type { PhaseStrategy, AIPersonality, AIMove, ScoredAIMove } from "../../types.js";
+import type { MyGameState } from "../../../types.js";
 import type { Ctx } from "boardgame.io";
-import { coloniseConfidence, hasTroopsAtTile } from "../../../helpers/fleetUtils";
+import { coloniseConfidence, hasTroopsAtTile } from "../../../helpers/fleetUtils.js";
 
 /**
  * Conquest strategy: decide whether to colonise, build outpost, or pass.

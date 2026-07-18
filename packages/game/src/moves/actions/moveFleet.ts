@@ -1,8 +1,8 @@
-import { MyGameState, MoveError, MoveDefinition } from "../../types";
-import { findPossibleDestinations } from "../../helpers/helpers";
+import { MyGameState, MoveError, MoveDefinition } from "../../types.js";
+import { findPossibleDestinations } from "../../helpers/helpers.js";
 import { INVALID_MOVE } from "boardgame.io/core";
-import { removeGoldAmount, incrementActionsTaken } from "../../helpers/stateUtils";
-import { validateMove } from "../moveValidation";
+import { removeGoldAmount, incrementActionsTaken } from "../../helpers/stateUtils.js";
+import { validateMove } from "../moveValidation.js";
 
 const validateMoveFleet = (
   G: MyGameState,

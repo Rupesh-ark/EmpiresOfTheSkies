@@ -1,7 +1,7 @@
-import { MoveDefinition, MyGameState, MoveError } from "../../types";
+import { MoveDefinition, MyGameState, MoveError } from "../../types.js";
 import { INVALID_MOVE } from "boardgame.io/core";
-import { humanizeTileName } from "../../helpers/helpers";
-import log from "../../helpers/logger";
+import { humanizeTileName } from "../../helpers/helpers.js";
+import log from "../../helpers/logger.js";
 
 const gLog = log.child({ mod: "garrison-transfer" });
 

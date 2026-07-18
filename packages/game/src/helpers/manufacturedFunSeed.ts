@@ -3,7 +3,7 @@ import {
   LegacyCardInfo,
   LegacyCardName,
   EventCardName,
-} from "../types";
+} from "../types.js";
 
 const KA_RIVALRY_GROUPS: [KingdomAdvantageCard, KingdomAdvantageCard][] = [
   ["licenced_smugglers", "sanctioned_piracy"],       // Group A — Economic

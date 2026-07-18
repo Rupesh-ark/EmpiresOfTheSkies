@@ -1,6 +1,6 @@
-import { MoveDefinition } from "../../types";
-import { drawFortuneOfWarCard } from "../../helpers/helpers";
-import { resolveConquest } from "../../helpers/resolveBattle";
+import { MoveDefinition } from "../../types.js";
+import { drawFortuneOfWarCard } from "../../helpers/helpers.js";
+import { resolveConquest } from "../../helpers/resolveBattle.js";
 
 // No-effect cards are handled by drawFortuneOfWarCard (reshuffle + redraw).
 const drawCardConquest: MoveDefinition = {

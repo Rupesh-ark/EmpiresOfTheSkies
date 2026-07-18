@@ -5,19 +5,19 @@
  * Handles: actions, discovery (sampled), simplified resolution (with FoW), taxes.
  * Skips: events (approximated with expected-value swing).
  */
-import type { MyGameState, TileInfoProps, TileLoot } from "../../types";
-import type { AIMove } from "../types";
-import type { BotPersonality } from "../evaluators/types";
-import { getNeighbors, FAITHDOM_TILES, tileKey, buildPlayerNetwork, bfsReachable, wouldPlacementConnectRoute, bfsShortestPath } from "../../helpers/mapUtils";
-import { getTradeRoutes } from "./RouteCache";
+import type { MyGameState, TileInfoProps, TileLoot } from "../../types.js";
+import type { AIMove } from "../types.js";
+import type { BotPersonality } from "../evaluators/types.js";
+import { getNeighbors, FAITHDOM_TILES, tileKey, buildPlayerNetwork, bfsReachable, wouldPlacementConnectRoute, bfsShortestPath } from "../../helpers/mapUtils.js";
+import { getTradeRoutes } from "./RouteCache.js";
 import {
   BUILDING_BASE_COST, CATHEDRAL_VP, PALACE_VP_HERETIC,
   PALACE_VP_ORTHODOX, RECRUIT_REGIMENTS_REWARD, BASE_GOLD_INCOME,
   KINGDOM_LOCATION, HERESY_MIN, HERESY_MAX,
   DEBT_PENALTY_DIVISOR, TRADE_VP_SCHEDULE,
   MAP_WIDTH, MAP_HEIGHT,
-} from "../../data/gameData";
-import { evaluatePosition } from "./StateEvaluator";
+} from "../../data/gameData.js";
+import { evaluatePosition } from "./StateEvaluator.js";
 
 // BattleMap helpers
 

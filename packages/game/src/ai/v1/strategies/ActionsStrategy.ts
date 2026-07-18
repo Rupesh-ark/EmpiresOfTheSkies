@@ -1,10 +1,10 @@
 /** @deprecated v1 scoring system — kept for non-actions phases. See ../../evaluators/ for v2. */
-import type { PhaseStrategy, AIPersonality, AIMove, AIWeights, ScoredAIMove } from "../../types";
-import type { MyGameState } from "../../../types";
+import type { PhaseStrategy, AIPersonality, AIMove, AIWeights, ScoredAIMove } from "../../types.js";
+import type { MyGameState } from "../../../types.js";
 import type { Ctx } from "boardgame.io";
-import { estimateMoveValue } from "../evaluate";
-import { countActiveTradeRoutes } from "../../../helpers/mapUtils";
-import { getRepublicInfluence } from "../../../helpers/republicUtils";
+import { estimateMoveValue } from "../evaluate.js";
+import { countActiveTradeRoutes } from "../../../helpers/mapUtils.js";
+import { getRepublicInfluence } from "../../../helpers/republicUtils.js";
 
 /**
  * Actions phase strategy: score each legal move using personality weights

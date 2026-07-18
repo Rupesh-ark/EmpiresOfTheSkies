@@ -4,12 +4,12 @@
  * Free action: draw 2 Fortune of War cards (keep hand limit of 4).
  * No gold cost. Gives combat cards for battles.
  */
-import type { MyGameState } from "../../../types";
-import type { AIMove } from "../../types";
-import type { MoveEval, BotPersonality } from "../types";
-import { V2_CONFIG } from "../config";
-import { getBase } from "../archetypes";
-import { personalityBonus } from "../common";
+import type { MyGameState } from "../../../types.js";
+import type { AIMove } from "../../types.js";
+import type { MoveEval, BotPersonality } from "../types.js";
+import { V2_CONFIG } from "../config.js";
+import { getBase } from "../archetypes.js";
+import { personalityBonus } from "../common.js";
 
 const TRAIN_PERSONALITY = {
   kaCards: ["improved_training", "elite_regiments"],

@@ -1,4 +1,4 @@
-import type { FleetInfo, MyGameState, PlayerInfo } from "../types";
+import type { FleetInfo, MyGameState, PlayerInfo } from "../types.js";
 
 export interface FleetTroopCounts {
   skyships: number;

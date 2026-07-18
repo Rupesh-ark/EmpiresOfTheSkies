@@ -1,32 +1,32 @@
 import type { Game, Ctx } from "boardgame.io";
 
-import { LegacyCardInfo, MyGameState, MapState } from "./types";
+import { LegacyCardInfo, MyGameState, MapState } from "./types.js";
 
-import { ALL_KA_CARDS, CONTINGENT_COUNTERS, EVENT_HAND_SIZE, MAX_ROUNDS, INFIDEL_HOST_COUNTERS } from "./data/gameData";
-import { filterKAPool, classifyEventDeck } from "./helpers/manufacturedFunSeed";
-import { initialBoardState, initialBattleMapState, createInitialBoardState } from "./setup/boardSetup";
+import { ALL_KA_CARDS, CONTINGENT_COUNTERS, EVENT_HAND_SIZE, MAX_ROUNDS, INFIDEL_HOST_COUNTERS } from "./data/gameData.js";
+import { filterKAPool, classifyEventDeck } from "./helpers/manufacturedFunSeed.js";
+import { initialBoardState, initialBattleMapState, createInitialBoardState } from "./setup/boardSetup.js";
 import {
   getRandomisedMapTileArray,
   getInitialDiscoveredTiles,
   getInitialOutpostsAndColoniesInfo,
-} from "./setup/mapSetup";
-import { buildPlayerInfoMap, getGoldIncomeForPlayer } from "./setup/playerSetup";
-import { logEvent, allPlayersPassed, calculateMercy, nextUnpassedPlayer } from "./helpers/stateUtils";
-import { wrapMove, withPhaseGuard, withPhaseReset, checkLoopGuard } from "./helpers/moveWrapper";
-import { MOVE_DEFINITIONS } from "./moveDefinitions";
+} from "./setup/mapSetup.js";
+import { buildPlayerInfoMap, getGoldIncomeForPlayer } from "./setup/playerSetup.js";
+import { logEvent, allPlayersPassed, calculateMercy, nextUnpassedPlayer } from "./helpers/stateUtils.js";
+import { wrapMove, withPhaseGuard, withPhaseReset, checkLoopGuard } from "./helpers/moveWrapper.js";
+import { MOVE_DEFINITIONS } from "./moveDefinitions.js";
 import {
   checkIfCurrentPlayerIsInCurrentBattle,
   fullResetFortuneOfWarCardDeck,
   resetBattleCheckCount,
-} from "./helpers/helpers";
+} from "./helpers/helpers.js";
 import { TurnOrder } from "boardgame.io/core";
-import resolveRound from "./helpers/resolveRound";
-import { ALL_EVENT_CARD_NAMES } from "./helpers/eventCardDefinitions";
-import { beginResolution, getResolutionTarget } from "./helpers/resolutionFlow";
+import resolveRound from "./helpers/resolveRound.js";
+import { ALL_EVENT_CARD_NAMES } from "./helpers/eventCardDefinitions.js";
+import { beginResolution, getResolutionTarget } from "./helpers/resolutionFlow.js";
 
-import { setStage, isStage } from "./helpers/stageUtils";
-import type { GameStage } from "./types";
-import log from "./helpers/logger";
+import { setStage, isStage } from "./helpers/stageUtils.js";
+import type { GameStage } from "./types.js";
+import log from "./helpers/logger.js";
 
 const phaseLog = log.child({ mod: "phase" });
 const budgetLog = log.child({ mod: "turn-budget" });
@@ -365,8 +365,9 @@ const MyGame: Game<MyGameState> = {
           playerInfo.passed = false;
           playerInfo.piracyIntent = "tax"; // reset each round
         });
-        context.events.endTurn({ next: context.ctx.playOrder[0] });
-        context.events.pass();
+        // NOTE: no turn events here — endTurn/pass are illegal in a phase's
+        // onBegin (boardgame.io #1266). The turn.onBegin below redirects the
+        // first turn of the round to playOrder[0] instead.
       },
       turn: {
         onBegin: (context) => {

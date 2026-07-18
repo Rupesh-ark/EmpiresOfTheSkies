@@ -1,5 +1,5 @@
-import { MoveDefinition, MyGameState, MoveError } from "../../types";
-import { validateOutpostTransfer, toBuildingOwner } from "../../helpers/stateUtils";
+import { MoveDefinition, MyGameState, MoveError } from "../../types.js";
+import { validateOutpostTransfer, toBuildingOwner } from "../../helpers/stateUtils.js";
 
 const validateTransferOutpost = (G: MyGameState, playerID: string, tileCoords: [number, number], targetPlayerID: string): MoveError | null => {
   if (targetPlayerID === playerID) {

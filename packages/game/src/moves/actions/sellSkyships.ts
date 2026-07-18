@@ -1,5 +1,5 @@
-import { MoveDefinition, MyGameState, MoveError } from "../../types";
-import { SKYSHIP_SELL_PRICE } from "../../data/gameData";
+import { MoveDefinition, MyGameState, MoveError } from "../../types.js";
+import { SKYSHIP_SELL_PRICE } from "../../data/gameData.js";
 
 const validateSellSkyships = (G: MyGameState, playerID: string, amount: number): MoveError | null => {
   if (!Number.isInteger(amount) || amount <= 0) {

@@ -1,4 +1,4 @@
-import { EventCardName, MyGameState, LegacyCardInfo, DeferredEvent, EventChoice } from "../types";
+import { EventCardName, MyGameState, LegacyCardInfo, DeferredEvent, EventChoice } from "../types.js";
 import {
   advanceAllHeresyTrackers,
   retreatAllHeresyTrackers,
@@ -9,11 +9,11 @@ import {
   addRegiments,
   logEvent,
   HERESY_MIN,
-} from "./stateUtils";
-import { CARD_RESOLVERS, resolveCardWithAlignmentPenalty } from "./legacyCardDefinitions";
-import { hasAnyOutpost, hasAnyColony } from "./helpers";
-import { tileKey } from "./mapUtils";
-import { BUILDING_SELL_PRICE } from "../data/gameData";
+} from "./stateUtils.js";
+import { CARD_RESOLVERS, resolveCardWithAlignmentPenalty } from "./legacyCardDefinitions.js";
+import { hasAnyOutpost, hasAnyColony } from "./helpers.js";
+import { tileKey } from "./mapUtils.js";
+import { BUILDING_SELL_PRICE } from "../data/gameData.js";
 
 const HERESY_EVENT_STEPS = 4;
 const CROPS_TAX_MODIFIER = 3;

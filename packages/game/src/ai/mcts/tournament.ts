@@ -5,13 +5,13 @@
  */
 import { Client } from "boardgame.io/client";
 import { Local } from "boardgame.io/multiplayer";
-import { MyGame } from "../../Game";
-import type { MyGameState } from "../../types";
-import { EmpiresBot } from "../EmpiresBot";
-import { AILogger, setAILogger, getAILogger } from "../AILogger";
-import { GameRecorder } from "../GameRecorder";
-import { runGameLoop } from "../selfPlay";
-import { setEvalWeights } from "./StateEvaluator";
+import { MyGame } from "../../Game.js";
+import type { MyGameState } from "../../types.js";
+import { EmpiresBot } from "../EmpiresBot.js";
+import { AILogger, setAILogger, getAILogger } from "../AILogger.js";
+import { GameRecorder } from "../GameRecorder.js";
+import { runGameLoop } from "../selfPlay.js";
+import { setEvalWeights } from "./StateEvaluator.js";
 
 // Evaluator weight config (what we're tuning)
 

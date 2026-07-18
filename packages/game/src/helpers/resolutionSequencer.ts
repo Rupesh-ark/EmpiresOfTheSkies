@@ -1,22 +1,22 @@
 // Resolution order: aerial → plunder → ground → conquest → election → post-election
 
 import { Ctx } from "boardgame.io";
-import { EventsAPI } from "boardgame.io/dist/types/src/plugins/plugin-events";
-import { MyGameState } from "../types";
-import { setStage } from "./stageUtils";
-import { sortPlayersInPlayerOrder } from "./helpers";
+import type { EventsAPI } from "../types.js";
+import { MyGameState } from "../types.js";
+import { setStage } from "./stageUtils.js";
+import { sortPlayersInPlayerOrder } from "./helpers.js";
 import {
   findNextBattle,
   findNextPlunder,
   findNextGroundBattle,
   findNextConquest,
-} from "./findNext";
+} from "./findNext.js";
 import {
   enterElection,
   advanceFromElection,
-} from "./resolutionFlow";
+} from "./resolutionFlow.js";
 
-export { beginResolution } from "./resolutionFlow";
+export { beginResolution } from "./resolutionFlow.js";
 
 const toPlunder = (G: MyGameState, events: EventsAPI): void => {
   G.mapState.currentBattle = [0, 0];

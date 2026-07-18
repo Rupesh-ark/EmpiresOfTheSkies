@@ -1,12 +1,12 @@
 import { describe, expect, it, vi } from "vitest";
 import { CreateGameReducer, InitializeGame } from "boardgame.io/internal";
 import type { State } from "boardgame.io";
-import type { EventsAPI } from "boardgame.io/dist/types/src/plugins/events/events";
-import { MyGame } from "../../Game";
-import { MOVE_DEFINITIONS } from "../../moveDefinitions";
-import { enumerateLegalMoves } from "../../ai/enumerate";
-import type { MyGameState } from "../../types";
-import { buildCtx, buildInitialG } from "../testHelpers";
+import type { EventsAPI } from "../../types.js";
+import { MyGame } from "../../Game.js";
+import { MOVE_DEFINITIONS } from "../../moveDefinitions.js";
+import { enumerateLegalMoves } from "../../ai/enumerate.js";
+import type { MyGameState } from "../../types.js";
+import { buildCtx, buildInitialG } from "../testHelpers.js";
 
 type TestState = State<MyGameState>;
 

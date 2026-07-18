@@ -1,8 +1,8 @@
-import { MyGameState, MoveError, MoveDefinition } from "../../types";
+import { MyGameState, MoveError, MoveDefinition } from "../../types.js";
 import { INVALID_MOVE } from "boardgame.io/core";
-import { validateMove } from "../moveValidation";
-import { incrementActionsTaken } from "../../helpers/stateUtils";
-import { MAX_FACTORIES } from "../../data/gameData";
+import { validateMove } from "../moveValidation.js";
+import { incrementActionsTaken } from "../../helpers/stateUtils.js";
+import { MAX_FACTORIES } from "../../data/gameData.js";
 
 const validateFoundFactory = (
   G: MyGameState,

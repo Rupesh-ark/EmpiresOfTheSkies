@@ -1,8 +1,8 @@
 import { INVALID_MOVE } from "boardgame.io/core";
-import { MoveDefinition } from "../../types";
-import { logEvent } from "../../helpers/stateUtils";
-import { resolveDeferredBattleInteractive } from "../../helpers/resolveDeferredBattles";
-import { setupNextDeferredBattle } from "../../helpers/resolutionFlow";
+import { MoveDefinition } from "../../types.js";
+import { logEvent } from "../../helpers/stateUtils.js";
+import { resolveDeferredBattleInteractive } from "../../helpers/resolveDeferredBattles.js";
+import { setupNextDeferredBattle } from "../../helpers/resolutionFlow.js";
 
 const commitDeferredBattleCard: MoveDefinition = {
   fn: ({ G, playerID, events, random }, ...args) => {

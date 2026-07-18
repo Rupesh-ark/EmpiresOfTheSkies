@@ -1,25 +1,25 @@
-export { MyGame } from "./Game";
-export { default as log } from "./helpers/logger";
-export { setMoveObserver, getMoveObserver } from "./recorder";
-export type { MoveObserver } from "./recorder";
+export { MyGame } from "./Game.js";
+export { default as log } from "./helpers/logger.js";
+export { setMoveObserver, getMoveObserver } from "./recorder.js";
+export type { MoveObserver } from "./recorder.js";
 
 
-export * from "./helpers/helpers";
+export * from "./helpers/helpers.js";
 
-export { tileKey, wouldPlacementConnectRoute, bfsShortestPath, buildPlayerNetwork, bfsReachable, getPlayerBuildings, isBuildingConnected, getRoutePlacementTiles, FAITHDOM_TILES } from "./helpers/mapUtils";
+export { tileKey, wouldPlacementConnectRoute, bfsShortestPath, buildPlayerNetwork, bfsReachable, getPlayerBuildings, isBuildingConnected, getRoutePlacementTiles, FAITHDOM_TILES } from "./helpers/mapUtils.js";
 
-export * from "./helpers/eventCardDefinitions";
+export * from "./helpers/eventCardDefinitions.js";
 
-export * from "./helpers/kaCardDefinitions";
+export * from "./helpers/kaCardDefinitions.js";
 
-export * from "./helpers/legacyCardRegistry";
+export * from "./helpers/legacyCardRegistry.js";
 
-export { setStage, isStage } from "./helpers/stageUtils";
+export { setStage, isStage } from "./helpers/stageUtils.js";
 
-export * from "./types";
+export * from "./types.js";
 
-export * from "./data/gameData"
+export * from "./data/gameData.js"
 
-export { MOVE_DEFINITIONS } from "./moveDefinitions";
+export { MOVE_DEFINITIONS } from "./moveDefinitions.js";
 
-export * from "./ai";
+export * from "./ai/index.js";

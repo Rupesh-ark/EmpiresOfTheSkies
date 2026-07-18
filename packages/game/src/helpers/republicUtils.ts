@@ -1,4 +1,4 @@
-import type { MyGameState } from "../types";
+import type { MyGameState } from "../types.js";
 
 export interface RepublicInfluence {
   zeeland: {

@@ -1,6 +1,6 @@
-import { MyGameState, MoveError, MoveDefinition } from "../../types";
+import { MyGameState, MoveError, MoveDefinition } from "../../types.js";
 import { INVALID_MOVE } from "boardgame.io/core";
-import { validateMove } from "../moveValidation";
+import { validateMove } from "../moveValidation.js";
 import {
   increaseHeresyWithinMove,
   increaseOrthodoxyWithinMove,
@@ -8,8 +8,8 @@ import {
   incrementActionsTaken,
   spendCounsellor,
   removeVPAmount,
-} from "../../helpers/stateUtils";
-import { PUNISH_EXECUTE_VP_COST, BASE_PRISONERS, MORE_PRISONS_BONUS, PUNISH_GOLD_COST } from "../../data/gameData";
+} from "../../helpers/stateUtils.js";
+import { PUNISH_EXECUTE_VP_COST, BASE_PRISONERS, MORE_PRISONS_BONUS, PUNISH_GOLD_COST } from "../../data/gameData.js";
 
 const validatePunishDissenters = (
   G: MyGameState,

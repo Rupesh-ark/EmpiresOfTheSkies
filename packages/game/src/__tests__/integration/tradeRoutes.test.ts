@@ -3,15 +3,15 @@ import {
   buildInitialG,
   buildPlayer,
   buildFleet,
-} from "../testHelpers";
+} from "../testHelpers.js";
 import {
   buildPlayerNetwork,
   wouldPlacementConnectRoute,
   countActiveTradeRoutes,
   tileKey,
-} from "../../helpers/mapUtils";
-import { grantTradeRouteGoods } from "../../helpers/tradeRouteResolver";
-import { MyGameState, TileLoot } from "../../types";
+} from "../../helpers/mapUtils.js";
+import { grantTradeRouteGoods } from "../../helpers/tradeRouteResolver.js";
+import { MyGameState, TileLoot } from "../../types.js";
 
 const LOOT: TileLoot = {
   gold: 2,

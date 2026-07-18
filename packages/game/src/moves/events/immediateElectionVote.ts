@@ -1,7 +1,7 @@
 import { INVALID_MOVE } from "boardgame.io/core";
-import { MoveDefinition } from "../../types";
-import { HERESY_MIN, logEvent } from "../../helpers/stateUtils";
-import { countOrthodoxRealms } from "../../helpers/helpers";
+import { MoveDefinition } from "../../types.js";
+import { HERESY_MIN, logEvent } from "../../helpers/stateUtils.js";
+import { countOrthodoxRealms } from "../../helpers/helpers.js";
 
 const immediateElectionVote: MoveDefinition = {
   fn: ({ G, ctx, playerID, events }, ...args) => {

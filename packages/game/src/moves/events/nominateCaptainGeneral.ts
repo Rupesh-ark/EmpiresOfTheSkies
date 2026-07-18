@@ -1,7 +1,7 @@
 import { INVALID_MOVE } from "boardgame.io/core";
-import { MoveDefinition } from "../../types";
-import { logEvent } from "../../helpers/stateUtils";
-import { setStage } from "../../helpers/stageUtils";
+import { MoveDefinition } from "../../types.js";
+import { logEvent } from "../../helpers/stateUtils.js";
+import { setStage } from "../../helpers/stageUtils.js";
 
 const nominateCaptainGeneral: MoveDefinition = {
   fn: ({ G, ctx, playerID, events }, ...args) => {

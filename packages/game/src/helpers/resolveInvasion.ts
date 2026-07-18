@@ -1,15 +1,15 @@
 /** Infidel Invasion resolution logic. */
 
-import { MyGameState, InfidelHostCounter } from "../types";
+import { MyGameState, InfidelHostCounter } from "../types.js";
 import {
   addVPAmount,
   removeVPAmount,
   increaseHeresyWithinMove,
   increaseOrthodoxyWithinMove,
   logEvent,
-} from "./stateUtils";
-import { calculateCombat } from "./combatMath";
-import { drawFortuneOfWarCard } from "./helpers";
+} from "./stateUtils.js";
+import { calculateCombat } from "./combatMath.js";
+import { drawFortuneOfWarCard } from "./helpers.js";
 import {
   INFIDEL_EMPIRE_LOCATION,
   CAPTAIN_GENERAL_VP,
@@ -17,7 +17,7 @@ import {
   SECOND_LARGEST_VP,
   TIED_LARGEST_VP,
   TOTAL_KINGDOMS,
-} from "../data/gameData";
+} from "../data/gameData.js";
 
 // Host counter draw
 

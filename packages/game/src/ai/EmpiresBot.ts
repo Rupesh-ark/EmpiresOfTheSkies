@@ -1,20 +1,20 @@
 import type { Ctx } from "boardgame.io";
-import type { MyGameState } from "../types";
-import type { AIMove, BotConfig } from "./types";
-import { enumerateLegalMoves } from "./enumerate";
-import { getAILogger } from "./AILogger";
-import type { MCTSStats } from "./AILogger";
-import type { PlayerSnapshot } from "./GameRecorder";
-import log from "../helpers/logger";
+import type { MyGameState } from "../types.js";
+import type { AIMove, BotConfig } from "./types.js";
+import { enumerateLegalMoves } from "./enumerate.js";
+import { getAILogger } from "./AILogger.js";
+import type { MCTSStats } from "./AILogger.js";
+import type { PlayerSnapshot } from "./GameRecorder.js";
+import log from "../helpers/logger.js";
 
 // Phase evaluators
-import { evaluateActions } from "./evaluators/ActionsEvaluator";
-import { evaluateDiscovery, pickDiscoveryMove } from "./evaluators/discovery/DiscoveryEvaluator";
-import { evaluateEvents, pickEventsMove } from "./evaluators/events/EventsEvaluator";
-import { evaluateResolution, pickResolutionMove } from "./evaluators/resolution/ResolutionEvaluator";
-import type { BotPersonality } from "./evaluators/types";
-import { computeArchetypeQualities, scoreLegacySynergy } from "./evaluators/archetypes";
-import { mctsSearch } from "./mcts/MCTSSearch";
+import { evaluateActions } from "./evaluators/ActionsEvaluator.js";
+import { evaluateDiscovery, pickDiscoveryMove } from "./evaluators/discovery/DiscoveryEvaluator.js";
+import { evaluateEvents, pickEventsMove } from "./evaluators/events/EventsEvaluator.js";
+import { evaluateResolution, pickResolutionMove } from "./evaluators/resolution/ResolutionEvaluator.js";
+import type { BotPersonality } from "./evaluators/types.js";
+import { computeArchetypeQualities, scoreLegacySynergy } from "./evaluators/archetypes.js";
+import { mctsSearch } from "./mcts/MCTSSearch.js";
 
 export class EmpiresBot {
   private config: BotConfig;

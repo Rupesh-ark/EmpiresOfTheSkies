@@ -1,8 +1,8 @@
 import { INVALID_MOVE } from "boardgame.io/core";
-import { MoveDefinition } from "../../types";
-import { isValidRetreatDestination } from "../../helpers/mapUtils";
-import { forceRetrieveFleets } from "../../helpers/resolveBattle";
-import { nextAfterAerialDecision } from "../../helpers/resolutionSequencer";
+import { MoveDefinition } from "../../types.js";
+import { isValidRetreatDestination } from "../../helpers/mapUtils.js";
+import { forceRetrieveFleets } from "../../helpers/resolveBattle.js";
+import { nextAfterAerialDecision } from "../../helpers/resolutionSequencer.js";
 
 const relocateDefeatedFleet: MoveDefinition = {
   validate: (G, playerID, ...args) => {

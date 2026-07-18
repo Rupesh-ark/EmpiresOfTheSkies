@@ -1,5 +1,5 @@
-import { MoveDefinition } from "../../types";
-import { resolveConquest } from "../../helpers/resolveBattle";
+import { MoveDefinition } from "../../types.js";
+import { resolveConquest } from "../../helpers/resolveBattle.js";
 
 const pickCardConquest: MoveDefinition = {
   fn: ({ G, ctx, playerID, events, random }, ...args) => {

@@ -1,8 +1,8 @@
-import { MoveDefinition, PlayerInfo } from "../../types";
-import { allPlayersPassed, logEvent } from "../../helpers/stateUtils";
-import { KINGDOM_LOCATION } from "../../data/gameData";
-import { tileKey, getRoutePlacementTiles } from "../../helpers/mapUtils";
-import log from "../../helpers/logger";
+import { MoveDefinition, PlayerInfo } from "../../types.js";
+import { allPlayersPassed, logEvent } from "../../helpers/stateUtils.js";
+import { KINGDOM_LOCATION } from "../../data/gameData.js";
+import { tileKey, getRoutePlacementTiles } from "../../helpers/mapUtils.js";
+import log from "../../helpers/logger.js";
 
 const retLog = log.child({ mod: "retrieve-fleets" });
 

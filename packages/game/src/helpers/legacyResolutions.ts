@@ -1,5 +1,5 @@
-import { MyGameState } from "../types";
-import { resolveCardWithAlignmentPenalty } from "./legacyCardDefinitions";
+import { MyGameState } from "../types.js";
+import { resolveCardWithAlignmentPenalty } from "./legacyCardDefinitions.js";
 
 const legacyResolutions = (G: MyGameState) => {
   Object.values(G.playerInfo).forEach((player) => {

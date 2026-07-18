@@ -5,8 +5,8 @@
  * No side effects beyond console.log.
  */
 
-import type { GameRecord, EnrichedDecision } from "./GameRecorder";
-import type { PlayerSnapshot } from "./GameRecorder";
+import type { GameRecord, EnrichedDecision } from "./GameRecorder.js";
+import type { PlayerSnapshot } from "./GameRecorder.js";
 
 // Formatting helpers
 

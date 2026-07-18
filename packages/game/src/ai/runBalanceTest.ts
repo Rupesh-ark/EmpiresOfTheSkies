@@ -8,7 +8,7 @@
  *   --verbose        Print per-game results (default: silent)
  *   --json           Output raw JSON instead of formatted report
  */
-import { runSelfPlay, printBalanceReport } from "./selfPlay";
+import { runSelfPlay, printBalanceReport } from "./selfPlay.js";
 
 const args = process.argv.slice(2);
 

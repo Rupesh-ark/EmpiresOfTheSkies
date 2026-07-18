@@ -1,12 +1,12 @@
-import { MOVE_DEFINITIONS } from "../moveDefinitions";
-import type { MyGameState } from "../types";
+import { MOVE_DEFINITIONS } from "../moveDefinitions.js";
+import type { MyGameState } from "../types.js";
 import type { Ctx } from "boardgame.io";
-import type { AIMove } from "./types";
-import { getNeighbors, isValidRetreatDestination, tileKey, wouldPlacementConnectRoute } from "../helpers/mapUtils";
-import { MAP_WIDTH, MAP_HEIGHT, KINGDOM_LOCATION, MAX_SKYSHIPS_PER_FLEET } from "../data/gameData";
-import { findPossibleDestinations } from "../helpers/helpers";
-import { isStage } from "../helpers/stageUtils";
-import log from "../helpers/logger";
+import type { AIMove } from "./types.js";
+import { getNeighbors, isValidRetreatDestination, tileKey, wouldPlacementConnectRoute } from "../helpers/mapUtils.js";
+import { MAP_WIDTH, MAP_HEIGHT, KINGDOM_LOCATION, MAX_SKYSHIPS_PER_FLEET } from "../data/gameData.js";
+import { findPossibleDestinations } from "../helpers/helpers.js";
+import { isStage } from "../helpers/stageUtils.js";
+import log from "../helpers/logger.js";
 
 const enumLog = log.child({ mod: "enumerate" });
 

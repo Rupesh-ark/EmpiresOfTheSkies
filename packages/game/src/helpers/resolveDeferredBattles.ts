@@ -10,10 +10,10 @@
  * commitDeferredBattleCard move. Attacker always draws from deck.
  */
 
-import { MyGameState, DeferredEvent } from "../types";
-import { addVPAmount, logEvent } from "./stateUtils";
-import { drawFortuneOfWarCard, hasFortAt, humanizeTileName } from "./helpers";
-import { calculateCombat } from "./combatMath";
+import { MyGameState, DeferredEvent } from "../types.js";
+import { addVPAmount, logEvent } from "./stateUtils.js";
+import { drawFortuneOfWarCard, hasFortAt, humanizeTileName } from "./helpers.js";
+import { calculateCombat } from "./combatMath.js";
 
 // Faerie Uprising
 

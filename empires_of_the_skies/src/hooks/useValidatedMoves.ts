@@ -1,6 +1,5 @@
 import { useMemo, useRef } from "react";
-import { useToast } from "./useToast";
-import { MOVE_DEFINITIONS, MyGameState } from "@eots/game";
+import { MyGameState } from "@eots/game";
 
 type BoardProps = {
   G: MyGameState;
@@ -16,18 +15,19 @@ type BoardProps = {
 };
 
 /**
- * Wraps boardgame.io's `moves` proxy with client-side validation.
+ * Wraps boardgame.io's `moves` proxy with a spectator guard.
  *
- * For moves that have a validate function in MOVE_DEFINITIONS, it runs
- * first. If it returns an error, a toast is shown and the move is NOT sent.
- * For moves without a validator, the call passes through unchanged.
+ * Validation is server-authoritative: moves are sent as-is and the move's
+ * `validate` function runs once, inside the server-side move handler
+ * (see packages/game/src/helpers/moveWrapper.ts). Rejections come back on
+ * boardgame.io's action-error channel and are toasted centrally in
+ * ActionBoardsAndMap.
  *
  * Usage:
  *   const moves = useValidatedMoves(props);
- *   moves.recruitCounsellors(0); // validates, shows toast on error
+ *   moves.recruitCounsellors(0); // sent to the server; server decides
  */
 export const useValidatedMoves = (props: BoardProps) => {
-  const { showToast } = useToast();
   const { G, ctx, playerID, moves } = props;
 
   // The proxy reads game state at CALL time via refs, so its identity does
@@ -39,49 +39,20 @@ export const useValidatedMoves = (props: BoardProps) => {
   return useMemo(() => {
     return new Proxy(moves, {
       get(_target, moveName: string) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const probe = stateRef.current.moves[moveName];
         if (typeof probe !== "function") return probe;
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         return (...args: any[]) => {
-          const { G, ctx, playerID, moves } = stateRef.current;
+          const { playerID, moves } = stateRef.current;
           const originalMove = moves[moveName];
           if (typeof originalMove !== "function") return;
-          if (!playerID) return;
-
-          const isActionMove = moveName in MOVE_DEFINITIONS;
-
-          if (isActionMove) {
-            const isActivePlayer = ctx.activePlayers?.[playerID] !== undefined;
-            if (ctx.currentPlayer !== playerID && !isActivePlayer) {
-              showToast("It's not your turn", "warning");
-              return;
-            }
-
-            const def = MOVE_DEFINITIONS[moveName];
-            if (def?.validate) {
-              const error = def.validate(G, playerID, ...args);
-              if (error) {
-                // TURN_COMPLETE is a false positive when the click just ran
-                // clearMoves() (undo) — the stale G closure still says
-                // turnComplete until the undo round-trips. That case always
-                // has undoable moves this turn, so only suppress then; with
-                // no moves to undo the rejection is genuine and must toast.
-                if (error.code === "TURN_COMPLETE" && (ctx.numMoves ?? 0) > 0) {
-                  originalMove(...args);
-                  return;
-                }
-                showToast(error.message, "error");
-                return;
-              }
-            }
-          }
+          if (!playerID) return; // spectators can't move
 
           originalMove(...args);
         };
       },
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [showToast]);
+  }, []);
 };

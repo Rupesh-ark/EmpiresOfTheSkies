@@ -13,15 +13,15 @@
  */
 
 import { describe, it, expect } from "vitest";
-import vote from "../../moves/election/vote";
+import vote from "../../moves/election/vote.js";
 import {
   buildInitialG,
   buildPlayer,
   buildCtx,
   buildResources,
   buildRandom,
-} from "../testHelpers";
-import type { EventsAPI } from "boardgame.io/dist/types/src/plugins/events/events";
+} from "../testHelpers.js";
+import type { EventsAPI } from "../../types.js";
 
 const stubEvents = {
   endTurn: () => {},

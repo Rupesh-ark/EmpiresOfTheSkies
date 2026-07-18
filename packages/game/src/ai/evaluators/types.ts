@@ -4,8 +4,8 @@
  * Each move evaluates itself independently — no move competes against another.
  * The heuristic layer filters bad moves; MCTS (future) picks from the rest.
  */
-import type { MyGameState } from "../../types";
-import type { AIMove } from "../types";
+import type { MyGameState } from "../../types.js";
+import type { AIMove } from "../types.js";
 
 // Core evaluation result
 

@@ -1,8 +1,8 @@
-import { MyGameState, MoveError, MoveDefinition } from "../../types";
-import { validateMove } from "../moveValidation";
+import { MyGameState, MoveError, MoveDefinition } from "../../types.js";
+import { validateMove } from "../moveValidation.js";
 import { INVALID_MOVE } from "boardgame.io/core";
-import { incrementActionsTaken } from "../../helpers/stateUtils";
-import { setStage } from "../../helpers/stageUtils";
+import { incrementActionsTaken } from "../../helpers/stateUtils.js";
+import { setStage } from "../../helpers/stageUtils.js";
 
 const validateTrainTroops = (
   G: MyGameState,

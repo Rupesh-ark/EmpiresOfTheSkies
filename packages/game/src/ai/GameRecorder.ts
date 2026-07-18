@@ -1,7 +1,7 @@
-import type { MyGameState } from "../types";
-import type { AIWeights } from "./types";
-import type { ResourceSnapshot, DecisionLogEntry, RoundSummaryEntry } from "./AILogger";
-import { countActiveTradeRoutes } from "../helpers/mapUtils";
+import type { MyGameState } from "../types.js";
+import type { AIWeights } from "./types.js";
+import type { ResourceSnapshot, DecisionLogEntry, RoundSummaryEntry } from "./AILogger.js";
+import { countActiveTradeRoutes } from "../helpers/mapUtils.js";
 
 // Player snapshot at a decision point
 

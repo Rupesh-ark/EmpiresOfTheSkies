@@ -1,5 +1,5 @@
-import { MyGameState, GameStage, StagePhase } from "../types";
-import log from "./logger";
+import { MyGameState, GameStage, StagePhase } from "../types.js";
+import log from "./logger.js";
 
 const validStages = new Set<string>([
   "setup:kingdom_advantage", "setup:legacy_card",

@@ -11,21 +11,21 @@
 
 import { Client } from "boardgame.io/client";
 import { Local } from "boardgame.io/multiplayer";
-import { MyGame } from "../Game";
-import type { MyGameState } from "../types";
-import { EmpiresBot } from "./EmpiresBot";
-import { AILogger, setAILogger, getAILogger } from "./AILogger";
-import type { DecisionLogEntry } from "./AILogger";
+import { MyGame } from "../Game.js";
+import type { MyGameState } from "../types.js";
+import { EmpiresBot } from "./EmpiresBot.js";
+import { AILogger, setAILogger, getAILogger } from "./AILogger.js";
+import type { DecisionLogEntry } from "./AILogger.js";
 import {
   GameRecorder,
   captureSnapshot,
   type EnrichedDecision,
   type PlayerSnapshot,
   type GameRecord,
-} from "./GameRecorder";
-import { AerialBattleStrategy } from "./v1/strategies/AerialBattleStrategy";
-import { GroundBattleStrategy } from "./v1/strategies/GroundBattleStrategy";
-import { AI_CONFIG } from "./v1/weightsConfig";
+} from "./GameRecorder.js";
+import { AerialBattleStrategy } from "./v1/strategies/AerialBattleStrategy.js";
+import { GroundBattleStrategy } from "./v1/strategies/GroundBattleStrategy.js";
+import { AI_CONFIG } from "./v1/weightsConfig.js";
 
 // Progress callback for UI updates
 

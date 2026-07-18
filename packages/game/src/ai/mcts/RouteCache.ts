@@ -4,8 +4,8 @@
  * Caches trade route calculations to avoid redundant BFS calls.
  * Trade routes only depend on: building positions, fleet positions, and round number.
  */
-import type { MyGameState } from "../../types";
-import { tileKey, buildPlayerNetwork, bfsReachable, getNeighbors, FAITHDOM_TILES } from "../../helpers/mapUtils";
+import type { MyGameState } from "../../types.js";
+import { tileKey, buildPlayerNetwork, bfsReachable, getNeighbors, FAITHDOM_TILES } from "../../helpers/mapUtils.js";
 
 interface CacheEntry {
   routes: Record<string, number>;

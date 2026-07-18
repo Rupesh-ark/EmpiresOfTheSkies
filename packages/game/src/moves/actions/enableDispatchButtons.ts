@@ -1,5 +1,5 @@
-import { MoveDefinition, MyGameState, MoveError } from "../../types";
-import { KINGDOM_LOCATION } from "../../data/gameData";
+import { MoveDefinition, MyGameState, MoveError } from "../../types.js";
+import { KINGDOM_LOCATION } from "../../data/gameData.js";
 
 const validateEnableDispatchButtons = (G: MyGameState, playerID: string): MoveError | null => {
   const player = G.playerInfo[playerID];

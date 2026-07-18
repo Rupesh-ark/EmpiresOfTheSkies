@@ -1,7 +1,7 @@
-import { MoveDefinition, MyGameState, MoveError } from "../../types";
+import { MoveDefinition, MyGameState, MoveError } from "../../types.js";
 import { INVALID_MOVE } from "boardgame.io/core";
-import { MAX_SKYSHIPS_PER_FLEET } from "../../data/gameData";
-import log from "../../helpers/logger";
+import { MAX_SKYSHIPS_PER_FLEET } from "../../data/gameData.js";
+import log from "../../helpers/logger.js";
 
 const tfLog = log.child({ mod: "transfer-fleets" });
 

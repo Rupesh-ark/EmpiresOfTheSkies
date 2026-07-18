@@ -1,8 +1,8 @@
 import { INVALID_MOVE } from "boardgame.io/core";
-import { MoveDefinition } from "../../types";
-import { logEvent } from "../../helpers/stateUtils";
-import { setStage } from "../../helpers/stageUtils";
-import { resolveGrandArmyBattle } from "../../helpers/resolveInvasion";
+import { MoveDefinition } from "../../types.js";
+import { logEvent } from "../../helpers/stateUtils.js";
+import { setStage } from "../../helpers/stageUtils.js";
+import { resolveGrandArmyBattle } from "../../helpers/resolveInvasion.js";
 
 const contributeToGrandArmy: MoveDefinition = {
   fn: ({ G, ctx, playerID, events, random }, ...args) => {

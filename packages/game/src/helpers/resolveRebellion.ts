@@ -7,17 +7,17 @@
  * This file provides the resolution logic called after interactive input.
  */
 
-import { MyGameState, DeferredEvent, LegacyCardInfo } from "../types";
+import { MyGameState, DeferredEvent, LegacyCardInfo } from "../types.js";
 import {
   addVPAmount,
   increaseHeresyWithinMove,
   increaseOrthodoxyWithinMove,
   logEvent,
-} from "./stateUtils";
-import { calculateCombat } from "./combatMath";
-import { drawFortuneOfWarCard, hasFortAt } from "./helpers";
-import { CARD_RESOLVERS, resolveCardWithAlignmentPenalty } from "./legacyCardDefinitions";
-import { KINGDOM_LOCATION } from "../data/gameData";
+} from "./stateUtils.js";
+import { calculateCombat } from "./combatMath.js";
+import { drawFortuneOfWarCard, hasFortAt } from "./helpers.js";
+import { CARD_RESOLVERS, resolveCardWithAlignmentPenalty } from "./legacyCardDefinitions.js";
+import { KINGDOM_LOCATION } from "../data/gameData.js";
 
 // Battle math
 

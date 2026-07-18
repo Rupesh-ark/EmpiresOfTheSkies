@@ -6,7 +6,7 @@ settings:
 
 overrides:
   is-generator-function: 1.0.10
-  boardgame.io: file:vendor/boardgame.io-0.51.0-beta.0.tgz
+  boardgame.io: file:vendor/boardgame.io-0.51.0-beta.1.tgz
 
 importers:
 
@@ -20,7 +20,7 @@ importers:
     dependencies:
       '@boardgame.io/p2p':
         specifier: ^0.4.4
-        version: 0.4.4(boardgame.io@file:vendor/boardgame.io-0.51.0-beta.0.tgz)
+        version: 0.4.4(boardgame.io@file:vendor/boardgame.io-0.51.0-beta.1.tgz)
       '@dnd-kit/core':
         specifier: ^6.3.1
         version: 6.3.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -49,8 +49,8 @@ importers:
         specifier: ^8.28.0
         version: 8.28.0(@emotion/react@11.14.0(@types/react@18.3.28)(react@18.3.1))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@18.3.28)(react@18.3.1))(@types/react@18.3.28)(react@18.3.1))(@mui/material@7.3.8(@emotion/react@11.14.0(@types/react@18.3.28)(react@18.3.1))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@18.3.28)(react@18.3.1))(@types/react@18.3.28)(react@18.3.1))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@mui/system@7.3.8(@emotion/react@11.14.0(@types/react@18.3.28)(react@18.3.1))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@18.3.28)(react@18.3.1))(@types/react@18.3.28)(react@18.3.1))(@types/react@18.3.28)(react@18.3.1))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       boardgame.io:
-        specifier: file:../vendor/boardgame.io-0.51.0-beta.0.tgz
-        version: file:vendor/boardgame.io-0.51.0-beta.0.tgz
+        specifier: file:../vendor/boardgame.io-0.51.0-beta.1.tgz
+        version: file:vendor/boardgame.io-0.51.0-beta.1.tgz
       file-saver:
         specifier: ^2.0.5
         version: 2.0.5
@@ -131,8 +131,8 @@ importers:
   packages/game:
     dependencies:
       boardgame.io:
-        specifier: file:../../vendor/boardgame.io-0.51.0-beta.0.tgz
-        version: file:vendor/boardgame.io-0.51.0-beta.0.tgz
+        specifier: file:../../vendor/boardgame.io-0.51.0-beta.1.tgz
+        version: file:vendor/boardgame.io-0.51.0-beta.1.tgz
       pino:
         specifier: ^10.3.1
         version: 10.3.1
@@ -157,10 +157,10 @@ importers:
         version: 5.0.0
       bgio-postgres:
         specifier: ^1.0.16
-        version: 1.0.16(boardgame.io@file:vendor/boardgame.io-0.51.0-beta.0.tgz)
+        version: 1.0.16(boardgame.io@file:vendor/boardgame.io-0.51.0-beta.1.tgz)
       boardgame.io:
-        specifier: file:../vendor/boardgame.io-0.51.0-beta.0.tgz
-        version: file:vendor/boardgame.io-0.51.0-beta.0.tgz
+        specifier: file:../vendor/boardgame.io-0.51.0-beta.1.tgz
+        version: file:vendor/boardgame.io-0.51.0-beta.1.tgz
       dotenv:
         specifier: ^17.3.1
         version: 17.3.1
@@ -1552,9 +1552,9 @@ packages:
     peerDependencies:
       boardgame.io: '>=0.40.0'
 
-  boardgame.io@file:vendor/boardgame.io-0.51.0-beta.0.tgz:
-    resolution: {integrity: sha512-ljHsU/WwWhHrpRiiThDZ9LhRend9iihiGvcfGxXmNkqdnXgeRhzcQXGWdfPnJoCOX/sS9csqD3r1S4Ql4VzQQw==, tarball: file:vendor/boardgame.io-0.51.0-beta.0.tgz}
-    version: 0.51.0-beta.0
+  boardgame.io@file:vendor/boardgame.io-0.51.0-beta.1.tgz:
+    resolution: {integrity: sha512-E7L/MUQw1D39emk+KgBaoI818dPUii/rzS4dZ5mgQ8O/AYYu9/GLL47bqWC0BnkdKF6sQO0+sDE2ZIzMoK3Bzg==, tarball: file:vendor/boardgame.io-0.51.0-beta.1.tgz}
+    version: 0.51.0-beta.1
     engines: {node: '>=22', pnpm: '>=10.16'}
     peerDependencies:
       svelte: ^5.0.0
@@ -3598,9 +3598,9 @@ snapshots:
       '@babel/helper-string-parser': 7.27.1
       '@babel/helper-validator-identifier': 7.28.5
 
-  '@boardgame.io/p2p@0.4.4(boardgame.io@file:vendor/boardgame.io-0.51.0-beta.0.tgz)':
+  '@boardgame.io/p2p@0.4.4(boardgame.io@file:vendor/boardgame.io-0.51.0-beta.1.tgz)':
     dependencies:
-      boardgame.io: file:vendor/boardgame.io-0.51.0-beta.0.tgz
+      boardgame.io: file:vendor/boardgame.io-0.51.0-beta.1.tgz
       peerjs: 1.5.5
       tweetnacl: 1.0.3
       tweetnacl-util: 0.15.1
@@ -4744,9 +4744,9 @@ snapshots:
 
   bezier-easing@2.1.0: {}
 
-  bgio-postgres@1.0.16(boardgame.io@file:vendor/boardgame.io-0.51.0-beta.0.tgz):
+  bgio-postgres@1.0.16(boardgame.io@file:vendor/boardgame.io-0.51.0-beta.1.tgz):
     dependencies:
-      boardgame.io: file:vendor/boardgame.io-0.51.0-beta.0.tgz
+      boardgame.io: file:vendor/boardgame.io-0.51.0-beta.1.tgz
       dotenv: 16.6.1
       pg: 8.20.0
       pg-hstore: 2.3.4
@@ -4762,7 +4762,7 @@ snapshots:
       - supports-color
       - tedious
 
-  boardgame.io@file:vendor/boardgame.io-0.51.0-beta.0.tgz:
+  boardgame.io@file:vendor/boardgame.io-0.51.0-beta.1.tgz:
     dependencies:
       '@koa/bodyparser': 6.1.0(koa@3.2.1)
       '@koa/cors': 5.0.0

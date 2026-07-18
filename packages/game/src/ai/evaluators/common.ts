@@ -5,10 +5,10 @@
  * are concerns every evaluator has — defined once here.
  * All thresholds read from V2_CONFIG so they're tunable in one place.
  */
-import type { BotPersonality } from "./types";
-import { V2_CONFIG } from "./config";
-import { buildPlayerNetwork, bfsReachable, FAITHDOM_TILES, tileKey, getPassableNeighbors } from "../../helpers/mapUtils";
-import type { MyGameState } from "../../types";
+import type { BotPersonality } from "./types.js";
+import { V2_CONFIG } from "./config.js";
+import { buildPlayerNetwork, bfsReachable, FAITHDOM_TILES, tileKey, getPassableNeighbors } from "../../helpers/mapUtils.js";
+import type { MyGameState } from "../../types.js";
 
 // Gold Pressure
 

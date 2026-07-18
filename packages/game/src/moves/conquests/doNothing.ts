@@ -1,5 +1,5 @@
-import { MoveDefinition } from "../../types";
-import { nextAfterConquest } from "../../helpers/resolutionSequencer";
+import { MoveDefinition } from "../../types.js";
+import { nextAfterConquest } from "../../helpers/resolutionSequencer.js";
 
 const doNothing: MoveDefinition = {
   fn: ({ G, events }) => {

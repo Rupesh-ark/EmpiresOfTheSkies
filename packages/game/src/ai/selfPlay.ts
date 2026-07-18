@@ -1,11 +1,11 @@
 import { Client } from "boardgame.io/client";
 import { Local } from "boardgame.io/multiplayer";
-import { MyGame } from "../Game";
-import type { MyGameState } from "../types";
-import { EmpiresBot } from "./EmpiresBot";
-import { AILogger, getAILogger, setAILogger } from "./AILogger";
-import type { DecisionLogEntry } from "./AILogger";
-import type { AIMove } from "./types";
+import { MyGame } from "../Game.js";
+import type { MyGameState } from "../types.js";
+import { EmpiresBot } from "./EmpiresBot.js";
+import { AILogger, getAILogger, setAILogger } from "./AILogger.js";
+import type { DecisionLogEntry } from "./AILogger.js";
+import type { AIMove } from "./types.js";
 import {
   GameRecorder,
   captureSnapshot,
@@ -13,12 +13,12 @@ import {
   type PlayerSnapshot,
   type GameRecord,
   type BattleContext,
-} from "./GameRecorder";
-import { AerialBattleStrategy } from "./v1/strategies/AerialBattleStrategy";
-import { GroundBattleStrategy } from "./v1/strategies/GroundBattleStrategy";
-import { AI_CONFIG } from "./v1/weightsConfig";
-import { enumerateLegalMoves } from "./enumerate";
-import log from "../helpers/logger";
+} from "./GameRecorder.js";
+import { AerialBattleStrategy } from "./v1/strategies/AerialBattleStrategy.js";
+import { GroundBattleStrategy } from "./v1/strategies/GroundBattleStrategy.js";
+import { AI_CONFIG } from "./v1/weightsConfig.js";
+import { enumerateLegalMoves } from "./enumerate.js";
+import log from "../helpers/logger.js";
 
 const spLog = log.child({ mod: "selfplay" });
 

@@ -1,5 +1,5 @@
-import { MoveDefinition } from "../types";
-import { allPlayersPassed } from "../helpers/stateUtils";
+import { MoveDefinition } from "../types.js";
+import { allPlayersPassed } from "../helpers/stateUtils.js";
 
 const pickLegacyCard: MoveDefinition = {
   fn: ({ G, playerID, events }, ...args: any[]) => {

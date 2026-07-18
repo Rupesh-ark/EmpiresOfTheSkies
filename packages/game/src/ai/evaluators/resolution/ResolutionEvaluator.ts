@@ -5,12 +5,12 @@
  * fleet retrieval, invasions, rebellions, etc.
  * Most sub-stages have 2-3 choices — all are kept viable for MCTS.
  */
-import type { MyGameState } from "../../../types";
-import type { AIMove } from "../../types";
-import type { MoveEval, BotPersonality } from "../types";
-import { V2_CONFIG } from "../config";
-import { personalityBonus, countOutposts } from "../common";
-import { countActiveTradeRoutes } from "../../../helpers/mapUtils";
+import type { MyGameState } from "../../../types.js";
+import type { AIMove } from "../../types.js";
+import type { MoveEval, BotPersonality } from "../types.js";
+import { V2_CONFIG } from "../config.js";
+import { personalityBonus, countOutposts } from "../common.js";
+import { countActiveTradeRoutes } from "../../../helpers/mapUtils.js";
 
 // Generic evaluator for binary/ternary decisions
 

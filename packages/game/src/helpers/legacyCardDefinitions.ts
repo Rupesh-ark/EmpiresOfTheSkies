@@ -1,5 +1,5 @@
-import { MyGameState, PlayerInfo, LegacyCardInfo, LegacyCardName } from "../types";
-import { bfsReachable, FAITHDOM_TILES, tileKey } from "./mapUtils";
+import { MyGameState, PlayerInfo, LegacyCardInfo, LegacyCardName } from "../types.js";
+import { bfsReachable, FAITHDOM_TILES, tileKey } from "./mapUtils.js";
 
 // Each resolver returns the raw VP earned — no state mutation.
 // resolveCardWithAlignmentPenalty applies the halving penalty before committing.

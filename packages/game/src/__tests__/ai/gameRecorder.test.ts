@@ -1,11 +1,11 @@
 import { describe, it, expect } from "vitest";
-import { setMoveObserver } from "../../recorder";
-import type { MoveObserver } from "../../recorder";
-import { GameRecorder } from "../../ai/GameRecorder";
-import { buildInitialG, buildCtx, buildEvents } from "../testHelpers";
+import { setMoveObserver } from "../../recorder.js";
+import type { MoveObserver } from "../../recorder.js";
+import { GameRecorder } from "../../ai/GameRecorder.js";
+import { buildInitialG, buildCtx, buildEvents } from "../testHelpers.js";
 import type { Ctx } from "boardgame.io";
-import { wrapMove } from "../../helpers/moveWrapper";
-import passMove from "../../moves/pass";
+import { wrapMove } from "../../helpers/moveWrapper.js";
+import passMove from "../../moves/pass.js";
 
 describe("_matchID", () => {
   it("is present in game state", () => {

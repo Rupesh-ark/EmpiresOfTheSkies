@@ -1,10 +1,10 @@
-import { MoveDefinition } from "../../types";
-import { findPossibleDestinations } from "../../helpers/helpers";
-import { forceRetrieveFleets } from "../../helpers/resolveBattle";
-import { setStage } from "../../helpers/stageUtils";
-import { nextAfterAerialDecision } from "../../helpers/resolutionSequencer";
-import { clonePlayerInfo } from "../../helpers/cloneUtils";
-import log from "../../helpers/logger";
+import { MoveDefinition } from "../../types.js";
+import { findPossibleDestinations } from "../../helpers/helpers.js";
+import { forceRetrieveFleets } from "../../helpers/resolveBattle.js";
+import { setStage } from "../../helpers/stageUtils.js";
+import { nextAfterAerialDecision } from "../../helpers/resolutionSequencer.js";
+import { clonePlayerInfo } from "../../helpers/cloneUtils.js";
+import log from "../../helpers/logger.js";
 
 const evadeAttackingFleet: MoveDefinition = {
   validate: (G, playerID) => {

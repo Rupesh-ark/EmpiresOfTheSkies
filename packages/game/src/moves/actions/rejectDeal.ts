@@ -1,5 +1,5 @@
-import { MoveDefinition, MyGameState, MoveError } from "../../types";
-import { logEvent } from "../../helpers/stateUtils";
+import { MoveDefinition, MyGameState, MoveError } from "../../types.js";
+import { logEvent } from "../../helpers/stateUtils.js";
 
 const validateRejectDeal = (G: MyGameState, playerID: string): MoveError | null => {
   if (!G.pendingDeal) {

@@ -1,6 +1,6 @@
-import { MyGameState, MapBuildingOwner, PlayerInfo } from "../types";
-import { MAX_SKYSHIPS, MAX_REGIMENTS, HERESY_MAX, HERESY_MIN } from "../data/gameData";
-import { getRepublicInfluence } from "./republicUtils";
+import { MyGameState, MapBuildingOwner, PlayerInfo } from "../types.js";
+import { MAX_SKYSHIPS, MAX_REGIMENTS, HERESY_MAX, HERESY_MIN } from "../data/gameData.js";
+import { getRepublicInfluence } from "./republicUtils.js";
 
 export { HERESY_MAX, HERESY_MIN };
 

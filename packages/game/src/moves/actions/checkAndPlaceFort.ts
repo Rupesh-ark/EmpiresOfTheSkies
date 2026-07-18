@@ -1,5 +1,5 @@
-import { MoveDefinition, MyGameState, MoveError } from "../../types";
-import { humanizeTileName } from "../../helpers/helpers";
+import { MoveDefinition, MyGameState, MoveError } from "../../types.js";
+import { humanizeTileName } from "../../helpers/helpers.js";
 
 const validateCheckAndPlaceFort = (G: MyGameState, playerID: string, coords: [number, number]): MoveError | null => {
   const [x, y] = coords;

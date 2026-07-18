@@ -1,5 +1,5 @@
-import { MoveDefinition } from "../../types";
-import { isStage } from "../../helpers/stageUtils";
+import { MoveDefinition } from "../../types.js";
+import { isStage } from "../../helpers/stageUtils.js";
 
 const acknowledgeRoundSummary: MoveDefinition = {
   fn: ({ G, ctx, playerID, events }) => {

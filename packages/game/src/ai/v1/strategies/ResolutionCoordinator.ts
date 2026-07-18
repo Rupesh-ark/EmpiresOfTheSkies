@@ -1,13 +1,13 @@
-import type { PhaseStrategy, AIPersonality, AIMove, ScoredAIMove } from "../../types";
-import type { MyGameState } from "../../../types";
+import type { PhaseStrategy, AIPersonality, AIMove, ScoredAIMove } from "../../types.js";
+import type { MyGameState } from "../../../types.js";
 import type { Ctx } from "boardgame.io";
-import { AerialBattleStrategy } from "./AerialBattleStrategy";
-import { GroundBattleStrategy } from "./GroundBattleStrategy";
-import { ConquestStrategy } from "./ConquestStrategy";
-import { PlunderStrategy } from "./PlunderStrategy";
-import { ElectionStrategy } from "./ElectionStrategy";
-import { ResolutionStrategy } from "./ResolutionStrategy";
-import log from "../../../helpers/logger";
+import { AerialBattleStrategy } from "./AerialBattleStrategy.js";
+import { GroundBattleStrategy } from "./GroundBattleStrategy.js";
+import { ConquestStrategy } from "./ConquestStrategy.js";
+import { PlunderStrategy } from "./PlunderStrategy.js";
+import { ElectionStrategy } from "./ElectionStrategy.js";
+import { ResolutionStrategy } from "./ResolutionStrategy.js";
+import log from "../../../helpers/logger.js";
 
 export class ResolutionCoordinator implements PhaseStrategy {
   private aerial = new AerialBattleStrategy();

@@ -1,6 +1,6 @@
-import { MyGameState } from "../types";
-import { FAITHDOM_TILES, tileKey, bfsReachable, bfsWithDistance, buildPlayerNetwork } from "./mapUtils";
-import { logEvent } from "./stateUtils";
+import { MyGameState } from "../types.js";
+import { FAITHDOM_TILES, tileKey, bfsReachable, bfsWithDistance, buildPlayerNetwork } from "./mapUtils.js";
+import { logEvent } from "./stateUtils.js";
 
 // Gold value of a route: tile loot goods × current price markers + flat gold
 const getTileRouteValue = (

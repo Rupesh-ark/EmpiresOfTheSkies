@@ -6,12 +6,12 @@
  * Cost: own slot = 0g, rival slot = their cathedral count, neutral = 1g.
  * Always costs 1 counsellor.
  */
-import type { MyGameState } from "../../../types";
-import type { AIMove } from "../../types";
-import type { MoveEval, BotPersonality } from "../types";
-import { V2_CONFIG } from "../config";
-import { getBase } from "../archetypes";
-import { goldPressure, goldPressureReason, personalityBonus, roundAwareness, diminishingReturns } from "../common";
+import type { MyGameState } from "../../../types.js";
+import type { AIMove } from "../../types.js";
+import type { MoveEval, BotPersonality } from "../types.js";
+import { V2_CONFIG } from "../config.js";
+import { getBase } from "../archetypes.js";
+import { goldPressure, goldPressureReason, personalityBonus, roundAwareness, diminishingReturns } from "../common.js";
 
 // Slot → kingdom colour mapping (mirrors influencePrelates.ts move code)
 const SLOT_TO_COLOUR: Record<number, string | null> = {

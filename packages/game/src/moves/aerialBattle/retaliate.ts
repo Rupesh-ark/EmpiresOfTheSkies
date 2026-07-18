@@ -1,6 +1,6 @@
-import { MoveDefinition } from "../../types";
-import { setStage } from "../../helpers/stageUtils";
-import { clonePlayerInfo } from "../../helpers/cloneUtils";
+import { MoveDefinition } from "../../types.js";
+import { setStage } from "../../helpers/stageUtils.js";
+import { clonePlayerInfo } from "../../helpers/cloneUtils.js";
 
 const retaliate: MoveDefinition = {
   validate: (G, playerID) => {

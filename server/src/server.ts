@@ -3,7 +3,7 @@ import { Server } from "boardgame.io/server";
 import { PostgresStore } from "bgio-postgres";
 import cors from "@koa/cors";
 import { MyGame, log as rootLog } from "@eots/game";
-import { initGameRecorder } from "./gameRecorder";
+import { initGameRecorder } from "./gameRecorder.js";
 
 const log = rootLog.child({ mod: "server" });
 

@@ -6,25 +6,20 @@
   "engines": {
     "node": ">=22"
   },
-  "main": "./dist/cjs/index.js",
-  "module": "./dist/esm/index.js",
-  "types": "./dist/types/index.d.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/types/index.d.ts",
-      "import": "./dist/esm/index.js",
-      "require": "./dist/cjs/index.js"
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
     }
   },
   "files": [
     "dist"
   ],
   "scripts": {
-    "build:types": "tsc -p tsconfig.types.json",
-    "build:esm": "tsc -p tsconfig.esm.json",
-    "build:cjs": "tsc -p tsconfig.cjs.json && node write-cjs-package.cjs",
-    "build": "pnpm run build:types && pnpm run build:esm && pnpm run build:cjs",
-    "watch": "tsc -p tsconfig.types.json -w --preserveWatchOutput & tsc -p tsconfig.esm.json -w --preserveWatchOutput & tsc -p tsconfig.cjs.json -w --preserveWatchOutput & wait",
+    "build": "tsc -p tsconfig.build.json",
+    "watch": "tsc -p tsconfig.build.json -w --preserveWatchOutput",
     "test": "vitest run",
     "test:watch": "vitest"
   },

@@ -1,5 +1,5 @@
-import { MoveDefinition } from "../../types";
-import { setStage } from "../../helpers/stageUtils";
+import { MoveDefinition } from "../../types.js";
+import { setStage } from "../../helpers/stageUtils.js";
 
 const defendGroundAttack: MoveDefinition = {
   fn: ({ G, events }, ...args) => {

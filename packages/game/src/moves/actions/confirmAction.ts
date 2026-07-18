@@ -1,4 +1,4 @@
-import { MoveDefinition, MyGameState, MoveError } from "../../types";
+import { MoveDefinition, MyGameState, MoveError } from "../../types.js";
 import { INVALID_MOVE } from "boardgame.io/core";
 
 const validateConfirmAction = (

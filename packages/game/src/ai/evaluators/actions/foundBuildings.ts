@@ -4,14 +4,14 @@
  * Evaluates whether building a cathedral, palace, shipyard, or fort
  * is a reasonable action given current game state and personality.
  */
-import type { MyGameState } from "../../../types";
-import type { AIMove } from "../../types";
-import type { MoveEval, BotPersonality } from "../types";
-import { V2_CONFIG } from "../config";
-import { getBase } from "../archetypes";
-import { goldPressure, goldPressureReason, personalityBonus, roundAwareness, diminishingReturns, heresyPressure } from "../common";
-import { BUILDING_BASE_COST, BuildingSlot } from "../../../data/gameData";
-import { countActiveTradeRoutes } from "../../../helpers/mapUtils";
+import type { MyGameState } from "../../../types.js";
+import type { AIMove } from "../../types.js";
+import type { MoveEval, BotPersonality } from "../types.js";
+import { V2_CONFIG } from "../config.js";
+import { getBase } from "../archetypes.js";
+import { goldPressure, goldPressureReason, personalityBonus, roundAwareness, diminishingReturns, heresyPressure } from "../common.js";
+import { BUILDING_BASE_COST, BuildingSlot } from "../../../data/gameData.js";
+import { countActiveTradeRoutes } from "../../../helpers/mapUtils.js";
 
 // Building type from slot index
 

@@ -1,8 +1,8 @@
 import { INVALID_MOVE } from "boardgame.io/core";
-import { MoveDefinition, MyGameState } from "../../types";
-import { HERESY_MIN, logEvent } from "../../helpers/stateUtils";
-import { advanceFromElection } from "../../helpers/resolutionFlow";
-import { countOrthodoxRealms } from "../../helpers/helpers";
+import { MoveDefinition, MyGameState } from "../../types.js";
+import { HERESY_MIN, logEvent } from "../../helpers/stateUtils.js";
+import { advanceFromElection } from "../../helpers/resolutionFlow.js";
+import { countOrthodoxRealms } from "../../helpers/helpers.js";
 
 const kingdomToNumberMap: Record<string, number> = {
   Angland: 1,

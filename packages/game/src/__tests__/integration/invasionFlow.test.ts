@@ -17,20 +17,20 @@
  */
 
 import { describe, it, expect, vi } from "vitest";
-import nominateCaptainGeneral from "../../moves/events/nominateCaptainGeneral";
-import contributeToGrandArmy from "../../moves/events/contributeToGrandArmy";
-import offerBuyoffGold from "../../moves/events/offerBuyoffGold";
-import { checkForInvasion } from "../../helpers/resolveInvasion";
-import { INFIDEL_EMPIRE_LOCATION } from "../../data/gameData";
+import nominateCaptainGeneral from "../../moves/events/nominateCaptainGeneral.js";
+import contributeToGrandArmy from "../../moves/events/contributeToGrandArmy.js";
+import offerBuyoffGold from "../../moves/events/offerBuyoffGold.js";
+import { checkForInvasion } from "../../helpers/resolveInvasion.js";
+import { INFIDEL_EMPIRE_LOCATION } from "../../data/gameData.js";
 import {
   buildInitialG,
   buildPlayer,
   buildCtx,
   buildResources,
   buildRandom,
-} from "../testHelpers";
+} from "../testHelpers.js";
 import { INVALID_MOVE } from "boardgame.io/core";
-import type { EventsAPI } from "boardgame.io/dist/types/src/plugins/events/events";
+import type { EventsAPI } from "../../types.js";
 
 const stubEvents = () =>
   ({

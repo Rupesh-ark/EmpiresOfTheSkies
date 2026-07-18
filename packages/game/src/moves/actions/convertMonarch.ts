@@ -1,13 +1,13 @@
-import { MyGameState, MoveError, MoveDefinition } from "../../types";
+import { MyGameState, MoveError, MoveDefinition } from "../../types.js";
 import {
   removeGoldAmount,
   incrementActionsTaken,
   spendCounsellor,
   increaseHeresyWithinMove,
   increaseOrthodoxyWithinMove,
-} from "../../helpers/stateUtils";
+} from "../../helpers/stateUtils.js";
 import { INVALID_MOVE } from "boardgame.io/core";
-import { validateMove } from "../moveValidation";
+import { validateMove } from "../moveValidation.js";
 
 const validateConvertMonarch = (
   G: MyGameState,

@@ -5,13 +5,13 @@
  * Cost: 1-3g based on distance. Also consumes skyships and troops from reserves.
  * This is a key economic move — fleets enable routes, conquest, and plunder.
  */
-import type { MyGameState } from "../../../types";
-import type { AIMove } from "../../types";
-import type { MoveEval, BotPersonality } from "../types";
-import { V2_CONFIG } from "../config";
-import { getBase } from "../archetypes";
-import { goldPressure, goldPressureReason, personalityBonus, roundAwareness, tradeRouteChainValue } from "../common";
-import { countActiveTradeRoutes, buildPlayerNetwork, tileKey, FAITHDOM_TILES, bfsReachable } from "../../../helpers/mapUtils";
+import type { MyGameState } from "../../../types.js";
+import type { AIMove } from "../../types.js";
+import type { MoveEval, BotPersonality } from "../types.js";
+import { V2_CONFIG } from "../config.js";
+import { getBase } from "../archetypes.js";
+import { goldPressure, goldPressureReason, personalityBonus, roundAwareness, tradeRouteChainValue } from "../common.js";
+import { countActiveTradeRoutes, buildPlayerNetwork, tileKey, FAITHDOM_TILES, bfsReachable } from "../../../helpers/mapUtils.js";
 
 const DEPLOY_PERSONALITY = {
   kaCards: ["elite_regiments", "sanctioned_piracy"],

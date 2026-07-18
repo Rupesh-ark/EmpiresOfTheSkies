@@ -18,7 +18,7 @@
  */
 import * as fs from "fs";
 import * as path from "path";
-import type { AIWeights } from "./types";
+import type { AIWeights } from "./types.js";
 import {
   runTournament,
   runHillClimb,
@@ -26,7 +26,7 @@ import {
   printTournamentResult,
   printHillClimbResult,
   printLeagueResult,
-} from "./tournament";
+} from "./tournament.js";
 
 const args = process.argv.slice(2);
 

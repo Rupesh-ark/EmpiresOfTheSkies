@@ -1,5 +1,5 @@
-import { MoveDefinition } from "../../types";
-import { nextAfterGroundDecision } from "../../helpers/resolutionSequencer";
+import { MoveDefinition } from "../../types.js";
+import { nextAfterGroundDecision } from "../../helpers/resolutionSequencer.js";
 
 const doNotGroundAttack: MoveDefinition = {
   fn: ({ G, ctx, playerID, events }) => {

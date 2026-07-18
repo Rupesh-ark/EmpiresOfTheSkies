@@ -1,12 +1,12 @@
-import { MyGameState, MoveError, MoveDefinition } from "../../types";
-import { validateMove } from "../moveValidation";
+import { MyGameState, MoveError, MoveDefinition } from "../../types.js";
+import { validateMove } from "../moveValidation.js";
 import { INVALID_MOVE } from "boardgame.io/core";
 import {
   addRegiments,
   removeGoldAmount,
   incrementActionsTaken,
-} from "../../helpers/stateUtils";
-import { RECRUIT_REGIMENTS_REWARD } from "../../data/gameData";
+} from "../../helpers/stateUtils.js";
+import { RECRUIT_REGIMENTS_REWARD } from "../../data/gameData.js";
 
 const validateRecruitRegiments = (
   G: MyGameState,

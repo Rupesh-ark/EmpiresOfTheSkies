@@ -2,18 +2,18 @@ import { describe, it, expect } from "vitest";
 import {
   executeInfidelFleetCombat,
   prepareInfidelFleetCombat,
-} from "../../helpers/resolveInfidelFleet";
+} from "../../helpers/resolveInfidelFleet.js";
 import {
   INFIDEL_EMPIRE_LOCATION,
   KINGDOM_LOCATION,
-} from "../../data/gameData";
-import type { FortuneOfWarCardInfo, InfidelHostCounter, MyGameState } from "../../types";
+} from "../../data/gameData.js";
+import type { FortuneOfWarCardInfo, InfidelHostCounter, MyGameState } from "../../types.js";
 import {
   buildFleet,
   buildInitialG,
   buildPlayer,
   buildResources,
-} from "../testHelpers";
+} from "../testHelpers.js";
 
 const shuffle = <T>(arr: T[]): T[] => [...arr];
 

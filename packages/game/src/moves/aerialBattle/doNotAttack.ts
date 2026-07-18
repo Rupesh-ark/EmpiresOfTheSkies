@@ -1,5 +1,5 @@
-import { MoveDefinition } from "../../types";
-import { nextAfterAerialDecision } from "../../helpers/resolutionSequencer";
+import { MoveDefinition } from "../../types.js";
+import { nextAfterAerialDecision } from "../../helpers/resolutionSequencer.js";
 
 const doNotAttack: MoveDefinition = {
   fn: ({ G, ctx, playerID, events }) => {

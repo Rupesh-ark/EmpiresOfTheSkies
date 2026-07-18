@@ -15,16 +15,16 @@
  * to the next step. The phase only ends after retrieve fleets.
  */
 
-import { MyGameState } from "../types";
-import log from "./logger";
-import { setStage } from "./stageUtils";
-import { setupNextRebellion } from "./resolveRebellion";
-import { getDeferredBattleDescription } from "./resolveDeferredBattles";
-import { checkForInvasion, getArchprelateForNomination } from "./resolveInvasion";
-import { prepareInfidelFleetCombat } from "./resolveInfidelFleet";
-import { findNextBattle, findNextPlunder, findNextGroundBattle, findNextConquest } from "./findNext";
-import { EventsAPI } from "boardgame.io/dist/types/src/plugins/events/events";
-import { sortPlayersInPlayerOrder } from "./helpers";
+import { MyGameState } from "../types.js";
+import log from "./logger.js";
+import { setStage } from "./stageUtils.js";
+import { setupNextRebellion } from "./resolveRebellion.js";
+import { getDeferredBattleDescription } from "./resolveDeferredBattles.js";
+import { checkForInvasion, getArchprelateForNomination } from "./resolveInvasion.js";
+import { prepareInfidelFleetCombat } from "./resolveInfidelFleet.js";
+import { findNextBattle, findNextPlunder, findNextGroundBattle, findNextConquest } from "./findNext.js";
+import type { EventsAPI } from "../types.js";
+import { sortPlayersInPlayerOrder } from "./helpers.js";
 
 /**
  * Set up the next non-rebellion deferred battle for interactive resolution.

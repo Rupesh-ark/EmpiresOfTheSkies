@@ -5,21 +5,21 @@
  * Each move evaluates itself independently. Viable moves are passed forward.
  * Viable moves are selected randomly until MCTS is implemented.
  */
-import type { MyGameState } from "../../types";
-import type { AIMove } from "../types";
-import type { MoveEval, MoveEvaluator, BotPersonality } from "./types";
-import { V2_CONFIG } from "./config";
+import type { MyGameState } from "../../types.js";
+import type { AIMove } from "../types.js";
+import type { MoveEval, MoveEvaluator, BotPersonality } from "./types.js";
+import { V2_CONFIG } from "./config.js";
 
 // Import all evaluators
-import { evaluateFoundBuildings } from "./actions/foundBuildings";
-import { evaluateInfluencePrelates } from "./actions/influencePrelates";
-import { evaluateDeployFleet } from "./actions/deployFleet";
-import { evaluatePurchaseSkyships } from "./actions/purchaseSkyships";
-import { evaluateRecruitCounsellors } from "./actions/recruitCounsellors";
-import { evaluateRecruitRegiments } from "./actions/recruitRegiments";
-import { evaluateTrainTroops } from "./actions/trainTroops";
-import { evaluateFoundFactory } from "./actions/foundFactory";
-import { evaluateSendAgitators } from "./actions/sendAgitators";
+import { evaluateFoundBuildings } from "./actions/foundBuildings.js";
+import { evaluateInfluencePrelates } from "./actions/influencePrelates.js";
+import { evaluateDeployFleet } from "./actions/deployFleet.js";
+import { evaluatePurchaseSkyships } from "./actions/purchaseSkyships.js";
+import { evaluateRecruitCounsellors } from "./actions/recruitCounsellors.js";
+import { evaluateRecruitRegiments } from "./actions/recruitRegiments.js";
+import { evaluateTrainTroops } from "./actions/trainTroops.js";
+import { evaluateFoundFactory } from "./actions/foundFactory.js";
+import { evaluateSendAgitators } from "./actions/sendAgitators.js";
 import {
   evaluatePunishDissenters,
   evaluateGarrisonTransfer,
@@ -38,7 +38,7 @@ import {
   evaluateDiscardFoWCard,
   evaluateSellSkyships,
   evaluateSellBuilding,
-} from "./actions/misc";
+} from "./actions/misc.js";
 
 // Move evaluator registry
 

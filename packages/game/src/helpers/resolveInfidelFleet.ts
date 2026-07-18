@@ -1,8 +1,8 @@
-import { MyGameState } from "../types";
-import { logEvent } from "./stateUtils";
-import { drawFortuneOfWarCard } from "./helpers";
-import { calculateCombat } from "./combatMath";
-import { INFIDEL_EMPIRE_LOCATION, KINGDOM_LOCATION } from "../data/gameData";
+import { MyGameState } from "../types.js";
+import { logEvent } from "./stateUtils.js";
+import { drawFortuneOfWarCard } from "./helpers.js";
+import { calculateCombat } from "./combatMath.js";
+import { INFIDEL_EMPIRE_LOCATION, KINGDOM_LOCATION } from "../data/gameData.js";
 
 const getPlayerMilitaryPower = (G: MyGameState, playerID: string): number => {
   const player = G.playerInfo[playerID];

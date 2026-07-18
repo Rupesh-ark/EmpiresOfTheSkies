@@ -1,5 +1,5 @@
-import { MoveDefinition } from "../../types";
-import { increaseHeresyWithinMove, increaseOrthodoxyWithinMove } from "../../helpers/stateUtils";
+import { MoveDefinition } from "../../types.js";
+import { increaseHeresyWithinMove, increaseOrthodoxyWithinMove } from "../../helpers/stateUtils.js";
 
 export const increaseHeresy: MoveDefinition = {
   fn: ({ G, playerID }) => {

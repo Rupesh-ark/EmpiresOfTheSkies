@@ -1,7 +1,7 @@
-import { MoveDefinition } from "../../types";
-import { removeVPAmount, logEvent } from "../../helpers/stateUtils";
-import { setStage } from "../../helpers/stageUtils";
-import { clonePlayerInfo } from "../../helpers/cloneUtils";
+import { MoveDefinition } from "../../types.js";
+import { removeVPAmount, logEvent } from "../../helpers/stateUtils.js";
+import { setStage } from "../../helpers/stageUtils.js";
+import { clonePlayerInfo } from "../../helpers/cloneUtils.js";
 
 const attackPlayersBuilding: MoveDefinition = {
   validate: (G, playerID) => {

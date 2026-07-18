@@ -27,22 +27,22 @@
  */
 
 import { describe, it, expect, vi } from "vitest";
-import attackOtherPlayersFleet from "../../moves/aerialBattle/attackOtherPlayersFleet";
-import retaliate from "../../moves/aerialBattle/retaliate";
-import evadeAttackingFleet from "../../moves/aerialBattle/evadeAttackingFleet";
-import attackPlayersBuilding from "../../moves/groundBattle/attackPlayersBuilding";
-import yieldToAttacker from "../../moves/groundBattle/yieldToAttacker";
-import garrisonTroops from "../../moves/groundBattle/garrisonTroops";
-import constructOutpost from "../../moves/conquests/constructOutpost";
-import { resolveBattleAndReturnWinner } from "../../helpers/resolveBattle";
+import attackOtherPlayersFleet from "../../moves/aerialBattle/attackOtherPlayersFleet.js";
+import retaliate from "../../moves/aerialBattle/retaliate.js";
+import evadeAttackingFleet from "../../moves/aerialBattle/evadeAttackingFleet.js";
+import attackPlayersBuilding from "../../moves/groundBattle/attackPlayersBuilding.js";
+import yieldToAttacker from "../../moves/groundBattle/yieldToAttacker.js";
+import garrisonTroops from "../../moves/groundBattle/garrisonTroops.js";
+import constructOutpost from "../../moves/conquests/constructOutpost.js";
+import { resolveBattleAndReturnWinner } from "../../helpers/resolveBattle.js";
 import {
   buildInitialG,
   buildPlayer,
   buildCtx,
   buildFleet,
   buildRandom,
-} from "../testHelpers";
-import type { EventsAPI } from "boardgame.io/dist/types/src/plugins/events/events";
+} from "../testHelpers.js";
+import type { EventsAPI } from "../../types.js";
 
 // Helpers
 

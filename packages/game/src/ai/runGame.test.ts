@@ -15,8 +15,8 @@
 import { describe, it } from "vitest";
 import { mkdirSync, writeFileSync } from "fs";
 import { dirname, resolve } from "path";
-import { runSingleGame } from "./selfPlay";
-import { setMCTSConfig, resetMCTSConfig } from "./mcts/config";
+import { runSingleGame } from "./selfPlay.js";
+import { setMCTSConfig, resetMCTSConfig } from "./mcts/config.js";
 
 describe("generate game record", () => {
   it(

@@ -1,8 +1,8 @@
 /**
  * MCTS Tree Node
  */
-import type { AIMove } from "../types";
-import type { MoveEval } from "../evaluators/types";
+import type { AIMove } from "../types.js";
+import type { MoveEval } from "../evaluators/types.js";
 
 export class MCTSNode {
   move: AIMove | null;      // null for root

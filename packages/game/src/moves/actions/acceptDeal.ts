@@ -1,6 +1,6 @@
-import { MyGameState, DealOffer, MoveError, MoveDefinition } from "../../types";
-import { logEvent, toBuildingOwner } from "../../helpers/stateUtils";
-import { validateOffer } from "./proposeDeal";
+import { MyGameState, DealOffer, MoveError, MoveDefinition } from "../../types.js";
+import { logEvent, toBuildingOwner } from "../../helpers/stateUtils.js";
+import { validateOffer } from "./proposeDeal.js";
 import { INVALID_MOVE } from "boardgame.io/core";
 
 const executeSide = (

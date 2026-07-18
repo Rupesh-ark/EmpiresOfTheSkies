@@ -1,4 +1,4 @@
-import { KingdomAdvantageCard } from "../types";
+import { KingdomAdvantageCard } from "../types.js";
 
 export type KACardDef = {
   displayName: string;

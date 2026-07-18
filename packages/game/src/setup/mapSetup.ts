@@ -1,10 +1,10 @@
-import { TileInfoProps, MapBuildingInfo } from "../types";
+import { TileInfoProps, MapBuildingInfo } from "../types.js";
 import {
   unknownWorldTiles,
   oceanTiles,
   legendTiles,
   knownWorldTiles,
-} from "../data/tileDefinitions";
+} from "../data/tileDefinitions.js";
 
 export const getRandomisedMapTileArray = (
   shuffle: <T>(arr: T[]) => T[]

@@ -1,14 +1,14 @@
 import { INVALID_MOVE } from "boardgame.io/core";
-import { EventCardName, MoveDefinition } from "../../types";
+import { EventCardName, MoveDefinition } from "../../types.js";
 import {
   isEventVoid,
   resolveEventCard,
   getBattleEventTarget,
   prepareEventChoice,
   EVENT_CARD_DEFS,
-} from "../../helpers/eventCardDefinitions";
-import { logEvent } from "../../helpers/stateUtils";
-import { setStage } from "../../helpers/stageUtils";
+} from "../../helpers/eventCardDefinitions.js";
+import { logEvent } from "../../helpers/stateUtils.js";
+import { setStage } from "../../helpers/stageUtils.js";
 
 const chooseEventCard: MoveDefinition = {
   fn: ({ G, ctx, playerID, events, random }, ...args) => {

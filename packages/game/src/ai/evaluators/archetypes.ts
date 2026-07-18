@@ -1,4 +1,4 @@
-import { V2_CONFIG } from "./config";
+import { V2_CONFIG } from "./config.js";
 
 type BaseQualityKey = keyof typeof V2_CONFIG.baseQuality;
 type WeightProfile = Partial<Record<BaseQualityKey, number>>;

@@ -1,9 +1,9 @@
-import { MoveDefinition, GoodKey } from "../../types";
-import { increaseHeresyWithinMove, addVPAmount, logEvent, toBuildingOwner } from "../../helpers/stateUtils";
-import { humanizeTileName } from "../../helpers/helpers";
-import { PRICE_MARKER_MIN } from "../../data/gameData";
-import { setStage } from "../../helpers/stageUtils";
-import { computeGarrisonTroops } from "../../helpers/resolveBattle";
+import { MoveDefinition, GoodKey } from "../../types.js";
+import { increaseHeresyWithinMove, addVPAmount, logEvent, toBuildingOwner } from "../../helpers/stateUtils.js";
+import { humanizeTileName } from "../../helpers/helpers.js";
+import { PRICE_MARKER_MIN } from "../../data/gameData.js";
+import { setStage } from "../../helpers/stageUtils.js";
+import { computeGarrisonTroops } from "../../helpers/resolveBattle.js";
 
 const GOODS: GoodKey[] = ["mithril", "dragonScales", "krakenSkin", "magicDust", "stickyIchor", "pipeweed"];
 

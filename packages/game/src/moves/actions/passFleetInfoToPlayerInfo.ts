@@ -1,7 +1,7 @@
-import { MyGameState, MoveError, MoveDefinition } from "../../types";
+import { MyGameState, MoveError, MoveDefinition } from "../../types.js";
 import { INVALID_MOVE } from "boardgame.io/core";
-import { KINGDOM_LOCATION } from "../../data/gameData";
-import log from "../../helpers/logger";
+import { KINGDOM_LOCATION } from "../../data/gameData.js";
+import log from "../../helpers/logger.js";
 
 const pfLog = log.child({ mod: "pass-fleet-info" });
 

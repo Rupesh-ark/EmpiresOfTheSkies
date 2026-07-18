@@ -18,17 +18,17 @@
 import * as fs from "fs";
 import { Client } from "boardgame.io/client";
 import { Local } from "boardgame.io/multiplayer";
-import { MyGame } from "../../Game";
-import type { MyGameState } from "../../types";
-import { EmpiresBot } from "../EmpiresBot";
-import { setAILogger } from "../AILogger";
-import { AILogger } from "../AILogger";
-import { GameRecorder } from "../GameRecorder";
-import { runGameLoop } from "../selfPlay";
-import { setV2Config, resetV2Config } from "../evaluators/config";
-import { setEvalWeights } from "../mcts/StateEvaluator";
-import { setMCTSConfig } from "../mcts/config";
-import type { EvalWeights } from "../mcts/tournament";
+import { MyGame } from "../../Game.js";
+import type { MyGameState } from "../../types.js";
+import { EmpiresBot } from "../EmpiresBot.js";
+import { setAILogger } from "../AILogger.js";
+import { AILogger } from "../AILogger.js";
+import { GameRecorder } from "../GameRecorder.js";
+import { runGameLoop } from "../selfPlay.js";
+import { setV2Config, resetV2Config } from "../evaluators/config.js";
+import { setEvalWeights } from "../mcts/StateEvaluator.js";
+import { setMCTSConfig } from "../mcts/config.js";
+import type { EvalWeights } from "../mcts/tournament.js";
 
 // Reduce MCTS overhead for tuning — 25 sims instead of 60
 setMCTSConfig({ simulationsPerMove: 25, rolloutDepth: 3, explorationConstant: 1.4 });

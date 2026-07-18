@@ -1,12 +1,12 @@
-import { MyGameState, GoodKey } from "../types";
+import { MyGameState, GoodKey } from "../types.js";
 import {
   FAITHDOM_TILES,
   bfsReachable,
   buildPlayerNetwork,
   getPlayerBuildings,
   isBuildingConnected,
-} from "./mapUtils";
-import { logEvent } from "./stateUtils";
+} from "./mapUtils.js";
+import { logEvent } from "./stateUtils.js";
 
 const GOODS: GoodKey[] = ["mithril", "dragonScales", "krakenSkin", "magicDust", "stickyIchor", "pipeweed"];
 

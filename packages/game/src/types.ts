@@ -1,7 +1,11 @@
 import type { BoardProps } from "boardgame.io/react";
-import type { Ctx } from "boardgame.io";
-import type { EventsAPI } from "boardgame.io/dist/types/src/plugins/events/events";
-import type { RandomAPI } from "boardgame.io/dist/types/src/plugins/random/random";
+import type { Ctx, DefaultPluginAPIs } from "boardgame.io";
+
+// The exports map added in boardgame.io 0.51 blocks deep imports of plugin
+// types, so derive them from the public DefaultPluginAPIs instead and
+// re-export for the rest of the package.
+export type EventsAPI = DefaultPluginAPIs["events"];
+export type RandomAPI = DefaultPluginAPIs["random"];
 
 export interface MyGameProps extends BoardProps<MyGameState> {}
 

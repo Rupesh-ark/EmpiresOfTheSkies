@@ -1,10 +1,10 @@
-import { MyGameState, MoveError, MoveDefinition } from "../../types";
-import { findPossibleDestinations } from "../../helpers/helpers";
+import { MyGameState, MoveError, MoveDefinition } from "../../types.js";
+import { findPossibleDestinations } from "../../helpers/helpers.js";
 import { INVALID_MOVE } from "boardgame.io/core";
-import { removeGoldAmount, incrementActionsTaken } from "../../helpers/stateUtils";
-import { validateMove } from "../moveValidation";
-import { KINGDOM_LOCATION, MAX_SKYSHIPS_PER_FLEET } from "../../data/gameData";
-import log from "../../helpers/logger";
+import { removeGoldAmount, incrementActionsTaken } from "../../helpers/stateUtils.js";
+import { validateMove } from "../moveValidation.js";
+import { KINGDOM_LOCATION, MAX_SKYSHIPS_PER_FLEET } from "../../data/gameData.js";
+import log from "../../helpers/logger.js";
 
 const dLog = log.child({ mod: "deploy-fleet" });
 

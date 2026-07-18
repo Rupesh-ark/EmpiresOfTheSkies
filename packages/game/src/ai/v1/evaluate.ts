@@ -1,11 +1,11 @@
 /** @deprecated v1 scoring system — kept for non-actions phases. See ../evaluators/ for v2. */
-import type { MyGameState, PlayerInfo } from "../../types";
-import type { AIWeights, AIMove } from "../types";
-import { CARD_RESOLVERS } from "../../helpers/legacyCardDefinitions";
-import { countActiveTradeRoutes, bfsWithDistance, tileKey, FAITHDOM_TILES } from "../../helpers/mapUtils";
-import { HERESY_MAX, MAX_COUNSELLORS, MAP_WIDTH, MAP_HEIGHT, KINGDOM_LOCATION } from "../../data/gameData";
-import { AI_CONFIG } from "./weightsConfig";
-import { getRepublicInfluence } from "../../helpers/republicUtils";
+import type { MyGameState, PlayerInfo } from "../../types.js";
+import type { AIWeights, AIMove } from "../types.js";
+import { CARD_RESOLVERS } from "../../helpers/legacyCardDefinitions.js";
+import { countActiveTradeRoutes, bfsWithDistance, tileKey, FAITHDOM_TILES } from "../../helpers/mapUtils.js";
+import { HERESY_MAX, MAX_COUNSELLORS, MAP_WIDTH, MAP_HEIGHT, KINGDOM_LOCATION } from "../../data/gameData.js";
+import { AI_CONFIG } from "./weightsConfig.js";
+import { getRepublicInfluence } from "../../helpers/republicUtils.js";
 
 // Internal helpers
 

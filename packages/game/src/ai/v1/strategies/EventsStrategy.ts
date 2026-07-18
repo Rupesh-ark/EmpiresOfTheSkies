@@ -1,6 +1,6 @@
 /** @deprecated v1 scoring system — kept for non-actions phases. See ../../evaluators/ for v2. */
-import type { PhaseStrategy, AIPersonality, AIMove, AIWeights, ScoredAIMove } from "../../types";
-import type { MyGameState, EventCardName } from "../../../types";
+import type { PhaseStrategy, AIPersonality, AIMove, AIWeights, ScoredAIMove } from "../../types.js";
+import type { MyGameState, EventCardName } from "../../../types.js";
 import type { Ctx } from "boardgame.io";
 
 /**

@@ -1,6 +1,6 @@
 import { INVALID_MOVE } from "boardgame.io/core";
-import { MoveDefinition, MoveError } from "../../types";
-import { logEvent } from "../../helpers/stateUtils";
+import { MoveDefinition, MoveError } from "../../types.js";
+import { logEvent } from "../../helpers/stateUtils.js";
 
 const AGITATOR_COST = 2;
 

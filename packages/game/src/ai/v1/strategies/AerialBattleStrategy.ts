@@ -1,9 +1,9 @@
 /** @deprecated v1 scoring system — kept for non-actions phases. See ../../evaluators/ for v2. */
-import type { PhaseStrategy, AIPersonality, AIMove, ScoredAIMove } from "../../types";
-import type { MyGameState } from "../../../types";
+import type { PhaseStrategy, AIPersonality, AIMove, ScoredAIMove } from "../../types.js";
+import type { MyGameState } from "../../../types.js";
 import type { Ctx } from "boardgame.io";
-import { calculateFleetStrength } from "../../../helpers/fleetUtils";
-import type { BattleContext } from "../../GameRecorder";
+import { calculateFleetStrength } from "../../../helpers/fleetUtils.js";
+import type { BattleContext } from "../../GameRecorder.js";
 
 /**
  * Aerial battle strategy: decide whether to attack, evade, or pick FoW cards

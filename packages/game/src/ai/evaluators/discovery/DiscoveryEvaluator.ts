@@ -4,11 +4,11 @@
  * Moves: discoverTile, pass
  * Each undiscovered tile adjacent to discovered territory is a candidate.
  */
-import type { MyGameState } from "../../../types";
-import type { AIMove } from "../../types";
-import type { MoveEval, BotPersonality } from "../types";
-import { V2_CONFIG } from "../config";
-import { personalityBonus } from "../common";
+import type { MyGameState } from "../../../types.js";
+import type { AIMove } from "../../types.js";
+import type { MoveEval, BotPersonality } from "../types.js";
+import { V2_CONFIG } from "../config.js";
+import { personalityBonus } from "../common.js";
 
 function evaluateDiscoverTile(
   G: MyGameState,

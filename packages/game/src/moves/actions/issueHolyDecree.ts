@@ -1,4 +1,4 @@
-import { MyGameState, MoveError, MoveDefinition } from "../../types";
+import { MyGameState, MoveError, MoveDefinition } from "../../types.js";
 import {
   addVPAmount,
   advanceAllHeresyTrackers,
@@ -6,9 +6,9 @@ import {
   removeVPAmount,
   retreatAllHeresyTrackers,
   logEvent,
-} from "../../helpers/stateUtils";
+} from "../../helpers/stateUtils.js";
 import { INVALID_MOVE } from "boardgame.io/core";
-import { blessingOrCurseVPAmount } from "../../helpers/helpers";
+import { blessingOrCurseVPAmount } from "../../helpers/helpers.js";
 
 const validateIssueHolyDecree = (
   G: MyGameState,

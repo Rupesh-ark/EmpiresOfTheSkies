@@ -1,9 +1,9 @@
-import { INVALID_MOVE } from "boardgame.io/core";
+import { INVALID_MOVE, Invalid } from "boardgame.io/core";
 import type { Ctx } from "boardgame.io";
-import log from "./logger";
-import { MyGameState, MoveDefinition } from "../types";
-import { logEvent } from "./stateUtils";
-import { getMoveObserver } from "../recorder";
+import log from "./logger.js";
+import { MyGameState, MoveDefinition } from "../types.js";
+import { logEvent } from "./stateUtils.js";
+import { getMoveObserver } from "../recorder.js";
 
 const moveLog = log.child({ mod: "move" });
 
@@ -11,12 +11,10 @@ const moveLog = log.child({ mod: "move" });
 
 /**
  * Wraps a MoveDefinition into a boardgame.io move function with:
- * 1. Server-side validation safety net (returns INVALID_MOVE on failure)
+ * 1. Server-authoritative validation (returns Invalid(error) on failure;
+ *    boardgame.io delivers the error to the acting client, which toasts it)
  * 2. Structured developer logging (console JSON)
  * 3. Player-visible game log entries for successful moves
- *
- * Note: Error feedback to the player is handled client-side — the frontend
- * calls validate() before invoking the move. See empires_of_the_skies/src/hooks/useValidatedMoves.ts.
  *
  * Pipeline: dev log → validate? → fn → successLog
  */
@@ -39,7 +37,7 @@ export const wrapMove = (name: string, def: MoveDefinition): any => {
       }, name);
     }
 
-    // Server-side validation safety net
+    // Server-authoritative validation — the single source of truth.
     if (def.validate) {
       const error = def.validate(G, playerID, ...args);
       if (error) {
@@ -47,7 +45,7 @@ export const wrapMove = (name: string, def: MoveDefinition): any => {
           playerID,
           error: error.message,
         }, `${name} REJECTED (validate)`);
-        return INVALID_MOVE;
+        return Invalid(error);
       }
     }
 

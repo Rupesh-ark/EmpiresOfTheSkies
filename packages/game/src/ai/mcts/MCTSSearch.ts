@@ -4,13 +4,13 @@
  * Given a game state and viable moves (from v2 evaluators),
  * runs N simulations to find the best move.
  */
-import type { MyGameState } from "../../types";
-import type { AIMove } from "../types";
-import type { MoveEval, BotPersonality } from "../evaluators/types";
-import { MCTSNode } from "./MCTSNode";
-import { rollout, applyMove } from "./StateSimulator";
-import { MCTS_CONFIG } from "./config";
-import { invalidateRouteCache } from "./RouteCache";
+import type { MyGameState } from "../../types.js";
+import type { AIMove } from "../types.js";
+import type { MoveEval, BotPersonality } from "../evaluators/types.js";
+import { MCTSNode } from "./MCTSNode.js";
+import { rollout, applyMove } from "./StateSimulator.js";
+import { MCTS_CONFIG } from "./config.js";
+import { invalidateRouteCache } from "./RouteCache.js";
 
 function deepCloneGameState(G: MyGameState): MyGameState {
   return JSON.parse(JSON.stringify(G));

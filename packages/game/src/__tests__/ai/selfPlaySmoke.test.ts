@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { runSingleGame } from "../../ai/selfPlay";
+import { runSingleGame } from "../../ai/selfPlay.js";
 
 describe("self-play smoke test", () => {
   it("completes a full game without stalling", () => {

@@ -1,8 +1,8 @@
-import { MoveDefinition } from "../../types";
-import { nextAfterGroundDecision, nextAfterConquest } from "../../helpers/resolutionSequencer";
+import { MoveDefinition } from "../../types.js";
+import { nextAfterGroundDecision, nextAfterConquest } from "../../helpers/resolutionSequencer.js";
 import { INVALID_MOVE } from "boardgame.io/core";
-import log from "../../helpers/logger";
-import { toBuildingOwner } from "../../helpers/stateUtils";
+import log from "../../helpers/logger.js";
+import { toBuildingOwner } from "../../helpers/stateUtils.js";
 
 const gtLog = log.child({ mod: "garrison-troops" });
 

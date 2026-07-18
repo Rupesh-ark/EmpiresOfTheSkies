@@ -1,4 +1,4 @@
-import type { MyGameState } from "../types";
+import type { MyGameState } from "../types.js";
 import type { Ctx } from "boardgame.io";
 
 export type AIWeights = {

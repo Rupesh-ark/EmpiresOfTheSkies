@@ -1,13 +1,13 @@
 import { INVALID_MOVE } from "boardgame.io/core";
-import { MoveDefinition } from "../../types";
-import { logEvent } from "../../helpers/stateUtils";
-import { setStage } from "../../helpers/stageUtils";
+import { MoveDefinition } from "../../types.js";
+import { logEvent } from "../../helpers/stateUtils.js";
+import { setStage } from "../../helpers/stageUtils.js";
 import {
   resolveRebellionWithTroopsAndRivals,
   setupNextRebellion,
-} from "../../helpers/resolveRebellion";
-import { continueResolution } from "../../helpers/resolutionFlow";
-import log from "../../helpers/logger";
+} from "../../helpers/resolveRebellion.js";
+import { continueResolution } from "../../helpers/resolutionFlow.js";
+import log from "../../helpers/logger.js";
 
 const conLog = log.child({ mod: "contribute-rebellion" });
 

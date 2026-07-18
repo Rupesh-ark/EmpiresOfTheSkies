@@ -1,7 +1,7 @@
-import { MoveDefinition, MyGameState, MoveError } from "../types";
+import { MoveDefinition, MyGameState, MoveError } from "../types.js";
 import { INVALID_MOVE } from "boardgame.io/core";
-import { allPlayersPassed } from "../helpers/stateUtils";
-import { setStage } from "../helpers/stageUtils";
+import { allPlayersPassed } from "../helpers/stateUtils.js";
+import { setStage } from "../helpers/stageUtils.js";
 
 const validatePass = (G: MyGameState, _playerID: string): MoveError | null => {
   if (G.mustContinueDiscovery) {

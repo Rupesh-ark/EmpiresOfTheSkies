@@ -1,5 +1,5 @@
 import type { Ctx } from "boardgame.io";
-import type { MyGameState } from "./types";
+import type { MyGameState } from "./types.js";
 
 export interface MoveObserver {
   recordMove(

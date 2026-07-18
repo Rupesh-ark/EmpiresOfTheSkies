@@ -1,11 +1,11 @@
 import * as fs from "fs";
 import * as path from "path";
+import { fileURLToPath } from "url";
 import type { MoveObserver, MyGameState } from "@eots/game";
 import type { Ctx } from "boardgame.io";
+import { GameRecorder, setMoveObserver, log } from "@eots/game";
 
-const eots = require("@eots/game") as typeof import("@eots/game");
-const { GameRecorder, setMoveObserver, log } = eots;
-
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ANALYTICS_DIR = path.resolve(__dirname, "../analytics");
 fs.mkdirSync(ANALYTICS_DIR, { recursive: true });
 

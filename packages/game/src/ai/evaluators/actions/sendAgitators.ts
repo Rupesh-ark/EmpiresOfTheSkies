@@ -5,12 +5,12 @@
  * Anytime action (no counsellor cost, doesn't end turn).
  * Max 1 per rival per round.
  */
-import type { MyGameState } from "../../../types";
-import type { AIMove } from "../../types";
-import type { MoveEval, BotPersonality } from "../types";
-import { V2_CONFIG } from "../config";
-import { getBase } from "../archetypes";
-import { goldPressure, goldPressureReason, personalityBonus, roundAwareness } from "../common";
+import type { MyGameState } from "../../../types.js";
+import type { AIMove } from "../../types.js";
+import type { MoveEval, BotPersonality } from "../types.js";
+import { V2_CONFIG } from "../config.js";
+import { getBase } from "../archetypes.js";
+import { goldPressure, goldPressureReason, personalityBonus, roundAwareness } from "../common.js";
 
 const AGITATOR_PERSONALITY = {
   kaCards: ["more_prisons"],

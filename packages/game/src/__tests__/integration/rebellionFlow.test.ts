@@ -16,17 +16,17 @@
  */
 
 import { describe, it, expect, vi } from "vitest";
-import commitRebellionTroops from "../../moves/events/commitRebellionTroops";
-import contributeToRebellion from "../../moves/events/contributeToRebellion";
+import commitRebellionTroops from "../../moves/events/commitRebellionTroops.js";
+import contributeToRebellion from "../../moves/events/contributeToRebellion.js";
 import {
   buildInitialG,
   buildPlayer,
   buildCtx,
   buildResources,
   buildRandom,
-} from "../testHelpers";
+} from "../testHelpers.js";
 import { INVALID_MOVE } from "boardgame.io/core";
-import type { EventsAPI } from "boardgame.io/dist/types/src/plugins/events/events";
+import type { EventsAPI } from "../../types.js";
 
 const stubEvents = () =>
   ({

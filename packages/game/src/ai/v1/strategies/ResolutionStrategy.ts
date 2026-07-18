@@ -1,9 +1,9 @@
-import type { PhaseStrategy, AIPersonality, AIMove, AIWeights, ScoredAIMove } from "../../types";
-import type { MyGameState, FleetInfo } from "../../../types";
+import type { PhaseStrategy, AIPersonality, AIMove, AIWeights, ScoredAIMove } from "../../types.js";
+import type { MyGameState, FleetInfo } from "../../../types.js";
 import type { Ctx } from "boardgame.io";
-import { KINGDOM_LOCATION } from "../../../data/gameData";
-import { calculateFleetStrength } from "../../../helpers/fleetUtils";
-import { countActiveTradeRoutes } from "../../../helpers/mapUtils";
+import { KINGDOM_LOCATION } from "../../../data/gameData.js";
+import { calculateFleetStrength } from "../../../helpers/fleetUtils.js";
+import { countActiveTradeRoutes } from "../../../helpers/mapUtils.js";
 
 /**
  * Resolution phase strategy: handles 8 distinct sub-stages.

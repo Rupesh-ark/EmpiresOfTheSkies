@@ -1,6 +1,6 @@
-import { MoveDefinition, MyGameState, MoveError } from "../../types";
-import { FOW_HAND_MAX } from "../../data/gameData";
-import { setStage } from "../../helpers/stageUtils";
+import { MoveDefinition, MyGameState, MoveError } from "../../types.js";
+import { FOW_HAND_MAX } from "../../data/gameData.js";
+import { setStage } from "../../helpers/stageUtils.js";
 
 const validateDiscardFoWCard = (G: MyGameState, playerID: string, cardIndex: number): MoveError | null => {
   const hand = G.playerInfo[playerID].resources.fortuneCards;

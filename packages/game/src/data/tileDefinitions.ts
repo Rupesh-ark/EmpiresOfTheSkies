@@ -1,4 +1,4 @@
-import { TileInfoProps } from "../types";
+import { TileInfoProps } from "../types.js";
 
 export const unknownWorldTiles: TileInfoProps[] = [
   {

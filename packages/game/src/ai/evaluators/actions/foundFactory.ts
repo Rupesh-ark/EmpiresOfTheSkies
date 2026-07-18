@@ -5,13 +5,13 @@
  * Factories generate income ONLY when engaged (activeRoutes >= factories).
  * An unengaged factory is a waste of gold.
  */
-import type { MyGameState } from "../../../types";
-import type { AIMove } from "../../types";
-import type { MoveEval, BotPersonality } from "../types";
-import { V2_CONFIG } from "../config";
-import { getBase } from "../archetypes";
-import { goldPressure, goldPressureReason, personalityBonus, roundAwareness } from "../common";
-import { countActiveTradeRoutes } from "../../../helpers/mapUtils";
+import type { MyGameState } from "../../../types.js";
+import type { AIMove } from "../../types.js";
+import type { MoveEval, BotPersonality } from "../types.js";
+import { V2_CONFIG } from "../config.js";
+import { getBase } from "../archetypes.js";
+import { goldPressure, goldPressureReason, personalityBonus, roundAwareness } from "../common.js";
+import { countActiveTradeRoutes } from "../../../helpers/mapUtils.js";
 
 const FACTORY_PERSONALITY = {
   kaCards: ["licenced_smugglers", "more_efficient_taxation"],

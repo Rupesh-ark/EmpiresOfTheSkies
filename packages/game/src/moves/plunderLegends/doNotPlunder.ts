@@ -1,5 +1,5 @@
-import { MoveDefinition } from "../../types";
-import { nextAfterPlunder } from "../../helpers/resolutionSequencer";
+import { MoveDefinition } from "../../types.js";
+import { nextAfterPlunder } from "../../helpers/resolutionSequencer.js";
 
 const doNotPlunder: MoveDefinition = {
   fn: ({ G, events }) => {

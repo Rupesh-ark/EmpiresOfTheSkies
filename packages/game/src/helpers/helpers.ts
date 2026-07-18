@@ -1,12 +1,12 @@
 import {
   FortuneOfWarCardInfo,
   MyGameState,
-} from "../types";
-import { fortuneOfWarCards, ASSIGNABLE_KINGDOMS } from "../data/gameData";
-import { getNeighbors, getPassableNeighbors } from "./mapUtils";
+} from "../types.js";
+import { fortuneOfWarCards, ASSIGNABLE_KINGDOMS } from "../data/gameData.js";
+import { getNeighbors, getPassableNeighbors } from "./mapUtils.js";
 import { Ctx } from "boardgame.io";
-import { EventsAPI } from "boardgame.io/dist/types/src/plugins/events/events";
-import log from "./logger";
+import type { EventsAPI } from "../types.js";
+import log from "./logger.js";
 
 export const fullResetFortuneOfWarCardDeck = (): FortuneOfWarCardInfo[] => {
   return [...fortuneOfWarCards];

@@ -10,15 +10,15 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { MOVE_DEFINITIONS } from "../../moveDefinitions";
-import { getInitialOutpostsAndColoniesInfo } from "../../setup/mapSetup";
+import { MOVE_DEFINITIONS } from "../../moveDefinitions.js";
+import { getInitialOutpostsAndColoniesInfo } from "../../setup/mapSetup.js";
 import {
   buildInitialG,
   buildPlayer,
   callMoveDef,
   buildFleet,
-} from "../testHelpers";
-import type { MyGameState } from "../../types";
+} from "../testHelpers.js";
+import type { MyGameState } from "../../types.js";
 
 const EMPTY_LOOT = {
   gold: 0,

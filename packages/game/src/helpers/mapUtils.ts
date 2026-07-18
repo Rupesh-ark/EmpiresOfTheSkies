@@ -1,5 +1,5 @@
-import { FleetInfo, MyGameState, TileInfoProps } from "../types";
-import { MAP_WIDTH, MAP_HEIGHT } from "../data/gameData";
+import { FleetInfo, MyGameState, TileInfoProps } from "../types.js";
+import { MAP_WIDTH, MAP_HEIGHT } from "../data/gameData.js";
 
 export const FAITHDOM_TILES: [number, number][] = [
   [3, 0],

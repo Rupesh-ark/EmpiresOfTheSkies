@@ -1,4 +1,4 @@
-import { MoveDefinition } from "../../types";
+import { MoveDefinition } from "../../types.js";
 
 const flipCards: MoveDefinition = {
   fn: ({ G, playerID }) => {

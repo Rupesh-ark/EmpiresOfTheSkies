@@ -4,12 +4,12 @@
  * Hire 4 regiments. Cost: 2-7g depending on slot.
  * Regiments are needed for conquest garrisons and ground combat.
  */
-import type { MyGameState } from "../../../types";
-import type { AIMove } from "../../types";
-import type { MoveEval, BotPersonality } from "../types";
-import { V2_CONFIG } from "../config";
-import { getBase } from "../archetypes";
-import { goldPressure, goldPressureReason, personalityBonus, roundAwareness, diminishingReturns } from "../common";
+import type { MyGameState } from "../../../types.js";
+import type { AIMove } from "../../types.js";
+import type { MoveEval, BotPersonality } from "../types.js";
+import { V2_CONFIG } from "../config.js";
+import { getBase } from "../archetypes.js";
+import { goldPressure, goldPressureReason, personalityBonus, roundAwareness, diminishingReturns } from "../common.js";
 
 const REGIMENT_PERSONALITY = {
   kaCards: ["elite_regiments", "improved_training"],

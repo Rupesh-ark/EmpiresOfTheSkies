@@ -1,6 +1,6 @@
-import { MoveDefinition } from "../../types";
-import { addEliteRegiments, addLevyAmount, addRegiments, toBuildingOwner } from "../../helpers/stateUtils";
-import { nextAfterGroundDecision } from "../../helpers/resolutionSequencer";
+import { MoveDefinition } from "../../types.js";
+import { addEliteRegiments, addLevyAmount, addRegiments, toBuildingOwner } from "../../helpers/stateUtils.js";
+import { nextAfterGroundDecision } from "../../helpers/resolutionSequencer.js";
 
 const yieldToAttacker: MoveDefinition = {
   validate: (G, playerID) => {

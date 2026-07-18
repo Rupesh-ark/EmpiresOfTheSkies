@@ -6,9 +6,9 @@
  * are secondary — they represent future VP potential.
  * Weights are configurable for tournament testing.
  */
-import type { MyGameState } from "../../types";
-import { getTradeRoutes } from "./RouteCache";
-import type { EvalWeights } from "./tournament";
+import type { MyGameState } from "../../types.js";
+import { getTradeRoutes } from "./RouteCache.js";
+import type { EvalWeights } from "./tournament.js";
 
 // CMA-ES tuned defaults (final iterative pass, 2026-03-30)
 const DEFAULT_EVAL_WEIGHTS: EvalWeights = {

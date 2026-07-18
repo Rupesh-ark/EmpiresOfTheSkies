@@ -1,9 +1,9 @@
 import { INVALID_MOVE } from "boardgame.io/core";
-import { EventCardName, LegacyCardInfo, MoveDefinition } from "../../types";
-import { getBattleEventTarget } from "../../helpers/eventCardDefinitions";
-import { addVPAmount, removeVPAmount, logEvent } from "../../helpers/stateUtils";
-import { humanizeTileName } from "../../helpers/helpers";
-import { BUILDING_SELL_PRICE } from "../../data/gameData";
+import { EventCardName, LegacyCardInfo, MoveDefinition } from "../../types.js";
+import { getBattleEventTarget } from "../../helpers/eventCardDefinitions.js";
+import { addVPAmount, removeVPAmount, logEvent } from "../../helpers/stateUtils.js";
+import { humanizeTileName } from "../../helpers/helpers.js";
+import { BUILDING_SELL_PRICE } from "../../data/gameData.js";
 
 // Choice handlers
 // Each handler validates the choice, applies the effect, and returns true

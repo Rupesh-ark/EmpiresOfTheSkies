@@ -1,8 +1,8 @@
 /** @deprecated v1 scoring system — kept for non-actions phases. See ../evaluators/ for v2. */
-import type { MyGameState, KingdomAdvantageCard, LegacyCardInfo } from "../../types";
-import type { AIWeights, AIPersonality } from "../types";
-import { ALL_KA_CARDS, LEGACY_CARDS } from "../../data/gameData";
-import { AI_CONFIG } from "./weightsConfig";
+import type { MyGameState, KingdomAdvantageCard, LegacyCardInfo } from "../../types.js";
+import type { AIWeights, AIPersonality } from "../types.js";
+import { ALL_KA_CARDS, LEGACY_CARDS } from "../../data/gameData.js";
+import { AI_CONFIG } from "./weightsConfig.js";
 
 // Re-export for self-play analytics
 export const ALL_KA_CARDS_LIST = ALL_KA_CARDS;

@@ -1,4 +1,4 @@
-import { LegacyCardName } from "../types";
+import { LegacyCardName } from "../types.js";
 
 export type LegacyCardDef = {
   displayName: string;

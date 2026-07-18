@@ -1,11 +1,11 @@
-import { MyGameState, MoveError, MoveDefinition } from "../../types";
-import { validateMove } from "../moveValidation";
+import { MyGameState, MoveError, MoveDefinition } from "../../types.js";
+import { validateMove } from "../moveValidation.js";
 import { INVALID_MOVE } from "boardgame.io/core";
 import {
   addSkyship,
   removeGoldAmount,
   incrementActionsTaken,
-} from "../../helpers/stateUtils";
+} from "../../helpers/stateUtils.js";
 
 const validateBuildSkyships = (
   G: MyGameState,

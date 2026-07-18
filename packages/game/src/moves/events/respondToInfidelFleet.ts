@@ -1,8 +1,8 @@
 import { INVALID_MOVE } from "boardgame.io/core";
-import { MoveDefinition } from "../../types";
-import { logEvent } from "../../helpers/stateUtils";
-import { executeInfidelFleetCombat } from "../../helpers/resolveInfidelFleet";
-import { continueResolution } from "../../helpers/resolutionFlow";
+import { MoveDefinition } from "../../types.js";
+import { logEvent } from "../../helpers/stateUtils.js";
+import { executeInfidelFleetCombat } from "../../helpers/resolveInfidelFleet.js";
+import { continueResolution } from "../../helpers/resolutionFlow.js";
 
 const respondToInfidelFleet: MoveDefinition = {
   fn: ({ G, playerID, events, random }, ...args) => {

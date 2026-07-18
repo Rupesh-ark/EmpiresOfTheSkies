@@ -1,9 +1,9 @@
 /** @deprecated v1 scoring system — kept for non-actions phases. See ../../evaluators/ for v2. */
-import type { PhaseStrategy, AIPersonality, AIMove, AIWeights, ScoredAIMove } from "../../types";
-import type { MyGameState } from "../../../types";
+import type { PhaseStrategy, AIPersonality, AIMove, AIWeights, ScoredAIMove } from "../../types.js";
+import type { MyGameState } from "../../../types.js";
 import type { Ctx } from "boardgame.io";
-import { getNeighbors } from "../../../helpers/mapUtils";
-import { KINGDOM_LOCATION, MAP_WIDTH, MAP_HEIGHT } from "../../../data/gameData";
+import { getNeighbors } from "../../../helpers/mapUtils.js";
+import { KINGDOM_LOCATION, MAP_WIDTH, MAP_HEIGHT } from "../../../data/gameData.js";
 
 /**
  * Discovery phase strategy: pick the best tile to reveal based on

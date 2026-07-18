@@ -1,9 +1,9 @@
 import { INVALID_MOVE } from "boardgame.io/core";
-import { MoveDefinition, KingdomAdvantageCard } from "../../types";
-import { ELITE_REGIMENTS_COUNT, LEGACY_CARDS } from "../../data/gameData";
-import { setStage } from "../../helpers/stageUtils";
-import { seedLegacyDeal } from "../../helpers/manufacturedFunSeed";
-import { logEvent } from "../../helpers/stateUtils";
+import { MoveDefinition, KingdomAdvantageCard } from "../../types.js";
+import { ELITE_REGIMENTS_COUNT, LEGACY_CARDS } from "../../data/gameData.js";
+import { setStage } from "../../helpers/stageUtils.js";
+import { seedLegacyDeal } from "../../helpers/manufacturedFunSeed.js";
+import { logEvent } from "../../helpers/stateUtils.js";
 
 const pickKingdomAdvantageCard: MoveDefinition = {
   fn: ({ G, playerID, events, random }, ...args) => {

@@ -4,13 +4,13 @@
  * Hire an additional counsellor. Cost: 1-2g depending on slot.
  * More counsellors = more actions per round (compound value).
  */
-import type { MyGameState } from "../../../types";
-import type { AIMove } from "../../types";
-import type { MoveEval, BotPersonality } from "../types";
-import { V2_CONFIG } from "../config";
-import { getBase } from "../archetypes";
-import { goldPressure, goldPressureReason, roundAwareness, diminishingReturns } from "../common";
-import { MAX_COUNSELLORS } from "../../../data/gameData";
+import type { MyGameState } from "../../../types.js";
+import type { AIMove } from "../../types.js";
+import type { MoveEval, BotPersonality } from "../types.js";
+import { V2_CONFIG } from "../config.js";
+import { getBase } from "../archetypes.js";
+import { goldPressure, goldPressureReason, roundAwareness, diminishingReturns } from "../common.js";
+import { MAX_COUNSELLORS } from "../../../data/gameData.js";
 
 function getSlotCost(slotIndex: number): number {
   // Slots 0,1 = 1g; slot 2 = 2g

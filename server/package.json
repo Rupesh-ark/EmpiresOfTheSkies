@@ -1,7 +1,7 @@
 {
   "name": "empires-server",
   "private": true,
-  "type": "commonjs",
+  "type": "module",
   "engines": {
     "node": ">=22"
   },

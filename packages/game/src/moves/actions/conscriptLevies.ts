@@ -1,13 +1,13 @@
-import { MyGameState, MoveError, MoveDefinition } from "../../types";
+import { MyGameState, MoveError, MoveDefinition } from "../../types.js";
 import { INVALID_MOVE } from "boardgame.io/core";
-import { validateMove } from "../moveValidation";
+import { validateMove } from "../moveValidation.js";
 import {
   addLevyAmount,
   incrementActionsTaken,
   removeVPAmount,
   sanitizeValue,
-} from "../../helpers/stateUtils";
-import { LEVY_GROUP_SIZE, MAX_LEVIES } from "../../data/gameData";
+} from "../../helpers/stateUtils.js";
+import { LEVY_GROUP_SIZE, MAX_LEVIES } from "../../data/gameData.js";
 
 const validateConscriptLevies = (
   G: MyGameState,

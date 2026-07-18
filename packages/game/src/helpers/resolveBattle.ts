@@ -1,15 +1,15 @@
 import { Ctx } from "boardgame.io";
-import { EventsAPI } from "boardgame.io/dist/types/src/plugins/events/events";
-import { FleetInfo, GoodKey, MyGameState, PlayerInfo } from "../types";
+import type { EventsAPI } from "../types.js";
+import { FleetInfo, GoodKey, MyGameState, PlayerInfo } from "../types.js";
 // findNext functions no longer called directly — resolutionSequencer handles all transitions
-import { drawFortuneOfWarCard, findPossibleDestinations, humanizeTileName } from "./helpers";
-import { RandomAPI } from "boardgame.io/dist/types/src/plugins/random/random";
-import { increaseHeresyWithinMove, increaseOrthodoxyWithinMove, logEvent, toBuildingOwner } from "./stateUtils";
-import { PRICE_MARKER_MIN, KINGDOM_LOCATION } from "../data/gameData";
-import { nextAfterAerialDecision, nextAfterGroundDecision, nextAfterConquest } from "./resolutionSequencer";
-import { setStage } from "./stageUtils";
-import { calculateCombat } from "./combatMath";
-import log from "./logger";
+import { drawFortuneOfWarCard, findPossibleDestinations, humanizeTileName } from "./helpers.js";
+import type { RandomAPI } from "../types.js";
+import { increaseHeresyWithinMove, increaseOrthodoxyWithinMove, logEvent, toBuildingOwner } from "./stateUtils.js";
+import { PRICE_MARKER_MIN, KINGDOM_LOCATION } from "../data/gameData.js";
+import { nextAfterAerialDecision, nextAfterGroundDecision, nextAfterConquest } from "./resolutionSequencer.js";
+import { setStage } from "./stageUtils.js";
+import { calculateCombat } from "./combatMath.js";
+import log from "./logger.js";
 
 const battleLog = log.child({ mod: "resolve-battle" });
 

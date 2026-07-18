@@ -1,11 +1,11 @@
-import { MyGameState, PlayerColour, MoveError, MoveDefinition } from "../../types";
-import { validateMove } from "../moveValidation";
+import { MyGameState, PlayerColour, MoveError, MoveDefinition } from "../../types.js";
+import { validateMove } from "../moveValidation.js";
 import { INVALID_MOVE } from "boardgame.io/core";
 import {
   addGoldAmount,
   removeGoldAmount,
   incrementActionsTaken,
-} from "../../helpers/stateUtils";
+} from "../../helpers/stateUtils.js";
 
 const validateInfluencePrelates = (
   G: MyGameState,

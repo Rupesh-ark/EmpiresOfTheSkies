@@ -1,8 +1,8 @@
-import { MoveDefinition, GoodKey } from "../../types";
-import { nextAfterPlunder } from "../../helpers/resolutionSequencer";
-import { increaseHeresyWithinMove, logEvent } from "../../helpers/stateUtils";
-import { humanizeTileName } from "../../helpers/helpers";
-import { PRICE_MARKER_MIN } from "../../data/gameData";
+import { MoveDefinition, GoodKey } from "../../types.js";
+import { nextAfterPlunder } from "../../helpers/resolutionSequencer.js";
+import { increaseHeresyWithinMove, logEvent } from "../../helpers/stateUtils.js";
+import { humanizeTileName } from "../../helpers/helpers.js";
+import { PRICE_MARKER_MIN } from "../../data/gameData.js";
 
 const GOODS: GoodKey[] = ["mithril", "dragonScales", "krakenSkin", "magicDust", "stickyIchor", "pipeweed"];
 

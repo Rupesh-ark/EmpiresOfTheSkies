@@ -4,13 +4,13 @@
  * Buy 2 skyships from a republic. Cost: 3-4g depending on slot.
  * Skyships are the foundation — needed for fleets, routes, combat.
  */
-import type { MyGameState } from "../../../types";
-import type { AIMove } from "../../types";
-import type { MoveEval, BotPersonality } from "../types";
-import { V2_CONFIG } from "../config";
-import { getBase } from "../archetypes";
-import { goldPressure, goldPressureReason, personalityBonus, roundAwareness, diminishingReturns } from "../common";
-import { countActiveTradeRoutes } from "../../../helpers/mapUtils";
+import type { MyGameState } from "../../../types.js";
+import type { AIMove } from "../../types.js";
+import type { MoveEval, BotPersonality } from "../types.js";
+import { V2_CONFIG } from "../config.js";
+import { getBase } from "../archetypes.js";
+import { goldPressure, goldPressureReason, personalityBonus, roundAwareness, diminishingReturns } from "../common.js";
+import { countActiveTradeRoutes } from "../../../helpers/mapUtils.js";
 
 const SKYSHIP_PERSONALITY = {
   kaCards: ["sanctioned_piracy"],

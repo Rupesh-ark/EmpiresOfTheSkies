@@ -1,5 +1,5 @@
-import { MyGameState, DealOffer, DealProposal, MoveDefinition, MoveError } from "../../types";
-import { validateOutpostTransfer } from "../../helpers/stateUtils";
+import { MyGameState, DealOffer, DealProposal, MoveDefinition, MoveError } from "../../types.js";
+import { validateOutpostTransfer } from "../../helpers/stateUtils.js";
 
 const validateOffer = (
   G: MyGameState,

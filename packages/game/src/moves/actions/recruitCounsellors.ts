@@ -1,8 +1,8 @@
-import { MyGameState, MoveError, MoveDefinition } from "../../types";
-import { validateMove } from "../moveValidation";
-import { recruitCounsellor, incrementActionsTaken, removeGoldAmount } from "../../helpers/stateUtils";
+import { MyGameState, MoveError, MoveDefinition } from "../../types.js";
+import { validateMove } from "../moveValidation.js";
+import { recruitCounsellor, incrementActionsTaken, removeGoldAmount } from "../../helpers/stateUtils.js";
 import { INVALID_MOVE } from "boardgame.io/core";
-import { MAX_COUNSELLORS } from "../../data/gameData";
+import { MAX_COUNSELLORS } from "../../data/gameData.js";
 
 const validateRecruitCounsellors = (
   G: MyGameState,

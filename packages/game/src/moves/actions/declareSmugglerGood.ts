@@ -1,4 +1,4 @@
-import { MoveDefinition, GoodKey, MyGameState, MoveError } from "../../types";
+import { MoveDefinition, GoodKey, MyGameState, MoveError } from "../../types.js";
 
 const validateDeclareSmugglerGood = (G: MyGameState, playerID: string): MoveError | null => {
   if (G.playerInfo[playerID].resources.advantageCard !== "licenced_smugglers") {

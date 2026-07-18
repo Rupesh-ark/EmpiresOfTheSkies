@@ -4,14 +4,14 @@
  * Each evaluator reads game state and returns a quality score.
  * No hardcoded values without game-state justification.
  */
-import type { MyGameState } from "../../../types";
-import type { AIMove } from "../../types";
-import type { MoveEval, BotPersonality } from "../types";
-import { V2_CONFIG } from "../config";
-import { getBase } from "../archetypes";
-import { goldPressure, goldPressureReason, personalityBonus, diminishingReturns, heresyPressure, tradeRouteChainValue } from "../common";
-import { countActiveTradeRoutes } from "../../../helpers/mapUtils";
-import { KINGDOM_LOCATION } from "../../../data/gameData";
+import type { MyGameState } from "../../../types.js";
+import type { AIMove } from "../../types.js";
+import type { MoveEval, BotPersonality } from "../types.js";
+import { V2_CONFIG } from "../config.js";
+import { getBase } from "../archetypes.js";
+import { goldPressure, goldPressureReason, personalityBonus, diminishingReturns, heresyPressure, tradeRouteChainValue } from "../common.js";
+import { countActiveTradeRoutes } from "../../../helpers/mapUtils.js";
+import { KINGDOM_LOCATION } from "../../../data/gameData.js";
 
 function clampEval(move: AIMove, quality: number, reason: string): MoveEval {
   quality = Math.max(0, Math.min(1, quality));

@@ -5,11 +5,11 @@
  * All defaults match v4.2 starting values from STARTING_RESOURCES and codifiedGameInfo.ts.
  */
 
-import { MyGameState, PlayerInfo, ActionBoardInfo, Resources, FleetInfo, PlayerBoardInfo, MoveDefinition, MoveContext, MapState, MapBuildingInfo, TileInfoProps } from "../types";
+import { MyGameState, PlayerInfo, ActionBoardInfo, Resources, FleetInfo, PlayerBoardInfo, MoveDefinition, MoveContext, MapState, MapBuildingInfo, TileInfoProps } from "../types.js";
 import type { Ctx } from "boardgame.io";
-import type { EventsAPI } from "boardgame.io/dist/types/src/plugins/events/events";
-import type { RandomAPI } from "boardgame.io/dist/types/src/plugins/random/random";
-import { fortuneOfWarCards } from "../data/gameData";
+import type { EventsAPI } from "../types.js";
+import type { RandomAPI } from "../types.js";
+import { fortuneOfWarCards } from "../data/gameData.js";
 
 // Player builder
 

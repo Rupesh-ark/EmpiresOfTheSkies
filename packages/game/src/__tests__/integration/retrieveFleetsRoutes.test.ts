@@ -1,8 +1,8 @@
 import { describe, it, expect } from "vitest";
-import retrieveFleets from "../../moves/resolution/retrieveFleets";
-import { getRoutePlacementTiles } from "../../helpers/mapUtils";
-import { buildInitialG, buildPlayer, buildFleet, buildEvents } from "../testHelpers";
-import { MyGameState, FleetInfo } from "../../types";
+import retrieveFleets from "../../moves/resolution/retrieveFleets.js";
+import { getRoutePlacementTiles } from "../../helpers/mapUtils.js";
+import { buildInitialG, buildPlayer, buildFleet, buildEvents } from "../testHelpers.js";
+import { MyGameState, FleetInfo } from "../../types.js";
 
 const runMove = (G: MyGameState, playerID: string, args: unknown[]) => {
   const events = buildEvents();

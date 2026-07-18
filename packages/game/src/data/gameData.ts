@@ -1,4 +1,4 @@
-import { EventCardName, FortuneOfWarCardInfo, InfidelHostCounter, KingdomAdvantageCard, KingdomName, LegacyCardInfo } from "../types";
+import { EventCardName, FortuneOfWarCardInfo, InfidelHostCounter, KingdomAdvantageCard, KingdomName, LegacyCardInfo } from "../types.js";
 
 // Game configuration
 
