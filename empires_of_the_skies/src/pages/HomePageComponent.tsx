@@ -10,9 +10,9 @@ import {
   Box,
 } from "@mui/material";
 import { LobbyClient } from "boardgame.io/client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { BG_DESKTOP as bgDesktop, BG_TABLET as bgTablet, BG_MOBILE as bgMobile } from "../assets/homePage";
 import { BG_PARCHMENT_PANEL } from "../assets/backgrounds";
 import { tokens } from "@/theme";
@@ -20,21 +20,25 @@ import { tokens } from "@/theme";
 const colors = { home: tokens.home } as const;
 const fonts = { accent: tokens.font.accent, primary: tokens.font.display, system: tokens.font.body } as const;
 
+const GAME_NAME = "empires-of-the-skies";
+const PLAYER_NAME_KEY = "eots_player_name";
+
 const createMatch = async (
   lobbyClient: LobbyClient,
   numHumans: number,
   numBots: number,
   setMatchReady: React.Dispatch<React.SetStateAction<string | undefined>>,
+  setError: (message: string) => void,
   botNames: string[] = [],
 ) => {
   try {
     const totalPlayers = numHumans + numBots;
-    const response = await lobbyClient.createMatch("empires-of-the-skies", {
+    const response = await lobbyClient.createMatch(GAME_NAME, {
       numPlayers: totalPlayers,
     });
 
     if (!response.matchID) {
-      alert("Failed to create match, please try again.");
+      setError("Failed to create match — please try again.");
       return;
     }
 
@@ -45,7 +49,7 @@ const createMatch = async (
       for (let i = 0; i < numBots; i++) {
         const botName = botNames[i] ?? `Bot ${i + 1}`;
         const botResponse = await lobbyClient.joinMatch(
-          "empires-of-the-skies",
+          GAME_NAME,
           response.matchID,
           { playerName: botName, playerID: String(i) }
         );
@@ -60,7 +64,7 @@ const createMatch = async (
 
     setMatchReady(response.matchID);
   } catch {
-    alert("Failed to create match, please check your connection and try again.");
+    setError("Failed to create match — check your connection and try again.");
   }
 };
 
@@ -89,23 +93,104 @@ const textFieldSx = {
   "& .MuiOutlinedInput-notchedOutline": { border: "none" },
 } as const;
 
+const errorTextSx = {
+  fontFamily: fonts.system,
+  fontSize: "0.8rem",
+  color: "#8f2f2f",
+  lineHeight: 1.4,
+} as const;
+
 const TAGLINES = [
-  ["An Age of Faith turns into an Age of ", "Discovery", "#5A9E72", "..."],
-  ["An Age of Scarcity to an Age of ", "Wealth", "#5A9E72", "..."],
-  ["An Age of Peace to an Age of ", "War!", "#C04040", ""],
+  ["An Age of Faith turns into an Age of ", "Discovery", "#33684a", "..."],
+  ["An Age of Scarcity to an Age of ", "Wealth", "#33684a", "..."],
+  ["An Age of Peace to an Age of ", "War!", "#9c3030", ""],
 ] as const;
 
 const HomePageComponent = (props: HomePageComponentProps) => {
+  const [searchParams] = useSearchParams();
+  const invitedMatchID = searchParams.get("match") ?? "";
+
   const [joinOrCreate, setJoinOrCreate] = useState<"join" | "create">("join");
-  const [playerName, setName] = useState("");
-  const [matchIDInput, setMatchIDInput] = useState("");
+  const [playerName, setName] = useState(
+    () => localStorage.getItem(PLAYER_NAME_KEY) ?? ""
+  );
+  const [matchIDInput, setMatchIDInput] = useState(invitedMatchID);
   const [numBots, setNumBots] = useState(0);
+  const [formError, setFormError] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [linkCopied, setLinkCopied] = useState(false);
   const navigate = useNavigate();
+
+  // An invite link (/?match=xyz) lands directly on the Join tab with the
+  // ID filled in — the invitee only types their name.
+  useEffect(() => {
+    if (invitedMatchID) setJoinOrCreate("join");
+  }, [invitedMatchID]);
 
   const BOT_NAMES = ["Aldric", "Isolde", "Theron", "Seraphina", "Cassius", "Elara"];
   const pickBotNames = (count: number) => {
     const shuffled = [...BOT_NAMES].sort(() => Math.random() - 0.5);
     return shuffled.slice(0, count);
+  };
+
+  const missingField =
+    playerName.trim() === ""
+      ? "Enter your name to continue"
+      : joinOrCreate === "join" && matchIDInput.trim() === ""
+        ? "Enter the Match ID you were given"
+        : "";
+
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (missingField || busy) return;
+
+    const name = playerName.trim();
+    localStorage.setItem(PLAYER_NAME_KEY, name);
+    setFormError("");
+    setBusy(true);
+
+    if (joinOrCreate === "create") {
+      await createMatch(
+        props.lobbyClient,
+        props.numPlayers,
+        numBots,
+        props.setMatchReady,
+        setFormError,
+        pickBotNames(numBots),
+      );
+      setBusy(false);
+      return;
+    }
+
+    // Verify the match exists (and has room) before navigating, so a
+    // typo'd ID fails here at the field instead of somewhere downstream.
+    const matchID = matchIDInput.trim();
+    try {
+      const match = await props.lobbyClient.getMatch(GAME_NAME, matchID);
+      const hasOpenSeat = match.players.some((p) => !p.name);
+      if (!hasOpenSeat) {
+        setFormError("That match is already full.");
+        setBusy(false);
+        return;
+      }
+    } catch {
+      setFormError("Match not found — check the ID and try again.");
+      setBusy(false);
+      return;
+    }
+
+    navigate(`/match/${matchID}/${name}`);
+  };
+
+  const copyInviteLink = async (matchID: string) => {
+    const link = `${window.location.origin}/?match=${matchID}`;
+    try {
+      await navigator.clipboard.writeText(link);
+      setLinkCopied(true);
+      setTimeout(() => setLinkCopied(false), 2500);
+    } catch {
+      // Clipboard unavailable (e.g. insecure context) — leave the ID visible.
+    }
   };
 
   return (
@@ -153,6 +238,8 @@ const HomePageComponent = (props: HomePageComponentProps) => {
         {/* Form panel — contains title, taglines, and form */}
         <Paper
           elevation={0}
+          component="form"
+          onSubmit={handleSubmit}
           sx={{
             width: "100%",
             display: "flex",
@@ -176,45 +263,21 @@ const HomePageComponent = (props: HomePageComponentProps) => {
               backgroundSize: "cover",
               backgroundPosition: "center",
               backgroundBlendMode: "multiply",
-              opacity: 0.82,
+              opacity: 0.9,
               pointerEvents: "none",
               zIndex: 0,
               borderRadius: "inherit",
             },
-            // Wire border — pulsing green glow using token colors
-            "@keyframes wirePulse": {
-              "0%, 100%": {
-                boxShadow: `
-                  inset 0 0 0 1px ${colors.home.border}40,
-                  0 0 0 1px ${colors.home.border}50,
-                  0 0 0 3px ${colors.home.gradientBottom}18,
-                  0 0 0 4px ${colors.home.border}40,
-                  0 0 0 6px ${colors.home.gradientBottom}10,
-                  0 0 0 7px ${colors.home.darkBrown}30,
-                  0 0 12px ${colors.home.gradientBottom}00
-                `,
-                borderColor: `${colors.home.border}80`,
-              },
-              "50%": {
-                boxShadow: `
-                  inset 0 0 0 1px ${colors.home.gradientTop}40,
-                  0 0 0 1px ${colors.home.gradientTop}70,
-                  0 0 0 3px ${colors.home.gradientTop}30,
-                  0 0 0 4px ${colors.home.gradientBottom}50,
-                  0 0 0 6px ${colors.home.gradientTop}20,
-                  0 0 0 7px ${colors.home.gradientBottom}35,
-                  0 0 16px ${colors.home.gradientTop}25
-                `,
-                borderColor: `${colors.home.gradientTop}90`,
-              },
-            },
+            // Quiet double border, echoing the illustrated frame of the
+            // artwork. Deliberately static: the only thing on this page
+            // that should ask for attention is the submit button.
             "&::after": {
               content: '""',
               position: "absolute",
               inset: -3,
               borderRadius: "8px",
-              border: `2px solid ${colors.home.border}80`,
-              animation: "wirePulse 3s ease-in-out infinite",
+              border: `1px solid ${colors.home.border}`,
+              boxShadow: `inset 0 0 0 3px transparent, 0 0 0 4px ${colors.home.darkBrown}30`,
               pointerEvents: "none",
               zIndex: 3,
             },
@@ -249,11 +312,11 @@ const HomePageComponent = (props: HomePageComponentProps) => {
                   lineHeight: 1.8,
                   fontStyle: "italic",
                   color: colors.home.text,
-                  opacity: 0.75,
+                  opacity: 0.9,
                 }}
               >
                 {prefix}
-                <Box component="span" sx={{ color: highlightColor, fontWeight: 700, opacity: 1 }}>
+                <Box component="span" sx={{ color: highlightColor, fontWeight: 700 }}>
                   {highlight}
                 </Box>
                 {suffix}
@@ -277,13 +340,10 @@ const HomePageComponent = (props: HomePageComponentProps) => {
                 fontSize: { xs: "0.78rem", md: "0.84rem" },
                 lineHeight: 1.65,
                 color: colors.home.text,
-                opacity: 0.85,
               }}
             >
-              A multiplayer strategy board game for 2–6 players. Command a kingdom in a fantasy world of
-              aerial fleets, religious politics, and territorial conquest. Discover new lands, build
-              skyships, recruit armies, and outmanoeuvre your rivals through trade, diplomacy, and war.
-              The player with the most Victory Points after 6 rounds wins the empire.
+              Command a kingdom of skyships through discovery, religious politics, and
+              war — 2&ndash;6 players, the most Victory Points after six rounds wins.
             </Typography>
           </Box>
 
@@ -310,7 +370,11 @@ const HomePageComponent = (props: HomePageComponentProps) => {
             color="secondary"
             value={joinOrCreate}
             exclusive
-            onChange={(_, value) => value && setJoinOrCreate(value)}
+            onChange={(_, value) => {
+              if (!value) return;
+              setJoinOrCreate(value);
+              setFormError("");
+            }}
             sx={{
               alignSelf: "center",
               "& .MuiToggleButton-root": {
@@ -339,9 +403,13 @@ const HomePageComponent = (props: HomePageComponentProps) => {
           <TextField
             size="small"
             fullWidth
-            placeholder="Enter username..."
+            autoFocus
+            placeholder="e.g. Aldric of Angland"
             value={playerName}
-            onChange={(e) => setName(e.target.value)}
+            onChange={(e) => {
+              setName(e.target.value);
+              setFormError("");
+            }}
             sx={textFieldSx}
           />
 
@@ -351,9 +419,12 @@ const HomePageComponent = (props: HomePageComponentProps) => {
               <TextField
                 size="small"
                 fullWidth
-                placeholder="Enter ID..."
+                placeholder="Paste the ID from your host"
                 value={matchIDInput}
-                onChange={(e) => setMatchIDInput(e.target.value)}
+                onChange={(e) => {
+                  setMatchIDInput(e.target.value);
+                  setFormError("");
+                }}
                 sx={textFieldSx}
               />
             </>
@@ -419,16 +490,19 @@ const HomePageComponent = (props: HomePageComponentProps) => {
             </>
           )}
 
+          {formError && (
+            <Typography role="alert" sx={{ ...errorTextSx, textAlign: "center" }}>
+              {formError}
+            </Typography>
+          )}
+
           <Button
             fullWidth
             size="large"
+            type="submit"
             color="success"
             variant="contained"
-            disabled={
-              joinOrCreate === "join"
-                ? playerName.trim() === "" || matchIDInput.trim() === ""
-                : playerName.trim() === ""
-            }
+            disabled={Boolean(missingField) || busy}
             sx={{
               mt: 1,
               fontFamily: fonts.accent,
@@ -438,28 +512,39 @@ const HomePageComponent = (props: HomePageComponentProps) => {
               background: `linear-gradient(to bottom, ${colors.home.gradientTop}, ${colors.home.gradientBottom})`,
               border: `2px solid ${colors.home.darkBrown}`,
               boxShadow: "0 2px 4px rgba(0, 0, 0, 0.3)",
-              color: "rgba(255, 255, 255, 0.9)",
+              color: "rgba(255, 255, 255, 0.95)",
               "&:hover": {
                 background: `linear-gradient(to bottom, ${colors.home.gradientTopHover}, ${colors.home.gradientBottomHover})`,
                 borderColor: colors.home.darkerBrown,
               },
+              // Unmistakably inert: flat and desaturated rather than a
+              // washed-out version of the enabled gradient.
               "&.Mui-disabled": {
-                background: `linear-gradient(to bottom, ${colors.home.gradientTop}, ${colors.home.gradientBottom})`,
-                opacity: 0.45,
-                color: "rgba(255, 255, 255, 0.6)",
-                border: `2px solid ${colors.home.darkBrown}`,
+                background: colors.home.disabledBg,
+                color: colors.home.disabledText,
+                border: `2px solid ${colors.home.disabledBorder}`,
+                boxShadow: "none",
               },
             }}
-            onClick={() => {
-              if (joinOrCreate === "create") {
-                createMatch(props.lobbyClient, props.numPlayers, numBots, props.setMatchReady, pickBotNames(numBots));
-              } else {
-                navigate(`/match/${matchIDInput}/${playerName}`);
-              }
-            }}
           >
-            {joinOrCreate === "join" ? "JOIN" : "CREATE"} GAME
+            {busy
+              ? joinOrCreate === "join" ? "Checking match..." : "Creating..."
+              : `${joinOrCreate} game`}
           </Button>
+
+          {missingField && (
+            <Typography
+              sx={{
+                fontFamily: fonts.system,
+                fontSize: "0.78rem",
+                color: colors.home.text,
+                opacity: 0.65,
+                textAlign: "center",
+              }}
+            >
+              {missingField}
+            </Typography>
+          )}
         </Paper>
 
         {props.matchReady && (
@@ -484,21 +569,52 @@ const HomePageComponent = (props: HomePageComponentProps) => {
             <Typography sx={{ my: 1.5, fontFamily: fonts.accent, fontSize: "0.95rem" }}>
               ID: <code>{props.matchReady}</code>
             </Typography>
-            <Button
-              variant="outlined"
-              onClick={() => navigate(`/match/${props.matchReady}/${playerName}`)}
+            <Box sx={{ display: "flex", gap: 1.5, justifyContent: "center", flexWrap: "wrap" }}>
+              <Button
+                variant="outlined"
+                onClick={() => copyInviteLink(props.matchReady!)}
+                sx={{
+                  fontFamily: fonts.accent,
+                  color: colors.home.text,
+                  borderColor: colors.home.border,
+                  minWidth: 150,
+                  "&:hover": {
+                    borderColor: colors.home.hoverBronze,
+                    backgroundColor: "rgba(0, 0, 0, 0.02)",
+                  },
+                }}
+              >
+                {linkCopied ? "Link copied ✓" : "Copy invite link"}
+              </Button>
+              <Button
+                variant="contained"
+                color="success"
+                onClick={() => navigate(`/match/${props.matchReady}/${playerName.trim()}`)}
+                sx={{
+                  fontFamily: fonts.accent,
+                  fontWeight: 700,
+                  background: `linear-gradient(to bottom, ${colors.home.gradientTop}, ${colors.home.gradientBottom})`,
+                  border: `2px solid ${colors.home.darkBrown}`,
+                  color: "rgba(255, 255, 255, 0.95)",
+                  "&:hover": {
+                    background: `linear-gradient(to bottom, ${colors.home.gradientTopHover}, ${colors.home.gradientBottomHover})`,
+                  },
+                }}
+              >
+                Enter Lobby
+              </Button>
+            </Box>
+            <Typography
               sx={{
-                fontFamily: fonts.accent,
+                mt: 1.5,
+                fontFamily: fonts.system,
+                fontSize: "0.78rem",
                 color: colors.home.text,
-                borderColor: colors.home.border,
-                "&:hover": {
-                  borderColor: colors.home.hoverBronze,
-                  backgroundColor: "rgba(0, 0, 0, 0.02)",
-                },
+                opacity: 0.65,
               }}
             >
-              Enter Lobby
-            </Button>
+              Send the invite link to your players — it opens with the Match ID filled in.
+            </Typography>
           </Paper>
         )}
       </Box>
