@@ -1,5 +1,5 @@
 import { MoveDefinition } from "../../types.js";
-import { removeVPAmount, logEvent } from "../../helpers/stateUtils.js";
+import { removeVPAmount } from "../../helpers/stateUtils.js";
 import { setStage } from "../../helpers/stageUtils.js";
 import { clonePlayerInfo } from "../../helpers/cloneUtils.js";
 
@@ -14,12 +14,24 @@ const attackOtherPlayersFleet: MoveDefinition = {
     if (!playersAtTile.includes(defenderID)) {
       return { code: "INVALID_TARGET", message: "Defender is not at this battle tile" };
     }
+    // Rulebook: after an evasion the attacker must challenge ANOTHER player.
+    const challenges = G.aerialChallenges;
+    if (
+      challenges &&
+      challenges.tile[0] === x &&
+      challenges.tile[1] === y &&
+      challenges.pairs.includes(`${playerID}>${defenderID}`)
+    ) {
+      const defenderName = G.playerInfo[defenderID]?.kingdomName ?? "that player";
+      return {
+        code: "ALREADY_CHALLENGED",
+        message: `You have already challenged ${defenderName} in this battle — challenge another player`,
+      };
+    }
     return null;
   },
   fn: ({ G, playerID, events }, ...args) => {
     const defenderID: string = args[0];
-    const attackerName = G.playerInfo[playerID].kingdomName;
-    const defenderName = G.playerInfo[defenderID].kingdomName;
 
     // Peace Accord: first attacker loses 3 VP and nullifies the accord
     if (G.eventState.peaceAccordActive) {
@@ -38,7 +50,15 @@ const attackOtherPlayersFleet: MoveDefinition = {
       }
     }
 
-    logEvent(G, `${attackerName} attacks ${defenderName}'s fleet`);
+    const [bx, by] = G.mapState.currentBattle;
+    if (
+      !G.aerialChallenges ||
+      G.aerialChallenges.tile[0] !== bx ||
+      G.aerialChallenges.tile[1] !== by
+    ) {
+      G.aerialChallenges = { tile: [bx, by], pairs: [] };
+    }
+    G.aerialChallenges.pairs.push(`${playerID}>${defenderID}`);
 
     G.battleState = {
       attacker: { decision: "fight", ...clonePlayerInfo(G.playerInfo[playerID]) },

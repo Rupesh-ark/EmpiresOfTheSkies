@@ -365,9 +365,8 @@ const MyGame: Game<MyGameState> = {
           playerInfo.passed = false;
           playerInfo.piracyIntent = "tax"; // reset each round
         });
-        // NOTE: no turn events here — endTurn/pass are illegal in a phase's
-        // onBegin (boardgame.io #1266). The turn.onBegin below redirects the
-        // first turn of the round to playOrder[0] instead.
+        // endTurn/pass are illegal in phase onBegin (boardgame.io#1266);
+        // turn.onBegin below redirects the first turn instead.
       },
       turn: {
         onBegin: (context) => {

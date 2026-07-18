@@ -23,6 +23,10 @@ const drawCard: MoveDefinition = {
     }
   },
   errorMessage: "Cannot draw a card right now",
+  successLog: (G, pid) => {
+    const k = G.playerInfo[pid].kingdomName;
+    return `${k} draws a Fortune of War card`;
+  },
 };
 
 export default drawCard;

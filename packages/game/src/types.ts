@@ -60,6 +60,9 @@ export interface MyGameState {
   cardDecks: CardDeckInfo;
   battleState?: BattleState;
   battleResult: BattleResult | null;
+  /** "attacker>defender" pairs at the current battle tile; a defender may
+   *  not be re-challenged by the same attacker (resets on tile change). */
+  aerialChallenges?: { tile: [number, number]; pairs: string[] };
   conquestState?: BattlePlayerInfo;
   pendingDeal?: DealProposal;
   possibleDefenders: string[];

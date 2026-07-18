@@ -46,10 +46,11 @@ const purchaseSkyships: MoveDefinition = {
   },
   errorMessage: "Cannot purchase Skyships right now",
   validate: validatePurchaseSkyships,
-  successLog: (G, pid, _slot, republic) => {
+  successLog: (G, pid, republic) => {
     const k = G.playerInfo[pid].kingdomName;
     const count = G.playerInfo[pid].resources.skyships;
-    return `${k} purchases Skyships from ${republic} (now ${count})`;
+    const republicName = republic === "venoa" ? "Venoa" : "Zeeland";
+    return `${k} purchases Skyships from ${republicName} (now ${count})`;
   },
 };
 

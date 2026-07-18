@@ -56,6 +56,10 @@ const evadeAttackingFleet: MoveDefinition = {
     }
   },
   errorMessage: "Cannot evade right now",
+  successLog: (G, pid) => {
+    const k = G.playerInfo[pid].kingdomName;
+    return `${k} evades the attack`;
+  },
 };
 
 export default evadeAttackingFleet;

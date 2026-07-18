@@ -25,6 +25,10 @@ const retaliate: MoveDefinition = {
     }
   },
   errorMessage: "Cannot retaliate right now",
+  successLog: (G, pid) => {
+    const k = G.playerInfo[pid].kingdomName;
+    return `${k} stands and fights!`;
+  },
 };
 
 export default retaliate;

@@ -26,6 +26,10 @@ const pickCard: MoveDefinition = {
     }
   },
   errorMessage: "Cannot pick a Fortune of War card right now",
+  successLog: (G, pid) => {
+    const k = G.playerInfo[pid].kingdomName;
+    return `${k} commits a Fortune of War card`;
+  },
 };
 
 export default pickCard;

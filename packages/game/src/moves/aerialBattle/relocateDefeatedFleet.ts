@@ -61,6 +61,12 @@ const relocateDefeatedFleet: MoveDefinition = {
     nextAfterAerialDecision(G, ctx, events, G.battleState?.attacker.id ?? playerID);
   },
   errorMessage: "Cannot relocate fleet to that destination",
+  successLog: (G, _pid, destination, defeatedPlayer) => {
+    const k = G.playerInfo[defeatedPlayer]?.kingdomName ?? "A fleet";
+    const [dx, dy] = destination ?? [];
+    if (dx === 4 && dy === 0) return `${k}'s fleet retreats home`;
+    return `${k}'s fleet withdraws to [${dx}, ${dy}]`;
+  },
 };
 
 export default relocateDefeatedFleet;

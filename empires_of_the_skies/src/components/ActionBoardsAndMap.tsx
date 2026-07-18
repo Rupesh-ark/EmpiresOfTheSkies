@@ -193,9 +193,7 @@ const ActionBoardsAndMapInner = (props: MyGameProps) => {
   const theme = useGameTheme(props.G.stage);
   const { showToast } = useToast();
 
-  // Action-error toast: the server (or the local optimistic check) rejected
-  // one of our actions. Validation lives once, in the move definitions —
-  // the framework delivers the rejection reason back to the acting client.
+  // Toast the reason whenever one of our actions is rejected.
   const prevActionError = useRef(props.lastActionError);
   useEffect(() => {
     const error = props.lastActionError;
