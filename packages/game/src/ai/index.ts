@@ -1,7 +1,5 @@
 export * from "./types.js";
 export { AI_CONFIG } from "./v1/weightsConfig.js";
-export { AIStrategyRegistry } from "./v1/AIStrategyRegistry.js";
-export { RandomFallbackStrategy } from "./v1/strategies/RandomFallback.js";
 export { enumerateLegalMoves } from "./enumerate.js";
 export {
   deriveWeightsFromCards,
@@ -46,7 +44,6 @@ export type {
   LeagueConfig,
   LeagueResult,
 } from "./tournament.js";
-export { ResolutionCoordinator } from "./v1/strategies/ResolutionCoordinator.js";
 export { GameRecorder } from "./GameRecorder.js";
 export type {
   GameRecord,
