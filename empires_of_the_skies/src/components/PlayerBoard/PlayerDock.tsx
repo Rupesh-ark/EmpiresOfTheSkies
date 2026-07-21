@@ -9,6 +9,7 @@ import { memo, useState } from "react";
 import { Box, Popover, Tooltip, Typography } from "@mui/material";
 import { ExpandLess, ExpandMore } from "@mui/icons-material";
 import { tokens, backgrounds } from "@/theme";
+import { IconRegiment, IconLevy, IconSkyship } from "@/theme";
 import { GiAnchor } from "react-icons/gi";
 import {
   MyGameProps, KINGDOM_LOCATION, findPossibleDestinations, FleetInfo,
