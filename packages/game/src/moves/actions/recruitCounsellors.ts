@@ -1,6 +1,7 @@
 import { MyGameState, MoveError, MoveDefinition } from "../../types.js";
 import { validateMove } from "../moveValidation.js";
 import { recruitCounsellor, incrementActionsTaken, removeGoldAmount } from "../../helpers/stateUtils.js";
+import { getNextSlotCost } from "../../helpers/actionCosts.js";
 import { INVALID_MOVE } from "boardgame.io/core";
 import { MAX_COUNSELLORS } from "../../data/gameData.js";
 
@@ -25,7 +26,7 @@ const recruitCounsellors: MoveDefinition = {
   fn: ({ G, playerID }) => {
     if (validateRecruitCounsellors(G, playerID)) return INVALID_MOVE;
 
-    const cost = 1 + G.boardState.recruitCounsellors.length;
+    const cost = getNextSlotCost(G, "recruitCounsellors");
 
     incrementActionsTaken(G, playerID);
     recruitCounsellor(G, playerID);

@@ -3,6 +3,7 @@ import { INVALID_MOVE } from "boardgame.io/core";
 import { validateMove } from "../moveValidation.js";
 import { incrementActionsTaken } from "../../helpers/stateUtils.js";
 import { MAX_FACTORIES } from "../../data/gameData.js";
+import { getNextSlotCost } from "../../helpers/actionCosts.js";
 
 const validateFoundFactory = (
   G: MyGameState,
@@ -22,7 +23,7 @@ const foundFactory: MoveDefinition = {
   fn: ({ G, playerID }) => {
     if (validateFoundFactory(G, playerID)) return INVALID_MOVE;
 
-    const cost = 1 + G.boardState.foundFactories.length + 1;
+    const cost = getNextSlotCost(G, "foundFactories");
 
     G.playerInfo[playerID].resources.gold -= cost;
     G.playerInfo[playerID].factories += 1;

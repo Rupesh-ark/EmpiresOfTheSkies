@@ -21,5 +21,6 @@ export * from "./types.js";
 export * from "./data/gameData.js"
 
 export { MOVE_DEFINITIONS } from "./moveDefinitions.js";
+export * from "./helpers/actionCosts.js";
 
 export * from "./ai/index.js";

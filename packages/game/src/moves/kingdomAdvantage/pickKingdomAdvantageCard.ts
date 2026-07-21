@@ -45,7 +45,7 @@ const pickKingdomAdvantageCard: MoveDefinition = {
         G.playerInfo[id].legacyCardOptions = hands[id];
       }
       G.cardDecks.legacyDeck = remainder;
-      for (const msg of legacyLog) logEvent(G, msg);
+      for (const msg of legacyLog) logEvent(G, msg, { debug: true });
       setStage(G, "setup", "legacy_card");
       // Reset passed flags for legacy picking
       Object.values(G.playerInfo).forEach((p: any) => { p.passed = false; });

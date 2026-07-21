@@ -259,7 +259,7 @@ const MyGame: Game<MyGameState> = {
       infidelHostPool,
       accumulatedHosts: [],
       infidelFleet: null,
-      gameLog: eventSeedLog.map((msg) => ({ round: 0, message: msg })),
+      gameLog: eventSeedLog.map((msg) => ({ round: 0, message: msg, debug: true })),
       currentRebellion: null,
       currentInvasion: null,
       infidelFleetCombat: null,
@@ -308,7 +308,7 @@ const MyGame: Game<MyGameState> = {
           context.random.Shuffle,
         );
         context.G.cardDecks.kingdomAdvantagePool = context.random.Shuffle(filteredPool);
-        for (const msg of kaLog) logEvent(context.G, msg);
+        for (const msg of kaLog) logEvent(context.G, msg, { debug: true });
       },
       turn: {
         order: {

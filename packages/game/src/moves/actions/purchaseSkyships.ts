@@ -6,6 +6,7 @@ import {
   removeGoldAmount,
   incrementActionsTaken,
 } from "../../helpers/stateUtils.js";
+import { getNextSlotCost } from "../../helpers/actionCosts.js";
 
 const validatePurchaseSkyships = (
   G: MyGameState,
@@ -35,7 +36,10 @@ const purchaseSkyships: MoveDefinition = {
         ? G.boardState.purchaseSkyshipsVenoa
         : G.boardState.purchaseSkyshipsZeeland;
 
-    const cost = 2 + boardSlots.length + 1;
+    const cost = getNextSlotCost(
+      G,
+      republic === "venoa" ? "purchaseSkyshipsVenoa" : "purchaseSkyshipsZeeland"
+    );
 
     incrementActionsTaken(G, playerID);
     removeGoldAmount(G, playerID, cost);

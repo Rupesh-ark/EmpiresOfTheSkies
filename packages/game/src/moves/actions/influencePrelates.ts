@@ -1,4 +1,4 @@
-import { MyGameState, PlayerColour, MoveError, MoveDefinition } from "../../types.js";
+import { MyGameState, MoveError, MoveDefinition } from "../../types.js";
 import { validateMove } from "../moveValidation.js";
 import { INVALID_MOVE } from "boardgame.io/core";
 import {
@@ -6,6 +6,7 @@ import {
   removeGoldAmount,
   incrementActionsTaken,
 } from "../../helpers/stateUtils.js";
+import { getInfluencePrelateCost } from "../../helpers/actionCosts.js";
 
 const validateInfluencePrelates = (
   G: MyGameState,
@@ -30,35 +31,10 @@ const influencePrelates: MoveDefinition = {
     const value: keyof typeof G.boardState.influencePrelates = args[0] + 1;
 
     if (validateInfluencePrelates(G, playerID, args[0])) return INVALID_MOVE;
-    let recipientOfPayment;
-    let cost = 1;
 
-    const kingdomToIDMap: { [key: number]: string | null } = {
-      1: PlayerColour.red,
-      2: PlayerColour.blue,
-      3: PlayerColour.yellow,
-      4: null,
-      5: null,
-      6: PlayerColour.brown,
-      7: PlayerColour.white,
-      8: PlayerColour.green,
-    };
-
-    const slotColour = kingdomToIDMap[value];
-    const actingPlayerColour = G.playerInfo[playerID].colour;
-    if (slotColour !== null && slotColour === actingPlayerColour) {
-      cost = 0;
-    } else {
-      Object.entries(G.playerInfo).forEach(([id, playerInfo]) => {
-        if (playerInfo.colour === slotColour) {
-          recipientOfPayment = id;
-          cost = playerInfo.cathedrals;
-        }
-      });
-    }
-
-    if (recipientOfPayment) {
-      addGoldAmount(G, recipientOfPayment, cost);
+    const { cost, recipientID } = getInfluencePrelateCost(G, playerID, value);
+    if (recipientID) {
+      addGoldAmount(G, recipientID, cost);
     }
     removeGoldAmount(G, playerID, cost);
 

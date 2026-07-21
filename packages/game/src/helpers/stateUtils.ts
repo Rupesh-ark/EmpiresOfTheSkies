@@ -159,8 +159,12 @@ export const addEliteRegiments = (
 
 const MAX_LOG_ENTRIES = 200;
 
-export const logEvent = (G: MyGameState, message: string) => {
-  G.gameLog.push({ round: G.round, message });
+export const logEvent = (
+  G: MyGameState,
+  message: string,
+  opts?: { debug?: boolean }
+) => {
+  G.gameLog.push({ round: G.round, message, ...(opts?.debug ? { debug: true } : {}) });
   if (G.gameLog.length > MAX_LOG_ENTRIES) {
     G.gameLog.splice(0, G.gameLog.length - MAX_LOG_ENTRIES);
   }

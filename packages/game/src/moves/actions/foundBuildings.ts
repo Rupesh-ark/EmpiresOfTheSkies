@@ -2,6 +2,7 @@ import { MyGameState, MoveError, MoveDefinition } from "../../types.js";
 import { INVALID_MOVE } from "boardgame.io/core";
 import { validateMove } from "../moveValidation.js";
 import { incrementActionsTaken, HERESY_MAX, HERESY_MIN } from "../../helpers/stateUtils.js";
+import { getNextBuildingCost } from "../../helpers/actionCosts.js";
 import {
   BuildingSlot,
   BUILDING_BASE_COST,
@@ -117,7 +118,7 @@ const foundCathedral = (
   playerID: string,
   _args: any[]
 ): void => {
-  const cost = BUILDING_BASE_COST.cathedral + G.boardState.foundBuildings[BuildingSlot.Cathedral].length + 1;
+  const cost = getNextBuildingCost(G, BuildingSlot.Cathedral);
   G.playerInfo[playerID].resources.gold -= cost;
   G.playerInfo[playerID].cathedrals += 1;
   G.playerInfo[playerID].resources.victoryPoints += CATHEDRAL_VP;
@@ -135,7 +136,7 @@ const foundPalace = (
 ): void => {
   const heresyDirection: "advance" | "retreat" = args[1];
 
-  const cost = BUILDING_BASE_COST.palace + G.boardState.foundBuildings[BuildingSlot.Palace].length + 1;
+  const cost = getNextBuildingCost(G, BuildingSlot.Palace);
 
   G.playerInfo[playerID].resources.gold -= cost;
   G.playerInfo[playerID].palaces += 1;
@@ -163,7 +164,7 @@ const foundShipyard = (
   playerID: string,
   _args: any[]
 ): void => {
-  const cost = BUILDING_BASE_COST.shipyard + G.boardState.foundBuildings[BuildingSlot.Shipyard].length + 1;
+  const cost = getNextBuildingCost(G, BuildingSlot.Shipyard);
 
   G.playerInfo[playerID].resources.gold -= cost;
   G.playerInfo[playerID].shipyards += 1;
@@ -178,7 +179,7 @@ const foundFort = (
   playerID: string,
   _args: any[]
 ): void => {
-  const cost = BUILDING_BASE_COST.fort + G.boardState.foundBuildings[BuildingSlot.Fort].length + 1;
+  const cost = getNextBuildingCost(G, BuildingSlot.Fort);
 
   G.playerInfo[playerID].resources.gold -= cost;
   G.boardState.foundBuildings[BuildingSlot.Fort].push(playerID);

@@ -7,6 +7,7 @@ import {
   incrementActionsTaken,
 } from "../../helpers/stateUtils.js";
 import { RECRUIT_REGIMENTS_REWARD } from "../../data/gameData.js";
+import { getNextSlotCost } from "../../helpers/actionCosts.js";
 
 const validateRecruitRegiments = (
   G: MyGameState,
@@ -22,7 +23,7 @@ const recruitRegiments: MoveDefinition = {
   fn: ({ G, playerID }) => {
     if (validateRecruitRegiments(G, playerID)) return INVALID_MOVE;
 
-    const cost = 1 + G.boardState.recruitRegiments.length + 1;
+    const cost = getNextSlotCost(G, "recruitRegiments");
     incrementActionsTaken(G, playerID);
     removeGoldAmount(G, playerID, cost);
     addRegiments(G, playerID, RECRUIT_REGIMENTS_REWARD);

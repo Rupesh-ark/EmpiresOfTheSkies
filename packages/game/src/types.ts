@@ -85,7 +85,7 @@ export interface MyGameState {
   contingentPool: number[];
   infidelHostPool: InfidelHostCounter[];
   accumulatedHosts: InfidelHostCounter[];
-  gameLog: { round: number; message: string }[];
+  gameLog: { round: number; message: string; debug?: boolean }[];
   infidelFleet: {
     counter: InfidelHostCounter;
     location: [number, number];

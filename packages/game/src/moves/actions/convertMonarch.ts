@@ -8,6 +8,7 @@ import {
 } from "../../helpers/stateUtils.js";
 import { INVALID_MOVE } from "boardgame.io/core";
 import { validateMove } from "../moveValidation.js";
+import { CONVERT_MONARCH_GOLD_COST } from "../../helpers/actionCosts.js";
 
 const validateConvertMonarch = (
   G: MyGameState,
@@ -34,7 +35,7 @@ const convertMonarch: MoveDefinition = {
 
     if (validateConvertMonarch(G, playerID)) return INVALID_MOVE;
 
-    removeGoldAmount(G, playerID, 2);
+    removeGoldAmount(G, playerID, CONVERT_MONARCH_GOLD_COST);
     spendCounsellor(G, playerID);
     incrementActionsTaken(G, playerID);
 
