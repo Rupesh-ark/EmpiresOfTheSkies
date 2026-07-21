@@ -2,9 +2,10 @@ import { useState } from "react";
 import { MyGameProps } from "@eots/game";
 import { Typography } from "@mui/material";
 import { KingdomButton } from "../shared/KingdomButton";
-import { DialogShell } from "@/components/atoms/DialogShell";
+import { DecisionPanel } from "@/components/atoms/DecisionPanel";
 import { GameButton } from "@/components/atoms/GameButton";
 import { getLocationPresentation } from "@/utils/locationLabels";
+import { tokens } from "@/theme";
 
 const AttackOrPassDiaLog = (props: AerialBattleDialogProps) => {
   const [x, y] = props.G.mapState.currentBattle;
@@ -37,41 +38,41 @@ const AttackOrPassDiaLog = (props: AerialBattleDialogProps) => {
     props.G.stage.sub === "aerial_attack_or_pass";
 
   return (
-    <DialogShell
+    <DecisionPanel
       open={isOpen}
       title="Choose your battle action"
       subtitle={`Battle at ${getLocationPresentation(props.G.mapState.currentTileArray, [x, y]).name} — highlighted in red on the map`}
       mood="battle"
-      size="sm"
-      hideActions
+      actions={
+        <>
+          <GameButton
+            variant="ghost"
+            onClick={() => {
+              props.moves.doNotAttack();
+              setOpen(false);
+            }}
+          >
+            Pass
+          </GameButton>
+          <GameButton
+            variant="danger"
+            onClick={() => {
+              props.moves.attackOtherPlayersFleet(currentKingdom);
+              setOpen(false);
+            }}
+            disabled={!currentKingdom}
+          >
+            Attack!
+          </GameButton>
+        </>
+      }
     >
-      <Typography sx={{ mb: 2 }}>
+      <Typography sx={{ fontFamily: tokens.font.body, fontSize: tokens.fontSize.sm, mb: 1 }}>
         Choose a kingdom's fleet to attack, or pass. Decisions to attack are
         made in player order, so even if you pass you may still be attacked.
       </Typography>
       {buttons}
-      <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginTop: 16 }}>
-        <GameButton
-          variant="ghost"
-          onClick={() => {
-            props.moves.doNotAttack();
-            setOpen(false);
-          }}
-        >
-          Pass
-        </GameButton>
-        <GameButton
-          variant="danger"
-          onClick={() => {
-            props.moves.attackOtherPlayersFleet(currentKingdom);
-            setOpen(false);
-          }}
-          disabled={!currentKingdom}
-        >
-          Attack!
-        </GameButton>
-      </div>
-    </DialogShell>
+    </DecisionPanel>
   );
 };
 

@@ -102,7 +102,7 @@ const PlayerTable = (props: PlayerTableProps) => {
                           borderColor: "#2E7D32",
                           color: "#2E7D32",
                           height: 20,
-                          fontSize: "0.65rem",
+                          fontSize: "0.75rem",
                           fontWeight: "bold",
                         }}
                       />
@@ -112,7 +112,7 @@ const PlayerTable = (props: PlayerTableProps) => {
                         label="Peace Accord"
                         size="small"
                         variant="outlined"
-                        sx={{ borderColor: "#D4A017", color: "#D4A017", height: 20, fontSize: "0.65rem", fontWeight: "bold" }}
+                        sx={{ borderColor: "#D4A017", color: "#D4A017", height: 20, fontSize: "0.75rem", fontWeight: "bold" }}
                       />
                     )}
                     {props.G.eventState.dynasticMarriage?.includes(key) && (
@@ -126,7 +126,7 @@ const PlayerTable = (props: PlayerTableProps) => {
                         }`}
                         size="small"
                         variant="outlined"
-                        sx={{ borderColor: "#C06090", color: "#C06090", height: 20, fontSize: "0.65rem", fontWeight: "bold" }}
+                        sx={{ borderColor: "#C06090", color: "#C06090", height: 20, fontSize: "0.75rem", fontWeight: "bold" }}
                       />
                     )}
                     {props.G.eventState.schismAffected.includes(key) && (
@@ -134,7 +134,7 @@ const PlayerTable = (props: PlayerTableProps) => {
                         label="Schism"
                         size="small"
                         variant="outlined"
-                        sx={{ borderColor: "#E77B00", color: "#E77B00", height: 20, fontSize: "0.65rem", fontWeight: "bold" }}
+                        sx={{ borderColor: "#E77B00", color: "#E77B00", height: 20, fontSize: "0.75rem", fontWeight: "bold" }}
                       />
                     )}
                     {props.G.eventState.lendersRefuseCredit.includes(key) &&
@@ -143,7 +143,7 @@ const PlayerTable = (props: PlayerTableProps) => {
                         label="Credit Blocked"
                         size="small"
                         variant="outlined"
-                        sx={{ borderColor: "#D32F2F", color: "#D32F2F", height: 20, fontSize: "0.65rem", fontWeight: "bold" }}
+                        sx={{ borderColor: "#D32F2F", color: "#D32F2F", height: 20, fontSize: "0.75rem", fontWeight: "bold" }}
                       />
                     )}
                   </Box>

@@ -7,7 +7,7 @@
 import { Box, Tooltip, Typography } from "@mui/material";
 import { tokens } from "@/theme";
 import { PlayerDot } from "@/components/atoms/PlayerDot";
-import { useActionHover, ACTION_INFO } from "../ActionHoverContext";
+import { ACTION_INFO } from "../ActionHoverContext";
 import { TOOLTIP_DELAY } from "./shared";
 
 export interface CollapsedActionRowProps {
@@ -24,9 +24,13 @@ export interface CollapsedActionRowProps {
   bgImage?: string;
   /** Action ID for hover info panel */
   actionId?: string;
+  /** Live gold cost of the next placement — shown as a chip on the row */
+  costGold?: number;
+  /** Viewing player's gold; when below costGold the chip turns red (debt warning) */
+  playerGold?: number;
 }
 
-const THUMB_W = 56;
+const THUMB_W = 40;
 
 export const CollapsedActionRow = ({
   label,
@@ -38,8 +42,12 @@ export const CollapsedActionRow = ({
   playerInfo,
   bgImage,
   actionId,
+  costGold,
+  playerGold,
 }: CollapsedActionRowProps) => {
-  const { setHoveredAction } = useActionHover();
+
+  const insufficientGold =
+    costGold !== undefined && playerGold !== undefined && costGold > playerGold;
 
   // Normalize slotState to array of player IDs
   const isArray = Array.isArray(slotState);
@@ -57,12 +65,10 @@ export const CollapsedActionRow = ({
   const row = (
     <Box
       onClick={handleClick}
-      onMouseEnter={() => actionId && setHoveredAction(actionId)}
-      onMouseLeave={() => setHoveredAction(null)}
       sx={{
         display: "flex",
         alignItems: "center",
-        height: 60,
+        height: 48,
         position: "relative" as const,
         overflow: "hidden",
         background: `linear-gradient(180deg, ${tokens.ui.surfaceRaised} 0%, ${tokens.ui.surface} 100%)`,
@@ -143,6 +149,19 @@ export const CollapsedActionRow = ({
         >
           {label}
         </Typography>
+        {costGold !== undefined && (
+          <Typography
+            sx={{
+              fontFamily: tokens.font.body,
+              fontSize: tokens.fontSize.xs,
+              fontWeight: 700,
+              lineHeight: 1.1,
+              color: insufficientGold ? tokens.ui.danger : tokens.ui.gold,
+            }}
+          >
+            {costGold}g
+          </Typography>
+        )}
       </Box>
 
       {/* Counsellor dots + count */}
@@ -159,7 +178,7 @@ export const CollapsedActionRow = ({
           <Typography
             sx={{
               fontFamily: tokens.font.body,
-              fontSize: 10,
+              fontSize: 12,
               color: tokens.ui.textMuted,
               fontWeight: 600,
             }}
@@ -183,7 +202,7 @@ export const CollapsedActionRow = ({
           <Typography
             sx={{
               fontFamily: tokens.font.body,
-              fontSize: 9,
+              fontSize: 12,
               color: tokens.ui.textMuted,
               fontWeight: 700,
             }}
@@ -218,19 +237,24 @@ export const CollapsedActionRow = ({
         {actionInfo.title}
       </Typography>
       {actionInfo.cost && (
-        <Typography sx={{ fontFamily: tokens.font.body, fontSize: 11, color: tokens.ui.gold, fontWeight: 600, mt: 0.25 }}>
+        <Typography sx={{ fontFamily: tokens.font.body, fontSize: 12, color: tokens.ui.gold, fontWeight: 600, mt: 0.25 }}>
           Cost: {actionInfo.cost}
         </Typography>
       )}
-      <Typography sx={{ fontFamily: tokens.font.body, fontSize: 11, color: tokens.ui.text, lineHeight: 1.4, mt: 0.5 }}>
+      <Typography sx={{ fontFamily: tokens.font.body, fontSize: 12, color: tokens.ui.text, lineHeight: 1.4, mt: 0.5 }}>
         {actionInfo.description}
       </Typography>
-      <Typography sx={{ fontFamily: tokens.font.body, fontSize: 10, color: tokens.ui.textMuted, mt: 0.5 }}>
+      <Typography sx={{ fontFamily: tokens.font.body, fontSize: 12, color: tokens.ui.textMuted, mt: 0.5 }}>
         {placedIds.length} counsellor{placedIds.length !== 1 ? "s" : ""} placed{hasSlots ? ` — ${totalSlots!} slots` : ""}
       </Typography>
       {isDisabled && disabledReason && (
-        <Typography sx={{ fontFamily: tokens.font.body, fontSize: 11, color: tokens.ui.danger, fontWeight: 600, mt: 0.5 }}>
+        <Typography sx={{ fontFamily: tokens.font.body, fontSize: 12, color: tokens.ui.danger, fontWeight: 600, mt: 0.5 }}>
           {disabledReason}
+        </Typography>
+      )}
+      {!isDisabled && insufficientGold && (
+        <Typography sx={{ fontFamily: tokens.font.body, fontSize: 12, color: tokens.ui.danger, fontWeight: 600, mt: 0.5 }}>
+          Costs {costGold}g — you have {playerGold}g. Placing here puts you {costGold! - playerGold!}g into debt.
         </Typography>
       )}
     </Box>
@@ -241,8 +265,6 @@ export const CollapsedActionRow = ({
       <Tooltip title={richTooltip} placement="right" arrow enterDelay={TOOLTIP_DELAY.enter} enterNextDelay={TOOLTIP_DELAY.enterNext}>
         <span
           style={{ display: "block" }}
-          onMouseEnter={() => actionId && setHoveredAction(actionId)}
-          onMouseLeave={() => setHoveredAction(null)}
         >
           {row}
         </span>

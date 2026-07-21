@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Chip, Typography, Box } from "@mui/material";
 import { MyGameProps } from "@eots/game";
-import { DialogShell } from "@/components/atoms/DialogShell";
+import { DecisionPanel } from "@/components/atoms/DecisionPanel";
+import { GameButton } from "@/components/atoms/GameButton";
 
 const InvasionNominateDialog = (props: MyGameProps) => {
   const [selected, setSelected] = useState<string | undefined>(undefined);
@@ -14,14 +15,15 @@ const InvasionNominateDialog = (props: MyGameProps) => {
   const eligible = invasion.eligibleCaptainGenerals ?? [];
 
   return (
-    <DialogShell
+    <DecisionPanel
       open
       title="Infidel Invasion!"
       mood="crisis"
-      size="sm"
-      confirmLabel="Nominate Captain-General"
-      confirmDisabled={!selected}
-      onConfirm={() => props.moves.nominateCaptainGeneral(selected)}
+      actions={
+        <GameButton variant="primary" disabled={!selected} onClick={() => props.moves.nominateCaptainGeneral(selected)}>
+          Nominate Captain-General
+        </GameButton>
+      }
     >
       <Box sx={{ p: 2, mb: 2, backgroundColor: "rgba(255, 112, 67, 0.08)", borderRadius: 1 }}>
         <Chip label={`Infidel Host: ${invasion.totalHostSwords} Swords`} color="error" sx={{ fontWeight: "bold" }} />
@@ -42,7 +44,7 @@ const InvasionNominateDialog = (props: MyGameProps) => {
           );
         })}
       </div>
-    </DialogShell>
+    </DecisionPanel>
   );
 };
 

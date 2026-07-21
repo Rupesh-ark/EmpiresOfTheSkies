@@ -370,12 +370,16 @@ export const WorldMapTile = memo((props: worldMapTileProps) => {
   return (
     <ReactCardFlip isFlipped={flip} key={props.location.toString()}>
       {/* Back (fog tile) */}
-      {/* No `value={tile.name}` here — that leaked undiscovered tile names into the DOM */}
+      {/* No `value={tile.name}` here — that leaked undiscovered tile names into the DOM.
+          aria-label uses only the board reference for the same reason. */}
       <Button
+        aria-label={`Unexplored skies ${locationPresentation.reference}`}
         sx={FOG_TILE_SX}
         onClick={
           !props.alternateOnClick
             ? (event) => {
+                // Spectators have no seat — don't send moves the server will reject.
+                if (!props.playerID) return;
                 if (Math.abs(event.clientX - xPosition.current) < 10 && Math.abs(event.clientY - yPosition.current) < 10) {
                   props.moves.discoverTile([xLocation, yLocation]);
                 }
@@ -392,6 +396,7 @@ export const WorldMapTile = memo((props: worldMapTileProps) => {
         <Button
           ref={setDroppableRef}
           className="front"
+          aria-label={locationPresentation.fullLabel}
           sx={{
             backgroundColor: currentTile.type === "ocean" ? "#009EE3" : currentTile.type === "legend" ? "#2a1a4a" : "#3a7a4a",
             backgroundImage: `url(${svgNameToElementMap[currentTile.name]})`,
@@ -438,11 +443,18 @@ export const WorldMapTile = memo((props: worldMapTileProps) => {
             )
           }
 
-          {/* Positioned fleets */}
+          {/* Positioned fleets — tokens mount fresh when a fleet arrives on
+              this tile, so the entrance animation doubles as a move signal */}
           {positionedFleets.map((pf) => (
             <Box key={pf.key} onClick={(e) => e.stopPropagation()} onPointerDown={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()} sx={{
               position: "absolute", top: pf.position.top, left: pf.position.left,
               zIndex: 100, transform: "translate(-50%, -50%)",
+              "@keyframes fleetArrive": {
+                "0%": { transform: "translate(-50%, -50%) scale(0.2)", opacity: 0, filter: "drop-shadow(0 0 14px rgba(232,200,96,0.95))" },
+                "60%": { transform: "translate(-50%, -50%) scale(1.18)", opacity: 1, filter: "drop-shadow(0 0 10px rgba(232,200,96,0.7))" },
+                "100%": { transform: "translate(-50%, -50%) scale(1)", opacity: 1, filter: "drop-shadow(0 0 0 rgba(232,200,96,0))" },
+              },
+              animation: "fleetArrive 500ms ease-out",
             }}>
               {pf.element}
             </Box>
@@ -490,7 +502,7 @@ export const WorldMapTile = memo((props: worldMapTileProps) => {
             <Box sx={{
               position: "absolute", top: 4, right: 4, px: "6px", py: "2px",
               borderRadius: "8px", backgroundColor: "rgba(232,184,75,0.9)",
-              fontSize: 10, fontWeight: 800, color: "#2a1a00",
+              fontSize: 12, fontWeight: 800, color: "#2a1a00",
               zIndex: 10, pointerEvents: "none", lineHeight: 1.4,
             }}>
               {tileCost}g
@@ -506,10 +518,10 @@ export const WorldMapTile = memo((props: worldMapTileProps) => {
               border: "1px solid rgba(255,100,100,0.4)",
               boxShadow: "0 1px 4px rgba(0,0,0,0.5)", pointerEvents: "none",
             }}>
-              <Typography sx={{ fontFamily: "Inter, sans-serif", fontSize: 10, fontWeight: 700, color: "#fff", lineHeight: 1 }}>
+              <Typography sx={{ fontFamily: "Inter, sans-serif", fontSize: 12, fontWeight: 700, color: "#fff", lineHeight: 1 }}>
                 ⚔ {props.G.accumulatedHosts.reduce((sum, h) => sum + h.swords, 0)}
               </Typography>
-              <Typography sx={{ fontFamily: "Inter, sans-serif", fontSize: 9, color: "rgba(255,200,200,0.8)", lineHeight: 1 }}>
+              <Typography sx={{ fontFamily: "Inter, sans-serif", fontSize: 12, color: "rgba(255,200,200,0.8)", lineHeight: 1 }}>
                 ({props.G.accumulatedHosts.length})
               </Typography>
             </Box>

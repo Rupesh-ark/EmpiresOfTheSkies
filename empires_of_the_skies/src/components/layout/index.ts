@@ -1,4 +1,5 @@
 export { GameLayout } from "./GameLayout";
-export { MapOverlay } from "./MapOverlay";
-export { getPhaseLayout } from "./phaseLayouts";
-export type { PhaseLayoutConfig, PanelSlot, MapSize } from "./phaseLayouts";
+export { TopStrip } from "./TopStrip";
+export { PromptBar } from "./PromptBar";
+export { OpponentRail } from "./OpponentRail";
+export type { PanelSlot } from "./GameLayout";

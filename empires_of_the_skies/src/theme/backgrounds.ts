@@ -41,6 +41,15 @@ export const backgrounds = {
   /** Leather button — for primary action buttons */
   leatherTexture: `url(${BG_LEATHER}) center / cover no-repeat`,
 
+  /** Dark leather bar — top strip, prompt bar, and other frame chrome */
+  leatherBar: `
+    linear-gradient(180deg, rgba(46,33,18,0.90) 0%, rgba(30,21,11,0.94) 100%),
+    url(${BG_LEATHER}) center / 420px repeat
+  `.trim(),
+
+  /** Polished brass ring — heresy gauge frame, rail medallions */
+  brassBezel: "linear-gradient(180deg, #9a7d3e 0%, #6b5423 60%, #8a6d34 100%)",
+
   /** Ornate border frame — for dialogs and card frames */
   ornateBorder: BG_ORNATE_BORDER,
 

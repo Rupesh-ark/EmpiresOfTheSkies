@@ -1,7 +1,8 @@
 import { useState, useMemo } from "react";
 import { MyGameProps, KINGDOM_LOCATION, tileKey, wouldPlacementConnectRoute, getRoutePlacementTiles, FAITHDOM_TILES } from "@eots/game";
 import { Box, Typography, Switch } from "@mui/material";
-import { DialogShell } from "@/components/atoms/DialogShell";
+import { DecisionPanel } from "@/components/atoms/DecisionPanel";
+import { GameButton } from "@/components/atoms/GameButton";
 import { tokens } from "@/theme";
 import { IconSkyship, IconRegiment, IconLevy } from "@/theme";
 import { getLocationPresentation } from "@/utils/locationLabels";
@@ -91,19 +92,22 @@ const RetrieveFleetsDialog = (props: MyGameProps) => {
     props.ctx.currentPlayer === props.playerID;
 
   return (
-    <DialogShell
+    <DecisionPanel
       open={isOpen}
       title="Retrieve Fleets"
       subtitle="Select fleets to bring home. Toggle route options to leave skyship markers."
       mood="peacetime"
-      size="sm"
-      confirmLabel="Retrieve"
-      confirmColor="success"
-      confirmDisabled={selectedFleets.length === 0}
-      onConfirm={handleConfirm}
-      cancelLabel="Skip"
-      cancelColor="error"
-      onCancel={() => props.moves.retrieveFleets([])}
+      width={500}
+      actions={
+        <>
+          <GameButton variant="ghost" onClick={() => props.moves.retrieveFleets([])}>
+            Skip
+          </GameButton>
+          <GameButton variant="primary" disabled={selectedFleets.length === 0} onClick={handleConfirm}>
+            Retrieve
+          </GameButton>
+        </>
+      }
     >
       <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
         {deployedFleets.map((fleet) => {
@@ -198,7 +202,7 @@ const RetrieveFleetsDialog = (props: MyGameProps) => {
                         backgroundColor: `${tokens.ui.textMuted}15`,
                         border: `1px solid ${tokens.ui.border}`,
                         fontFamily: tokens.font.body,
-                        fontSize: 10,
+                        fontSize: 12,
                         fontWeight: 700,
                         letterSpacing: "0.06em",
                         color: tokens.ui.textMuted,
@@ -290,7 +294,8 @@ const RetrieveFleetsDialog = (props: MyGameProps) => {
           </Typography>
         )}
       </Box>
-    </DialogShell>
+      <Box sx={{ height: 8 }} />
+    </DecisionPanel>
   );
 };
 

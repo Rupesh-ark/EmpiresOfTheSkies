@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Chip, Typography, Slider, Box } from "@mui/material";
 import { MyGameProps } from "@eots/game";
-import { DialogShell } from "@/components/atoms/DialogShell";
+import { DecisionPanel } from "@/components/atoms/DecisionPanel";
+import { GameButton } from "@/components/atoms/GameButton";
 
 const InvasionBuyoffDialog = (props: MyGameProps) => {
   const invasion = props.G.currentInvasion;
@@ -23,15 +24,20 @@ const InvasionBuyoffDialog = (props: MyGameProps) => {
   }));
 
   return (
-    <DialogShell
+    <DecisionPanel
       open
       title="Infidel Buy-off"
       mood="crisis"
-      size="sm"
-      confirmLabel={`Offer ${amount} Gold`}
-      onConfirm={() => props.moves.offerBuyoffGold(amount)}
-      cancelLabel="Offer Nothing"
-      onCancel={() => props.moves.offerBuyoffGold(0)}
+      actions={
+        <>
+          <GameButton variant="ghost" onClick={() => props.moves.offerBuyoffGold(0)}>
+            Offer Nothing
+          </GameButton>
+          <GameButton variant="primary" onClick={() => props.moves.offerBuyoffGold(amount)}>
+            Offer {amount} Gold
+          </GameButton>
+        </>
+      }
     >
       <Typography variant="body2" sx={{ mb: 2 }}>
         The Grand Army has been defeated. The Infidels demand gold to leave. Any shortfall is paid in Victory Points.
@@ -54,7 +60,7 @@ const InvasionBuyoffDialog = (props: MyGameProps) => {
       {amount === 0 && remaining > 0 && (
         <Typography variant="body2" color="error" sx={{ mt: 1 }}>Offering nothing risks Victory Point penalties if the total falls short!</Typography>
       )}
-    </DialogShell>
+    </DecisionPanel>
   );
 };
 

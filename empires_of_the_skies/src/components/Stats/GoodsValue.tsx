@@ -124,7 +124,7 @@ const GoodsValueFull = ({ props }: { props: MyGameProps }) => {
 
   return (
     <Box>
-      <Typography sx={{ fontSize: 10, fontFamily: tokens.font.body, color: tokens.ui.textMuted, mb: `${tokens.spacing.xs}px` }}>
+      <Typography sx={{ fontSize: 12, fontFamily: tokens.font.body, color: tokens.ui.textMuted, mb: `${tokens.spacing.xs}px` }}>
         Highlighted = current supply on the board
       </Typography>
       <Box sx={{ overflowX: "auto" }}>
@@ -136,9 +136,9 @@ const GoodsValueFull = ({ props }: { props: MyGameProps }) => {
             fontSize: tokens.fontSize.xs,
           }}
         >
-          <Box sx={{ fontWeight: 700, color: tokens.ui.textMuted, px: "4px", py: "3px", fontSize: 10 }}>Good</Box>
+          <Box sx={{ fontWeight: 700, color: tokens.ui.textMuted, px: "4px", py: "3px", fontSize: 12 }}>Good</Box>
           {Array.from({ length: maxCols }, (_, i) => (
-            <Box key={i} sx={{ textAlign: "center", fontWeight: 700, color: tokens.ui.textMuted, py: "3px", fontSize: 10 }}>
+            <Box key={i} sx={{ textAlign: "center", fontWeight: 700, color: tokens.ui.textMuted, py: "3px", fontSize: 12 }}>
               {i}
             </Box>
           ))}
@@ -148,7 +148,7 @@ const GoodsValueFull = ({ props }: { props: MyGameProps }) => {
             return [
               <Box key={`name-${good.name}`} sx={{ display: "flex", alignItems: "center", gap: "4px", px: "4px", py: "2px" }}>
                 <LootIcon colour={good.colour} />
-                <Typography sx={{ fontSize: 11, fontFamily: tokens.font.body, fontWeight: 500, lineHeight: 1 }}>
+                <Typography sx={{ fontSize: 12, fontFamily: tokens.font.body, fontWeight: 500, lineHeight: 1 }}>
                   {good.name}
                 </Typography>
               </Box>,
@@ -167,7 +167,7 @@ const GoodsValueFull = ({ props }: { props: MyGameProps }) => {
                       outline: isActive ? `2px solid ${good.borderColour}` : "none",
                       outlineOffset: "-2px",
                       fontWeight: isActive ? 700 : 400,
-                      fontSize: 11,
+                      fontSize: 12,
                       fontFamily: tokens.font.body,
                       color: isActive
                         ? (good.colour === "#ECEDED" || good.colour === "#F6B1B5" ? "#222" : "white")

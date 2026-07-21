@@ -131,7 +131,7 @@ const PickLegacyCardDialog = (props: MyGameProps) => {
                 <Typography
                   sx={{
                     fontFamily: tokens.font.body,
-                    fontSize: 10,
+                    fontSize: 12,
                     fontWeight: 700,
                     color: colourAccent,
                     textTransform: "uppercase",

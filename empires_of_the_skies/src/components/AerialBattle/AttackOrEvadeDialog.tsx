@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { MyGameProps, colourToKingdomMap } from "@eots/game";
 import { Typography } from "@mui/material";
-import { DialogShell } from "@/components/atoms/DialogShell";
+import { DecisionPanel } from "@/components/atoms/DecisionPanel";
 import { GameButton } from "@/components/atoms/GameButton";
 import { getLocationPresentation } from "@/utils/locationLabels";
+import { tokens } from "@/theme";
 
 const AttackOrEvadeDialog = (props: AttackOrEvadeDialogProps) => {
   const [open, setOpen] = useState(true);
@@ -22,15 +23,29 @@ const AttackOrEvadeDialog = (props: AttackOrEvadeDialogProps) => {
     props.G.battleState.defender.decision === "undecided";
 
   return (
-    <DialogShell
+    <DecisionPanel
       open={isOpen}
       title="Your fleet is under attack!"
       subtitle={`Battle at ${getLocationPresentation(props.G.mapState.currentTileArray, [x, y]).name} — highlighted in red on the map`}
       mood="battle"
-      size="sm"
-      hideActions
+      actions={
+        <>
+          <GameButton
+            variant="ghost"
+            onClick={() => { props.moves.evadeAttackingFleet(); setOpen(false); }}
+          >
+            Evade
+          </GameButton>
+          <GameButton
+            variant="danger"
+            onClick={() => { props.moves.retaliate(); setOpen(false); }}
+          >
+            Attack!
+          </GameButton>
+        </>
+      }
     >
-      <Typography sx={{ mb: 2 }}>
+      <Typography sx={{ fontFamily: tokens.font.body, fontSize: tokens.fontSize.sm }}>
         Your fleet at {getLocationPresentation(props.G.mapState.currentTileArray, [x, y]).name} is under attack by{" "}
         {props.G.battleState
           ? colourToKingdomMap[props.G.battleState?.attacker.colour]
@@ -39,21 +54,7 @@ const AttackOrEvadeDialog = (props: AttackOrEvadeDialogProps) => {
         kingdom will get to move your fleet to an adjoining tile of their
         choosing.
       </Typography>
-      <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginTop: 16 }}>
-        <GameButton
-          variant="ghost"
-          onClick={() => { props.moves.evadeAttackingFleet(); setOpen(false); }}
-        >
-          Evade
-        </GameButton>
-        <GameButton
-          variant="danger"
-          onClick={() => { props.moves.retaliate(); setOpen(false); }}
-        >
-          Attack!
-        </GameButton>
-      </div>
-    </DialogShell>
+    </DecisionPanel>
   );
 };
 

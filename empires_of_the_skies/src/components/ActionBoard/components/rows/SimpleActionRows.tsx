@@ -8,7 +8,13 @@
 import { ActionBoardProps } from "../shared";
 import { BTN_BG } from "@/assets/actionBoard";
 import { CollapsedActionRow } from "../CollapsedActionRow";
-import { clearMoves, getAvailableActions } from "@/utils/gameHelpers";
+import { clearMoves } from "@/utils/gameHelpers";
+import {
+  MOVE_DEFINITIONS,
+  getNextSlotCost,
+  CONVERT_MONARCH_GOLD_COST,
+  type SlottedActionKey,
+} from "@eots/game";
 
 type RowConfig = {
   label: string;
@@ -18,14 +24,25 @@ type RowConfig = {
   moveExtraArgs?: unknown[];
   accent: string;
   bgImage: string;
+  /** Flat gold cost for non-stacking rows; stacking rows derive from boardStateKey */
+  fixedCostGold?: number;
 };
 
 const createRow = (config: RowConfig) => {
   const Row = (props: ActionBoardProps) => {
     const slotState = (props.G.boardState as Record<string, unknown>)[config.boardStateKey];
     const player = props.playerID ? props.G.playerInfo[props.playerID] : undefined;
-    const availableActions = player ? getAvailableActions(player) : 0;
-    const hasActions = availableActions > 0;
+
+    // Same validator the server runs — disabled state and reason can't drift.
+    const validate = MOVE_DEFINITIONS[config.moveName]?.validate;
+    const moveError =
+      props.isActive && props.playerID && validate
+        ? validate(props.G, props.playerID, ...(config.moveExtraArgs ?? []))
+        : null;
+
+    const costGold =
+      config.fixedCostGold ??
+      getNextSlotCost(props.G, config.boardStateKey as SlottedActionKey);
 
     return (
       <CollapsedActionRow
@@ -39,8 +56,10 @@ const createRow = (config: RowConfig) => {
           const move = (props.moves as Record<string, (...args: unknown[]) => void>)[config.moveName];
           move(...(config.moveExtraArgs ?? []));
         }}
-        disabled={props.isActive && !hasActions}
-        disabledReason={props.isActive && !hasActions ? "No actions remaining" : undefined}
+        disabled={!!moveError}
+        disabledReason={moveError?.message}
+        costGold={costGold}
+        playerGold={player?.resources.gold}
         playerInfo={props.G.playerInfo}
         accent={config.accent}
         bgImage={config.bgImage}
@@ -105,4 +124,5 @@ export const ConvertMonarchRow = createRow({
   moveName: "convertMonarch",
   accent: "#1e6091",
   bgImage: BTN_BG.convertMonarch,
+  fixedCostGold: CONVERT_MONARCH_GOLD_COST,
 });

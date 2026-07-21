@@ -10,28 +10,12 @@ import GameOverView from "./GameOverView";
 
 // Lazily-loaded dialogs (code-split)
 const PickKingdomAdvantageCardDialog = lazy(() => import("./Cards/PickKingdomAdvantageCardDialog").then(m => ({ default: m.default })));
-const PickEventCardDialog = lazy(() => import("./Events/PickEventCardDialog").then(m => ({ default: m.default })));
-const EventChoiceDialog = lazy(() => import("./Events/EventChoiceDialog").then(m => ({ default: m.default })));
 const PickLegacyCardDialog = lazy(() => import("./Cards/PickLegacyCardDialog").then(m => ({ default: m.default })));
-const AttackOrPassDialog = lazy(() => import("./AerialBattle/AttackOrPassDialog").then(m => ({ default: m.default })));
-const AttackOrEvadeDialog = lazy(() => import("./AerialBattle/AttackOrEvadeDialog").then(m => ({ default: m.default })));
-const RelocateLoserDialog = lazy(() => import("./AerialBattle/RelocateLoserDialog").then(m => ({ default: m.default })));
 const PlunderLegendsDialog = lazy(() => import("./PlunderLegends/PlunderLegendsDialog").then(m => ({ default: m.default })));
-const GroundAttackOrPassDialog = lazy(() => import("./GroundBattle/GroundAttackOrPassDialog").then(m => ({ default: m.default })));
-const DefendOrYieldDialog = lazy(() => import("./GroundBattle/DefendOrYieldDialog").then(m => ({ default: m.default })));
 const GarrisonTroopsDialog = lazy(() => import("./GroundBattle/GarrisonTroopsDialog").then(m => ({ default: m.default })));
-const OutpostOrColonyDialog = lazy(() => import("./Conquests/OutpostOrColonyDialog").then(m => ({ default: m.default })));
 const InfidelFleetCombatDialog = lazy(() => import("./Events/InfidelFleetCombatDialog").then(m => ({ default: m.default })));
 const DeferredBattleDialog = lazy(() => import("./Events/DeferredBattleDialog").then(m => ({ default: m.default })));
-const RebellionDialog = lazy(() => import("./Events/RebellionDialog").then(m => ({ default: m.default })));
-const RebellionRivalSupportDialog = lazy(() => import("./Events/RebellionRivalSupportDialog").then(m => ({ default: m.default })));
-const InvasionNominateDialog = lazy(() => import("./Events/InvasionNominateDialog").then(m => ({ default: m.default })));
-const InvasionContributeDialog = lazy(() => import("./Events/InvasionContributeDialog").then(m => ({ default: m.default })));
-const InvasionBuyoffDialog = lazy(() => import("./Events/InvasionBuyoffDialog").then(m => ({ default: m.default })));
-const RetrieveFleetsDialog = lazy(() => import("./Resolution/RetrieveFleetsDialog").then(m => ({ default: m.default })));
 const ElectionDialog = lazy(() => import("./Election/ElectionDialog").then(m => ({ default: m.default })));
-const DiscardFoWCardDialog = lazy(() => import("./Cards/DiscardFoWCardDialog").then(m => ({ default: m.default })));
-const ConfirmDrawDialog = lazy(() => import("./Cards/ConfirmDrawDialog").then(m => ({ default: m.default })));
 
 /**
  * Loading fallback for lazy dialogs
@@ -63,7 +47,7 @@ const DialogLoader: React.FC<{ name: string }> = ({ name }) => (
  * Rule: do NOT modify the individual dialog components — only their mount conditions.
  */
 export const DialogRouter = memo((props: MyGameProps) => {
-  const { sub, phase } = props.G.stage;
+  const { sub } = props.G.stage;
 
   return (
     <>
@@ -76,12 +60,7 @@ export const DialogRouter = memo((props: MyGameProps) => {
         </Suspense>
       )}
 
-      {phase === "events" && sub === "default" && (
-        <Suspense fallback={<DialogLoader name="Event Cards" />}>
-          <PickEventCardDialog {...props} />
-          <EventChoiceDialog {...props} />
-        </Suspense>
-      )}
+      {/* Event card pick + event choices are non-modal hand strips — see DecisionRouter. */}
 
       {sub === "legacy_card" && (
         <Suspense fallback={<DialogLoader name="Legacy Card" />}>
@@ -89,43 +68,18 @@ export const DialogRouter = memo((props: MyGameProps) => {
         </Suspense>
       )}
 
-      {sub === "aerial_attack_or_pass" && (
-        <Suspense fallback={<DialogLoader name="Aerial Battle" />}>
-          <AttackOrPassDialog {...props} />
-        </Suspense>
-      )}
-
-      {sub === "aerial_attack_or_evade" && (
-        <Suspense fallback={<DialogLoader name="Evade Decision" />}>
-          <AttackOrEvadeDialog {...props} />
-        </Suspense>
-      )}
+      {/* Combat prompts (attack/pass, attack/evade, ground attack, defend/yield)
+          are non-modal DecisionPanels — see DecisionRouter. */}
 
       {/* BattleResultDialog and DrawOrPickCardDialog manage their own open state (static import) */}
       <BattleResultDialog {...props} />
       <DrawOrPickCardDialog {...props} />
 
-      {sub === "relocate_loser" && (
-        <Suspense fallback={<DialogLoader name="Fleet Relocation" />}>
-          <RelocateLoserDialog {...props} />
-        </Suspense>
-      )}
+      {/* Relocate-loser is a headless map-selection controller — see DecisionRouter. */}
 
       {sub === "plunder_legends" && (
         <Suspense fallback={<DialogLoader name="Plunder" />}>
           <PlunderLegendsDialog {...props} />
-        </Suspense>
-      )}
-
-      {sub === "ground_attack_or_pass" && (
-        <Suspense fallback={<DialogLoader name="Ground Attack" />}>
-          <GroundAttackOrPassDialog {...props} />
-        </Suspense>
-      )}
-
-      {sub === "ground_defend_or_yield" && (
-        <Suspense fallback={<DialogLoader name="Defend/Yield" />}>
-          <DefendOrYieldDialog {...props} />
         </Suspense>
       )}
 
@@ -135,11 +89,7 @@ export const DialogRouter = memo((props: MyGameProps) => {
         </Suspense>
       )}
 
-      {sub === "conquest" && (
-        <Suspense fallback={<DialogLoader name="Conquest" />}>
-          <OutpostOrColonyDialog {...props} />
-        </Suspense>
-      )}
+      {/* Conquest (outpost/colony/pass) is a non-modal DecisionPanel — see DecisionRouter. */}
 
       {sub === "infidel_fleet_combat" && (
         <Suspense fallback={<DialogLoader name="Infidel Fleet" />}>
@@ -153,41 +103,9 @@ export const DialogRouter = memo((props: MyGameProps) => {
         </Suspense>
       )}
 
-      {sub === "rebellion" && (
-        <Suspense fallback={<DialogLoader name="Rebellion" />}>
-          <RebellionDialog {...props} />
-        </Suspense>
-      )}
+      {/* Rebellion + invasion prompts are non-modal DecisionPanels — see DecisionRouter. */}
 
-      {sub === "rebellion_rival_support" && (
-        <Suspense fallback={<DialogLoader name="Rebellion Support" />}>
-          <RebellionRivalSupportDialog {...props} />
-        </Suspense>
-      )}
-
-      {sub === "invasion_nominate" && (
-        <Suspense fallback={<DialogLoader name="Invasion Nomination" />}>
-          <InvasionNominateDialog {...props} />
-        </Suspense>
-      )}
-
-      {sub === "invasion_contribute" && (
-        <Suspense fallback={<DialogLoader name="Invasion Contribution" />}>
-          <InvasionContributeDialog {...props} />
-        </Suspense>
-      )}
-
-      {sub === "invasion_buyoff" && (
-        <Suspense fallback={<DialogLoader name="Invasion Buyoff" />}>
-          <InvasionBuyoffDialog {...props} />
-        </Suspense>
-      )}
-
-      {sub === "retrieve_fleets" && (
-        <Suspense fallback={<DialogLoader name="Fleet Retrieval" />}>
-          <RetrieveFleetsDialog {...props} />
-        </Suspense>
-      )}
+      {/* Fleet retrieval is a non-modal DecisionPanel — see DecisionRouter. */}
 
       {(sub === "election" || sub === "immediate_election") && (
         <Suspense fallback={<DialogLoader name="Election" />}>
@@ -195,17 +113,7 @@ export const DialogRouter = memo((props: MyGameProps) => {
         </Suspense>
       )}
 
-      {sub === "confirm_fow_draw" && (
-        <Suspense fallback={<DialogLoader name="Draw Cards" />}>
-          <ConfirmDrawDialog {...props} />
-        </Suspense>
-      )}
-
-      {sub === "discard_fow" && (
-        <Suspense fallback={<DialogLoader name="Discard Cards" />}>
-          <DiscardFoWCardDialog {...props} />
-        </Suspense>
-      )}
+      {/* FoW draw/discard are non-modal DecisionPanels — see DecisionRouter. */}
 
       {/* GameOverView manages its own open state (static import) */}
       <GameOverView {...props} />

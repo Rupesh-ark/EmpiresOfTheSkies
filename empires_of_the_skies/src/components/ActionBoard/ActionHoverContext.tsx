@@ -1,21 +1,38 @@
 /* eslint-disable react-refresh/only-export-components */
-import { createContext, useContext, useState, useMemo, ReactNode } from "react";
+import { createContext, useContext, useState, useMemo, useRef, useCallback, ReactNode } from "react";
 
-interface ActionHoverState {
-  hoveredAction: string | null;
-  setHoveredAction: (action: string | null) => void;
+/**
+ * Guide-flash channel + the ACTION_INFO reference data used by action
+ * tooltips. (The old hover-tracking state died with the ActionInfoPanel —
+ * rich tooltips on the rows replaced it.)
+ */
+interface ActionFlashState {
+  /** Action currently being guide-flashed (pulses on the board), or null */
+  flashedAction: string | null;
+  /** Pulse an action on the board briefly — used to guide players to prerequisites */
+  flashAction: (action: string) => void;
 }
 
-const ActionHoverContext = createContext<ActionHoverState>({
-  hoveredAction: null,
-  setHoveredAction: () => {},
+const ActionHoverContext = createContext<ActionFlashState>({
+  flashedAction: null,
+  flashAction: () => {},
 });
 
 export const useActionHover = () => useContext(ActionHoverContext);
 
+const FLASH_DURATION_MS = 3000;
+
 export const ActionHoverProvider = ({ children }: { children: ReactNode }) => {
-  const [hoveredAction, setHoveredAction] = useState<string | null>(null);
-  const value = useMemo(() => ({ hoveredAction, setHoveredAction }), [hoveredAction]);
+  const [flashedAction, setFlashedAction] = useState<string | null>(null);
+  const flashTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const flashAction = useCallback((action: string) => {
+    if (flashTimer.current) clearTimeout(flashTimer.current);
+    setFlashedAction(action);
+    flashTimer.current = setTimeout(() => setFlashedAction(null), FLASH_DURATION_MS);
+  }, []);
+
+  const value = useMemo(() => ({ flashedAction, flashAction }), [flashedAction, flashAction]);
   return (
     <ActionHoverContext.Provider value={value}>
       {children}

@@ -14,7 +14,7 @@ empires_of_the_skies/   →  React frontend (Vite, MUI, boardgame.io client)
 server/                 →  Koa backend   (boardgame.io server, PostgreSQL)
 ```
 
-`@eots/game` is the shared library. It compiles to three outputs (ESM, CJS, types) so both the frontend and server can import it. The frontend uses ESM, the server uses CJS.
+`@eots/game` is the shared library. It compiles once as ESM, with TypeScript declarations in the same `dist/` tree. Both the frontend and server consume that output.
 
 **Build order matters**: game engine first, then server and frontend.
 
@@ -24,12 +24,8 @@ pnpm build:all    # runs: @eots/game build → server build → frontend build
 
 The game engine build is defined in `packages/game/package.json`:
 ```
-build:types  →  tsc -p tsconfig.types.json   →  dist/types/
-build:esm    →  tsc -p tsconfig.esm.json     →  dist/esm/
-build:cjs    →  tsc -p tsconfig.cjs.json      →  dist/cjs/
+build  →  tsc -p tsconfig.build.json  →  dist/
 ```
-
-A small `write-cjs-package.cjs` script writes `{ "type": "commonjs" }` into `dist/cjs/` so Node treats those files as CJS.
 
 ---
 
@@ -72,7 +68,7 @@ const GameClient = Client({
 <GameClient playerID={playerID} matchID={matchID} credentials={credentials} />
 ```
 
-boardgame.io's `Client()` wires everything: it connects to the server via SocketIO, subscribes to state changes, and passes `{ G, ctx, moves, playerID, isActive }` as props to the `board` component.
+boardgame.io's `Client()` wires everything: it connects to the server via SocketIO, subscribes to state changes, and passes `{ G, ctx, moves, playerID, isActive, lastActionError }` as props to the `board` component.
 
 ### 4. Bot clients connect (`setupBotClients.ts`)
 
@@ -142,20 +138,17 @@ Each phase is defined with:
 
 ### Move Registration 
 
-Every move is wrapped before being handed to boardgame.io:
+Move implementations and validators are stored once in `MOVE_DEFINITIONS`. Each phase registers the names it permits:
 
 ```typescript
-moves: {
-  discoverTile: wrapMove("discoverTile", discoverTile),
-  deployFleet: wrapMove("deployFleet", deployFleet),
-  // ... ~60 more
-}
+moves: wrapSet("discoverTile", "pass")
 ```
 
 `wrapMove()` (from `helpers/moveWrapper.ts`) adds:
-- Logging (move name, player, phase, args)
-- Phase/stage guards
-- Loop guard checks (prevents infinite transitions)
+- Server-authoritative validation
+- Structured rejection and success logging
+- Player-visible success log entries
+- Move recording for analytics
 
 ### Turn Budget Plugin 
 
@@ -170,9 +163,10 @@ A custom boardgame.io plugin that counts `endTurn()` and `endPhase()` calls per 
 1. Player clicks a button in the UI (e.g. "Deploy Fleet")
 2. Component calls `props.moves.deployFleet(fleetIdx, destination, skyships, regiments, levies, elites)`
 3. boardgame.io client sends this to the server over SocketIO
-4. Server runs the move function, which mutates `G`
-5. Server broadcasts the new `G` to all connected clients
-6. All clients re-render with the updated state
+4. Server validates the move and runs it if valid
+5. A rejection is rolled back and returned only to the acting client as `lastActionError`
+6. A success is broadcast to all clients as the new authoritative `G`
+7. Relevant clients re-render
 
 ### Move Structure
 
@@ -190,16 +184,18 @@ const deployFleet: MoveDefinition = {
 ```
 
 - `fn` — the actual logic. Receives the game context and move arguments.
-- `validate` — optional pre-check. Returns null if valid, or a `MoveError`.
-- `errorMessage` — shown to player if the move is rejected.
+- `validate` — optional server-side check. Returns null if valid, or a detailed `MoveError`.
+- `errorMessage` — fallback shown when the move returns a bare `INVALID_MOVE`.
 - `successLog` — generates a log message for the game log.
 
 ### Move Validation Pipeline (`moveWrapper.ts`)
 
-`wrapMove()` wraps every move with:
-- `withPhaseGuard()` — rejects moves if the game is in the wrong phase
-- `checkLoopGuard()` — rejects if the turn budget is exhausted
-- Logging — timestamps, player, phase, args
+`wrapMove()` is the server-side boundary for every move:
+
+- It runs `validate` once and returns `Invalid(error)` on rejection.
+- It converts a bare `INVALID_MOVE` into `Invalid({ message: errorMessage })`.
+- boardgame.io rolls back rejected mutations and delivers the payload to the acting client.
+- `ActionBoardsAndMap` observes `lastActionError` and displays the message as a toast.
 
 ---
 
@@ -409,31 +405,38 @@ The evaluator weights were tuned using CMA-ES (`ai/tuner/cma_tuner.py`), a Pytho
 
 ## Frontend Component Structure
 
+The in-game UI is a **stable frame**: one layout for every phase and both turn
+states. Turn/phase changes swap content (prompt text, overlay visibility),
+never the frame — the map keeps its size and camera.
+
 ```
 Client.tsx
   └─ ActionBoardsAndMap (root game component)
-       ├─ StatusBar/         — round, phase, current player display
-       ├─ WorldMap/          — 8×4 tile grid, fleet icons, buildings, route markers
-       │   └─ WorldMapTile   — individual tile with overlays
-       ├─ ActionBoard/       — counsellor placement board
-       ├─ PlayerBoard/       — your kingdom's resources, fleets, buildings
-       ├─ PlayerTable/       — summary of all players
-       ├─ Cards/             — FoW, KA, Legacy card displays
-       ├─ Chat/              — in-game chat
-       ├─ Trade/             — deal proposal interface
-       │
-       └─ Phase-specific dialogs:
-           ├─ AerialBattle/   — fleet combat UI
-           ├─ GroundBattle/   — siege resolution
-           ├─ Election/       — archprelate voting
-           ├─ Events/         — event card selection
-           ├─ PlunderLegends/ — plunder legends UI
-           └─ Resolution/     — end-of-round dialogs (retrieve fleets, etc.)
+       └─ layout/GameLayout — the stable frame
+            ├─ layout/TopStrip     — round / phase / turn + mini heresy gauge; panel tab icons
+            ├─ layout/OpponentRail — player chips (click → dock swap), round timeline, emblem
+            ├─ WorldMap/           — 8×4 tile grid, permanent centre; fit-to-discovered camera,
+            │   └─ WorldMapTile      battle auto-pan, fleet icons, buildings, route markers
+            │
+            ├─ action board overlay — ActionBoard/ as a dismissible right side sheet
+            │                         (reserves map width during your actions turn)
+            ├─ side panel drawer    — GameLog / Stats / Trade / Chat over the map's right edge
+            │
+            ├─ layout/PromptBar    — "what is the game waiting for?" + your resource chips
+            │                        + Clear / Pass / Confirm; hosts map-selection confirms
+            ├─ PlayerBoard/PlayerDock — station cards: Kingdom | Forces & Musters | Fleets |
+            │                           Cards | Holdings (self full, opponents public-only)
+            │
+            ├─ DecisionRouter — NON-MODAL decision panels (atoms/DecisionPanel) floating over
+            │                   the map: combat prompts, event card fan, event choices, FoW
+            │                   draw/discard, rebellion, invasion, conquest, retrieve fleets
+            └─ DialogRouter   — true takeover ceremonies only: setup card picks, battle
+                                results, garrison, elections, round summary, game over
 ```
 
 Components receive `MyGameProps` from boardgame.io — that's `{ G, ctx, moves, playerID, isActive }`. They read `G` to render state and call `moves.*()` to dispatch player actions.
 
-Components check `G.stage.phase` and `G.stage.sub` to decide what to show. For example, the aerial battle dialog only opens when `G.stage.sub === "aerial_attack_or_pass"` and it's your turn.
+Components check `G.stage.phase` and `G.stage.sub` to decide what to show. For example, the aerial battle prompt only opens when `G.stage.sub === "aerial_attack_or_pass"` and it's your turn. Action rows call the same `MOVE_DEFINITIONS.*.validate` functions the server runs (disabled states can't drift) and show live costs from `helpers/actionCosts.ts` — the single source of truth shared by moves and UI.
 
 ---
 

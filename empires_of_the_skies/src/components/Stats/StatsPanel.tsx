@@ -258,7 +258,7 @@ const OpponentSummary = ({ props }: { props: MyGameProps }) => {
                   <Typography
                     key={tag.label}
                     sx={{
-                      fontSize: 9,
+                      fontSize: 12,
                       fontFamily: tokens.font.body,
                       fontWeight: 700,
                       color: tag.color,
@@ -342,7 +342,7 @@ const NprKingdoms = ({ props }: { props: MyGameProps }) => {
               {isRepublic && (
                 <Typography
                   sx={{
-                    fontSize: 9,
+                    fontSize: 12,
                     fontFamily: tokens.font.body,
                     color: tokens.ui.textMuted,
                     border: `1px solid ${tokens.ui.border}`,
@@ -368,13 +368,13 @@ const NprKingdoms = ({ props }: { props: MyGameProps }) => {
 
             <Box sx={{ display: "flex", alignItems: "center", gap: `${tokens.spacing.sm}px` }}>
               {cathedrals > 0 && (
-                <Typography sx={{ fontSize: 10, fontFamily: tokens.font.body, color: tokens.ui.textMuted, lineHeight: 1 }}>
+                <Typography sx={{ fontSize: 12, fontFamily: tokens.font.body, color: tokens.ui.textMuted, lineHeight: 1 }}>
                   {cathedrals} cath.
                 </Typography>
               )}
               <Typography
                 sx={{
-                  fontSize: 10,
+                  fontSize: 12,
                   fontFamily: tokens.font.body,
                   color: controllerName ? tokens.ui.text : tokens.ui.textMuted,
                   fontWeight: controllerName ? 600 : 400,

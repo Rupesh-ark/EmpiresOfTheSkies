@@ -96,7 +96,7 @@ const CompactAction = ({
     <Typography sx={{ fontFamily: tokens.font.body, fontSize: tokens.fontSize.xs, color: tokens.ui.text, fontWeight: 600, lineHeight: 1.2 }}>
       {label}
     </Typography>
-    <Typography sx={{ fontFamily: tokens.font.body, fontSize: 10, color: disabled ? tokens.ui.textMuted : tokens.ui.gold, fontWeight: 700, lineHeight: 1, whiteSpace: "nowrap", ml: 1 }}>
+    <Typography sx={{ fontFamily: tokens.font.body, fontSize: 12, color: disabled ? tokens.ui.textMuted : tokens.ui.gold, fontWeight: 700, lineHeight: 1, whiteSpace: "nowrap", ml: 1 }}>
       {disabled && disabledReason ? disabledReason : price}
     </Typography>
   </Box>
@@ -190,7 +190,7 @@ const Trade = (props: MyGameProps) => {
                 <Typography
                   sx={{
                     fontFamily: tokens.font.body,
-                    fontSize: 10,
+                    fontSize: 12,
                     color: tokens.ui.danger,
                     fontWeight: 600,
                     pl: `${tokens.spacing.xs}px`,
@@ -256,7 +256,7 @@ const Trade = (props: MyGameProps) => {
                   <Typography noWrap sx={{ fontFamily: tokens.font.body, fontSize: tokens.fontSize.xs, color: tokens.ui.text, fontWeight: 600, lineHeight: 1.2 }}>
                     {r.name}
                   </Typography>
-                  <Typography sx={{ fontFamily: tokens.font.body, fontSize: 10, color: tokens.ui.textMuted, lineHeight: 1.2 }}>
+                  <Typography sx={{ fontFamily: tokens.font.body, fontSize: 12, color: tokens.ui.textMuted, lineHeight: 1.2 }}>
                     {r.kind === "colony" ? "Colony" : "Outpost"} · {r.gold}g + {r.goods} goods
                   </Typography>
                 </Box>
@@ -267,7 +267,7 @@ const Trade = (props: MyGameProps) => {
             </Tooltip>
           ))}
           {routeStatuses.length === 0 && (
-            <Typography sx={{ fontFamily: tokens.font.body, fontSize: 10, color: tokens.ui.textMuted, fontStyle: "italic" }}>
+            <Typography sx={{ fontFamily: tokens.font.body, fontSize: 12, color: tokens.ui.textMuted, fontStyle: "italic" }}>
               No outposts or colonies yet — claim Lands to start trading.
             </Typography>
           )}

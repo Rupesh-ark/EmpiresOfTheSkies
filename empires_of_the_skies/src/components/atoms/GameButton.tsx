@@ -5,7 +5,7 @@ import { tokens, backgrounds } from "@/theme";
 
 export interface GameButtonProps {
   children: ReactNode;
-  onClick?: () => void;
+  onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
   onMouseEnter?: () => void;
   onMouseLeave?: () => void;
   disabled?: boolean;

@@ -1,0 +1,530 @@
+/**
+ * PlayerDock — the single player-economy dock at the bottom of the stable
+ * frame, designed for its horizontal shape: one row of uniform "station"
+ * cards — Kingdom | Forces & Musters | Fleets | Cards | Holdings.
+ *
+ * The local player's treasury lives in the PromptBar above (no duplicated
+ * band here). Shows YOUR kingdom by default; clicking a rail chip swaps any
+ * player's public board in (hidden hands stay hidden).
+ */
+import { memo, useState } from "react";
+import { Box, Tooltip, Typography } from "@mui/material";
+import { ExpandLess, ExpandMore } from "@mui/icons-material";
+import { tokens, backgrounds } from "@/theme";
+import {
+  IconRegiment, IconElite, IconLevy, IconSkyship,
+  IconCathedral, IconPalace, IconFactory,
+} from "@/theme";
+import { GiAnchor } from "react-icons/gi";
+import { MyGameProps, KINGDOM_LOCATION, findPossibleDestinations, KA_CARD_DEFS, FleetInfo } from "@eots/game";
+import popeLogo from "@/boards_and_assets/action_board/pope_logo.webp";
+import captainGeneralLogo from "@/boards_and_assets/action_board/captain_general.webp";
+
+import { Holdings } from "./Holdings";
+import { KingdomActions, CardDrawers } from "./board";
+import { ResourceChip } from "@/components/atoms/ResourceChip";
+import { GameButton } from "@/components/atoms/GameButton";
+import { getLocationPresentation } from "@/utils/locationLabels";
+import { useMapSelection } from "@/contexts/MapSelectionContext";
+import { FleetTransferDialog } from "@/components/WorldMap/FleetTransferDialog";
+
+interface PlayerDockProps extends MyGameProps {
+  /** Player whose board the dock shows (rail selection); defaults to self */
+  viewPlayerID: string;
+  onOpenFleetLocation?: (location: number[]) => void;
+}
+
+const DOCK_HEIGHT = 176;
+type ViewInfo = MyGameProps["G"]["playerInfo"][string];
+
+export const PlayerDock = memo((props: PlayerDockProps) => {
+  const [collapsed, setCollapsed] = useState(false);
+  const [manageFleetsOpen, setManageFleetsOpen] = useState(false);
+  const { startSelection } = useMapSelection();
+
+  const viewInfo = props.G.playerInfo[props.viewPlayerID];
+  const isSelf = props.playerID === props.viewPlayerID;
+  if (!viewInfo) return null;
+
+  const colour = viewInfo.colour;
+
+  const [homeX, homeY] = KINGDOM_LOCATION;
+  const homeFleets = viewInfo.fleetInfo.filter(
+    (f) => f.location[0] === homeX && f.location[1] === homeY
+  );
+  const isMyActionsTurn =
+    isSelf &&
+    props.G.stage.phase === "actions" &&
+    props.ctx.currentPlayer === props.playerID;
+  const deployableFleetIds = isMyActionsTurn
+    ? viewInfo.fleetInfo.filter((f) => f.skyships > 0 && !f.dispatchedThisRound).map((f) => f.fleetId)
+    : [];
+
+  const handleDeploy = (fleetId: number) => {
+    const fleetIndex = viewInfo.fleetInfo.findIndex((f) => f.fleetId === fleetId);
+    const fleet = viewInfo.fleetInfo[fleetIndex];
+    if (!fleet) return;
+
+    const isLaden = fleet.regiments > 0 || fleet.levies > 0 || fleet.eliteRegiments > 0;
+    const [allDests, within1, within2, within3] = findPossibleDestinations(props.G, fleet.location, !isLaden);
+    const costMap = new Map<string, number>();
+    for (const [x, y] of within3) costMap.set(`${x},${y}`, 3);
+    for (const [x, y] of within2) costMap.set(`${x},${y}`, 2);
+    for (const [x, y] of within1) costMap.set(`${x},${y}`, 1);
+
+    startSelection({
+      tiles: allDests,
+      prompt: `Deploy Fleet ${fleetId + 1} — pick a highlighted destination on the map`,
+      confirmLabel: "Deploy",
+      getSelectionDetail: (coords) => `(${costMap.get(`${coords[0]},${coords[1]}`) ?? 1}g)`,
+      onConfirm: (coords) => props.moves.moveFleet(fleetIndex, coords),
+      onCancel: () => {},
+    });
+  };
+
+  if (collapsed) {
+    return (
+      <DockShell colour={colour} collapsed onToggle={() => setCollapsed(false)}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: `${tokens.spacing.md}px`, minWidth: 0 }}>
+          <Identity viewInfo={viewInfo} isSelf={isSelf} />
+          {!isSelf && (
+            <Typography sx={{ fontFamily: tokens.font.body, fontSize: tokens.fontSize.xs, color: tokens.ui.textMuted, whiteSpace: "nowrap" }}>
+              {viewInfo.resources.victoryPoints} VP · {viewInfo.resources.gold}g ·{" "}
+              {viewInfo.hereticOrOrthodox === "heretic" ? "Heretic" : "Orthodox"}
+            </Typography>
+          )}
+        </Box>
+      </DockShell>
+    );
+  }
+
+  return (
+    <DockShell colour={colour} onToggle={() => setCollapsed(true)}>
+      <Box sx={{ display: "flex", gap: `${tokens.spacing.sm}px`, flex: 1, minWidth: 0, height: "100%", overflowX: "auto", pb: "2px", pr: "30px" }}>
+        {/* Kingdom — identity + allegiance (+ public treasury for opponents) */}
+        <Station labelNode={<Identity viewInfo={viewInfo} isSelf={isSelf} />} minWidth={isSelf ? 170 : 200} grow={0}>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: "5px" }}>
+            <AllegiancePill viewInfo={viewInfo} />
+            {(viewInfo.isArchprelate || viewInfo.isCaptainGeneral) && (
+              <Typography sx={{ fontFamily: tokens.font.accent, fontSize: tokens.fontSize.xs, color: tokens.ui.gold, fontStyle: "italic", lineHeight: 1.3 }}>
+                {[
+                  viewInfo.isArchprelate && "Seat of the Archprelate",
+                  viewInfo.isCaptainGeneral && "Captain-General of the Faith",
+                ].filter(Boolean).join(" · ")}
+              </Typography>
+            )}
+            {!isSelf && (
+              <Box>
+                <StatRow label="Victory Points" value={viewInfo.resources.victoryPoints} />
+                <StatRow label="Gold" value={viewInfo.resources.gold} />
+                <StatRow label="Counsellors" value={viewInfo.resources.counsellors} />
+              </Box>
+            )}
+          </Box>
+        </Station>
+
+        <Station label="Forces & Musters" minWidth={260}>
+          <Box sx={{ display: "flex", flexWrap: "wrap", gap: "6px", mb: isSelf ? "8px" : 0 }}>
+            <ForceChip Icon={IconRegiment} value={viewInfo.resources.regiments} label="Regiments" />
+            <ForceChip Icon={IconElite} value={viewInfo.resources.eliteRegiments ?? 0} label="Elite" />
+            <ForceChip Icon={IconLevy} value={viewInfo.resources.levies} label="Levies" />
+            <ForceChip Icon={IconSkyship} value={viewInfo.resources.skyships} label="Skyships" />
+          </Box>
+          {isSelf && (
+            <KingdomActions
+              layout="row"
+              colour={colour}
+              shipyards={viewInfo.shipyards}
+              counsellorLocations={viewInfo.playerBoardCounsellorLocations}
+              moves={props.moves}
+            />
+          )}
+        </Station>
+
+        <Station
+          label="Fleets"
+          minWidth={300}
+          action={
+            isSelf && homeFleets.length > 0 ? (
+              <GameButton variant="ghost" size="sm" onClick={() => setManageFleetsOpen(true)}>
+                Manage
+              </GameButton>
+            ) : undefined
+          }
+        >
+          <FleetStrip
+            fleets={viewInfo.fleetInfo}
+            tileMap={props.G.mapState.currentTileArray}
+            deployableFleetIds={deployableFleetIds}
+            onDeploy={isMyActionsTurn ? handleDeploy : undefined}
+            onViewLocation={props.onOpenFleetLocation}
+          />
+        </Station>
+
+        {isSelf ? (
+          <Station label="Cards" minWidth={260}>
+            <CardDrawers
+              fortuneCards={viewInfo.resources.fortuneCards}
+              legacyCard={viewInfo.resources.legacyCard}
+              advantageCard={viewInfo.resources.advantageCard}
+              eventCards={viewInfo.resources.eventCards}
+              resolvedEvent={props.G.eventState.resolvedEvent}
+              eventContributions={props.G.eventState.eventContributions}
+              playerInfo={props.G.playerInfo}
+            />
+          </Station>
+        ) : (
+          <Station label="Cards" minWidth={200}>
+            <PublicCards viewInfo={viewInfo} />
+          </Station>
+        )}
+
+        <Station label="Holdings" minWidth={230}>
+          {isSelf ? <Holdings {...props} variant="compact" /> : <PublicHoldings viewInfo={viewInfo} />}
+        </Station>
+      </Box>
+
+      {isSelf && homeFleets.length > 0 && (
+        <FleetTransferDialog
+          open={manageFleetsOpen}
+          onClose={() => setManageFleetsOpen(false)}
+          location={[homeX, homeY]}
+          fleets={homeFleets}
+          reserves={viewInfo.resources}
+          isKingdom
+          garrison={null}
+          tileArray={props.G.mapState.currentTileArray}
+          moves={props.moves}
+        />
+      )}
+    </DockShell>
+  );
+});
+
+// Shell
+
+const DockShell = ({
+  colour,
+  collapsed = false,
+  onToggle,
+  children,
+}: {
+  colour: string;
+  collapsed?: boolean;
+  onToggle: () => void;
+  children: React.ReactNode;
+}) => (
+  <Box
+    sx={{
+      display: "flex",
+      alignItems: collapsed ? "center" : "stretch",
+      height: collapsed ? 38 : DOCK_HEIGHT,
+      flexShrink: 0,
+      px: `${tokens.spacing.sm}px`,
+      py: collapsed ? 0 : `${tokens.spacing.xs}px`,
+      borderTop: `3px solid ${colour}`,
+      background: backgrounds.parchmentPanelTinted,
+      backgroundColor: tokens.ui.background,
+      boxShadow: "inset 0 6px 10px -6px rgba(0,0,0,0.25)",
+      transition: `height ${tokens.transition.normal}`,
+      position: "relative",
+    }}
+  >
+    {children}
+    <Tooltip title={collapsed ? "Expand the board" : "Collapse"} placement="top">
+      <Box
+        onClick={onToggle}
+        sx={{
+          position: "absolute",
+          top: collapsed ? "50%" : 8,
+          right: 8,
+          transform: collapsed ? "translateY(-50%)" : "none",
+          display: "flex",
+          alignItems: "center",
+          color: tokens.ui.textMuted,
+          cursor: "pointer",
+          zIndex: 5,
+          "&:hover": { color: tokens.ui.text },
+        }}
+      >
+        {collapsed ? <ExpandLess /> : <ExpandMore />}
+      </Box>
+    </Tooltip>
+  </Box>
+);
+
+/** Uniform bordered station card with a small-caps header */
+const Station = ({
+  label,
+  labelNode,
+  action,
+  minWidth,
+  grow = 1,
+  children,
+}: {
+  label?: string;
+  labelNode?: React.ReactNode;
+  action?: React.ReactNode;
+  minWidth: number;
+  grow?: number;
+  children: React.ReactNode;
+}) => (
+  <Box
+    sx={{
+      minWidth,
+      flex: `${grow} 1 ${grow === 0 ? "auto" : "0px"}`,
+      maxWidth: minWidth * 1.6,
+      display: "flex",
+      flexDirection: "column",
+      borderRadius: `${tokens.radius.md}px`,
+      border: `1px solid ${tokens.ui.border}`,
+      borderTop: `1px solid ${tokens.ui.gold}22`,
+      background: backgrounds.surfaceGradient,
+      boxShadow: `inset 0 1px 0 rgba(255,255,255,0.35), 0 1px 3px rgba(80,60,30,0.10)`,
+      px: `${tokens.spacing.sm}px`,
+      py: `${tokens.spacing.xs}px`,
+      overflow: "hidden",
+    }}
+  >
+    <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: "4px", flexShrink: 0, minHeight: 22 }}>
+      {labelNode ?? (
+        <Typography sx={{ fontFamily: tokens.font.accent, fontSize: tokens.fontSize.xs, fontWeight: 700, color: tokens.ui.gold, textTransform: "uppercase", letterSpacing: "0.08em", lineHeight: 1 }}>
+          {label}
+        </Typography>
+      )}
+      {action}
+    </Box>
+    <Box sx={{ flex: 1, minHeight: 0, overflowY: "auto", "&::-webkit-scrollbar": { width: 6 }, "&::-webkit-scrollbar-thumb": { background: tokens.ui.surfaceHover, borderRadius: 3 } }}>
+      {children}
+    </Box>
+  </Box>
+);
+
+const Identity = ({ viewInfo, isSelf }: { viewInfo: ViewInfo; isSelf: boolean }) => (
+  <Box sx={{ display: "flex", alignItems: "center", gap: `${tokens.spacing.sm}px`, minWidth: 0, flexShrink: 0 }}>
+    <Box sx={{ width: 10, height: 10, borderRadius: "50%", backgroundColor: viewInfo.colour, boxShadow: `0 0 6px ${viewInfo.colour}66`, flexShrink: 0 }} />
+    <Typography
+      noWrap
+      sx={{
+        fontFamily: tokens.font.display,
+        fontSize: tokens.fontSize.md,
+        color: viewInfo.colour,
+        lineHeight: 1.2,
+        textShadow: `0 1px 2px rgba(0,0,0,0.35)`,
+      }}
+    >
+      {viewInfo.kingdomName}
+      {isSelf ? " (you)" : ""}
+    </Typography>
+    {viewInfo.isArchprelate && (
+      <Tooltip title="Seat of the Archprelate" placement="top" arrow>
+        <Box component="img" src={popeLogo} alt="Archprelate" sx={{ width: 22, height: 22, objectFit: "contain", opacity: 0.85 }} />
+      </Tooltip>
+    )}
+    {viewInfo.isCaptainGeneral && (
+      <Tooltip title="Captain-General of the Faith" placement="top" arrow>
+        <Box component="img" src={captainGeneralLogo} alt="Captain-General" sx={{ width: 22, height: 22, objectFit: "contain", opacity: 0.85 }} />
+      </Tooltip>
+    )}
+  </Box>
+);
+
+const AllegiancePill = ({ viewInfo }: { viewInfo: ViewInfo }) => {
+  const isHeretic = viewInfo.hereticOrOrthodox === "heretic";
+  const heresyVP = isHeretic ? viewInfo.heresyTracker : -viewInfo.heresyTracker;
+  const alColor = isHeretic ? tokens.allegiance.heresy : tokens.allegiance.orthodox;
+  return (
+    <Box
+      sx={{
+        display: "inline-flex",
+        alignItems: "center",
+        gap: "5px",
+        px: `${tokens.spacing.sm}px`,
+        height: 24,
+        borderRadius: `${tokens.radius.pill}px`,
+        background: backgrounds.surfaceGradient,
+        border: `1px solid ${alColor}44`,
+        alignSelf: "flex-start",
+      }}
+    >
+      <Box sx={{ width: 7, height: 7, borderRadius: "50%", backgroundColor: alColor, boxShadow: `0 0 4px ${alColor}88` }} />
+      <Typography component="span" sx={{ fontSize: tokens.fontSize.xs, fontFamily: tokens.font.body, fontWeight: 600, color: alColor, lineHeight: 1 }}>
+        {isHeretic ? "Heretic" : "Orthodox"}
+      </Typography>
+      <Typography component="span" sx={{ fontSize: tokens.fontSize.xs, fontFamily: tokens.font.body, fontWeight: 700, color: heresyVP >= 0 ? tokens.ui.success : tokens.ui.danger, lineHeight: 1 }}>
+        {heresyVP > 0 ? "+" : ""}{heresyVP} VP
+      </Typography>
+    </Box>
+  );
+};
+
+const ForceChip = ({
+  Icon,
+  value,
+  label,
+}: {
+  Icon: React.ComponentType<{ style?: React.CSSProperties }>;
+  value: number;
+  label: string;
+}) => (
+  <ResourceChip
+    icon={<Icon style={{ fontSize: 15 }} />}
+    value={value}
+    label={label}
+    size="sm"
+    variant={value === 0 ? "muted" : "default"}
+  />
+);
+
+// Fleets — horizontal mini-cards built for the dock
+
+const FleetStrip = ({
+  fleets,
+  tileMap,
+  deployableFleetIds,
+  onDeploy,
+  onViewLocation,
+}: {
+  fleets: FleetInfo[];
+  tileMap: MyGameProps["G"]["mapState"]["currentTileArray"];
+  deployableFleetIds: number[];
+  onDeploy?: (fleetId: number) => void;
+  onViewLocation?: (location: number[]) => void;
+}) => (
+  <Box sx={{ display: "flex", gap: "6px", height: "100%", alignItems: "stretch" }}>
+    {fleets.map((fleet) => {
+      const atHome = fleet.location[0] === KINGDOM_LOCATION[0] && fleet.location[1] === KINGDOM_LOCATION[1];
+      const isEmpty = fleet.skyships === 0;
+      const placeName = atHome ? "Home Waters" : getLocationPresentation(tileMap, fleet.location).name;
+      const canDeploy = !!onDeploy && deployableFleetIds.includes(fleet.fleetId);
+
+      return (
+        <Box
+          key={fleet.fleetId}
+          onClick={onViewLocation ? () => onViewLocation(fleet.location) : undefined}
+          sx={{
+            flex: "1 1 0",
+            minWidth: 84,
+            display: "flex",
+            flexDirection: "column",
+            gap: "3px",
+            p: "6px",
+            borderRadius: `${tokens.radius.sm}px`,
+            border: `1px solid ${tokens.ui.border}`,
+            backgroundColor: isEmpty ? `${tokens.ui.surface}88` : tokens.ui.surfaceRaised,
+            opacity: isEmpty ? 0.75 : 1,
+            cursor: onViewLocation ? "pointer" : "default",
+            transition: `all ${tokens.transition.fast}`,
+            "&:hover": onViewLocation ? { borderColor: `${tokens.ui.gold}55` } : undefined,
+          }}
+        >
+          <Typography sx={{ fontFamily: tokens.font.display, fontSize: tokens.fontSize.xs, fontWeight: 700, color: tokens.ui.text, lineHeight: 1 }}>
+            Fleet {fleet.fleetId + 1}
+          </Typography>
+          <Box sx={{ display: "flex", alignItems: "center", gap: "3px", minWidth: 0 }}>
+            <GiAnchor size={11} color={tokens.ui.textMuted} />
+            <Typography noWrap sx={{ fontFamily: tokens.font.body, fontSize: tokens.fontSize.xs, color: tokens.ui.textMuted, lineHeight: 1 }}>
+              {placeName}
+            </Typography>
+          </Box>
+          <Box sx={{ display: "flex", alignItems: "center", gap: "7px", mt: "1px" }}>
+            <LoadoutStat Icon={IconSkyship} value={fleet.skyships} />
+            <LoadoutStat Icon={IconRegiment} value={fleet.regiments + (fleet.eliteRegiments ?? 0)} />
+            <LoadoutStat Icon={IconLevy} value={fleet.levies} />
+          </Box>
+          <Box sx={{ mt: "auto" }}>
+            {canDeploy ? (
+              <GameButton
+                variant="secondary"
+                size="sm"
+                fullWidth
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDeploy!(fleet.fleetId);
+                }}
+              >
+                Deploy
+              </GameButton>
+            ) : (
+              <Typography sx={{ fontFamily: tokens.font.body, fontSize: tokens.fontSize.xs, color: tokens.ui.textMuted, fontStyle: "italic", lineHeight: 1, textAlign: "right" }}>
+                {isEmpty ? "empty" : fleet.dispatchedThisRound ? "dispatched" : atHome ? "at home" : "deployed"}
+              </Typography>
+            )}
+          </Box>
+        </Box>
+      );
+    })}
+  </Box>
+);
+
+const LoadoutStat = ({
+  Icon,
+  value,
+}: {
+  Icon: React.ComponentType<{ style?: React.CSSProperties }>;
+  value: number;
+}) => (
+  <Box sx={{ display: "inline-flex", alignItems: "center", gap: "2px" }}>
+    <Icon style={{ fontSize: 13, color: value > 0 ? tokens.ui.text : tokens.ui.textMuted }} />
+    <Typography sx={{ fontFamily: tokens.font.body, fontSize: tokens.fontSize.xs, fontWeight: 600, color: value > 0 ? tokens.ui.text : tokens.ui.textMuted, lineHeight: 1 }}>
+      {value}
+    </Typography>
+  </Box>
+);
+
+// Public (opponent) views
+
+const StatRow = ({ label, value }: { label: string; value: string | number }) => (
+  <Box sx={{ display: "flex", justifyContent: "space-between", gap: "8px" }}>
+    <Typography sx={{ fontFamily: tokens.font.body, fontSize: tokens.fontSize.xs, color: tokens.ui.textMuted, lineHeight: 1.5 }}>
+      {label}
+    </Typography>
+    <Typography sx={{ fontFamily: tokens.font.body, fontSize: tokens.fontSize.xs, fontWeight: 700, color: tokens.ui.text, lineHeight: 1.5 }}>
+      {value}
+    </Typography>
+  </Box>
+);
+
+const PublicHoldings = ({ viewInfo }: { viewInfo: ViewInfo }) => (
+  <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", columnGap: `${tokens.spacing.md}px` }}>
+    <HoldingStat Icon={IconCathedral} label="Cathedrals" value={viewInfo.cathedrals} />
+    <HoldingStat Icon={IconPalace} label="Palaces" value={viewInfo.palaces} />
+    <HoldingStat Icon={IconSkyship} label="Shipyards" value={viewInfo.shipyards} />
+    <HoldingStat Icon={IconFactory} label="Factories" value={viewInfo.factories} />
+    <HoldingStat Icon={IconRegiment} label="Prisoners" value={viewInfo.prisoners} />
+    <HoldingStat Icon={IconLevy} label="Dissenters" value={viewInfo.freeDissenters} />
+  </Box>
+);
+
+const HoldingStat = ({
+  Icon,
+  label,
+  value,
+}: {
+  Icon: React.ComponentType<{ style?: React.CSSProperties }>;
+  label: string;
+  value: number;
+}) => (
+  <Box sx={{ display: "flex", alignItems: "center", gap: "5px", opacity: value === 0 ? 0.5 : 1, py: "2px" }}>
+    <Icon style={{ fontSize: 14, color: tokens.ui.textMuted }} />
+    <Typography sx={{ fontFamily: tokens.font.body, fontSize: tokens.fontSize.xs, fontWeight: 700, color: tokens.ui.text, lineHeight: 1 }}>
+      {value}
+    </Typography>
+    <Typography sx={{ fontFamily: tokens.font.body, fontSize: tokens.fontSize.xs, color: tokens.ui.textMuted, lineHeight: 1 }}>
+      {label}
+    </Typography>
+  </Box>
+);
+
+const PublicCards = ({ viewInfo }: { viewInfo: ViewInfo }) => {
+  const ka = viewInfo.resources.advantageCard;
+  const kaName = ka ? (KA_CARD_DEFS[ka]?.displayName ?? ka) : "—";
+  return (
+    <Box>
+      <StatRow label="Fortune of War" value={viewInfo.resources.fortuneCards.length} />
+      <StatRow label="Event cards" value={viewInfo.resources.eventCards.length} />
+      <StatRow label="Legacy" value={viewInfo.resources.legacyCard ? "hidden" : "—"} />
+      <StatRow label="Advantage" value={kaName} />
+    </Box>
+  );
+};

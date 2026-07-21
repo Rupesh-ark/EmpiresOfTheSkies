@@ -69,9 +69,12 @@ const GameLog = (props: MyGameProps) => {
     }
   };
 
-  // Group entries by round, newest round first
+  // Group entries by round, newest round first.
+  // Debug entries (deck seeding internals) stay in G.gameLog for
+  // troubleshooting but are never player-facing.
   const rounds = new Map<number, string[]>();
   for (const entry of log) {
+    if (entry.debug) continue;
     if (!rounds.has(entry.round)) {
       rounds.set(entry.round, []);
     }
@@ -103,7 +106,7 @@ const GameLog = (props: MyGameProps) => {
         >
           <Typography
             sx={{
-              fontSize: 10,
+              fontSize: tokens.fontSize.xs,
               fontFamily: "monospace",
               color: tokens.ui.textMuted,
               letterSpacing: "0.03em",
@@ -230,7 +233,7 @@ const GameLog = (props: MyGameProps) => {
                   <Typography
                     sx={{
                       fontFamily: tokens.font.body,
-                      fontSize: 11,
+                      fontSize: tokens.fontSize.xs,
                       color: tokens.ui.text,
                       lineHeight: 1.4,
                       pb: `${tokens.spacing.xs}px`,

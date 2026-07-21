@@ -1,7 +1,9 @@
 import { MyGameProps } from "@eots/game";
-import { DialogShell } from "@/components/atoms/DialogShell";
 import { Typography } from "@mui/material";
+import { DecisionPanel } from "@/components/atoms/DecisionPanel";
+import { GameButton } from "@/components/atoms/GameButton";
 import { getLocationPresentation } from "@/utils/locationLabels";
+import { tokens } from "@/theme";
 
 const GroundAttackOrPassDialog = (props: MyGameProps) => {
   const [x, y] = props.G.mapState.currentBattle;
@@ -19,24 +21,27 @@ const GroundAttackOrPassDialog = (props: MyGameProps) => {
     props.G.stage.sub === "ground_attack_or_pass";
 
   return (
-    <DialogShell
+    <DecisionPanel
       open={isOpen}
       title="Choose your battle action"
       subtitle={`Battle at ${getLocationPresentation(props.G.mapState.currentTileArray, [x, y]).name} — highlighted in red on the map`}
       mood="battle"
-      size="sm"
-      confirmLabel="Attack!"
-      confirmColor="success"
-      onConfirm={() => props.moves.attackPlayersBuilding()}
-      cancelLabel="Pass"
-      cancelColor="error"
-      onCancel={() => props.moves.doNotGroundAttack()}
+      actions={
+        <>
+          <GameButton variant="ghost" onClick={() => props.moves.doNotGroundAttack()}>
+            Pass
+          </GameButton>
+          <GameButton variant="danger" onClick={() => props.moves.attackPlayersBuilding()}>
+            Attack!
+          </GameButton>
+        </>
+      }
     >
-      <Typography>
+      <Typography sx={{ fontFamily: tokens.font.body, fontSize: tokens.fontSize.sm }}>
         Do you want to attack this enemy's region? You must completely wipe
         them out in order to take control.
       </Typography>
-    </DialogShell>
+    </DecisionPanel>
   );
 };
 

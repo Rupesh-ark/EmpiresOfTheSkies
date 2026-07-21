@@ -8,11 +8,9 @@ import { BTN_BG } from "@/assets/actionBoard";
 import { ActionBoardProps, ActionTooltipContent, TOOLTIP_DELAY } from "./shared";
 import HolyDecreeDialog from "./HolyDecreeDialog";
 import { PlayerDot } from "@/components/atoms/PlayerDot";
-import { useActionHover } from "../ActionHoverContext";
 
 const IssueHolyDecree = (props: ActionBoardProps) => {
   const [dialogOpen, setDialogOpen] = useState(false);
-  const { setHoveredAction } = useActionHover();
 
   const isArchPrelate =
     props.playerID
@@ -32,8 +30,6 @@ const IssueHolyDecree = (props: ActionBoardProps) => {
     <>
       <Tooltip title={<ActionTooltipContent actionId="issue-holy-decree" />} placement="right" arrow enterDelay={TOOLTIP_DELAY.enter} enterNextDelay={TOOLTIP_DELAY.enterNext}>
       <Box
-        onMouseEnter={() => setHoveredAction("issue-holy-decree")}
-        onMouseLeave={() => setHoveredAction(null)}
         sx={{
           display: "flex",
           alignItems: "center",
@@ -104,7 +100,7 @@ const IssueHolyDecree = (props: ActionBoardProps) => {
           <Typography
             sx={{
               fontFamily: tokens.font.body,
-              fontSize: 10,
+              fontSize: 12,
               color: tokens.allegiance.orthodox,
               fontWeight: 600,
               lineHeight: 1.3,

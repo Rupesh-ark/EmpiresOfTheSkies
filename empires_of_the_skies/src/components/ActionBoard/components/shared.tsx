@@ -30,11 +30,11 @@ export const ActionTooltipContent = ({ actionId }: { actionId: string }) => {
         {info.title}
       </Typography>
       {info.cost && (
-        <Typography sx={{ fontFamily: tokens.font.body, fontSize: 11, color: tokens.ui.gold, fontWeight: 600, mt: 0.25 }}>
+        <Typography sx={{ fontFamily: tokens.font.body, fontSize: 12, color: tokens.ui.gold, fontWeight: 600, mt: 0.25 }}>
           Cost: {info.cost}
         </Typography>
       )}
-      <Typography sx={{ fontFamily: tokens.font.body, fontSize: 11, color: tokens.ui.text, lineHeight: 1.4, mt: 0.5 }}>
+      <Typography sx={{ fontFamily: tokens.font.body, fontSize: 12, color: tokens.ui.text, lineHeight: 1.4, mt: 0.5 }}>
         {info.description}
       </Typography>
     </Box>

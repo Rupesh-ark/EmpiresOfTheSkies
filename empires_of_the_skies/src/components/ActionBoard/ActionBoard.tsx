@@ -1,9 +1,18 @@
 import { memo } from "react";
-import { Box } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import { MyGameProps } from "@eots/game";
 import { tokens } from "@/theme";
 export { ActionHoverProvider } from "./ActionHoverContext";
-export { ActionInfoPanel } from "./ActionInfoPanel";
+
+/** Small-caps group header with a brass rule — scannability in the sheet */
+const GroupHeader = ({ label }: { label: string }) => (
+  <Box sx={{ display: "flex", alignItems: "center", gap: `${tokens.spacing.sm}px`, gridColumn: "1 / -1", mt: "4px" }}>
+    <Typography sx={{ fontFamily: tokens.font.accent, fontSize: 12, fontWeight: 700, color: tokens.ui.gold, textTransform: "uppercase", letterSpacing: "0.1em", lineHeight: 1, flexShrink: 0 }}>
+      {label}
+    </Typography>
+    <Box sx={{ flex: 1, height: "1px", background: `linear-gradient(90deg, ${tokens.ui.gold}44, transparent)` }} />
+  </Box>
+);
 
 // Row components
 import PlayerOrderRow from "./components/rows/PlayerOrderRow";
@@ -35,16 +44,16 @@ export const ActionBoard = memo((props: ActionBoardProps) => (
           display: "grid",
           gridTemplateColumns: "1fr 1fr",
           width: "100%",
-          gap: "6px",
+          gap: "4px",
           alignContent: "start",
         }}
       >
-        {/* Row 1: Player Order spans full width */}
+        {/* Player Order spans full width */}
         <Box sx={{ gridColumn: "1 / -1" }}>
           <PlayerOrderRow {...props} />
         </Box>
 
-        {/* Slotted actions (numbered slots, stacking cost) */}
+        <GroupHeader label="Musters & Trade" />
         <RecruitCounsellorsRow {...props} />
         <RecruitRegimentsRow {...props} />
         <PurchaseSkyshipsZeelandRow {...props} />
@@ -55,17 +64,15 @@ export const ActionBoard = memo((props: ActionBoardProps) => (
           <ConvertMonarchRow {...props} />
         </Box>
 
-        {/* Building actions — single row of 4 */}
+        <GroupHeader label="Construction" />
         <Box sx={{ gridColumn: "1 / -1" }}>
           <FoundBuildingsRow {...props} />
         </Box>
 
-        {/* Per-kingdom slots */}
+        <GroupHeader label="The Church" />
         <Box sx={{ gridColumn: "1 / -1" }}>
           <InfluencePrelatesRow {...props} />
         </Box>
-
-        {/* Holy Decree — full width (only if Archprelate) */}
         <Box sx={{ gridColumn: "1 / -1" }}>
           <IssueHolyDecree {...props} />
         </Box>

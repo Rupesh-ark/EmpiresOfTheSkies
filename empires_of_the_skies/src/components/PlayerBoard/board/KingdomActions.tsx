@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { Box, Typography, Dialog, DialogTitle, DialogContent, DialogActions } from "@mui/material";
+import { Box, Tooltip, Typography, Dialog, DialogTitle, DialogContent, DialogActions } from "@mui/material";
 import { tokens } from "@/theme";
 import { MyGameProps } from "@eots/game";
 import { GamePanel } from "@/components/atoms/GamePanel";
 import { GameButton } from "@/components/atoms/GameButton";
 import { SectionHeader } from "./SectionHeader";
 import { useActionHover } from "@/components/ActionBoard/ActionHoverContext";
+import { useToast } from "@/hooks/useToast";
 
 interface CounsellorDotProps {
   placed: boolean;
@@ -142,6 +143,8 @@ interface KingdomActionsProps {
     trainTroops: boolean;
   };
   moves: MyGameProps["moves"];
+  /** "column" — sidebar-style stacked buttons (default); "row" — compact dock strip */
+  layout?: "column" | "row";
 }
 
 export const KingdomActions = ({
@@ -149,11 +152,15 @@ export const KingdomActions = ({
   shipyards,
   counsellorLocations,
   moves,
+  layout = "column",
 }: KingdomActionsProps) => {
   const [buildDialogOpen, setBuildDialogOpen] = useState(false);
   const [levyDialogOpen, setLevyDialogOpen] = useState(false);
   const [levyCount, setLevyCount] = useState(3);
-  const { setHoveredAction } = useActionHover();
+  const { flashAction } = useActionHover();
+  const { showToast } = useToast();
+
+  const noShipyards = shipyards === 0;
 
   const handleBuildSkyships = (perYard: number) => {
     moves.buildSkyships(perYard);
@@ -167,54 +174,86 @@ export const KingdomActions = ({
     setLevyCount(3);
   };
 
-  return (
-    <>
-      <GamePanel variant="default" padding="sm">
-        <SectionHeader label="Kingdom Actions" />
-        <Box sx={{ display: "flex", flexDirection: "column", gap: `${tokens.spacing.sm}px` }}>
+  const isRow = layout === "row";
+
+  const buttons = (
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: isRow ? "row" : "column",
+        flexWrap: isRow ? "wrap" : "nowrap",
+        gap: isRow ? "6px" : `${tokens.spacing.sm}px`,
+      }}
+    >
+      <Tooltip
+        title={noShipyards && !counsellorLocations.buildSkyships ? "You have no Shipyards yet — click to see where to build one" : ""}
+        placement="top"
+        arrow
+      >
+        <span>
           <GameButton
             variant="secondary"
-            fullWidth
-            onMouseEnter={() => setHoveredAction("build-skyships")}
-            onMouseLeave={() => setHoveredAction(null)}
+            size={isRow ? "sm" : "md"}
+            fullWidth={!isRow}
             onClick={() => {
+              if (noShipyards) {
+                // Guide, don't block: point the player at the Shipyard cell.
+                flashAction("shipyard");
+                showToast(
+                  "Your Kingdom has no Shipyards — build one on the Action Board (Construction → Shipyard).",
+                  "info"
+                );
+                return;
+              }
               moves.enableDispatchButtons(true);
               setBuildDialogOpen(true);
             }}
-            disabled={counsellorLocations.buildSkyships || shipyards === 0}
-            disabledReason={shipyards === 0 ? "No shipyards" : "Already built this round"}
+            disabled={counsellorLocations.buildSkyships}
+            disabledReason="Already built this round"
             icon={<CounsellorDot placed={counsellorLocations.buildSkyships} colour={colour} />}
+            sx={noShipyards ? { opacity: 0.75 } : undefined}
           >
-            Build Skyships ({shipyards} {shipyards === 1 ? "yard" : "yards"})
+            {isRow ? `Skyships (${shipyards}y)` : `Build Skyships (${shipyards} ${shipyards === 1 ? "yard" : "yards"})`}
           </GameButton>
+        </span>
+      </Tooltip>
 
-          <GameButton
-            variant="secondary"
-            fullWidth
-            onMouseEnter={() => setHoveredAction("conscript-levies")}
-            onMouseLeave={() => setHoveredAction(null)}
-            onClick={() => setLevyDialogOpen(true)}
-            disabled={counsellorLocations.conscriptLevies}
-            disabledReason="Already conscripted this round"
-            icon={<CounsellorDot placed={counsellorLocations.conscriptLevies} colour={colour} />}
-          >
-            Conscript Levies
-          </GameButton>
+      <GameButton
+        variant="secondary"
+        size={isRow ? "sm" : "md"}
+        fullWidth={!isRow}
+        onClick={() => setLevyDialogOpen(true)}
+        disabled={counsellorLocations.conscriptLevies}
+        disabledReason="Already conscripted this round"
+        icon={<CounsellorDot placed={counsellorLocations.conscriptLevies} colour={colour} />}
+      >
+        {isRow ? "Levies (1VP/3)" : "Conscript Levies (1 VP per 3)"}
+      </GameButton>
 
-          <GameButton
-            variant="secondary"
-            fullWidth
-            onMouseEnter={() => setHoveredAction("train-troops")}
-            onMouseLeave={() => setHoveredAction(null)}
-            onClick={() => moves.trainTroops()}
-            disabled={counsellorLocations.trainTroops}
-            disabledReason="Already trained this round"
-            icon={<CounsellorDot placed={counsellorLocations.trainTroops} colour={colour} />}
-          >
-            Train Troops
-          </GameButton>
-        </Box>
-      </GamePanel>
+      <GameButton
+        variant="secondary"
+        size={isRow ? "sm" : "md"}
+        fullWidth={!isRow}
+        onClick={() => moves.trainTroops()}
+        disabled={counsellorLocations.trainTroops}
+        disabledReason="Already trained this round"
+        icon={<CounsellorDot placed={counsellorLocations.trainTroops} colour={colour} />}
+      >
+        {isRow ? "Train (+2 FoW)" : "Train Troops (draw 2 FoW cards)"}
+      </GameButton>
+    </Box>
+  );
+
+  return (
+    <>
+      {isRow ? (
+        buttons
+      ) : (
+        <GamePanel variant="default" padding="sm">
+          <SectionHeader label="Kingdom Actions" />
+          {buttons}
+        </GamePanel>
+      )}
 
       <BuildSkyshipsDialog
         open={buildDialogOpen}

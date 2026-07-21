@@ -20,19 +20,23 @@ import { PlayerDot } from "@/components/atoms/PlayerDot";
 import { ActionBoardProps, ActionTooltipContent, TOOLTIP_DELAY } from "../shared";
 import { useActionHover } from "../../ActionHoverContext";
 import { useMapSelection } from "@/contexts/MapSelectionContext";
+import { MOVE_DEFINITIONS, getNextBuildingCost } from "@eots/game";
 
 const THUMB_W = 40;
 
 const BUILDINGS = [
-  { label: "Cathedral", index: 0, key: 1, bg: BTN_BG.cathedral, actionId: "cathedral", baseCost: 5 },
-  { label: "Palace",    index: 1, key: 2, bg: BTN_BG.palace,    actionId: "palace",    baseCost: 5 },
-  { label: "Shipyard",  index: 2, key: 3, bg: BTN_BG.shipyard,  actionId: "shipyard",  baseCost: 3 },
-  { label: "Fort",      index: 3, key: 4, bg: BTN_BG.fort,      actionId: "fort",      baseCost: 2 },
+  { label: "Cathedral", index: 0, key: 1, bg: BTN_BG.cathedral, actionId: "cathedral" },
+  { label: "Palace",    index: 1, key: 2, bg: BTN_BG.palace,    actionId: "palace"    },
+  { label: "Shipyard",  index: 2, key: 3, bg: BTN_BG.shipyard,  actionId: "shipyard"  },
+  { label: "Fort",      index: 3, key: 4, bg: BTN_BG.fort,      actionId: "fort"      },
 ] as const;
 
 const BuildingCell = ({
   label,
   cost,
+  insufficientGold,
+  disabled,
+  disabledReason,
   counsellors,
   playerInfo,
   onClick,
@@ -41,20 +45,38 @@ const BuildingCell = ({
 }: {
   label: string;
   cost: number;
+  insufficientGold?: boolean;
+  disabled?: boolean;
+  disabledReason?: string;
   counsellors: string[];
   playerInfo: Record<string, { colour: string; kingdomName: string }>;
   onClick: () => void;
   bg?: string;
   actionId: string;
 }) => {
-  const { setHoveredAction } = useActionHover();
+  const { flashedAction } = useActionHover();
+  const isFlashed = flashedAction === actionId;
+
+  const tooltip = (
+    <Box>
+      <ActionTooltipContent actionId={actionId} />
+      {disabled && disabledReason && (
+        <Typography sx={{ fontFamily: tokens.font.body, fontSize: 12, color: tokens.ui.danger, fontWeight: 600, px: 0.5, pb: 0.5 }}>
+          {disabledReason}
+        </Typography>
+      )}
+      {!disabled && insufficientGold && (
+        <Typography sx={{ fontFamily: tokens.font.body, fontSize: 12, color: tokens.ui.danger, fontWeight: 600, px: 0.5, pb: 0.5 }}>
+          Costs {cost}g — building now puts you into debt.
+        </Typography>
+      )}
+    </Box>
+  );
 
   return (
-    <Tooltip title={<ActionTooltipContent actionId={actionId} />} placement="top" arrow enterDelay={TOOLTIP_DELAY.enter} enterNextDelay={TOOLTIP_DELAY.enterNext}>
+    <Tooltip title={tooltip} placement="top" arrow enterDelay={TOOLTIP_DELAY.enter} enterNextDelay={TOOLTIP_DELAY.enterNext}>
     <Box
-      onClick={onClick}
-      onMouseEnter={() => setHoveredAction(actionId)}
-      onMouseLeave={() => setHoveredAction(null)}
+      onClick={disabled ? undefined : onClick}
       sx={{
         display: "flex",
         flexDirection: "column",
@@ -75,20 +97,34 @@ const BuildingCell = ({
           bottom: 0,
           width: 3,
           borderRadius: `${tokens.radius.md}px 0 0 ${tokens.radius.md}px`,
-          background: `linear-gradient(180deg, ${tokens.ui.gold} 0%, ${tokens.ui.gold}55 60%, transparent 100%)`,
+          background: disabled
+            ? `linear-gradient(180deg, ${tokens.ui.gold}44 0%, ${tokens.ui.gold}22 60%, transparent 100%)`
+            : `linear-gradient(180deg, ${tokens.ui.gold} 0%, ${tokens.ui.gold}55 60%, transparent 100%)`,
           transition: `background ${tokens.transition.fast}`,
         },
-        cursor: "pointer",
+        cursor: disabled ? "not-allowed" : "pointer",
+        opacity: disabled ? 0.55 : 1,
         transition: `all ${tokens.transition.fast}`,
-        "&:hover": {
-          borderColor: `${tokens.ui.gold}33`,
-          backgroundColor: tokens.ui.surfaceHover,
-          boxShadow: `0 0 6px ${tokens.ui.gold}10`,
-          "&::before": {
-            background: `linear-gradient(180deg, ${tokens.ui.gold} 0%, ${tokens.ui.gold}88 60%, ${tokens.ui.gold}22 100%)`,
+        // Guide flash — pulses when another control points the player here
+        ...(isFlashed && {
+          "@keyframes guidePulse": {
+            "0%, 100%": { boxShadow: "0 0 0 rgba(232,184,75,0)" },
+            "50%": { boxShadow: `0 0 18px rgba(232,184,75,0.9), inset 0 0 10px rgba(232,184,75,0.35)` },
           },
-        },
-        "&:active": { transform: "scale(0.998)" },
+          animation: "guidePulse 1s ease-in-out 3",
+          borderColor: tokens.ui.gold,
+        }),
+        ...(!disabled && {
+          "&:hover": {
+            borderColor: `${tokens.ui.gold}33`,
+            backgroundColor: tokens.ui.surfaceHover,
+            boxShadow: `0 0 6px ${tokens.ui.gold}10`,
+            "&::before": {
+              background: `linear-gradient(180deg, ${tokens.ui.gold} 0%, ${tokens.ui.gold}88 60%, ${tokens.ui.gold}22 100%)`,
+            },
+          },
+          "&:active": { transform: "scale(0.998)" },
+        }),
       }}
     >
       {/* Top: thumbnail + label */}
@@ -135,7 +171,7 @@ const BuildingCell = ({
             sx={{
               fontFamily: tokens.font.body,
               fontSize: tokens.fontSize.xs,
-              color: tokens.ui.gold,
+              color: insufficientGold ? tokens.ui.danger : tokens.ui.gold,
               fontWeight: 600,
               lineHeight: 1,
             }}
@@ -161,7 +197,7 @@ const BuildingCell = ({
           <Typography
             sx={{
               fontFamily: tokens.font.body,
-              fontSize: 9,
+              fontSize: 12,
               color: tokens.ui.textMuted,
               fontWeight: 600,
             }}
@@ -239,12 +275,25 @@ const FoundBuildingsRow = (props: ActionBoardProps) => {
           const counsellors = (props.G.boardState.foundBuildings[
             b.key as keyof typeof props.G.boardState.foundBuildings
           ] as string[]) ?? [];
-          const cost = b.baseCost + counsellors.length + 1;
+          const cost = getNextBuildingCost(props.G, b.key);
+          // Palace availability check needs a provisional direction — the real
+          // one is chosen in the dialog after the click.
+          const validateArgs = b.index === 1 ? [b.index, "advance"] : [b.index];
+          const moveError =
+            props.isActive && props.playerID
+              ? MOVE_DEFINITIONS.foundBuildings.validate?.(props.G, props.playerID, ...validateArgs) ?? null
+              : null;
+          const gold = props.playerID
+            ? props.G.playerInfo[props.playerID]?.resources.gold
+            : undefined;
           return (
             <BuildingCell
               key={b.label}
               label={b.label}
               cost={cost}
+              insufficientGold={gold !== undefined && cost > gold}
+              disabled={!!moveError}
+              disabledReason={moveError?.message}
               counsellors={counsellors}
               playerInfo={props.G.playerInfo}
               bg={b.bg}

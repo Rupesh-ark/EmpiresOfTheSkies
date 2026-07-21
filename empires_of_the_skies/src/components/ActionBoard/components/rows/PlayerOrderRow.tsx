@@ -7,14 +7,12 @@ import { BTN_BG } from "@/assets/actionBoard";
 import { ActionBoardProps, ActionTooltipContent, TOOLTIP_DELAY } from "../shared";
 import { clearMoves } from "@/utils/gameHelpers";
 import { PlayerDot } from "@/components/atoms/PlayerDot";
-import { useActionHover } from "../../ActionHoverContext";
 import { useToast } from "@/hooks/useToast";
 
 const ORDINALS = ["1st", "2nd", "3rd", "4th", "5th", "6th"];
 const THUMB_W = 80;
 
 const PlayerOrderRow = (props: ActionBoardProps) => {
-  const { setHoveredAction } = useActionHover();
   const { showToast } = useToast();
   const numPlayers = Object.keys(props.G.playerInfo).length;
 
@@ -25,8 +23,6 @@ const PlayerOrderRow = (props: ActionBoardProps) => {
   return (
     <Tooltip title={<ActionTooltipContent actionId="change-player-order" />} placement="right" arrow enterDelay={TOOLTIP_DELAY.enter} enterNextDelay={TOOLTIP_DELAY.enterNext}>
     <Box
-      onMouseEnter={() => setHoveredAction("change-player-order")}
-      onMouseLeave={() => setHoveredAction(null)}
       sx={{
         display: "flex",
         alignItems: "center",
@@ -150,7 +146,7 @@ const PlayerOrderRow = (props: ActionBoardProps) => {
                 ) : (
                   <Typography
                     sx={{
-                      fontSize: 10,
+                      fontSize: 12,
                       fontFamily: tokens.font.body,
                       fontWeight: 600,
                       color: tokens.ui.textMuted,

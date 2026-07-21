@@ -117,7 +117,7 @@ const HoldingsHeader = ({ label }: { label: string }) => (
     <Typography
       sx={{
         fontFamily: tokens.font.accent,
-        fontSize: 10,
+        fontSize: 12,
         fontWeight: 600,
         color: tokens.ui.gold,
         textTransform: "uppercase",
@@ -187,7 +187,7 @@ export const Holdings = (props: HoldingsProps) => {
             <Typography
               key={i}
               sx={{
-                fontSize: 10,
+                fontSize: 12,
                 fontFamily: tokens.font.body,
                 color: tokens.ui.textMuted,
                 lineHeight: 1.4,

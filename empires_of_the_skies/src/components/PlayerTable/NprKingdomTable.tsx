@@ -141,7 +141,7 @@ const NprKingdomTable = (props: MyGameProps) => {
                             borderColor: "#607D8B",
                             color: "#607D8B",
                             height: 20,
-                            fontSize: "0.65rem",
+                            fontSize: "0.75rem",
                             fontWeight: "bold",
                           }}
                         />

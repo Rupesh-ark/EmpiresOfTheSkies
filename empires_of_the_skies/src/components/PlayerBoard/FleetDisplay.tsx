@@ -40,7 +40,7 @@ const FleetDisplay = (props: FleetDisplayProps) => {
       <Typography
         sx={{
           fontFamily: tokens.font.body,
-          fontSize: "0.68rem",
+          fontSize: "0.75rem",
           fontWeight: 800,
           letterSpacing: "0.08em",
           textTransform: "uppercase",
@@ -70,7 +70,7 @@ const FleetDisplay = (props: FleetDisplayProps) => {
             backgroundColor: "rgba(19,38,58,0.08)",
             border: "1px solid rgba(19,38,58,0.15)",
             fontFamily: tokens.font.body,
-            fontSize: "0.68rem",
+            fontSize: "0.75rem",
             fontWeight: 800,
             letterSpacing: "0.08em",
             color: "rgba(19,38,58,0.72)",

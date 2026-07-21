@@ -12,7 +12,7 @@ export interface PlayerDotProps {
 }
 
 const sizeMap = {
-  xs: { diameter: 10, fontSize: 7 },
+  xs: { diameter: 10, fontSize: tokens.fontSize.xs },
   sm: { diameter: 16, fontSize: tokens.fontSize.xs },
   md: { diameter: 24, fontSize: tokens.fontSize.sm },
   lg: { diameter: 32, fontSize: tokens.fontSize.base },

@@ -164,7 +164,7 @@ export const CardDrawers = ({
                       {def.description}
                     </Typography>
                   )}
-                  <Typography sx={{ fontFamily: tokens.font.body, fontSize: 9, color: legacyCard.colour === "purple" ? tokens.allegiance.orthodox : tokens.allegiance.heresy, lineHeight: 1.3, mt: "3px", fontWeight: 600, textShadow: "0 1px 2px rgba(0,0,0,0.7)" }}>
+                  <Typography sx={{ fontFamily: tokens.font.body, fontSize: 12, color: legacyCard.colour === "purple" ? tokens.allegiance.orthodox : tokens.allegiance.heresy, lineHeight: 1.3, mt: "3px", fontWeight: 600, textShadow: "0 1px 2px rgba(0,0,0,0.7)" }}>
                     {legacyCard.colour === "purple" ? "Orthodox — full VP if Orthodox, half if Heretic" : "Heretic — full VP if Heretic, half if Orthodox"}
                   </Typography>
                 </Box>
@@ -231,7 +231,7 @@ export const CardDrawers = ({
                     {Icon && <Icon size={18} color={tokens.ui.gold} style={{ opacity: 0.9 }} />}
                   </Box>
                   <Box sx={{ flex: 1, minWidth: 0 }}>
-                    <Typography sx={{ fontFamily: tokens.font.body, fontSize: 9, color: tokens.ui.gold, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", lineHeight: 1 }}>
+                    <Typography sx={{ fontFamily: tokens.font.body, fontSize: 12, color: tokens.ui.gold, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", lineHeight: 1 }}>
                       Resolved
                     </Typography>
                     <Typography sx={{ fontFamily: tokens.font.display, fontSize: tokens.fontSize.sm, color: tokens.ui.gold, lineHeight: 1.2 }}>
@@ -247,7 +247,7 @@ export const CardDrawers = ({
 
             {hasContributions && (
               <>
-                <Typography sx={{ fontFamily: tokens.font.body, fontSize: 9, color: tokens.ui.textMuted, textTransform: "uppercase", letterSpacing: "0.08em", mt: "2px" }}>
+                <Typography sx={{ fontFamily: tokens.font.body, fontSize: 12, color: tokens.ui.textMuted, textTransform: "uppercase", letterSpacing: "0.08em", mt: "2px" }}>
                   Chosen Cards
                 </Typography>
                 {Object.entries(eventContributions).map(([pid, card]) => {
@@ -265,7 +265,7 @@ export const CardDrawers = ({
                         {def.displayName}
                       </Typography>
                       {isResolved && (
-                        <Typography sx={{ fontFamily: tokens.font.body, fontSize: 9, fontWeight: 700, color: tokens.ui.gold, flexShrink: 0 }}>
+                        <Typography sx={{ fontFamily: tokens.font.body, fontSize: 12, fontWeight: 700, color: tokens.ui.gold, flexShrink: 0 }}>
                           ★
                         </Typography>
                       )}
@@ -277,7 +277,7 @@ export const CardDrawers = ({
 
             {eventCards.length > 0 && (
               <>
-                <Typography sx={{ fontFamily: tokens.font.body, fontSize: 9, color: tokens.ui.textMuted, textTransform: "uppercase", letterSpacing: "0.08em", mt: "2px" }}>
+                <Typography sx={{ fontFamily: tokens.font.body, fontSize: 12, color: tokens.ui.textMuted, textTransform: "uppercase", letterSpacing: "0.08em", mt: "2px" }}>
                   Your Hand
                 </Typography>
                 {eventCards.map((card, i) => {

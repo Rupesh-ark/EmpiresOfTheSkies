@@ -1,6 +1,7 @@
 import { MyGameProps } from "@eots/game";
-import { Button, Typography, Box } from "@mui/material";
-import { DialogShell } from "@/components/atoms/DialogShell";
+import { Typography, Box } from "@mui/material";
+import { DecisionPanel } from "@/components/atoms/DecisionPanel";
+import { tokens } from "@/theme";
 
 const DiscardFoWCardDialog = (props: MyGameProps) => {
   if (props.G.stage.sub !== "discard_fow" || props.ctx.currentPlayer !== props.playerID || !props.playerID) return null;
@@ -9,28 +10,55 @@ const DiscardFoWCardDialog = (props: MyGameProps) => {
   const maxCards = 4;
 
   return (
-    <DialogShell open title="Discard Fortunes of War Cards" mood="battle" size="sm" hideActions>
-      <Typography variant="body2" sx={{ mb: 2 }}>
-        Your hand exceeds {maxCards} cards. Discard down to {maxCards} by clicking cards to remove. ({hand.length} / {maxCards})
-      </Typography>
-      <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
-        {hand.map((card, i) => (
-          <Button
-            key={`${card.name}-${i}`}
-            variant="outlined"
-            onClick={() => props.moves.discardFoWCard(i)}
-            sx={{ minWidth: 100, flexDirection: "column", textTransform: "none", border: "2px solid", borderColor: card.sword > 0 ? "#c62828" : card.shield > 0 ? "#1565c0" : "#757575", color: "text.primary" }}
-          >
-            <Typography variant="body2" fontWeight={700}>
-              {card.sword > 0 ? `${card.sword} Swords` : card.shield > 0 ? `${card.shield} Shields` : "No Effect"}
-            </Typography>
-          </Button>
-        ))}
+    <DecisionPanel
+      open
+      title="Discard Fortune of War Cards"
+      subtitle={`Your hand exceeds ${maxCards} cards — click cards to discard (${hand.length} / ${maxCards})`}
+      mood="battle"
+      width={520}
+    >
+      <Box sx={{ display: "flex", gap: "8px", flexWrap: "wrap", justifyContent: "center", py: "6px", pb: "14px" }}>
+        {hand.map((card, i) => {
+          const isSword = card.sword > 0;
+          const accent = isSword ? "#c62828" : card.shield > 0 ? "#1565c0" : tokens.ui.textMuted;
+          return (
+            <Box
+              key={`${card.name}-${i}`}
+              onClick={() => props.moves.discardFoWCard(i)}
+              sx={{
+                width: 88,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: "3px",
+                py: `${tokens.spacing.sm}px`,
+                borderRadius: `${tokens.radius.md}px`,
+                border: `2px solid ${accent}66`,
+                borderTop: `3px solid ${accent}`,
+                background: `linear-gradient(180deg, ${tokens.ui.surfaceRaised} 0%, ${tokens.ui.surface} 100%)`,
+                cursor: "pointer",
+                transition: `all ${tokens.transition.fast}`,
+                "&:hover": {
+                  borderColor: accent,
+                  transform: "translateY(-3px)",
+                  boxShadow: `0 4px 10px rgba(0,0,0,0.25), 0 0 8px ${accent}44`,
+                },
+              }}
+            >
+              <Typography sx={{ fontFamily: tokens.font.display, fontSize: tokens.fontSize.lg, fontWeight: 700, color: accent, lineHeight: 1 }}>
+                {isSword ? card.sword : card.shield > 0 ? card.shield : "—"}
+              </Typography>
+              <Typography sx={{ fontFamily: tokens.font.body, fontSize: 12, fontWeight: 600, color: tokens.ui.text, lineHeight: 1 }}>
+                {isSword ? "⚔ Swords" : card.shield > 0 ? "🛡 Shields" : "No effect"}
+              </Typography>
+              <Typography sx={{ fontFamily: tokens.font.body, fontSize: 12, color: tokens.ui.textMuted, fontStyle: "italic", lineHeight: 1 }}>
+                discard
+              </Typography>
+            </Box>
+          );
+        })}
       </Box>
-      <Typography variant="caption" color="text.secondary" sx={{ mt: 2, display: "block" }}>
-        Click a card to discard it
-      </Typography>
-    </DialogShell>
+    </DecisionPanel>
   );
 };
 

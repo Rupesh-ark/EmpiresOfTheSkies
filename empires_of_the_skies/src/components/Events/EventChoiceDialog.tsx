@@ -2,7 +2,7 @@ import { ReactNode, useState } from "react";
 import { Chip, Typography } from "@mui/material";
 import { MyGameProps, EVENT_CARD_DEFS } from "@eots/game";
 import type { LegacyCardInfo } from "@eots/game";
-import { DialogShell } from "@/components/atoms/DialogShell";
+import { DecisionPanel } from "@/components/atoms/DecisionPanel";
 import { GameButton } from "@/components/atoms/GameButton";
 
 // Shared wrapper for the 4 chip-selection branches
@@ -35,19 +35,23 @@ const ChipChoice = ({
   confirmDisabled: boolean;
   onConfirm: () => void;
 }) => (
-  <DialogShell open title={title} mood="crisis" size="sm" hideActions>
-    <Typography variant="body2" sx={{ mb: 2 }}>
+  <DecisionPanel
+    open
+    title={title}
+    mood="crisis"
+    actions={
+      <GameButton variant={confirmVariant} disabled={confirmDisabled} onClick={onConfirm}>
+        {confirmLabel}
+      </GameButton>
+    }
+  >
+    <Typography variant="body2" sx={{ mb: 1.5 }}>
       {description}
     </Typography>
     <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
       {chips}
     </div>
-    <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 16 }}>
-      <GameButton variant={confirmVariant} disabled={confirmDisabled} onClick={onConfirm}>
-        {confirmLabel}
-      </GameButton>
-    </div>
-  </DialogShell>
+  </DecisionPanel>
 );
 
 // Main component
@@ -74,18 +78,18 @@ const EventChoiceDialog = (props: MyGameProps) => {
     };
 
     return (
-      <DialogShell open title={def.displayName} mood="crisis" size="sm" hideActions>
-        <Typography variant="body2" sx={{ mb: 2 }}>
+      <DecisionPanel open title={def.displayName} mood="crisis">
+        <Typography variant="body2" sx={{ mb: 1.5 }}>
           {def.description}
         </Typography>
-        <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
+        <div style={{ display: "flex", gap: "10px", justifyContent: "center", paddingBottom: 12 }}>
           {choice.binaryOptions.map((opt) => (
             <GameButton key={opt} variant="danger" onClick={() => props.moves.resolveEventChoice(opt)}>
               {formatLabel(opt)}
             </GameButton>
           ))}
         </div>
-      </DialogShell>
+      </DecisionPanel>
     );
   }
 

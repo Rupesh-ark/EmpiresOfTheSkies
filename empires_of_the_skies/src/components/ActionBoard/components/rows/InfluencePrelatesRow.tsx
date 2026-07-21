@@ -8,11 +8,10 @@ import { Box, Tooltip, Typography } from "@mui/material";
 import { IconOrthodox, IconHeretic } from "@/theme";
 import { tokens } from "@/theme";
 import { BTN_BG } from "@/assets/actionBoard";
-import { PlayerColour } from "@eots/game";
+import { PlayerColour, MOVE_DEFINITIONS, getInfluencePrelateCost } from "@eots/game";
 import { ActionBoardProps, ActionTooltipContent, TOOLTIP_DELAY } from "../shared";
 import { clearMoves } from "@/utils/gameHelpers";
 import { PlayerDot } from "@/components/atoms/PlayerDot";
-import { useActionHover } from "../../ActionHoverContext";
 
 const KINGDOMS = [
   { name: "Angland",     color: PlayerColour.red,    key: 1 },
@@ -25,23 +24,20 @@ const KINGDOMS = [
   { name: "Constantium", color: PlayerColour.green,  key: 8 },
 ] as const;
 
-const THUMB_W = 80;
+const THUMB_W = 40;
 
 const InfluencePrelatesRow = (props: ActionBoardProps) => {
-  const { setHoveredAction } = useActionHover();
   const nprHeretics = new Set(props.G.eventState.nprHeretic);
 
   return (
     <Tooltip title={<ActionTooltipContent actionId="influence-prelates" />} placement="right" arrow enterDelay={TOOLTIP_DELAY.enter} enterNextDelay={TOOLTIP_DELAY.enterNext}>
     <Box
-      onMouseEnter={() => setHoveredAction("influence-prelates")}
-      onMouseLeave={() => setHoveredAction(null)}
       sx={{
         display: "flex",
-        alignItems: "center",
-        minHeight: 60,
+        flexDirection: "column",
+        gap: `${tokens.spacing.xs}px`,
         py: `${tokens.spacing.xs}px`,
-        gap: `${tokens.spacing.sm}px`,
+        px: `${tokens.spacing.sm}px`,
         position: "relative",
         overflow: "hidden",
         background: `linear-gradient(180deg, ${tokens.ui.surfaceRaised} 0%, ${tokens.ui.surface} 100%)`,
@@ -62,34 +58,16 @@ const InfluencePrelatesRow = (props: ActionBoardProps) => {
         boxShadow: `inset 0 1px 0 rgba(255,255,255,0.4), 0 1px 3px rgba(80,60,30,0.10)`,
       }}
     >
-      {/* Feathered thumbnail */}
-      <Box
-        sx={{
-          width: THUMB_W,
-          alignSelf: "stretch",
-          flexShrink: 0,
-          overflow: "hidden",
-          ml: "3px",
-        }}
-      >
-        <Box
-          component="img"
-          src={BTN_BG.influencePrelates}
-          alt=""
-          sx={{
-            width: "100%",
-            height: "100%",
-            objectFit: "cover",
-            objectPosition: "center",
-            display: "block",
-            maskImage: "linear-gradient(to right, black 50%, transparent 100%)",
-            WebkitMaskImage: "linear-gradient(to right, black 50%, transparent 100%)",
-          }}
-        />
-      </Box>
-
-      {/* Label */}
-      <Box sx={{ minWidth: 0, flexShrink: 0 }}>
+      {/* Header: small thumbnail + label */}
+      <Box sx={{ display: "flex", alignItems: "center", gap: `${tokens.spacing.sm}px` }}>
+        <Box sx={{ width: THUMB_W, height: 26, flexShrink: 0, overflow: "hidden", borderRadius: `${tokens.radius.sm}px` }}>
+          <Box
+            component="img"
+            src={BTN_BG.influencePrelates}
+            alt=""
+            sx={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center", display: "block" }}
+          />
+        </Box>
         <Typography
           sx={{
             fontFamily: tokens.font.display,
@@ -102,16 +80,13 @@ const InfluencePrelatesRow = (props: ActionBoardProps) => {
         </Typography>
       </Box>
 
-      {/* Kingdom buttons */}
+      {/* Kingdom slots — full-width 8-column grid */}
       <Box
         sx={{
-          display: "flex",
-          gap: "3px",
-          flex: 1,
-          alignSelf: "stretch",
-          alignItems: "stretch",
-          pr: `${tokens.spacing.sm}px`,
-          py: `${tokens.spacing.xs}px`,
+          display: "grid",
+          gridTemplateColumns: "repeat(8, 1fr)",
+          gap: "4px",
+          minHeight: 46,
         }}
       >
         {KINGDOMS.map((kingdom) => {
@@ -131,6 +106,19 @@ const InfluencePrelatesRow = (props: ActionBoardProps) => {
             ? props.G.eventState.schismAffected.includes(playerEntry.id)
             : false;
 
+          const moveError =
+            props.isActive && props.playerID
+              ? MOVE_DEFINITIONS.influencePrelates.validate?.(props.G, props.playerID, kingdom.key - 1) ?? null
+              : null;
+          const slotCost = props.playerID
+            ? getInfluencePrelateCost(props.G, props.playerID, kingdom.key).cost
+            : null;
+          const myGold = props.playerID
+            ? props.G.playerInfo[props.playerID]?.resources.gold
+            : undefined;
+          const costShort = slotCost !== null && myGold !== undefined && slotCost > myGold;
+          const isBlocked = isSchismAffected || !!moveError;
+
           const iconColor = "rgba(60,40,20,0.6)";
           const IconComponent = isHeretic ? IconHeretic : IconOrthodox;
 
@@ -138,7 +126,7 @@ const InfluencePrelatesRow = (props: ActionBoardProps) => {
               <Box
                 key={kingdom.name}
                 onClick={() => {
-                  if (!isSchismAffected) {
+                  if (!isBlocked) {
                     clearMoves(props);
                     props.moves.influencePrelates(kingdom.key - 1);
                   }
@@ -157,7 +145,7 @@ const InfluencePrelatesRow = (props: ActionBoardProps) => {
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  cursor: isSchismAffected ? "not-allowed" : "pointer",
+                  cursor: isBlocked ? "not-allowed" : "pointer",
                   position: "relative",
                   transition: `all ${tokens.transition.fast}`,
                   boxShadow: `inset 0 1px 0 rgba(255,255,255,0.35), inset 0 -1px 3px ${kingdom.color}10`,
@@ -165,7 +153,10 @@ const InfluencePrelatesRow = (props: ActionBoardProps) => {
                     opacity: 0.35,
                     filter: "grayscale(0.6)",
                   }),
-                  ...(!isSchismAffected && {
+                  ...(!isSchismAffected && moveError && {
+                    opacity: 0.55,
+                  }),
+                  ...(!isBlocked && {
                     "&:hover": {
                       background: `
                         radial-gradient(ellipse at 50% 30%, ${kingdom.color}30 0%, ${kingdom.color}08 70%),
@@ -184,7 +175,7 @@ const InfluencePrelatesRow = (props: ActionBoardProps) => {
                   <Typography
                     sx={{
                       fontFamily: tokens.font.body,
-                      fontSize: 8,
+                      fontSize: 12,
                       fontWeight: 700,
                       color: iconColor,
                       lineHeight: 1,
@@ -193,6 +184,19 @@ const InfluencePrelatesRow = (props: ActionBoardProps) => {
                   >
                     {kingdom.name.slice(0, 3).toUpperCase()}
                   </Typography>
+                  {slotCost !== null && (
+                    <Typography
+                      sx={{
+                        fontFamily: tokens.font.body,
+                        fontSize: 12,
+                        fontWeight: 700,
+                        color: costShort ? tokens.ui.danger : `${tokens.ui.gold}cc`,
+                        lineHeight: 1,
+                      }}
+                    >
+                      {slotCost === 0 ? "free" : `${slotCost}g`}
+                    </Typography>
+                  )}
                 </Box>
 
                 {/* Schism strikethrough */}

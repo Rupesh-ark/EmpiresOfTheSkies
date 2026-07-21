@@ -8,7 +8,7 @@ import {
   ToggleButton,
 } from "@mui/material";
 import { MyGameProps, EVENT_CARD_DEFS } from "@eots/game";
-import { DialogShell } from "@/components/atoms/DialogShell";
+import { DecisionPanel } from "@/components/atoms/DecisionPanel";
 import { GameButton } from "@/components/atoms/GameButton";
 
 const MAX_RIVAL_TROOPS = 3;
@@ -41,12 +41,25 @@ const RebellionRivalSupportDialog = (props: MyGameProps) => {
     (rebellion.defenderRegiments ?? 0) * 2 + (rebellion.defenderLevies ?? 0);
 
   return (
-    <DialogShell
+    <DecisionPanel
       open
       title={`⚔ ${def.displayName} — Choose Your Side`}
       mood="crisis"
-      size="sm"
-      hideActions
+      width={500}
+      actions={
+        <>
+          <GameButton variant="ghost" onClick={() => props.moves.contributeToRebellion("defender", 0, 0)}>
+            Stay Out
+          </GameButton>
+          <GameButton
+            variant={side === "rebel" ? "danger" : "primary"}
+            disabled={!side || total === 0}
+            onClick={() => props.moves.contributeToRebellion(side, regiments, levies)}
+          >
+            Contribute {total} Troop{total !== 1 ? "s" : ""}
+          </GameButton>
+        </>
+      }
     >
       <Typography variant="body2" sx={{ mb: 2 }}>
         {defenderKingdom} faces a rebellion. You may contribute up to 3
@@ -83,19 +96,7 @@ const RebellionRivalSupportDialog = (props: MyGameProps) => {
         </>
       )}
 
-      <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginTop: 16 }}>
-        <GameButton variant="ghost" onClick={() => props.moves.contributeToRebellion("defender", 0, 0)}>
-          Stay Out
-        </GameButton>
-        <GameButton
-          variant={side === "rebel" ? "danger" : "primary"}
-          disabled={!side || total === 0}
-          onClick={() => props.moves.contributeToRebellion(side, regiments, levies)}
-        >
-          Contribute {total} Troop{total !== 1 ? "s" : ""}
-        </GameButton>
-      </div>
-    </DialogShell>
+    </DecisionPanel>
   );
 };
 

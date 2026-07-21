@@ -1,7 +1,9 @@
 import { MyGameProps, colourToKingdomMap } from "@eots/game";
-import { DialogShell } from "@/components/atoms/DialogShell";
 import { Typography } from "@mui/material";
+import { DecisionPanel } from "@/components/atoms/DecisionPanel";
+import { GameButton } from "@/components/atoms/GameButton";
 import { getLocationPresentation } from "@/utils/locationLabels";
+import { tokens } from "@/theme";
 
 const DefendOrYieldDialog = (props: MyGameProps) => {
   const [x, y] = props.G.mapState.currentBattle;
@@ -24,26 +26,29 @@ const DefendOrYieldDialog = (props: MyGameProps) => {
     props.G.battleState.defender.decision === "undecided";
 
   return (
-    <DialogShell
+    <DecisionPanel
       open={isOpen}
       title="Your region is under attack!"
       subtitle={`Battle at ${getLocationPresentation(props.G.mapState.currentTileArray, [x, y]).name} — highlighted in red on the map`}
       mood="battle"
-      size="sm"
-      confirmLabel="Defend"
-      confirmColor="success"
-      onConfirm={() => props.moves.defendGroundAttack()}
-      cancelLabel="Yield"
-      cancelColor="error"
-      onCancel={() => props.moves.yieldToAttacker()}
+      actions={
+        <>
+          <GameButton variant="ghost" onClick={() => props.moves.yieldToAttacker()}>
+            Yield
+          </GameButton>
+          <GameButton variant="danger" onClick={() => props.moves.defendGroundAttack()}>
+            Defend
+          </GameButton>
+        </>
+      }
     >
-      <Typography>
+      <Typography sx={{ fontFamily: tokens.font.body, fontSize: tokens.fontSize.sm }}>
         Your region is under attack by {attackerName}. You can either yield
         the region and all its buildings or fight back. If you yield, the
         attacking kingdom will get control over any outposts, colonies or
         forts and your troops will be returned safely to your kingdom.
       </Typography>
-    </DialogShell>
+    </DecisionPanel>
   );
 };
 

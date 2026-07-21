@@ -26,6 +26,18 @@ interface PendingDeploy {
   cost: number;
 }
 
+/** Scroll offset that centres `centerPx` (grid coords) in the viewport,
+ *  accounting for the grid being auto-margin-centred when it fits. */
+const clampScrollCenter = (
+  scrollSize: number,
+  clientSize: number,
+  gridSize: number,
+  centerPx: number
+): number => {
+  const gridStart = Math.max(0, (scrollSize - gridSize) / 2);
+  return Math.max(0, Math.min(scrollSize - clientSize, gridStart + centerPx - clientSize / 2));
+};
+
 const WorldMap = (props: WorldMapProps) => {
   const currentMap = props.G.mapState.currentTileArray;
   const battleCoords = props.G.mapState.currentBattle;
@@ -44,42 +56,85 @@ const WorldMap = (props: WorldMapProps) => {
 
   const [fleetDragState, setFleetDragState] = useState<FleetDragState | null>(null);
   const [pendingDeploy, setPendingDeploy] = useState<PendingDeploy | null>(null);
-  const isMyTurn = props.playerID === props.ctx.currentPlayer;
 
-  function defaultZoom(phase: string, myTurn: boolean) {
-    if (phase === "discoveries") return 50;
-    if (phase === "actions" && myTurn) return 150;
-    return 75;
-  }
+  const [zoomLevel, setZoomLevel] = useState(75);
+  const [showHint, setShowHint] = useState(true);
 
-  const [zoomLevel, setZoomLevel] = useState(defaultZoom(props.G.stage.phase, isMyTurn));
-  const [showHint, setShowHint] = useState(false);
-
-  const prevPhaseRef = useRef(props.G.stage.phase);
-  const prevTurnRef = useRef(isMyTurn);
+  // Controls hint fades out after a few seconds
   useEffect(() => {
-    const prevPhase = prevPhaseRef.current;
-    const prevTurn = prevTurnRef.current;
-    const currPhase = props.G.stage.phase;
-    prevPhaseRef.current = currPhase;
-    prevTurnRef.current = isMyTurn;
-    if (prevPhase !== currPhase || prevTurn !== isMyTurn) {
-      setZoomLevel(defaultZoom(currPhase, isMyTurn));
-    }
-  }, [props.G.stage.phase, isMyTurn]);
-
-  // Show hint when map expands, auto-hide after 4s
-  useEffect(() => {
-    if (props.expanded) {
-      setShowHint(true);
-      const timer = setTimeout(() => setShowHint(false), 4000);
-      return () => clearTimeout(timer);
-    } else {
-      setShowHint(false);
-    }
-  }, [props.expanded]);
+    const timer = setTimeout(() => setShowHint(false), 4000);
+    return () => clearTimeout(timer);
+  }, []);
 
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Fit the camera to the discovered portion of the map once, on mount.
+  // After that the camera belongs to the player — zoom and scroll are
+  // never changed automatically (no resets on phase/turn changes).
+  const didInitialFit = useRef(false);
+  useEffect(() => {
+    if (didInitialFit.current) return;
+    const el = scrollRef.current;
+    if (!el || el.clientWidth === 0) return;
+    didInitialFit.current = true;
+
+    const discovered = props.G.mapState.discoveredTiles;
+    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+    for (let y = 0; y < discovered.length; y++) {
+      for (let x = 0; x < discovered[y].length; x++) {
+        if (!discovered[y][x]) continue;
+        if (x < minX) minX = x;
+        if (x > maxX) maxX = x;
+        if (y < minY) minY = y;
+        if (y > maxY) maxY = y;
+      }
+    }
+    if (!isFinite(minX)) return;
+
+    const cols = discovered[0].length;
+    const rows = discovered.length;
+    const boxCols = maxX - minX + 1;
+    const boxRows = maxY - minY + 1;
+    // Largest square tile edge that fits the discovered box in the viewport
+    // (with a 10% margin), expressed back as the `${zoom}vw` grid width.
+    const tileEdge = Math.min(
+      (el.clientWidth * 0.9) / boxCols,
+      (el.clientHeight * 0.9) / boxRows
+    );
+    const zoom = Math.max(50, Math.min(200, Math.round((tileEdge * cols * 100) / window.innerWidth)));
+    setZoomLevel(zoom);
+
+    // Center the discovered box after the new grid width has laid out.
+    requestAnimationFrame(() => {
+      const tile = (zoom / 100) * window.innerWidth / cols;
+      el.scrollLeft = clampScrollCenter(el.scrollWidth, el.clientWidth, tile * cols, ((minX + maxX + 1) / 2) * tile);
+      el.scrollTop = clampScrollCenter(el.scrollHeight, el.clientHeight, tile * rows, ((minY + maxY + 1) / 2) * tile);
+    });
+  }, [props.G.mapState.discoveredTiles]);
+
+  // Pan the camera to the battle tile whenever a battle sequence begins, so
+  // the non-modal combat prompts always have their subject on screen. One
+  // smooth pan per battle location — the camera is the player's afterwards.
+  const zoomRef = useRef(zoomLevel);
+  zoomRef.current = zoomLevel;
+  const battleKey =
+    isBattlePhase && battleCoords?.length === 2 ? `${battleCoords[0]},${battleCoords[1]}` : null;
+  useEffect(() => {
+    if (!battleKey) return;
+    const el = scrollRef.current;
+    if (!el) return;
+    const [bx, by] = battleKey.split(",").map(Number);
+    const cols = props.G.mapState.discoveredTiles[0].length;
+    const rows = props.G.mapState.discoveredTiles.length;
+    const tile = (zoomRef.current / 100) * window.innerWidth / cols;
+    el.scrollTo({
+      left: clampScrollCenter(el.scrollWidth, el.clientWidth, tile * cols, (bx + 0.5) * tile),
+      top: clampScrollCenter(el.scrollHeight, el.clientHeight, tile * rows, (by + 0.5) * tile),
+      behavior: "smooth",
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- pan once per battle location
+  }, [battleKey]);
+
   const isPanningRef = useRef(false);
   const [isPanningState, setIsPanningState] = useState(false);
   const panStart = useRef<{ x: number; y: number; scrollX: number; scrollY: number } | null>(null);
@@ -272,8 +327,8 @@ const WorldMap = (props: WorldMapProps) => {
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >
-      {/* Zoom control — only in expanded mode, above the map */}
-      {props.expanded && (
+      {/* Zoom control */}
+      {(
         <Box
           sx={{
             display: "flex",
@@ -284,13 +339,13 @@ const WorldMap = (props: WorldMapProps) => {
             py: 0,
           }}
         >
-          <Typography sx={{ fontSize: 11, color: tokens.ui.textMuted, fontWeight: 600 }}>
+          <Typography sx={{ fontSize: 12, color: tokens.ui.textMuted, fontWeight: 600 }}>
             Zoom
           </Typography>
           <GameButton variant="ghost" size="sm" onClick={() => setZoomLevel((z) => Math.max(50, z - 25))}>
             −
           </GameButton>
-          <Typography sx={{ fontSize: 11, color: tokens.ui.text, minWidth: 36, textAlign: "center" }}>
+          <Typography sx={{ fontSize: 12, color: tokens.ui.text, minWidth: 36, textAlign: "center" }}>
             {zoomLevel}%
           </Typography>
           <GameButton variant="ghost" size="sm" onClick={() => setZoomLevel((z) => Math.min(300, z + 25))}>
@@ -308,7 +363,6 @@ const WorldMap = (props: WorldMapProps) => {
           overflowX: "auto",
           overflowY: "auto",
           display: "flex",
-          justifyContent: "center",
           alignItems: "flex-start",
           width: "100%",
           height: "100%",
@@ -322,10 +376,11 @@ const WorldMap = (props: WorldMapProps) => {
         <Box
           sx={{
             position: "relative",
-            width: props.expanded ? `${zoomLevel}vw` : "100%",
-            maxWidth: props.expanded ? "none" : 1600,
-            my: "auto",
-            mx: props.expanded ? 0 : "auto",
+            width: `${zoomLevel}vw`,
+            // Auto margins centre the grid when it fits the viewport and keep
+            // every edge scroll-reachable when it overflows (flex justify-content
+            // centring would clip the left edge).
+            m: "auto",
             flexShrink: 0,
           }}
         >
@@ -352,8 +407,8 @@ const WorldMap = (props: WorldMapProps) => {
         </Box>
       </div>
 
-      {/* Map hint — fades in when expanded, auto-hides */}
-      {props.expanded && (
+      {/* Map hint — fades out after a few seconds */}
+      {(
         <Box
           sx={{
             position: "absolute",
@@ -371,7 +426,7 @@ const WorldMap = (props: WorldMapProps) => {
             transition: "opacity 0.6s ease",
           }}
         >
-          <Typography sx={{ fontSize: 11, color: "#fff", fontWeight: 500, whiteSpace: "nowrap", letterSpacing: "0.03em" }}>
+          <Typography sx={{ fontSize: 12, color: "#fff", fontWeight: 500, whiteSpace: "nowrap", letterSpacing: "0.03em" }}>
             Hold Space + drag to pan &nbsp;·&nbsp; Scroll to navigate &nbsp;·&nbsp; Drag fleet to deploy
           </Typography>
         </Box>
@@ -460,7 +515,6 @@ const WorldMap = (props: WorldMapProps) => {
 interface WorldMapProps extends MyGameProps {
   alternateOnClick?: (coords: number[]) => void;
   selectableTiles?: number[][];
-  expanded?: boolean;
   detailRequest?: { location: number[]; key: number } | null;
   onDetailRequestHandled?: (requestKey: number) => void;
 }

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Typography, Slider, Box, Chip } from "@mui/material";
 import { MyGameProps, EVENT_CARD_DEFS } from "@eots/game";
-import { DialogShell } from "@/components/atoms/DialogShell";
+import { DecisionPanel } from "@/components/atoms/DecisionPanel";
 import { GameButton } from "@/components/atoms/GameButton";
 import { FoWCardSelector } from "@/components/atoms/FoWCardSelector";
 
@@ -24,12 +24,21 @@ const RebellionDialog = (props: MyGameProps) => {
   const fowHand = player.resources.fortuneCards;
 
   return (
-    <DialogShell
+    <DecisionPanel
       open
       title={`⚔ ${def.displayName}`}
       mood="crisis"
-      size="sm"
-      hideActions
+      width={500}
+      actions={
+        <>
+          <GameButton variant="danger" onClick={() => props.moves.commitRebellionTroops(0, 0)}>
+            Surrender
+          </GameButton>
+          <GameButton variant="primary" onClick={() => props.moves.commitRebellionTroops(regiments, levies, selectedFoW)}>
+            {totalSwords > 0 ? "Defend!" : "Confirm Surrender"}
+          </GameButton>
+        </>
+      }
     >
       <Typography variant="body2" sx={{ mb: 2 }}>
         {def.description}
@@ -92,26 +101,11 @@ const RebellionDialog = (props: MyGameProps) => {
       <FoWCardSelector fowHand={fowHand} selectedIndex={selectedFoW} onSelect={setSelectedFoW} />
 
       {totalSwords === 0 && (
-        <Typography variant="body2" color="error" sx={{ mt: 1 }}>
+        <Typography variant="body2" color="error" sx={{ mt: 1, mb: 1 }}>
           Committing no troops means the rebels win automatically!
         </Typography>
       )}
-
-      <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginTop: 16 }}>
-        <GameButton
-          variant="danger"
-          onClick={() => props.moves.commitRebellionTroops(0, 0)}
-        >
-          Surrender
-        </GameButton>
-        <GameButton
-          variant="primary"
-          onClick={() => props.moves.commitRebellionTroops(regiments, levies, selectedFoW)}
-        >
-          {totalSwords > 0 ? "Defend!" : "Confirm Surrender"}
-        </GameButton>
-      </div>
-    </DialogShell>
+    </DecisionPanel>
   );
 };
 

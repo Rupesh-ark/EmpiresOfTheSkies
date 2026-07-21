@@ -6,7 +6,7 @@ import {
   GiWatchtower,
   GiScrollUnfurled,
 } from "react-icons/gi";
-import { DialogShell } from "@/components/atoms/DialogShell";
+import { DecisionPanel } from "@/components/atoms/DecisionPanel";
 import { tokens } from "@/theme";
 import { getLocationPresentation } from "@/utils/locationLabels";
 import { IconRegiment } from "@/theme";
@@ -60,7 +60,7 @@ const LootChips = ({ loot }: { loot: TileLoot }) => {
           <Typography
             sx={{
               fontFamily: tokens.font.body,
-              fontSize: 11,
+              fontSize: 12,
               fontWeight: 600,
               color: tokens.ui.text,
               lineHeight: 1,
@@ -163,7 +163,7 @@ const OptionCard = ({
         <Typography
           sx={{
             fontFamily: tokens.font.body,
-            fontSize: 11,
+            fontSize: 12,
             color: tokens.ui.danger,
             mt: 0.5,
             fontStyle: "italic",
@@ -204,13 +204,12 @@ const OutpostOrColonyDialog = (props: MyGameProps) => {
     building?.buildings === "outpost";
 
   return (
-    <DialogShell
+    <DecisionPanel
       open={isOpen}
       title={`Claim ${tileName}`}
       subtitle={`Your fleet has reached ${tileName}. Choose how to establish your presence.`}
       mood="discovery"
-      size="sm"
-      hideActions
+      width={480}
     >
       {/* Garrison Strength banner */}
       <Box
@@ -230,7 +229,7 @@ const OutpostOrColonyDialog = (props: MyGameProps) => {
         <Typography
           sx={{
             fontFamily: tokens.font.accent,
-            fontSize: 10,
+            fontSize: 12,
             textTransform: "uppercase",
             letterSpacing: "0.08em",
             color: tokens.ui.textMuted,
@@ -299,7 +298,8 @@ const OutpostOrColonyDialog = (props: MyGameProps) => {
           accentColor={tokens.ui.textMuted}
         />
       </Box>
-    </DialogShell>
+      <Box sx={{ height: 12 }} />
+    </DecisionPanel>
   );
 };
 

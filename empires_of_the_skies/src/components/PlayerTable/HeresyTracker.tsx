@@ -94,7 +94,7 @@ const HeresyTracker = (props: HeresyTrackerProps) => {
                       </Box>
                       <Box
                         sx={{
-                          fontSize: "0.65rem",
+                          fontSize: "0.75rem",
                           color: player.hereticOrOrthodox === "heretic" ? "#E77B00" : "#A74383",
                           fontWeight: 600,
                           textTransform: "capitalize",

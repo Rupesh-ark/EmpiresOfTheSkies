@@ -1,179 +1,27 @@
-import React, { lazy, memo, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react";
 
-import { MyGameProps, EVENT_CARD_DEFS, PlayerInfo } from "@eots/game";
+import { MyGameProps, EVENT_CARD_DEFS } from "@eots/game";
 const ActionBoard = lazy(() => import("./ActionBoard/ActionBoard").then(m => ({ default: m.ActionBoard })));
 const WorldMap = lazy(() => import("./WorldMap/WorldMap"));
-const PlayerBoard = lazy(() => import("./PlayerBoard/PlayerBoard").then(m => ({ default: m.PlayerBoard })));
+const PlayerDock = lazy(() => import("./PlayerBoard/PlayerDock").then(m => ({ default: m.PlayerDock })));
 const Chat = lazy(() => import("./Chat/Chat"));
 const Trade = lazy(() => import("./Trade/Trade"));
 
-import { Box, ThemeProvider, Typography, Tooltip } from "@mui/material";
+import { Box, ThemeProvider } from "@mui/material";
 import { DialogRouter } from "./DialogRouter";
-import { MapOverlay } from "./layout/MapOverlay";
+import { DecisionRouter } from "./DecisionRouter";
 
-import { useGameTheme, tokens } from "@/theme";
+import { useGameTheme } from "@/theme";
 import GameLog from "./GameLog";
 import { StatsPanel } from "./Stats/StatsPanel";
 import { ToastProvider, useToast } from "@/hooks/useToast";
 import { DialogQueueProvider } from "./atoms/DialogQueue";
 import { MapSelectionProvider } from "@/contexts/MapSelectionContext";
-import { useValidatedMoves } from "@/hooks/useValidatedMoves";
 import { ActionHoverProvider } from "./ActionBoard/ActionHoverContext";
 import { PiracyIntentProvider } from "@/contexts/PiracyIntentContext";
 
-import { GameLayout } from "./layout";
-import type { PanelSlot, MapSize } from "./layout";
-
-// Compact heresy tracker bar (below map, always visible)
-
-const HERESY_POSITIONS = Array.from({ length: 19 }, (_, i) => i - 9);
-
-// Memoized on the fields it renders — playerInfo's identity changes on every
-// move, but the bar only cares about heresy positions and allegiance.
-const heresyBarPropsEqual = (
-  prev: { playerInfo: Record<string, PlayerInfo> },
-  next: { playerInfo: Record<string, PlayerInfo> }
-): boolean => {
-  const prevIds = Object.keys(prev.playerInfo);
-  const nextIds = Object.keys(next.playerInfo);
-  if (prevIds.length !== nextIds.length) return false;
-  return nextIds.every((id) => {
-    const a = prev.playerInfo[id];
-    const b = next.playerInfo[id];
-    return (
-      !!a && !!b &&
-      a.heresyTracker === b.heresyTracker &&
-      a.hereticOrOrthodox === b.hereticOrOrthodox &&
-      a.colour === b.colour &&
-      a.kingdomName === b.kingdomName
-    );
-  });
-};
-
-const HeresyBar = memo(({ playerInfo }: { playerInfo: Record<string, PlayerInfo> }) => {
-  const players = Object.entries(playerInfo) as [string, PlayerInfo][];
-
-  return (
-    <Box sx={{ display: "flex", flexDirection: "column", gap: "2px" }}>
-      {/* Row 1: Track with labels */}
-      <Box sx={{ display: "flex", alignItems: "center", gap: `${tokens.spacing.sm}px` }}>
-        {/* Orthodox label */}
-        <Typography sx={{ fontSize: 9, fontFamily: tokens.font.body, fontWeight: 700, color: tokens.allegiance.orthodox, flexShrink: 0, letterSpacing: "0.04em", minWidth: 42 }}>
-          Orthodox
-        </Typography>
-
-        {/* Track */}
-        <Box
-          sx={{
-            display: "flex",
-            flex: 1,
-            borderRadius: "3px",
-            overflow: "hidden",
-            border: `1px solid ${tokens.ui.borderMedium}`,
-            height: 18,
-          }}
-        >
-          {HERESY_POSITIONS.map((pos) => {
-            const isCenter = pos === 0;
-            const isOrthodox = pos < 0;
-            const playersHere = players.filter(([, p]) => p.heresyTracker === pos);
-
-            return (
-              <Tooltip
-                key={pos}
-                title={
-                  playersHere.length > 0
-                    ? playersHere.map(([, p]) => `${p.kingdomName} (${p.hereticOrOrthodox})`).join(", ")
-                    : `Position ${pos > 0 ? "+" : ""}${pos}`
-                }
-                placement="top"
-                arrow
-              >
-                <Box
-                  sx={{
-                    flex: 1,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    backgroundColor: isCenter
-                      ? tokens.ui.surfaceHover
-                      : isOrthodox
-                        ? `${tokens.allegiance.orthodox}${Math.round(8 + Math.abs(pos) * 2).toString(16).padStart(2, "0")}`
-                        : `${tokens.allegiance.heresy}${Math.round(8 + Math.abs(pos) * 2).toString(16).padStart(2, "0")}`,
-                    borderRight: `1px solid ${tokens.ui.border}`,
-                    "&:last-child": { borderRight: "none" },
-                  }}
-                >
-                  {playersHere.map(([id, p], i) => (
-                    <Box
-                      key={id}
-                      sx={{
-                        width: 10,
-                        height: 10,
-                        borderRadius: "50%",
-                        backgroundColor: p.colour,
-                        border: "1.5px solid rgba(255,255,255,0.5)",
-                        boxShadow: "0 1px 2px rgba(0,0,0,0.3)",
-                        flexShrink: 0,
-                        ml: i > 0 ? "-4px" : 0,
-                        zIndex: i,
-                        position: "relative",
-                      }}
-                    />
-                  ))}
-                </Box>
-              </Tooltip>
-            );
-          })}
-        </Box>
-
-        {/* Heretic label */}
-        <Typography sx={{ fontSize: 9, fontFamily: tokens.font.body, fontWeight: 700, color: tokens.allegiance.heresy, flexShrink: 0, letterSpacing: "0.04em", minWidth: 36, textAlign: "right" }}>
-          Heretic
-        </Typography>
-      </Box>
-
-      {/* Row 2: VP scale labels */}
-      <Box sx={{ display: "flex", alignItems: "center", gap: `${tokens.spacing.sm}px` }}>
-        <Box sx={{ minWidth: 42 }} />
-        <Box sx={{ display: "flex", flex: 1 }}>
-          {HERESY_POSITIONS.map((pos) => (
-            <Box key={pos} sx={{ flex: 1, textAlign: "center" }}>
-              <Typography sx={{ fontSize: 7, fontFamily: tokens.font.body, color: tokens.ui.textMuted, lineHeight: 1 }}>
-                {pos === 0 ? "0" : pos < 0 ? `+${-pos}` : `+${pos}`}
-              </Typography>
-            </Box>
-          ))}
-        </Box>
-        <Box sx={{ minWidth: 36 }} />
-      </Box>
-
-      {/* Row 3: Player legend */}
-      <Box sx={{ display: "flex", flexWrap: "wrap", gap: `${tokens.spacing.sm}px`, pl: "50px" }}>
-        {players.map(([id, p]) => (
-          <Box key={id} sx={{ display: "flex", alignItems: "center", gap: "3px" }}>
-            <Box
-              sx={{
-                width: 8,
-                height: 8,
-                borderRadius: "50%",
-                backgroundColor: p.colour,
-                border: "1px solid rgba(0,0,0,0.15)",
-                flexShrink: 0,
-              }}
-            />
-            <Typography sx={{ fontSize: 9, fontFamily: tokens.font.body, color: tokens.ui.textMuted, lineHeight: 1 }}>
-              {p.kingdomName}
-            </Typography>
-            <Typography sx={{ fontSize: 8, fontFamily: tokens.font.body, color: p.hereticOrOrthodox === "heretic" ? tokens.allegiance.heresy : tokens.allegiance.orthodox, lineHeight: 1, fontWeight: 600 }}>
-              {p.hereticOrOrthodox === "heretic" ? "H" : "O"}
-            </Typography>
-          </Box>
-        ))}
-      </Box>
-    </Box>
-  );
-}, heresyBarPropsEqual);
+import { GameLayout, TopStrip, PromptBar, OpponentRail } from "./layout";
+import type { PanelSlot } from "./layout";
 
 export const ActionBoardsAndMap = (props: MyGameProps) => {
   return (
@@ -188,8 +36,6 @@ export const ActionBoardsAndMap = (props: MyGameProps) => {
 };
 
 const ActionBoardsAndMapInner = (props: MyGameProps) => {
-  const validatedMoves = useValidatedMoves(props);
-  const validatedProps = useMemo(() => ({ ...props, moves: validatedMoves }), [props, validatedMoves]);
   const theme = useGameTheme(props.G.stage);
   const { showToast } = useToast();
 
@@ -257,72 +103,62 @@ const ActionBoardsAndMapInner = (props: MyGameProps) => {
     }));
   }, []);
 
-  // Slot renderer — maps slot names to components
+  // Rail selection: whose board the dock shows. Null = self.
+  const [viewPlayerID, setViewPlayerID] = useState<string | null>(null);
+  const dockPlayerID = viewPlayerID ?? props.playerID ?? props.ctx.currentPlayer;
+  const handleSelectPlayer = useCallback(
+    (id: string) => {
+      // Your own chip — or re-clicking the viewed opponent — returns to your board.
+      setViewPlayerID((prev) => (id === props.playerID || prev === id ? null : id));
+    },
+    [props.playerID]
+  );
 
-  const renderSlot = useCallback((slot: PanelSlot): React.ReactNode => {
+  const renderPanel = useCallback((slot: PanelSlot): React.ReactNode => {
     switch (slot) {
-      case "player-board":
-        return (
-          <Suspense fallback={null}>
-            <PlayerBoard {...validatedProps} onOpenFleetLocation={openMapAtLocation} />
-          </Suspense>
-        );
-
-      case "action-board":
-        return (
-          <Suspense fallback={null}>
-            <ActionBoard {...validatedProps} />
-          </Suspense>
-        );
-
       case "game-log":
-        return <GameLog {...validatedProps} />;
-
+        return <GameLog {...props} />;
       case "stats":
-        return <StatsPanel {...validatedProps} />;
-
+        return <StatsPanel {...props} />;
       case "chat":
         return (
           <Suspense fallback={null}>
-            <Chat {...validatedProps} />
+            <Chat {...props} />
           </Suspense>
         );
-
       case "trade":
         return (
           <Suspense fallback={null}>
-            <Trade {...validatedProps} />
+            <Trade {...props} />
           </Suspense>
         );
-
       default:
         return null;
     }
-  }, [validatedProps, openMapAtLocation]);
+  }, [props]);
 
-  // Map renderer
+  const renderActionBoard = useCallback((): React.ReactNode => (
+    <Suspense fallback={null}>
+      <ActionBoard {...props} />
+    </Suspense>
+  ), [props]);
 
-  const renderMap = useCallback((size: MapSize): React.ReactNode => {
-    return (
-      <>
-        <Suspense fallback={null}>
-          <WorldMap
-            {...validatedProps}
-            expanded={size === "large"}
-            detailRequest={mapDetailRequest}
-            onDetailRequestHandled={(requestKey) => {
-              setMapDetailRequest((current) =>
-                current?.key === requestKey ? null : current
-              );
-            }}
-          />
-        </Suspense>
-        <MapOverlay {...validatedProps} />
-      </>
-    );
-  }, [validatedProps, mapDetailRequest]);
+  const renderMap = useCallback((): React.ReactNode => (
+    <Suspense fallback={null}>
+      <WorldMap
+        {...props}
+        detailRequest={mapDetailRequest}
+        onDetailRequestHandled={(requestKey) => {
+          setMapDetailRequest((current) =>
+            current?.key === requestKey ? null : current
+          );
+        }}
+      />
+    </Suspense>
+  ), [props, mapDetailRequest]);
 
-  // Render
+  const isMyTurn = props.ctx.currentPlayer === props.playerID;
+  const actionOverlayActive = props.G.stage.phase === "actions" && isMyTurn;
 
   return (
     <ThemeProvider theme={theme}>
@@ -350,12 +186,31 @@ const ActionBoardsAndMapInner = (props: MyGameProps) => {
           )}
           <GameLayout
             stage={props.G.stage}
-            isMyTurn={props.ctx.currentPlayer === props.playerID}
-            renderSlot={renderSlot}
+            topStrip={<TopStrip {...props} />}
+            opponentRail={
+              <OpponentRail
+                {...props}
+                viewPlayerID={dockPlayerID}
+                onSelectPlayer={handleSelectPlayer}
+              />
+            }
+            promptBar={<PromptBar {...props} />}
+            dock={
+              <Suspense fallback={null}>
+                <PlayerDock
+                  {...props}
+                  viewPlayerID={dockPlayerID}
+                  onOpenFleetLocation={openMapAtLocation}
+                />
+              </Suspense>
+            }
+            actionOverlayActive={actionOverlayActive}
+            renderPanel={renderPanel}
+            renderActionBoard={renderActionBoard}
             renderMap={renderMap}
-            heresyTracker={<HeresyBar playerInfo={props.G.playerInfo} />}
+            decisionPanel={<DecisionRouter {...props} />}
           >
-            <DialogRouter {...validatedProps} />
+            <DialogRouter {...props} />
           </GameLayout>
         </Box>
         </PiracyIntentProvider>
