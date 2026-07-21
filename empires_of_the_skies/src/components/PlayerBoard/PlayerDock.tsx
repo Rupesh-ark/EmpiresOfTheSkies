@@ -30,7 +30,6 @@ import { EVENT_ICONS } from "@/components/Events/eventCardIcons";
 import { Holdings } from "./Holdings";
 import { KingdomActions } from "./board";
 import { ResourceChip } from "@/components/atoms/ResourceChip";
-import { CardLightbox, type EnlargedCard } from "@/components/atoms/CardLightbox";
 import { GameButton } from "@/components/atoms/GameButton";
 import { getLocationPresentation } from "@/utils/locationLabels";
 import { useMapSelection } from "@/contexts/MapSelectionContext";
@@ -489,6 +488,22 @@ const getFoWCardImage = (card: PlayerFortuneOfWarCardInfo): string => {
   return NO_EFFECT_CARD;
 };
 
+interface CardPreview {
+  src: string;
+  title: string;
+  description?: string;
+  /** Legacy card allegiance colour ("purple" | "orange") */
+  colour?: string;
+}
+
+/** Shared parchment chrome for dock popovers */
+const POPOVER_PAPER_SX = {
+  backgroundColor: tokens.ui.surface,
+  border: `1px solid ${tokens.ui.borderMedium}`,
+  borderRadius: `${tokens.radius.md}px`,
+  boxShadow: "0 8px 24px rgba(0,0,0,0.35)",
+} as const;
+
 const DockCards = ({
   fortuneCards,
   legacyCard,
@@ -506,7 +521,7 @@ const DockCards = ({
   eventContributions: Record<string, EventCardName>;
   playerInfo: Record<string, { colour: string; kingdomName: string }>;
 }) => {
-  const [enlarged, setEnlarged] = useState<EnlargedCard | null>(null);
+  const [cardPreview, setCardPreview] = useState<{ anchor: HTMLElement; card: CardPreview } | null>(null);
   const [eventsAnchor, setEventsAnchor] = useState<HTMLElement | null>(null);
 
   const resolvedDef = resolvedEvent ? EVENT_CARD_DEFS[resolvedEvent] : null;
@@ -533,7 +548,11 @@ const DockCards = ({
                   key={i}
                   onClick={
                     flipped
-                      ? () => setEnlarged({ src: getFoWCardImage(card), title, description: `⚔ ${card.sword}  🛡 ${card.shield}` })
+                      ? (e) =>
+                          setCardPreview({
+                            anchor: e.currentTarget,
+                            card: { src: getFoWCardImage(card), title, description: `⚔ ${card.sword}  🛡 ${card.shield}` },
+                          })
                       : undefined
                   }
                   sx={{
@@ -563,12 +582,15 @@ const DockCards = ({
           empty={!legacyCard}
           onClick={
             legacyCard
-              ? () =>
-                  setEnlarged({
-                    src: LEGACY_CARD_IMAGES[legacyCard.name.toLowerCase()],
-                    title: legacyCard.name,
-                    description: legacyDef?.description,
-                    colour: legacyCard.colour,
+              ? (e) =>
+                  setCardPreview({
+                    anchor: e.currentTarget,
+                    card: {
+                      src: LEGACY_CARD_IMAGES[legacyCard.name.toLowerCase()],
+                      title: legacyCard.name,
+                      description: legacyDef?.description,
+                      colour: legacyCard.colour,
+                    },
                   })
               : undefined
           }
@@ -590,7 +612,11 @@ const DockCards = ({
           empty={!advantageCard}
           onClick={
             advantageCard
-              ? () => setEnlarged({ src: KA_CARD_IMAGES[advantageCard], title: kaTitle ?? "", description: kaDef?.description })
+              ? (e) =>
+                  setCardPreview({
+                    anchor: e.currentTarget,
+                    card: { src: KA_CARD_IMAGES[advantageCard], title: kaTitle ?? "", description: kaDef?.description },
+                  })
               : undefined
           }
         >
@@ -641,15 +667,7 @@ const DockCards = ({
         transformOrigin={{ vertical: "bottom", horizontal: "center" }}
         slotProps={{
           paper: {
-            sx: {
-              width: 320,
-              maxHeight: 380,
-              p: `${tokens.spacing.sm}px`,
-              backgroundColor: tokens.ui.surface,
-              border: `1px solid ${tokens.ui.borderMedium}`,
-              borderRadius: `${tokens.radius.md}px`,
-              boxShadow: "0 8px 24px rgba(0,0,0,0.35)",
-            },
+            sx: { ...POPOVER_PAPER_SX, width: 320, maxHeight: 380, p: `${tokens.spacing.sm}px` },
           },
         }}
       >
@@ -726,7 +744,59 @@ const DockCards = ({
         </Box>
       </Popover>
 
-      <CardLightbox card={enlarged} onClose={() => setEnlarged(null)} />
+      {/* Card preview — art + rules text, anchored to the clicked tile */}
+      <Popover
+        open={cardPreview !== null}
+        anchorEl={cardPreview?.anchor ?? null}
+        onClose={() => setCardPreview(null)}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        transformOrigin={{ vertical: "bottom", horizontal: "center" }}
+        slotProps={{
+          paper: { sx: { ...POPOVER_PAPER_SX, width: 280, p: `${tokens.spacing.sm}px` } },
+        }}
+      >
+        {cardPreview && (
+          <Box sx={{ display: "flex", flexDirection: "column", gap: `${tokens.spacing.sm}px` }}>
+            <Box
+              component="img"
+              src={cardPreview.card.src}
+              alt={cardPreview.card.title}
+              sx={{
+                width: "100%",
+                maxHeight: 320,
+                objectFit: "contain",
+                borderRadius: `${tokens.radius.sm}px`,
+                backgroundColor: "rgba(0,0,0,0.06)",
+                display: "block",
+              }}
+            />
+            <Box sx={{ display: "flex", alignItems: "center", gap: "6px" }}>
+              <Typography sx={{ fontFamily: tokens.font.display, fontSize: tokens.fontSize.md, color: tokens.ui.textBright, textTransform: "capitalize", lineHeight: 1.2, flex: 1 }}>
+                {cardPreview.card.title}
+              </Typography>
+              {cardPreview.card.colour && (
+                <Tooltip title={cardPreview.card.colour === "purple" ? "Orthodox — full VP if Orthodox, half if Heretic" : "Heretic — full VP if Heretic, half if Orthodox"} placement="top" arrow>
+                  <Box
+                    sx={{
+                      width: 12,
+                      height: 12,
+                      borderRadius: "50%",
+                      flexShrink: 0,
+                      backgroundColor: cardPreview.card.colour === "purple" ? tokens.allegiance.orthodox : tokens.allegiance.heresy,
+                      border: "1.5px solid rgba(0,0,0,0.25)",
+                    }}
+                  />
+                </Tooltip>
+              )}
+            </Box>
+            {cardPreview.card.description && (
+              <Typography sx={{ fontFamily: tokens.font.body, fontSize: tokens.fontSize.xs, color: tokens.ui.text, lineHeight: 1.4 }}>
+                {cardPreview.card.description}
+              </Typography>
+            )}
+          </Box>
+        )}
+      </Popover>
     </>
   );
 };

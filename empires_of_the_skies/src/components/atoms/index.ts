@@ -10,8 +10,6 @@ export { UnitStack } from "./UnitStack";
 export type { UnitStackProps } from "./UnitStack";
 export { TroopSelector } from "./TroopSelector";
 export type { TroopSelectorProps } from "./TroopSelector";
-export { CardFrame } from "./CardFrame";
-export type { CardFrameProps } from "./CardFrame";
 export { PlayerDot } from "./PlayerDot";
 export type { PlayerDotProps } from "./PlayerDot";
 export { DialogShell } from "./DialogShell";
