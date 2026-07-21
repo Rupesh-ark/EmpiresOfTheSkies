@@ -187,7 +187,7 @@ export const PlayerDock = memo((props: PlayerDockProps) => {
         )}
 
         <Station label="Holdings" minWidth={230}>
-          {isSelf ? <Holdings {...props} variant="compact" /> : <PublicHoldings viewInfo={viewInfo} />}
+          {isSelf ? <Holdings {...props} variant="compact" bare /> : <PublicHoldings viewInfo={viewInfo} />}
         </Station>
       </Box>
 
@@ -744,7 +744,8 @@ const DockCards = ({
         </Box>
       </Popover>
 
-      {/* Card preview — art + rules text, anchored to the clicked tile */}
+      {/* Card preview — information first: thumbnail beside name, allegiance,
+          and rules text. Compact enough to always fit above the dock. */}
       <Popover
         open={cardPreview !== null}
         anchorEl={cardPreview?.anchor ?? null}
@@ -752,48 +753,55 @@ const DockCards = ({
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
         transformOrigin={{ vertical: "bottom", horizontal: "center" }}
         slotProps={{
-          paper: { sx: { ...POPOVER_PAPER_SX, width: 280, p: `${tokens.spacing.sm}px` } },
+          paper: { sx: { ...POPOVER_PAPER_SX, width: 400, p: `${tokens.spacing.sm}px` } },
         }}
       >
         {cardPreview && (
-          <Box sx={{ display: "flex", flexDirection: "column", gap: `${tokens.spacing.sm}px` }}>
+          <Box sx={{ display: "flex", gap: `${tokens.spacing.sm}px`, alignItems: "stretch" }}>
             <Box
               component="img"
               src={cardPreview.card.src}
               alt={cardPreview.card.title}
               sx={{
-                width: "100%",
-                maxHeight: 320,
-                objectFit: "contain",
+                width: 104,
+                height: 148,
+                objectFit: "cover",
+                objectPosition: "top",
                 borderRadius: `${tokens.radius.sm}px`,
-                backgroundColor: "rgba(0,0,0,0.06)",
-                display: "block",
+                border: `1px solid ${tokens.ui.borderMedium}`,
+                boxShadow: "0 2px 6px rgba(0,0,0,0.25)",
+                flexShrink: 0,
+                alignSelf: "flex-start",
               }}
             />
-            <Box sx={{ display: "flex", alignItems: "center", gap: "6px" }}>
-              <Typography sx={{ fontFamily: tokens.font.display, fontSize: tokens.fontSize.md, color: tokens.ui.textBright, textTransform: "capitalize", lineHeight: 1.2, flex: 1 }}>
+            <Box sx={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: "5px" }}>
+              <Typography sx={{ fontFamily: tokens.font.display, fontSize: tokens.fontSize.md, color: tokens.ui.textBright, textTransform: "capitalize", lineHeight: 1.2 }}>
                 {cardPreview.card.title}
               </Typography>
               {cardPreview.card.colour && (
-                <Tooltip title={cardPreview.card.colour === "purple" ? "Orthodox — full VP if Orthodox, half if Heretic" : "Heretic — full VP if Heretic, half if Orthodox"} placement="top" arrow>
+                <Box sx={{ display: "flex", alignItems: "center", gap: "5px" }}>
                   <Box
                     sx={{
-                      width: 12,
-                      height: 12,
+                      width: 8,
+                      height: 8,
                       borderRadius: "50%",
                       flexShrink: 0,
                       backgroundColor: cardPreview.card.colour === "purple" ? tokens.allegiance.orthodox : tokens.allegiance.heresy,
-                      border: "1.5px solid rgba(0,0,0,0.25)",
                     }}
                   />
-                </Tooltip>
+                  <Typography sx={{ fontFamily: tokens.font.body, fontSize: tokens.fontSize.xs, fontWeight: 600, color: cardPreview.card.colour === "purple" ? tokens.allegiance.orthodox : tokens.allegiance.heresy, lineHeight: 1.3 }}>
+                    {cardPreview.card.colour === "purple"
+                      ? "Orthodox — full VP if Orthodox, half if Heretic"
+                      : "Heretic — full VP if Heretic, half if Orthodox"}
+                  </Typography>
+                </Box>
+              )}
+              {cardPreview.card.description && (
+                <Typography sx={{ fontFamily: tokens.font.body, fontSize: tokens.fontSize.sm, color: tokens.ui.text, lineHeight: 1.45 }}>
+                  {cardPreview.card.description}
+                </Typography>
               )}
             </Box>
-            {cardPreview.card.description && (
-              <Typography sx={{ fontFamily: tokens.font.body, fontSize: tokens.fontSize.xs, color: tokens.ui.text, lineHeight: 1.4 }}>
-                {cardPreview.card.description}
-              </Typography>
-            )}
           </Box>
         )}
       </Popover>

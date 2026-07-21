@@ -142,6 +142,8 @@ const HoldingsHeader = ({ label }: { label: string }) => (
 
 interface HoldingsProps extends MyGameProps {
   variant?: "compact" | "full";
+  /** Skip padding + internal header — the dock station provides both */
+  bare?: boolean;
 }
 
 export const Holdings = (props: HoldingsProps) => {
@@ -152,13 +154,13 @@ export const Holdings = (props: HoldingsProps) => {
   return (
     <Box
       sx={{
-        px: `${tokens.spacing.sm}px`,
-        py: `${tokens.spacing.xs}px`,
+        px: props.bare ? 0 : `${tokens.spacing.sm}px`,
+        py: props.bare ? 0 : `${tokens.spacing.xs}px`,
         flex: 1,
         minHeight: 0,
       }}
     >
-      <HoldingsHeader label="Holdings" />
+      {!props.bare && <HoldingsHeader label="Holdings" />}
 
       {/* 2-column grid */}
       <Box
