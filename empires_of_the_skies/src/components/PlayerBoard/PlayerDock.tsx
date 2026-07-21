@@ -8,7 +8,7 @@
  * player's public board in (hidden hands stay hidden).
  */
 import { memo, useState } from "react";
-import { Box, Tooltip, Typography } from "@mui/material";
+import { Box, Popover, Tooltip, Typography } from "@mui/material";
 import { ExpandLess, ExpandMore } from "@mui/icons-material";
 import { tokens, backgrounds } from "@/theme";
 import {
@@ -25,6 +25,7 @@ import captainGeneralLogo from "@/boards_and_assets/action_board/captain_general
 import { SWORD_CARDS, SHIELD_CARDS, NO_EFFECT_CARD } from "@/assets/fortuneOfWarCards";
 import { LEGACY_CARD_IMAGES } from "@/assets/legacyCards";
 import { KA_CARD_IMAGES } from "@/assets/kingdomAdvantage";
+import { EVENT_ICONS } from "@/components/Events/eventCardIcons";
 
 import { Holdings } from "./Holdings";
 import { KingdomActions } from "./board";
@@ -175,6 +176,9 @@ export const PlayerDock = memo((props: PlayerDockProps) => {
               legacyCard={viewInfo.resources.legacyCard}
               advantageCard={viewInfo.resources.advantageCard}
               eventCards={viewInfo.resources.eventCards}
+              resolvedEvent={props.G.eventState.resolvedEvent}
+              eventContributions={props.G.eventState.eventContributions}
+              playerInfo={props.G.playerInfo}
             />
           </Station>
         ) : (
@@ -490,13 +494,23 @@ const DockCards = ({
   legacyCard,
   advantageCard,
   eventCards,
+  resolvedEvent,
+  eventContributions,
+  playerInfo,
 }: {
   fortuneCards: PlayerFortuneOfWarCardInfo[];
   legacyCard: { name: string; colour: string } | undefined;
   advantageCard: string | undefined;
   eventCards: EventCardName[];
+  resolvedEvent: EventCardName | null;
+  eventContributions: Record<string, EventCardName>;
+  playerInfo: Record<string, { colour: string; kingdomName: string }>;
 }) => {
   const [enlarged, setEnlarged] = useState<EnlargedCard | null>(null);
+  const [eventsAnchor, setEventsAnchor] = useState<HTMLElement | null>(null);
+
+  const resolvedDef = resolvedEvent ? EVENT_CARD_DEFS[resolvedEvent] : null;
+  const hasEventInfo = eventCards.length > 0 || resolvedEvent !== null || Object.keys(eventContributions).length > 0;
 
   const legacyDef = legacyCard
     ? LEGACY_CARD_DEFS[legacyCard.name.toLowerCase() as keyof typeof LEGACY_CARD_DEFS]
@@ -589,35 +603,139 @@ const DockCards = ({
           )}
         </CardTile>
 
-        <Tooltip
-          title={
-            eventCards.length > 0 ? (
-              <Box sx={{ p: 0.5 }}>
-                {eventCards.map((card, i) => (
-                  <Typography key={`${card}-${i}`} sx={{ fontFamily: tokens.font.body, fontSize: tokens.fontSize.xs, color: tokens.ui.text, lineHeight: 1.5 }}>
-                    {EVENT_CARD_DEFS[card].displayName}
-                  </Typography>
-                ))}
-              </Box>
-            ) : (
-              ""
-            )
-          }
-          placement="top"
-          arrow
+        <CardTile
+          label={`Events · ${eventCards.length} in hand`}
+          empty={!hasEventInfo}
+          onClick={hasEventInfo ? (e) => setEventsAnchor(e.currentTarget) : undefined}
         >
-          <span style={{ display: "block", minWidth: 0 }}>
-            <CardTile label={`Events · ${eventCards.length}`} empty={eventCards.length === 0}>
-              <TileEmptyText>{eventCards.length > 0 ? "hover to preview hand" : "hand empty"}</TileEmptyText>
-            </CardTile>
-          </span>
-        </Tooltip>
+          {resolvedDef ? (
+            // This round's resolved event is the ambient fact worth a glance.
+            <Box sx={{ display: "flex", alignItems: "center", gap: "4px", minWidth: 0 }}>
+              <Typography sx={{ fontSize: tokens.fontSize.xs, color: tokens.ui.gold, lineHeight: 1, flexShrink: 0 }}>★</Typography>
+              <Typography noWrap sx={{ fontFamily: tokens.font.display, fontSize: tokens.fontSize.xs, fontWeight: 700, color: tokens.ui.gold, lineHeight: 1.2 }}>
+                {resolvedDef.displayName}
+              </Typography>
+            </Box>
+          ) : eventCards.length > 0 ? (
+            <Box sx={{ display: "flex", gap: "4px", alignItems: "center" }}>
+              {eventCards.slice(0, 4).map((card, i) => {
+                const def = EVENT_CARD_DEFS[card];
+                const Icon = EVENT_ICONS[card];
+                return Icon ? (
+                  <Icon key={`${card}-${i}`} size={15} color={def.isBattle ? tokens.ui.danger : tokens.ui.gold} style={{ opacity: 0.85 }} />
+                ) : null;
+              })}
+            </Box>
+          ) : (
+            <TileEmptyText>hand empty</TileEmptyText>
+          )}
+        </CardTile>
       </Box>
+
+      {/* Events detail — resolved event, everyone's chosen cards, your hand */}
+      <Popover
+        open={eventsAnchor !== null}
+        anchorEl={eventsAnchor}
+        onClose={() => setEventsAnchor(null)}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        transformOrigin={{ vertical: "bottom", horizontal: "center" }}
+        slotProps={{
+          paper: {
+            sx: {
+              width: 320,
+              maxHeight: 380,
+              p: `${tokens.spacing.sm}px`,
+              backgroundColor: tokens.ui.surface,
+              border: `1px solid ${tokens.ui.borderMedium}`,
+              borderRadius: `${tokens.radius.md}px`,
+              boxShadow: "0 8px 24px rgba(0,0,0,0.35)",
+            },
+          },
+        }}
+      >
+        <Box sx={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+          {resolvedDef && resolvedEvent && (() => {
+            const Icon = EVENT_ICONS[resolvedEvent];
+            return (
+              <Box sx={{ display: "flex", alignItems: "center", gap: `${tokens.spacing.sm}px`, px: `${tokens.spacing.sm}px`, py: `${tokens.spacing.xs + 2}px`, borderRadius: `${tokens.radius.sm}px`, border: `1px solid ${tokens.ui.gold}55`, background: `linear-gradient(135deg, ${tokens.ui.gold}12 0%, transparent 100%)` }}>
+                <Box sx={{ width: 32, height: 32, borderRadius: `${tokens.radius.sm}px`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, background: `radial-gradient(circle, ${tokens.ui.gold}25 0%, transparent 70%)` }}>
+                  {Icon && <Icon size={18} color={tokens.ui.gold} style={{ opacity: 0.9 }} />}
+                </Box>
+                <Box sx={{ flex: 1, minWidth: 0 }}>
+                  <Typography sx={{ fontFamily: tokens.font.body, fontSize: tokens.fontSize.xs, color: tokens.ui.gold, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", lineHeight: 1 }}>
+                    Resolved this round
+                  </Typography>
+                  <Typography sx={{ fontFamily: tokens.font.display, fontSize: tokens.fontSize.sm, color: tokens.ui.gold, lineHeight: 1.2 }}>
+                    {resolvedDef.displayName}
+                  </Typography>
+                  <Typography sx={{ fontFamily: tokens.font.body, fontSize: tokens.fontSize.xs, color: tokens.ui.textMuted, lineHeight: 1.3, mt: "1px" }}>
+                    {resolvedDef.description}
+                  </Typography>
+                </Box>
+              </Box>
+            );
+          })()}
+
+          {Object.keys(eventContributions).length > 0 && (
+            <>
+              <PopoverSectionLabel>Chosen Cards</PopoverSectionLabel>
+              {Object.entries(eventContributions).map(([pid, card]) => {
+                const def = EVENT_CARD_DEFS[card];
+                const Icon = EVENT_ICONS[card];
+                const player = playerInfo[pid];
+                const isResolved = card === resolvedEvent;
+                return (
+                  <Box key={pid} sx={{ display: "flex", alignItems: "center", gap: `${tokens.spacing.xs}px`, px: `${tokens.spacing.sm}px`, py: "4px", borderRadius: `${tokens.radius.sm}px`, border: `1px solid ${isResolved ? `${tokens.ui.gold}44` : tokens.ui.border}`, backgroundColor: isResolved ? `${tokens.ui.gold}08` : tokens.ui.surfaceRaised }}>
+                    <Box sx={{ width: 10, height: 10, borderRadius: "50%", backgroundColor: player?.colour, flexShrink: 0, boxShadow: `0 0 4px ${player?.colour}66` }} />
+                    {Icon && <Icon size={14} color={def.isBattle ? tokens.ui.danger : tokens.ui.gold} style={{ opacity: 0.7, flexShrink: 0 }} />}
+                    <Typography sx={{ fontFamily: tokens.font.body, fontSize: tokens.fontSize.xs, color: tokens.ui.text, lineHeight: 1.2, flex: 1, minWidth: 0 }}>
+                      {def.displayName}
+                    </Typography>
+                    {isResolved && (
+                      <Typography sx={{ fontSize: tokens.fontSize.xs, fontWeight: 700, color: tokens.ui.gold, flexShrink: 0 }}>★</Typography>
+                    )}
+                  </Box>
+                );
+              })}
+            </>
+          )}
+
+          {eventCards.length > 0 && (
+            <>
+              <PopoverSectionLabel>Your Hand</PopoverSectionLabel>
+              {eventCards.map((card, i) => {
+                const def = EVENT_CARD_DEFS[card];
+                const Icon = EVENT_ICONS[card];
+                return (
+                  <Box key={`${card}-${i}`} sx={{ display: "flex", gap: `${tokens.spacing.xs}px`, px: `${tokens.spacing.sm}px`, py: "4px", borderRadius: `${tokens.radius.sm}px`, border: `1px solid ${tokens.ui.border}`, backgroundColor: tokens.ui.surfaceRaised }}>
+                    {Icon && <Icon size={14} color={def.isBattle ? tokens.ui.danger : tokens.ui.gold} style={{ opacity: 0.7, flexShrink: 0, marginTop: 2 }} />}
+                    <Box sx={{ flex: 1, minWidth: 0 }}>
+                      <Typography sx={{ fontFamily: tokens.font.body, fontSize: tokens.fontSize.xs, fontWeight: 600, color: tokens.ui.text, lineHeight: 1.2 }}>
+                        {def.displayName}
+                        {def.isBattle ? "  ⚔" : ""}
+                      </Typography>
+                      <Typography sx={{ fontFamily: tokens.font.body, fontSize: tokens.fontSize.xs, color: tokens.ui.textMuted, lineHeight: 1.3 }}>
+                        {def.effect}
+                      </Typography>
+                    </Box>
+                  </Box>
+                );
+              })}
+            </>
+          )}
+        </Box>
+      </Popover>
 
       <CardLightbox card={enlarged} onClose={() => setEnlarged(null)} />
     </>
   );
 };
+
+const PopoverSectionLabel = ({ children }: { children: React.ReactNode }) => (
+  <Typography sx={{ fontFamily: tokens.font.body, fontSize: tokens.fontSize.xs, color: tokens.ui.textMuted, textTransform: "uppercase", letterSpacing: "0.08em", mt: "2px" }}>
+    {children}
+  </Typography>
+);
 
 const CardTile = ({
   label,
@@ -627,7 +745,7 @@ const CardTile = ({
 }: {
   label: string;
   empty?: boolean;
-  onClick?: () => void;
+  onClick?: (event: React.MouseEvent<HTMLDivElement>) => void;
   children: React.ReactNode;
 }) => (
   <Box
