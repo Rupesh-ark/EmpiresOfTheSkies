@@ -16,13 +16,20 @@ import {
   IconCathedral, IconPalace, IconFactory,
 } from "@/theme";
 import { GiAnchor } from "react-icons/gi";
-import { MyGameProps, KINGDOM_LOCATION, findPossibleDestinations, KA_CARD_DEFS, FleetInfo } from "@eots/game";
+import {
+  MyGameProps, KINGDOM_LOCATION, findPossibleDestinations, FleetInfo,
+  KA_CARD_DEFS, LEGACY_CARD_DEFS, EVENT_CARD_DEFS, PlayerFortuneOfWarCardInfo, EventCardName,
+} from "@eots/game";
 import popeLogo from "@/boards_and_assets/action_board/pope_logo.webp";
 import captainGeneralLogo from "@/boards_and_assets/action_board/captain_general.webp";
+import { SWORD_CARDS, SHIELD_CARDS, NO_EFFECT_CARD } from "@/assets/fortuneOfWarCards";
+import { LEGACY_CARD_IMAGES } from "@/assets/legacyCards";
+import { KA_CARD_IMAGES } from "@/assets/kingdomAdvantage";
 
 import { Holdings } from "./Holdings";
-import { KingdomActions, CardDrawers } from "./board";
+import { KingdomActions } from "./board";
 import { ResourceChip } from "@/components/atoms/ResourceChip";
+import { CardLightbox, type EnlargedCard } from "@/components/atoms/CardLightbox";
 import { GameButton } from "@/components/atoms/GameButton";
 import { getLocationPresentation } from "@/utils/locationLabels";
 import { useMapSelection } from "@/contexts/MapSelectionContext";
@@ -163,14 +170,11 @@ export const PlayerDock = memo((props: PlayerDockProps) => {
 
         {isSelf ? (
           <Station label="Cards" minWidth={260}>
-            <CardDrawers
+            <DockCards
               fortuneCards={viewInfo.resources.fortuneCards}
               legacyCard={viewInfo.resources.legacyCard}
               advantageCard={viewInfo.resources.advantageCard}
               eventCards={viewInfo.resources.eventCards}
-              resolvedEvent={props.G.eventState.resolvedEvent}
-              eventContributions={props.G.eventState.eventContributions}
-              playerInfo={props.G.playerInfo}
             />
           </Station>
         ) : (
@@ -470,6 +474,191 @@ const LoadoutStat = ({
       {value}
     </Typography>
   </Box>
+);
+
+// Cards — flat 2×2 category grid built for the dock's height.
+// Full art opens in the lightbox on click (no drawers, no cropped images).
+
+const getFoWCardImage = (card: PlayerFortuneOfWarCardInfo): string => {
+  if (card.sword > 0) return SWORD_CARDS[card.sword] ?? NO_EFFECT_CARD;
+  if (card.shield > 0) return SHIELD_CARDS[card.shield] ?? NO_EFFECT_CARD;
+  return NO_EFFECT_CARD;
+};
+
+const DockCards = ({
+  fortuneCards,
+  legacyCard,
+  advantageCard,
+  eventCards,
+}: {
+  fortuneCards: PlayerFortuneOfWarCardInfo[];
+  legacyCard: { name: string; colour: string } | undefined;
+  advantageCard: string | undefined;
+  eventCards: EventCardName[];
+}) => {
+  const [enlarged, setEnlarged] = useState<EnlargedCard | null>(null);
+
+  const legacyDef = legacyCard
+    ? LEGACY_CARD_DEFS[legacyCard.name.toLowerCase() as keyof typeof LEGACY_CARD_DEFS]
+    : undefined;
+  const kaDef = advantageCard ? KA_CARD_DEFS[advantageCard as keyof typeof KA_CARD_DEFS] : undefined;
+  const kaTitle = kaDef?.displayName ?? advantageCard?.replace(/_/g, " ");
+  const legacyColour = legacyCard?.colour === "purple" ? tokens.allegiance.orthodox : tokens.allegiance.heresy;
+
+  return (
+    <>
+      <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "5px", height: "100%", alignContent: "stretch" }}>
+        <CardTile label={`Fortune of War · ${fortuneCards.length}`} empty={fortuneCards.length === 0}>
+          <Box sx={{ display: "flex", flexWrap: "wrap", gap: "3px" }}>
+            {fortuneCards.map((card, i) => {
+              const flipped = card.flipped;
+              const text = !flipped ? "?" : card.sword > 0 ? `${card.sword}⚔` : card.shield > 0 ? `${card.shield}🛡` : "—";
+              const title = card.sword > 0 ? `${card.sword} Swords` : card.shield > 0 ? `${card.shield} Shields` : "No Effect";
+              return (
+                <Box
+                  key={i}
+                  onClick={
+                    flipped
+                      ? () => setEnlarged({ src: getFoWCardImage(card), title, description: `⚔ ${card.sword}  🛡 ${card.shield}` })
+                      : undefined
+                  }
+                  sx={{
+                    px: "6px",
+                    py: "2px",
+                    borderRadius: `${tokens.radius.sm}px`,
+                    border: `1px solid ${flipped ? (card.sword > 0 ? "#c6282866" : "#1565c066") : tokens.ui.border}`,
+                    backgroundColor: tokens.ui.surfaceRaised,
+                    fontFamily: tokens.font.body,
+                    fontSize: tokens.fontSize.xs,
+                    fontWeight: 700,
+                    lineHeight: 1.2,
+                    color: flipped ? tokens.ui.text : tokens.ui.textMuted,
+                    cursor: flipped ? "pointer" : "default",
+                    "&:hover": flipped ? { borderColor: tokens.ui.gold } : undefined,
+                  }}
+                >
+                  {text}
+                </Box>
+              );
+            })}
+          </Box>
+        </CardTile>
+
+        <CardTile
+          label="Legacy"
+          empty={!legacyCard}
+          onClick={
+            legacyCard
+              ? () =>
+                  setEnlarged({
+                    src: LEGACY_CARD_IMAGES[legacyCard.name.toLowerCase()],
+                    title: legacyCard.name,
+                    description: legacyDef?.description,
+                    colour: legacyCard.colour,
+                  })
+              : undefined
+          }
+        >
+          {legacyCard ? (
+            <Box sx={{ display: "flex", alignItems: "center", gap: "5px", minWidth: 0 }}>
+              <Box sx={{ width: 8, height: 8, borderRadius: "50%", backgroundColor: legacyColour, flexShrink: 0 }} />
+              <Typography noWrap sx={{ fontFamily: tokens.font.display, fontSize: tokens.fontSize.xs, fontWeight: 700, color: tokens.ui.text, textTransform: "capitalize", lineHeight: 1.2 }}>
+                {legacyCard.name}
+              </Typography>
+            </Box>
+          ) : (
+            <TileEmptyText>none yet</TileEmptyText>
+          )}
+        </CardTile>
+
+        <CardTile
+          label="Advantage"
+          empty={!advantageCard}
+          onClick={
+            advantageCard
+              ? () => setEnlarged({ src: KA_CARD_IMAGES[advantageCard], title: kaTitle ?? "", description: kaDef?.description })
+              : undefined
+          }
+        >
+          {advantageCard ? (
+            <Typography noWrap sx={{ fontFamily: tokens.font.display, fontSize: tokens.fontSize.xs, fontWeight: 700, color: tokens.ui.text, textTransform: "capitalize", lineHeight: 1.2 }}>
+              {kaTitle}
+            </Typography>
+          ) : (
+            <TileEmptyText>none yet</TileEmptyText>
+          )}
+        </CardTile>
+
+        <Tooltip
+          title={
+            eventCards.length > 0 ? (
+              <Box sx={{ p: 0.5 }}>
+                {eventCards.map((card, i) => (
+                  <Typography key={`${card}-${i}`} sx={{ fontFamily: tokens.font.body, fontSize: tokens.fontSize.xs, color: tokens.ui.text, lineHeight: 1.5 }}>
+                    {EVENT_CARD_DEFS[card].displayName}
+                  </Typography>
+                ))}
+              </Box>
+            ) : (
+              ""
+            )
+          }
+          placement="top"
+          arrow
+        >
+          <span style={{ display: "block", minWidth: 0 }}>
+            <CardTile label={`Events · ${eventCards.length}`} empty={eventCards.length === 0}>
+              <TileEmptyText>{eventCards.length > 0 ? "hover to preview hand" : "hand empty"}</TileEmptyText>
+            </CardTile>
+          </span>
+        </Tooltip>
+      </Box>
+
+      <CardLightbox card={enlarged} onClose={() => setEnlarged(null)} />
+    </>
+  );
+};
+
+const CardTile = ({
+  label,
+  empty = false,
+  onClick,
+  children,
+}: {
+  label: string;
+  empty?: boolean;
+  onClick?: () => void;
+  children: React.ReactNode;
+}) => (
+  <Box
+    onClick={onClick}
+    sx={{
+      display: "flex",
+      flexDirection: "column",
+      gap: "4px",
+      px: "7px",
+      py: "5px",
+      minWidth: 0,
+      borderRadius: `${tokens.radius.sm}px`,
+      border: `1px solid ${tokens.ui.border}`,
+      backgroundColor: tokens.ui.surfaceRaised,
+      opacity: empty ? 0.6 : 1,
+      cursor: onClick ? "pointer" : "default",
+      transition: `all ${tokens.transition.fast}`,
+      "&:hover": onClick ? { borderColor: `${tokens.ui.gold}88`, boxShadow: `0 0 6px ${tokens.ui.gold}22` } : undefined,
+    }}
+  >
+    <Typography noWrap sx={{ fontFamily: tokens.font.body, fontSize: tokens.fontSize.xs, fontWeight: 700, color: tokens.ui.textMuted, textTransform: "uppercase", letterSpacing: "0.05em", lineHeight: 1 }}>
+      {label}
+    </Typography>
+    <Box sx={{ flex: 1, minHeight: 0, minWidth: 0 }}>{children}</Box>
+  </Box>
+);
+
+const TileEmptyText = ({ children }: { children: React.ReactNode }) => (
+  <Typography sx={{ fontFamily: tokens.font.body, fontSize: tokens.fontSize.xs, color: tokens.ui.textMuted, fontStyle: "italic", lineHeight: 1.2 }}>
+    {children}
+  </Typography>
 );
 
 // Public (opponent) views
