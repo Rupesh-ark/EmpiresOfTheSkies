@@ -1,15 +1,17 @@
 /**
- * OpponentRail — always-visible player summary chips on the left edge.
- * Every player gets a chip (you first); clicking one swaps that player's
- * board into the dock. Below the chips, the rail carries the round
- * timeline — which phase we're in and what's coming — and the game
- * emblem as a foot ornament. Collapsible to a strip of colour dots.
+ * OpponentRail — the reference column on the left edge. Player standings
+ * chips (you first; clicking one inspects that player), then the inspected
+ * player's Holdings and Forces, then the game emblem as a foot ornament.
+ * Collapsible to a strip of colour medallions.
  */
 import { useState } from "react";
 import { Box, Tooltip, Typography } from "@mui/material";
 import { ChevronLeft, ChevronRight } from "@mui/icons-material";
-import { MyGameProps, GAME_PHASES } from "@eots/game";
+import { MyGameProps } from "@eots/game";
 import { tokens, backgrounds } from "@/theme";
+import { IconRegiment, IconElite, IconLevy, IconSkyship } from "@/theme";
+import { Holdings } from "@/components/PlayerBoard/Holdings";
+import { ResourceChip } from "@/components/atoms/ResourceChip";
 import emblem from "@/boards_and_assets/branding/box_art_logo.webp";
 import popeLogo from "@/boards_and_assets/action_board/pope_logo.webp";
 import captainGeneralLogo from "@/boards_and_assets/action_board/captain_general.webp";
@@ -40,7 +42,7 @@ export const OpponentRail = (props: OpponentRailProps) => {
   return (
     <Box
       sx={{
-        width: collapsed ? 48 : 176,
+        width: collapsed ? 48 : 216,
         flexShrink: 0,
         display: "flex",
         flexDirection: "column",
@@ -227,7 +229,33 @@ export const OpponentRail = (props: OpponentRailProps) => {
         }}
       />
 
-      <RoundTimeline stage={props.G.stage} collapsed={collapsed} />
+      {!collapsed && (() => {
+        const viewed = props.G.playerInfo[props.viewPlayerID];
+        if (!viewed) return null;
+        const inspectingOther = props.viewPlayerID !== props.playerID;
+        return (
+          <Box sx={{ px: `${tokens.spacing.sm}px`, display: "flex", flexDirection: "column", gap: "8px", flexShrink: 0 }}>
+            {inspectingOther && (
+              <Typography sx={{ fontFamily: tokens.font.accent, fontSize: tokens.fontSize.xs, fontWeight: 700, color: viewed.colour, textTransform: "uppercase", letterSpacing: "0.08em", lineHeight: 1, textShadow: "0 1px 1px rgba(0,0,0,0.2)" }}>
+                Inspecting {viewed.kingdomName}
+              </Typography>
+            )}
+            <Box>
+              <RailSectionHeader label="Forces" />
+              <Box sx={{ display: "flex", flexWrap: "wrap", gap: "5px" }}>
+                <ForceChip Icon={IconRegiment} value={viewed.resources.regiments} label="Regiments" />
+                <ForceChip Icon={IconElite} value={viewed.resources.eliteRegiments ?? 0} label="Elite" />
+                <ForceChip Icon={IconLevy} value={viewed.resources.levies} label="Levies" />
+                <ForceChip Icon={IconSkyship} value={viewed.resources.skyships} label="Skyships" />
+              </Box>
+            </Box>
+            <Box>
+              <RailSectionHeader label="Holdings" />
+              <Holdings {...props} variant="compact" bare viewPlayerID={props.viewPlayerID} />
+            </Box>
+          </Box>
+        );
+      })()}
 
       {/* Foot ornament — the game emblem, engraved into the parchment */}
       {!collapsed && (
@@ -251,124 +279,39 @@ export const OpponentRail = (props: OpponentRailProps) => {
   );
 };
 
-/** Vertical phase tracker — where the round stands and what comes next. */
-const RoundTimeline = ({
-  stage,
-  collapsed,
+
+
+const RailSectionHeader = ({ label }: { label: string }) => (
+  <Typography
+    sx={{
+      fontFamily: tokens.font.accent,
+      fontSize: tokens.fontSize.xs,
+      fontWeight: 700,
+      color: tokens.ui.gold,
+      textTransform: "uppercase",
+      letterSpacing: "0.1em",
+      lineHeight: 1,
+      mb: "5px",
+    }}
+  >
+    {label}
+  </Typography>
+);
+
+const ForceChip = ({
+  Icon,
+  value,
+  label,
 }: {
-  stage: MyGameProps["G"]["stage"];
-  collapsed: boolean;
-}) => {
-  // Hide setup once the game is under way.
-  const phases = GAME_PHASES.filter((p) => p.key !== "setup" || stage.phase === "setup");
-  const currentIdx = phases.findIndex((p) => p.key === stage.phase);
-
-  if (collapsed) {
-    return (
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          gap: "8px",
-          flexShrink: 0,
-          mx: "auto",
-          px: "8px",
-          py: "10px",
-          borderRadius: `${tokens.radius.pill}px`,
-          // Recessed groove — same instrument language as the heresy gauge
-          backgroundColor: "rgba(60,40,20,0.12)",
-          border: `1px solid ${tokens.ui.border}`,
-          boxShadow: "inset 0 2px 4px rgba(0,0,0,0.25), inset 0 -1px 0 rgba(255,255,255,0.3)",
-        }}
-      >
-        {phases.map((p, i) => (
-          <Tooltip key={p.key} title={`${p.label}${i === currentIdx ? " — now" : ""}`} placement="right" arrow>
-            <Box
-              sx={{
-                width: i === currentIdx ? 10 : 6,
-                height: i === currentIdx ? 10 : 6,
-                borderRadius: "50%",
-                background:
-                  i === currentIdx
-                    ? `radial-gradient(circle at 34% 28%, #ffe9a8, ${tokens.ui.gold} 60%)`
-                    : i < currentIdx
-                      ? `${tokens.ui.gold}66`
-                      : "transparent",
-                border: i > currentIdx ? `1px solid ${tokens.ui.borderMedium}` : i === currentIdx ? "1px solid rgba(0,0,0,0.3)" : "none",
-                boxShadow: i === currentIdx ? `0 0 6px ${tokens.ui.gold}aa` : "none",
-              }}
-            />
-          </Tooltip>
-        ))}
-      </Box>
-    );
-  }
-
-  return (
-    <Box sx={{ px: `${tokens.spacing.sm}px`, flexShrink: 0 }}>
-      <Typography
-        sx={{
-          fontFamily: tokens.font.accent,
-          fontSize: tokens.fontSize.xs,
-          fontWeight: 700,
-          color: tokens.ui.gold,
-          textTransform: "uppercase",
-          letterSpacing: "0.1em",
-          lineHeight: 1,
-          mb: "6px",
-        }}
-      >
-        The Round
-      </Typography>
-      {phases.map((p, i) => {
-        const isCurrent = i === currentIdx;
-        const isPast = i < currentIdx;
-        return (
-          <Tooltip key={p.key} title={p.hint} placement="right" arrow enterDelay={500}>
-            <Box sx={{ display: "flex", gap: "8px", cursor: "default" }}>
-              {/* Node + connecting line */}
-              <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", width: 10, flexShrink: 0 }}>
-                <Box
-                  sx={{
-                    width: isCurrent ? 10 : 7,
-                    height: isCurrent ? 10 : 7,
-                    mt: isCurrent ? "2px" : "4px",
-                    borderRadius: "50%",
-                    backgroundColor: isCurrent ? tokens.ui.gold : isPast ? `${tokens.ui.gold}66` : "transparent",
-                    border: !isCurrent && !isPast ? `1.5px solid ${tokens.ui.borderMedium}` : "none",
-                    boxShadow: isCurrent ? `0 0 8px ${tokens.ui.gold}aa` : "none",
-                    flexShrink: 0,
-                    ...(isCurrent && {
-                      "@keyframes phaseGlow": {
-                        "0%, 100%": { boxShadow: `0 0 4px ${tokens.ui.gold}66` },
-                        "50%": { boxShadow: `0 0 10px ${tokens.ui.gold}` },
-                      },
-                      animation: "phaseGlow 2.5s ease-in-out infinite",
-                    }),
-                  }}
-                />
-                {i < phases.length - 1 && (
-                  <Box sx={{ width: "1px", flex: 1, minHeight: 8, backgroundColor: isPast ? `${tokens.ui.gold}44` : tokens.ui.border }} />
-                )}
-              </Box>
-              <Typography
-                sx={{
-                  fontFamily: tokens.font.body,
-                  fontSize: tokens.fontSize.xs,
-                  fontWeight: isCurrent ? 700 : 400,
-                  color: isCurrent ? tokens.ui.text : isPast ? `${tokens.ui.textMuted}aa` : tokens.ui.textMuted,
-                  lineHeight: 1,
-                  pb: "11px",
-                }}
-              >
-                {p.label}
-              </Typography>
-            </Box>
-          </Tooltip>
-        );
-      })}
-    </Box>
-  );
-};
-
+  Icon: React.ComponentType<{ style?: React.CSSProperties }>;
+  value: number;
+  label: string;
+}) => (
+  <ResourceChip
+    icon={<Icon style={{ fontSize: 15 }} />}
+    value={value}
+    label={label}
+    size="sm"
+    variant={value === 0 ? "muted" : "default"}
+  />
+);

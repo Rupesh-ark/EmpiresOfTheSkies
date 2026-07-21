@@ -122,6 +122,64 @@ const MiniHeresyTrack = ({ playerInfo }: { playerInfo: Record<string, PlayerInfo
   );
 };
 
+/** Horizontal round sequence — every phase, the current one lit. */
+const RoundSequence = ({ stage }: { stage: MyGameProps["G"]["stage"] }) => {
+  const phases = GAME_PHASES.filter((p) => p.key !== "setup" || stage.phase === "setup");
+  const currentIdx = phases.findIndex((p) => p.key === stage.phase);
+
+  return (
+    <Box sx={{ display: "flex", alignItems: "center", minWidth: 0 }}>
+      {phases.map((p, i) => {
+        const isCurrent = i === currentIdx;
+        const isPast = i < currentIdx;
+        return (
+          <Tooltip key={p.key} title={p.hint} placement="bottom" arrow enterDelay={400}>
+            <Box sx={{ display: "flex", alignItems: "center", cursor: "default" }}>
+              {i > 0 && (
+                <Box sx={{ width: 12, height: "1px", mx: "2px", backgroundColor: isPast || isCurrent ? "rgba(232,200,96,0.45)" : "rgba(200,170,120,0.2)" }} />
+              )}
+              <Box
+                sx={{
+                  width: isCurrent ? 8 : 5,
+                  height: isCurrent ? 8 : 5,
+                  mr: "4px",
+                  borderRadius: "50%",
+                  flexShrink: 0,
+                  background: isCurrent
+                    ? `radial-gradient(circle at 34% 28%, #ffe9a8, ${tokens.ui.gold} 60%)`
+                    : isPast
+                      ? "rgba(232,200,96,0.5)"
+                      : "transparent",
+                  border: !isCurrent && !isPast ? "1px solid rgba(200,170,120,0.4)" : "none",
+                  ...(isCurrent && {
+                    "@keyframes seqGlow": {
+                      "0%, 100%": { boxShadow: "0 0 3px rgba(232,200,96,0.5)" },
+                      "50%": { boxShadow: "0 0 9px rgba(232,200,96,0.95)" },
+                    },
+                    animation: "seqGlow 2.5s ease-in-out infinite",
+                  }),
+                }}
+              />
+              <Typography
+                sx={{
+                  fontFamily: tokens.font.body,
+                  fontSize: tokens.fontSize.xs,
+                  fontWeight: isCurrent ? 700 : 400,
+                  color: isCurrent ? "#F5ECD8" : isPast ? "rgba(200,180,152,0.55)" : "#C8B898",
+                  lineHeight: 1,
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {p.label}
+              </Typography>
+            </Box>
+          </Tooltip>
+        );
+      })}
+    </Box>
+  );
+};
+
 export const TopStrip = (props: MyGameProps) => {
   const isMyTurn = props.ctx.currentPlayer === props.playerID;
   const currentPlayerInfo = props.G.playerInfo[props.ctx.currentPlayer];
@@ -129,8 +187,6 @@ export const TopStrip = (props: MyGameProps) => {
   const moodTokens = getMoodTokens(mood);
   const shouldPulse = PULSING_MOODS.has(mood);
 
-  const phase = GAME_PHASES.find((p) => p.key === props.G.stage.phase);
-  const phaseName = phase?.label ?? props.G.stage.sub;
   const currentPlayerName =
     props.matchData?.find((p) => String(p.id) === props.ctx.currentPlayer)?.name ?? "Player";
 
@@ -156,14 +212,12 @@ export const TopStrip = (props: MyGameProps) => {
         }),
       }}
     >
-      {/* Round + phase */}
+      {/* Round + the phase sequence */}
       <Typography sx={{ fontFamily: tokens.font.accent, fontSize: tokens.fontSize.xs, color: "#E8C860", fontWeight: 700, lineHeight: 1, whiteSpace: "nowrap" }}>
         Round {props.G.round} / {props.G.finalRound}
       </Typography>
       <Box sx={{ width: "1px", height: 16, backgroundColor: "rgba(200,170,120,0.3)", flexShrink: 0 }} />
-      <Typography sx={{ fontFamily: tokens.font.body, fontSize: tokens.fontSize.xs, color: "#F5ECD8", whiteSpace: "nowrap", lineHeight: 1 }}>
-        {phaseName}
-      </Typography>
+      <RoundSequence stage={props.G.stage} />
       <Box sx={{ width: "1px", height: 16, backgroundColor: "rgba(200,170,120,0.3)", flexShrink: 0 }} />
 
       {/* Turn indicator */}

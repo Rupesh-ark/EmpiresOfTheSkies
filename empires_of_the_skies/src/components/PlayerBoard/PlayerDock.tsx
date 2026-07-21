@@ -1,19 +1,14 @@
 /**
- * PlayerDock — the single player-economy dock at the bottom of the stable
- * frame. Station cards in reading order: information on the left
- * (Cards | Holdings | Forces), actions on the right of the brass divider
- * (Musters | Fleets), under the prompt bar's Confirm corner.
- *
- * Identity/allegiance live on the rail chips; treasury lives in the
- * PromptBar — the dock never duplicates them. Shows YOUR kingdom by
- * default; clicking a rail chip swaps any player's public board in
- * (hidden hands stay hidden).
+ * PlayerDock — the hand-and-actions tray at the bottom of the stable
+ * frame: Cards || Musters | Fleets, one silhouette for every viewed
+ * player. Slow reference info lives on the rail (standings, Holdings,
+ * Forces); treasury lives in the PromptBar — the dock never duplicates
+ * them. Hidden hands stay hidden when inspecting opponents.
  */
 import { memo, useState } from "react";
 import { Box, Popover, Tooltip, Typography } from "@mui/material";
 import { ExpandLess, ExpandMore } from "@mui/icons-material";
 import { tokens, backgrounds } from "@/theme";
-import { IconRegiment, IconElite, IconLevy, IconSkyship } from "@/theme";
 import { GiAnchor } from "react-icons/gi";
 import {
   MyGameProps, KINGDOM_LOCATION, findPossibleDestinations, FleetInfo,
@@ -26,9 +21,7 @@ import { LEGACY_CARD_IMAGES } from "@/assets/legacyCards";
 import { KA_CARD_IMAGES } from "@/assets/kingdomAdvantage";
 import { EVENT_ICONS } from "@/components/Events/eventCardIcons";
 
-import { Holdings } from "./Holdings";
 import { KingdomActions } from "./board";
-import { ResourceChip } from "@/components/atoms/ResourceChip";
 import { GameButton } from "@/components/atoms/GameButton";
 import { getLocationPresentation } from "@/utils/locationLabels";
 import { useMapSelection } from "@/contexts/MapSelectionContext";
@@ -115,19 +108,6 @@ export const PlayerDock = memo((props: PlayerDockProps) => {
             eventContributions={props.G.eventState.eventContributions}
             playerInfo={props.G.playerInfo}
           />
-        </Station>
-
-        <Station label="Holdings" minWidth={230}>
-          <Holdings {...props} variant="compact" bare viewPlayerID={props.viewPlayerID} />
-        </Station>
-
-        <Station label="Forces" minWidth={170}>
-          <Box sx={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
-            <ForceChip Icon={IconRegiment} value={viewInfo.resources.regiments} label="Regiments" />
-            <ForceChip Icon={IconElite} value={viewInfo.resources.eliteRegiments ?? 0} label="Elite" />
-            <ForceChip Icon={IconLevy} value={viewInfo.resources.levies} label="Levies" />
-            <ForceChip Icon={IconSkyship} value={viewInfo.resources.skyships} label="Skyships" />
-          </Box>
         </Station>
 
         {/* Divider: information | actions */}
@@ -354,23 +334,6 @@ const MustersStatus = ({
   </Box>
 );
 
-const ForceChip = ({
-  Icon,
-  value,
-  label,
-}: {
-  Icon: React.ComponentType<{ style?: React.CSSProperties }>;
-  value: number;
-  label: string;
-}) => (
-  <ResourceChip
-    icon={<Icon style={{ fontSize: 15 }} />}
-    value={value}
-    label={label}
-    size="sm"
-    variant={value === 0 ? "muted" : "default"}
-  />
-);
 
 // Fleets — horizontal mini-cards built for the dock
 
