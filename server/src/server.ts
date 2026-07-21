@@ -26,9 +26,7 @@ const DATABASE_URL = process.env.DATABASE_URL;
 if (!DATABASE_URL) throw new Error("DATABASE_URL is required");
 const db = new PostgresStore(DATABASE_URL, { logging: false });
 
-// Static origin list (not a validator function): the array form is accepted by
-// both boardgame.io 0.50.2 and the @lean-poker fork's 0.50.4, whose SocketIO
-// CORS moved to the `cors` package callback signature.
+// Static origin list shared by the lobby API and SocketIO transport.
 const server = Server({
   games: [MyGame],
   origins: ALLOWED_ORIGINS,

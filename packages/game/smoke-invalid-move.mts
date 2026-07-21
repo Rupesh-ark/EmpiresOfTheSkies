@@ -62,8 +62,8 @@ if (!state!.G || !("cardDecks" in (state!.G as object))) {
   fail(`G was corrupted by the invalid move: ${JSON.stringify(state!.G).slice(0, 200)}`);
 }
 
-if (!sawError) fail("no actionError reached the client");
-if (!sawError.payload?.message) fail(`actionError lacks payload: ${JSON.stringify(sawError)}`);
+if (!sawError) fail("no action-result error reached the client");
+if (!sawError.payload?.message) fail(`action-result error lacks payload: ${JSON.stringify(sawError)}`);
 
 console.log("PASS: invalid move rejected server-side, G intact, error delivered:");
 console.log("  ", JSON.stringify(sawError));

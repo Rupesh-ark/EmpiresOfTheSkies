@@ -6,11 +6,7 @@ packages:
 allowBuilds:
   esbuild: true
 
-# is-generator-function pinned to 1.0.10 because 1.1.x broke koa compatibility
-# (boardgame.io depends on koa-socket-2 → koa → is-generator-function)
 overrides:
-  is-generator-function: 1.0.10
-  # vendored test build from the boardgame.io repo
-  # (rupesh-ark/invalid-move-payload branch: error channel + everything on main);
-  # remove this line and `pnpm install` to go back to the npm release
-  boardgame.io: file:vendor/boardgame.io-0.51.0-beta.3.tgz
+  # Unreleased test build from boardgame.io commit c92e91c.
+  # Keep all direct and peer dependency resolutions on the same protocol version.
+  boardgame.io: file:vendor/boardgame.io-0.51.0-beta.4.tgz

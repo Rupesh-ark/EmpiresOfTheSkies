@@ -57,6 +57,10 @@ export const wrapMove = (name: string, def: MoveDefinition): any => {
         playerID,
         phase: ctx.phase,
       }, `${name} REJECTED`);
+      return Invalid({
+        code: "INVALID_MOVE",
+        message: def.errorMessage,
+      });
     } else {
       if (def.successLog) {
         const message = def.successLog(G, playerID, ...args);

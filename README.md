@@ -90,7 +90,7 @@ EmpiresOfTheSkies/
 |-------|-------------|
 | Frontend | React, TypeScript, Vite, Material UI, Emotion |
 | Backend | Node.js 22, boardgame.io, Koa, PostgreSQL |
-| Game Engine | boardgame.io (shared package, compiled to CJS + ESM) |
+| Game Engine | boardgame.io (shared ESM package) |
 | Multiplayer | boardgame.io server sync over SocketIO |
 | AI Tuning | Python, CMA-ES, Matplotlib |
 | Monorepo | pnpm workspaces |

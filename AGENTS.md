@@ -20,7 +20,7 @@ EmpiresOfTheSkies/
 ```
 
 - `@eots/game` is consumed by both frontend and server.
-- It builds to `dist/esm/`, `dist/cjs/`, and `dist/types/`.
+- It builds once as ESM to `dist/`, including declaration files.
 - Build order matters: **game → server → frontend**.
 
 ---
@@ -70,7 +70,7 @@ UI click → props.moves.*() → SocketIO → server validates & mutates G
 ## Important Conventions
 
 - **Discriminated union for stage**: `GameStage` is `{ phase, sub }`. Always use `setStage()` and `isStage()` helpers from `helpers/stageUtils.ts`.
-- **Moves**: every move is a `MoveDefinition` with `fn`, optional `validate`, `errorMessage`, and `successLog`. Register moves in `Game.ts` via `wrapMove()`.
+- **Moves**: every move is a `MoveDefinition` with `fn`, optional `validate`, `errorMessage`, and `successLog`. Add it to `MOVE_DEFINITIONS`, then register its name in `Game.ts` via `wrapSet(...)`.
 - **Server-authoritative**: all rule logic lives in `@eots/game` and runs on the server. Never duplicate rules in the frontend.
 - **TypeScript strictness**: prefer compile-time safety; illegal `GameStage` combinations should be type errors.
 - **Loop guard**: `helpers/moveWrapper.ts` wraps moves; resolution has a turn-budget plugin that halts at 550 `endTurn`/`endPhase` calls per round.
@@ -80,10 +80,10 @@ UI click → props.moves.*() → SocketIO → server validates & mutates G
 ## Gotchas
 
 - `@eots/game` must be rebuilt after engine changes before server/frontend see them. `pnpm build:all` handles ordering, or run `pnpm dev:game` for watch mode during development.
-- The backend is CJS (`"type": "commonjs"`); frontend is ESM.
-- `pnpm-workspace.yaml` pins `is-generator-function@1.0.10` for Koa compatibility (droppable after the planned swap to the `@lean-poker/boardgame.io` fork, which removes koa-socket-2).
+- The game package, backend, and frontend are all ESM. The vendored boardgame.io build exposes both ESM and CJS entry points.
+- `pnpm-workspace.yaml` overrides boardgame.io with an unreleased local tarball. Frontend and server must use the same build because their SocketIO action-result protocol changes together.
 - AI tests under `packages/game/src/__tests__/ai/` can be slow; normal dev tests skip the full self-play smoke test.
-- The `docs/` folder is NOT this project's documentation — it's local-only (gitignored) vendored material for the planned `@lean-poker/boardgame.io` fork swap. This project's architecture guide is the root `ARCHITECTURE.md`.
+- The `docs/` folder is NOT this project's documentation — it is local-only (gitignored) boardgame.io reference material. This project's architecture guide is the root `ARCHITECTURE.md`.
 - Moves are defined once in `packages/game/src/moveDefinitions.ts` (implementation + validator) — `Game.ts` registers them from there via `wrapSet(...)`. To add a move: create the move file, add it to `MOVE_DEFINITIONS`, then list its name in the right `wrapSet` call(s) in `Game.ts`.
 
 ---
