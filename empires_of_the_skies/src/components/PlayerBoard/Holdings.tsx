@@ -144,10 +144,13 @@ interface HoldingsProps extends MyGameProps {
   variant?: "compact" | "full";
   /** Skip padding + internal header — the dock station provides both */
   bare?: boolean;
+  /** Whose holdings to show (dock rail selection); defaults to the local player */
+  viewPlayerID?: string;
 }
 
 export const Holdings = (props: HoldingsProps) => {
-  const playerInfo = props.G.playerInfo[props.playerID ?? props.ctx.currentPlayer];
+  const playerInfo =
+    props.G.playerInfo[props.viewPlayerID ?? props.playerID ?? props.ctx.currentPlayer];
   const colour = playerInfo.colour;
   const { outposts, colonies, forts, locations } = countTerritories(props, colour);
 

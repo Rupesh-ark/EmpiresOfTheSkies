@@ -1,20 +1,19 @@
 /**
  * PlayerDock — the single player-economy dock at the bottom of the stable
- * frame, designed for its horizontal shape: one row of uniform "station"
- * cards — Kingdom | Forces & Musters | Fleets | Cards | Holdings.
+ * frame. Station cards in reading order: information on the left
+ * (Cards | Holdings | Forces), actions on the right of the brass divider
+ * (Musters | Fleets), under the prompt bar's Confirm corner.
  *
- * The local player's treasury lives in the PromptBar above (no duplicated
- * band here). Shows YOUR kingdom by default; clicking a rail chip swaps any
- * player's public board in (hidden hands stay hidden).
+ * Identity/allegiance live on the rail chips; treasury lives in the
+ * PromptBar — the dock never duplicates them. Shows YOUR kingdom by
+ * default; clicking a rail chip swaps any player's public board in
+ * (hidden hands stay hidden).
  */
 import { memo, useState } from "react";
 import { Box, Popover, Tooltip, Typography } from "@mui/material";
 import { ExpandLess, ExpandMore } from "@mui/icons-material";
 import { tokens, backgrounds } from "@/theme";
-import {
-  IconRegiment, IconElite, IconLevy, IconSkyship,
-  IconCathedral, IconPalace, IconFactory,
-} from "@/theme";
+import { IconRegiment, IconElite, IconLevy, IconSkyship } from "@/theme";
 import { GiAnchor } from "react-icons/gi";
 import {
   MyGameProps, KINGDOM_LOCATION, findPossibleDestinations, FleetInfo,
@@ -94,12 +93,6 @@ export const PlayerDock = memo((props: PlayerDockProps) => {
       <DockShell colour={colour} collapsed onToggle={() => setCollapsed(false)}>
         <Box sx={{ display: "flex", alignItems: "center", gap: `${tokens.spacing.md}px`, minWidth: 0 }}>
           <Identity viewInfo={viewInfo} isSelf={isSelf} />
-          {!isSelf && (
-            <Typography sx={{ fontFamily: tokens.font.body, fontSize: tokens.fontSize.xs, color: tokens.ui.textMuted, whiteSpace: "nowrap" }}>
-              {viewInfo.resources.victoryPoints} VP · {viewInfo.resources.gold}g ·{" "}
-              {viewInfo.hereticOrOrthodox === "heretic" ? "Heretic" : "Orthodox"}
-            </Typography>
-          )}
         </Box>
       </DockShell>
     );
@@ -107,37 +100,49 @@ export const PlayerDock = memo((props: PlayerDockProps) => {
 
   return (
     <DockShell colour={colour} onToggle={() => setCollapsed(true)}>
+      {/* One silhouette for every player — cycling the rail changes the
+          numbers, never the geometry. Information stations left, action
+          stations right of the divider, under the Confirm corner. */}
       <Box sx={{ display: "flex", gap: `${tokens.spacing.sm}px`, flex: 1, minWidth: 0, height: "100%", overflowX: "auto", pb: "2px", pr: "30px" }}>
-        {/* Kingdom — identity + allegiance (+ public treasury for opponents) */}
-        <Station labelNode={<Identity viewInfo={viewInfo} isSelf={isSelf} />} minWidth={isSelf ? 170 : 200} grow={0}>
-          <Box sx={{ display: "flex", flexDirection: "column", gap: "5px" }}>
-            <AllegiancePill viewInfo={viewInfo} />
-            {(viewInfo.isArchprelate || viewInfo.isCaptainGeneral) && (
-              <Typography sx={{ fontFamily: tokens.font.accent, fontSize: tokens.fontSize.xs, color: tokens.ui.gold, fontStyle: "italic", lineHeight: 1.3 }}>
-                {[
-                  viewInfo.isArchprelate && "Seat of the Archprelate",
-                  viewInfo.isCaptainGeneral && "Captain-General of the Faith",
-                ].filter(Boolean).join(" · ")}
-              </Typography>
-            )}
-            {!isSelf && (
-              <Box>
-                <StatRow label="Victory Points" value={viewInfo.resources.victoryPoints} />
-                <StatRow label="Gold" value={viewInfo.resources.gold} />
-                <StatRow label="Counsellors" value={viewInfo.resources.counsellors} />
-              </Box>
-            )}
-          </Box>
+        <Station label="Cards" minWidth={250}>
+          <DockCards
+            publicView={!isSelf}
+            fortuneCards={viewInfo.resources.fortuneCards}
+            legacyCard={viewInfo.resources.legacyCard}
+            advantageCard={viewInfo.resources.advantageCard}
+            eventCards={viewInfo.resources.eventCards}
+            resolvedEvent={props.G.eventState.resolvedEvent}
+            eventContributions={props.G.eventState.eventContributions}
+            playerInfo={props.G.playerInfo}
+          />
         </Station>
 
-        <Station label="Forces & Musters" minWidth={260}>
-          <Box sx={{ display: "flex", flexWrap: "wrap", gap: "6px", mb: isSelf ? "8px" : 0 }}>
+        <Station label="Holdings" minWidth={230}>
+          <Holdings {...props} variant="compact" bare viewPlayerID={props.viewPlayerID} />
+        </Station>
+
+        <Station label="Forces" minWidth={170}>
+          <Box sx={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
             <ForceChip Icon={IconRegiment} value={viewInfo.resources.regiments} label="Regiments" />
             <ForceChip Icon={IconElite} value={viewInfo.resources.eliteRegiments ?? 0} label="Elite" />
             <ForceChip Icon={IconLevy} value={viewInfo.resources.levies} label="Levies" />
             <ForceChip Icon={IconSkyship} value={viewInfo.resources.skyships} label="Skyships" />
           </Box>
-          {isSelf && (
+        </Station>
+
+        {/* Divider: information | actions */}
+        <Box
+          sx={{
+            width: "2px",
+            alignSelf: "stretch",
+            my: "4px",
+            flexShrink: 0,
+            background: `linear-gradient(180deg, transparent, ${tokens.ui.gold}55, transparent)`,
+          }}
+        />
+
+        <Station label="Musters" minWidth={200}>
+          {isSelf ? (
             <KingdomActions
               layout="row"
               colour={colour}
@@ -145,6 +150,8 @@ export const PlayerDock = memo((props: PlayerDockProps) => {
               counsellorLocations={viewInfo.playerBoardCounsellorLocations}
               moves={props.moves}
             />
+          ) : (
+            <MustersStatus colour={colour} shipyards={viewInfo.shipyards} counsellorLocations={viewInfo.playerBoardCounsellorLocations} />
           )}
         </Station>
 
@@ -166,28 +173,6 @@ export const PlayerDock = memo((props: PlayerDockProps) => {
             onDeploy={isMyActionsTurn ? handleDeploy : undefined}
             onViewLocation={props.onOpenFleetLocation}
           />
-        </Station>
-
-        {isSelf ? (
-          <Station label="Cards" minWidth={260}>
-            <DockCards
-              fortuneCards={viewInfo.resources.fortuneCards}
-              legacyCard={viewInfo.resources.legacyCard}
-              advantageCard={viewInfo.resources.advantageCard}
-              eventCards={viewInfo.resources.eventCards}
-              resolvedEvent={props.G.eventState.resolvedEvent}
-              eventContributions={props.G.eventState.eventContributions}
-              playerInfo={props.G.playerInfo}
-            />
-          </Station>
-        ) : (
-          <Station label="Cards" minWidth={200}>
-            <PublicCards viewInfo={viewInfo} />
-          </Station>
-        )}
-
-        <Station label="Holdings" minWidth={230}>
-          {isSelf ? <Holdings {...props} variant="compact" bare /> : <PublicHoldings viewInfo={viewInfo} />}
         </Station>
       </Box>
 
@@ -263,23 +248,19 @@ const DockShell = ({
 /** Uniform bordered station card with a small-caps header */
 const Station = ({
   label,
-  labelNode,
   action,
   minWidth,
-  grow = 1,
   children,
 }: {
-  label?: string;
-  labelNode?: React.ReactNode;
+  label: string;
   action?: React.ReactNode;
   minWidth: number;
-  grow?: number;
   children: React.ReactNode;
 }) => (
   <Box
     sx={{
       minWidth,
-      flex: `${grow} 1 ${grow === 0 ? "auto" : "0px"}`,
+      flex: "1 1 0",
       maxWidth: minWidth * 1.6,
       display: "flex",
       flexDirection: "column",
@@ -294,11 +275,9 @@ const Station = ({
     }}
   >
     <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: "4px", flexShrink: 0, minHeight: 22 }}>
-      {labelNode ?? (
-        <Typography sx={{ fontFamily: tokens.font.accent, fontSize: tokens.fontSize.xs, fontWeight: 700, color: tokens.ui.gold, textTransform: "uppercase", letterSpacing: "0.08em", lineHeight: 1 }}>
-          {label}
-        </Typography>
-      )}
+      <Typography sx={{ fontFamily: tokens.font.accent, fontSize: tokens.fontSize.xs, fontWeight: 700, color: tokens.ui.gold, textTransform: "uppercase", letterSpacing: "0.08em", lineHeight: 1 }}>
+        {label}
+      </Typography>
       {action}
     </Box>
     <Box sx={{ flex: 1, minHeight: 0, overflowY: "auto", "&::-webkit-scrollbar": { width: 6 }, "&::-webkit-scrollbar-thumb": { background: tokens.ui.surfaceHover, borderRadius: 3 } }}>
@@ -336,34 +315,44 @@ const Identity = ({ viewInfo, isSelf }: { viewInfo: ViewInfo; isSelf: boolean })
   </Box>
 );
 
-const AllegiancePill = ({ viewInfo }: { viewInfo: ViewInfo }) => {
-  const isHeretic = viewInfo.hereticOrOrthodox === "heretic";
-  const heresyVP = isHeretic ? viewInfo.heresyTracker : -viewInfo.heresyTracker;
-  const alColor = isHeretic ? tokens.allegiance.heresy : tokens.allegiance.orthodox;
-  return (
-    <Box
-      sx={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: "5px",
-        px: `${tokens.spacing.sm}px`,
-        height: 24,
-        borderRadius: `${tokens.radius.pill}px`,
-        background: backgrounds.surfaceGradient,
-        border: `1px solid ${alColor}44`,
-        alignSelf: "flex-start",
-      }}
-    >
-      <Box sx={{ width: 7, height: 7, borderRadius: "50%", backgroundColor: alColor, boxShadow: `0 0 4px ${alColor}88` }} />
-      <Typography component="span" sx={{ fontSize: tokens.fontSize.xs, fontFamily: tokens.font.body, fontWeight: 600, color: alColor, lineHeight: 1 }}>
-        {isHeretic ? "Heretic" : "Orthodox"}
-      </Typography>
-      <Typography component="span" sx={{ fontSize: tokens.fontSize.xs, fontFamily: tokens.font.body, fontWeight: 700, color: heresyVP >= 0 ? tokens.ui.success : tokens.ui.danger, lineHeight: 1 }}>
-        {heresyVP > 0 ? "+" : ""}{heresyVP} VP
-      </Typography>
-    </Box>
-  );
-};
+/** Opponent view of the Musters station — same slot, read-only round status. */
+const MustersStatus = ({
+  colour,
+  shipyards,
+  counsellorLocations,
+}: {
+  colour: string;
+  shipyards: number;
+  counsellorLocations: { buildSkyships: boolean; conscriptLevies: boolean; trainTroops: boolean };
+}) => (
+  <Box sx={{ display: "flex", flexDirection: "column", gap: "3px" }}>
+    {[
+      { label: `Build skyships (${shipyards} ${shipyards === 1 ? "yard" : "yards"})`, done: counsellorLocations.buildSkyships },
+      { label: "Conscript levies", done: counsellorLocations.conscriptLevies },
+      { label: "Train troops", done: counsellorLocations.trainTroops },
+    ].map(({ label, done }) => (
+      <Box key={label} sx={{ display: "flex", alignItems: "center", gap: "6px", opacity: done ? 1 : 0.55 }}>
+        <Box
+          sx={{
+            width: 10,
+            height: 10,
+            borderRadius: "50%",
+            flexShrink: 0,
+            backgroundColor: done ? colour : "transparent",
+            border: done ? "none" : `1.5px solid ${tokens.ui.textMuted}`,
+            boxShadow: done ? `0 0 4px ${colour}88` : "none",
+          }}
+        />
+        <Typography sx={{ fontFamily: tokens.font.body, fontSize: tokens.fontSize.xs, color: tokens.ui.text, lineHeight: 1.3, flex: 1 }}>
+          {label}
+        </Typography>
+        <Typography sx={{ fontFamily: tokens.font.body, fontSize: tokens.fontSize.xs, fontStyle: "italic", color: done ? tokens.ui.text : tokens.ui.textMuted, lineHeight: 1.3 }}>
+          {done ? "done" : "—"}
+        </Typography>
+      </Box>
+    ))}
+  </Box>
+);
 
 const ForceChip = ({
   Icon,
@@ -505,6 +494,7 @@ const POPOVER_PAPER_SX = {
 } as const;
 
 const DockCards = ({
+  publicView = false,
   fortuneCards,
   legacyCard,
   advantageCard,
@@ -513,6 +503,8 @@ const DockCards = ({
   eventContributions,
   playerInfo,
 }: {
+  /** Another player's board: hidden hands stay hidden, layout stays identical */
+  publicView?: boolean;
   fortuneCards: PlayerFortuneOfWarCardInfo[];
   legacyCard: { name: string; colour: string } | undefined;
   advantageCard: string | undefined;
@@ -540,7 +532,7 @@ const DockCards = ({
         <CardTile label={`Fortune of War · ${fortuneCards.length}`} empty={fortuneCards.length === 0}>
           <Box sx={{ display: "flex", flexWrap: "wrap", gap: "3px" }}>
             {fortuneCards.map((card, i) => {
-              const flipped = card.flipped;
+              const flipped = card.flipped && !publicView;
               const text = !flipped ? "?" : card.sword > 0 ? `${card.sword}⚔` : card.shield > 0 ? `${card.shield}🛡` : "—";
               const title = card.sword > 0 ? `${card.sword} Swords` : card.shield > 0 ? `${card.shield} Shields` : "No Effect";
               return (
@@ -581,7 +573,7 @@ const DockCards = ({
           label="Legacy"
           empty={!legacyCard}
           onClick={
-            legacyCard
+            legacyCard && !publicView
               ? (e) =>
                   setCardPreview({
                     anchor: e.currentTarget,
@@ -596,12 +588,16 @@ const DockCards = ({
           }
         >
           {legacyCard ? (
-            <Box sx={{ display: "flex", alignItems: "center", gap: "5px", minWidth: 0 }}>
-              <Box sx={{ width: 8, height: 8, borderRadius: "50%", backgroundColor: legacyColour, flexShrink: 0 }} />
-              <Typography noWrap sx={{ fontFamily: tokens.font.display, fontSize: tokens.fontSize.xs, fontWeight: 700, color: tokens.ui.text, textTransform: "capitalize", lineHeight: 1.2 }}>
-                {legacyCard.name}
-              </Typography>
-            </Box>
+            publicView ? (
+              <TileEmptyText>hidden until scored</TileEmptyText>
+            ) : (
+              <Box sx={{ display: "flex", alignItems: "center", gap: "5px", minWidth: 0 }}>
+                <Box sx={{ width: 8, height: 8, borderRadius: "50%", backgroundColor: legacyColour, flexShrink: 0 }} />
+                <Typography noWrap sx={{ fontFamily: tokens.font.display, fontSize: tokens.fontSize.xs, fontWeight: 700, color: tokens.ui.text, textTransform: "capitalize", lineHeight: 1.2 }}>
+                  {legacyCard.name}
+                </Typography>
+              </Box>
+            )
           ) : (
             <TileEmptyText>none yet</TileEmptyText>
           )}
@@ -643,15 +639,19 @@ const DockCards = ({
               </Typography>
             </Box>
           ) : eventCards.length > 0 ? (
-            <Box sx={{ display: "flex", gap: "4px", alignItems: "center" }}>
-              {eventCards.slice(0, 4).map((card, i) => {
-                const def = EVENT_CARD_DEFS[card];
-                const Icon = EVENT_ICONS[card];
-                return Icon ? (
-                  <Icon key={`${card}-${i}`} size={15} color={def.isBattle ? tokens.ui.danger : tokens.ui.gold} style={{ opacity: 0.85 }} />
-                ) : null;
-              })}
-            </Box>
+            publicView ? (
+              <TileEmptyText>hand hidden</TileEmptyText>
+            ) : (
+              <Box sx={{ display: "flex", gap: "4px", alignItems: "center" }}>
+                {eventCards.slice(0, 4).map((card, i) => {
+                  const def = EVENT_CARD_DEFS[card];
+                  const Icon = EVENT_ICONS[card];
+                  return Icon ? (
+                    <Icon key={`${card}-${i}`} size={15} color={def.isBattle ? tokens.ui.danger : tokens.ui.gold} style={{ opacity: 0.85 }} />
+                  ) : null;
+                })}
+              </Box>
+            )
           ) : (
             <TileEmptyText>hand empty</TileEmptyText>
           )}
@@ -718,7 +718,7 @@ const DockCards = ({
             </>
           )}
 
-          {eventCards.length > 0 && (
+          {eventCards.length > 0 && !publicView && (
             <>
               <PopoverSectionLabel>Your Hand</PopoverSectionLabel>
               {eventCards.map((card, i) => {
@@ -857,59 +857,7 @@ const TileEmptyText = ({ children }: { children: React.ReactNode }) => (
   </Typography>
 );
 
-// Public (opponent) views
 
-const StatRow = ({ label, value }: { label: string; value: string | number }) => (
-  <Box sx={{ display: "flex", justifyContent: "space-between", gap: "8px" }}>
-    <Typography sx={{ fontFamily: tokens.font.body, fontSize: tokens.fontSize.xs, color: tokens.ui.textMuted, lineHeight: 1.5 }}>
-      {label}
-    </Typography>
-    <Typography sx={{ fontFamily: tokens.font.body, fontSize: tokens.fontSize.xs, fontWeight: 700, color: tokens.ui.text, lineHeight: 1.5 }}>
-      {value}
-    </Typography>
-  </Box>
-);
 
-const PublicHoldings = ({ viewInfo }: { viewInfo: ViewInfo }) => (
-  <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", columnGap: `${tokens.spacing.md}px` }}>
-    <HoldingStat Icon={IconCathedral} label="Cathedrals" value={viewInfo.cathedrals} />
-    <HoldingStat Icon={IconPalace} label="Palaces" value={viewInfo.palaces} />
-    <HoldingStat Icon={IconSkyship} label="Shipyards" value={viewInfo.shipyards} />
-    <HoldingStat Icon={IconFactory} label="Factories" value={viewInfo.factories} />
-    <HoldingStat Icon={IconRegiment} label="Prisoners" value={viewInfo.prisoners} />
-    <HoldingStat Icon={IconLevy} label="Dissenters" value={viewInfo.freeDissenters} />
-  </Box>
-);
 
-const HoldingStat = ({
-  Icon,
-  label,
-  value,
-}: {
-  Icon: React.ComponentType<{ style?: React.CSSProperties }>;
-  label: string;
-  value: number;
-}) => (
-  <Box sx={{ display: "flex", alignItems: "center", gap: "5px", opacity: value === 0 ? 0.5 : 1, py: "2px" }}>
-    <Icon style={{ fontSize: 14, color: tokens.ui.textMuted }} />
-    <Typography sx={{ fontFamily: tokens.font.body, fontSize: tokens.fontSize.xs, fontWeight: 700, color: tokens.ui.text, lineHeight: 1 }}>
-      {value}
-    </Typography>
-    <Typography sx={{ fontFamily: tokens.font.body, fontSize: tokens.fontSize.xs, color: tokens.ui.textMuted, lineHeight: 1 }}>
-      {label}
-    </Typography>
-  </Box>
-);
 
-const PublicCards = ({ viewInfo }: { viewInfo: ViewInfo }) => {
-  const ka = viewInfo.resources.advantageCard;
-  const kaName = ka ? (KA_CARD_DEFS[ka]?.displayName ?? ka) : "—";
-  return (
-    <Box>
-      <StatRow label="Fortune of War" value={viewInfo.resources.fortuneCards.length} />
-      <StatRow label="Event cards" value={viewInfo.resources.eventCards.length} />
-      <StatRow label="Legacy" value={viewInfo.resources.legacyCard ? "hidden" : "—"} />
-      <StatRow label="Advantage" value={kaName} />
-    </Box>
-  );
-};

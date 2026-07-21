@@ -10,9 +10,9 @@ import { Box, Tooltip, Typography } from "@mui/material";
 import { ChevronLeft, ChevronRight } from "@mui/icons-material";
 import { MyGameProps, GAME_PHASES } from "@eots/game";
 import { tokens, backgrounds } from "@/theme";
-import { IconGold, IconVP } from "@/theme";
-import { GiZeppelin, GiCrossedSwords } from "react-icons/gi";
 import emblem from "@/boards_and_assets/branding/box_art_logo.webp";
+import popeLogo from "@/boards_and_assets/action_board/pope_logo.webp";
+import captainGeneralLogo from "@/boards_and_assets/action_board/captain_general.webp";
 
 interface OpponentRailProps extends MyGameProps {
   viewPlayerID: string;
@@ -169,23 +169,49 @@ export const OpponentRail = (props: OpponentRailProps) => {
             <Box sx={{ display: "flex", alignItems: "center", gap: "5px", minWidth: 0 }}>
               <Typography noWrap sx={{ fontFamily: tokens.font.display, fontSize: tokens.fontSize.xs, fontWeight: 700, color: tokens.ui.text, lineHeight: 1.1, flex: 1 }}>
                 {p.kingdomName}
-                {isMe ? " (you)" : ""}
               </Typography>
-              <Typography sx={{ fontSize: tokens.fontSize.xs, fontFamily: tokens.font.body, fontWeight: 700, lineHeight: 1, color: p.hereticOrOrthodox === "heretic" ? tokens.allegiance.heresy : tokens.allegiance.orthodox }}>
-                {p.hereticOrOrthodox === "heretic" ? "H" : "O"}
+              {p.isArchprelate && (
+                <Tooltip title="Seat of the Archprelate" placement="right" arrow>
+                  <Box component="img" src={popeLogo} alt="Archprelate" sx={{ width: 15, height: 15, objectFit: "contain", opacity: 0.85, flexShrink: 0 }} />
+                </Tooltip>
+              )}
+              {p.isCaptainGeneral && (
+                <Tooltip title="Captain-General of the Faith" placement="right" arrow>
+                  <Box component="img" src={captainGeneralLogo} alt="Captain-General" sx={{ width: 15, height: 15, objectFit: "contain", opacity: 0.85, flexShrink: 0 }} />
+                </Tooltip>
+              )}
+              <Tooltip
+                title={`${p.hereticOrOrthodox === "heretic" ? "Heretic" : "Orthodox"} — heresy position worth ${(p.hereticOrOrthodox === "heretic" ? p.heresyTracker : -p.heresyTracker) > 0 ? "+" : ""}${p.hereticOrOrthodox === "heretic" ? p.heresyTracker : -p.heresyTracker} VP at game end`}
+                placement="right"
+                arrow
+              >
+                <Typography sx={{ fontSize: tokens.fontSize.xs, fontFamily: tokens.font.body, fontWeight: 700, lineHeight: 1, flexShrink: 0, color: p.hereticOrOrthodox === "heretic" ? tokens.allegiance.heresy : tokens.allegiance.orthodox }}>
+                  {p.hereticOrOrthodox === "heretic" ? "H" : "O"}{" "}
+                  {(p.hereticOrOrthodox === "heretic" ? p.heresyTracker : -p.heresyTracker) >= 0 ? "+" : ""}
+                  {p.hereticOrOrthodox === "heretic" ? p.heresyTracker : -p.heresyTracker}
+                </Typography>
+              </Tooltip>
+            </Box>
+            <Typography noWrap sx={{ fontFamily: tokens.font.body, fontSize: tokens.fontSize.xs, color: tokens.ui.textMuted, lineHeight: 1 }}>
+              {isMe ? "you" : name ?? "—"}
+            </Typography>
+
+            {/* Standings, in words — who's winning, who can outspend */}
+            <Box sx={{ display: "flex", alignItems: "baseline", gap: "5px", minWidth: 0 }}>
+              <Typography sx={{ fontFamily: tokens.font.display, fontSize: 15, fontWeight: 800, color: tokens.ui.gold, lineHeight: 1 }}>
+                {p.resources.victoryPoints}
+              </Typography>
+              <Typography sx={{ fontFamily: tokens.font.body, fontSize: tokens.fontSize.xs, fontWeight: 600, color: tokens.ui.gold, lineHeight: 1 }}>
+                VP
+              </Typography>
+              <Typography sx={{ fontFamily: tokens.font.body, fontSize: tokens.fontSize.xs, color: p.resources.gold < 0 ? tokens.ui.danger : tokens.ui.text, lineHeight: 1, ml: "4px" }}>
+                {p.resources.gold} gold
               </Typography>
             </Box>
-            {name && !isMe && (
-              <Typography noWrap sx={{ fontFamily: tokens.font.body, fontSize: tokens.fontSize.xs, color: tokens.ui.textMuted, lineHeight: 1 }}>
-                {name}
-              </Typography>
-            )}
-            <Box sx={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
-              <Stat icon={<IconVP style={{ fontSize: 13, color: tokens.ui.gold }} />} value={p.resources.victoryPoints} />
-              <Stat icon={<IconGold style={{ fontSize: 13, color: p.resources.gold < 0 ? tokens.ui.danger : tokens.ui.gold }} />} value={p.resources.gold} />
-              <Stat icon={<GiZeppelin size={13} color={tokens.ui.textMuted} />} value={p.resources.skyships} />
-              <Stat icon={<GiCrossedSwords size={12} color={tokens.ui.textMuted} />} value={p.resources.regiments + (p.resources.eliteRegiments ?? 0)} />
-            </Box>
+            {/* Military threat, in words */}
+            <Typography noWrap sx={{ fontFamily: tokens.font.body, fontSize: tokens.fontSize.xs, color: tokens.ui.textMuted, lineHeight: 1 }}>
+              {p.resources.regiments + (p.resources.eliteRegiments ?? 0)} troops · {p.resources.skyships} skyships
+            </Typography>
           </Box>
         );
       })}
@@ -346,11 +372,3 @@ const RoundTimeline = ({
   );
 };
 
-const Stat = ({ icon, value }: { icon: React.ReactNode; value: number }) => (
-  <Box sx={{ display: "inline-flex", alignItems: "center", gap: "3px" }}>
-    {icon}
-    <Typography sx={{ fontFamily: tokens.font.body, fontSize: tokens.fontSize.xs, fontWeight: 600, color: tokens.ui.text, lineHeight: 1 }}>
-      {value}
-    </Typography>
-  </Box>
-);
