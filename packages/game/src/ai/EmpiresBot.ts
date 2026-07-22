@@ -170,7 +170,7 @@ export class EmpiresBot {
         chosenScore = pick.quality;
         topMoves = viable.slice(0, 5).map(v => ({ move: v.move.move, args: v.move.args, score: v.quality }));
       }
-    } else if (phase === "resolution") {
+    } else if (phase === "resolution" || ctx.phase === "retrieveFleets") {
       const { viable } = evaluateResolution(G, playerID, availableMoves, personality);
       const pick = pickResolutionMove(viable);
       if (pick) {

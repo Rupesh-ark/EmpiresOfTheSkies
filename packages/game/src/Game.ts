@@ -12,17 +12,17 @@ import {
 } from "./setup/mapSetup.js";
 import { buildPlayerInfoMap, getGoldIncomeForPlayer } from "./setup/playerSetup.js";
 import { logEvent, allPlayersPassed, calculateMercy, nextUnpassedPlayer } from "./helpers/stateUtils.js";
-import { wrapMove, withPhaseGuard, withPhaseReset, checkLoopGuard } from "./helpers/moveWrapper.js";
-import { MOVE_DEFINITIONS } from "./moveDefinitions.js";
+import { withPhaseGuard, withPhaseReset, checkLoopGuard } from "./helpers/moveWrapper.js";
+import { wrapSet } from "./helpers/wrapSet.js";
 import {
   checkIfCurrentPlayerIsInCurrentBattle,
   fullResetFortuneOfWarCardDeck,
   resetBattleCheckCount,
 } from "./helpers/helpers.js";
 import { TurnOrder } from "boardgame.io/core";
-import resolveRound from "./helpers/resolveRound.js";
 import { ALL_EVENT_CARD_NAMES } from "./helpers/eventCardDefinitions.js";
 import { beginResolution, getResolutionTarget } from "./helpers/resolutionFlow.js";
+import retrieveFleetsPhase from "./phases/retrieveFleets.js";
 
 import { setStage, isStage } from "./helpers/stageUtils.js";
 import type { GameStage } from "./types.js";
@@ -30,21 +30,6 @@ import log from "./helpers/logger.js";
 
 const phaseLog = log.child({ mod: "phase" });
 const budgetLog = log.child({ mod: "turn-budget" });
-
-/**
- * Registers a set of moves from MOVE_DEFINITIONS — the single source of truth
- * for move implementations AND their validators (some definitions carry
- * stricter validate() wrappers than the raw move files; the server enforces
- * those too). Throws at load time on a typo'd name.
- */
-const wrapSet = (...names: string[]) =>
-  Object.fromEntries(
-    names.map((name) => {
-      const def = MOVE_DEFINITIONS[name];
-      if (!def) throw new Error(`wrapSet: unknown move "${name}" — not in MOVE_DEFINITIONS`);
-      return [name, wrapMove(name, def)];
-    })
-  );
 
 const TURN_ENDING_LIMIT = 550;
 const turnEndingCounters = new Map<string, number>();
@@ -507,25 +492,6 @@ const MyGame: Game<MyGameState> = {
               || sub === "rebellion_rival_support"
               || sub === "invasion_contribute" || sub === "invasion_buyoff") return;
 
-          // Retrieve fleets — auto-skip players with nothing to retrieve
-          if (sub === "retrieve_fleets") {
-            const playerID = context.ctx.currentPlayer;
-            const player = context.G.playerInfo[playerID];
-            const hasRetrievableFleets = player.fleetInfo.some(
-              (f) => f.skyships > 0 && (f.location[0] !== 4 || f.location[1] !== 0)
-            );
-            if (!hasRetrievableFleets || player.passed) {
-              player.passed = true;
-              if (allPlayersPassed(context.G)) {
-                context.events.endPhase();
-              } else {
-                const next = nextUnpassedPlayer(context.G, context.ctx.currentPlayer);
-                context.events.endTurn(next ? { next } : undefined);
-              }
-            }
-            return;
-          }
-
           // Post-election stages — redirect to correct player
           const target = getResolutionTarget(context.G);
           if (target) {
@@ -548,15 +514,13 @@ const MyGame: Game<MyGameState> = {
         if (context.G._halted) return;
         if (checkLoopGuard(context, "resolution")) return;
         phaseLog.info({ round: context.G.round }, "resolution");
-        // Walk the full resolution sequence: aerial → plunder → ground → conquest → election → post-election → retrieve
+        // Walk the unified sequence through post-election; retrieval begins in the next phase.
         beginResolution(context.G, context.events, true);
       },
-      onEnd: (context) => {
-        resolveRound(context.G, context.events, context.random);
-      },
-      moves: wrapSet("doNotAttack", "attackOtherPlayersFleet", "retaliate", "evadeAttackingFleet", "drawCard", "pickCard", "relocateDefeatedFleet", "plunder", "doNotPlunder", "attackPlayersBuilding", "doNotGroundAttack", "defendGroundAttack", "yieldToAttacker", "coloniseLand", "constructOutpost", "doNothing", "drawCardConquest", "pickCardConquest", "garrisonTroops", "vote", "pass", "retrieveFleets", "commitRebellionTroops", "contributeToRebellion", "nominateCaptainGeneral", "contributeToGrandArmy", "respondToInfidelFleet", "offerBuyoffGold", "commitDeferredBattleCard"),
-      next: "reset",
+      moves: wrapSet("doNotAttack", "attackOtherPlayersFleet", "retaliate", "evadeAttackingFleet", "drawCard", "pickCard", "relocateDefeatedFleet", "plunder", "doNotPlunder", "attackPlayersBuilding", "doNotGroundAttack", "defendGroundAttack", "yieldToAttacker", "coloniseLand", "constructOutpost", "doNothing", "drawCardConquest", "pickCardConquest", "garrisonTroops", "vote", "commitRebellionTroops", "contributeToRebellion", "nominateCaptainGeneral", "contributeToGrandArmy", "respondToInfidelFleet", "offerBuyoffGold", "commitDeferredBattleCard"),
+      next: "retrieveFleets",
     },
+    retrieveFleets: retrieveFleetsPhase,
     reset: {
       turn: {
         order: TurnOrder.ONCE,

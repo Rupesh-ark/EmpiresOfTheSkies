@@ -39,7 +39,7 @@ const offerBuyoffGold: MoveDefinition = {
 
       // Proceed to retrieve fleets
       setStage(G, "resolution", "retrieve_fleets");
-      events.endTurn();
+      events.endPhase();
     } else {
       // Next player in IPO who hasn't offered
       const nextPlayer = ctx.playOrder.find(

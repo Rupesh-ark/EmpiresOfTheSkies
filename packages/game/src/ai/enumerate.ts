@@ -673,54 +673,6 @@ export function enumerateLegalMoves(G: MyGameState, ctx: Ctx, playerID: string):
           }
         }
         return moves;
-      } else if (isStage(G, "resolution", "retrieve_fleets")) {
-        const fleets = G.playerInfo[playerID].fleetInfo;
-        const deployedIndices: number[] = [];
-        for (let i = 0; i < fleets.length; i++) {
-          const f = fleets[i];
-          const isAtHome =
-            f.location[0] === KINGDOM_LOCATION[0] &&
-            f.location[1] === KINGDOM_LOCATION[1];
-          if (f.skyships > 0 && !isAtHome) {
-            deployedIndices.push(i);
-          }
-        }
-        if (deployedIndices.length > 0) {
-          // Option: retrieve ALL deployed fleets (plain)
-          moves.push({ move: "retrieveFleets", args: [deployedIndices] });
-          // Per-fleet options: placeAt vs trailFrom vs plain
-          for (const idx of deployedIndices) {
-            const fleet = fleets[idx];
-            const fleetTile = tileKey(fleet.location[0], fleet.location[1]);
-            if (wouldPlacementConnectRoute(G, playerID, fleetTile)) {
-              // Place a route skyship here — repairs a broken route
-              moves.push({ move: "retrieveFleets", args: [[idx], { placeAt: [idx] }] });
-            } else if (fleet.skyships > 1) {
-              // Leave a trail back to Faithdom
-              moves.push({ move: "retrieveFleets", args: [[idx], { trailFrom: [idx] }] });
-            }
-            // Plain individual retrieve (always available if >1 fleet deployed)
-            if (deployedIndices.length > 1) {
-              moves.push({ move: "retrieveFleets", args: [[idx]] });
-            }
-          }
-          // Retrieve all with route options where applicable
-          const placeAtIndices = deployedIndices.filter(idx => {
-            const f = fleets[idx];
-            return wouldPlacementConnectRoute(G, playerID, tileKey(f.location[0], f.location[1]));
-          });
-          const trailIndices = deployedIndices.filter(idx => {
-            const f = fleets[idx];
-            return !wouldPlacementConnectRoute(G, playerID, tileKey(f.location[0], f.location[1])) && f.skyships > 1;
-          });
-          if (placeAtIndices.length > 0 || trailIndices.length > 0) {
-            moves.push({ move: "retrieveFleets", args: [deployedIndices, {
-              ...(placeAtIndices.length > 0 ? { placeAt: placeAtIndices } : {}),
-              ...(trailIndices.length > 0 ? { trailFrom: trailIndices } : {}),
-            }] });
-          }
-        }
-        moves.push({ move: "pass", args: [] });
       } else if (isStage(G, "resolution", "infidel_fleet_combat")) {
         moves.push({ move: "respondToInfidelFleet", args: ["fight"] });
         moves.push({ move: "respondToInfidelFleet", args: ["evade"] });
@@ -803,6 +755,58 @@ export function enumerateLegalMoves(G: MyGameState, ctx: Ctx, playerID: string):
       if (moves.length === 0) {
         enumLog.info({ playerID, sub: G.stage?.sub, attacker: G.battleState?.attacker?.id, defender: G.battleState?.defender?.id }, "empty resolution moves");
       }
+      return moves;
+    }
+
+    case "retrieveFleets": {
+      const moves: AIMove[] = [];
+      const fleets = G.playerInfo[playerID].fleetInfo;
+      const deployedIndices: number[] = [];
+      for (let i = 0; i < fleets.length; i++) {
+        const f = fleets[i];
+        const isAtHome =
+          f.location[0] === KINGDOM_LOCATION[0] &&
+          f.location[1] === KINGDOM_LOCATION[1];
+        if (f.skyships > 0 && !isAtHome) {
+          deployedIndices.push(i);
+        }
+      }
+      if (deployedIndices.length > 0) {
+        // Option: retrieve ALL deployed fleets (plain)
+        moves.push({ move: "retrieveFleets", args: [deployedIndices] });
+        // Per-fleet options: placeAt vs trailFrom vs plain
+        for (const idx of deployedIndices) {
+          const fleet = fleets[idx];
+          const fleetTile = tileKey(fleet.location[0], fleet.location[1]);
+          if (wouldPlacementConnectRoute(G, playerID, fleetTile)) {
+            // Place a route skyship here — repairs a broken route
+            moves.push({ move: "retrieveFleets", args: [[idx], { placeAt: [idx] }] });
+          } else if (fleet.skyships > 1) {
+            // Leave a trail back to Faithdom
+            moves.push({ move: "retrieveFleets", args: [[idx], { trailFrom: [idx] }] });
+          }
+          // Plain individual retrieve (always available if >1 fleet deployed)
+          if (deployedIndices.length > 1) {
+            moves.push({ move: "retrieveFleets", args: [[idx]] });
+          }
+        }
+        // Retrieve all with route options where applicable
+        const placeAtIndices = deployedIndices.filter(idx => {
+          const f = fleets[idx];
+          return wouldPlacementConnectRoute(G, playerID, tileKey(f.location[0], f.location[1]));
+        });
+        const trailIndices = deployedIndices.filter(idx => {
+          const f = fleets[idx];
+          return !wouldPlacementConnectRoute(G, playerID, tileKey(f.location[0], f.location[1])) && f.skyships > 1;
+        });
+        if (placeAtIndices.length > 0 || trailIndices.length > 0) {
+          moves.push({ move: "retrieveFleets", args: [deployedIndices, {
+            ...(placeAtIndices.length > 0 ? { placeAt: placeAtIndices } : {}),
+            ...(trailIndices.length > 0 ? { trailFrom: trailIndices } : {}),
+          }] });
+        }
+      }
+      moves.push({ move: "pass", args: [] });
       return moves;
     }
 
