@@ -10,7 +10,6 @@ export const electionPhase: PhaseConfig<MyGameState> = {
   moves: wrapSet("vote"),
   next: "invasionCheck",
   onBegin: (context) => {
-    if (context.G._halted) return;
     phaseLog.info({ round: context.G.round }, "election");
     context.G.electionResults = {};
     context.G.hasVoted = [];

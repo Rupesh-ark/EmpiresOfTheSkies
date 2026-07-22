@@ -30,7 +30,6 @@ export const groundBattlesPhase: PhaseConfig<MyGameState> = {
   ),
   next: "conquests",
   onBegin: (context) => {
-    if (context.G._halted) return;
     phaseLog.info({ round: context.G.round }, "ground-battles");
     context.G.mapState.currentBattle = [0, 0];
     context.G.battleState = undefined;
@@ -52,7 +51,6 @@ export const groundBattlesPhase: PhaseConfig<MyGameState> = {
       next: ({ ctx }) => (ctx.playOrderPos + 1) % ctx.playOrder.length,
     },
     onBegin: (context) => {
-      if (context.G._halted) return;
       if (context.G.stage.sub === "deferred_battle") {
         const target = getResolutionTarget(context.G);
         if (target && target !== context.ctx.currentPlayer) {

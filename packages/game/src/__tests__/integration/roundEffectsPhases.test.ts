@@ -140,7 +140,7 @@ describe("round effects phases", () => {
     expect(endGame).toHaveBeenCalledWith({ ranking: ["0", "1", "3", "2"] });
   });
 
-  it.each(PHASES)("%s ends automatically and short-circuits when halted", (_name, phase) => {
+  it.each(PHASES)("%s ends automatically", (_name, phase) => {
     const endPhase = vi.fn();
     const events = { endPhase, endGame: vi.fn() } as unknown as EventsAPI;
     phase.onBegin!({
@@ -150,14 +150,5 @@ describe("round effects phases", () => {
       random: { Number: () => 0 },
     } as any);
     expect(endPhase).toHaveBeenCalledOnce();
-
-    const haltedEndPhase = vi.fn();
-    phase.onBegin!({
-      G: buildInitialG(undefined, { _halted: true }),
-      ctx: buildCtx("0"),
-      events: { endPhase: haltedEndPhase, endGame: vi.fn() },
-      random: { Number: () => 0 },
-    } as any);
-    expect(haltedEndPhase).not.toHaveBeenCalled();
   });
 });

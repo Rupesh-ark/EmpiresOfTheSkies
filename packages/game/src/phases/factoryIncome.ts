@@ -7,7 +7,6 @@ const phaseLog = log.child({ mod: "phase" });
 
 export const factoryIncomePhase: PhaseConfig<MyGameState> = {
   onBegin: (context) => {
-    if (context.G._halted) return;
     phaseLog.info({ round: context.G.round }, "factory-income");
     factoryIncomePhaseEffects(context.G);
     context.events.endPhase();

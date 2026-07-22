@@ -17,7 +17,6 @@ export const invasionCheckPhase: PhaseConfig<MyGameState> = {
   ),
   next: "retrieveFleets",
   onBegin: (context) => {
-    if (context.G._halted) return;
     phaseLog.info({ round: context.G.round }, "invasion-check");
     if (prepareInfidelFleetCombat(context.G)) {
       setStage(context.G, "resolution", "infidel_fleet_combat");
@@ -37,7 +36,6 @@ export const invasionCheckPhase: PhaseConfig<MyGameState> = {
       next: ({ ctx }) => (ctx.playOrderPos + 1) % ctx.playOrder.length,
     },
     onBegin: (context) => {
-      if (context.G._halted) return;
       const sub = context.G.stage.sub;
       if (sub === "invasion_contribute" || sub === "invasion_buyoff") return;
 

@@ -19,7 +19,6 @@ export const plunderPhase: PhaseConfig<MyGameState> = {
   moves: wrapSet("plunder", "doNotPlunder"),
   next: "groundBattles",
   onBegin: (context) => {
-    if (context.G._halted) return;
     phaseLog.info({ round: context.G.round }, "plunder");
     context.G.mapState.currentBattle = [0, 0];
     context.G.battleState = undefined;
@@ -32,7 +31,6 @@ export const plunderPhase: PhaseConfig<MyGameState> = {
       next: ({ ctx }) => (ctx.playOrderPos + 1) % ctx.playOrder.length,
     },
     onBegin: (context) => {
-      if (context.G._halted) return;
       checkIfCurrentPlayerIsInCurrentBattle(
         context.G,
         context.ctx,

@@ -33,7 +33,6 @@ export const aerialBattlesPhase: PhaseConfig<MyGameState> = {
   ),
   next: "plunder",
   onBegin: (context) => {
-    if (context.G._halted) return;
     phaseLog.info({ round: context.G.round }, "aerial-battles");
     context.G.mapState.currentBattle = [0, 0];
     context.G.battleState = undefined;
@@ -46,7 +45,6 @@ export const aerialBattlesPhase: PhaseConfig<MyGameState> = {
       next: ({ ctx }) => (ctx.playOrderPos + 1) % ctx.playOrder.length,
     },
     onBegin: (context) => {
-      if (context.G._halted) return;
       checkIfCurrentPlayerIsInCurrentBattle(
         context.G,
         context.ctx,

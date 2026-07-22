@@ -16,7 +16,6 @@ export const retrieveFleetsPhase: PhaseConfig<MyGameState> = {
   moves: wrapSet("retrieveFleets", "pass"),
   next: "scoring",
   onBegin: (context) => {
-    if (context.G._halted) return;
     phaseLog.info({ round: context.G.round }, "retrieve-fleets");
     Object.values(context.G.playerInfo).forEach((player) => {
       player.passed = false;
@@ -38,7 +37,6 @@ export const retrieveFleetsPhase: PhaseConfig<MyGameState> = {
       next: ({ ctx }) => (ctx.playOrderPos + 1) % ctx.playOrder.length,
     },
     onBegin: (context) => {
-      if (context.G._halted) return;
       const playerID = context.ctx.currentPlayer;
       const player = context.G.playerInfo[playerID];
       const hasRetrievableFleets = hasRetrievableFleet(player);

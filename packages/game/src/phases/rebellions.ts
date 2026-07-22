@@ -12,7 +12,6 @@ export const rebellionsPhase: PhaseConfig<MyGameState> = {
   moves: wrapSet("commitRebellionTroops", "contributeToRebellion"),
   next: "aerialBattles",
   onBegin: (context) => {
-    if (context.G._halted) return;
     phaseLog.info({ round: context.G.round }, "rebellions");
     if (setupNextRebellion(context.G)) {
       setStage(context.G, "resolution", "rebellion");
@@ -32,7 +31,6 @@ export const rebellionsPhase: PhaseConfig<MyGameState> = {
       next: ({ ctx }) => (ctx.playOrderPos + 1) % ctx.playOrder.length,
     },
     onBegin: (context) => {
-      if (context.G._halted) return;
       if (context.G.stage.sub === "rebellion_rival_support") return;
 
       const target = getResolutionTarget(context.G);

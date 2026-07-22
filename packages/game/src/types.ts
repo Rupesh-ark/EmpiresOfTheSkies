@@ -123,8 +123,6 @@ export interface MyGameState {
     description: string;
   } | null;
   mercyGold: Record<string, number>;
-  _loopGuard: number;
-  _halted: boolean;
   _matchID?: string;
 }
 

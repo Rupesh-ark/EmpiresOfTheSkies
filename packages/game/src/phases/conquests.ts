@@ -26,7 +26,6 @@ export const conquestsPhase: PhaseConfig<MyGameState> = {
   ),
   next: "trade",
   onBegin: (context) => {
-    if (context.G._halted) return;
     phaseLog.info({ round: context.G.round }, "conquests");
     context.G.mapState.currentBattle = [0, 0];
     context.G.battleState = undefined;
@@ -39,7 +38,6 @@ export const conquestsPhase: PhaseConfig<MyGameState> = {
       next: ({ ctx }) => (ctx.playOrderPos + 1) % ctx.playOrder.length,
     },
     onBegin: (context) => {
-      if (context.G._halted) return;
       if (context.G.stage.sub === "conquest") return;
       checkIfCurrentPlayerIsInCurrentBattle(
         context.G,

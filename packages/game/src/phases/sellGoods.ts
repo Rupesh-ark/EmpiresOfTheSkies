@@ -7,7 +7,6 @@ const phaseLog = log.child({ mod: "phase" });
 
 export const sellGoodsPhase: PhaseConfig<MyGameState> = {
   onBegin: (context) => {
-    if (context.G._halted) return;
     phaseLog.info({ round: context.G.round }, "sell-goods");
     sellGoodsPhaseEffects(context.G, context.random);
     context.events.endPhase();

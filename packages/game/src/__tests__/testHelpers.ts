@@ -215,9 +215,7 @@ export function buildInitialG(
     pendingDeal: undefined,
     currentDeferredBattle: null,
     mercyGold: {},
-      _loopGuard: 0,
-      _halted: false,
-      _matchID: `game_${Date.now()}_test`,
+    _matchID: `game_${Date.now()}_test`,
     eventState: {
       deck: [],
       lateDeck: [],

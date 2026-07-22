@@ -7,7 +7,6 @@ const phaseLog = log.child({ mod: "phase" });
 
 export const piracyPhase: PhaseConfig<MyGameState> = {
   onBegin: (context) => {
-    if (context.G._halted) return;
     phaseLog.info({ round: context.G.round }, "piracy");
     piracyPhaseEffects(context.G);
     context.events.endPhase();

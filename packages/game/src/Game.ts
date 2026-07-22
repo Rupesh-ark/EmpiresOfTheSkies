@@ -12,12 +12,8 @@ import {
 } from "./setup/mapSetup.js";
 import { buildPlayerInfoMap, getGoldIncomeForPlayer } from "./setup/playerSetup.js";
 import { logEvent, allPlayersPassed, calculateMercy, nextUnpassedPlayer } from "./helpers/stateUtils.js";
-import { withPhaseGuard, withPhaseReset, checkLoopGuard } from "./helpers/moveWrapper.js";
 import { wrapSet } from "./helpers/wrapSet.js";
-import {
-  fullResetFortuneOfWarCardDeck,
-  resetBattleCheckCount,
-} from "./helpers/helpers.js";
+import { fullResetFortuneOfWarCardDeck } from "./helpers/helpers.js";
 import { TurnOrder } from "boardgame.io/core";
 import { ALL_EVENT_CARD_NAMES } from "./helpers/eventCardDefinitions.js";
 import rebellionsPhase from "./phases/rebellions.js";
@@ -144,9 +140,6 @@ const turnBudgetPlugin = {
       }
 
       const result = fn(context, ...args);
-
-      if (events) events._budgetWrapped = false;
-
       return result;
     },
 };
@@ -262,8 +255,6 @@ const MyGame: Game<MyGameState> = {
       currentDeferredBattle: null,
       pendingDeal: undefined,
       mercyGold: {},
-      _loopGuard: 0,
-      _halted: false,
       _matchID: `game_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
       eventState: {
         deck: earlyDeck,
@@ -319,7 +310,7 @@ const MyGame: Game<MyGameState> = {
       turn: {
         order: TurnOrder.CUSTOM_FROM("turnOrder"),
       },
-      onBegin: withPhaseGuard("events", (context) => {
+      onBegin: (context) => {
         phaseLog.info({ round: context.G.round }, "events");
         setStage(context.G, "events", "default");
         context.G.eventState.taxModifier = 0;
@@ -338,18 +329,13 @@ const MyGame: Game<MyGameState> = {
           context.G.eventState.deck = context.random.Shuffle(context.G.eventState.deck);
           logEvent(context.G, `Event deck: merged ${mergeCount} late-game cards into active deck`);
         }
-      }),
+      },
       moves: wrapSet("chooseEventCard", "resolveEventChoice", "immediateElectionVote"),
       next: "discovery",
     },
     discovery: {
       onBegin: (context) => {
-        // Reset the loop guard at the start of each new round, then check.
-        context.G._loopGuard = 0;
-        context.G._halted = false;
-        resetBattleCheckCount();
         resetTurnEndingBudget(context.G, context.G.round + 1);
-        if (checkLoopGuard(context, "discovery")) return;
         phaseLog.info({ round: context.G.round + 1 }, "discovery");
         context.G.round += 1;
         context.ctx.playOrderPos = 0;
@@ -419,8 +405,6 @@ const MyGame: Game<MyGameState> = {
     taxes: {
       turn: { order: TurnOrder.ONCE },
       onBegin: (context) => {
-        if (context.G._halted) return;
-        if (checkLoopGuard(context, "taxes")) return;
         phaseLog.info({ round: context.G.round }, "taxes");
         setStage(context.G, "taxes", "default");
 
@@ -449,16 +433,12 @@ const MyGame: Game<MyGameState> = {
     },
     actions: {
       onBegin: (context) => {
-        if (context.G._halted) return;
-        if (checkLoopGuard(context, "actions")) return;
         phaseLog.info({ round: context.G.round }, "actions");
         context.G.firstTurnOfRound = true;
         setStage(context.G, "actions", "default");
       },
       turn: {
         onBegin: (context) => {
-          if (context.G._halted) return;
-          if (checkLoopGuard(context, "actions:turn")) return;
           if (context.G.firstTurnOfRound && context.ctx.playOrderPos !== 0) {
             context.events.endTurn({ next: context.ctx.playOrder[0] });
           }
@@ -516,7 +496,6 @@ const MyGame: Game<MyGameState> = {
         },
       },
       onBegin: (context) => {
-        if (checkLoopGuard(context, "reset")) return;
         phaseLog.info({ round: context.G.round }, "reset");
         // Recompute turn order from alterPlayerOrder choices
         const currentTurnOrder = [...context.ctx.playOrder];
