@@ -88,7 +88,7 @@ const RetrieveFleetsDialog = (props: MyGameProps) => {
   };
 
   const isOpen =
-    props.G.stage.sub === "retrieve_fleets" &&
+    props.G.step === "retrieve_fleets" &&
     props.ctx.currentPlayer === props.playerID;
 
   return (

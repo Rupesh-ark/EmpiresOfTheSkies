@@ -1,6 +1,5 @@
 import { MoveDefinition } from "../../types.js";
 import { removeVPAmount, logEvent } from "../../helpers/stateUtils.js";
-import { setStage } from "../../helpers/stageUtils.js";
 import { clonePlayerInfo } from "../../helpers/cloneUtils.js";
 
 const attackPlayersBuilding: MoveDefinition = {
@@ -16,7 +15,7 @@ const attackPlayersBuilding: MoveDefinition = {
     if (defender.id === playerID) {
       return { code: "SELF_ATTACK", message: "Cannot attack your own building" };
     }
-    const sub = G.stage.sub;
+    const sub = G.step;
     if (sub !== "ground_attack_or_pass") {
       return { code: "WRONG_STAGE", message: "Cannot attack building in this stage" };
     }
@@ -53,7 +52,7 @@ const attackPlayersBuilding: MoveDefinition = {
         defender: { decision: "undecided", ...clonePlayerInfo(G.playerInfo[defender.id]) },
       };
       events.endTurn({ next: defender.id });
-      setStage(G, "resolution", "ground_defend_or_yield");
+      G.step = "ground_defend_or_yield";
     }
   },
   errorMessage: "Cannot attack this building",

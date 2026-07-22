@@ -1,5 +1,4 @@
 import { MoveDefinition } from "../../types.js";
-import { setStage } from "../../helpers/stageUtils.js";
 import { clonePlayerInfo } from "../../helpers/cloneUtils.js";
 
 const retaliate: MoveDefinition = {
@@ -10,7 +9,7 @@ const retaliate: MoveDefinition = {
     if (G.battleState.defender?.id !== playerID) {
       return { code: "NOT_DEFENDER", message: "Only the defender can retaliate" };
     }
-    const sub = G.stage.sub;
+    const sub = G.step;
     if (sub !== "aerial_attack_or_evade") {
       return { code: "WRONG_STAGE", message: "Cannot retaliate in this stage" };
     }
@@ -20,7 +19,7 @@ const retaliate: MoveDefinition = {
     if (G.battleState) {
       G.battleState.defender = { decision: "fight", ...clonePlayerInfo(G.playerInfo[playerID]) };
       // Transition to aerial_resolve — attacker draws/picks FoW card first
-      setStage(G, "resolution", "aerial_resolve");
+      G.step = "aerial_resolve";
       events.endTurn({ next: G.battleState.attacker.id });
     }
   },

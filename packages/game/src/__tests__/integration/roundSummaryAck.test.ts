@@ -30,7 +30,7 @@ describe("round summary acknowledgement gate", () => {
     const { state } = enterResetPhase();
 
     expect(state.ctx.phase).toBe("reset");
-    expect(state.G.stage).toEqual({ phase: "reset", sub: "round_summary" });
+    expect(state.G.step).toBe("round_summary");
     expect(state.G.roundSummaryAck).toEqual([]);
     expect(state.ctx.activePlayers).toEqual({ "0": "ack_summary", "1": "ack_summary" });
   });
@@ -52,7 +52,7 @@ describe("round summary acknowledgement gate", () => {
     ) as TestState;
     expect(afterSecondAck.ctx.phase).toBe("events");
     expect(afterSecondAck.ctx.activePlayers).toBeNull();
-    expect(afterSecondAck.G.stage).toEqual({ phase: "events", sub: "default" });
+    expect(afterSecondAck.G.step).toBe("default");
     expect(afterSecondAck.G.roundSummaryAck).toEqual(["0", "1"]);
 
     const afterEvents = reducer(
@@ -65,7 +65,7 @@ describe("round summary acknowledgement gate", () => {
 
   it("does not double-count duplicate acknowledgements", () => {
     const G = buildInitialG(undefined, {
-      stage: { phase: "reset", sub: "round_summary" },
+      step: "round_summary",
       roundSummaryAck: ["0"],
     });
     const ctx = {
@@ -87,7 +87,7 @@ describe("round summary acknowledgement gate", () => {
 
   it("enumerates the ack move only for players who have not acknowledged", () => {
     const G = buildInitialG(undefined, {
-      stage: { phase: "reset", sub: "round_summary" },
+      step: "round_summary",
       roundSummaryAck: ["1"],
     });
     const ctx = {

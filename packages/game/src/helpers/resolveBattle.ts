@@ -7,7 +7,6 @@ import type { RandomAPI } from "../types.js";
 import { increaseHeresyWithinMove, increaseOrthodoxyWithinMove, logEvent, toBuildingOwner } from "./stateUtils.js";
 import { PRICE_MARKER_MIN, KINGDOM_LOCATION } from "../data/gameData.js";
 import { nextAfterAerialDecision, nextAfterGroundDecision, nextAfterConquest } from "./resolutionSequencer.js";
-import { setStage } from "./stageUtils.js";
 import { calculateCombat } from "./combatMath.js";
 import log from "./logger.js";
 
@@ -335,7 +334,7 @@ export const resolveBattleAndReturnWinner = (
 
   let defenderSwordValue = baseDefenderSword;
   let defenderShieldValue = baseDefenderShield;
-  if (G.stage.sub === "ground_resolve") {
+  if (G.step === "ground_resolve") {
     const currentBuilding = G.mapState.buildings[y][x];
     defenderSwordValue += (currentBuilding.garrisonedRegiments ?? 0) * 2;
     defenderSwordValue += currentBuilding.garrisonedLevies ?? 0;
@@ -359,7 +358,7 @@ export const resolveBattleAndReturnWinner = (
 
   const attackerName = G.playerInfo[attackerID].kingdomName;
   const defenderName = G.playerInfo[defenderID].kingdomName;
-  const battleType = G.stage.sub === "ground_resolve" ? "Ground battle" : "Aerial battle";
+  const battleType = G.step === "ground_resolve" ? "Ground battle" : "Aerial battle";
   logEvent(G, `${battleType}: ${attackerName} (${attackerSwordValue}S/${attackerShieldValue}Sh) vs ${defenderName} (${defenderSwordValue}S/${defenderShieldValue}Sh)`);
 
   const { hitsOnAttacker: attackerLosses, hitsOnDefender: defenderLosses } = calculateCombat(
@@ -369,13 +368,13 @@ export const resolveBattleAndReturnWinner = (
 
   const attackerSnap = snapshotFleets(attackerFleets);
   const defenderFleetSnap = snapshotFleets(defenderFleets);
-  const garrisonSnapLevies = G.stage.sub === "ground_resolve" ? (G.mapState.buildings[y][x].garrisonedLevies ?? 0) : 0;
-  const garrisonSnapRegiments = G.stage.sub === "ground_resolve" ? (G.mapState.buildings[y][x].garrisonedRegiments ?? 0) : 0;
-  const garrisonSnapElite = G.stage.sub === "ground_resolve" ? (G.mapState.buildings[y][x].garrisonedEliteRegiments ?? 0) : 0;
+  const garrisonSnapLevies = G.step === "ground_resolve" ? (G.mapState.buildings[y][x].garrisonedLevies ?? 0) : 0;
+  const garrisonSnapRegiments = G.step === "ground_resolve" ? (G.mapState.buildings[y][x].garrisonedRegiments ?? 0) : 0;
+  const garrisonSnapElite = G.step === "ground_resolve" ? (G.mapState.buildings[y][x].garrisonedEliteRegiments ?? 0) : 0;
 
   applyFleetLosses(attackerFleets, attackerLosses, true);
 
-  if (G.stage.sub === "ground_resolve") {
+  if (G.step === "ground_resolve") {
     const currentBuilding = G.mapState.buildings[y][x];
     let defenderLossesCopy = defenderLosses;
     if (defenderLosses % 2 === 1 && (currentBuilding.garrisonedLevies ?? 0) > 0) {
@@ -414,7 +413,7 @@ export const resolveBattleAndReturnWinner = (
       skyships: attackerSnap.skyships - attackerAfter.skyships,
     });
 
-    if (G.stage.sub === "ground_resolve") {
+    if (G.step === "ground_resolve") {
       const currentBuilding = G.mapState.buildings[y][x];
       const defenderAfter = snapshotFleets(defenderFleets);
       defenderLossDetail = formatLosses({
@@ -450,7 +449,7 @@ export const resolveBattleAndReturnWinner = (
   );
 
   let remainingDefenders = 0;
-  if (G.stage.sub === "ground_resolve") {
+  if (G.step === "ground_resolve") {
     const currentBuilding = G.mapState.buildings[y][x];
     remainingDefenders +=
       (currentBuilding.garrisonedLevies ?? 0) +
@@ -473,7 +472,7 @@ export const resolveBattleAndReturnWinner = (
   } else if (remainingAttackers === 0 && remainingDefenders === 0) {
     winner = "total annihilation";
   }
-  if (remainingDefenders > 0 && G.stage.sub === "ground_resolve") {
+  if (remainingDefenders > 0 && G.step === "ground_resolve") {
     winner = G.battleState?.defender.id;
   }
   if (winner !== "total annihilation" && winner) {
@@ -515,18 +514,18 @@ export const resolveBattleAndReturnWinner = (
 
     if (remainingAttackers === 0 || remainingDefenders === 0) {
       if (
-        G.stage.sub === "ground_resolve" &&
+        G.step === "ground_resolve" &&
         remainingDefenders === 0 &&
         remainingAttackers > 0
       ) {
-        setStage(G, "resolution", "ground_garrison");
+        G.step = "ground_garrison";
         computeGarrisonTroops(G, winner);
         events.endTurn({ next: winner });
       } else {
         nextAfterAerialDecision(G, ctx, events, G.battleState?.attacker.id ?? ctx.currentPlayer);
       }
     } else {
-      if (G.stage.sub === "ground_resolve") {
+      if (G.step === "ground_resolve") {
         nextAfterGroundDecision(G, ctx, events, G.battleState?.attacker.id ?? ctx.currentPlayer);
       } else {
         // Pre-compute valid relocation tiles for the frontend
@@ -551,7 +550,7 @@ export const resolveBattleAndReturnWinner = (
           // No valid relocation destinations — skip relocate stage, advance battle
           nextAfterAerialDecision(G, ctx, events, winner);
         } else {
-          setStage(G, "resolution", "relocate_loser");
+          G.step = "relocate_loser";
           events.endTurn({ next: winner });
         }
       }
@@ -573,7 +572,7 @@ export const resolveBattleAndReturnWinner = (
       winner: winner === "total annihilation" ? "Total annihilation" : "Draw",
       outcome: winner === "total annihilation" ? "Both sides destroyed" : "Stalemate",
     };
-    if (G.stage.sub === "ground_resolve") {
+    if (G.step === "ground_resolve") {
       const currentBuilding = G.mapState.buildings[y][x];
       currentBuilding.player = undefined;
       nextAfterGroundDecision(G, ctx, events, G.battleState?.attacker.id ?? ctx.currentPlayer);
@@ -756,7 +755,7 @@ export const resolveConquest = (
     currentBuilding.player = toBuildingOwner(currentPlayer);
     currentBuilding.buildings = "colony";
     G.conquestState = undefined;
-    setStage(G, "resolution", "conquest_garrison");
+    G.step = "conquest_garrison";
     computeGarrisonTroops(G, attackerID);
   }
 };

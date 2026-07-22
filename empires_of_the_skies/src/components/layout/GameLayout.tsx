@@ -10,7 +10,7 @@ import { Box, Tooltip } from "@mui/material";
 import { Close } from "@mui/icons-material";
 import { tokens, backgrounds } from "@/theme";
 import { getMood } from "@/theme";
-import type { GameStage } from "@eots/game";
+import type { GameStep, PhaseGroup } from "@eots/game";
 import {
   GiScrollUnfurled, GiSwapBag, GiConversation, GiBarracks,
 } from "react-icons/gi";
@@ -40,8 +40,9 @@ const PANEL_TABS: { slot: PanelSlot; label: string; Icon: React.ComponentType<{ 
 ];
 
 interface GameLayoutProps {
-  /** G.stage — drives mood styling only, never structure */
-  stage: GameStage;
+  /** Current phase group and step drive mood styling only, never structure. */
+  group: PhaseGroup;
+  step: GameStep;
   topStrip: ReactNode;
   opponentRail: ReactNode;
   promptBar: ReactNode;
@@ -58,7 +59,8 @@ interface GameLayoutProps {
 }
 
 export const GameLayout = ({
-  stage,
+  group,
+  step,
   topStrip,
   opponentRail,
   promptBar,
@@ -70,7 +72,7 @@ export const GameLayout = ({
   decisionPanel,
   children,
 }: GameLayoutProps) => {
-  const mood = getMood(stage);
+  const mood = getMood(group, step);
   const moodBg = MOOD_BACKGROUNDS[mood] ?? MOOD_BACKGROUNDS.peacetime;
 
   const [openPanel, setOpenPanel] = useState<PanelSlot | null>(null);

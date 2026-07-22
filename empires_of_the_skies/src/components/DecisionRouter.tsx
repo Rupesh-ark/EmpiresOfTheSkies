@@ -7,7 +7,7 @@
  * elections, round summaries) stay in DialogRouter.
  */
 import { memo, lazy, Suspense } from "react";
-import { MyGameProps } from "@eots/game";
+import { MyGameProps, phaseGroup } from "@eots/game";
 
 const AttackOrPassDialog = lazy(() => import("./AerialBattle/AttackOrPassDialog").then(m => ({ default: m.default })));
 const AttackOrEvadeDialog = lazy(() => import("./AerialBattle/AttackOrEvadeDialog").then(m => ({ default: m.default })));
@@ -27,7 +27,8 @@ const OutpostOrColonyDialog = lazy(() => import("./Conquests/OutpostOrColonyDial
 const RetrieveFleetsDialog = lazy(() => import("./Resolution/RetrieveFleetsDialog").then(m => ({ default: m.default })));
 
 export const DecisionRouter = memo((props: MyGameProps) => {
-  const { sub, phase } = props.G.stage;
+  const sub = props.G.step;
+  const phase = phaseGroup(props.ctx.phase!);
 
   return (
     <>

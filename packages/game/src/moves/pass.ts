@@ -1,18 +1,12 @@
 import { MoveDefinition, MyGameState, MoveError } from "../types.js";
 import { INVALID_MOVE } from "boardgame.io/core";
 import { allPlayersPassed } from "../helpers/stateUtils.js";
-import { setStage } from "../helpers/stageUtils.js";
 
 const validatePass = (G: MyGameState, _playerID: string): MoveError | null => {
   if (G.mustContinueDiscovery) {
     return { code: "MUST_CONTINUE", message: "You must continue discovering (Ocean/Legend tile flipped)" };
   }
-  const phase = G.stage.phase;
-  const sub = G.stage.sub;
-  if (phase === "discovery" || phase === "actions" || sub === "retrieve_fleets") {
-    return null;
-  }
-  return { code: "INVALID_PHASE", message: "Cannot pass in this stage" };
+  return null;
 };
 
 const pass: MoveDefinition = {
@@ -27,9 +21,8 @@ const pass: MoveDefinition = {
     }
 
     if (allPlayersPassed(G)) {
-      if (ctx.phase === "actions") setStage(G, "actions", "default");
-      else if (ctx.phase === "discovery") setStage(G, "discovery", "default");
-      else setStage(G, "resolution", "retrieve_fleets");
+      if (ctx.phase === "actions" || ctx.phase === "discovery") G.step = "default";
+      else G.step = "retrieve_fleets";
       events.endPhase();
     } else {
       events.endTurn();

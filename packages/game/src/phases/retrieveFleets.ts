@@ -1,7 +1,6 @@
 import type { PhaseConfig } from "boardgame.io";
 import type { MyGameState, PlayerInfo } from "../types.js";
 import log from "../helpers/logger.js";
-import { setStage } from "../helpers/stageUtils.js";
 import { allPlayersPassed, nextUnpassedPlayer } from "../helpers/stateUtils.js";
 import { wrapSet } from "../helpers/wrapSet.js";
 
@@ -20,7 +19,7 @@ export const retrieveFleetsPhase: PhaseConfig<MyGameState> = {
     Object.values(context.G.playerInfo).forEach((player) => {
       player.passed = false;
     });
-    setStage(context.G, "resolution", "retrieve_fleets");
+    context.G.step = "retrieve_fleets";
     if (!Object.values(context.G.playerInfo).some(hasRetrievableFleet)) {
       context.events.endPhase();
     }

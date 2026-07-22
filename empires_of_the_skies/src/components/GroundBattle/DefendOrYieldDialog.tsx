@@ -20,7 +20,7 @@ const DefendOrYieldDialog = (props: MyGameProps) => {
 
   const isOpen =
     props.ctx.currentPlayer === props.playerID &&
-    props.G.stage.sub === "ground_defend_or_yield" &&
+    props.G.step === "ground_defend_or_yield" &&
     inCurrentBattle &&
     props.G.battleState?.defender.id === props.playerID &&
     props.G.battleState.defender.decision === "undecided";

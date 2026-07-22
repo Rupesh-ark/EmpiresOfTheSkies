@@ -2,7 +2,6 @@ import { MoveDefinition, GoodKey } from "../../types.js";
 import { increaseHeresyWithinMove, addVPAmount, logEvent, toBuildingOwner } from "../../helpers/stateUtils.js";
 import { humanizeTileName } from "../../helpers/helpers.js";
 import { PRICE_MARKER_MIN } from "../../data/gameData.js";
-import { setStage } from "../../helpers/stageUtils.js";
 import { computeGarrisonTroops } from "../../helpers/resolveBattle.js";
 
 const GOODS: GoodKey[] = ["mithril", "dragonScales", "krakenSkin", "magicDust", "stickyIchor", "pipeweed"];
@@ -36,7 +35,7 @@ const constructOutpost: MoveDefinition = {
       G.eventState.royalPatronageActive = false;
     }
 
-    setStage(G, "resolution", "conquest_garrison");
+    G.step = "conquest_garrison";
     computeGarrisonTroops(G, playerID);
   },
   errorMessage: "Cannot construct an outpost here",

@@ -6,6 +6,7 @@ import { getAILogger } from "./AILogger.js";
 import type { MCTSStats } from "./AILogger.js";
 import type { PlayerSnapshot } from "./GameRecorder.js";
 import log from "../helpers/logger.js";
+import { RESOLUTION_SEQUENCE } from "../data/resolutionSequence.js";
 
 // Phase evaluators
 import { evaluateActions } from "./evaluators/ActionsEvaluator.js";
@@ -84,13 +85,13 @@ export class EmpiresBot {
     }
 
     // Card-picking phases (setup) — simple heuristics
-    if (G.stage.sub === "kingdom_advantage") {
+    if (G.step === "kingdom_advantage") {
       return this.chooseKACard(G, playerID);
     }
-    if (G.stage.sub === "legacy_card") {
+    if (G.step === "legacy_card") {
       return this.chooseLegacyCard(G, playerID);
     }
-    if (G.stage.phase === "reset" && G.stage.sub === "round_summary") {
+    if (ctx.phase === "reset" && G.step === "round_summary") {
       return (G.roundSummaryAck ?? []).includes(playerID)
         ? null
         : { move: "acknowledgeRoundSummary", args: [] };
@@ -103,7 +104,7 @@ export class EmpiresBot {
 
     // Route to phase-specific v2 evaluator
     // (Don't early-return for single moves — some sub-stages need overrides)
-    const phase = G.stage.phase;
+    const phase = ctx.phase;
     let chosen: AIMove | null = null;
     let chosenScore = 0;
     let topMoves: { move: string; args: any[]; score: number }[] | undefined;
@@ -111,12 +112,12 @@ export class EmpiresBot {
 
     if (phase === "actions") {
       // Sub-stage flow control — handle mechanical stages before evaluator
-      if (G.stage.sub === "confirm_fow_draw") {
+      if (G.step === "confirm_fow_draw") {
         // trainTroops sets this stage. The only valid move is drawFoWCards.
         // Enumerate incorrectly returns confirmAction — override it.
         chosen = { move: "drawFoWCards", args: [] };
         chosenScore = 0;
-      } else if (G.stage.sub === "discard_fow") {
+      } else if (G.step === "discard_fow") {
         // Choose which FoW card to discard — use evaluator (simple decision)
         const { viable } = evaluateActions(G, playerID, availableMoves, personality);
         if (viable.length > 0) {
@@ -170,7 +171,7 @@ export class EmpiresBot {
         chosenScore = pick.quality;
         topMoves = viable.slice(0, 5).map(v => ({ move: v.move.move, args: v.move.args, score: v.quality }));
       }
-    } else if (phase === "resolution" || ctx.phase === "retrieveFleets") {
+    } else if ((RESOLUTION_SEQUENCE as readonly string[]).includes(ctx.phase)) {
       const { viable } = evaluateResolution(G, playerID, availableMoves, personality);
       const pick = pickResolutionMove(viable);
       if (pick) {
@@ -247,7 +248,7 @@ export class EmpiresBot {
     getAILogger().logDecision({
       round: G.round,
       phase: ctx.phase ?? "unknown",
-      stage: G.stage ? `${G.stage.phase}/${G.stage.sub}` : "unknown",
+      stage: `${ctx.phase}:${G.step}`,
       playerID,
       personalityName: `${personality.kaCard}+${personality.legacyCard}`,
       legalMoveCount: allMoves.length,

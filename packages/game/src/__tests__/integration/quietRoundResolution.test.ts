@@ -72,9 +72,9 @@ describe("quiet round — resolution with no combat work", () => {
         const ctx = state.ctx;
         lastRound = G.round;
         lastPhase = ctx.phase ?? "";
-        lastSeen = `${ctx.phase}/${G.stage.phase}:${G.stage.sub}/t${ctx.turn}/P${ctx.currentPlayer}`;
+        lastSeen = `${ctx.phase}:${G.step}/t${ctx.turn}/P${ctx.currentPlayer}`;
 
-        if (G.stage.phase === "resolution" && G.stage.sub === "election") {
+        if (G.step === "election") {
           reachedElection = true;
         }
         if (G.round === 2 && ctx.phase === "events") {

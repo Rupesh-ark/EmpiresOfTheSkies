@@ -3,7 +3,6 @@ import type { MyGameState } from "../types.js";
 import { getResolutionTarget } from "../helpers/resolutionFlow.js";
 import { setupNextRebellion } from "../helpers/resolveRebellion.js";
 import log from "../helpers/logger.js";
-import { setStage } from "../helpers/stageUtils.js";
 import { wrapSet } from "../helpers/wrapSet.js";
 
 const phaseLog = log.child({ mod: "phase" });
@@ -14,7 +13,7 @@ export const rebellionsPhase: PhaseConfig<MyGameState> = {
   onBegin: (context) => {
     phaseLog.info({ round: context.G.round }, "rebellions");
     if (setupNextRebellion(context.G)) {
-      setStage(context.G, "resolution", "rebellion");
+      context.G.step = "rebellion";
     } else {
       context.events.endPhase();
     }
@@ -31,7 +30,7 @@ export const rebellionsPhase: PhaseConfig<MyGameState> = {
       next: ({ ctx }) => (ctx.playOrderPos + 1) % ctx.playOrder.length,
     },
     onBegin: (context) => {
-      if (context.G.stage.sub === "rebellion_rival_support") return;
+      if (context.G.step === "rebellion_rival_support") return;
 
       const target = getResolutionTarget(context.G);
       if (target && target !== context.ctx.currentPlayer) {

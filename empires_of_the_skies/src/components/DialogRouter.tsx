@@ -47,7 +47,7 @@ const DialogLoader: React.FC<{ name: string }> = ({ name }) => (
  * Rule: do NOT modify the individual dialog components — only their mount conditions.
  */
 export const DialogRouter = memo((props: MyGameProps) => {
-  const { sub } = props.G.stage;
+  const sub = props.G.step;
 
   return (
     <>

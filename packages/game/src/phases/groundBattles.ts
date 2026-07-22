@@ -9,7 +9,7 @@ import { wrapSet } from "../helpers/wrapSet.js";
 const phaseLog = log.child({ mod: "phase" });
 
 const firstFleetOwnerPosition = (G: MyGameState): number => {
-  if (G.stage.sub !== "ground_attack_or_pass") return 0;
+  if (G.step !== "ground_attack_or_pass") return 0;
   const [x, y] = G.mapState.currentBattle;
   const owner = G.mapState.battleMap[y]?.[x]?.[0];
   const position = owner === undefined ? -1 : G.turnOrder.indexOf(owner);
@@ -42,7 +42,7 @@ export const groundBattlesPhase: PhaseConfig<MyGameState> = {
     order: {
       playOrder: ({ G }) => G.turnOrder,
       first: ({ G }) => {
-        if (G.stage.sub !== "deferred_battle") return firstFleetOwnerPosition(G);
+        if (G.step !== "deferred_battle") return firstFleetOwnerPosition(G);
         const target = getResolutionTarget(G);
         if (target === null) return 0;
         const position = G.turnOrder.indexOf(target);
@@ -51,7 +51,7 @@ export const groundBattlesPhase: PhaseConfig<MyGameState> = {
       next: ({ ctx }) => (ctx.playOrderPos + 1) % ctx.playOrder.length,
     },
     onBegin: (context) => {
-      if (context.G.stage.sub === "deferred_battle") {
+      if (context.G.step === "deferred_battle") {
         const target = getResolutionTarget(context.G);
         if (target && target !== context.ctx.currentPlayer) {
           context.events.endTurn({ next: target });

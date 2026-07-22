@@ -32,7 +32,7 @@ export class AerialBattleStrategy implements PhaseStrategy {
     if (moves.length === 0) return { move: { move: "doNotAttack", args: [] }, score: 0 };
     if (moves.length === 1) return { move: moves[0], score: 0 };
 
-    switch (G.stage.sub) {
+    switch (G.step) {
       case "aerial_attack_or_pass":
         return this.decideAttack(G, ctx, playerID, personality, moves);
 

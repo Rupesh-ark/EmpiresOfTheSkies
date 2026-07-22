@@ -31,7 +31,7 @@ export class GroundBattleStrategy implements PhaseStrategy {
     if (moves.length === 0) return { move: { move: "doNotGroundAttack", args: [] }, score: 0 };
     if (moves.length === 1) return { move: moves[0], score: 0 };
 
-    switch (G.stage.sub) {
+    switch (G.step) {
       case "ground_attack_or_pass":
         return { move: this.decideGroundAttack(G, playerID, personality, moves), score: 0 };
 

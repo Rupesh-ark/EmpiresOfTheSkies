@@ -1,5 +1,4 @@
 import { MoveDefinition } from "../../types.js";
-import { isStage } from "../../helpers/stageUtils.js";
 
 const acknowledgeRoundSummary: MoveDefinition = {
   fn: ({ G, ctx, playerID, events }) => {
@@ -17,7 +16,7 @@ const acknowledgeRoundSummary: MoveDefinition = {
   },
   errorMessage: "Cannot acknowledge the round summary right now",
   validate: (G) => {
-    if (!isStage(G, "reset", "round_summary")) {
+    if (G.step !== "round_summary") {
       return { code: "WRONG_STAGE", message: "Round summary is not awaiting acknowledgement" };
     }
     return null;

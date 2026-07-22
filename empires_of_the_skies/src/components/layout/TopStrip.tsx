@@ -4,7 +4,8 @@
  * Never moves, never resizes; only its text changes.
  */
 import { Box, Tooltip, Typography } from "@mui/material";
-import { MyGameProps, GAME_PHASES, PlayerInfo } from "@eots/game";
+import { MyGameProps, GAME_PHASES, PlayerInfo, phaseGroup } from "@eots/game";
+import type { PhaseGroup } from "@eots/game";
 import { tokens, backgrounds } from "@/theme";
 import { getMood, getMoodTokens } from "@/theme";
 
@@ -123,9 +124,9 @@ const MiniHeresyTrack = ({ playerInfo }: { playerInfo: Record<string, PlayerInfo
 };
 
 /** Horizontal round sequence — every phase, the current one lit. */
-const RoundSequence = ({ stage }: { stage: MyGameProps["G"]["stage"] }) => {
-  const phases = GAME_PHASES.filter((p) => p.key !== "setup" || stage.phase === "setup");
-  const currentIdx = phases.findIndex((p) => p.key === stage.phase);
+const RoundSequence = ({ group }: { group: PhaseGroup }) => {
+  const phases = GAME_PHASES.filter((p) => p.key !== "setup" || group === "setup");
+  const currentIdx = phases.findIndex((p) => p.key === group);
 
   return (
     <Box sx={{ display: "flex", alignItems: "center", minWidth: 0 }}>
@@ -183,7 +184,8 @@ const RoundSequence = ({ stage }: { stage: MyGameProps["G"]["stage"] }) => {
 export const TopStrip = (props: MyGameProps) => {
   const isMyTurn = props.ctx.currentPlayer === props.playerID;
   const currentPlayerInfo = props.G.playerInfo[props.ctx.currentPlayer];
-  const mood = getMood(props.G.stage);
+  const group = phaseGroup(props.ctx.phase!);
+  const mood = getMood(group, props.G.step);
   const moodTokens = getMoodTokens(mood);
   const shouldPulse = PULSING_MOODS.has(mood);
 
@@ -217,7 +219,7 @@ export const TopStrip = (props: MyGameProps) => {
         Round {props.G.round} / {props.G.finalRound}
       </Typography>
       <Box sx={{ width: "1px", height: 16, backgroundColor: "rgba(200,170,120,0.3)", flexShrink: 0 }} />
-      <RoundSequence stage={props.G.stage} />
+      <RoundSequence group={group} />
       <Box sx={{ width: "1px", height: 16, backgroundColor: "rgba(200,170,120,0.3)", flexShrink: 0 }} />
 
       {/* Turn indicator */}

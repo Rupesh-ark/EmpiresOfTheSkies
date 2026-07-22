@@ -3,7 +3,6 @@
 import { Ctx } from "boardgame.io";
 import type { EventsAPI } from "../types.js";
 import { MyGameState } from "../types.js";
-import { setStage } from "./stageUtils.js";
 import { sortPlayersInPlayerOrder } from "./helpers.js";
 import {
   findNextBattle,
@@ -45,7 +44,7 @@ export function nextAfterAerialDecision(
 
   const nextPlayer = getNextPlayerAtTile(G, lastAttackerID);
   if (nextPlayer) {
-    setStage(G, "resolution", "aerial_attack_or_pass");
+    G.step = "aerial_attack_or_pass";
     computeDefendersAtBattle(G, nextPlayer);
     events.endTurn({ next: nextPlayer });
   } else {
@@ -70,7 +69,7 @@ export function nextAfterGroundDecision(
 
   const nextPlayer = getNextPlayerAtTile(G, lastAttackerID);
   if (nextPlayer) {
-    setStage(G, "resolution", "ground_attack_or_pass");
+    G.step = "ground_attack_or_pass";
     computeDefendersAtBattle(G, nextPlayer);
     events.endTurn({ next: nextPlayer });
   } else {

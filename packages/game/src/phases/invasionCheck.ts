@@ -3,7 +3,6 @@ import type { MyGameState } from "../types.js";
 import { getResolutionTarget, runInvasionCheck } from "../helpers/resolutionFlow.js";
 import { prepareInfidelFleetCombat } from "../helpers/resolveInfidelFleet.js";
 import log from "../helpers/logger.js";
-import { setStage } from "../helpers/stageUtils.js";
 import { wrapSet } from "../helpers/wrapSet.js";
 
 const phaseLog = log.child({ mod: "phase" });
@@ -19,7 +18,7 @@ export const invasionCheckPhase: PhaseConfig<MyGameState> = {
   onBegin: (context) => {
     phaseLog.info({ round: context.G.round }, "invasion-check");
     if (prepareInfidelFleetCombat(context.G)) {
-      setStage(context.G, "resolution", "infidel_fleet_combat");
+      context.G.step = "infidel_fleet_combat";
     } else {
       runInvasionCheck(context.G, context.events, true);
     }
@@ -36,7 +35,7 @@ export const invasionCheckPhase: PhaseConfig<MyGameState> = {
       next: ({ ctx }) => (ctx.playOrderPos + 1) % ctx.playOrder.length,
     },
     onBegin: (context) => {
-      const sub = context.G.stage.sub;
+      const sub = context.G.step;
       if (sub === "invasion_contribute" || sub === "invasion_buyoff") return;
 
       const target = getResolutionTarget(context.G);

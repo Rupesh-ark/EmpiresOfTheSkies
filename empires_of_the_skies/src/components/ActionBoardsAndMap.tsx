@@ -1,6 +1,6 @@
 import React, { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react";
 
-import { MyGameProps, EVENT_CARD_DEFS } from "@eots/game";
+import { MyGameProps, EVENT_CARD_DEFS, phaseGroup } from "@eots/game";
 const ActionBoard = lazy(() => import("./ActionBoard/ActionBoard").then(m => ({ default: m.ActionBoard })));
 const WorldMap = lazy(() => import("./WorldMap/WorldMap"));
 const PlayerDock = lazy(() => import("./PlayerBoard/PlayerDock").then(m => ({ default: m.PlayerDock })));
@@ -36,7 +36,8 @@ export const ActionBoardsAndMap = (props: MyGameProps) => {
 };
 
 const ActionBoardsAndMapInner = (props: MyGameProps) => {
-  const theme = useGameTheme(props.G.stage);
+  const group = phaseGroup(props.ctx.phase!);
+  const theme = useGameTheme(group, props.G.step);
   const { showToast } = useToast();
 
   // Toast the reason whenever one of our actions is rejected.
@@ -56,7 +57,7 @@ const ActionBoardsAndMapInner = (props: MyGameProps) => {
   const prevLogLen = useRef(props.G.gameLog.length);
   useEffect(() => {
     const logLen = props.G.gameLog.length;
-    const isDiscovery = props.G.stage.phase === "discovery";
+    const isDiscovery = phaseGroup(props.ctx.phase!) === "discovery";
     const isMyTurn = props.ctx.currentPlayer === props.playerID;
 
     if (isDiscovery && logLen > prevLogLen.current) {
@@ -76,7 +77,7 @@ const ActionBoardsAndMapInner = (props: MyGameProps) => {
       }
     }
     prevLogLen.current = logLen;
-  }, [props.G.gameLog, props.G.stage.phase, props.ctx.currentPlayer, props.playerID, props.G.playerInfo, showToast]);
+  }, [props.G.gameLog, props.ctx.phase, props.ctx.currentPlayer, props.playerID, props.G.playerInfo, showToast]);
 
   // Event toast: notify all players when an event card is resolved
   const prevResolvedEvent = useRef(props.G.eventState.resolvedEvent);
@@ -158,7 +159,7 @@ const ActionBoardsAndMapInner = (props: MyGameProps) => {
   ), [props, mapDetailRequest]);
 
   const isMyTurn = props.ctx.currentPlayer === props.playerID;
-  const actionOverlayActive = props.G.stage.phase === "actions" && isMyTurn;
+  const actionOverlayActive = group === "actions" && isMyTurn;
 
   return (
     <ThemeProvider theme={theme}>
@@ -185,7 +186,8 @@ const ActionBoardsAndMapInner = (props: MyGameProps) => {
             </Box>
           )}
           <GameLayout
-            stage={props.G.stage}
+            group={group}
+            step={props.G.step}
             topStrip={<TopStrip {...props} />}
             opponentRail={
               <OpponentRail

@@ -28,30 +28,35 @@ export type DealProposal = {
   requesting: DealOffer;
 };
 
-// Discriminated-union game stage
-export type GameStage =
-  | { phase: "setup";      sub: "kingdom_advantage" | "legacy_card" }
-  | { phase: "events";     sub: "default" | "immediate_election" }
-  | { phase: "discovery";  sub: "default" }
-  | { phase: "taxes";      sub: "default" }
-  | { phase: "actions";    sub: "default" | "confirm_fow_draw" | "discard_fow" }
-  | { phase: "resolution"; sub:
-      | "rebellion" | "rebellion_rival_support"
-      | "aerial_attack_or_pass" | "aerial_attack_or_evade" | "aerial_resolve"
-      | "plunder_legends"
-      | "ground_attack_or_pass" | "ground_defend_or_yield" | "ground_resolve" | "ground_garrison"
-      | "relocate_loser"
-      | "conquest" | "conquest_draw_or_pick" | "conquest_garrison"
-      | "election"
-      | "infidel_fleet_combat" | "deferred_battle"
-      | "invasion_nominate" | "invasion_contribute" | "invasion_buyoff"
-      | "retrieve_fleets"
-    }
-  | { phase: "scoring";    sub: "default" }
-  | { phase: "reset";      sub: "default" | "round_summary" };
-
-export type StagePhase = GameStage["phase"];
-export type StageSub = GameStage["sub"];
+export type GameStep =
+  | "default"
+  | "kingdom_advantage"
+  | "legacy_card"
+  | "immediate_election"
+  | "confirm_fow_draw"
+  | "discard_fow"
+  | "rebellion"
+  | "rebellion_rival_support"
+  | "aerial_attack_or_pass"
+  | "aerial_attack_or_evade"
+  | "aerial_resolve"
+  | "plunder_legends"
+  | "ground_attack_or_pass"
+  | "ground_defend_or_yield"
+  | "ground_resolve"
+  | "ground_garrison"
+  | "relocate_loser"
+  | "conquest"
+  | "conquest_draw_or_pick"
+  | "conquest_garrison"
+  | "election"
+  | "infidel_fleet_combat"
+  | "deferred_battle"
+  | "invasion_nominate"
+  | "invasion_contribute"
+  | "invasion_buyoff"
+  | "retrieve_fleets"
+  | "round_summary";
 
 export interface MyGameState {
   playerInfo: { [details: string]: PlayerInfo };
@@ -68,7 +73,7 @@ export interface MyGameState {
   possibleDefenders: string[];
   validRelocationTiles: number[][];
   troopsAvailableForGarrison: { regiments: number; elites: number; levies: number };
-  stage: GameStage;
+  step: GameStep;
   electionResults: Record<string, number>;
   hasVoted: string[];
   roundSummaryAck: string[];

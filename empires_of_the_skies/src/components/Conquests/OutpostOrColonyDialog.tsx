@@ -191,7 +191,7 @@ const OutpostOrColonyDialog = (props: MyGameProps) => {
     props.ctx.currentPlayer === props.playerID &&
     inCurrentBattle &&
     props.G.conquestState === undefined &&
-    props.G.stage.sub === "conquest";
+    props.G.step === "conquest";
 
   const tile = props.G.mapState.currentTileArray[y][x];
   const { name: tileName } = getLocationPresentation(

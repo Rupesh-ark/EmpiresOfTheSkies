@@ -11,7 +11,7 @@ import { wrapSet } from "../helpers/wrapSet.js";
 const phaseLog = log.child({ mod: "phase" });
 
 const firstAttackerPosition = (G: MyGameState): number => {
-  if (G.stage.sub !== "aerial_attack_or_pass") return 0;
+  if (G.step !== "aerial_attack_or_pass") return 0;
   const [x, y] = G.mapState.currentBattle;
   const attacker = sortPlayersInPlayerOrder(
     [...(G.mapState.battleMap[y]?.[x] ?? [])],

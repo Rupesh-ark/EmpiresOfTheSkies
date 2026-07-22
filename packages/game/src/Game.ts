@@ -30,8 +30,6 @@ import piracyPhase from "./phases/piracy.js";
 import factoryIncomePhase from "./phases/factoryIncome.js";
 import scoringPhase from "./phases/scoring.js";
 
-import { setStage, isStage } from "./helpers/stageUtils.js";
-import type { GameStage } from "./types.js";
 import log from "./helpers/logger.js";
 
 const phaseLog = log.child({ mod: "phase" });
@@ -68,7 +66,7 @@ const turnBudgetPlugin = {
           events.endTurn = (endTurnArgs?: any) => {
             const counter = incrBudget(G);
             const phase = context.ctx?.phase ?? "?";
-            const stage = G?.stage ? `${G.stage.phase}/${G.stage.sub}` : "?";
+            const step = G?.step ?? "?";
             const { round } = budgetFor(G);
 
             if (counter >= TURN_ENDING_LIMIT) {
@@ -77,7 +75,7 @@ const turnBudgetPlugin = {
                 type: "endTurn",
                 method: methodType,
                 phase,
-                stage,
+                step,
                 round,
                 turn: context.ctx?.turn,
                 next: endTurnArgs?.next,
@@ -90,7 +88,7 @@ const turnBudgetPlugin = {
                 count: counter,
                 method: methodType,
                 phase,
-                stage,
+                step,
                 round,
                 turn: context.ctx?.turn,
                 next: endTurnArgs?.next,
@@ -105,7 +103,7 @@ const turnBudgetPlugin = {
           events.endPhase = (...phaseArgs: any[]) => {
             const counter = incrBudget(G);
             const phase = context.ctx?.phase ?? "?";
-            const stage = G?.stage ? `${G.stage.phase}/${G.stage.sub}` : "?";
+            const step = G?.step ?? "?";
             const { round } = budgetFor(G);
 
             if (counter >= TURN_ENDING_LIMIT) {
@@ -114,7 +112,7 @@ const turnBudgetPlugin = {
                 type: "endPhase",
                 method: methodType,
                 phase,
-                stage,
+                step,
                 round,
                 turn: context.ctx?.turn,
               }, "BUDGET EXCEEDED — halting game");
@@ -126,7 +124,7 @@ const turnBudgetPlugin = {
                 count: counter,
                 method: methodType,
                 phase,
-                stage,
+                step,
                 round,
                 turn: context.ctx?.turn,
               }, "endPhase milestone");
@@ -225,7 +223,7 @@ const MyGame: Game<MyGameState> = {
         kingdomAdvantagePool: [...ALL_KA_CARDS],
         legacyDeck: [],
       },
-      stage: { phase: "setup", sub: "kingdom_advantage" } as GameStage,
+      step: "kingdom_advantage",
       electionResults: {},
       hasVoted: [],
       roundSummaryAck: [],
@@ -288,7 +286,7 @@ const MyGame: Game<MyGameState> = {
       next: "events",
       onBegin: (context) => {
         phaseLog.info({ round: context.G.round }, "setup");
-        setStage(context.G, "setup", "kingdom_advantage");
+        context.G.step = "kingdom_advantage";
         const { pool: filteredPool, log: kaLog } = filterKAPool(
           context.G.cardDecks.kingdomAdvantagePool,
           context.ctx.numPlayers,
@@ -312,7 +310,7 @@ const MyGame: Game<MyGameState> = {
       },
       onBegin: (context) => {
         phaseLog.info({ round: context.G.round }, "events");
-        setStage(context.G, "events", "default");
+        context.G.step = "default";
         context.G.eventState.taxModifier = 0;
         context.G.eventState.chosenCards = [];
         context.G.eventState.eventContributions = {};
@@ -339,7 +337,7 @@ const MyGame: Game<MyGameState> = {
         phaseLog.info({ round: context.G.round + 1 }, "discovery");
         context.G.round += 1;
         context.ctx.playOrderPos = 0;
-        setStage(context.G, "discovery", "default");
+        context.G.step = "default";
 
         context.G.firstTurnOfRound = true;
 
@@ -406,7 +404,7 @@ const MyGame: Game<MyGameState> = {
       turn: { order: TurnOrder.ONCE },
       onBegin: (context) => {
         phaseLog.info({ round: context.G.round }, "taxes");
-        setStage(context.G, "taxes", "default");
+        context.G.step = "default";
 
         // Peasant REBELLION loss: skip taxes this round
         if (context.G.eventState.skipTaxesNextRound) {
@@ -435,7 +433,7 @@ const MyGame: Game<MyGameState> = {
       onBegin: (context) => {
         phaseLog.info({ round: context.G.round }, "actions");
         context.G.firstTurnOfRound = true;
-        setStage(context.G, "actions", "default");
+        context.G.step = "default";
       },
       turn: {
         onBegin: (context) => {
@@ -454,7 +452,7 @@ const MyGame: Game<MyGameState> = {
 
           if (currentPlayer.passed) {
             if (allPlayersPassed(context.G)) {
-              setStage(context.G, "actions", "default");
+              context.G.step = "default";
               context.events.endPhase();
             } else {
               const next = nextUnpassedPlayer(context.G, context.ctx.currentPlayer);
@@ -548,7 +546,7 @@ const MyGame: Game<MyGameState> = {
           context.events.endPhase();
           return;
         }
-        setStage(context.G, "reset", "round_summary");
+        context.G.step = "round_summary";
       },
       moves: {},
       next: "events",

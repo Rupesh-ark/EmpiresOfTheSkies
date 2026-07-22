@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Box, Typography } from "@mui/material";
-import { MyGameProps, EventCardName, EVENT_CARD_DEFS } from "@eots/game";
+import { MyGameProps, EventCardName, EVENT_CARD_DEFS, phaseGroup } from "@eots/game";
 import { DecisionPanel } from "@/components/atoms/DecisionPanel";
 import { GameButton } from "@/components/atoms/GameButton";
 import { tokens } from "@/theme";
@@ -19,7 +19,7 @@ const PickEventCardDialog = (props: MyGameProps) => {
 
   const isOpen =
     open &&
-    props.G.stage.phase === "events" && props.G.stage.sub === "default" &&
+    phaseGroup(props.ctx.phase!) === "events" && props.G.step === "default" &&
     props.ctx.currentPlayer === props.playerID;
 
   return (

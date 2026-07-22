@@ -1,7 +1,6 @@
 import { INVALID_MOVE } from "boardgame.io/core";
 import { MoveDefinition, KingdomAdvantageCard } from "../../types.js";
 import { ELITE_REGIMENTS_COUNT, LEGACY_CARDS } from "../../data/gameData.js";
-import { setStage } from "../../helpers/stageUtils.js";
 import { seedLegacyDeal } from "../../helpers/manufacturedFunSeed.js";
 import { logEvent } from "../../helpers/stateUtils.js";
 
@@ -46,7 +45,7 @@ const pickKingdomAdvantageCard: MoveDefinition = {
       }
       G.cardDecks.legacyDeck = remainder;
       for (const msg of legacyLog) logEvent(G, msg, { debug: true });
-      setStage(G, "setup", "legacy_card");
+      G.step = "legacy_card";
       // Reset passed flags for legacy picking
       Object.values(G.playerInfo).forEach((p: any) => { p.passed = false; });
       events.endTurn({ next: Object.keys(G.playerInfo)[0] });

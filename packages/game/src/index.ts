@@ -14,11 +14,10 @@ export * from "./helpers/kaCardDefinitions.js";
 
 export * from "./helpers/legacyCardRegistry.js";
 
-export { setStage, isStage } from "./helpers/stageUtils.js";
-
 export * from "./types.js";
 
 export * from "./data/gameData.js"
+export * from "./data/resolutionSequence.js";
 
 export { MOVE_DEFINITIONS } from "./moveDefinitions.js";
 export * from "./helpers/actionCosts.js";

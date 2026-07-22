@@ -1,6 +1,5 @@
 import { MoveDefinition } from "../../types.js";
 import { removeVPAmount } from "../../helpers/stateUtils.js";
-import { setStage } from "../../helpers/stageUtils.js";
 import { clonePlayerInfo } from "../../helpers/cloneUtils.js";
 
 const attackOtherPlayersFleet: MoveDefinition = {
@@ -65,7 +64,7 @@ const attackOtherPlayersFleet: MoveDefinition = {
       defender: { decision: "undecided", ...clonePlayerInfo(G.playerInfo[defenderID]) },
     };
     events.endTurn({ next: defenderID });
-    setStage(G, "resolution", "aerial_attack_or_evade");
+    G.step = "aerial_attack_or_evade";
   },
   errorMessage: "Cannot attack this fleet",
   successLog: (G, pid, defenderID) => {

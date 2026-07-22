@@ -71,18 +71,9 @@ import respondToInfidelFleet from "./moves/events/respondToInfidelFleet.js";
 import commitDeferredBattleCard from "./moves/events/commitDeferredBattleCard.js";
 import acknowledgeRoundSummary from "./moves/reset/acknowledgeRoundSummary.js";
 
-const RESOLUTION_GUARD = (G: MyGameState) => {
-  if (G.stage.phase !== "resolution") {
-    return { code: "WRONG_PHASE", message: "Can only use this move during Resolution" };
-  }
-  return null;
-};
-
-import { MyGameState } from "./types.js";
-
 const AERIAL_FOW_GUARD: MoveDefinition["validate"] = (G, playerID) => {
   if (!G.battleState) return { code: "NO_BATTLE", message: "No active battle" };
-  const sub = G.stage.sub;
+  const sub = G.step;
   if (sub !== "aerial_resolve") return { code: "WRONG_STAGE", message: "Cannot pick/draw FoW card in this stage" };
   const battler = Object.values(G.battleState).find((b) => b.id === playerID);
   if (!battler) return { code: "NOT_IN_BATTLE", message: "You are not in this battle" };
@@ -91,7 +82,7 @@ const AERIAL_FOW_GUARD: MoveDefinition["validate"] = (G, playerID) => {
 
 const CONQUEST_FOW_GUARD: MoveDefinition["validate"] = (G, playerID) => {
   if (!G.conquestState) return { code: "NO_CONQUEST", message: "No active conquest" };
-  const sub = G.stage.sub;
+  const sub = G.step;
   if (sub !== "conquest_draw_or_pick") return { code: "WRONG_STAGE", message: "Cannot pick/draw conquest FoW card in this stage" };
   if (G.conquestState.id !== playerID) return { code: "NOT_CONQUEROR", message: "You are not the conquering player" };
   return null;
@@ -136,7 +127,7 @@ export const MOVE_DEFINITIONS: Record<string, MoveDefinition> = {
 
   discoverTile,
   attackOtherPlayersFleet,
-  doNotAttack: { ...doNotAttack, validate: RESOLUTION_GUARD },
+  doNotAttack,
   retaliate,
   evadeAttackingFleet,
   drawCard: { ...drawCard, validate: AERIAL_FOW_GUARD },
@@ -160,7 +151,7 @@ export const MOVE_DEFINITIONS: Record<string, MoveDefinition> = {
   plunder,
   doNotPlunder,
   attackPlayersBuilding,
-  doNotGroundAttack: { ...doNotGroundAttack, validate: RESOLUTION_GUARD },
+  doNotGroundAttack,
   defendGroundAttack,
   garrisonTroops,
   yieldToAttacker,
@@ -168,7 +159,7 @@ export const MOVE_DEFINITIONS: Record<string, MoveDefinition> = {
   constructOutpost: {
     ...constructOutpost,
     validate: (G, playerID) => {
-      const sub = G.stage.sub;
+      const sub = G.step;
       if (sub !== "conquest") return { code: "WRONG_STAGE", message: "Can only construct an outpost during conquest" };
       const [x, y] = G.mapState.currentBattle;
       const building = G.mapState.buildings[y]?.[x];

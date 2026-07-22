@@ -130,7 +130,7 @@ describe("invasionFlow — Archprelate nominates Captain-General", () => {
     callNominate(G, "0", "1", ["0", "1"]);
 
     expect(G.currentInvasion?.phase).toBe("contribute");
-    expect(G.stage).toEqual({ phase: "resolution", sub: "invasion_contribute" });
+    expect(G.step).toBe("invasion_contribute");
   });
 
   it("returns INVALID_MOVE if the player is not the Archprelate", () => {

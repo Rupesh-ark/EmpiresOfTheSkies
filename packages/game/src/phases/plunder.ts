@@ -8,7 +8,7 @@ import { wrapSet } from "../helpers/wrapSet.js";
 const phaseLog = log.child({ mod: "phase" });
 
 const firstFleetOwnerPosition = (G: MyGameState): number => {
-  if (G.stage.sub !== "plunder_legends") return 0;
+  if (G.step !== "plunder_legends") return 0;
   const [x, y] = G.mapState.currentBattle;
   const owner = G.mapState.battleMap[y]?.[x]?.[0];
   const position = owner === undefined ? -1 : G.turnOrder.indexOf(owner);

@@ -361,7 +361,7 @@ export function evaluateResolution(
 ): { viable: MoveEval[]; filtered: MoveEval[] } {
   const viable: MoveEval[] = [];
   const filtered: MoveEval[] = [];
-  const sub = G.stage.sub;
+  const sub = G.step;
 
   for (const move of moves) {
     let result: MoveEval;

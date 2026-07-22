@@ -13,3 +13,18 @@ export const RESOLUTION_SEQUENCE = [
   "invasionCheck",
   "retrieveFleets",
 ] as const;
+
+export type PhaseGroup =
+  | "setup"
+  | "events"
+  | "discovery"
+  | "taxes"
+  | "actions"
+  | "resolution"
+  | "scoring"
+  | "reset";
+
+export const phaseGroup = (phase: string): PhaseGroup =>
+  (RESOLUTION_SEQUENCE as readonly string[]).includes(phase)
+    ? "resolution"
+    : phase as PhaseGroup;

@@ -10,7 +10,7 @@ const yieldToAttacker: MoveDefinition = {
     if (G.battleState.defender?.id !== playerID) {
       return { code: "NOT_DEFENDER", message: "Only the defender can yield" };
     }
-    const sub = G.stage.sub;
+    const sub = G.step;
     if (sub !== "ground_defend_or_yield") {
       return { code: "WRONG_STAGE", message: "Cannot yield in this stage" };
     }

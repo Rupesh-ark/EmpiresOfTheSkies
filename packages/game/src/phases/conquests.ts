@@ -8,7 +8,7 @@ import { wrapSet } from "../helpers/wrapSet.js";
 const phaseLog = log.child({ mod: "phase" });
 
 const firstFleetOwnerPosition = (G: MyGameState): number => {
-  if (G.stage.sub !== "conquest") return 0;
+  if (G.step !== "conquest") return 0;
   const [x, y] = G.mapState.currentBattle;
   const owner = G.mapState.battleMap[y]?.[x]?.[0];
   const position = owner === undefined ? -1 : G.turnOrder.indexOf(owner);
@@ -38,7 +38,7 @@ export const conquestsPhase: PhaseConfig<MyGameState> = {
       next: ({ ctx }) => (ctx.playOrderPos + 1) % ctx.playOrder.length,
     },
     onBegin: (context) => {
-      if (context.G.stage.sub === "conquest") return;
+      if (context.G.step === "conquest") return;
       checkIfCurrentPlayerIsInCurrentBattle(
         context.G,
         context.ctx,

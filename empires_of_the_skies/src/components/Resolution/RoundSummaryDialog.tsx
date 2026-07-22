@@ -2,7 +2,7 @@ import { useState } from "react";
 import { List, ListItem, ListItemText, ListItemIcon, Divider, Typography } from "@mui/material";
 import { Gavel, AttachMoney, Shield, HowToVote, Warning } from "@mui/icons-material";
 import { GiTrumpetFlag, GiTwoCoins } from "react-icons/gi";
-import { MyGameProps, EVENT_CARD_DEFS, isStage } from "@eots/game";
+import { MyGameProps, EVENT_CARD_DEFS, phaseGroup } from "@eots/game";
 import { DialogShell } from "@/components/atoms/DialogShell";
 import { DIALOG_PRIORITY } from "@/components/atoms/DialogQueue";
 import React from "react";
@@ -11,7 +11,7 @@ const RoundSummaryDialog = (props: MyGameProps) => {
   const [spectatorClosedRound, setSpectatorClosedRound] = useState<number | null>(null);
   const currentRound = props.G.round;
   const roundSummaryAck = props.G.roundSummaryAck ?? [];
-  const isGateOpen = isStage(props.G, "reset", "round_summary");
+  const isGateOpen = phaseGroup(props.ctx.phase!) === "reset" && props.G.step === "round_summary";
   const isSpectator = !props.playerID;
   const localPlayerAcked = !!props.playerID && roundSummaryAck.includes(props.playerID);
   const pendingAckIDs = props.ctx.playOrder.filter((id) => !roundSummaryAck.includes(id));

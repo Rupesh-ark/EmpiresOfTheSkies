@@ -251,10 +251,10 @@ export const checkIfCurrentPlayerIsInCurrentBattle = (
   if (G.mapState.battleMap[y][x].length > 0) {
     // Battle sub-stage routing
     // Each sub-stage has a specific player who should act. Route to them.
-    // Uses ctx.phase to disambiguate shared G.stage values, and
+    // Uses ctx.phase to disambiguate shared G.step values, and
     // G.battleState to identify attacker/defender/victor.
     const bs = G.battleState;
-    const sub = G.stage.sub;
+    const sub = G.step;
     const isBattleStage = sub === "aerial_attack_or_pass" || sub === "aerial_attack_or_evade"
       || sub === "aerial_resolve" || sub === "ground_attack_or_pass"
       || sub === "ground_defend_or_yield" || sub === "ground_resolve"
@@ -262,7 +262,7 @@ export const checkIfCurrentPlayerIsInCurrentBattle = (
     if (bs && isBattleStage) {
       let target: string | undefined;
 
-      switch (G.stage.sub) {
+      switch (G.step) {
         case "aerial_attack_or_pass":
         case "ground_attack_or_pass":
           // Normal turn order — attacker picks target or passes

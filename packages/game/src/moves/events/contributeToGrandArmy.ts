@@ -1,7 +1,6 @@
 import { INVALID_MOVE } from "boardgame.io/core";
 import { MoveDefinition } from "../../types.js";
 import { logEvent } from "../../helpers/stateUtils.js";
-import { setStage } from "../../helpers/stageUtils.js";
 import { resolveGrandArmyBattle } from "../../helpers/resolveInvasion.js";
 
 const contributeToGrandArmy: MoveDefinition = {
@@ -55,7 +54,7 @@ const contributeToGrandArmy: MoveDefinition = {
         G.currentInvasion.phase = "buyoff";
         G.currentInvasion.buyoffCost = buyoffCost;
         G.currentInvasion.buyoffOffered = {};
-        setStage(G, "resolution", "invasion_buyoff");
+        G.step = "invasion_buyoff";
         events.endTurn({ next: ctx.playOrder[0] });
       } else {
         // Army won — proceed to retrieve fleets

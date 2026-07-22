@@ -1,7 +1,6 @@
 /** Shared handoffs for interactive resolution work. */
 
 import { MyGameState } from "../types.js";
-import { setStage } from "./stageUtils.js";
 import { setupNextRebellion } from "./resolveRebellion.js";
 import { getDeferredBattleDescription } from "./resolveDeferredBattles.js";
 import { checkForInvasion, getArchprelateForNomination } from "./resolveInvasion.js";
@@ -11,7 +10,7 @@ import type { EventsAPI } from "../types.js";
  * Set up the next non-rebellion deferred battle for interactive resolution.
  * If one exists, transitions to deferred_battle stage and pauses.
  *
- * @param skipEndTurn — if true, sets G.stage but does NOT call endTurn.
+ * @param skipEndTurn — if true, sets G.step but does NOT call endTurn.
  *   Used when called from phase onBegin where endTurn is silently discarded
  *   by boardgame.io (see docs/BOARDGAMEIO_ENDTURN_ONBEGIN.md).
  *   The turn.onBegin hook handles redirection via getResolutionTarget().
@@ -32,7 +31,7 @@ export const setupNextDeferredBattle = (
       event,
       description: getDeferredBattleDescription(G, event),
     };
-    setStage(G, "resolution", "deferred_battle");
+    G.step = "deferred_battle";
     if (!skipEndTurn) events.endTurn({ next: event.targetPlayerID });
     return true;
   }
@@ -46,7 +45,7 @@ export const nextAfterRebellion = (
   events: EventsAPI
 ): void => {
   if (setupNextRebellion(G)) {
-    setStage(G, "resolution", "rebellion");
+    G.step = "rebellion";
     events.endTurn({ next: G.currentRebellion!.event.targetPlayerID });
     return;
   }
@@ -62,7 +61,7 @@ export const nextAfterRebellion = (
  * Returns the target playerID, or null if normal turn order is fine.
  */
 export const getResolutionTarget = (G: MyGameState): string | null => {
-  switch (G.stage.sub) {
+  switch (G.step) {
     case "infidel_fleet_combat":
       return G.infidelFleetCombat?.targetPlayerID ?? null;
 
@@ -89,7 +88,7 @@ export const runInvasionCheck = (
   if (checkForInvasion(G)) {
     const archprelate = getArchprelateForNomination(G);
     if (archprelate) {
-      setStage(G, "resolution", "invasion_nominate");
+      G.step = "invasion_nominate";
       if (!skipEndTurn) events.endTurn({ next: archprelate });
       return;
     }

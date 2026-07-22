@@ -6,7 +6,7 @@ import { clearMoves } from "@/utils/gameHelpers";
 import { tokens } from "@/theme";
 
 const ConfirmDrawDialog = (props: MyGameProps) => {
-  const isOpen = props.G.stage.sub === "confirm_fow_draw" && props.ctx.currentPlayer === props.playerID;
+  const isOpen = props.G.step === "confirm_fow_draw" && props.ctx.currentPlayer === props.playerID;
 
   return (
     <DecisionPanel

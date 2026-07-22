@@ -12,7 +12,7 @@ const PlunderLegendsDialog = (props: MyGameProps) => {
       open={
         open &&
         props.playerID === props.ctx.currentPlayer &&
-        props.G.stage.sub === "plunder_legends"
+        props.G.step === "plunder_legends"
       }
       title="Would you like to plunder this legend?"
       subtitle={`${getLocationPresentation(props.G.mapState.currentTileArray, props.G.mapState.currentBattle).name} — highlighted on the map`}

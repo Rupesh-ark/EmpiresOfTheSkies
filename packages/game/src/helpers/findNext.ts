@@ -1,7 +1,6 @@
 import { MyGameState } from "../types.js";
 import { sortPlayersInPlayerOrder } from "./helpers.js";
 import type { EventsAPI } from "../types.js";
-import { setStage } from "./stageUtils.js";
 
 const computeDefendersAtBattle = (G: MyGameState, nextPlayer: string): void => {
   const [x, y] = G.mapState.currentBattle;
@@ -29,7 +28,7 @@ export const findNextBattle = (
         const nextPlayer = sortPlayersInPlayerOrder(playerIDs, G)[0];
         G.mapState.currentBattle = [x, y];
         G.battleState = undefined;
-        setStage(G, "resolution", "aerial_attack_or_pass");
+        G.step = "aerial_attack_or_pass";
         computeDefendersAtBattle(G, nextPlayer);
         if (!skipEndTurn) events.endTurn({ next: nextPlayer });
         return;
@@ -63,7 +62,7 @@ export const findNextPlunder = (
       ) {
         const nextPlayer = G.mapState.battleMap[y][x][0];
         G.mapState.currentBattle = [x, y];
-        setStage(G, "resolution", "plunder_legends");
+        G.step = "plunder_legends";
         if (!skipEndTurn) events.endTurn({ next: nextPlayer });
         return;
       }
@@ -97,7 +96,7 @@ export const findNextGroundBattle = (
       ) {
         const nextPlayer = G.mapState.battleMap[y][x][0];
         G.mapState.currentBattle = [x, y];
-        setStage(G, "resolution", "ground_attack_or_pass");
+        G.step = "ground_attack_or_pass";
         computeDefendersAtBattle(G, nextPlayer);
         if (!skipEndTurn) events.endTurn({ next: nextPlayer });
         return;
@@ -136,7 +135,7 @@ export const findNextConquest = (
       ) {
         const nextPlayer = G.mapState.battleMap[y][x][0];
         G.mapState.currentBattle = [x, y];
-        setStage(G, "resolution", "conquest");
+        G.step = "conquest";
         if (!skipEndTurn) events.endTurn({ next: nextPlayer });
         return;
       }

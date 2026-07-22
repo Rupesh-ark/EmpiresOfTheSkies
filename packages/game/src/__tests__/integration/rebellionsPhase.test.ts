@@ -39,7 +39,7 @@ describe("rebellions phase", () => {
       card: "peasant_rebellion",
       targetPlayerID: "1",
     });
-    expect(G.stage).toEqual({ phase: "resolution", sub: "rebellion" });
+    expect(G.step).toBe("rebellion");
     expect(rebellionsPhase.turn!.order!.first({ G } as any)).toBe(2);
     expect(events.endPhase).not.toHaveBeenCalled();
   });
@@ -69,7 +69,7 @@ describe("ground battles deferred-event ordering", () => {
     } as any);
 
     expect(deferredG.currentDeferredBattle?.event.card).toBe("treacherous_creatures");
-    expect(deferredG.stage).toEqual({ phase: "resolution", sub: "deferred_battle" });
+    expect(deferredG.step).toBe("deferred_battle");
     expect(deferredG.mapState.currentBattle).toEqual([0, 0]);
     expect(groundBattlesPhase.turn!.order!.first({ G: deferredG } as any)).toBe(2);
 
@@ -84,6 +84,6 @@ describe("ground battles deferred-event ordering", () => {
 
     expect(mapG.currentDeferredBattle).toBeNull();
     expect(mapG.mapState.currentBattle).toEqual(TARGET);
-    expect(mapG.stage).toEqual({ phase: "resolution", sub: "ground_attack_or_pass" });
+    expect(mapG.step).toBe("ground_attack_or_pass");
   });
 });

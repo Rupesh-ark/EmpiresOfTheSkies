@@ -18,7 +18,7 @@ const GroundAttackOrPassDialog = (props: MyGameProps) => {
     props.ctx.currentPlayer === props.playerID &&
     inCurrentBattle &&
     props.G.battleState === undefined &&
-    props.G.stage.sub === "ground_attack_or_pass";
+    props.G.step === "ground_attack_or_pass";
 
   return (
     <DecisionPanel

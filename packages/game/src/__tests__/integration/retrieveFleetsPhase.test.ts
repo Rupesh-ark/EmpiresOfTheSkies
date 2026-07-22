@@ -36,7 +36,7 @@ describe("retrieveFleets phase", () => {
     retrieveFleetsPhase.onBegin!({ G, ctx: buildCtx("0"), events } as any);
 
     expect(Object.values(G.playerInfo).map((player) => player.passed)).toEqual([false, false]);
-    expect(G.stage).toEqual({ phase: "resolution", sub: "retrieve_fleets" });
+    expect(G.step).toBe("retrieve_fleets");
     expect(endPhase).toHaveBeenCalledOnce();
   });
 

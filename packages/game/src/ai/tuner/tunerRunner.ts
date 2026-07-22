@@ -217,7 +217,7 @@ function runOneGame(): { vps: number[]; archetypes: string[] } | null {
     const G = finalState?.G as MyGameState | undefined;
     const ctx = finalState?.ctx;
     if (G && ctx) {
-      process.stderr.write(`[STALL] ${elapsedMs}ms iters=${iterations} R${G.round} phase=${ctx.phase} stage=${G.stage.phase}:${G.stage.sub} P${ctx.currentPlayer}\n`);
+      process.stderr.write(`[STALL] ${elapsedMs}ms iters=${iterations} R${G.round} phase=${ctx.phase}:${G.step} P${ctx.currentPlayer}\n`);
     }
     // Dump bounce/stall diagnostics from recorder
     const record = recorder.getRecord();

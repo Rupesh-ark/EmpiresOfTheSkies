@@ -1,6 +1,5 @@
 import { INVALID_MOVE } from "boardgame.io/core";
 import { MoveDefinition } from "../../types.js";
-import { setStage } from "../../helpers/stageUtils.js";
 import { logEvent } from "../../helpers/stateUtils.js";
 import { humanizeTileName } from "../../helpers/helpers.js";
 
@@ -27,7 +26,7 @@ const coloniseLand: MoveDefinition = {
       decision: "fight",
       ...G.playerInfo[playerID],
     };
-    setStage(G, "resolution", "conquest_draw_or_pick");
+    G.step = "conquest_draw_or_pick";
   },
   errorMessage: "Cannot colonise this land",
   successLog: (G, pid) => {

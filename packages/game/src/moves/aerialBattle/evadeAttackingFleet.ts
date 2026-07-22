@@ -1,7 +1,6 @@
 import { MoveDefinition } from "../../types.js";
 import { findPossibleDestinations } from "../../helpers/helpers.js";
 import { forceRetrieveFleets } from "../../helpers/resolveBattle.js";
-import { setStage } from "../../helpers/stageUtils.js";
 import { nextAfterAerialDecision } from "../../helpers/resolutionSequencer.js";
 import { clonePlayerInfo } from "../../helpers/cloneUtils.js";
 import log from "../../helpers/logger.js";
@@ -14,7 +13,7 @@ const evadeAttackingFleet: MoveDefinition = {
     if (G.battleState.defender?.id !== playerID) {
       return { code: "NOT_DEFENDER", message: "Only the defender can evade" };
     }
-    const sub = G.stage.sub;
+    const sub = G.step;
     if (sub !== "aerial_attack_or_evade") {
       return { code: "WRONG_STAGE", message: "Cannot evade in this stage" };
     }
@@ -50,7 +49,7 @@ const evadeAttackingFleet: MoveDefinition = {
         forceRetrieveFleets(G, playerID, bx, by);
         nextAfterAerialDecision(G, ctx, events, attackerID);
       } else {
-        setStage(G, "resolution", "relocate_loser");
+        G.step = "relocate_loser";
         events.endTurn({ next: attackerID });
       }
     }

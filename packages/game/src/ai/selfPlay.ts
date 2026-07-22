@@ -111,7 +111,7 @@ function checkBounce(
   iterations: number
 ): void {
   const currentTurn = ctx.turn;
-  const currentPhase = `${ctx.phase}/${G.stage.phase}:${G.stage.sub}`;
+  const currentPhase = `${ctx.phase}:${G.step}`;
   const currentRound = G.round;
 
   // Track turn bounces
@@ -220,7 +220,7 @@ export function runGameLoop(
     const ctx = state.ctx;
     const G = state.G as MyGameState;
     const currentRound = G.round;
-    const currentPhase = `${ctx.phase}/${G.stage.phase}:${G.stage.sub}`;
+    const currentPhase = `${ctx.phase}:${G.step}`;
 
     // Round boundary
     if (currentRound !== lastRound) {
@@ -235,12 +235,12 @@ export function runGameLoop(
         phaseTiming[lastSub] = entry;
       }
       phaseStart = Date.now();
-      lastSub = `${G.stage.phase}:${G.stage.sub}`;
+      lastSub = `${ctx.phase}:${G.step}`;
       lastPhase = currentPhase;
     }
 
     // Track time per sub-stage
-    const currentSub = `${G.stage.phase}:${G.stage.sub}`;
+    const currentSub = `${ctx.phase}:${G.step}`;
     if (currentSub !== lastSub) {
       if (lastSub) {
         const entry = phaseTiming[lastSub] ?? { ms: 0, iters: 0 };
@@ -260,7 +260,7 @@ export function runGameLoop(
     checkBounce(recorder, bounceTracker, ctx, G, iterations);
 
     // Detect stalls: same phase/stage/turn/player repeating
-    const stateKey = `${ctx.phase}/${G.stage.phase}:${G.stage.sub}/t${ctx.turn}/P${ctx.currentPlayer}`;
+    const stateKey = `${ctx.phase}:${G.step}/t${ctx.turn}/P${ctx.currentPlayer}`;
     if (stateKey === lastStateKey) {
       staleCount++;
       if (staleCount === 5) {
@@ -273,7 +273,7 @@ export function runGameLoop(
           type: "stall",
           iteration: iterations,
           round: G.round,
-          phase: `${G.stage.phase}:${G.stage.sub}`,
+          phase: `${ctx.phase}:${G.step}`,
           playerID: ctx.currentPlayer,
           details: `STALL: ${stateKey} — proposed move: ${move ? `${move.move}(${JSON.stringify(move.args)})` : "NULL"}`,
         });
@@ -290,7 +290,7 @@ export function runGameLoop(
         type: "nan",
         iteration: iterations,
         round: G.round,
-        phase: `${G.stage.phase}:${G.stage.sub}`,
+        phase: `${ctx.phase}:${G.step}`,
         playerID: ctx.currentPlayer,
         details: nanCheck.detail,
       });
@@ -300,7 +300,7 @@ export function runGameLoop(
         type: "nan",
         iteration: iterations,
         round: G.round,
-        phase: `${G.stage.phase}:${G.stage.sub}`,
+        phase: `${ctx.phase}:${G.step}`,
         playerID: ctx.currentPlayer,
         details: "FLEET_NAN detected",
       });
@@ -340,7 +340,7 @@ export function runGameLoop(
             type: "nan",
             iteration: iterations,
             round: G.round,
-            phase: `${G.stage.phase}:${G.stage.sub}`,
+            phase: `${ctx.phase}:${G.step}`,
             playerID: currentPlayer,
             details: `FLEET_NAN_AFTER_MOVE: ${move.move}(${JSON.stringify(move.args)})`,
           });
@@ -350,7 +350,7 @@ export function runGameLoop(
           type: "skip",
           iteration: iterations,
           round: G.round,
-          phase: `${G.stage.phase}:${G.stage.sub}`,
+          phase: `${ctx.phase}:${G.step}`,
           playerID: currentPlayer,
           details: "No valid moves available",
         });
@@ -364,7 +364,7 @@ export function runGameLoop(
       if (s) {
         const diagG = s.G as MyGameState;
         const moveStr = lastMove ? `${lastMove.move}(${JSON.stringify(lastMove.args).slice(0, 60)})` : "null";
-        spLog.info({ iterations, round: diagG.round, phase: s.ctx.phase, stage: `${diagG.stage.phase}:${diagG.stage.sub}`, turn: s.ctx.turn, currentPlayer: s.ctx.currentPlayer, move: moveStr }, "diag");
+        spLog.info({ iterations, round: diagG.round, phase: `${s.ctx.phase}:${diagG.step}`, turn: s.ctx.turn, currentPlayer: s.ctx.currentPlayer, move: moveStr }, "diag");
       }
     }
 
@@ -376,12 +376,12 @@ export function runGameLoop(
         const botState = clients[pIdx]?.getState();
         const availableMoves = botState ? enumerateLegalMoves(botState.G as MyGameState, botState.ctx, s.ctx.currentPlayer) : [];
         const lastMove = botState ? bots[pIdx].chooseMove(botState.G as MyGameState, botState.ctx, s.ctx.currentPlayer) : null;
-        spLog.warn({ iterations, round: stuckG.round, phase: s.ctx.phase, stage: `${stuckG.stage.phase}:${stuckG.stage.sub}`, turn: s.ctx.turn, currentPlayer: s.ctx.currentPlayer, availableMoves: availableMoves.length, chosen: lastMove?.move ?? 'null' }, "stuck");
+        spLog.warn({ iterations, round: stuckG.round, phase: `${s.ctx.phase}:${stuckG.step}`, turn: s.ctx.turn, currentPlayer: s.ctx.currentPlayer, availableMoves: availableMoves.length, chosen: lastMove?.move ?? 'null' }, "stuck");
         recorder.addDiagnostic({
           type: "stall",
           iteration: iterations,
           round: stuckG.round,
-          phase: `${stuckG.stage.phase}:${stuckG.stage.sub}`,
+          phase: `${s.ctx.phase}:${stuckG.step}`,
           playerID: s.ctx.currentPlayer,
           details: `STUCK at iter ${iterations}: available=${availableMoves.length}, chosen=${lastMove?.move ?? 'null'}`,
         });

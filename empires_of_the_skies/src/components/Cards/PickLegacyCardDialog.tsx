@@ -19,7 +19,7 @@ const PickLegacyCardDialog = (props: MyGameProps) => {
   const [currentCard, setCurrentCard] = useState<LegacyCardInfo | undefined>(undefined);
 
   const isOpen =
-    props.G.stage.sub === "legacy_card" &&
+    props.G.step === "legacy_card" &&
     props.ctx.currentPlayer === props.playerID;
 
   const legacyOptions =

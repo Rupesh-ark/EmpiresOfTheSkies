@@ -16,7 +16,7 @@ const relocateDefeatedFleet: MoveDefinition = {
     if (!G.battleState) {
       return { code: "NO_BATTLE", message: "No active battle" };
     }
-    const sub = G.stage.sub;
+    const sub = G.step;
     if (sub !== "relocate_loser") {
       return { code: "WRONG_STAGE", message: "Cannot relocate fleet in this stage" };
     }

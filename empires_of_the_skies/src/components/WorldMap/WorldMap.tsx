@@ -3,7 +3,7 @@ import { ReactElement, useState, useEffect, useRef, useCallback } from "react";
 import { Box, Dialog, DialogActions, DialogContent, DialogTitle, Grid, Typography } from "@mui/material";
 import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { WorldMapTile } from "./WorldMapTile";
-import { MyGameProps, findPossibleDestinations } from "@eots/game";
+import { MyGameProps, findPossibleDestinations, phaseGroup } from "@eots/game";
 import { tokens } from "@/theme";
 import mapFogImg from "@/boards_and_assets/textures/map_fog.webp";
 import FleetIcon from "@/components/Icons/FleetIcon";
@@ -41,8 +41,8 @@ const clampScrollCenter = (
 const WorldMap = (props: WorldMapProps) => {
   const currentMap = props.G.mapState.currentTileArray;
   const battleCoords = props.G.mapState.currentBattle;
-  const isBattlePhase = props.G.stage.phase === "resolution" &&
-    BATTLE_RESOLUTION_SUBS.has(props.G.stage.sub);
+  const isBattlePhase = phaseGroup(props.ctx.phase!) === "resolution" &&
+    BATTLE_RESOLUTION_SUBS.has(props.G.step);
   const { showToast } = useToast();
   const mapSelection = useMapSelection();
 

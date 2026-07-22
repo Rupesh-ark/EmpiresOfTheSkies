@@ -34,7 +34,7 @@ describe("battle phase entry", () => {
     beginPhase(aerialBattlesPhase, G, events);
 
     expect(G.mapState.currentBattle).toEqual(TARGET);
-    expect(G.stage).toEqual({ phase: "resolution", sub: "aerial_attack_or_pass" });
+    expect(G.step).toBe("aerial_attack_or_pass");
     expect(G.possibleDefenders).toEqual(["1"]);
     expect(G.battleState).toBeUndefined();
     expect(events.endTurn).not.toHaveBeenCalled();
@@ -59,7 +59,7 @@ describe("battle phase entry", () => {
     beginPhase(plunderPhase, G, events);
 
     expect(G.mapState.currentBattle).toEqual(TARGET);
-    expect(G.stage).toEqual({ phase: "resolution", sub: "plunder_legends" });
+    expect(G.step).toBe("plunder_legends");
     expect(events.endTurn).not.toHaveBeenCalled();
     expect(events.endPhase).not.toHaveBeenCalled();
   });
@@ -83,7 +83,7 @@ describe("battle phase entry", () => {
     beginPhase(groundBattlesPhase, G, events);
 
     expect(G.mapState.currentBattle).toEqual(TARGET);
-    expect(G.stage).toEqual({ phase: "resolution", sub: "ground_attack_or_pass" });
+    expect(G.step).toBe("ground_attack_or_pass");
     expect(events.endTurn).not.toHaveBeenCalled();
     expect(events.endPhase).not.toHaveBeenCalled();
   });
@@ -106,7 +106,7 @@ describe("battle phase entry", () => {
     beginPhase(conquestsPhase, G, events);
 
     expect(G.mapState.currentBattle).toEqual(TARGET);
-    expect(G.stage).toEqual({ phase: "resolution", sub: "conquest" });
+    expect(G.step).toBe("conquest");
     expect(events.endTurn).not.toHaveBeenCalled();
     expect(events.endPhase).not.toHaveBeenCalled();
   });

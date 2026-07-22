@@ -176,7 +176,7 @@ export function buildInitialG(
   }
 
   return {
-    stage: { phase: "actions", sub: "default" },
+    step: "default",
     round: 1,
     finalRound: 6,
     firstTurnOfRound: true,

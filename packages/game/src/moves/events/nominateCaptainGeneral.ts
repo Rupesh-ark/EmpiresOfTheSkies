@@ -1,7 +1,6 @@
 import { INVALID_MOVE } from "boardgame.io/core";
 import { MoveDefinition } from "../../types.js";
 import { logEvent } from "../../helpers/stateUtils.js";
-import { setStage } from "../../helpers/stageUtils.js";
 
 const nominateCaptainGeneral: MoveDefinition = {
   fn: ({ G, ctx, playerID, events }, ...args) => {
@@ -30,7 +29,7 @@ const nominateCaptainGeneral: MoveDefinition = {
     }
     G.playerInfo[nomineeID].isCaptainGeneral = true;
     G.currentInvasion.phase = "contribute";
-    setStage(G, "resolution", "invasion_contribute");
+    G.step = "invasion_contribute";
 
     logEvent(
       G,

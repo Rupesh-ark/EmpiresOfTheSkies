@@ -1,7 +1,6 @@
 import { INVALID_MOVE } from "boardgame.io/core";
 import { MoveDefinition } from "../../types.js";
 import { logEvent } from "../../helpers/stateUtils.js";
-import { setStage } from "../../helpers/stageUtils.js";
 import {
   resolveRebellionWithTroopsAndRivals,
 } from "../../helpers/resolveRebellion.js";

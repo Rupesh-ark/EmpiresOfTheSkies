@@ -4,7 +4,7 @@ import { DecisionPanel } from "@/components/atoms/DecisionPanel";
 import { tokens } from "@/theme";
 
 const DiscardFoWCardDialog = (props: MyGameProps) => {
-  if (props.G.stage.sub !== "discard_fow" || props.ctx.currentPlayer !== props.playerID || !props.playerID) return null;
+  if (props.G.step !== "discard_fow" || props.ctx.currentPlayer !== props.playerID || !props.playerID) return null;
 
   const hand = props.G.playerInfo[props.playerID].resources.fortuneCards;
   const maxCards = 4;

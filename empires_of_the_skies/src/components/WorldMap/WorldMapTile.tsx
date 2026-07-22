@@ -4,7 +4,7 @@ import { keyframes } from "@emotion/react";
 import ReactCardFlip from "react-card-flip";
 import { useLongPress } from "use-long-press";
 import { useDroppable } from "@dnd-kit/core";
-import { MyGameProps } from "@eots/game";
+import { MyGameProps, phaseGroup } from "@eots/game";
 import { Box, Button, Dialog, DialogContent, DialogTitle, IconButton, Tooltip, Typography } from "@mui/material";
 import { Close } from "@mui/icons-material";
 import { ThemeProvider } from "@mui/material/styles";
@@ -155,6 +155,7 @@ const areTilePropsEqual = (
     prev.alternateOnClick !== next.alternateOnClick ||
     prev.moves !== next.moves ||
     prev.playerID !== next.playerID ||
+    prev.ctx.phase !== next.ctx.phase ||
     prev.ctx.currentPlayer !== next.ctx.currentPlayer
   )
     return false;
@@ -162,7 +163,6 @@ const areTilePropsEqual = (
   const pg = prev.G;
   const ng = next.G;
   if (
-    pg.stage.phase !== ng.stage.phase ||
     pg.mapState.currentTileArray !== ng.mapState.currentTileArray ||
     pg.mapState.discoveredTiles[y][x] !== ng.mapState.discoveredTiles[y][x] ||
     pg.mapState.buildings[y][x] !== ng.mapState.buildings[y][x] ||
@@ -235,7 +235,7 @@ export const WorldMapTile = memo((props: worldMapTileProps) => {
 
   const myPlayerID = props.playerID ?? props.ctx.currentPlayer;
   const myPlayerInfo = props.G.playerInfo[myPlayerID];
-  const isActionsPhase = props.G.stage.phase === "actions";
+  const isActionsPhase = phaseGroup(props.ctx.phase!) === "actions";
   const isMyTurn = props.ctx.currentPlayer === myPlayerID;
   const isHomeWaters = xLocation === 4 && yLocation === 0;
 

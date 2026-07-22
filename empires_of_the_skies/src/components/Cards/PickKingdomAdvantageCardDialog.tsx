@@ -9,7 +9,7 @@ const PickKingdomAdvantageCardDialog = (props: MyGameProps) => {
   const [selectedCard, setSelectedCard] = useState<KingdomAdvantageCard | undefined>(undefined);
 
   const isOpen =
-    props.G.stage.sub === "kingdom_advantage" &&
+    props.G.step === "kingdom_advantage" &&
     props.ctx.currentPlayer === props.playerID;
 
   const availableCards = props.G.cardDecks.kingdomAdvantagePool;

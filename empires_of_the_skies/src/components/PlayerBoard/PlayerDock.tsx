@@ -13,7 +13,7 @@ import { IconRegiment, IconLevy, IconSkyship } from "@/theme";
 import { GiAnchor } from "react-icons/gi";
 import {
   MyGameProps, KINGDOM_LOCATION, findPossibleDestinations, FleetInfo,
-  KA_CARD_DEFS, LEGACY_CARD_DEFS, EVENT_CARD_DEFS, PlayerFortuneOfWarCardInfo, EventCardName,
+  KA_CARD_DEFS, LEGACY_CARD_DEFS, EVENT_CARD_DEFS, PlayerFortuneOfWarCardInfo, EventCardName, phaseGroup,
 } from "@eots/game";
 import popeLogo from "@/boards_and_assets/action_board/pope_logo.webp";
 import captainGeneralLogo from "@/boards_and_assets/action_board/captain_general.webp";
@@ -54,7 +54,7 @@ export const PlayerDock = memo((props: PlayerDockProps) => {
   );
   const isMyActionsTurn =
     isSelf &&
-    props.G.stage.phase === "actions" &&
+    phaseGroup(props.ctx.phase!) === "actions" &&
     props.ctx.currentPlayer === props.playerID;
   const deployableFleetIds = isMyActionsTurn
     ? viewInfo.fleetInfo.filter((f) => f.skyships > 0 && !f.dispatchedThisRound).map((f) => f.fleetId)
@@ -820,7 +820,6 @@ const TileEmptyText = ({ children }: { children: React.ReactNode }) => (
     {children}
   </Typography>
 );
-
 
 
 

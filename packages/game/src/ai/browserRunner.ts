@@ -94,12 +94,12 @@ function hasNaNFleets(G: MyGameState): boolean {
 function checkBounce(
   recorder: GameRecorder,
   tracker: BounceTracker,
-  ctx: { turn: number; currentPlayer: string },
+  ctx: { phase: string; turn: number; currentPlayer: string },
   G: MyGameState,
   iterations: number
 ): void {
   const currentTurn = ctx.turn;
-  const currentPhase = `${G.stage.phase}:${G.stage.sub}`;
+  const currentPhase = `${ctx.phase}:${G.step}`;
   const currentRound = G.round;
 
   if (currentTurn !== tracker.lastTurn) {
@@ -296,7 +296,7 @@ export function runGameInBrowser(
     checkBounce(recorder, bounceTracker, ctx, G, iterations);
 
     // Stall detection: same key repeating
-    const stateKey = `${ctx.phase}/${G.stage.phase}:${G.stage.sub}/t${ctx.turn}/P${ctx.currentPlayer}`;
+    const stateKey = `${ctx.phase}:${G.step}/t${ctx.turn}/P${ctx.currentPlayer}`;
     if (stateKey === lastStateKey) {
       staleCount++;
       if (staleCount === 5) {
@@ -309,7 +309,7 @@ export function runGameInBrowser(
           type: "stall",
           iteration: iterations,
           round: G.round,
-          phase: `${G.stage.phase}:${G.stage.sub}`,
+          phase: `${ctx.phase}:${G.step}`,
           playerID: ctx.currentPlayer,
           details: `STALL: ${stateKey} — proposed move: ${move ? `${move.move}(${JSON.stringify(move.args)})` : "NULL"}`,
         });
@@ -325,7 +325,7 @@ export function runGameInBrowser(
         type: "nan",
         iteration: iterations,
         round: G.round,
-        phase: `${G.stage.phase}:${G.stage.sub}`,
+        phase: `${ctx.phase}:${G.step}`,
         playerID: ctx.currentPlayer,
         details: nanCheck.detail,
       });
@@ -335,7 +335,7 @@ export function runGameInBrowser(
         type: "nan",
         iteration: iterations,
         round: G.round,
-        phase: `${G.stage.phase}:${G.stage.sub}`,
+        phase: `${ctx.phase}:${G.step}`,
         playerID: ctx.currentPlayer,
         details: `FLEET_NAN detected`,
       });
@@ -346,7 +346,7 @@ export function runGameInBrowser(
       onProgress({
         iteration: iterations,
         round: G.round,
-        phase: `${G.stage.phase}:${G.stage.sub}`,
+        phase: `${ctx.phase}:${G.step}`,
         playerID: ctx.currentPlayer,
       });
     }
@@ -394,7 +394,7 @@ export function runGameInBrowser(
             type: "nan",
             iteration: iterations,
             round: G.round,
-            phase: `${G.stage.phase}:${G.stage.sub}`,
+            phase: `${ctx.phase}:${G.step}`,
             playerID: currentPlayer,
             details: `FLEET_NAN_AFTER_MOVE: ${move.move}(${JSON.stringify(move.args)})`,
           });
@@ -404,7 +404,7 @@ export function runGameInBrowser(
           type: "skip",
           iteration: iterations,
           round: G.round,
-          phase: `${G.stage.phase}:${G.stage.sub}`,
+          phase: `${ctx.phase}:${G.step}`,
           playerID: currentPlayer,
           details: `No valid moves available`,
         });
@@ -422,7 +422,7 @@ export function runGameInBrowser(
           type: "stall",
           iteration: iterations,
           round: gStuck.round,
-          phase: `${gStuck.stage.phase}:${gStuck.stage.sub}`,
+          phase: `${s.ctx.phase}:${gStuck.step}`,
           playerID: s.ctx.currentPlayer,
           details: `STUCK at iteration limit`,
         });

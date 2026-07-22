@@ -195,18 +195,18 @@ const GarrisonTroopsDialog = (props: MyGameProps) => {
 
   // Auto-skip if no troops to garrison
   if (
-    (props.G.stage.sub === "ground_garrison" || props.G.stage.sub === "conquest_garrison") &&
+    (props.G.step === "ground_garrison" || props.G.step === "conquest_garrison") &&
     props.ctx.currentPlayer === props.playerID &&
     !(
-      props.G.stage.sub === "ground_garrison" &&
+      props.G.step === "ground_garrison" &&
       inCurrentBattle &&
       props.G.battleState?.attacker.id === props.playerID &&
       props.G.battleState.attacker.victorious === true &&
       hasTroopsToGarrison
     ) &&
-    !(props.G.stage.sub === "conquest_garrison" && inCurrentBattle && hasTroopsToGarrison)
+    !(props.G.step === "conquest_garrison" && inCurrentBattle && hasTroopsToGarrison)
   ) {
-    props.G.stage.sub === "ground_garrison"
+    props.G.step === "ground_garrison"
       ? props.moves.doNotGroundAttack()
       : props.moves.doNothing();
   }
@@ -274,13 +274,13 @@ const GarrisonTroopsDialog = (props: MyGameProps) => {
 
   const isOpen =
     props.ctx.currentPlayer === props.playerID &&
-    (props.G.stage.sub === "ground_garrison" || props.G.stage.sub === "conquest_garrison") &&
-    ((props.G.stage.sub === "ground_garrison" &&
+    (props.G.step === "ground_garrison" || props.G.step === "conquest_garrison") &&
+    ((props.G.step === "ground_garrison" &&
       inCurrentBattle &&
       props.G.battleState?.attacker.id === props.playerID &&
       props.G.battleState.attacker.victorious === true &&
       hasTroopsToGarrison) ||
-      (props.G.stage.sub === "conquest_garrison" &&
+      (props.G.step === "conquest_garrison" &&
         inCurrentBattle &&
         hasTroopsToGarrison));
 
@@ -309,7 +309,7 @@ const GarrisonTroopsDialog = (props: MyGameProps) => {
       cancelLabel="Pass"
       cancelColor="error"
       onCancel={() => {
-        props.G.stage.sub === "ground_garrison"
+        props.G.step === "ground_garrison"
           ? props.moves.doNotGroundAttack()
           : props.moves.doNothing();
       }}

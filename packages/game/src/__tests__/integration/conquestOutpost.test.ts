@@ -39,7 +39,7 @@ function buildConquestG(): MyGameState {
     buildPlayer("1"),
   ]);
 
-  G.stage = { phase: "resolution", sub: "conquest" };
+  G.step = "conquest";
   G.mapState.currentBattle = [2, 2];
   G.mapState.discoveredTiles[2][2] = true;
   G.mapState.battleMap[2][2] = ["0"];
@@ -84,7 +84,7 @@ describe("conquest outpost — constructOutpost validation", () => {
     expect(result).not.toBe("INVALID_MOVE");
     expect(G.mapState.buildings[2][2].buildings).toBe("outpost");
     expect(G.mapState.buildings[2][2].player?.id).toBe("0");
-    expect(G.stage).toEqual({ phase: "resolution", sub: "conquest_garrison" });
+    expect(G.step).toBe("conquest_garrison");
   });
 
   it("fails when another player already owns the tile", () => {
@@ -117,7 +117,7 @@ describe("conquest outpost — constructOutpost validation", () => {
 
     // Reset state to claim the original target [2,2] in a separate conquest step.
     G.mapState.currentBattle = [2, 2];
-    G.stage = { phase: "resolution", sub: "conquest" };
+    G.step = "conquest";
     G.playerInfo["0"].turnComplete = false;
 
     const secondClaim = callMoveDef(MOVE_DEFINITIONS.constructOutpost, G, "0");

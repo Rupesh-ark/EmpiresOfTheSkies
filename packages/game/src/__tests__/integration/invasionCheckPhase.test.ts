@@ -21,7 +21,7 @@ describe("election phase", () => {
     expect(G.electionResults).toEqual({});
     expect(G.hasVoted).toEqual([]);
     expect(G.voteSubmitted).toEqual({});
-    expect(G.stage).toEqual({ phase: "resolution", sub: "election" });
+    expect(G.step).toBe("election");
   });
 });
 
@@ -54,7 +54,7 @@ describe("invasion-check phase", () => {
     },
   ])("starts $sub with the expected actor", ({ sub, expected, setup }) => {
     const G = buildThreePlayerG();
-    G.stage = { phase: "resolution", sub };
+    G.step = sub;
     setup(G);
 
     expect(firstPlayerPosition(G)).toBe(expected);

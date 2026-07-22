@@ -9,7 +9,7 @@
  */
 import { useState } from "react";
 import { Box, Tooltip, Typography } from "@mui/material";
-import { MyGameProps, GAME_PHASES, PlayerInfo } from "@eots/game";
+import { MyGameProps, GAME_PHASES, PlayerInfo, phaseGroup } from "@eots/game";
 import { tokens, backgrounds } from "@/theme";
 import { IconCounsellor, IconGold, IconVP } from "@/theme";
 import { GameButton } from "@/components/atoms/GameButton";
@@ -43,7 +43,7 @@ export const PromptBar = (props: MyGameProps) => {
 
   if (!props.playerID) {
     // Spectator: still show what the table is waiting on.
-    const phase = GAME_PHASES.find((p) => p.key === props.G.stage.phase);
+    const phase = GAME_PHASES.find((p) => p.key === phaseGroup(props.ctx.phase!));
     return (
       <Bar>
         <PromptText muted>{phase?.hint ?? "Watching the match"}</PromptText>
@@ -53,15 +53,15 @@ export const PromptBar = (props: MyGameProps) => {
 
   const playerInfo = props.G.playerInfo[props.playerID];
   const isMyTurn = props.ctx.currentPlayer === props.playerID;
-  const phase = GAME_PHASES.find((p) => p.key === props.G.stage.phase);
+  const phase = GAME_PHASES.find((p) => p.key === phaseGroup(props.ctx.phase!));
   const phaseHint = phase?.hint ?? "";
-  const isActions = props.G.stage.phase === "actions";
+  const isActions = phaseGroup(props.ctx.phase!) === "actions";
   const resources = <ResourceCluster playerInfo={playerInfo} showActions={isActions} />;
 
   const turnComplete = playerInfo.turnComplete;
   const showConfirmEndTurn = turnComplete && isActions && isMyTurn;
   const showPassButton =
-    isMyTurn && (props.G.stage.phase === "discovery" || isActions);
+    isMyTurn && (phaseGroup(props.ctx.phase!) === "discovery" || isActions);
   const showClear = isMyTurn && (props.ctx.numMoves ?? 0) > 0 && isActions;
   const remaining = getAvailableActions(playerInfo);
 

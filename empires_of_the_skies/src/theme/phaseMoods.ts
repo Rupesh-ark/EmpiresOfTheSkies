@@ -1,5 +1,5 @@
 import { tokens } from "./tokens";
-import type { GameStage } from "@eots/game";
+import type { GameStep, PhaseGroup } from "@eots/game";
 
 export type GameMood = "peacetime" | "battle" | "election" | "discovery" | "crisis";
 
@@ -26,7 +26,7 @@ const SUB_MOOD_OVERRIDES: Record<string, GameMood> = {
   retrieve_fleets:        "peacetime",
 };
 
-export const getMood = (stage: GameStage): GameMood =>
-  SUB_MOOD_OVERRIDES[stage.sub] ?? PHASE_TO_MOOD[stage.phase] ?? "peacetime";
+export const getMood = (group: PhaseGroup, step: GameStep): GameMood =>
+  SUB_MOOD_OVERRIDES[step] ?? PHASE_TO_MOOD[group] ?? "peacetime";
 
 export const getMoodTokens = (mood: GameMood) => tokens.mood[mood];

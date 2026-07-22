@@ -35,7 +35,7 @@ const AttackOrPassDiaLog = (props: AerialBattleDialogProps) => {
     props.ctx.currentPlayer === props.playerID &&
     inCurrentBattle &&
     props.G.battleState === undefined &&
-    props.G.stage.sub === "aerial_attack_or_pass";
+    props.G.step === "aerial_attack_or_pass";
 
   return (
     <DecisionPanel
