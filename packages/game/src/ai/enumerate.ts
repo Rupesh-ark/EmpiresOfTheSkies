@@ -494,7 +494,9 @@ export function enumerateLegalMoves(G: MyGameState, ctx: Ctx, playerID: string):
       return moves;
     }
 
-    case "resolution": {
+    case "resolution":
+    case "election":
+    case "postElection": {
       const moves: AIMove[] = [];
 
       if (isStage(G, "resolution", "aerial_attack_or_pass")) {

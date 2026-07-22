@@ -1,7 +1,6 @@
 import { INVALID_MOVE } from "boardgame.io/core";
 import { MoveDefinition, MyGameState } from "../../types.js";
 import { HERESY_MIN, logEvent } from "../../helpers/stateUtils.js";
-import { advanceFromElection } from "../../helpers/resolutionFlow.js";
 import { countOrthodoxRealms } from "../../helpers/helpers.js";
 
 const kingdomToNumberMap: Record<string, number> = {
@@ -179,8 +178,8 @@ const vote: MoveDefinition = {
         }
       });
 
-      // Election complete — advance to post-election (infidel fleet, deferred, rebellion, invasion, retrieve)
-      advanceFromElection(G, events);
+      // Election complete — advance to the post-election phase
+      events.endPhase();
     } else {
       // Sequential voting — advance to next player
       events.endTurn();

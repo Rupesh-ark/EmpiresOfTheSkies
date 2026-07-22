@@ -1,20 +1,15 @@
 /**
  * quietRoundResolution.test.ts (integration)
  *
- * Regression for the 2026-07-21 production soft-lock: a round whose
+ * Guards the fix for the 2026-07-21 production soft-lock: a round whose
  * resolution phase finds NO interactive work before the election (no aerial
- * battles, no plunder, no ground battles, no conquests) must still reach the
- * election. Under beta.4, the walker's unguarded endTurn inside
- * resolution.onBegin invalidates the triggering action, rolling the game
- * back to end-of-actions — permanently, since every retry repeats the cycle.
+ * battles, no plunder, no ground battles, no conquests) must reach the
+ * election and complete the round loop.
  *
  * Unlike the other integration tests, this one runs the REAL boardgame.io
  * pipeline (Local() clients): the events-plugin legality contract IS the
  * thing under test, so stubbed events would prove nothing.
  *
- * Marked it.fails while the bug exists. When the resolution redesign fixes
- * phase entry, vitest will flag this test as "expected to fail but passed" —
- * flip it to a plain it() then.
  */
 
 import { describe, it, expect } from "vitest";
@@ -27,7 +22,7 @@ import type { AIMove } from "../../ai/types.js";
 import type { Ctx } from "boardgame.io";
 
 const NUM_PLAYERS = 3;
-const MAX_ITERATIONS = 1500;
+const MAX_ITERATIONS = 3000;
 const STALL_LIMIT = 60;
 
 /**
@@ -46,7 +41,7 @@ function choosePacifistMove(G: MyGameState, ctx: Ctx, playerID: string): AIMove 
 }
 
 describe("quiet round — resolution with no combat work", () => {
-  it.fails("enters the election when no battles/plunders/conquests exist", () => {
+  it("enters the election and completes the round loop with no combat work", () => {
     // One shared game object: Local() keys its in-memory master by game
     // object identity — per-client spreads would create 3 separate games.
     const game = { ...MyGame, seed: "quiet-round-regression" } as typeof MyGame;
@@ -61,9 +56,12 @@ describe("quiet round — resolution with no combat work", () => {
     clients.forEach((c) => c.start());
 
     let reachedElection = false;
+    let reachedRoundTwoEvents = false;
     let lastStateKey = "";
     let staleCount = 0;
     let lastSeen = "";
+    let lastRound = 0;
+    let lastPhase = "";
 
     try {
       for (let i = 0; i < MAX_ITERATIONS; i++) {
@@ -72,10 +70,15 @@ describe("quiet round — resolution with no combat work", () => {
 
         const G = state.G as MyGameState;
         const ctx = state.ctx;
+        lastRound = G.round;
+        lastPhase = ctx.phase ?? "";
         lastSeen = `${ctx.phase}/${G.stage.phase}:${G.stage.sub}/t${ctx.turn}/P${ctx.currentPlayer}`;
 
         if (G.stage.phase === "resolution" && G.stage.sub === "election") {
           reachedElection = true;
+        }
+        if (G.round === 2 && ctx.phase === "events") {
+          reachedRoundTwoEvents = true;
           break;
         }
 
@@ -106,5 +109,9 @@ describe("quiet round — resolution with no combat work", () => {
     }
 
     expect(reachedElection, `never reached election; stuck at ${lastSeen}`).toBe(true);
+    expect(
+      { reachedRoundTwoEvents, round: lastRound, phase: lastPhase },
+      `did not complete the round loop; stuck at ${lastSeen}`
+    ).toEqual({ reachedRoundTwoEvents: true, round: 2, phase: "events" });
   });
 });

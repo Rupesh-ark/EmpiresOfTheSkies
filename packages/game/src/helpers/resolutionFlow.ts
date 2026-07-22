@@ -175,18 +175,9 @@ export const advanceFromGround = (G: MyGameState, events: EventsAPI): void => {
   findNextConquest(G, events, advanceFromConquest);
 };
 
-/** Called when conquests are exhausted → enter election */
+/** Called when conquests are exhausted → finish resolution */
 export const advanceFromConquest = (G: MyGameState, events: EventsAPI): void => {
-  enterElection(G, events);
-};
-
-/** Set up sequential election — each player votes in turn order */
-export const enterElection = (G: MyGameState, events: EventsAPI): void => {
-  G.electionResults = {};
-  G.hasVoted = [];
-  G.voteSubmitted = {};
-  setStage(G, "resolution", "election");
-  events.endTurn({ next: G.turnOrder[0] });
+  events.endPhase();
 };
 
 /**

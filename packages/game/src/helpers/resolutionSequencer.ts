@@ -11,10 +11,7 @@ import {
   findNextGroundBattle,
   findNextConquest,
 } from "./findNext.js";
-import {
-  enterElection,
-  advanceFromElection,
-} from "./resolutionFlow.js";
+import { advanceFromElection } from "./resolutionFlow.js";
 
 export { beginResolution } from "./resolutionFlow.js";
 
@@ -34,7 +31,7 @@ const toConquest = (G: MyGameState, events: EventsAPI): void => {
 };
 
 const toElection = (G: MyGameState, events: EventsAPI): void => {
-  enterElection(G, events);
+  events.endPhase();
 };
 
 function computeDefendersAtBattle(G: MyGameState, nextPlayer: string): void {
