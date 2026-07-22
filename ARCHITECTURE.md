@@ -107,34 +107,54 @@ Creates the initial `MyGameState` (`G`):
 
 ### Phase Sequence
 
-Each round cycles through these phases in order:
+The engine's phase chain mirrors the rulebook exactly — one boardgame.io phase per
+rulebook step. A round is 18 phases:
 
 ```
-setup → events → discovery → taxes → actions → resolution → reset → events → ...
+setup (once) → events → discovery → taxes → actions
+  → rebellions → aerialBattles → plunder → groundBattles → conquests   ┐
+  → trade → sellGoods → piracy → factoryIncome                         │ "Resolution"
+  → election → invasionCheck → retrieveFleets                          ┘ (umbrella)
+  → scoring → reset → events → ...
 ```
 
-(Setup only runs once. After that it loops events → ... → reset → events.)
+The twelve phases bracketed above are the rulebook's Phase 5 ("Resolution
+Sequence") and are grouped under one "Resolution" label in the UI via
+`phaseGroup(ctx.phase)`. The ordered list lives in `data/resolutionSequence.ts`,
+and `__tests__/integration/rulebookOrder.test.ts` asserts the engine chain
+matches it — rulebook drift is a test failure, not a code review hope.
 
-Each phase is defined with:
-- `onBegin` — initialization logic when entering the phase
-- `moves` — which moves are legal during this phase
-- `turn` — turn order, auto-pass logic, move limits
-- `next` — which phase comes after
-- `onEnd` — cleanup when leaving
+Each phase is defined in `src/phases/` (one file each, plus the inline
+setup/events/discovery/taxes/actions/reset definitions in `Game.ts`) with:
+- `onBegin` — scan for this phase's work; if none, `events.endPhase()` (empty
+  phases self-skip; automatic phases like taxes/trade/scoring do their work
+  here and always end)
+- `turn.order.first` — computes who acts from `G` (the sanctioned mechanism for
+  phase-entry routing; `endTurn` is illegal inside `onBegin`)
+- `moves` — the framework-enforced legal move set for the phase
+- `next` — the following phase
 
 **Key phases:**
 
-**events** — Each player picks an event card. Some events need interactive resolution (elections, rebellions). Turn order follows `G.turnOrder`.
+**events** — Each player picks an event card. Battle-flavored events queue
+deferred work that the rebellions/groundBattles phases consume later.
 
-**discovery** — Players flip undiscovered tiles on the map or pass. Once everyone passes, the phase ends.
+**discovery** — Players flip undiscovered tiles or pass. Ends when all pass.
 
-**taxes** — Automatic. Calculates gold income from colonies, trade, buildings, and applies modifiers. No player interaction.
+**actions** — The main phase. Players alternate placing counsellors on the
+shared action board: deploy fleets, found buildings, recruit, influence
+prelates, deals, etc. Ends when everyone passes.
 
-**actions** — The main phase. Players take turns placing counsellors on the shared action board to do things: deploy fleets, found buildings, recruit troops, buy skyships, influence prelates, propose deals, etc. ~60 moves are available. Ends when everyone passes (no counsellors left).
+**rebellions → … → retrieveFleets** — the resolution umbrella. Battle phases
+scan the map for work (deferred event battles resolve first in groundBattles,
+per the rulebook); trade/sellGoods/piracy/factoryIncome are automatic economy
+slices; election and invasionCheck route interactive sub-steps to the right
+players; retrieveFleets lets players bring fleets home.
 
-**resolution** — A complex multi-step sequence. Aerial battles → plunder legends → ground battles → conquests → election → deferred events → rebellions → invasions → fleet retrieval. The resolution sequencer walks through all of these.
+**scoring** — the rulebook's Phase 6: agitator shifts, trade-gains VP, heresy
+VP, palace VP, debt penalty, and (final round) legacy scoring + `endGame`.
 
-**reset** — Recomputes turn order, checks if the game should end.
+**reset** — Recomputes turn order from the action-board slots, round summary.
 
 ### Move Registration 
 
@@ -152,7 +172,7 @@ moves: wrapSet("discoverTile", "pass")
 
 ### Turn Budget Plugin 
 
-A custom boardgame.io plugin that counts `endTurn()` and `endPhase()` calls per round. If it exceeds 550, it force-ends the game. This is a safety net against infinite loops in the resolution phase.
+A custom boardgame.io plugin that counts `endTurn()` and `endPhase()` calls per round (reset in discovery's `onBegin`). Past 550 it stops forwarding the calls, freezing rather than corrupting a runaway game. It is the engine's single backstop — the phase structure itself is the real loop protection, enforced by the conformance tests.
 
 ---
 
@@ -199,77 +219,71 @@ const deployFleet: MoveDefinition = {
 
 ---
 
-## The Resolution Sequencer
+## The Resolution Phases
 
-The resolution phase is the most complex part. It walks through a fixed sequence of sub-phases, each of which may or may not have anything to resolve.
+Resolution is not one machine — it is twelve small phases in rulebook order
+(see Phase Sequence above). Three patterns make them work:
 
-### Entry Point
+### Scan-or-skip entry
 
-When the resolution phase begins, `Game.ts` calls `beginResolution(G, events)` in the phase's `onBegin`. This kicks off the sequencer.
+Each battle-family phase's `onBegin` resets the map cursor and scans for its
+kind of work (`helpers/findNext.ts`, left-to-right, top-to-bottom). Work found:
+it records the site (`G.mapState.currentBattle`), sets the micro-step
+(`G.step`), and `turn.order.first` routes the turn to the acting player.
+Nothing found: `events.endPhase()` and the round flows on — an all-peaceful
+round cascades through every battle phase in milliseconds.
+`__tests__/integration/quietRoundResolution.test.ts` drives exactly that
+pacifist round through the real client pipeline as a required-green guard.
 
-### The Chain (`resolutionSequencer.ts`)
+### Move-driven continuation
 
-```
-beginResolution()
-  → findNextBattle()      scan map for aerial battles
-  → toPlunder()           
-  → findNextPlunder()     scan for plunder opportunities
-  → toGround()
-  → findNextGroundBattle() scan for ground sieges
-  → toConquest()
-  → findNextConquest()    scan for unoccupied tiles to claim
-  → toElection()
-  → enterElection()       archprelate voting
-```
+When an interactive step resolves, the move itself advances the phase: the
+`nextAfterX` helpers in `helpers/resolutionSequencer.ts` handle same-tile
+multi-attacker sequencing, then rescan (`findNextX`) — next site gets
+`endTurn({ next })` (legal from a move), an exhausted phase gets `endPhase()`.
 
-Each `findNext*()` function scans the map left-to-right, top-to-bottom. If it finds something to resolve, it sets `G.stage` to the appropriate sub-phase and `events.endTurn({ next: relevantPlayer })` to hand control to the right player. If nothing found, it calls the next function in the chain.
+### Micro-steps within a phase
 
-### After the Sequencer (`resolutionFlow.ts`)
+`G.step` tracks the sub-state the UI and validators key on — e.g. an aerial
+battle walks `aerial_attack_or_pass → aerial_attack_or_evade → aerial_resolve
+→ relocate_loser`, with `G.battleState` carrying the combatants.
+`getResolutionTarget` (`helpers/resolutionFlow.ts`) and
+`checkIfCurrentPlayerIsInCurrentBattle` (`helpers/helpers.ts`) compute the
+acting player for step-routing in `turn.onBegin`.
 
-After the sequencer finishes (election done), `resolutionFlow.ts` takes over:
-
-```
-continueResolution()
-  → setupNextDeferredBattle()    (event-triggered battles)
-  → continueAfterDeferredBattles()
-    → setupNextRebellion()       (interactive rebellion resolution)
-    → checkForInvasion()         (grand army invasion)
-    → stage: "retrieve_fleets"   (final step — players retrieve fleets)
-```
-
-### Sub-Phases During Resolution
-
-`G.stage.sub` changes as the sequencer advances:
-
-```
-aerial_attack_or_pass → aerial_battle_cards → aerial_battle_result
-→ plunder_or_pass → ground_attack_or_pass → ground_defence
-→ conquest → conquest_garrison → conquest_draw_or_pick
-→ election → post_election_heresy
-→ deferred_aerial_battle → rebellion → rebellion_contribution
-→ invasion → retrieve_fleets
-```
-
-Each sub-phase has specific moves available (attack/evade/defend/vote/garrison/etc).
+The automatic economy phases (trade → sellGoods → piracy → factoryIncome) and
+scoring are exported slice functions in `helpers/resolveRound.ts`, called from
+their phases' `onBegin` — pure state transformations, unit-tested with
+rule-derived expected values in `roundEffectsPhases.test.ts`.
 
 ---
 
 ## The Type System (`types.ts`)
 
-### GameStage — Discriminated Union
+### One Clock: `ctx.phase` + `G.step`
+
+There is exactly one phase clock: boardgame.io's `ctx.phase` (18 values, see
+Phase Sequence). The engine's own state carries only the micro-step:
 
 ```typescript
-type GameStage =
-  | { phase: "setup"; sub: "kingdom_advantage" | "legacy_card" }
-  | { phase: "events"; sub: "default" | "immediate_election" | ... }
-  | { phase: "discovery"; sub: "default" }
-  | { phase: "actions"; sub: "default" | "confirm_fow_draw" | "discard_fow" }
-  | { phase: "resolution"; sub: "aerial_attack_or_pass" | "conquest" | ... }
-  | { phase: "scoring"; sub: "default" }
-  | { phase: "reset"; sub: "default" }
+type GameStep =
+  | "default"
+  | "kingdom_advantage" | "legacy_card"          // setup
+  | "immediate_election"                          // events
+  | "confirm_fow_draw" | "discard_fow"            // actions
+  | "aerial_attack_or_pass" | "aerial_resolve"    // battle steps…
+  | "conquest_garrison" | "election" | "retrieve_fleets" | ...
+  | "round_summary";                              // reset
+
+G.step: GameStep
 ```
 
-This is type-safe — if you check `G.stage.phase === "actions"`, TypeScript knows that `G.stage.sub` can only be `"default" | "confirm_fow_draw" | "discard_fow"`. Illegal combinations are a compile error.
+For display, `phaseGroup(ctx.phase)` collapses the 18 phases into the 8
+rulebook groups (the twelve resolution phases → `"resolution"`). A historical
+note for readers of old commits: the engine once kept a second clock,
+`G.stage: { phase, sub }`, whose divergence from `ctx.phase` bred a whole
+workaround genus (`validStages`, redirect layers, `skipEndTurn`). It was
+removed in the July 2026 resolution redesign.
 
 ### MyGameState (G)
 
@@ -281,7 +295,7 @@ The full game state. Key fields:
   mapState: MapState                       // tile grid, buildings, battle map
   boardState: ActionBoardInfo              // counsellor placement slots
   cardDecks: CardDeckInfo                  // all card pools
-  stage: GameStage                         // current phase/sub
+  step: GameStep                           // micro-step within the current phase
   round: number
   turnOrder: string[]                      // player order this round
   battleState?: BattleState                // active battle info
@@ -436,7 +450,7 @@ Client.tsx
 
 Components receive `MyGameProps` from boardgame.io — that's `{ G, ctx, moves, playerID, isActive }`. They read `G` to render state and call `moves.*()` to dispatch player actions.
 
-Components check `G.stage.phase` and `G.stage.sub` to decide what to show. For example, the aerial battle prompt only opens when `G.stage.sub === "aerial_attack_or_pass"` and it's your turn. Action rows call the same `MOVE_DEFINITIONS.*.validate` functions the server runs (disabled states can't drift) and show live costs from `helpers/actionCosts.ts` — the single source of truth shared by moves and UI.
+Components check `phaseGroup(ctx.phase)` (the 8-group rulebook view) and `G.step` to decide what to show. For example, the aerial battle prompt only opens when `G.step === "aerial_attack_or_pass"` and it's your turn. Action rows call the same `MOVE_DEFINITIONS.*.validate` functions the server runs (disabled states can't drift) and show live costs from `helpers/actionCosts.ts` — the single source of truth shared by moves and UI.
 
 ---
 
@@ -446,11 +460,12 @@ These are the utility functions that moves and the resolution flow depend on:
 
 | File | What it does |
 |------|-------------|
-| `resolutionSequencer.ts` | Walks the resolution chain (aerial → plunder → ground → conquest → election) |
-| `resolutionFlow.ts` | Continues after sequencer (deferred battles → rebellions → invasion → retrieve) |
+| `findNext.ts` | Map scanners for the battle phases (aerial/plunder/ground/conquest); exhausted scan = endPhase |
+| `resolutionSequencer.ts` | Same-tile multi-attacker sequencing (`nextAfterX` helpers moves call after each resolution) |
+| `resolutionFlow.ts` | Interactive-step routing: `getResolutionTarget`, deferred-battle/rebellion/invasion handoffs |
 | `resolveBattle.ts` | All combat math — aerial and ground battle resolution (30 KB) |
 | `combatMath.ts` | Battle formula utilities shared across resolution |
-| `resolveRound.ts` | End-of-round scoring: trade routes, piracy, factory income |
+| `resolveRound.ts` | The economy/scoring slice functions the trade→scoring phases call (rule-derived, unit-tested) |
 | `resolveRebellion.ts` | Rebellion event resolution logic |
 | `resolveInvasion.ts` | Grand army invasion logic |
 | `resolveInfidelFleet.ts` | Infidel fleet attack logic |
@@ -458,7 +473,7 @@ These are the utility functions that moves and the resolution flow depend on:
 | `mapUtils.ts` | Pathfinding (BFS), neighbor calculation, passability checks, trade route connectivity |
 | `stateUtils.ts` | Utilities: remove gold, remove counsellor, check all passed, etc. |
 | `helpers.ts` | Misc helpers: find possible destinations, player order, etc. |
-| `moveWrapper.ts` | Move validation pipeline (wrapMove, withPhaseGuard, checkLoopGuard) |
+| `moveWrapper.ts` | Move validation pipeline (`wrapMove`); `wrapSet.ts` builds per-phase move maps from `MOVE_DEFINITIONS` |
 | `eventCardDefinitions.ts` | All 40+ event cards with resolution logic |
 | `kaCardDefinitions.ts` | Kingdom Advantage card definitions |
 | `legacyCardDefinitions.ts` | Legacy card definitions |
@@ -466,8 +481,7 @@ These are the utility functions that moves and the resolution flow depend on:
 | `manufacturedFunSeed.ts` | Rivalry-aware card seeding for balanced games |
 | `tradeRouteResolver.ts` | Computes which buildings are connected to Faithdom via route skyships |
 | `piracy.ts` | Piracy mechanics (tax vs cut, corsair raids) |
-| `logger.ts` | Structured logging system |
-| `stageUtils.ts` | `setStage()` helper for type-safe stage transitions |
+| `logger.ts` | Structured logging system (`LOG_LEVEL=silent` for stress runs) |
 
 ---
 
@@ -502,7 +516,11 @@ pnpm vitest run src/__tests__/integration/battleFlow.test.ts   # single file
 - `rebellionFlow.test.ts` — rebellion event handling
 - `invasionFlow.test.ts` — grand army invasion
 
+**Conformance guards** — two required-green tests protect the redesigned engine: `rulebookOrder.test.ts` (the phase chain equals the rulebook's Resolution Sequence) and `quietRoundResolution.test.ts` (a combat-free round completes the full round loop through the real client pipeline — the scenario that once soft-locked production).
+
 **AI smoke test** (`ai/selfPlaySmoke.test.ts`) — runs a headless bot game. Slow — skip during normal development.
+
+**Stress runner** (`scripts/stress.mjs`) — N full bot games against the built engine: `pnpm build && LOG_LEVEL=silent pnpm stress 30`. Used as the gate for every engine change.
 
 ---
 
