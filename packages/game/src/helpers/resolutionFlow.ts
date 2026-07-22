@@ -1,30 +1,17 @@
 /**
  * resolutionFlow.ts
  *
- * Walker that advances through the unified Resolution phase:
- *
- *   Rulebook order (Phase 5):
- *   1. Rebellions
- *   2. Encounters: aerial → plunder → ground → conquest
- *   3-6. Trade/Piracy/Factories (auto, handled in resolveRound)
- *   7. Election
- *   8. Infidel invasion check
- *   9. Retrieve fleets
- *
- * Each step either finds interactive work (sets stage, pauses) or chains
- * to the next step. The phase only ends after retrieve fleets.
+ * Post-election resolution flow for deferred battles, rebellions, invasion,
+ * and fleet retrieval.
  */
 
 import { MyGameState } from "../types.js";
-import log from "./logger.js";
 import { setStage } from "./stageUtils.js";
 import { setupNextRebellion } from "./resolveRebellion.js";
 import { getDeferredBattleDescription } from "./resolveDeferredBattles.js";
 import { checkForInvasion, getArchprelateForNomination } from "./resolveInvasion.js";
 import { prepareInfidelFleetCombat } from "./resolveInfidelFleet.js";
-import { findNextBattle, findNextPlunder, findNextGroundBattle, findNextConquest } from "./findNext.js";
 import type { EventsAPI } from "../types.js";
-import { sortPlayersInPlayerOrder } from "./helpers.js";
 
 /**
  * Set up the next non-rebellion deferred battle for interactive resolution.
@@ -89,8 +76,8 @@ const continueAfterDeferredBattles = (
 };
 
 /**
- * Continue the Resolution flow from the current point.
- * Entry point called from Resolution onBegin and after Fleet combat.
+ * Continue post-election deferred work from the current point.
+ * Called after fleet combat and interactive rebellion steps.
  *
  * @param skipEndTurn — pass true when called from phase onBegin
  */
@@ -127,57 +114,6 @@ export const getResolutionTarget = (G: MyGameState): string | null => {
     default:
       return null; // retrieve fleets, rebellion_rival_support, etc. use normal turn order
   }
-};
-
-// Resolution Walker
-// Each "advance" function is called when its step is exhausted.
-// It tries the NEXT step; if that step has no work, it chains further.
-
-/**
- * Begin the resolution phase. Entry point from resolution.onBegin.
- * Walks: aerial → plunder → ground → conquest → election → post-election
- *
- * @param skipEndTurn — true when called from phase onBegin (boardgame.io discards endTurn there)
- */
-const resLog = log.child({ mod: "res-flow" });
-
-export const beginResolution = (
-  G: MyGameState,
-  events: EventsAPI,
-  skipEndTurn = false
-): void => {
-  resLog.info({ round: G.round }, "beginResolution");
-  // Reset battle scan position
-  G.mapState.currentBattle = [0, 0];
-  // Start with aerial battles (step 2a in rulebook)
-  findNextBattle(G, events, skipEndTurn, advanceFromAerial);
-  resLog.info({ round: G.round }, "beginResolution done");
-};
-
-/** Called when aerial battles are exhausted → try plunder */
-export const advanceFromAerial = (G: MyGameState, events: EventsAPI): void => {
-  // DEBUG: detect infinite recursion in resolution chain
-  (G as any)._resFlowDepth = ((G as any)._resFlowDepth ?? 0) + 1;
-  if ((G as any)._resFlowDepth > 20) { resLog.error({ depth: (G as any)._resFlowDepth }, "infinite recursion detected at advanceFromAerial"); return; }
-  G.mapState.currentBattle = [0, 0];
-  findNextPlunder(G, events, advanceFromPlunder);
-};
-
-/** Called when plunder is exhausted → try ground battles */
-export const advanceFromPlunder = (G: MyGameState, events: EventsAPI): void => {
-  G.mapState.currentBattle = [0, 0];
-  findNextGroundBattle(G, events, advanceFromGround);
-};
-
-/** Called when ground battles are exhausted → try conquest */
-export const advanceFromGround = (G: MyGameState, events: EventsAPI): void => {
-  G.mapState.currentBattle = [0, 0];
-  findNextConquest(G, events, advanceFromConquest);
-};
-
-/** Called when conquests are exhausted → finish resolution */
-export const advanceFromConquest = (G: MyGameState, events: EventsAPI): void => {
-  events.endPhase();
 };
 
 /**

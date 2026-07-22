@@ -1,4 +1,4 @@
-// Resolution order: aerial → plunder → ground → conquest → election → post-election
+// Same-tile and within-segment battle sequencing.
 
 import { Ctx } from "boardgame.io";
 import type { EventsAPI } from "../types.js";
@@ -11,28 +11,6 @@ import {
   findNextGroundBattle,
   findNextConquest,
 } from "./findNext.js";
-import { advanceFromElection } from "./resolutionFlow.js";
-
-export { beginResolution } from "./resolutionFlow.js";
-
-const toPlunder = (G: MyGameState, events: EventsAPI): void => {
-  G.mapState.currentBattle = [0, 0];
-  findNextPlunder(G, events, toGround);
-};
-
-const toGround = (G: MyGameState, events: EventsAPI): void => {
-  G.mapState.currentBattle = [0, 0];
-  findNextGroundBattle(G, events, toConquest);
-};
-
-const toConquest = (G: MyGameState, events: EventsAPI): void => {
-  G.mapState.currentBattle = [0, 0];
-  findNextConquest(G, events, toElection);
-};
-
-const toElection = (G: MyGameState, events: EventsAPI): void => {
-  events.endPhase();
-};
 
 function computeDefendersAtBattle(G: MyGameState, nextPlayer: string): void {
   const [x, y] = G.mapState.currentBattle;
@@ -71,7 +49,7 @@ export function nextAfterAerialDecision(
     computeDefendersAtBattle(G, nextPlayer);
     events.endTurn({ next: nextPlayer });
   } else {
-    findNextBattle(G, events, false, toPlunder);
+    findNextBattle(G, events);
   }
 }
 
@@ -79,7 +57,7 @@ export function nextAfterPlunder(
   G: MyGameState,
   events: EventsAPI
 ): void {
-  findNextPlunder(G, events, toGround);
+  findNextPlunder(G, events);
 }
 
 export function nextAfterGroundDecision(
@@ -96,7 +74,7 @@ export function nextAfterGroundDecision(
     computeDefendersAtBattle(G, nextPlayer);
     events.endTurn({ next: nextPlayer });
   } else {
-    findNextGroundBattle(G, events, toConquest);
+    findNextGroundBattle(G, events);
   }
 }
 
@@ -104,7 +82,5 @@ export function nextAfterConquest(
   G: MyGameState,
   events: EventsAPI
 ): void {
-  findNextConquest(G, events, toElection);
+  findNextConquest(G, events);
 }
-
-export { advanceFromElection as nextAfterElection };

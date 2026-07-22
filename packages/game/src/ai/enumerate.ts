@@ -495,6 +495,10 @@ export function enumerateLegalMoves(G: MyGameState, ctx: Ctx, playerID: string):
     }
 
     case "resolution":
+    case "aerialBattles":
+    case "plunder":
+    case "groundBattles":
+    case "conquests":
     case "election":
     case "postElection": {
       const moves: AIMove[] = [];

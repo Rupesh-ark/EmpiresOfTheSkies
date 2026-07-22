@@ -15,13 +15,15 @@ import { logEvent, allPlayersPassed, calculateMercy, nextUnpassedPlayer } from "
 import { withPhaseGuard, withPhaseReset, checkLoopGuard } from "./helpers/moveWrapper.js";
 import { wrapSet } from "./helpers/wrapSet.js";
 import {
-  checkIfCurrentPlayerIsInCurrentBattle,
   fullResetFortuneOfWarCardDeck,
   resetBattleCheckCount,
 } from "./helpers/helpers.js";
 import { TurnOrder } from "boardgame.io/core";
 import { ALL_EVENT_CARD_NAMES } from "./helpers/eventCardDefinitions.js";
-import { beginResolution } from "./helpers/resolutionFlow.js";
+import aerialBattlesPhase from "./phases/aerialBattles.js";
+import plunderPhase from "./phases/plunder.js";
+import groundBattlesPhase from "./phases/groundBattles.js";
+import conquestsPhase from "./phases/conquests.js";
 import electionPhase from "./phases/election.js";
 import postElectionPhase from "./phases/postElection.js";
 import retrieveFleetsPhase from "./phases/retrieveFleets.js";
@@ -481,35 +483,12 @@ const MyGame: Game<MyGameState> = {
           playerInfo.passed = false;
         });
       },
-      next: "resolution",
+      next: "aerialBattles",
     },
-    resolution: {
-      turn: {
-        order: TurnOrder.CUSTOM_FROM("turnOrder"),
-        onBegin: (context) => {
-          if (context.G._halted) return;
-          const sub = context.G.stage.sub;
-
-          if (sub === "conquest") return;
-
-          // Battle sub-stages — route attacker/defender/victor
-          checkIfCurrentPlayerIsInCurrentBattle(
-            context.G,
-            context.ctx,
-            context.events
-          );
-        },
-      },
-      onBegin: (context) => {
-        if (context.G._halted) return;
-        if (checkLoopGuard(context, "resolution")) return;
-        phaseLog.info({ round: context.G.round }, "resolution");
-        // Walk battles through conquest; election begins in the next phase.
-        beginResolution(context.G, context.events, true);
-      },
-      moves: wrapSet("doNotAttack", "attackOtherPlayersFleet", "retaliate", "evadeAttackingFleet", "drawCard", "pickCard", "relocateDefeatedFleet", "plunder", "doNotPlunder", "attackPlayersBuilding", "doNotGroundAttack", "defendGroundAttack", "yieldToAttacker", "coloniseLand", "constructOutpost", "doNothing", "drawCardConquest", "pickCardConquest", "garrisonTroops"),
-      next: "election",
-    },
+    aerialBattles: aerialBattlesPhase,
+    plunder: plunderPhase,
+    groundBattles: groundBattlesPhase,
+    conquests: conquestsPhase,
     election: electionPhase,
     postElection: postElectionPhase,
     retrieveFleets: retrieveFleetsPhase,

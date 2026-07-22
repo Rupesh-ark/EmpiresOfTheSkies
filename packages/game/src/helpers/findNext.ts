@@ -47,6 +47,7 @@ export const findNextBattle = (
 export const findNextPlunder = (
   G: MyGameState,
   events: EventsAPI,
+  skipEndTurn = false,
   onExhausted?: (G: MyGameState, events: EventsAPI) => void
 ): void => {
   for (let y = G.mapState.currentBattle[1]; y < 4; y++) {
@@ -63,7 +64,7 @@ export const findNextPlunder = (
         const nextPlayer = G.mapState.battleMap[y][x][0];
         G.mapState.currentBattle = [x, y];
         setStage(G, "resolution", "plunder_legends");
-        events.endTurn({ next: nextPlayer });
+        if (!skipEndTurn) events.endTurn({ next: nextPlayer });
         return;
       }
     }
@@ -78,6 +79,7 @@ export const findNextPlunder = (
 export const findNextGroundBattle = (
   G: MyGameState,
   events: EventsAPI,
+  skipEndTurn = false,
   onExhausted?: (G: MyGameState, events: EventsAPI) => void
 ): void => {
   for (let y = G.mapState.currentBattle[1]; y < 4; y++) {
@@ -97,7 +99,7 @@ export const findNextGroundBattle = (
         G.mapState.currentBattle = [x, y];
         setStage(G, "resolution", "ground_attack_or_pass");
         computeDefendersAtBattle(G, nextPlayer);
-        events.endTurn({ next: nextPlayer });
+        if (!skipEndTurn) events.endTurn({ next: nextPlayer });
         return;
       }
     }
@@ -113,6 +115,7 @@ export const findNextGroundBattle = (
 export const findNextConquest = (
   G: MyGameState,
   events: EventsAPI,
+  skipEndTurn = false,
   onExhausted?: (G: MyGameState, events: EventsAPI) => void
 ) => {
   for (let y = G.mapState.currentBattle[1]; y < 4; y++) {
@@ -134,7 +137,7 @@ export const findNextConquest = (
         const nextPlayer = G.mapState.battleMap[y][x][0];
         G.mapState.currentBattle = [x, y];
         setStage(G, "resolution", "conquest");
-        events.endTurn({ next: nextPlayer });
+        if (!skipEndTurn) events.endTurn({ next: nextPlayer });
         return;
       }
     }
@@ -146,4 +149,3 @@ export const findNextConquest = (
     events.endPhase();
   }
 };
-
