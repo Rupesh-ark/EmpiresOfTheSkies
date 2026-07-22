@@ -21,7 +21,7 @@ const firstAttackerPosition = (G: MyGameState): number => {
   return position === -1 ? 0 : position;
 };
 
-export const aerialBattlesPhase: PhaseConfig<MyGameState> = {
+const aerialBattlesPhase: PhaseConfig<MyGameState> = {
   moves: wrapSet(
     "doNotAttack",
     "attackOtherPlayersFleet",

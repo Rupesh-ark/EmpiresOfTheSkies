@@ -420,5 +420,3 @@ export const TileDetailContent: React.FC<TileDetailContentProps> = ({ tile, G, l
       return <LandContent tile={tile} x={x} y={y} G={G} />;
   }
 };
-
-export default TileDetailContent;

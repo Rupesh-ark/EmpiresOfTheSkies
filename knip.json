@@ -1,0 +1,21 @@
+{
+  "ignore": ["**/.venv/**"],
+  "workspaces": {
+    "packages/game": {
+      "entry": [
+        "src/index.ts",
+        "scripts/stress.mjs",
+        "src/ai/runAnalysis.ts",
+        "src/ai/runBalanceTest.ts",
+        "src/ai/runTournament.ts",
+        "src/ai/tuner/tunerRunner.ts",
+        "src/ai/selfPlay.ts",
+        "src/__tests__/**/*.test.ts"
+      ]
+    },
+    "empires_of_the_skies": {
+      "entry": ["src/main.tsx"],
+      "ignore": ["src/theme/presets/**"]
+    }
+  }
+}

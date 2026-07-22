@@ -248,17 +248,6 @@ export const resolveDeferredBattleInteractive = (
 };
 
 /**
- * Legacy auto-resolve (no player input). Still used as fallback.
- */
-export const resolveDeferredBattle = (
-  G: MyGameState,
-  event: DeferredEvent,
-  shuffle: <T>(arr: T[]) => T[]
-): void => {
-  resolveDeferredBattleInteractive(G, event, shuffle);
-};
-
-/**
  * Get a human-readable description of a deferred battle for the UI.
  */
 export const getDeferredBattleDescription = (

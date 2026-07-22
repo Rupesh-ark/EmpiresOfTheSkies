@@ -8,16 +8,6 @@ export const clearMoves = (props: MyGameProps) => {
   }
 };
 
-export const checkPlayerIDAndReturnPlayerInfo = (
-  props: MyGameProps
-): PlayerInfo => {
-  if (props.playerID) {
-    return props.G.playerInfo[props.playerID];
-  } else {
-    throw new Error("No playerID found in props");
-  }
-};
-
 /**
  * Returns the number of actions a player can still take this round.
  * Under the v4.2 unlimited-counsellor model, counsellors represent the

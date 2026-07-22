@@ -5,7 +5,7 @@ import log from "../../helpers/logger.js";
 
 const gLog = log.child({ mod: "garrison-transfer" });
 
-export const validateGarrisonTransfer = (
+const validateGarrisonTransfer = (
   G: MyGameState,
   playerID: string,
   fleetId: number,

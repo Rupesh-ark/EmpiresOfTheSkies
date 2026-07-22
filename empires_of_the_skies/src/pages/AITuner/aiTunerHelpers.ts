@@ -1,8 +1,6 @@
 import { tokens } from "../../theme/tokens";
 import type { GameRecord } from "@eots/game";
 
-export { tokens };
-
 export const PLAYER_COLORS = [
   tokens.kingdom.angland,
   tokens.kingdom.constantium,

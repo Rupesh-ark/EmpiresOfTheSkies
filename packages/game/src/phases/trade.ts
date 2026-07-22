@@ -5,7 +5,7 @@ import log from "../helpers/logger.js";
 
 const phaseLog = log.child({ mod: "phase" });
 
-export const tradePhase: PhaseConfig<MyGameState> = {
+const tradePhase: PhaseConfig<MyGameState> = {
   onBegin: (context) => {
     phaseLog.info({ round: context.G.round }, "trade");
     tradePhaseEffects(context.G);

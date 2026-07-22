@@ -11,7 +11,7 @@ export const hasRetrievableFleet = (player: PlayerInfo): boolean =>
     (fleet) => fleet.skyships > 0 && (fleet.location[0] !== 4 || fleet.location[1] !== 0)
   );
 
-export const retrieveFleetsPhase: PhaseConfig<MyGameState> = {
+const retrieveFleetsPhase: PhaseConfig<MyGameState> = {
   moves: wrapSet("retrieveFleets", "pass"),
   next: "scoring",
   onBegin: (context) => {

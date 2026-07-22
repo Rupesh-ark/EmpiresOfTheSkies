@@ -15,7 +15,7 @@ const firstFleetOwnerPosition = (G: MyGameState): number => {
   return position === -1 ? 0 : position;
 };
 
-export const plunderPhase: PhaseConfig<MyGameState> = {
+const plunderPhase: PhaseConfig<MyGameState> = {
   moves: wrapSet("plunder", "doNotPlunder"),
   next: "groundBattles",
   onBegin: (context) => {

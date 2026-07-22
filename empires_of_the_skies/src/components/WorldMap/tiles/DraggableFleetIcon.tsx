@@ -68,5 +68,3 @@ export const DraggableFleetIcon: React.FC<DraggableFleetIconProps> = ({
     </Tooltip>
   );
 };
-
-export default DraggableFleetIcon;

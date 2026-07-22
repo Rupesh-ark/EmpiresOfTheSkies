@@ -195,5 +195,3 @@ export const baseTokens = {
     shadowOverlay:      "rgba(0, 0, 0, 0.5)",
   },
 } as const;
-
-export type Tokens = typeof baseTokens;

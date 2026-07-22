@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { createTheme } from "@mui/material/styles";
 import { baseTheme } from "./baseTheme";
-import { getMood, getMoodTokens, GameMood } from "./phaseMoods";
+import { getMood, getMoodTokens } from "./phaseMoods";
 import type { GameStep, PhaseGroup } from "@eots/game";
 
 /**
@@ -26,5 +26,4 @@ export function useGameTheme(group: PhaseGroup, step: GameStep) {
   }, [mood]);
 }
 
-export type { GameMood };
 export { getMood, getMoodTokens };

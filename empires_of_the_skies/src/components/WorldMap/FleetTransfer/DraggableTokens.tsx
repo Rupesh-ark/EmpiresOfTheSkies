@@ -4,7 +4,7 @@ import { tokens } from "@/theme";
 import { IconSkyship, IconRegiment, IconElite, IconLevy } from "@/theme";
 import type { TroopKind } from "./types";
 
-export function TroopIcon({ kind, size = 14 }: { kind: TroopKind; size?: number }) {
+function TroopIcon({ kind, size = 14 }: { kind: TroopKind; size?: number }) {
   const style = { color: tokens.ui.text };
   if (kind === "regiment") return <IconRegiment size={size} style={style} />;
   if (kind === "elite") return <IconElite size={size} style={style} />;

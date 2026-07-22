@@ -67,7 +67,7 @@ export function buildResources(overrides: Partial<Resources> = {}): Resources {
   };
 }
 
-export function buildPlayerBoard(overrides: Partial<PlayerBoardInfo> = {}): PlayerBoardInfo {
+function buildPlayerBoard(overrides: Partial<PlayerBoardInfo> = {}): PlayerBoardInfo {
   return {
     buildSkyships: false,
     conscriptLevies: false,
@@ -109,7 +109,7 @@ function buildOceanTile(): TileInfoProps {
 }
 
 /** Builds a proper 4×8 map state. All tiles are ocean by default. */
-export function buildMapState(overrides: Partial<MapState> = {}): MapState {
+function buildMapState(overrides: Partial<MapState> = {}): MapState {
   const rows = 4;
   const cols = 8;
   return {
@@ -143,7 +143,7 @@ export function buildMapState(overrides: Partial<MapState> = {}): MapState {
 
 // ActionBoard builder
 
-export function buildActionBoard(overrides: Partial<ActionBoardInfo> = {}): ActionBoardInfo {
+function buildActionBoard(overrides: Partial<ActionBoardInfo> = {}): ActionBoardInfo {
   return {
     pendingPlayerOrder: { 1: undefined, 2: undefined, 3: undefined, 4: undefined, 5: undefined, 6: undefined },
     recruitCounsellors: [],
@@ -252,17 +252,6 @@ export function buildInitialG(
  * Note: boardgame.io moves use Immer under the hood in real games. In tests
  * we pass G directly so mutations apply in place.
  */
-export function callMove<TArgs extends unknown[]>(
-  moveFn: (params: { G: MyGameState; ctx: Ctx; playerID: string }, ...args: TArgs) => unknown,
-  G: MyGameState,
-  playerID: string,
-  ...args: TArgs
-): { G: MyGameState; result: unknown } {
-  const ctx = buildCtx(playerID);
-  const result = moveFn({ G, ctx, playerID }, ...args);
-  return { G, result };
-}
-
 /**
  * Simulates the wrapMove pipeline: validate → fn.
  * Use this for MoveDefinition objects instead of calling .fn() directly.

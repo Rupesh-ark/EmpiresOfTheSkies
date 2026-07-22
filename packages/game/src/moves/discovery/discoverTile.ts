@@ -5,7 +5,7 @@ import { getNeighbors } from "../../helpers/mapUtils.js";
 import { humanizeTileName } from "../../helpers/helpers.js";
 import { MIN_ROUNDS } from "../../data/gameData.js";
 
-export const discoverTile: MoveDefinition = {
+const discoverTile: MoveDefinition = {
   fn: ({ G, ctx, playerID, events }, ...args: any[]) => {
     const [x, y] = args[0];
     if (G.mapState.discoveredTiles[y][x]) {

@@ -43,16 +43,3 @@ export function getRepublicInfluence(
     },
   };
 }
-
-export function countRepublicSupport(G: MyGameState, playerID: string): number {
-  const { zeeland, venoa } = getRepublicInfluence(G, playerID);
-  let count = 0;
-  if (zeeland.supporting) count++;
-  if (venoa.supporting) count++;
-  return count;
-}
-
-export function hasFullRepublicAccess(G: MyGameState, playerID: string): boolean {
-  const { zeeland, venoa } = getRepublicInfluence(G, playerID);
-  return zeeland.supporting && venoa.supporting;
-}

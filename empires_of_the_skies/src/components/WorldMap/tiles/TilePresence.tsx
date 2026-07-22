@@ -186,5 +186,3 @@ export const TilePresence: React.FC<TilePresenceProps> = ({ G, x, y }) => {
     </Box>
   );
 };
-
-export default TilePresence;

@@ -67,3 +67,4 @@ bot-training/
 packages/game/src/ai/analytics/*.json
 packages/game/src/ai/docs/*
 packages/game/tuner_results/*
+.venv/

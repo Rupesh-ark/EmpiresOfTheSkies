@@ -23,10 +23,6 @@ export const incrementActionsTaken = (G: MyGameState, playerID: string) => {
   G.playerInfo[playerID].actionsTakenThisRound += 1;
 };
 
-export const assertHasActionsAvailable = (G: MyGameState, playerID: string): boolean => {
-  return G.playerInfo[playerID].actionsTakenThisRound < G.playerInfo[playerID].resources.counsellors;
-};
-
 export const recruitCounsellor = (G: MyGameState, playerID: string) => {
   G.playerInfo[playerID].resources.counsellors += 1;
 };
@@ -73,12 +69,8 @@ export const addGoldAmount = (
   G.playerInfo[playerID].resources.gold += goldAmount;
 };
 
-export const removeSkyship = (G: MyGameState, playerID: string) => {
-  G.playerInfo[playerID].resources.skyships -= 1;
-};
-
 /** Count all skyships a player has placed as route markers on the map. */
-export const countRouteSkyships = (G: MyGameState, playerID: string): number =>
+const countRouteSkyships = (G: MyGameState, playerID: string): number =>
   Object.values(G.mapState.routeSkyships)
     .filter(players => players.includes(playerID)).length;
 
@@ -133,16 +125,6 @@ export const addLevyAmount = (
   const sanitized = sanitizeValue(levyAmount, 0);
   const currentLevies = sanitizeValue(G.playerInfo[playerID].resources.levies);
   G.playerInfo[playerID].resources.levies = currentLevies + sanitized;
-};
-
-export const removeLevyAmount = (
-  G: MyGameState,
-  playerID: string,
-  levyAmount: number
-) => {
-  const sanitized = sanitizeValue(levyAmount, 0);
-  const currentLevies = sanitizeValue(G.playerInfo[playerID].resources.levies);
-  G.playerInfo[playerID].resources.levies = Math.max(0, currentLevies - sanitized);
 };
 
 export { sanitizeValue };

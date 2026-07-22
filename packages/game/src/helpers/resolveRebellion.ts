@@ -7,7 +7,7 @@
  * This file provides the resolution logic called after interactive input.
  */
 
-import { MyGameState, DeferredEvent, LegacyCardInfo } from "../types.js";
+import { MyGameState, LegacyCardInfo } from "../types.js";
 import {
   addVPAmount,
   increaseHeresyWithinMove,
@@ -175,82 +175,6 @@ const resolveColonialRebellion = (
     // Rebel counter stays on the colony — mark it as occupied
     G.mapState.buildings[y][x].rebelCounter = counterSwords;
   }
-};
-
-// Main resolver
-
-/**
- * Process a single pending rebellion event. Draws a contingent counter,
- * simulates FoW card draws for both sides, calculates the battle, and
- * applies the per-card outcome.
- *
- * NOTE: This is the legacy auto-resolve path. The interactive path uses
- * resolveRebellionWithTroops() and resolveRebellionWithTroopsAndRivals().
- */
-export const resolveRebellionEvent = (
-  G: MyGameState,
-  event: DeferredEvent,
-  shuffle: <T>(arr: T[]) => T[]
-): void => {
-  const { card, targetPlayerID, targetTile } = event;
-
-  // Draw contingent counter
-  if (G.contingentPool.length === 0) {
-    return;
-  }
-  const counterSwords = G.contingentPool.pop()!;
-  const kingdom = G.playerInfo[targetPlayerID].kingdomName;
-  logEvent(G, `Rebellion in ${kingdom}! Rebel force: ${counterSwords} swords`);
-
-  const player = G.playerInfo[targetPlayerID];
-
-  // Determine defender troops (auto-commit all kingdom troops)
-  const defenderRegiments = player.resources.regiments;
-  const defenderLevies = player.resources.levies;
-
-  // If no troops committed, rebels auto-win
-  if (defenderRegiments === 0 && defenderLevies === 0) {
-    logEvent(G, `${kingdom} has no troops \u2014 rebels win automatically`);
-    applyOutcome(G, card, targetPlayerID, false, counterSwords, targetTile, shuffle);
-    returnCounter(G, card, false, counterSwords);
-    return;
-  }
-
-  // Check for fort — colonial rebellions use the colony tile, others use Kingdom
-  let fortPresent = false;
-  if (card === "colonial_rebellion" && targetTile) {
-    fortPresent = hasFortAt(G, targetTile[0], targetTile[1]);
-  } else {
-    fortPresent = hasFortAt(G, KINGDOM_LOCATION[0], KINGDOM_LOCATION[1]);
-  }
-
-  const fowRebel = drawFortuneOfWarCard(G, shuffle);
-  const fowDefender = drawFortuneOfWarCard(G, shuffle);
-
-  const { defenderWins, hitsOnDefender } = calculateBattle(
-    counterSwords,
-    defenderRegiments,
-    defenderLevies,
-    fortPresent,
-    fowRebel,
-    fowDefender
-  );
-
-  // Apply troop losses to defender (even if they win, they may take casualties)
-  if (hitsOnDefender > 0) {
-    applyTroopLosses(G, targetPlayerID, hitsOnDefender);
-  }
-
-  logEvent(G, defenderWins
-    ? `${kingdom} defeats the rebels!`
-    : `Rebels overwhelm ${kingdom}'s defenders!`
-  );
-
-  // Apply per-card outcome
-  applyOutcome(G, card, targetPlayerID, defenderWins, counterSwords, targetTile, shuffle);
-
-  // Return counter to pool (except Colonial REBELLION loss)
-  returnCounter(G, card, defenderWins, counterSwords);
 };
 
 /** Apply the win/lose effect for the specific rebellion card */

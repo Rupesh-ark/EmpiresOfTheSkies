@@ -5,7 +5,7 @@ import log from "../helpers/logger.js";
 
 const phaseLog = log.child({ mod: "phase" });
 
-export const scoringPhase: PhaseConfig<MyGameState> = {
+const scoringPhase: PhaseConfig<MyGameState> = {
   onBegin: (context) => {
     phaseLog.info({ round: context.G.round }, "scoring");
     scoringPhaseEffects(context.G, context.events);

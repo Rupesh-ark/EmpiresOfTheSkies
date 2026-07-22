@@ -7,7 +7,7 @@ import { wrapSet } from "../helpers/wrapSet.js";
 
 const phaseLog = log.child({ mod: "phase" });
 
-export const rebellionsPhase: PhaseConfig<MyGameState> = {
+const rebellionsPhase: PhaseConfig<MyGameState> = {
   moves: wrapSet("commitRebellionTroops", "contributeToRebellion"),
   next: "aerialBattles",
   onBegin: (context) => {

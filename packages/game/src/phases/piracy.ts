@@ -5,7 +5,7 @@ import log from "../helpers/logger.js";
 
 const phaseLog = log.child({ mod: "phase" });
 
-export const piracyPhase: PhaseConfig<MyGameState> = {
+const piracyPhase: PhaseConfig<MyGameState> = {
   onBegin: (context) => {
     phaseLog.info({ round: context.G.round }, "piracy");
     piracyPhaseEffects(context.G);

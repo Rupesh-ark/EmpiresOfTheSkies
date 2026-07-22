@@ -33,7 +33,7 @@ export interface SlotState {
   troop: TroopKind | null;
 }
 
-export interface FleetLocalState {
+interface FleetLocalState {
   fleetId: number;
   slots: SlotState[];
 }

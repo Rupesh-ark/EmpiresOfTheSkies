@@ -15,7 +15,7 @@ const firstFleetOwnerPosition = (G: MyGameState): number => {
   return position === -1 ? 0 : position;
 };
 
-export const conquestsPhase: PhaseConfig<MyGameState> = {
+const conquestsPhase: PhaseConfig<MyGameState> = {
   moves: wrapSet(
     "coloniseLand",
     "constructOutpost",

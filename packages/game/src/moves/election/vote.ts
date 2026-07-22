@@ -25,7 +25,7 @@ const numberToKingdomMap: Record<string, string> = {
   8: "Constantium",
 };
 
-export function calculateVotePower(G: MyGameState, playerID: string): number {
+function calculateVotePower(G: MyGameState, playerID: string): number {
   const playerInfo = G.playerInfo[playerID];
   if (!playerInfo) return 0;
 

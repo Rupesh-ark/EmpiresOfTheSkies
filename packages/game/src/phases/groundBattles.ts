@@ -16,7 +16,7 @@ const firstFleetOwnerPosition = (G: MyGameState): number => {
   return position === -1 ? 0 : position;
 };
 
-export const groundBattlesPhase: PhaseConfig<MyGameState> = {
+const groundBattlesPhase: PhaseConfig<MyGameState> = {
   moves: wrapSet(
     "attackPlayersBuilding",
     "doNotGroundAttack",

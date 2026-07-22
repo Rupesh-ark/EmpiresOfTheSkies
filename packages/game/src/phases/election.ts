@@ -5,7 +5,7 @@ import { wrapSet } from "../helpers/wrapSet.js";
 
 const phaseLog = log.child({ mod: "phase" });
 
-export const electionPhase: PhaseConfig<MyGameState> = {
+const electionPhase: PhaseConfig<MyGameState> = {
   moves: wrapSet("vote"),
   next: "invasionCheck",
   onBegin: (context) => {

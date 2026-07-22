@@ -7,7 +7,7 @@ import { wrapSet } from "../helpers/wrapSet.js";
 
 const phaseLog = log.child({ mod: "phase" });
 
-export const invasionCheckPhase: PhaseConfig<MyGameState> = {
+const invasionCheckPhase: PhaseConfig<MyGameState> = {
   moves: wrapSet(
     "respondToInfidelFleet",
     "nominateCaptainGeneral",

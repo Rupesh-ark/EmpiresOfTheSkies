@@ -8,7 +8,7 @@ import type {
   TroopKind,
 } from "./types";
 
-export function initFleetSlots(fleet: FleetInfo): SlotState[] {
+function initFleetSlots(fleet: FleetInfo): SlotState[] {
   const slots: SlotState[] = Array.from({ length: MAX_SKYSHIPS_PER_FLEET }, () => ({
     hasSkyship: false,
     troop: null,
