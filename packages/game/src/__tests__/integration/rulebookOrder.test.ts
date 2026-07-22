@@ -3,8 +3,8 @@ import { MyGame } from "../../Game.js";
 import { RESOLUTION_SEQUENCE } from "../../data/resolutionSequence.js";
 
 describe("rulebook phase order", () => {
-  // North-star conformance test; flip to it() when the resolution carve-out is complete.
-  it.fails("matches the Resolution Sequence between actions and reset", () => {
+  // North-star conformance test: the engine chain must match the rulebook sequence.
+  it("matches the Resolution Sequence between actions and reset", () => {
     const phases = MyGame.phases!;
     const chain: string[] = [];
     const visited = new Set<string>();

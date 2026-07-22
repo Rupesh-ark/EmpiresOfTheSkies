@@ -145,10 +145,30 @@ describe("rebellionFlow — all rivals contribute resolves battle", () => {
     callCommit(G, "0", 6, 0, ["0", "1"]);
 
     // Rival contributes 0 troops (stays out)
-    callContribute(G, "1", "rebel", 0, 0, ["0", "1"]);
+    const { events } = callContribute(G, "1", "rebel", 0, 0, ["0", "1"]);
 
     // Rebellion should be resolved
     expect(G.currentRebellion).toBeNull();
+    expect(events.endPhase).toHaveBeenCalledOnce();
+  });
+
+  it("routes to the next queued rebellion target", () => {
+    const G = buildInitialG([
+      buildPlayer("0", { resources: buildResources({ regiments: 8 }) }),
+      buildPlayer("1", { resources: buildResources({ regiments: 8 }) }),
+    ]);
+    G.currentRebellion = buildRebellion("0", "peasant_rebellion", 1);
+    G.eventState.deferredEvents = [
+      { card: "pretender_rebellion", targetPlayerID: "1" },
+    ];
+
+    callCommit(G, "0", 6, 0, ["0", "1"]);
+    const { events } = callContribute(G, "1", "rebel", 0, 0, ["0", "1"]);
+
+    expect(G.currentRebellion?.event.targetPlayerID).toBe("1");
+    expect(G.stage).toEqual({ phase: "resolution", sub: "rebellion" });
+    expect(events.endTurn).toHaveBeenCalledWith({ next: "1" });
+    expect(events.endPhase).not.toHaveBeenCalled();
   });
 
   it("moves rebel troops from rival's pool when they contribute", () => {

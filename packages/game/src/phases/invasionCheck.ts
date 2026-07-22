@@ -1,17 +1,16 @@
 import type { PhaseConfig } from "boardgame.io";
 import type { MyGameState } from "../types.js";
+import { getResolutionTarget, runInvasionCheck } from "../helpers/resolutionFlow.js";
+import { prepareInfidelFleetCombat } from "../helpers/resolveInfidelFleet.js";
 import log from "../helpers/logger.js";
-import { advanceFromElection, getResolutionTarget } from "../helpers/resolutionFlow.js";
+import { setStage } from "../helpers/stageUtils.js";
 import { wrapSet } from "../helpers/wrapSet.js";
 
 const phaseLog = log.child({ mod: "phase" });
 
-export const postElectionPhase: PhaseConfig<MyGameState> = {
+export const invasionCheckPhase: PhaseConfig<MyGameState> = {
   moves: wrapSet(
     "respondToInfidelFleet",
-    "commitDeferredBattleCard",
-    "commitRebellionTroops",
-    "contributeToRebellion",
     "nominateCaptainGeneral",
     "contributeToGrandArmy",
     "offerBuyoffGold"
@@ -19,8 +18,12 @@ export const postElectionPhase: PhaseConfig<MyGameState> = {
   next: "retrieveFleets",
   onBegin: (context) => {
     if (context.G._halted) return;
-    phaseLog.info({ round: context.G.round }, "post-election");
-    advanceFromElection(context.G, context.events, true);
+    phaseLog.info({ round: context.G.round }, "invasion-check");
+    if (prepareInfidelFleetCombat(context.G)) {
+      setStage(context.G, "resolution", "infidel_fleet_combat");
+    } else {
+      runInvasionCheck(context.G, context.events, true);
+    }
   },
   turn: {
     order: {
@@ -36,9 +39,7 @@ export const postElectionPhase: PhaseConfig<MyGameState> = {
     onBegin: (context) => {
       if (context.G._halted) return;
       const sub = context.G.stage.sub;
-
-      if (sub === "rebellion_rival_support"
-          || sub === "invasion_contribute" || sub === "invasion_buyoff") return;
+      if (sub === "invasion_contribute" || sub === "invasion_buyoff") return;
 
       const target = getResolutionTarget(context.G);
       if (target && target !== context.ctx.currentPlayer) {
@@ -48,4 +49,4 @@ export const postElectionPhase: PhaseConfig<MyGameState> = {
   },
 };
 
-export default postElectionPhase;
+export default invasionCheckPhase;

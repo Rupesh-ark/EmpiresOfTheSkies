@@ -8,7 +8,7 @@ const phaseLog = log.child({ mod: "phase" });
 
 export const electionPhase: PhaseConfig<MyGameState> = {
   moves: wrapSet("vote"),
-  next: "postElection",
+  next: "invasionCheck",
   onBegin: (context) => {
     if (context.G._halted) return;
     phaseLog.info({ round: context.G.round }, "election");

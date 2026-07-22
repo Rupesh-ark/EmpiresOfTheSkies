@@ -500,12 +500,13 @@ export function enumerateLegalMoves(G: MyGameState, ctx: Ctx, playerID: string):
     }
 
     case "resolution":
+    case "rebellions":
     case "aerialBattles":
     case "plunder":
     case "groundBattles":
     case "conquests":
     case "election":
-    case "postElection": {
+    case "invasionCheck": {
       const moves: AIMove[] = [];
 
       if (isStage(G, "resolution", "aerial_attack_or_pass")) {

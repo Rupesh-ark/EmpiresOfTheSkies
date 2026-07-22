@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import electionPhase from "../../phases/election.js";
-import postElectionPhase from "../../phases/postElection.js";
+import invasionCheckPhase from "../../phases/invasionCheck.js";
 import type { EventsAPI, MyGameState } from "../../types.js";
 import { buildCtx, buildInitialG, buildPlayer } from "../testHelpers.js";
 
@@ -25,9 +25,9 @@ describe("election phase", () => {
   });
 });
 
-describe("post-election phase", () => {
+describe("invasion-check phase", () => {
   const firstPlayerPosition = (G: MyGameState) => {
-    const order = postElectionPhase.turn!.order!;
+    const order = invasionCheckPhase.turn!.order!;
     return order.first({ G } as any);
   };
 
@@ -38,32 +38,17 @@ describe("post-election phase", () => {
       setup: (G: MyGameState) => { G.infidelFleetCombat = { targetPlayerID: "1", fleetIndex: 0 }; },
     },
     {
-      sub: "deferred_battle" as const,
-      expected: 1,
-      setup: (G: MyGameState) => {
-        G.currentDeferredBattle = {
-          event: { card: "treacherous_creatures", targetPlayerID: "0" },
-          description: "Deferred battle",
-        };
-      },
-    },
-    {
-      sub: "rebellion" as const,
-      expected: 2,
-      setup: (G: MyGameState) => {
-        G.currentRebellion = {
-          event: { card: "peasant_rebellion", targetPlayerID: "1" },
-          counterSwords: 1,
-        };
-      },
-    },
-    {
       sub: "invasion_nominate" as const,
       expected: 1,
       setup: (G: MyGameState) => { G.playerInfo["0"].isArchprelate = true; },
     },
     {
-      sub: "rebellion_rival_support" as const,
+      sub: "invasion_contribute" as const,
+      expected: 0,
+      setup: (_G: MyGameState) => {},
+    },
+    {
+      sub: "invasion_buyoff" as const,
       expected: 0,
       setup: (_G: MyGameState) => {},
     },
@@ -75,12 +60,12 @@ describe("post-election phase", () => {
     expect(firstPlayerPosition(G)).toBe(expected);
   });
 
-  it("ends immediately when there is no post-election work", () => {
+  it("ends immediately when there is no invasion-check work", () => {
     const G = buildThreePlayerG();
     const endPhase = vi.fn();
     const events = { endPhase, endTurn: vi.fn() } as unknown as EventsAPI;
 
-    postElectionPhase.onBegin!({ G, ctx: buildCtx("2", 3), events } as any);
+    invasionCheckPhase.onBegin!({ G, ctx: buildCtx("2", 3), events } as any);
 
     expect(endPhase).toHaveBeenCalledOnce();
   });

@@ -1,6 +1,7 @@
 import { INVALID_MOVE } from "boardgame.io/core";
 import { MoveDefinition } from "../../types.js";
 import { logEvent } from "../../helpers/stateUtils.js";
+import { findNextGroundBattle } from "../../helpers/findNext.js";
 import { resolveDeferredBattleInteractive } from "../../helpers/resolveDeferredBattles.js";
 import { setupNextDeferredBattle } from "../../helpers/resolutionFlow.js";
 
@@ -29,8 +30,9 @@ const commitDeferredBattleCard: MoveDefinition = {
     resolveDeferredBattleInteractive(G, battle.event, random.Shuffle, fowCard);
     G.currentDeferredBattle = null;
 
-    // Check for next deferred battle or continue resolution
-    setupNextDeferredBattle(G, events);
+    if (!setupNextDeferredBattle(G, events)) {
+      findNextGroundBattle(G, events);
+    }
   },
   errorMessage: "Cannot commit a battle card right now",
 };

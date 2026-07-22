@@ -4,9 +4,8 @@ import { logEvent } from "../../helpers/stateUtils.js";
 import { setStage } from "../../helpers/stageUtils.js";
 import {
   resolveRebellionWithTroopsAndRivals,
-  setupNextRebellion,
 } from "../../helpers/resolveRebellion.js";
-import { continueResolution } from "../../helpers/resolutionFlow.js";
+import { nextAfterRebellion } from "../../helpers/resolutionFlow.js";
 import log from "../../helpers/logger.js";
 
 const conLog = log.child({ mod: "contribute-rebellion" });
@@ -63,12 +62,7 @@ const contributeToRebellion: MoveDefinition = {
 
       G.currentRebellion = null;
 
-      if (setupNextRebellion(G)) {
-        setStage(G, "resolution", "rebellion");
-        events.endTurn({ next: G.currentRebellion!.event.targetPlayerID });
-      } else {
-        continueResolution(G, events);
-      }
+      nextAfterRebellion(G, events);
     } else {
       // Next rival in IPO
       const nextRival = ctx.playOrder.find(

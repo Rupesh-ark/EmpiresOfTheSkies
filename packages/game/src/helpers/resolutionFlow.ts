@@ -1,22 +1,15 @@
-/**
- * resolutionFlow.ts
- *
- * Post-election resolution flow for deferred battles, rebellions, invasion,
- * and fleet retrieval.
- */
+/** Shared handoffs for interactive resolution work. */
 
 import { MyGameState } from "../types.js";
 import { setStage } from "./stageUtils.js";
 import { setupNextRebellion } from "./resolveRebellion.js";
 import { getDeferredBattleDescription } from "./resolveDeferredBattles.js";
 import { checkForInvasion, getArchprelateForNomination } from "./resolveInvasion.js";
-import { prepareInfidelFleetCombat } from "./resolveInfidelFleet.js";
 import type { EventsAPI } from "../types.js";
 
 /**
  * Set up the next non-rebellion deferred battle for interactive resolution.
  * If one exists, transitions to deferred_battle stage and pauses.
- * If none remain, continues to rebellions → invasion → retrieve fleets.
  *
  * @param skipEndTurn — if true, sets G.stage but does NOT call endTurn.
  *   Used when called from phase onBegin where endTurn is silently discarded
@@ -27,7 +20,7 @@ export const setupNextDeferredBattle = (
   G: MyGameState,
   events: EventsAPI,
   skipEndTurn = false
-): void => {
+): boolean => {
   // Find next non-rebellion deferred event
   const idx = G.eventState.deferredEvents.findIndex(
     (e) => !e.card.endsWith("_rebellion")
@@ -41,53 +34,24 @@ export const setupNextDeferredBattle = (
     };
     setStage(G, "resolution", "deferred_battle");
     if (!skipEndTurn) events.endTurn({ next: event.targetPlayerID });
-    return;
+    return true;
   }
 
-  // No more deferred battles — continue to rebellions → invasion
-  continueAfterDeferredBattles(G, events, skipEndTurn);
+  return false;
 };
 
-/** Continue through rebellions and invasion, then enter the retrieve-fleets phase. */
-const continueAfterDeferredBattles = (
+/** Route to the next rebellion, or finish the rebellions phase. */
+export const nextAfterRebellion = (
   G: MyGameState,
-  events: EventsAPI,
-  skipEndTurn = false
+  events: EventsAPI
 ): void => {
-  // Interactive rebellions
-  if (G.eventState.deferredEvents.length > 0 && setupNextRebellion(G)) {
+  if (setupNextRebellion(G)) {
     setStage(G, "resolution", "rebellion");
-    if (!skipEndTurn) events.endTurn({ next: G.currentRebellion!.event.targetPlayerID });
+    events.endTurn({ next: G.currentRebellion!.event.targetPlayerID });
     return;
-  }
-
-  // Invasion check
-  const invasionTriggered = checkForInvasion(G);
-  if (invasionTriggered) {
-    const archprelate = getArchprelateForNomination(G);
-    if (archprelate) {
-      setStage(G, "resolution", "invasion_nominate");
-      if (!skipEndTurn) events.endTurn({ next: archprelate });
-      return;
-    }
   }
 
   events.endPhase();
-};
-
-/**
- * Continue post-election deferred work from the current point.
- * Called after fleet combat and interactive rebellion steps.
- *
- * @param skipEndTurn — pass true when called from phase onBegin
- */
-export const continueResolution = (
-  G: MyGameState,
-  events: EventsAPI,
-  skipEndTurn = false
-): void => {
-  // Try to set up first deferred battle (interactive)
-  setupNextDeferredBattle(G, events, skipEndTurn);
 };
 
 /**
@@ -116,34 +80,20 @@ export const getResolutionTarget = (G: MyGameState): string | null => {
   }
 };
 
-/**
- * Called when election is complete → post-election sequence.
- * Rulebook order: infidel invasion (step 8) → deferred battles → rebellions → invasion → retrieve fleets
- */
-export const advanceFromElection = (
+/** Run the invasion draw and route interactive nomination when required. */
+export const runInvasionCheck = (
   G: MyGameState,
   events: EventsAPI,
   skipEndTurn = false
 ): void => {
-  // Infidel Fleet targeting + movement
-  const hasCombat = prepareInfidelFleetCombat(G);
-  if (hasCombat) {
-    setStage(G, "resolution", "infidel_fleet_combat");
-    if (!skipEndTurn) events.endTurn({ next: G.infidelFleetCombat!.targetPlayerID });
-    return;
+  if (checkForInvasion(G)) {
+    const archprelate = getArchprelateForNomination(G);
+    if (archprelate) {
+      setStage(G, "resolution", "invasion_nominate");
+      if (!skipEndTurn) events.endTurn({ next: archprelate });
+      return;
+    }
   }
-  // No fleet combat — continue to deferred battles / rebellions / invasion / retrieve
-  continuePostElection(G, events, skipEndTurn);
-};
 
-/**
- * Continue post-election flow (after infidel fleet combat if any).
- * Deferred battles → rebellions → invasion → retrieve fleets.
- */
-export const continuePostElection = (
-  G: MyGameState,
-  events: EventsAPI,
-  skipEndTurn = false
-): void => {
-  setupNextDeferredBattle(G, events, skipEndTurn);
+  events.endPhase();
 };

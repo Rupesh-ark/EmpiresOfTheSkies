@@ -191,14 +191,10 @@ describe("invasionFlow — all players contribute troops", () => {
     G.accumulatedHosts = [{ swords: 3, shields: 0, isFleet: false, isInvasionTrigger: true }];
 
     callContribute(G, "0", 5, 0, ["0", "1"]);
-    callContribute(G, "1", 5, 0, ["0", "1"]);
+    const { events } = callContribute(G, "1", 5, 0, ["0", "1"]);
 
-    // Either resolved (won) or moved to buyoff (lost) — in either case invasion contributions recorded
-    const allContributed =
-      G.currentInvasion === null ||
-      G.currentInvasion.phase === "buyoff" ||
-      G.stage.sub === "retrieve_fleets";
-    expect(allContributed).toBe(true);
+    expect(G.currentInvasion).toBeNull();
+    expect(events.endPhase).toHaveBeenCalledOnce();
   });
 
   it("excludes the Infidel Fleet from Grand Army ground battle and pool return", () => {
@@ -284,10 +280,11 @@ describe("invasionFlow — buyoff phase", () => {
     expect(G.currentInvasion).not.toBeNull();
     expect(G.currentInvasion?.buyoffOffered?.["0"]).toBe(5);
 
-    callBuyoff(G, "1", 5, ["0", "1"]);
+    const { events } = callBuyoff(G, "1", 5, ["0", "1"]);
 
     // Both offered → should transition away from buyoff
-    expect(G.stage).toEqual({ phase: "resolution", sub: "retrieve_fleets" });
+    expect(G.currentInvasion).toBeNull();
+    expect(events.endPhase).toHaveBeenCalledOnce();
   });
 
   it("returns INVALID_MOVE if player offers more gold than they have", () => {

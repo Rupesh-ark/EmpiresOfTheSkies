@@ -3,6 +3,7 @@ import type { MyGameState } from "../types.js";
 import { findNextGroundBattle } from "../helpers/findNext.js";
 import { checkIfCurrentPlayerIsInCurrentBattle } from "../helpers/helpers.js";
 import log from "../helpers/logger.js";
+import { getResolutionTarget, setupNextDeferredBattle } from "../helpers/resolutionFlow.js";
 import { wrapSet } from "../helpers/wrapSet.js";
 
 const phaseLog = log.child({ mod: "phase" });
@@ -24,7 +25,8 @@ export const groundBattlesPhase: PhaseConfig<MyGameState> = {
     "garrisonTroops",
     "drawCard",
     "pickCard",
-    "relocateDefeatedFleet"
+    "relocateDefeatedFleet",
+    "commitDeferredBattleCard"
   ),
   next: "conquests",
   onBegin: (context) => {
@@ -32,16 +34,32 @@ export const groundBattlesPhase: PhaseConfig<MyGameState> = {
     phaseLog.info({ round: context.G.round }, "ground-battles");
     context.G.mapState.currentBattle = [0, 0];
     context.G.battleState = undefined;
-    findNextGroundBattle(context.G, context.events, true);
+    // Resolve all deferred battles before any map ground battle.
+    if (!setupNextDeferredBattle(context.G, context.events, true)) {
+      findNextGroundBattle(context.G, context.events, true);
+    }
   },
   turn: {
     order: {
       playOrder: ({ G }) => G.turnOrder,
-      first: ({ G }) => firstFleetOwnerPosition(G),
+      first: ({ G }) => {
+        if (G.stage.sub !== "deferred_battle") return firstFleetOwnerPosition(G);
+        const target = getResolutionTarget(G);
+        if (target === null) return 0;
+        const position = G.turnOrder.indexOf(target);
+        return position === -1 ? 0 : position;
+      },
       next: ({ ctx }) => (ctx.playOrderPos + 1) % ctx.playOrder.length,
     },
     onBegin: (context) => {
       if (context.G._halted) return;
+      if (context.G.stage.sub === "deferred_battle") {
+        const target = getResolutionTarget(context.G);
+        if (target && target !== context.ctx.currentPlayer) {
+          context.events.endTurn({ next: target });
+        }
+        return;
+      }
       checkIfCurrentPlayerIsInCurrentBattle(
         context.G,
         context.ctx,

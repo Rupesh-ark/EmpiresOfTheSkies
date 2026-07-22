@@ -2,7 +2,7 @@ import { INVALID_MOVE } from "boardgame.io/core";
 import { MoveDefinition } from "../../types.js";
 import { logEvent } from "../../helpers/stateUtils.js";
 import { executeInfidelFleetCombat } from "../../helpers/resolveInfidelFleet.js";
-import { continueResolution } from "../../helpers/resolutionFlow.js";
+import { runInvasionCheck } from "../../helpers/resolutionFlow.js";
 
 const respondToInfidelFleet: MoveDefinition = {
   fn: ({ G, playerID, events, random }, ...args) => {
@@ -34,8 +34,7 @@ const respondToInfidelFleet: MoveDefinition = {
       executeInfidelFleetCombat(G, random.Shuffle, fowCard);
     }
 
-    // Continue Resolution flow (deferred events → rebellions → invasion → retrieve)
-    continueResolution(G, events);
+    runInvasionCheck(G, events);
   },
   errorMessage: "Cannot respond to the Infidel Fleet right now",
 };

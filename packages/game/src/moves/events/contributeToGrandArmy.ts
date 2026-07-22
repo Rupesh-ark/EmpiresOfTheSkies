@@ -59,7 +59,6 @@ const contributeToGrandArmy: MoveDefinition = {
         events.endTurn({ next: ctx.playOrder[0] });
       } else {
         // Army won — proceed to retrieve fleets
-        setStage(G, "resolution", "retrieve_fleets");
         events.endPhase();
       }
     } else {

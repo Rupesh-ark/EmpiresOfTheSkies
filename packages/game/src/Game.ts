@@ -20,12 +20,13 @@ import {
 } from "./helpers/helpers.js";
 import { TurnOrder } from "boardgame.io/core";
 import { ALL_EVENT_CARD_NAMES } from "./helpers/eventCardDefinitions.js";
+import rebellionsPhase from "./phases/rebellions.js";
 import aerialBattlesPhase from "./phases/aerialBattles.js";
 import plunderPhase from "./phases/plunder.js";
 import groundBattlesPhase from "./phases/groundBattles.js";
 import conquestsPhase from "./phases/conquests.js";
 import electionPhase from "./phases/election.js";
-import postElectionPhase from "./phases/postElection.js";
+import invasionCheckPhase from "./phases/invasionCheck.js";
 import retrieveFleetsPhase from "./phases/retrieveFleets.js";
 import tradePhase from "./phases/trade.js";
 import sellGoodsPhase from "./phases/sellGoods.js";
@@ -489,14 +490,15 @@ const MyGame: Game<MyGameState> = {
           playerInfo.passed = false;
         });
       },
-      next: "aerialBattles",
+      next: "rebellions",
     },
+    rebellions: rebellionsPhase,
     aerialBattles: aerialBattlesPhase,
     plunder: plunderPhase,
     groundBattles: groundBattlesPhase,
     conquests: conquestsPhase,
     election: electionPhase,
-    postElection: postElectionPhase,
+    invasionCheck: invasionCheckPhase,
     retrieveFleets: retrieveFleetsPhase,
     trade: tradePhase,
     sellGoods: sellGoodsPhase,
