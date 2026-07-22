@@ -203,6 +203,7 @@ export function buildInitialG(
     troopsAvailableForGarrison: { regiments: 0, elites: 0, levies: 0 },
     battleResult: null,
     failedConquests: [],
+    tradeGainsThisRound: {},
     contingentPool: [10, 10, 7, 7],
     infidelHostPool: [],
     accumulatedHosts: [],

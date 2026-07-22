@@ -1,7 +1,6 @@
 import type { PhaseConfig } from "boardgame.io";
 import type { MyGameState, PlayerInfo } from "../types.js";
 import log from "../helpers/logger.js";
-import resolveRound from "../helpers/resolveRound.js";
 import { setStage } from "../helpers/stageUtils.js";
 import { allPlayersPassed, nextUnpassedPlayer } from "../helpers/stateUtils.js";
 import { wrapSet } from "../helpers/wrapSet.js";
@@ -15,7 +14,7 @@ export const hasRetrievableFleet = (player: PlayerInfo): boolean =>
 
 export const retrieveFleetsPhase: PhaseConfig<MyGameState> = {
   moves: wrapSet("retrieveFleets", "pass"),
-  next: "reset",
+  next: "trade",
   onBegin: (context) => {
     if (context.G._halted) return;
     phaseLog.info({ round: context.G.round }, "retrieve-fleets");
@@ -53,9 +52,6 @@ export const retrieveFleetsPhase: PhaseConfig<MyGameState> = {
         }
       }
     },
-  },
-  onEnd: (context) => {
-    resolveRound(context.G, context.events, context.random);
   },
 };
 

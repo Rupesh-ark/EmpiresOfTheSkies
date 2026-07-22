@@ -179,7 +179,12 @@ export function enumerateLegalMoves(G: MyGameState, ctx: Ctx, playerID: string):
       return moves;
     }
 
-    case "taxes": {
+    case "taxes":
+    case "trade":
+    case "sellGoods":
+    case "piracy":
+    case "factoryIncome":
+    case "scoring": {
       return [];
     }
 

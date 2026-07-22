@@ -27,6 +27,11 @@ import conquestsPhase from "./phases/conquests.js";
 import electionPhase from "./phases/election.js";
 import postElectionPhase from "./phases/postElection.js";
 import retrieveFleetsPhase from "./phases/retrieveFleets.js";
+import tradePhase from "./phases/trade.js";
+import sellGoodsPhase from "./phases/sellGoods.js";
+import piracyPhase from "./phases/piracy.js";
+import factoryIncomePhase from "./phases/factoryIncome.js";
+import scoringPhase from "./phases/scoring.js";
 
 import { setStage, isStage } from "./helpers/stageUtils.js";
 import type { GameStage } from "./types.js";
@@ -244,6 +249,7 @@ const MyGame: Game<MyGameState> = {
       troopsAvailableForGarrison: { regiments: 0, elites: 0, levies: 0 },
       battleResult: null,
       failedConquests: [],
+      tradeGainsThisRound: {},
       contingentPool,
       infidelHostPool,
       accumulatedHosts: [],
@@ -492,6 +498,11 @@ const MyGame: Game<MyGameState> = {
     election: electionPhase,
     postElection: postElectionPhase,
     retrieveFleets: retrieveFleetsPhase,
+    trade: tradePhase,
+    sellGoods: sellGoodsPhase,
+    piracy: piracyPhase,
+    factoryIncome: factoryIncomePhase,
+    scoring: scoringPhase,
     reset: {
       turn: {
         order: TurnOrder.ONCE,

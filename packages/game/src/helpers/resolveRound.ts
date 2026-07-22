@@ -107,13 +107,16 @@ const scoreHeresyTrackVP = (G: MyGameState) => {
   });
 };
 
-const resolveRound = (G: MyGameState, events: EventsAPI, random: RandomAPI) => {
+export const tradePhaseEffects = (G: MyGameState): void => {
   G.failedConquests = [];
+  // Heresy and palace VP stay pre-trade to preserve the existing order.
   scoreHeresyTrackVP(G);
   palaceBonus(G);
 
   grantTradeRouteGoods(G);
+};
 
+export const sellGoodsPhaseEffects = (G: MyGameState, random: RandomAPI): void => {
   const smugglerGoods: Record<string, GoodKey> = {};
   Object.values(G.playerInfo).forEach((player) => {
     if (player.resources.advantageCard !== "licenced_smugglers") return;
@@ -163,12 +166,19 @@ const resolveRound = (G: MyGameState, events: EventsAPI, random: RandomAPI) => {
     G.mapState.goodsPriceMarkers[good] = Math.min(PRICE_MARKER_MAX, G.mapState.goodsPriceMarkers[good] + 1);
   });
 
+  G.tradeGainsThisRound = tradeGainsMap;
+};
+
+export const piracyPhaseEffects = (G: MyGameState): void => {
   // B7: piracy — after goods sold, before factory income
   enactPiracy(G);
+};
 
+export const factoryIncomePhaseEffects = (G: MyGameState): void => {
   // B2: factory income
   collectFactoryIncome(G);
 
+  // Free dissenters and debt stay here to preserve the existing order.
   // Free dissenters (from Send Agitators): advance heresy +1 each if unimprisoned
   Object.values(G.playerInfo).forEach((player) => {
     if (player.freeDissenters > 0) {
@@ -190,7 +200,11 @@ const resolveRound = (G: MyGameState, events: EventsAPI, random: RandomAPI) => {
       }
     }
   });
+};
 
+export const scoringPhaseEffects = (G: MyGameState, events: EventsAPI): void => {
+  const tradeGainsMap = G.tradeGainsThisRound;
+  G.tradeGainsThisRound = {};
   const tradeAmounts = [...Object.values(tradeGainsMap)];
   const highestTradeAmount = Math.max(...tradeAmounts);
 
@@ -291,8 +305,6 @@ const resolveRound = (G: MyGameState, events: EventsAPI, random: RandomAPI) => {
     events.endGame({ ranking });
   }
 };
-
-export default resolveRound;
 
 // D2: corrected trade VP schedule — lookup from TRADE_VP_SCHEDULE
 const tradeVictoryPoints = (G: MyGameState): [number, number, number] => {

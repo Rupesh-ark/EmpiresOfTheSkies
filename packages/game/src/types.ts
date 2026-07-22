@@ -82,6 +82,7 @@ export interface MyGameState {
   turnOrder: string[];
   validFortLocations: [number, number][];
   failedConquests: { playerId: string; tile: [number, number] }[];
+  tradeGainsThisRound: Record<string, number>;
   contingentPool: number[];
   infidelHostPool: InfidelHostCounter[];
   accumulatedHosts: InfidelHostCounter[];
