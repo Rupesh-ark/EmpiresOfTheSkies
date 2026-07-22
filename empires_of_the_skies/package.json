@@ -8,7 +8,8 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "pnpm --filter @eots/game build && vite build",
+    "build": "pnpm --filter @eots/game build && tsc -b && vite build",
+    "typecheck": "tsc -b",
     "lint": "eslint .",
     "preview": "vite preview"
   },

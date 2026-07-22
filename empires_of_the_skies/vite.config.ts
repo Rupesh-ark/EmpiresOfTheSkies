@@ -3,7 +3,9 @@ import react from '@vitejs/plugin-react';
 import { visualizer } from 'rollup-plugin-visualizer';
 import path from 'path';
 
-export default defineConfig({
+export default defineConfig(({ command }) => ({
+  // top-level Vite option; nested under `build` it is silently ignored
+  esbuild: command === 'build' ? { drop: ['console', 'debugger'] as const } : undefined,
   plugins: [
     react(),
     visualizer({
@@ -43,8 +45,5 @@ export default defineConfig({
         },
       },
     },
-    esbuild: {
-      drop: ['console', 'debugger'],
-    },
   },
-});
+}));

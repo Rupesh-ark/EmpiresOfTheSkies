@@ -32,8 +32,10 @@ jobs:
       - name: Server build (typecheck)
         run: pnpm --filter empires-server build
 
+      # root tsconfig is solution-style ("files": []), so plain `tsc --noEmit`
+      # checks nothing — `tsc -b` walks the app + node project references
       - name: Frontend typecheck
-        run: pnpm --filter empires_of_the_skies exec tsc --noEmit
+        run: pnpm --filter empires_of_the_skies typecheck
 
       - name: Frontend build
         run: pnpm --filter empires_of_the_skies build

@@ -6,7 +6,7 @@
  */
 import { Client } from "boardgame.io/react";
 import { SocketIO } from "boardgame.io/multiplayer";
-import { useMemo, useEffect, useRef } from "react";
+import { useMemo, useEffect, useRef, type ComponentType } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { MyGame } from "@eots/game";
 import { ActionBoardsAndMap } from "../components/ActionBoardsAndMap";
@@ -62,12 +62,18 @@ const ClientComponent = ({ server }: { server: string }) => {
 
   const EmpiresOfTheSkiesClient = useMemo(
     () =>
+      // beta.4's declaration emit loses the wrapper class's React.Component
+      // heritage ("refs" missing), so React 18 JSX rejects it without the cast
       Client({
         game: MyGame,
         board: ActionBoardsAndMap,
         multiplayer: SocketIO({ server }),
         debug: false,
-      }),
+      }) as unknown as ComponentType<{
+        playerID?: string;
+        matchID?: string;
+        credentials?: string;
+      }>,
     [server]
   );
 
