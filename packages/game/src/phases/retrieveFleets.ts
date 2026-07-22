@@ -14,7 +14,7 @@ export const hasRetrievableFleet = (player: PlayerInfo): boolean =>
 
 export const retrieveFleetsPhase: PhaseConfig<MyGameState> = {
   moves: wrapSet("retrieveFleets", "pass"),
-  next: "trade",
+  next: "scoring",
   onBegin: (context) => {
     if (context.G._halted) return;
     phaseLog.info({ round: context.G.round }, "retrieve-fleets");

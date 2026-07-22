@@ -109,10 +109,6 @@ const scoreHeresyTrackVP = (G: MyGameState) => {
 
 export const tradePhaseEffects = (G: MyGameState): void => {
   G.failedConquests = [];
-  // Heresy and palace VP stay pre-trade to preserve the existing order.
-  scoreHeresyTrackVP(G);
-  palaceBonus(G);
-
   grantTradeRouteGoods(G);
 };
 
@@ -177,8 +173,9 @@ export const piracyPhaseEffects = (G: MyGameState): void => {
 export const factoryIncomePhaseEffects = (G: MyGameState): void => {
   // B2: factory income
   collectFactoryIncome(G);
+};
 
-  // Free dissenters and debt stay here to preserve the existing order.
+export const scoringPhaseEffects = (G: MyGameState, events: EventsAPI): void => {
   // Free dissenters (from Send Agitators): advance heresy +1 each if unimprisoned
   Object.values(G.playerInfo).forEach((player) => {
     if (player.freeDissenters > 0) {
@@ -190,19 +187,6 @@ export const factoryIncomePhaseEffects = (G: MyGameState): void => {
     }
   });
 
-  // D8: debt penalty — gold < 0 only (not at exactly 0)
-  Object.values(G.playerInfo).forEach((player) => {
-    if (player.resources.gold < 0) {
-      const penalty = Math.floor(Math.abs(player.resources.gold) / DEBT_PENALTY_DIVISOR);
-      removeVPAmount(G, player.id, penalty);
-      if (penalty > 0) {
-        logEvent(G, `Debt penalty: ${player.kingdomName} -${penalty} VP`);
-      }
-    }
-  });
-};
-
-export const scoringPhaseEffects = (G: MyGameState, events: EventsAPI): void => {
   const tradeGainsMap = G.tradeGainsThisRound;
   G.tradeGainsThisRound = {};
   const tradeAmounts = [...Object.values(tradeGainsMap)];
@@ -289,6 +273,20 @@ export const scoringPhaseEffects = (G: MyGameState, events: EventsAPI): void => 
       }
     });
   }
+
+  scoreHeresyTrackVP(G);
+  palaceBonus(G);
+
+  // D8: debt penalty — gold < 0 only (not at exactly 0)
+  Object.values(G.playerInfo).forEach((player) => {
+    if (player.resources.gold < 0) {
+      const penalty = Math.floor(Math.abs(player.resources.gold) / DEBT_PENALTY_DIVISOR);
+      removeVPAmount(G, player.id, penalty);
+      if (penalty > 0) {
+        logEvent(G, `Debt penalty: ${player.kingdomName} -${penalty} VP`);
+      }
+    }
+  });
 
   if (G.round >= G.finalRound) {
     applyFinalRoundBonus(G);

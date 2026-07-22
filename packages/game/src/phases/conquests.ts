@@ -24,7 +24,7 @@ export const conquestsPhase: PhaseConfig<MyGameState> = {
     "pickCardConquest",
     "garrisonTroops"
   ),
-  next: "election",
+  next: "trade",
   onBegin: (context) => {
     if (context.G._halted) return;
     phaseLog.info({ round: context.G.round }, "conquests");

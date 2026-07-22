@@ -23,6 +23,6 @@ describe("rulebook phase order", () => {
     }
 
     const segment = chain.slice(chain.indexOf("actions") + 1, chain.indexOf("reset"));
-    expect(segment).toEqual([...RESOLUTION_SEQUENCE]);
+    expect(segment).toEqual([...RESOLUTION_SEQUENCE, "scoring"]);
   });
 });

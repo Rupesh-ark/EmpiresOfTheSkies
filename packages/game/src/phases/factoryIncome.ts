@@ -13,7 +13,7 @@ export const factoryIncomePhase: PhaseConfig<MyGameState> = {
     context.events.endPhase();
   },
   moves: {},
-  next: "scoring",
+  next: "election",
 };
 
 export default factoryIncomePhase;

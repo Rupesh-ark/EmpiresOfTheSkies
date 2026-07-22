@@ -32,7 +32,7 @@ const PHASES = [
 ] as const;
 
 describe("round effects phases", () => {
-  it("preserves the existing round-effects totals across all five slices", () => {
+  it("applies rulebook round-effects totals across all five slices", () => {
     const G = buildInitialG([
       buildPlayer("0", {
         hereticOrOrthodox: "heretic",
@@ -94,17 +94,24 @@ describe("round effects phases", () => {
     const random = { Number: () => 0 } as any;
 
     tradePhaseEffects(G);
+    expect(G.failedConquests).toEqual([]);
+    expect(G.playerInfo["0"].resources.victoryPoints).toBe(10);
     sellGoodsPhaseEffects(G, random);
     expect(G.tradeGainsThisRound).toEqual({ "0": 3 });
     piracyPhaseEffects(G);
     factoryIncomePhaseEffects(G);
+    expect(G.playerInfo["1"].heresyTracker).toBe(0);
+    expect(G.playerInfo["1"].freeDissenters).toBe(2);
     scoringPhaseEffects(G, events);
 
-    expect(G.failedConquests).toEqual([]);
+    // P0 gold: 0 + 1 route gold + (3 goods × 2) + 1 factory income = 8.
     expect(G.playerInfo["0"].resources.gold).toBe(8);
+    // P1 gold: -5 + (1 good × 2) = -3.
     expect(G.playerInfo["1"].resources.gold).toBe(-3);
+    // P0 VP: 10 + 3 trade + 2 heresy + (3 - 1) palace = 17.
     expect(G.playerInfo["0"].resources.victoryPoints).toBe(17);
-    expect(G.playerInfo["1"].resources.victoryPoints).toBe(9);
+    // P1: orthodox at tracker 2 after 2 agitator shifts → -2 VP; debt -1 → 7 VP.
+    expect(G.playerInfo["1"].resources.victoryPoints).toBe(7);
     expect(G.playerInfo["0"].heresyTracker).toBe(2);
     expect(G.playerInfo["1"].heresyTracker).toBe(2);
     expect(G.playerInfo["1"].freeDissenters).toBe(0);
