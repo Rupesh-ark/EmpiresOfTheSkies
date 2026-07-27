@@ -3,6 +3,7 @@ import { ReactElement, useState, useEffect, useRef, useCallback } from "react";
 import { Box, Dialog, DialogActions, DialogContent, DialogTitle, Grid, Typography } from "@mui/material";
 import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { WorldMapTile } from "./WorldMapTile";
+import { TradeRouteOverlay } from "./TradeRouteOverlay";
 import svgNameToElementMap from "./nameToElementMap";
 import { MyGameProps, findPossibleDestinations, phaseGroup } from "@eots/game";
 import { tokens } from "@/theme";
@@ -454,6 +455,14 @@ const WorldMap = (props: WorldMapProps) => {
           >
             {tiles}
           </Grid>
+
+          {/* Trade routes, drawn over the terrain but under fleets and badges */}
+          <TradeRouteOverlay
+            G={props.G}
+            playerID={props.playerID}
+            cols={currentMap[0].length}
+            rows={currentMap.length}
+          />
 
           {/* Pan overlay — blocks tile clicks while Space is held */}
           {isPanningState && (

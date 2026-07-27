@@ -9,9 +9,7 @@ import { Box, Button, Dialog, DialogContent, DialogTitle, IconButton, Tooltip, T
 import { Close } from "@mui/icons-material";
 import { ThemeProvider } from "@mui/material/styles";
 import { baseTheme, backgrounds } from "@/theme";
-import ColonyIcon from "../Icons/ColonyIcon";
-import OutpostIcon from "../Icons/OutpostIcon";
-import FortIcon from "../Icons/FortIcon";
+import { ColonyIcon, OutpostIcon, FortIcon } from "../Icons/MapMarkers";
 import FleetIcon from "../Icons/FleetIcon";
 import svgNameToElementMap from "./nameToElementMap";
 import { getLocationPresentation } from "@/utils/locationLabels";
@@ -433,7 +431,7 @@ export const WorldMapTile = memo((props: worldMapTileProps) => {
           onClick={props.selectable ? altOnClick : canShowDetail ? () => setDetailOpen(true) : undefined}
         >
           {building()}
-          {fort.length > 0 ? <Box sx={{ position: "absolute", bottom: 2, right: 2, width: 18, height: 18, zIndex: 10 }}><FortIcon colour={fortColour ?? "#888"} /></Box> : null}
+          {fort.length > 0 ? <Box sx={{ position: "absolute", bottom: 2, right: 2, zIndex: 10 }}><FortIcon colour={fortColour ?? "#888"} /></Box> : null}
 
           {/* Infidel Fleet icon */}
           {props.G.infidelFleet?.active && !props.G.infidelFleet.destroyed &&
