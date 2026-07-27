@@ -269,6 +269,35 @@ export const countActiveTradeRoutes = (G: MyGameState, playerID: string): number
 };
 
 /**
+ * What a prospective set of route placements would achieve, so the UI can
+ * state the outcome instead of a skyship count. A partial chain is legal and
+ * not wasted — "Skyships already so placed can be counted as part or all of
+ * the new chain" (eots42) — so the useful answer is how many claims go from
+ * disconnected to connected, not merely how many ships get left behind.
+ */
+export const claimsConnectedAfterPlacement = (
+  G: MyGameState,
+  playerID: string,
+  extraTiles: [number, number][],
+): { before: number; after: number; total: number } => {
+  const tileArray = G.mapState.currentTileArray;
+  const claims = getPlayerBuildings(G, playerID);
+
+  const base = buildPlayerNetwork(G, playerID);
+  const baseReachable = bfsReachable(FAITHDOM_TILES, base, tileArray);
+
+  const extended = new Set(base);
+  extraTiles.forEach(([x, y]) => extended.add(tileKey(x, y)));
+  const extendedReachable = bfsReachable(FAITHDOM_TILES, extended, tileArray);
+
+  return {
+    before: claims.filter(([x, y]) => isBuildingConnected(x, y, baseReachable, tileArray)).length,
+    after: claims.filter(([x, y]) => isBuildingConnected(x, y, extendedReachable, tileArray)).length,
+    total: claims.length,
+  };
+};
+
+/**
  * Would placing a route skyship at the given tile connect any currently
  * disconnected outpost/colony to Faithdom for this player?
  */

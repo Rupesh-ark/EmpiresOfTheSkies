@@ -30,7 +30,17 @@ export type MapSelectionRequest = {
   getSelectionDetail?: (coords: number[]) => string;
 };
 
+/**
+ * A prospective set of tiles to show on the map — a route chain being
+ * considered, say. Deliberately separate from `selection`: previewing is not
+ * choosing, and folding it into the single-tile selection flow would have
+ * bent the semantics that deploy, fort placement and relocate rely on.
+ */
+export type MapPreview = { tiles: number[][]; colour: string } | null;
+
 type MapSelectionValue = {
+  preview: MapPreview;
+  setPreview: (preview: MapPreview) => void;
   selection: MapSelectionRequest | null;
   selected: number[] | null;
   startSelection: (req: MapSelectionRequest) => void;
@@ -46,6 +56,7 @@ const MapSelectionContext = createContext<MapSelectionValue | null>(null);
 export const MapSelectionProvider = ({ children }: { children: ReactNode }) => {
   const [selection, setSelection] = useState<MapSelectionRequest | null>(null);
   const [selected, setSelected] = useState<number[] | null>(null);
+  const [preview, setPreview] = useState<MapPreview>(null);
 
   const startSelection = useCallback((req: MapSelectionRequest) => {
     setSelection(req);
@@ -82,8 +93,10 @@ export const MapSelectionProvider = ({ children }: { children: ReactNode }) => {
       confirmSelection,
       cancelSelection,
       clearSelection,
+      preview,
+      setPreview,
     }),
-    [selection, selected, startSelection, selectTile, confirmSelection, cancelSelection, clearSelection]
+    [selection, selected, startSelection, selectTile, confirmSelection, cancelSelection, clearSelection, preview]
   );
 
   return (
@@ -95,6 +108,8 @@ export const MapSelectionProvider = ({ children }: { children: ReactNode }) => {
 
 /** No-op fallback so components render safely outside the provider (e.g. lobby). */
 const NOOP_VALUE: MapSelectionValue = {
+  preview: null,
+  setPreview: () => {},
   selection: null,
   selected: null,
   startSelection: () => {},

@@ -1,21 +1,44 @@
-import { useState, useMemo } from "react";
-import { MyGameProps, KINGDOM_LOCATION, tileKey, wouldPlacementConnectRoute, getRoutePlacementTiles, FAITHDOM_TILES } from "@eots/game";
-import { Box, Typography, Switch } from "@mui/material";
+/**
+ * RetrieveFleetsDialog — bring fleets home, and decide what they leave behind.
+ *
+ * A returning fleet can drop skyships along the path it flew, and those
+ * markers are what physically link a claimed Land back to Faithdom. The old
+ * panel presented this as a switch labelled with a count ("Leave Trade Route
+ * (3 skyships)"), which answered the wrong question: what matters is whether
+ * the chain REACHES, not how many ships it costs.
+ *
+ * So the choice leads with the outcome — how many of your claims the placement
+ * connects — and the prospective chain is previewed on the map in your kingdom
+ * colour while you decide. A short chain is legal and not wasted: skyships
+ * already placed count toward a chain you finish later (eots42), so an
+ * incomplete route is reported as progress rather than an error.
+ */
+import { useState, useMemo, useEffect } from "react";
+import {
+  MyGameProps, KINGDOM_LOCATION, tileKey, wouldPlacementConnectRoute,
+  getRoutePlacementTiles, claimsConnectedAfterPlacement, FAITHDOM_TILES,
+  buildPlayerNetwork, bfsReachable, isBuildingConnected,
+} from "@eots/game";
+import { Box, Typography } from "@mui/material";
 import { DecisionPanel } from "@/components/atoms/DecisionPanel";
 import { GameButton } from "@/components/atoms/GameButton";
 import { tokens } from "@/theme";
 import { IconSkyship, IconRegiment, IconLevy } from "@/theme";
 import { getLocationPresentation } from "@/utils/locationLabels";
+import { useMapSelection } from "@/contexts/MapSelectionContext";
 
 type RouteOption = "placeAt" | "trail" | null;
 
 const RetrieveFleetsDialog = (props: MyGameProps) => {
   const [selectedFleets, setSelectedFleets] = useState<number[]>([]);
   const [routeToggles, setRouteToggles] = useState<Record<number, boolean>>({});
+  const [hoveredFleet, setHoveredFleet] = useState<number | null>(null);
+  const { setPreview } = useMapSelection();
 
   const playerID = props.playerID ?? props.ctx.currentPlayer;
   const player = props.G.playerInfo[playerID];
   const [homeX, homeY] = KINGDOM_LOCATION;
+
   const deployedFleets = useMemo(() =>
     player?.fleetInfo.filter(
       (f) =>
@@ -23,279 +46,272 @@ const RetrieveFleetsDialog = (props: MyGameProps) => {
         f.skyships + f.regiments + f.levies + f.eliteRegiments > 0
     ) ?? [], [player, homeX, homeY]);
 
-  // Compute which route option each fleet gets
-  const fleetRouteOptions = useMemo(() => {
-    const options: Record<number, RouteOption> = {};
+  /** Which route mode each fleet qualifies for, and why not when it doesn't. */
+  const routeInfo = useMemo(() => {
+    const info: Record<number, { option: RouteOption; reason?: string }> = {};
     for (const fleet of deployedFleets) {
-      const fleetTile = tileKey(fleet.location[0], fleet.location[1]);
-      const isFaithdom = FAITHDOM_TILES.some(([fx, fy]) => fx === fleet.location[0] && fy === fleet.location[1]);
-      if (isFaithdom || fleet.skyships <= 0) {
-        options[fleet.fleetId] = null;
-      } else if (wouldPlacementConnectRoute(props.G, playerID, fleetTile)) {
-        options[fleet.fleetId] = "placeAt";
-      } else if (fleet.skyships > 1 && fleet.travelHistory.length > 0) {
-        options[fleet.fleetId] = "trail";
-      } else {
-        options[fleet.fleetId] = null;
-      }
+      const key = tileKey(fleet.location[0], fleet.location[1]);
+      const atFaithdom = FAITHDOM_TILES.some(([fx, fy]) => fx === fleet.location[0] && fy === fleet.location[1]);
+      if (atFaithdom) info[fleet.fleetId] = { option: null, reason: "Already in Faithdom" };
+      else if (fleet.skyships <= 0) info[fleet.fleetId] = { option: null, reason: "No skyships to leave" };
+      else if (wouldPlacementConnectRoute(props.G, playerID, key)) info[fleet.fleetId] = { option: "placeAt" };
+      else if (fleet.travelHistory.length > 0) info[fleet.fleetId] = { option: "trail" };
+      else info[fleet.fleetId] = { option: null, reason: "No flight path to mark" };
     }
-    return options;
+    return info;
   }, [deployedFleets, props.G, playerID]);
 
-  // Skyships each route option would actually consume — computed by the same
-  // engine function the retrieveFleets move uses, so the displayed cost can
-  // never drift from the real deduction.
-  const routeCost = useMemo(() => {
-    const costs: Record<number, number> = {};
+  /** Tiles each option would occupy — the same engine call the move makes. */
+  const routeTiles = useMemo(() => {
+    const tiles: Record<number, [number, number][]> = {};
     for (const fleet of deployedFleets) {
-      const option = fleetRouteOptions[fleet.fleetId];
-      if (option) {
-        costs[fleet.fleetId] = getRoutePlacementTiles(props.G, playerID, fleet, option).length;
-      }
+      const option = routeInfo[fleet.fleetId]?.option;
+      tiles[fleet.fleetId] = option ? getRoutePlacementTiles(props.G, playerID, fleet, option) : [];
     }
-    return costs;
-  }, [deployedFleets, fleetRouteOptions, props.G, playerID]);
+    return tiles;
+  }, [deployedFleets, routeInfo, props.G, playerID]);
 
-  const toggleFleet = (fleetId: number) => {
-    setSelectedFleets((prev) =>
-      prev.includes(fleetId)
-        ? prev.filter((id) => id !== fleetId)
-        : [...prev, fleetId]
+  /**
+   * Why a fleet offers no placement. An option can qualify and still place
+   * nothing — most often because the fleet is parked on its own claim, and a
+   * claim is the chain's endpoint rather than a link. If that claim already
+   * touches Faithdom the route is simply finished, which is worth saying.
+   */
+  const emptyNote = useMemo(() => {
+    const notes: Record<number, string> = {};
+    const reachable = bfsReachable(
+      FAITHDOM_TILES,
+      buildPlayerNetwork(props.G, playerID),
+      props.G.mapState.currentTileArray
     );
-  };
+    for (const fleet of deployedFleets) {
+      if (!routeInfo[fleet.fleetId]?.option) continue;
+      if ((routeTiles[fleet.fleetId] ?? []).length > 0) continue;
+      const [fx, fy] = fleet.location;
+      const here = props.G.mapState.buildings[fy]?.[fx];
+      const onOwnClaim = here?.player?.id === playerID && !!here?.buildings;
+      notes[fleet.fleetId] = onOwnClaim
+        ? isBuildingConnected(fx, fy, reachable, props.G.mapState.currentTileArray)
+          ? "Already linked to Faithdom — this claim needs no markers"
+          : "Standing on your own claim — fly a fleet back through the gap to link it"
+        : "Nothing to mark along this fleet's path";
+    }
+    return notes;
+  }, [deployedFleets, routeInfo, routeTiles, props.G, playerID]);
 
-  const toggleRoute = (fleetId: number) => {
-    setRouteToggles((prev) => ({ ...prev, [fleetId]: !prev[fleetId] }));
-  };
+  /** Everything armed right now, so the map preview shows the combined chain. */
+  const armedTiles = useMemo(() => {
+    const all: number[][] = [];
+    for (const fleet of deployedFleets) {
+      const armed = selectedFleets.includes(fleet.fleetId) && routeToggles[fleet.fleetId];
+      const shown = armed || hoveredFleet === fleet.fleetId;
+      if (shown) all.push(...(routeTiles[fleet.fleetId] ?? []));
+    }
+    return all;
+  }, [deployedFleets, selectedFleets, routeToggles, hoveredFleet, routeTiles]);
+
+  useEffect(() => {
+    setPreview(armedTiles.length ? { tiles: armedTiles, colour: player?.colour ?? "#888" } : null);
+    return () => setPreview(null);
+  }, [armedTiles, player?.colour, setPreview]);
+
+  const outcome = useMemo(
+    () => claimsConnectedAfterPlacement(props.G, playerID, armedTiles as [number, number][]),
+    [props.G, playerID, armedTiles]
+  );
+
+  const toggleFleet = (fleetId: number) =>
+    setSelectedFleets((prev) =>
+      prev.includes(fleetId) ? prev.filter((id) => id !== fleetId) : [...prev, fleetId]
+    );
 
   const handleConfirm = () => {
     const placeAt: number[] = [];
     const trailFrom: number[] = [];
-    for (const idx of selectedFleets) {
-      if (routeToggles[idx]) {
-        const option = fleetRouteOptions[idx];
-        if (option === "placeAt") placeAt.push(idx);
-        else if (option === "trail") trailFrom.push(idx);
-      }
+    for (const id of selectedFleets) {
+      if (!routeToggles[id]) continue;
+      const option = routeInfo[id]?.option;
+      if (option === "placeAt") placeAt.push(id);
+      else if (option === "trail") trailFrom.push(id);
     }
-    const options = (placeAt.length > 0 || trailFrom.length > 0)
-      ? {
-        ...(placeAt.length > 0 ? { placeAt } : {}),
-        ...(trailFrom.length > 0 ? { trailFrom } : {}),
-      }
-      : undefined;
+    const options =
+      placeAt.length || trailFrom.length
+        ? { ...(placeAt.length ? { placeAt } : {}), ...(trailFrom.length ? { trailFrom } : {}) }
+        : undefined;
+    setPreview(null);
     props.moves.retrieveFleets(selectedFleets, options);
   };
 
-  const isOpen =
-    props.G.step === "retrieve_fleets" &&
-    props.ctx.currentPlayer === props.playerID;
+  const isOpen = props.G.step === "retrieve_fleets" && props.ctx.currentPlayer === props.playerID;
+  const gained = outcome.after - outcome.before;
 
   return (
     <DecisionPanel
       open={isOpen}
       title="Retrieve Fleets"
-      subtitle="Select fleets to bring home. Toggle route options to leave skyship markers."
+      subtitle="Fleets fly home. Any skyships you leave behind stay as trade-route markers."
       mood="peacetime"
       actions={
         <>
-          <GameButton variant="ghost" onClick={() => props.moves.retrieveFleets([])}>
+          <GameButton variant="ghost" onClick={() => { setPreview(null); props.moves.retrieveFleets([]); }}>
             Skip
           </GameButton>
           <GameButton variant="primary" disabled={selectedFleets.length === 0} onClick={handleConfirm}>
-            Retrieve
+            {selectedFleets.length === 0 ? "Retrieve" : `Retrieve ${selectedFleets.length}`}
           </GameButton>
         </>
       }
     >
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+      <Box sx={{ display: "flex", flexDirection: "column", gap: `${tokens.spacing.sm}px` }}>
         {deployedFleets.map((fleet) => {
-          const loc = getLocationPresentation(
-            props.G.mapState.currentTileArray,
-            fleet.location
-          );
+          const loc = getLocationPresentation(props.G.mapState.currentTileArray, fleet.location);
           const isSelected = selectedFleets.includes(fleet.fleetId);
-          const routeOption = fleetRouteOptions[fleet.fleetId];
-          const routeEnabled = routeToggles[fleet.fleetId] ?? false;
+          const { option, reason } = routeInfo[fleet.fleetId] ?? { option: null };
+          const tiles = routeTiles[fleet.fleetId] ?? [];
+
           return (
-            <Box key={fleet.fleetId}>
+            <Box
+              key={fleet.fleetId}
+              onMouseEnter={() => setHoveredFleet(fleet.fleetId)}
+              onMouseLeave={() => setHoveredFleet((f) => (f === fleet.fleetId ? null : f))}
+              sx={{
+                borderRadius: `${tokens.radius.md}px`,
+                border: isSelected ? `2px solid ${tokens.ui.gold}` : `1px solid ${tokens.ui.border}`,
+                background: isSelected ? `${tokens.ui.gold}0e` : tokens.ui.surface,
+                overflow: "hidden",
+                transition: `all ${tokens.transition.fast}`,
+              }}
+            >
               <Box
                 onClick={() => toggleFleet(fleet.fleetId)}
                 sx={{
                   display: "flex",
                   alignItems: "center",
-                  gap: 1.5,
-                  p: 1.5,
-                  borderRadius: routeOption && isSelected
-                    ? `${tokens.radius.md}px ${tokens.radius.md}px 0 0`
-                    : `${tokens.radius.md}px`,
-                  border: isSelected
-                    ? `2px solid ${tokens.ui.gold}`
-                    : `1px solid ${tokens.ui.border}`,
-                  borderBottom: routeOption && isSelected
-                    ? "none"
-                    : undefined,
-                  background: isSelected
-                    ? `${tokens.ui.gold}12`
-                    : tokens.ui.surface,
+                  gap: `${tokens.spacing.sm}px`,
+                  px: `${tokens.spacing.sm}px`,
+                  py: "8px",
                   cursor: "pointer",
-                  transition: `all ${tokens.transition.fast}`,
-                  "&:hover": {
-                    background: tokens.ui.surfaceHover,
-                    boxShadow: tokens.shadow.sm,
-                  },
+                  "&:hover": { background: tokens.ui.surfaceHover },
                 }}
               >
-                {/* Selection indicator */}
                 <Box
                   sx={{
-                    width: 20,
-                    height: 20,
+                    width: 18, height: 18, flexShrink: 0,
                     borderRadius: `${tokens.radius.sm}px`,
-                    border: isSelected
-                      ? `2px solid ${tokens.ui.gold}`
-                      : `2px solid ${tokens.ui.borderMedium}`,
+                    border: `2px solid ${isSelected ? tokens.ui.gold : tokens.ui.borderMedium}`,
                     background: isSelected ? tokens.ui.gold : "transparent",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    flexShrink: 0,
-                    transition: `all ${tokens.transition.fast}`,
+                    display: "flex", alignItems: "center", justifyContent: "center",
                   }}
                 >
                   {isSelected && (
-                    <Typography sx={{ color: tokens.ui.white, fontSize: 12, fontWeight: 700, lineHeight: 1 }}>
-                      ✓
-                    </Typography>
+                    <Typography sx={{ color: "#fff", fontSize: 11, fontWeight: 700, lineHeight: 1 }}>✓</Typography>
                   )}
                 </Box>
 
-                {/* Fleet info */}
                 <Box sx={{ flex: 1, minWidth: 0 }}>
-                  <Box sx={{ display: "flex", alignItems: "baseline", gap: 1, mb: 0.25 }}>
-                    <Typography
-                      sx={{
-                        fontFamily: tokens.font.accent,
-                        fontSize: tokens.fontSize.sm,
-                        fontWeight: 700,
-                        color: tokens.ui.text,
-                      }}
-                    >
+                  <Box sx={{ display: "flex", alignItems: "baseline", gap: "6px", minWidth: 0 }}>
+                    <Typography sx={{ fontFamily: tokens.font.display, fontSize: tokens.fontSize.sm, fontWeight: 700, color: tokens.ui.text, lineHeight: 1.2 }}>
                       Fleet {fleet.fleetId + 1}
                     </Typography>
-                    <Typography
-                      sx={{
-                        fontFamily: tokens.font.body,
-                        fontSize: tokens.fontSize.xs,
-                        color: tokens.ui.textMuted,
-                      }}
-                    >
-                      {loc.name}
+                    <Typography noWrap sx={{ fontFamily: tokens.font.body, fontSize: tokens.fontSize.xs, color: tokens.ui.textMuted, lineHeight: 1.2 }}>
+                      {loc.name} · {loc.reference}
                     </Typography>
-                    <Box
-                      component="span"
-                      sx={{
-                        px: 0.5,
-                        py: 0.1,
-                        borderRadius: `${tokens.radius.pill}px`,
-                        backgroundColor: `${tokens.ui.textMuted}15`,
-                        border: `1px solid ${tokens.ui.border}`,
-                        fontFamily: tokens.font.body,
-                        fontSize: 12,
-                        fontWeight: 700,
-                        letterSpacing: "0.06em",
-                        color: tokens.ui.textMuted,
-                      }}
-                    >
-                      {loc.reference}
-                    </Box>
                   </Box>
-
-                  {/* Unit counts with icons */}
-                  <Box sx={{ display: "flex", gap: 1.5, alignItems: "center" }}>
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 0.3 }}>
-                      <IconSkyship size={13} style={{ color: tokens.ui.textMuted }} />
-                      <Typography sx={{ fontFamily: tokens.font.body, fontSize: tokens.fontSize.xs, color: tokens.ui.text }}>
-                        {fleet.skyships}
-                      </Typography>
-                    </Box>
-                    {fleet.regiments > 0 && (
-                      <Box sx={{ display: "flex", alignItems: "center", gap: 0.3 }}>
-                        <IconRegiment size={13} style={{ color: tokens.ui.textMuted }} />
-                        <Typography sx={{ fontFamily: tokens.font.body, fontSize: tokens.fontSize.xs, color: tokens.ui.text }}>
-                          {fleet.regiments}
-                        </Typography>
-                      </Box>
-                    )}
-                    {fleet.levies > 0 && (
-                      <Box sx={{ display: "flex", alignItems: "center", gap: 0.3 }}>
-                        <IconLevy size={13} style={{ color: tokens.ui.textMuted }} />
-                        <Typography sx={{ fontFamily: tokens.font.body, fontSize: tokens.fontSize.xs, color: tokens.ui.text }}>
-                          {fleet.levies}
-                        </Typography>
-                      </Box>
-                    )}
+                  <Box sx={{ display: "flex", gap: "10px", alignItems: "center", mt: "2px" }}>
+                    <Count Icon={IconSkyship} value={fleet.skyships} />
+                    {fleet.regiments > 0 && <Count Icon={IconRegiment} value={fleet.regiments} />}
+                    {fleet.levies > 0 && <Count Icon={IconLevy} value={fleet.levies} />}
                   </Box>
                 </Box>
               </Box>
 
-              {routeOption && isSelected && (routeCost[fleet.fleetId] ?? 0) > 0 && (
-                <Box
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    px: 1.5,
-                    py: 0.75,
-                    borderRadius: `0 0 ${tokens.radius.md}px ${tokens.radius.md}px`,
-                    border: `2px solid ${tokens.ui.gold}`,
-                    borderTop: `1px solid ${tokens.ui.border}`,
-                    background: routeEnabled ? `${tokens.ui.gold}08` : tokens.ui.surface,
-                  }}
-                >
-                  <Typography
-                    sx={{
-                      fontFamily: tokens.font.body,
-                      fontSize: tokens.fontSize.xs,
-                      color: tokens.ui.textMuted,
-                    }}
-                  >
-                    {routeOption === "placeAt"
-                      ? `Place Route Skyship (${routeCost[fleet.fleetId] ?? 0} skyship)`
-                      : `Leave Trade Route (${routeCost[fleet.fleetId] ?? 0} skyships)`}
-                  </Typography>
-                  <Switch
-                    size="small"
-                    checked={routeEnabled}
-                    onChange={(e) => {
-                      e.stopPropagation();
-                      toggleRoute(fleet.fleetId);
-                    }}
-                    onClick={(e) => e.stopPropagation()}
-                  />
+              {/* The route choice — stated as an outcome, not a switch label */}
+              {option && tiles.length > 0 ? (
+                <Box sx={{ display: "flex", gap: "4px", px: `${tokens.spacing.sm}px`, pb: "8px" }}>
+                  {[
+                    { on: false, label: "Bring all home", detail: `${fleet.skyships} return` },
+                    {
+                      on: true,
+                      label: "Leave a trail",
+                      detail: `${tiles.length} stay · ${fleet.skyships - tiles.length} return`,
+                    },
+                  ].map(({ on, label, detail }) => {
+                    const active = (routeToggles[fleet.fleetId] ?? false) === on;
+                    return (
+                      <Box
+                        key={String(on)}
+                        onClick={() => setRouteToggles((p) => ({ ...p, [fleet.fleetId]: on }))}
+                        sx={{
+                          flex: 1,
+                          px: "8px",
+                          py: "5px",
+                          borderRadius: `${tokens.radius.sm}px`,
+                          cursor: "pointer",
+                          border: `1px solid ${active ? tokens.ui.gold : tokens.ui.border}`,
+                          backgroundColor: active ? `${tokens.ui.gold}1a` : tokens.ui.surfaceRaised,
+                          transition: `all ${tokens.transition.fast}`,
+                          "&:hover": { borderColor: `${tokens.ui.gold}88` },
+                        }}
+                      >
+                        <Typography sx={{ fontFamily: tokens.font.body, fontSize: tokens.fontSize.xs, fontWeight: active ? 700 : 500, color: active ? tokens.ui.gold : tokens.ui.text, lineHeight: 1.2 }}>
+                          {label}
+                        </Typography>
+                        <Typography sx={{ fontFamily: tokens.font.body, fontSize: 11, color: tokens.ui.textMuted, lineHeight: 1.2 }}>
+                          {detail}
+                        </Typography>
+                      </Box>
+                    );
+                  })}
                 </Box>
+              ) : (
+                (reason || emptyNote[fleet.fleetId]) && (
+                  <Typography sx={{ fontFamily: tokens.font.body, fontSize: 11, fontStyle: "italic", color: tokens.ui.textMuted, px: `${tokens.spacing.sm}px`, pb: "8px" }}>
+                    {emptyNote[fleet.fleetId] ?? `No route to leave — ${reason!.toLowerCase()}`}
+                  </Typography>
+                )
               )}
             </Box>
           );
         })}
+
         {deployedFleets.length === 0 && (
-          <Typography
-            sx={{
-              fontFamily: tokens.font.body,
-              fontSize: tokens.fontSize.xs,
-              color: tokens.ui.textMuted,
-              fontStyle: "italic",
-              textAlign: "center",
-              py: 2,
-            }}
-          >
+          <Typography sx={{ fontFamily: tokens.font.body, fontSize: tokens.fontSize.xs, color: tokens.ui.textMuted, fontStyle: "italic", textAlign: "center", py: 2 }}>
             No fleets deployed
           </Typography>
         )}
+
+        {/* The verdict: what the armed placements actually achieve */}
+        {armedTiles.length > 0 && (
+          <Box
+            sx={{
+              px: `${tokens.spacing.sm}px`,
+              py: "6px",
+              borderRadius: `${tokens.radius.sm}px`,
+              border: `1px solid ${gained > 0 ? `${tokens.ui.success}66` : tokens.ui.border}`,
+              backgroundColor: gained > 0 ? `${tokens.ui.success}12` : `${tokens.ui.textMuted}0c`,
+            }}
+          >
+            <Typography sx={{ fontFamily: tokens.font.body, fontSize: tokens.fontSize.xs, color: gained > 0 ? tokens.ui.success : tokens.ui.text, fontWeight: 600, lineHeight: 1.35 }}>
+              {gained > 0
+                ? `Connects ${gained} ${gained === 1 ? "claim" : "claims"} to Faithdom — ${outcome.after} of ${outcome.total} trading`
+                : outcome.total === 0
+                  ? "No claims yet — these markers wait for a Land to link"
+                  : "Chain doesn't reach yet — the markers stay and count toward finishing it later"}
+            </Typography>
+          </Box>
+        )}
       </Box>
-      <Box sx={{ height: 8 }} />
     </DecisionPanel>
   );
 };
+
+const Count = ({ Icon, value }: { Icon: React.ComponentType<{ size?: number; style?: React.CSSProperties }>; value: number }) => (
+  <Box sx={{ display: "inline-flex", alignItems: "center", gap: "3px" }}>
+    <Icon size={13} style={{ color: tokens.ui.textMuted }} />
+    <Typography sx={{ fontFamily: tokens.font.body, fontSize: tokens.fontSize.xs, fontWeight: 600, color: tokens.ui.text, lineHeight: 1 }}>
+      {value}
+    </Typography>
+  </Box>
+);
 
 export default RetrieveFleetsDialog;

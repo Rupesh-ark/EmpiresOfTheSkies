@@ -462,6 +462,7 @@ const WorldMap = (props: WorldMapProps) => {
             playerID={props.playerID}
             cols={currentMap[0].length}
             rows={currentMap.length}
+            preview={mapSelection.preview}
           />
 
           {/* Pan overlay — blocks tile clicks while Space is held */}

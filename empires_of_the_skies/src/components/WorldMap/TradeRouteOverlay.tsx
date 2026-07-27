@@ -33,11 +33,14 @@ export const TradeRouteOverlay = ({
   playerID,
   cols,
   rows,
+  preview,
 }: {
   G: MyGameState;
   playerID: string | null;
   cols: number;
   rows: number;
+  /** A chain being considered but not yet committed, in the owner's colour */
+  preview?: { tiles: number[][]; colour: string } | null;
 }) => {
   const tileArray = G.mapState.currentTileArray;
 
@@ -92,7 +95,7 @@ export const TradeRouteOverlay = ({
     }
   }
 
-  if (segments.length === 0) return null;
+  if (segments.length === 0 && !preview?.tiles.length) return null;
 
   // Rivals' chains sit behind yours but stay visible — piracy targets theirs.
   const ordered = [...segments].sort((a, b) => Number(a.mine) - Number(b.mine));
@@ -128,6 +131,28 @@ export const TradeRouteOverlay = ({
       preserveAspectRatio="none"
       style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none", zIndex: 5 }}
     >
+      {/* Prospective chain: where these skyships would sit if left behind */}
+      {preview?.tiles.map(([x, y], i) => (
+        <g key={`p${i}`}>
+          <circle
+            cx={x + 0.5} cy={y + 0.5} r={0.17}
+            fill={preview.colour} fillOpacity={0.35}
+            stroke={preview.colour} strokeWidth={2.5}
+            strokeDasharray="4 3"
+            vectorEffect="non-scaling-stroke"
+          />
+          {i > 0 && (
+            <line
+              x1={preview.tiles[i - 1][0] + 0.5} y1={preview.tiles[i - 1][1] + 0.5}
+              x2={x + 0.5} y2={y + 0.5}
+              stroke={preview.colour} strokeWidth={3} strokeDasharray="5 4"
+              strokeLinecap="round" opacity={0.8}
+              vectorEffect="non-scaling-stroke"
+            />
+          )}
+        </g>
+      ))}
+
       {ordered.flatMap((s, i) => {
         const [fx, fy] = s.from;
         const [tx, ty] = s.to;
