@@ -1,10 +1,10 @@
 # Empires of the Skies
 
-A digital adaptation of a 6-player strategy board game set in a fantasy world where kingdoms race to discover new lands via skyships, fight aerial and ground battles, trade exotic goods, and compete for religious and political dominance.
+A digital adaptation of a 2–6 player strategy board game set in a fantasy age of exploration, where kingdoms race to discover new lands by skyship, fight aerial and ground battles, run trade monopolies, and contest control of the Church.
 
-Built as a full-stack multiplayer web application with a shared game engine, React frontend, and server-authoritative backend using boardgame.io.
+Built as a full-stack multiplayer web application: one shared TypeScript rules engine consumed by both a React client and a server-authoritative boardgame.io backend, plus a self-playing AI capable of running complete games unattended.
 
-Developed as part of a dissertation exploring digital board game implementation, multiplayer architecture, and game-playing AI.
+Developed as part of a dissertation on digital board game implementation, multiplayer architecture, and game-playing AI.
 
 ---
 
@@ -22,7 +22,7 @@ Developed as part of a dissertation exploring digital board game implementation,
 git clone <repository-url>
 cd EmpiresOfTheSkies
 pnpm install
-pnpm db:up               # Start PostgreSQL in Docker
+pnpm db:up               # PostgreSQL in Docker
 ```
 
 Run the backend and frontend in separate terminals:
@@ -45,42 +45,38 @@ pnpm build:all
 ```
 EmpiresOfTheSkies/
   packages/
-    game/                   Core game engine (@eots/game, shared by client + server)
+    game/                   Core rules engine (@eots/game — shared by client + server)
       src/
-        Game.ts             Main game definition — phases, turn order, hooks
-        types.ts            All shared TypeScript types
-        moves/              50+ move implementations grouped by phase
-          actions/           Action board moves (recruit, build, trade, etc.)
-          aerialBattle/      Fleet combat moves
-          groundBattle/      Siege and garrison moves
-          conquests/         Territory claiming
-          election/          Archprelate voting
-          events/            Event card resolution
-          resolution/        End-of-round resolution flow
-          plunderLegends/    Legend tile plunder
-        helpers/             Game logic — battle math, map utils, resolution flow
-        setup/               Initial state construction and card seeding
-        data/                Tile definitions, game constants, card data
-        ai/                  Bot system (see AI section below)
-        __tests__/           Unit and integration tests (Vitest)
-  empires_of_the_skies/     React frontend (Vite, MUI)
+        Game.ts             Game definition: 19 phases, turn order, hooks
+        types.ts            Shared TypeScript types
+        moves/              50+ move implementations, grouped by phase
+        helpers/            Battle maths, map utils, within-phase sequencing
+        setup/              Initial state and card seeding
+        data/               Tile definitions, constants, card data
+        ai/                 Bot system (see below)
+        __tests__/          Unit + integration tests (Vitest)
+  empires_of_the_skies/     React client (Vite, MUI)
     src/
-      pages/                HomePage, LobbyPage, RulesPage, Client (game board)
-      components/           UI organised by game system:
-        WorldMap/            8x4 discovery map with tile reveal
-        ActionBoard/         Action selection board (spend actions from counsellor pool)
-        AerialBattle/        Fleet combat dialogs
-        GroundBattle/        Siege resolution
-        Election/            Archprelate voting UI
-        Events/              Event card selection
-        PlayerBoard/         Kingdom status panel
-        Cards/               FoW, KA, and Legacy card displays
-        Trade/               Deal proposal interface
-        Resolution/          End-of-round dialogs
-        ...
+      pages/                Home, Lobby, Rules, AI Tuner, Client (the game board)
+      components/
+        layout/              The stable frame — TopStrip, OpponentRail, PromptBar, GameLayout
+        WorldMap/            8×4 discovery map, fleet deployment, trade-route overlay
+        ActionBoard/         Shared counsellor-placement board
+        PlayerBoard/         Your dock — hand, fleets, shipyards, musters
+        AerialBattle/        Fleet combat
+        GroundBattle/        Sieges and garrisons
+        Conquests/           Territory claiming
+        Election/            Archprelate voting
+        Events/              Event cards and rebellions
+        Trade/               Goods market, routes, piracy intent
+        Stats/ Chat/ Cards/  Reference panels and card displays
+        atoms/               Shared primitives (DecisionPanel, SectionHeader, GameButton…)
+      theme/                Design tokens, presets, materials
   server/                   boardgame.io backend (Koa, PostgreSQL)
   rulesets/                 Original board game rulebook (markdown)
 ```
+
+A deeper walkthrough — tracing any flow from UI click to state change and back — lives in [`ARCHITECTURE.md`](./ARCHITECTURE.md).
 
 ---
 
@@ -88,7 +84,7 @@ EmpiresOfTheSkies/
 
 | Layer | Technologies |
 |-------|-------------|
-| Frontend | React, TypeScript, Vite, Material UI, Emotion |
+| Frontend | React 18, TypeScript, Vite, Material UI, Emotion |
 | Backend | Node.js 22, boardgame.io, Koa, PostgreSQL |
 | Game Engine | boardgame.io (shared ESM package) |
 | Multiplayer | boardgame.io server sync over SocketIO |
@@ -101,48 +97,63 @@ EmpiresOfTheSkies/
 
 ## Game Overview
 
-Six kingdoms compete over a variable number of rounds. Each round follows this phase sequence:
+Kingdoms compete over six rounds. Every round runs the same rulebook sequence, and each step below is a real engine phase rather than a sub-state:
 
 ```
-Events -> Discovery -> Taxes -> Actions -> Resolution -> Scoring -> Reset
+events → discovery → taxes → actions
+       → rebellions → aerialBattles → plunder → groundBattles → conquests
+       → trade → sellGoods → piracy → factoryIncome
+       → election → invasionCheck → retrieveFleets
+       → scoring → reset
 ```
 
-**Discovery** — Players flip tiles on an 8x4 map to reveal new lands (Dwarves, Elves, Humans, Magical creatures, Legendary locations). Each tile has resources, combat values, and directional blocking that shapes exploration routes.
+**Discovery** — Flip tiles on an 8×4 map to reveal lands, peoples and legends. Each tile carries resources, combat values, and mountain edges that block movement and trade chains, so the map shapes where expansion is even possible. The map wraps horizontally.
 
-**Actions** — Players spend actions from their counsellor pool on a shared action board to recruit troops, purchase skyships, found buildings (outposts, colonies, forts, cathedrals, palaces, shipyards, factories), influence prelates, manage heresy, dispatch fleets, trade goods, and negotiate deals with other players. Counsellors represent the maximum number of actions a kingdom may take each round; repeated use of the same action row increases its cost.
+**Actions** — The heart of the game, and where most of the skill sits. Players place counsellors on a shared, contested action board to recruit troops, buy skyships, found buildings, influence prelates, punish dissenters and convert their monarch. Counsellors cap how many actions a kingdom takes per round, and each extra counsellor in the same row costs more — so the board is a competition for cheap access, not just a menu.
 
-**Resolution** — Aerial battles between fleets, ground sieges at contested tiles, conquest of unoccupied discoveries, Archprelate elections (religious VP), infidel fleet attacks, rebellions, and grand army invasions all resolve in a fixed sequence.
+**Resolution** — Battles, plunder, conquest, trade, piracy, factory income, the Archprelate election, invasion checks and fleet retrieval all resolve in fixed rulebook order.
 
-**Economy** — Six tradeable goods (mithril, dragon scales, kraken skin, magic dust, sticky ichor, pipeweed) with a fluctuating price market. Income from taxes, colonies, trade routes, and factories. Piracy mechanics. Debt is allowed.
+**Economy** — Six tradeable goods (mithril, dragon scales, kraken skin, magic dust, sticky ichor, pipeweed) on price tracks that fall as supply enters play. Income comes from taxes, claims, trade routes and factories. Routes are physical chains of skyships running from a claimed Land back to Faithdom, and rivals can tax or sever them. Debt is legal and costs VP.
 
-**Religion** — A heresy/orthodoxy track per kingdom (-9 to +9). Players can convert their monarch, punish dissenters, influence other kingdoms' prelates, and compete for Archprelate (elected leader of the church, worth VP each round). Event cards trigger religious upheaval.
+**Religion** — A heresy/orthodoxy track per kingdom (−9 to +9). Convert your monarch, punish dissenters, sway rival prelates, and contest the Archprelacy — worth VP and the power to bless or curse.
 
-**Victory** — VP from territory, buildings, military strength, the Archprelate title, legacy cards, and end-game bonuses. Highest VP after the final round wins.
+**Victory** — VP from territory, buildings, military standing, the Archprelate title, secret legacy cards and end-game bonuses. Most VP after the final round wins.
+
+---
+
+## Interface
+
+The in-game frame is fixed: nothing appears, disappears or resizes during play, and nothing is ever allowed to cover the map.
+
+- **Top strip** — round, the phase track, whose turn, and the shared heresy gauge.
+- **Left rail** — standings only. One plate per kingdom with its enamel pin; clicking one opens that kingdom in the panel.
+- **Map** — permanently centred. Trade routes draw as chains, so a route severed by piracy visibly fails to reach Faithdom.
+- **Right column** — one panel region. The contested action board by default; a live decision, or Log / Stats / Trade / kingdom inspection, take the same slot.
+- **Prompt bar** — what the game is waiting on, your treasury, and the commit controls.
+- **Dock** — your player board: hand, fleets, shipyards and musters, each action sitting beside what it produces.
+
+Two rules run through it. **Material encodes role** — leather is frame, parchment is content. **Slots show capacity** — five berths to a fleet, four Fortunes to a hand, three shipyards to a kingdom; absence is information.
 
 ---
 
 ## Game-Playing AI
 
-The bot system lets up to 6 AI players run a complete game with no human input. It powers balance testing, self-play tournaments, and mixed human/bot matches.
+Up to six bots can play a complete game with no human input, which powers balance testing, self-play tournaments and mixed human/bot matches.
 
-**Architecture:**
-- `EmpiresBot` — top-level class that routes decisions to phase-specific evaluators
-- `enumerate.ts` — generates all legal moves for the current game state
-- Phase evaluators score each legal move based on game context:
-  - `ActionsEvaluator` — action board decisions
-  - `DiscoveryEvaluator` — tile flip choices
-  - `EventsEvaluator` — event card selection
-  - `ResolutionEvaluator` — battles, elections, conquests, rebellions
+**Architecture**
+- `EmpiresBot` — routes each decision to a phase-specific evaluator
+- `enumerate.ts` — generates the legal moves for the current state
+- Evaluators score those moves in context: `ActionsEvaluator`, `DiscoveryEvaluator`, `EventsEvaluator`, `ResolutionEvaluator`
 
-**MCTS** — For the action phase, a Monte Carlo Tree Search layer runs simulations over the evaluator scores to pick moves that account for future consequences, not just immediate value.
+**MCTS** — the actions phase runs a Monte Carlo Tree Search over evaluator scores, so placements account for future consequences rather than immediate value alone.
 
-**Personality system** — Each bot derives a personality from its dealt Kingdom Advantage and Legacy cards. The archetype system maps card combinations to quality weights (territory focus, economy focus, military aggression, religious influence, etc.), so bots with different cards play differently.
+**Personality** — each bot derives an archetype from its dealt Kingdom Advantage and Legacy cards, mapping card combinations to quality weights (territory, economy, military, religion). Different cards produce genuinely different play.
 
-**Tuning pipeline:**
-- `selfPlay.ts` — runs headless games locally via boardgame.io's Local client
-- `tournament.ts` — A/B testing, hill climbing, and round-robin league formats
-- `cma_tuner.py` — CMA-ES (Covariance Matrix Adaptation) optimiser that tunes evaluator weights across batches of self-play games
-- `GameRecorder` — captures per-decision snapshots for post-game analysis
+**Tuning pipeline**
+- `selfPlay.ts` — headless games via boardgame.io's Local client
+- `tournament.ts` — A/B testing, hill climbing and round-robin leagues
+- `ai/tuner/cma_tuner.py` — CMA-ES optimiser tuning evaluator weights across batches of self-play games
+- `GameRecorder` — per-decision snapshots for post-game analysis
 
 ---
 
@@ -150,25 +161,25 @@ The bot system lets up to 6 AI players run a complete game with no human input. 
 
 ```bash
 cd packages/game
-pnpm test           # run all tests
-pnpm test:watch     # watch mode
+pnpm test           # 140 tests across 22 files
+pnpm test:watch
 ```
 
 ---
 
 ## Design Decisions
 
-- **Shared game package** — a single `@eots/game` library used by both client and server ensures rules are never duplicated or out of sync.
-- **Discriminated union for game stage** — `GameStage` encodes the current phase and sub-phase as a type-safe union, making illegal state transitions a compile-time error.
-- **Server-authoritative multiplayer** — all game state lives on the server; clients send moves and receive validated state updates.
-- **Resolution sequencer** — a central module (`resolutionSequencer.ts`) owns the entire end-of-round transition graph (aerial -> plunder -> ground -> conquest -> election -> post-election), replacing scattered callback chains.
-- **Seeded card distribution** — `manufacturedFunSeed.ts` implements rivalry-aware dealing for Kingdom Advantage and Legacy cards so that every game has meaningful strategic counters at the table.
+- **One shared game package.** `@eots/game` is consumed by client and server alike, so a rule cannot drift between them. Where the UI needs a derived value the engine already computes — a fleet's combat strength, an action's cost — it imports the engine's function rather than reimplementing the maths.
+- **One clock.** Every step of a round is a real boardgame.io phase. An earlier design carried a `G.stage` discriminated union alongside the phase, which meant two sources of truth for "where are we" and a walker that had to keep them agreed; deleting it removed a whole class of desync bug. `resolutionSequencer.ts` now handles only within-phase ordering, such as which battle at a contested tile resolves next.
+- **Server-authoritative multiplayer.** All state lives on the server; clients send moves and receive validated state.
+- **Seeded card distribution.** `manufacturedFunSeed.ts` deals Kingdom Advantage and Legacy cards with rivalry awareness, so every game has meaningful counters at the table rather than a hand of unopposed strategies.
+- **The frame never moves.** Layout is not a function of phase or whose turn it is. Content swaps inside fixed regions, which keeps the board readable while other kingdoms commit.
 
 ---
 
 ## Contributing
 
-For agent/AI coding instructions, conventions, and common commands, see [`AGENTS.md`](./AGENTS.md).
+For agent/AI coding instructions, conventions and common commands, see [`AGENTS.md`](./AGENTS.md).
 
 ---
 
