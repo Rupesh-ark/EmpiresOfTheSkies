@@ -43,6 +43,7 @@ export const PALACE_VP_HERETIC = 2;
 export const PALACE_VP_ORTHODOX = 1;
 
 // Fleet & troop caps
+/** Rulebook: "Collections of up to five Skyships placed in a Fleet box". */
 export const MAX_SKYSHIPS_PER_FLEET = 5;
 export const MAX_SKYSHIPS = 24;
 export const MAX_REGIMENTS = 30;
@@ -97,6 +98,7 @@ export const CONTINGENT_COUNTERS: number[] =
 
 // Fortune of War
 export const FOW_CARDS_DRAWN = 2;
+/** Rulebook: "a hand of up to four Fortunes of War cards". */
 export const FOW_HAND_MAX = 4;
 
 // Conscript Levies
@@ -195,6 +197,7 @@ export const GAME_PHASES: { key: string; label: string; hint: string }[] = [
   { key: "taxes",       label: "Taxes",      hint: "Collect income from your territories" },
   { key: "actions",     label: "Actions",    hint: "Place counsellors on the board to take actions" },
   { key: "resolution",  label: "Resolution", hint: "Resolve battles, conquest, piracy, trade, and archprelate election" },
+  { key: "scoring",     label: "Scoring",    hint: "Score victory points for this round" },
   { key: "reset",       label: "Reset",      hint: "Prepare for the next round" },
 ];
 

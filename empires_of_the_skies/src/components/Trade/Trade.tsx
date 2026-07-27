@@ -4,7 +4,8 @@
  */
 import { useMemo, useState } from "react";
 import { Box, Typography, Slider, Button, Tooltip } from "@mui/material";
-import { tokens } from "@/theme";
+import { tokens, backgrounds } from "@/theme";
+import { SectionHeader } from "@/components/atoms/SectionHeader";
 import {
   MyGameProps,
   SKYSHIP_SELL_PRICE,
@@ -18,7 +19,7 @@ import {
 } from "@eots/game";
 import { usePiracyIntent } from "@/contexts/PiracyIntentContext";
 import { DialogShell } from "@/components/atoms/DialogShell";
-import { GoodsValue } from "@/components/Stats/GoodsValue";
+import { GoodsMarket } from "@/components/Stats/GoodsMarket";
 import { getLocationPresentation } from "@/utils/locationLabels";
 
 const GOODS: GoodKey[] = ["mithril", "dragonScales", "krakenSkin", "magicDust", "stickyIchor", "pipeweed"];
@@ -73,21 +74,20 @@ const CompactAction = ({
   <Box
     onClick={disabled ? undefined : onClick}
     sx={{
+      ...backgrounds.actionSurface,
       display: "flex",
       alignItems: "center",
       justifyContent: "space-between",
-      px: `${tokens.spacing.sm}px`,
-      py: `${tokens.spacing.xs + 1}px`,
-      borderRadius: `${tokens.radius.sm}px`,
-      border: `1px solid ${tokens.ui.border}`,
-      backgroundColor: tokens.ui.surface,
+      px: `${tokens.spacing.md}px`,
+      py: `${tokens.spacing.sm}px`,
       cursor: disabled ? "default" : "pointer",
       opacity: disabled ? 0.45 : 1,
       transition: `all ${tokens.transition.fast}`,
       ...(!disabled && {
         "&:hover": {
-          borderColor: `${tokens.ui.gold}55`,
+          borderColor: `${tokens.ui.gold}66`,
           backgroundColor: tokens.ui.surfaceHover,
+          "&::before": { background: backgrounds.goldAccentHover },
         },
         "&:active": { transform: "scale(0.99)" },
       }),
@@ -134,24 +134,20 @@ const Trade = (props: MyGameProps) => {
   const routeStatuses = useRouteStatuses(props);
 
   return (
-    <Box sx={{ p: `${tokens.spacing.sm}px`, height: "100%" }}>
-      <Box sx={{ display: "flex", gap: `${tokens.spacing.md}px`, height: "100%" }}>
-        {/* Left: Sell Actions */}
-        <Box sx={{ minWidth: 200, maxWidth: 260, flexShrink: 0, display: "flex", flexDirection: "column", gap: `${tokens.spacing.xs}px` }}>
-          <Typography
-            sx={{
-              fontFamily: tokens.font.accent,
-              fontSize: tokens.fontSize.xs,
-              fontWeight: 600,
-              color: tokens.ui.gold,
-              textTransform: "uppercase",
-              letterSpacing: "0.1em",
-              lineHeight: 1,
-              mb: "2px",
-            }}
-          >
-            Anytime Actions
-          </Typography>
+    <Box sx={{ p: `${tokens.spacing.md}px`, height: "100%", overflowY: "auto" }}>
+      {/* Stacked, not three columns: three side-by-side lists needed ~700px and
+          the panel is 560, which crushed Goods Value to a clipped sliver.
+          Order follows use — check the market, read your network, then act. */}
+      <Box sx={{ display: "flex", flexDirection: "column", gap: `${tokens.spacing.lg}px` }}>
+        {/* Goods market */}
+        <Box>
+          <SectionHeader label="Goods Market" sx={{ mb: "6px" }} />
+          <GoodsMarket props={props} />
+        </Box>
+
+        {/* Anytime actions */}
+        <Box sx={{ display: "flex", flexDirection: "column", gap: `${tokens.spacing.xs}px` }}>
+          <SectionHeader label="Anytime Actions" sx={{ mb: "6px" }} />
 
           {skyships > 0 && (
             <CompactAction
@@ -204,30 +200,49 @@ const Trade = (props: MyGameProps) => {
           )}
 
           {hasFleets && (
-            <CompactAction
-              label={piracyIntent === "tax" ? "Tax Routes" : "Cut Routes"}
-              price={piracyIntent === "tax" ? "→ Cut" : "→ Tax"}
-              onClick={() => setIntent(piracyIntent === "tax" ? "cut" : "tax")}
-            />
+            <Box sx={{ mt: `${tokens.spacing.xs}px` }}>
+              <Typography sx={{ fontFamily: tokens.font.body, fontSize: tokens.fontSize.xs, color: tokens.ui.textMuted, mb: "4px" }}>
+                When your fleets reach a rival's trade route:
+              </Typography>
+              <Box sx={{ display: "flex", gap: "6px" }}>
+                {([
+                  { key: "tax" as const, label: "Tax it", hint: "Take the gold and leave the route standing" },
+                  { key: "cut" as const, label: "Cut it", hint: "Destroy the route skyship — no gold, but their trade and factories suffer" },
+                ]).map(({ key, label, hint }) => {
+                  const active = piracyIntent === key;
+                  return (
+                    <Tooltip key={key} title={hint} placement="top" arrow>
+                      <Box
+                        onClick={() => setIntent(key)}
+                        sx={{
+                          flex: 1,
+                          px: `${tokens.spacing.sm}px`,
+                          py: `${tokens.spacing.xs}px`,
+                          textAlign: "center",
+                          borderRadius: `${tokens.radius.sm}px`,
+                          cursor: "pointer",
+                          border: `1px solid ${active ? tokens.ui.gold : tokens.ui.border}`,
+                          backgroundColor: active ? `${tokens.ui.gold}18` : tokens.ui.surface,
+                          boxShadow: active ? `inset 0 0 0 1px ${tokens.ui.gold}44` : "none",
+                          transition: `all ${tokens.transition.fast}`,
+                          "&:hover": { borderColor: `${tokens.ui.gold}88` },
+                        }}
+                      >
+                        <Typography sx={{ fontFamily: tokens.font.body, fontSize: tokens.fontSize.sm, fontWeight: active ? 700 : 500, color: active ? tokens.ui.gold : tokens.ui.textMuted, lineHeight: 1.2 }}>
+                          {label}
+                        </Typography>
+                      </Box>
+                    </Tooltip>
+                  );
+                })}
+              </Box>
+            </Box>
           )}
         </Box>
 
-        {/* Middle: Trade Route status */}
-        <Box sx={{ minWidth: 190, maxWidth: 250, flexShrink: 0, display: "flex", flexDirection: "column", gap: `${tokens.spacing.xs}px`, overflowY: "auto" }}>
-          <Typography
-            sx={{
-              fontFamily: tokens.font.accent,
-              fontSize: tokens.fontSize.xs,
-              fontWeight: 600,
-              color: tokens.ui.gold,
-              textTransform: "uppercase",
-              letterSpacing: "0.1em",
-              lineHeight: 1,
-              mb: "2px",
-            }}
-          >
-            Trade Routes
-          </Typography>
+        {/* Trade routes */}
+        <Box sx={{ display: "flex", flexDirection: "column", gap: `${tokens.spacing.xs}px` }}>
+          <SectionHeader label="Trade Routes" sx={{ mb: "6px" }} />
           {routeStatuses.map((r) => (
             <Tooltip
               key={`${r.coords[0]}-${r.coords[1]}`}
@@ -273,46 +288,6 @@ const Trade = (props: MyGameProps) => {
           )}
         </Box>
 
-        {/* Right: Goods Value */}
-        <Box
-          sx={{
-            flex: 1,
-            minWidth: 0,
-            borderRadius: `${tokens.radius.md}px`,
-            border: `1px solid ${tokens.ui.border}`,
-            backgroundColor: tokens.ui.surface,
-            overflow: "hidden",
-            boxShadow: tokens.shadow.sm,
-            display: "flex",
-            flexDirection: "column",
-          }}
-        >
-          <Box
-            sx={{
-              px: `${tokens.spacing.sm}px`,
-              py: `${tokens.spacing.xs + 2}px`,
-              backgroundColor: tokens.ui.surfaceRaised,
-              borderBottom: `1px solid ${tokens.ui.border}`,
-            }}
-          >
-            <Typography
-              sx={{
-                fontFamily: tokens.font.accent,
-                fontSize: tokens.fontSize.xs,
-                fontWeight: 600,
-                color: tokens.ui.gold,
-                textTransform: "uppercase",
-                letterSpacing: "0.1em",
-                lineHeight: 1,
-              }}
-            >
-              Goods Value
-            </Typography>
-          </Box>
-          <Box sx={{ p: `${tokens.spacing.sm}px`, overflowX: "auto" }}>
-            <GoodsValue props={props} compact />
-          </Box>
-        </Box>
       </Box>
 
       {/* Sell Skyships dialog */}

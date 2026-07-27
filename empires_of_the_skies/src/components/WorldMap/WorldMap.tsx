@@ -3,6 +3,7 @@ import { ReactElement, useState, useEffect, useRef, useCallback } from "react";
 import { Box, Dialog, DialogActions, DialogContent, DialogTitle, Grid, Typography } from "@mui/material";
 import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { WorldMapTile } from "./WorldMapTile";
+import svgNameToElementMap from "./nameToElementMap";
 import { MyGameProps, findPossibleDestinations, phaseGroup } from "@eots/game";
 import { tokens } from "@/theme";
 import mapFogImg from "@/boards_and_assets/textures/map_fog.webp";
@@ -19,6 +20,14 @@ const BATTLE_RESOLUTION_SUBS = new Set([
   "plunder_legends", "conquest", "conquest_draw_or_pick", "conquest_garrison",
   "relocate_loser",
 ]);
+
+/** Ghost GameButtons are styled for parchment; the floating pill is dark. */
+const ZOOM_BUTTON_SX = {
+  minWidth: 22,
+  color: "#E8C860",
+  borderColor: "transparent",
+  "&:hover": { color: "#F5ECD8", borderColor: "rgba(232,200,96,0.5)" },
+} as const;
 
 interface PendingDeploy {
   fleetIndex: number;
@@ -66,6 +75,15 @@ const WorldMap = (props: WorldMapProps) => {
     return () => clearTimeout(timer);
   }, []);
 
+  // Tile art is kept off undiscovered tiles (it leaked the board), so warm the
+  // whole set here instead — the set carries no positional information.
+  useEffect(() => {
+    for (const src of Object.values(svgNameToElementMap)) {
+      const img = new Image();
+      img.src = src;
+    }
+  }, []);
+
   const scrollRef = useRef<HTMLDivElement>(null);
 
   // Fit the camera to the discovered portion of the map once, on mount.
@@ -96,21 +114,53 @@ const WorldMap = (props: WorldMapProps) => {
     const boxCols = maxX - minX + 1;
     const boxRows = maxY - minY + 1;
     // Largest square tile edge that fits the discovered box in the viewport
-    // (with a 10% margin), expressed back as the `${zoom}vw` grid width.
+    // (with a 10% margin), expressed back as the `${zoom}%` grid width.
     const tileEdge = Math.min(
       (el.clientWidth * 0.9) / boxCols,
       (el.clientHeight * 0.9) / boxRows
     );
-    const zoom = Math.max(50, Math.min(200, Math.round((tileEdge * cols * 100) / window.innerWidth)));
+    const zoom = Math.max(50, Math.min(200, Math.round((tileEdge * cols * 100) / el.clientWidth)));
     setZoomLevel(zoom);
 
     // Center the discovered box after the new grid width has laid out.
     requestAnimationFrame(() => {
-      const tile = (zoom / 100) * window.innerWidth / cols;
+      const tile = (zoom / 100) * el.clientWidth / cols;
       el.scrollLeft = clampScrollCenter(el.scrollWidth, el.clientWidth, tile * cols, ((minX + maxX + 1) / 2) * tile);
       el.scrollTop = clampScrollCenter(el.scrollHeight, el.clientHeight, tile * rows, ((minY + maxY + 1) / 2) * tile);
     });
   }, [props.G.mapState.discoveredTiles]);
+
+  // Zoom is a share of the CONTAINER, so the grid rescales itself whenever the
+  // frame changes the map's box. All this does is keep the camera pointed at
+  // the same place across that resize — the player's zoom is never touched.
+  const camera = useRef({ fx: 0.5, fy: 0.5 });
+  const rememberCamera = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el || el.scrollWidth === 0 || el.scrollHeight === 0) return;
+    camera.current = {
+      fx: (el.scrollLeft + el.clientWidth / 2) / el.scrollWidth,
+      fy: (el.scrollTop + el.clientHeight / 2) / el.scrollHeight,
+    };
+  }, []);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    let frame = 0;
+    const observer = new ResizeObserver(() => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        const { fx, fy } = camera.current;
+        el.scrollLeft = Math.max(0, fx * el.scrollWidth - el.clientWidth / 2);
+        el.scrollTop = Math.max(0, fy * el.scrollHeight - el.clientHeight / 2);
+      });
+    });
+    observer.observe(el);
+    return () => {
+      cancelAnimationFrame(frame);
+      observer.disconnect();
+    };
+  }, []);
 
   // Pan the camera to the battle tile whenever a battle sequence begins, so
   // the non-modal combat prompts always have their subject on screen. One
@@ -126,7 +176,9 @@ const WorldMap = (props: WorldMapProps) => {
     const [bx, by] = battleKey.split(",").map(Number);
     const cols = props.G.mapState.discoveredTiles[0].length;
     const rows = props.G.mapState.discoveredTiles.length;
-    const tile = (zoomRef.current / 100) * window.innerWidth / cols;
+    // Container-relative, matching the grid's own sizing — window width
+    // overshoots now that the rail and action column take a third of it.
+    const tile = (zoomRef.current / 100) * el.clientWidth / cols;
     el.scrollTo({
       left: clampScrollCenter(el.scrollWidth, el.clientWidth, tile * cols, (bx + 0.5) * tile),
       top: clampScrollCenter(el.scrollHeight, el.clientHeight, tile * rows, (by + 0.5) * tile),
@@ -327,34 +379,38 @@ const WorldMap = (props: WorldMapProps) => {
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >
-      {/* Zoom control */}
-      {(
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: 0.5,
-            px: 1,
-            py: 0,
-          }}
-        >
-          <Typography sx={{ fontSize: 12, color: tokens.ui.textMuted, fontWeight: 600 }}>
-            Zoom
-          </Typography>
-          <GameButton variant="ghost" size="sm" onClick={() => setZoomLevel((z) => Math.max(50, z - 25))}>
-            −
-          </GameButton>
-          <Typography sx={{ fontSize: 12, color: tokens.ui.text, minWidth: 36, textAlign: "center" }}>
-            {zoomLevel}%
-          </Typography>
-          <GameButton variant="ghost" size="sm" onClick={() => setZoomLevel((z) => Math.min(300, z + 25))}>
-            +
-          </GameButton>
-        </Box>
-      )}
+      {/* Zoom — floats over the map. Height is the map's scarce axis, so map
+          controls live on the map, not in a band above it. */}
+      <Box
+        sx={{
+          position: "absolute",
+          top: 8,
+          right: 8,
+          zIndex: 15,
+          display: "flex",
+          alignItems: "center",
+          gap: "2px",
+          px: "6px",
+          py: "2px",
+          borderRadius: `${tokens.radius.md}px`,
+          backgroundColor: "rgba(0,0,0,0.55)",
+          backdropFilter: "blur(4px)",
+          border: "1px solid rgba(200,170,120,0.35)",
+        }}
+      >
+        <GameButton variant="ghost" size="sm" onClick={() => setZoomLevel((z) => Math.max(50, z - 25))} sx={ZOOM_BUTTON_SX}>
+          −
+        </GameButton>
+        <Typography sx={{ fontSize: 12, color: "#F5ECD8", minWidth: 38, textAlign: "center", fontWeight: 600, fontVariantNumeric: "tabular-nums" }}>
+          {zoomLevel}%
+        </Typography>
+        <GameButton variant="ghost" size="sm" onClick={() => setZoomLevel((z) => Math.min(300, z + 25))} sx={ZOOM_BUTTON_SX}>
+          +
+        </GameButton>
+      </Box>
       <div
         ref={scrollRef}
+        onScroll={rememberCamera}
         onMouseDown={onPanMouseDown}
         onMouseMove={onPanMouseMove}
         onMouseUp={onPanMouseUp}
@@ -376,7 +432,7 @@ const WorldMap = (props: WorldMapProps) => {
         <Box
           sx={{
             position: "relative",
-            width: `${zoomLevel}vw`,
+            width: `${zoomLevel}%`,
             // Auto margins centre the grid when it fits the viewport and keep
             // every edge scroll-reachable when it overflows (flex justify-content
             // centring would clip the left edge).

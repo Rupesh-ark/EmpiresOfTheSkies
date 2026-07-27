@@ -28,7 +28,6 @@ const RebellionDialog = (props: MyGameProps) => {
       open
       title={`⚔ ${def.displayName}`}
       mood="crisis"
-      width={500}
       actions={
         <>
           <GameButton variant="danger" onClick={() => props.moves.commitRebellionTroops(0, 0)}>

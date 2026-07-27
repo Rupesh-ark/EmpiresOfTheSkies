@@ -8,6 +8,7 @@ import { increaseHeresyWithinMove, increaseOrthodoxyWithinMove, logEvent, toBuil
 import { PRICE_MARKER_MIN, KINGDOM_LOCATION } from "../data/gameData.js";
 import { nextAfterAerialDecision, nextAfterGroundDecision, nextAfterConquest } from "./resolutionSequencer.js";
 import { calculateCombat } from "./combatMath.js";
+import { fleetCombatValues } from "./fleetUtils.js";
 import log from "./logger.js";
 
 const battleLog = log.child({ mod: "resolve-battle" });
@@ -121,8 +122,9 @@ const calcFleetCombatValues = (
   const fleets: FleetInfo[] = [];
   playerFleets.forEach((fleet) => {
     if (fleet.location[0] === x && fleet.location[1] === y) {
-      swordValue += fleet.skyships + fleet.levies + fleet.regiments * 2 + fleet.eliteRegiments * 3;
-      shieldValue += fleet.skyships;
+      const { swords, shields } = fleetCombatValues(fleet);
+      swordValue += swords;
+      shieldValue += shields;
       fleets.push(fleet);
     }
   });

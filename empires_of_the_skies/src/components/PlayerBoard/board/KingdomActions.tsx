@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Box, Tooltip, Typography, Dialog, DialogTitle, DialogContent, DialogActions } from "@mui/material";
-import { tokens } from "@/theme";
+import { tokens, backgrounds } from "@/theme";
 import { MyGameProps } from "@eots/game";
 import { GamePanel } from "@/components/atoms/GamePanel";
 import { GameButton } from "@/components/atoms/GameButton";
@@ -143,8 +143,17 @@ interface KingdomActionsProps {
     trainTroops: boolean;
   };
   moves: MyGameProps["moves"];
-  /** "column" — sidebar-style stacked buttons (default); "row" — compact dock strip */
-  layout?: "column" | "row";
+  /**
+   * "column" — sidebar-style stacked buttons (default); "row" — compact strip;
+   * "inline" — bare ghost buttons for a group header.
+   */
+  layout?: "column" | "row" | "inline";
+  /**
+   * Render only these actions. Lets each muster sit beside what it produces —
+   * Train Troops with the Fortunes hand it fills, Build Skyships with the
+   * Fleets its hulls crew — while the dialogs stay defined in one place.
+   */
+  only?: ("skyships" | "levies" | "train")[];
 }
 
 export const KingdomActions = ({
@@ -153,6 +162,7 @@ export const KingdomActions = ({
   counsellorLocations,
   moves,
   layout = "column",
+  only,
 }: KingdomActionsProps) => {
   const [buildDialogOpen, setBuildDialogOpen] = useState(false);
   const [levyDialogOpen, setLevyDialogOpen] = useState(false);
@@ -175,16 +185,46 @@ export const KingdomActions = ({
   };
 
   const isRow = layout === "row";
+  const isInline = layout === "inline";
+  const shows = (k: "skyships" | "levies" | "train") => !only || only.includes(k);
+  const compact = isRow || isInline;
 
   const buttons = (
     <Box
-      sx={{
-        display: "flex",
-        flexDirection: isRow ? "row" : "column",
-        flexWrap: isRow ? "wrap" : "nowrap",
-        gap: isRow ? "6px" : `${tokens.spacing.sm}px`,
-      }}
+      sx={
+        isInline
+        ? { display: "flex", gap: "6px", alignItems: "center", "& > *": { display: "block" } }
+        // Row layout is the action column: three equal cells across the full
+        // width. Wrapping left a 2+1 orphan and a ragged right edge.
+        : isRow
+          ? {
+              display: "grid",
+              gridTemplateColumns: "repeat(3, 1fr)",
+              gap: "6px",
+              // One child is a Tooltip's <span> wrapper — inline by default,
+              // so fullWidth wouldn't reach the button inside it.
+              "& > *": { minWidth: 0, display: "block" },
+              // Wear the board's row vocabulary: gold edge stripe, brass
+              // hairline, raised gradient. Plain pills read as unfinished
+              // next to the action rows directly above.
+              "& button": {
+                ...backgrounds.actionSurface,
+                justifyContent: "flex-start",
+                height: 40,
+                px: "10px",
+                textTransform: "none",
+                "&:hover": {
+                  borderColor: `${tokens.ui.gold}66`,
+                  backgroundColor: tokens.ui.surfaceHover,
+                  "&::before": { background: backgrounds.goldAccentHover },
+                },
+                "&.Mui-disabled::before": { background: backgrounds.goldAccent, opacity: 0.5 },
+              },
+            }
+          : { display: "flex", flexDirection: "column", flexWrap: "nowrap", gap: `${tokens.spacing.sm}px` }
+      }
     >
+      {shows("skyships") && (
       <Tooltip
         title={noShipyards && !counsellorLocations.buildSkyships ? "You have no Shipyards yet — click to see where to build one" : ""}
         placement="top"
@@ -192,9 +232,9 @@ export const KingdomActions = ({
       >
         <span>
           <GameButton
-            variant="secondary"
-            size={isRow ? "sm" : "md"}
-            fullWidth={!isRow}
+            variant={isInline ? "ghost" : "secondary"}
+            size={compact ? "sm" : "md"}
+            fullWidth={!isInline}
             onClick={() => {
               if (noShipyards) {
                 // Guide, don't block: point the player at the Shipyard cell.
@@ -213,40 +253,47 @@ export const KingdomActions = ({
             icon={<CounsellorDot placed={counsellorLocations.buildSkyships} colour={colour} />}
             sx={noShipyards ? { opacity: 0.75 } : undefined}
           >
-            {isRow ? `Skyships (${shipyards}y)` : `Build Skyships (${shipyards} ${shipyards === 1 ? "yard" : "yards"})`}
+            {compact
+              ? `Build Skyships · ${shipyards} ${shipyards === 1 ? "yard" : "yards"}`
+              : `Build Skyships (${shipyards} ${shipyards === 1 ? "yard" : "yards"})`}
           </GameButton>
         </span>
       </Tooltip>
+      )}
 
+      {shows("levies") && (
       <GameButton
-        variant="secondary"
-        size={isRow ? "sm" : "md"}
-        fullWidth={!isRow}
+        variant={isInline ? "ghost" : "secondary"}
+        size={compact ? "sm" : "md"}
+        fullWidth={!isInline}
         onClick={() => setLevyDialogOpen(true)}
         disabled={counsellorLocations.conscriptLevies}
         disabledReason="Already conscripted this round"
         icon={<CounsellorDot placed={counsellorLocations.conscriptLevies} colour={colour} />}
       >
-        {isRow ? "Levies (1VP/3)" : "Conscript Levies (1 VP per 3)"}
+        {compact ? "Conscript Levies" : "Conscript Levies (1 VP per 3)"}
       </GameButton>
+      )}
 
+      {shows("train") && (
       <GameButton
-        variant="secondary"
-        size={isRow ? "sm" : "md"}
-        fullWidth={!isRow}
+        variant={isInline ? "ghost" : "secondary"}
+        size={compact ? "sm" : "md"}
+        fullWidth={!isInline}
         onClick={() => moves.trainTroops()}
         disabled={counsellorLocations.trainTroops}
         disabledReason="Already trained this round"
         icon={<CounsellorDot placed={counsellorLocations.trainTroops} colour={colour} />}
       >
-        {isRow ? "Train (+2 FoW)" : "Train Troops (draw 2 FoW cards)"}
+        {compact ? "Train Troops" : "Train Troops (draw 2 FoW cards)"}
       </GameButton>
+      )}
     </Box>
   );
 
   return (
     <>
-      {isRow ? (
+      {compact ? (
         buttons
       ) : (
         <GamePanel variant="default" padding="sm">
@@ -255,13 +302,19 @@ export const KingdomActions = ({
         </GamePanel>
       )}
 
+      {/* Only mount what this instance can open — the dock renders two
+          KingdomActions with different `only` lists, and mounting both
+          dialogs in each gave every dialog a second, unreachable owner. */}
+      {shows("skyships") && (
       <BuildSkyshipsDialog
         open={buildDialogOpen}
         shipyards={shipyards}
         onClose={() => setBuildDialogOpen(false)}
         onBuild={handleBuildSkyships}
       />
+      )}
 
+      {shows("levies") && (
       <ConscriptLeviesDialog
         open={levyDialogOpen}
         levyCount={levyCount}
@@ -269,6 +322,7 @@ export const KingdomActions = ({
         onConscript={handleConscriptLevies}
         onSetLevyCount={setLevyCount}
       />
+      )}
     </>
   );
 };

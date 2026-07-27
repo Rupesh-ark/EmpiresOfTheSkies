@@ -1,10 +1,13 @@
 /**
- * GameLayout — the stable frame. One layout for every phase and both turn
- * states: top strip / opponent rail + map / prompt bar / dock. Turn and
- * phase changes swap CONTENT (prompt text, overlay visibility), never the
- * frame itself — the map keeps its size and camera at all times.
+ * GameLayout — the stable frame: top strip / rail + map + action column /
+ * prompt bar / dock. Nothing appears, disappears, or resizes during play.
+ *
+ * The action column is permanent furniture, not an overlay. Counsellor
+ * placement is a contested shared board — hiding it off-turn hid the
+ * contention that drives most of the game's decisions. Off-turn it goes
+ * read-only; that's a state change, not a layout change.
  */
-import { ReactNode, useState } from "react";
+import { ReactNode } from "react";
 import React from "react";
 import { Box, Tooltip } from "@mui/material";
 import { Close } from "@mui/icons-material";
@@ -15,11 +18,9 @@ import {
   GiScrollUnfurled, GiSwapBag, GiConversation, GiBarracks,
 } from "react-icons/gi";
 import { MdQueryStats } from "react-icons/md";
-import { GameButton } from "@/components/atoms/GameButton";
-import { useActionHover } from "@/components/ActionBoard/ActionHoverContext";
 
-/** Side-panel tabs (right drawer over the map) */
-export type PanelSlot = "game-log" | "stats" | "trade" | "chat";
+/** Right drawer contents. "inspect" has no tab — the rail opens it. */
+export type PanelSlot = "game-log" | "stats" | "trade" | "chat" | "inspect";
 
 const MOOD_BACKGROUNDS: Record<string, string> = {
   peacetime: tokens.ui.background,
@@ -29,8 +30,8 @@ const MOOD_BACKGROUNDS: Record<string, string> = {
   crisis: tokens.mood.crisis.bg,
 };
 
-/** Width reserved beside the map while the action board is open */
-const ACTION_OVERLAY_WIDTH = 560;
+/** The action column — always present, never resized */
+const ACTION_COLUMN_WIDTH = 560;
 
 const PANEL_TABS: { slot: PanelSlot; label: string; Icon: React.ComponentType<{ size?: number }> }[] = [
   { slot: "game-log", label: "Log", Icon: GiScrollUnfurled },
@@ -47,8 +48,13 @@ interface GameLayoutProps {
   opponentRail: ReactNode;
   promptBar: ReactNode;
   dock: ReactNode;
-  /** True during the local player's actions turn — shows the action overlay */
-  actionOverlayActive: boolean;
+  /** True during the local player's actions turn — the column accepts input */
+  actionsInteractive: boolean;
+  /** Controlled: the rail opens "inspect" from outside the frame */
+  openPanel: PanelSlot | null;
+  onOpenPanel: (slot: PanelSlot | null) => void;
+  /** Drawer heading — lets "inspect" name the kingdom being read */
+  panelTitle?: string;
   renderPanel: (slot: PanelSlot) => ReactNode;
   renderActionBoard: () => ReactNode;
   renderMap: () => ReactNode;
@@ -65,7 +71,10 @@ export const GameLayout = ({
   opponentRail,
   promptBar,
   dock,
-  actionOverlayActive,
+  actionsInteractive,
+  openPanel,
+  onOpenPanel,
+  panelTitle,
   renderPanel,
   renderActionBoard,
   renderMap,
@@ -74,28 +83,6 @@ export const GameLayout = ({
 }: GameLayoutProps) => {
   const mood = getMood(group, step);
   const moodBg = MOOD_BACKGROUNDS[mood] ?? MOOD_BACKGROUNDS.peacetime;
-
-  const [openPanel, setOpenPanel] = useState<PanelSlot | null>(null);
-  const [overlayDismissed, setOverlayDismissed] = useState(false);
-
-  // A new actions turn re-opens the overlay the player dismissed last turn.
-  // State-adjust-during-render: cheaper than an effect, no extra paint.
-  const [prevOverlayActive, setPrevOverlayActive] = useState(actionOverlayActive);
-  if (prevOverlayActive !== actionOverlayActive) {
-    setPrevOverlayActive(actionOverlayActive);
-    if (actionOverlayActive) setOverlayDismissed(false);
-  }
-
-  // A guide flash (e.g. "build a shipyard first") must be visible — reopen
-  // the overlay if the player had dismissed it.
-  const { flashedAction } = useActionHover();
-  const [prevFlashed, setPrevFlashed] = useState(flashedAction);
-  if (prevFlashed !== flashedAction) {
-    setPrevFlashed(flashedAction);
-    if (flashedAction && actionOverlayActive) setOverlayDismissed(false);
-  }
-
-  const overlayVisible = actionOverlayActive && !overlayDismissed;
 
   return (
     <Box
@@ -133,7 +120,7 @@ export const GameLayout = ({
             return (
               <Tooltip key={slot} title={label} placement="bottom" arrow>
                 <Box
-                  onClick={() => setOpenPanel((prev) => (prev === slot ? null : slot))}
+                  onClick={() => onOpenPanel(openPanel === slot ? null : slot)}
                   sx={{
                     display: "flex",
                     alignItems: "center",
@@ -173,144 +160,120 @@ export const GameLayout = ({
             backgroundColor: `${tokens.ui.background}`,
           }}
         >
-          {/* The map viewport narrows while the action board is open, so the
-              board reserves space beside the map instead of covering tiles. */}
-          <Box
-            sx={{
-              height: "100%",
-              width: overlayVisible ? `calc(100% - ${ACTION_OVERLAY_WIDTH}px)` : "100%",
-              minWidth: 0,
-              display: "flex",
-              flexDirection: "column",
-              transition: `width ${tokens.transition.normal}`,
-            }}
-          >
+          <Box sx={{ height: "100%", width: "100%", minWidth: 0, display: "flex", flexDirection: "column" }}>
             {renderMap()}
           </Box>
+        </Box>
 
-          {/* Action board — right side sheet in the reserved strip */}
-          {overlayVisible && (
-            <Box
-              sx={{
-                position: "absolute",
-                top: 8,
-                right: 8,
-                bottom: 8,
-                width: ACTION_OVERLAY_WIDTH - 16,
-                maxWidth: "calc(100% - 16px)",
-                display: "flex",
-                flexDirection: "column",
-                borderRadius: `${tokens.radius.lg}px`,
-                border: `1px solid ${tokens.ui.borderMedium}`,
-                background: backgrounds.parchmentPanelTinted,
-                backgroundColor: tokens.ui.background,
-                boxShadow: "0 8px 32px rgba(0,0,0,0.35)",
-                zIndex: 20,
-                overflow: "hidden",
-              }}
-            >
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  px: `${tokens.spacing.md}px`,
-                  py: `${tokens.spacing.xs}px`,
-                  borderBottom: `1px solid ${tokens.ui.border}`,
-                  flexShrink: 0,
-                }}
-              >
-                <Box sx={{ display: "flex", alignItems: "center", gap: "6px", color: tokens.ui.gold }}>
-                  <GiBarracks size={16} />
-                  <Box component="span" sx={{ fontFamily: tokens.font.accent, fontSize: tokens.fontSize.sm, fontWeight: 700, letterSpacing: "0.06em" }}>
-                    ACTION BOARD
-                  </Box>
-                </Box>
-                <Tooltip title="Hide — peek at the map (reopens from the button below)" placement="left">
-                  <Box
-                    onClick={() => setOverlayDismissed(true)}
-                    sx={{ display: "flex", color: tokens.ui.textMuted, cursor: "pointer", "&:hover": { color: tokens.ui.text } }}
-                  >
-                    <Close fontSize="small" />
-                  </Box>
-                </Tooltip>
+        {/* The right region — ONE panel, never an overlay. The board lives here
+            by default; Log/Stats/Trade/Chat/Inspect take the same slot when
+            opened. Nothing is ever allowed to cover the map. */}
+        <Box
+          sx={{
+            width: ACTION_COLUMN_WIDTH,
+            flexShrink: 0,
+            display: "flex",
+            flexDirection: "column",
+            borderLeft: `1px solid ${tokens.ui.borderMedium}`,
+            ...backgrounds.panelSurface,
+            boxShadow: "inset 10px 0 14px -10px rgba(0,0,0,0.35)",
+          }}
+        >
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: `${tokens.spacing.sm}px`,
+              px: `${tokens.spacing.md}px`,
+              py: `${tokens.spacing.xs}px`,
+              borderBottom: `1px solid ${tokens.ui.borderMedium}`,
+              background: backgrounds.leatherBar,
+              flexShrink: 0,
+            }}
+          >
+            <Box sx={{ display: "flex", alignItems: "center", gap: "6px", color: "#E8C860", minWidth: 0 }}>
+              {openPanel === null && <GiBarracks size={16} />}
+              <Box component="span" sx={{ fontFamily: tokens.font.accent, fontSize: tokens.fontSize.sm, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase" }}>
+                {openPanel === null
+                  ? "Action Board"
+                  : panelTitle ?? PANEL_TABS.find((t) => t.slot === openPanel)?.label}
               </Box>
-              <Box sx={{ flex: 1, overflowY: "auto", minHeight: 0 }}>{renderActionBoard()}</Box>
             </Box>
-          )}
+            {openPanel !== null ? (
+              <Tooltip title="Back to the board" placement="left" arrow>
+                <Box
+                  onClick={() => onOpenPanel(null)}
+                  sx={{ display: "flex", color: "#C8B898", cursor: "pointer", flexShrink: 0, "&:hover": { color: "#F5ECD8" } }}
+                >
+                  <Close fontSize="small" />
+                </Box>
+              </Tooltip>
+            ) : !actionsInteractive ? (
+              <Tooltip title="You can read the board any time — placements open up on your turn" placement="left" arrow>
+                <Box
+                  component="span"
+                  sx={{
+                    fontFamily: tokens.font.body,
+                    fontSize: tokens.fontSize.xs,
+                    fontWeight: 600,
+                    letterSpacing: "0.06em",
+                    textTransform: "uppercase",
+                    color: "#C8B898",
+                    border: "1px solid rgba(200,170,120,0.4)",
+                    borderRadius: `${tokens.radius.sm}px`,
+                    px: "6px",
+                    py: "1px",
+                    flexShrink: 0,
+                    cursor: "default",
+                  }}
+                >
+                  Watching
+                </Box>
+              </Tooltip>
+            ) : null}
+          </Box>
 
-          {/* Non-modal decision panels — lower-centre of the map, map stays live */}
+          {/* Whatever the game is waiting on, pinned above whatever else the
+              column is showing. Deliberately OUTSIDE the panel check: a
+              combat or event decision is mandatory, and hiding it behind an
+              open Log/Stats panel stalls the game with no way to see why.
+              Renders nothing when no decision is live. */}
           {decisionPanel && (
-            <Box
-              sx={{
-                position: "absolute",
-                bottom: 12,
-                left: 0,
-                right: 0,
-                display: "flex",
-                justifyContent: "center",
-                zIndex: 25,
-                pointerEvents: "none",
-                "& > *": { pointerEvents: "auto" },
-              }}
-            >
+            <Box sx={{ flexShrink: 0, px: `${tokens.spacing.sm}px`, "&:not(:empty)": { pt: `${tokens.spacing.sm}px` } }}>
               {decisionPanel}
             </Box>
           )}
 
-          {/* Restore chip when the overlay is dismissed mid-turn */}
-          {actionOverlayActive && overlayDismissed && (
-            <GameButton
-              variant="primary"
-              size="sm"
-              onClick={() => setOverlayDismissed(false)}
-              sx={{ position: "absolute", bottom: 10, right: 10, zIndex: 20, boxShadow: `0 0 12px ${tokens.ui.gold}55` }}
-            >
-              ⚔ Action Board
-            </GameButton>
+          {openPanel !== null && (
+            <Box sx={{ flex: 1, overflowY: "auto", minHeight: 0 }}>{renderPanel(openPanel)}</Box>
           )}
 
-          {/* Side panel drawer — over the map, right edge */}
-          {openPanel !== null && (
-            <Box
-              sx={{
-                position: "absolute",
-                top: 0,
-                right: 0,
-                bottom: 0,
-                width: "min(380px, 85%)",
-                display: "flex",
-                flexDirection: "column",
-                background: backgrounds.parchmentPanelTinted,
-                backgroundColor: tokens.ui.surface,
-                borderLeft: `1px solid ${tokens.ui.borderMedium}`,
-                boxShadow: "-4px 0 16px rgba(0,0,0,0.25)",
-                zIndex: 30,
-              }}
-            >
+          {openPanel === null && (
+            <>
+              {/* Only the BOARD goes read-only off-turn — a live decision sits
+                  above it and must stay clickable. Clicks are swallowed at the
+                  boundary rather than disabled per-row, so hover and tooltips
+                  still work: off-turn, the board is for reading. */}
               <Box
+                onClickCapture={(e) => {
+                  if (!actionsInteractive) {
+                    e.stopPropagation();
+                    e.preventDefault();
+                  }
+                }}
                 sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  px: `${tokens.spacing.md}px`,
-                  py: `${tokens.spacing.xs}px`,
-                  borderBottom: `1px solid ${tokens.ui.border}`,
-                  flexShrink: 0,
+                  flex: 1,
+                  overflowY: "auto",
+                  minHeight: 0,
+                  opacity: actionsInteractive ? 1 : 0.78,
+                  filter: actionsInteractive ? "none" : "saturate(0.72)",
+                  transition: `opacity ${tokens.transition.normal}, filter ${tokens.transition.normal}`,
                 }}
               >
-                <Box component="span" sx={{ fontFamily: tokens.font.accent, fontSize: tokens.fontSize.sm, fontWeight: 700, color: tokens.ui.gold, letterSpacing: "0.06em", textTransform: "uppercase" }}>
-                  {PANEL_TABS.find((t) => t.slot === openPanel)?.label}
-                </Box>
-                <Box
-                  onClick={() => setOpenPanel(null)}
-                  sx={{ display: "flex", color: tokens.ui.textMuted, cursor: "pointer", "&:hover": { color: tokens.ui.text } }}
-                >
-                  <Close fontSize="small" />
-                </Box>
+                {renderActionBoard()}
               </Box>
-              <Box sx={{ flex: 1, overflowY: "auto", minHeight: 0 }}>{renderPanel(openPanel)}</Box>
-            </Box>
+            </>
           )}
         </Box>
       </Box>

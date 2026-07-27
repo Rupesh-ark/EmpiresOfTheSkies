@@ -4,6 +4,7 @@ import { MyGameProps, EVENT_CARD_DEFS, phaseGroup } from "@eots/game";
 const ActionBoard = lazy(() => import("./ActionBoard/ActionBoard").then(m => ({ default: m.ActionBoard })));
 const WorldMap = lazy(() => import("./WorldMap/WorldMap"));
 const PlayerDock = lazy(() => import("./PlayerBoard/PlayerDock").then(m => ({ default: m.PlayerDock })));
+const OpponentInspector = lazy(() => import("./PlayerBoard/OpponentInspector").then(m => ({ default: m.OpponentInspector })));
 const Chat = lazy(() => import("./Chat/Chat"));
 const Trade = lazy(() => import("./Trade/Trade"));
 
@@ -104,15 +105,24 @@ const ActionBoardsAndMapInner = (props: MyGameProps) => {
     }));
   }, []);
 
-  // Rail selection: whose board the dock shows. Null = self.
-  const [viewPlayerID, setViewPlayerID] = useState<string | null>(null);
-  const dockPlayerID = viewPlayerID ?? props.playerID ?? props.ctx.currentPlayer;
+  // Rail selection opens the inspector drawer. Nothing else in the frame
+  // changes identity — the dock and column are always yours.
+  const [openPanel, setOpenPanel] = useState<PanelSlot | null>(null);
+  const [inspectPlayerID, setInspectPlayerID] = useState<string | null>(null);
+
   const handleSelectPlayer = useCallback(
     (id: string) => {
-      // Your own chip — or re-clicking the viewed opponent — returns to your board.
-      setViewPlayerID((prev) => (id === props.playerID || prev === id ? null : id));
+      // Your own chip returns to the board — your forces and holdings are
+      // already inline there, so inspecting yourself would cost you the map
+      // to show what's on screen anyway.
+      if (id === props.playerID) {
+        setOpenPanel(null);
+        return;
+      }
+      setInspectPlayerID(id);
+      setOpenPanel((prev) => (prev === "inspect" && inspectPlayerID === id ? null : "inspect"));
     },
-    [props.playerID]
+    [inspectPlayerID, props.playerID]
   );
 
   const renderPanel = useCallback((slot: PanelSlot): React.ReactNode => {
@@ -133,11 +143,19 @@ const ActionBoardsAndMapInner = (props: MyGameProps) => {
             <Trade {...props} />
           </Suspense>
         );
+      case "inspect":
+        return inspectPlayerID ? (
+          <Suspense fallback={null}>
+            <OpponentInspector {...props} viewPlayerID={inspectPlayerID} />
+          </Suspense>
+        ) : null;
       default:
         return null;
     }
-  }, [props]);
+  }, [props, inspectPlayerID]);
 
+  // Column content: the contested placement board, and nothing else. Every
+  // player-board action now sits in the dock beside what it produces.
   const renderActionBoard = useCallback((): React.ReactNode => (
     <Suspense fallback={null}>
       <ActionBoard {...props} />
@@ -159,7 +177,7 @@ const ActionBoardsAndMapInner = (props: MyGameProps) => {
   ), [props, mapDetailRequest]);
 
   const isMyTurn = props.ctx.currentPlayer === props.playerID;
-  const actionOverlayActive = group === "actions" && isMyTurn;
+  const actionsInteractive = group === "actions" && isMyTurn;
 
   return (
     <ThemeProvider theme={theme}>
@@ -192,21 +210,24 @@ const ActionBoardsAndMapInner = (props: MyGameProps) => {
             opponentRail={
               <OpponentRail
                 {...props}
-                viewPlayerID={dockPlayerID}
+                viewPlayerID={openPanel === "inspect" ? inspectPlayerID ?? "" : ""}
                 onSelectPlayer={handleSelectPlayer}
               />
             }
             promptBar={<PromptBar {...props} />}
             dock={
               <Suspense fallback={null}>
-                <PlayerDock
-                  {...props}
-                  viewPlayerID={dockPlayerID}
-                  onOpenFleetLocation={openMapAtLocation}
-                />
+                <PlayerDock {...props} onOpenFleetLocation={openMapAtLocation} />
               </Suspense>
             }
-            actionOverlayActive={actionOverlayActive}
+            actionsInteractive={actionsInteractive}
+            openPanel={openPanel}
+            onOpenPanel={setOpenPanel}
+            panelTitle={
+              openPanel === "inspect" && inspectPlayerID
+                ? props.G.playerInfo[inspectPlayerID]?.kingdomName
+                : undefined
+            }
             renderPanel={renderPanel}
             renderActionBoard={renderActionBoard}
             renderMap={renderMap}

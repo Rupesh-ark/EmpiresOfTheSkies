@@ -352,6 +352,16 @@ export const WorldMapTile = memo((props: worldMapTileProps) => {
   const locationPresentation = getLocationPresentation(props.G.mapState.currentTileArray, [xLocation, yLocation]);
   const canShowDetail = flip;
 
+  // ReactCardFlip keeps BOTH faces mounted, so the front face leaks the tile's
+  // identity (label, artwork, type colour) until it's actually discovered.
+  const frontFace = flip
+    ? {
+        label: locationPresentation.fullLabel,
+        colour: currentTile.type === "ocean" ? "#009EE3" : currentTile.type === "legend" ? "#2a1a4a" : "#3a7a4a",
+        image: `url(${svgNameToElementMap[currentTile.name]})`,
+      }
+    : { label: `Unexplored skies ${locationPresentation.reference}`, colour: "transparent", image: "none" };
+
   const altOnClick = () => {
     if (props.alternateOnClick) {
       props.alternateOnClick([xLocation, yLocation]);
@@ -396,10 +406,12 @@ export const WorldMapTile = memo((props: worldMapTileProps) => {
         <Button
           ref={setDroppableRef}
           className="front"
-          aria-label={locationPresentation.fullLabel}
+          aria-label={frontFace.label}
+          aria-hidden={!flip}
+          tabIndex={flip ? undefined : -1}
           sx={{
-            backgroundColor: currentTile.type === "ocean" ? "#009EE3" : currentTile.type === "legend" ? "#2a1a4a" : "#3a7a4a",
-            backgroundImage: `url(${svgNameToElementMap[currentTile.name]})`,
+            backgroundColor: frontFace.colour,
+            backgroundImage: frontFace.image,
             backgroundSize: "cover",
             backgroundRepeat: "no-repeat",
             width: "100%",

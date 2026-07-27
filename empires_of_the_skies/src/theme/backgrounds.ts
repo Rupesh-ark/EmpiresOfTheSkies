@@ -29,11 +29,25 @@ export const backgrounds = {
   /** Parchment panel texture — for sidebars, action board, tab drawers */
   parchmentPanel: `url(${BG_PARCHMENT_PANEL}) center / 800px repeat`,
 
-  /** Parchment panel with surface color overlay for readability */
-  parchmentPanelTinted: `
-    linear-gradient(180deg, ${tokens.ui.surface}dd 0%, ${tokens.ui.surface}cc 100%),
-    url(${BG_PARCHMENT_PANEL}) center / 800px repeat
-  `.trim(),
+  /**
+   * Content-zone surface — parchment with the texture at a whisper.
+   *
+   * Bundled as one object because the recipe has to travel together: an
+   * earlier version needed a companion `backgroundBlendMode` at every call
+   * site, and the one place that forgot it looked different from the rest.
+   *
+   * Deliberately NOT multiply — multiply modulates by the texture no matter
+   * how opaque the layer above, so the pattern stayed loud however far the
+   * alpha was pushed. Plain compositing at 95% leaves 5% grain, which is
+   * what "aged paper" should be.
+   */
+  panelSurface: {
+    background: `
+      linear-gradient(180deg, ${tokens.ui.surface}f2 0%, ${tokens.ui.surface}ee 100%),
+      url(${BG_PARCHMENT_PANEL}) center / 800px repeat
+    `.trim(),
+    backgroundColor: tokens.ui.surface,
+  },
 
   /** River water — aerial satellite texture for game background */
   riverTexture: `url(${BG_RIVER}) center / cover no-repeat`,
@@ -96,4 +110,44 @@ export const backgrounds = {
 
   /** Gold accent intensified (hover state) */
   goldAccentHover: `linear-gradient(180deg, ${tokens.ui.gold} 0%, ${tokens.ui.gold}88 60%, ${tokens.ui.gold}22 100%)`,
+
+  /**
+   * Enamel pin — the shared material for player markers (rail medallions,
+   * heresy track pins). A tight offset specular plus bounce light and vertical
+   * shading over flat kingdom colour. The old version ramped white from 0% to
+   * ~46% of the radius, which blew out a third of the sphere.
+   */
+  enamel: (colour: string) =>
+    `
+    radial-gradient(circle at 32% 26%, rgba(255,255,255,0.52) 0%, rgba(255,255,255,0.13) 15%, rgba(255,255,255,0) 33%),
+    radial-gradient(circle at 50% 118%, rgba(255,255,255,0.20) 0%, rgba(255,255,255,0) 44%),
+    linear-gradient(180deg, rgba(255,255,255,0.10) 0%, rgba(0,0,0,0) 44%, rgba(0,0,0,0.32) 100%),
+    ${colour}
+  `.trim(),
+
+  /**
+   * Action-row surface — the frame's vocabulary for anything clickable that
+   * sits on parchment: raised gradient, brass hairline, gold edge stripe.
+   * Shared so the dock and Musters read as the same system as the board.
+   */
+  actionSurface: {
+    position: "relative" as const,
+    overflow: "hidden",
+    background: `linear-gradient(180deg, ${tokens.ui.surfaceRaised} 0%, ${tokens.ui.surface} 100%)`,
+    borderRadius: `${tokens.radius.md}px`,
+    border: `1px solid ${tokens.ui.border}`,
+    borderTop: `1px solid ${tokens.ui.gold}22`,
+    borderLeft: "3px solid transparent",
+    "&::before": {
+      content: '""',
+      position: "absolute",
+      left: -3,
+      top: 0,
+      bottom: 0,
+      width: 3,
+      borderRadius: `${tokens.radius.md}px 0 0 ${tokens.radius.md}px`,
+      background: `linear-gradient(180deg, ${tokens.ui.gold} 0%, ${tokens.ui.gold}55 60%, transparent 100%)`,
+      transition: `background ${tokens.transition.fast}`,
+    },
+  },
 } as const;

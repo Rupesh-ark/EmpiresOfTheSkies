@@ -45,7 +45,6 @@ const RebellionRivalSupportDialog = (props: MyGameProps) => {
       open
       title={`⚔ ${def.displayName} — Choose Your Side`}
       mood="crisis"
-      width={500}
       actions={
         <>
           <GameButton variant="ghost" onClick={() => props.moves.contributeToRebellion("defender", 0, 0)}>

@@ -1,11 +1,10 @@
 /**
- * DecisionPanel — a non-modal decision card that floats over the map's
- * lower edge instead of blocking the screen. The map stays fully visible
- * and interactive behind it, so players can inspect the battle tile,
+ * DecisionPanel — a non-modal decision card, pinned to the top of the action
+ * column. The map is never covered, so players can inspect the battle tile,
  * pan around, and check fleets before committing.
  *
- * Used by DecisionRouter for combat prompts; keep takeover ceremonies
- * (battle results, elections, round summaries) on DialogShell.
+ * Used by DecisionRouter; keep takeover ceremonies (battle results,
+ * elections, round summaries) on DialogShell.
  */
 import { ReactNode } from "react";
 import { Box, Typography } from "@mui/material";
@@ -20,8 +19,6 @@ interface DecisionPanelProps {
   children: ReactNode;
   /** Right-aligned button row */
   actions?: ReactNode;
-  /** Panel width in px — widen for card fans (default 460) */
-  width?: number;
 }
 
 export const DecisionPanel = ({
@@ -31,7 +28,6 @@ export const DecisionPanel = ({
   mood = "battle",
   children,
   actions,
-  width = 460,
 }: DecisionPanelProps) => {
   if (!open) return null;
   const moodTokens = getMoodTokens(mood);
@@ -39,16 +35,15 @@ export const DecisionPanel = ({
   return (
     <Box
       sx={{
-        width,
-        maxWidth: "94%",
+        // The column sets the width; the panel never chooses its own.
+        width: "100%",
         maxHeight: "52vh",
         display: "flex",
         flexDirection: "column",
         borderRadius: `${tokens.radius.lg}px`,
         border: `1px solid ${tokens.ui.borderMedium}`,
         borderTop: `3px solid ${moodTokens.accent}`,
-        background: backgrounds.parchmentPanelTinted,
-        backgroundColor: tokens.ui.surface,
+        ...backgrounds.panelSurface,
         boxShadow: `0 10px 32px rgba(0,0,0,0.45), 0 0 14px ${moodTokens.accent}22`,
         overflow: "hidden",
         pointerEvents: "auto",

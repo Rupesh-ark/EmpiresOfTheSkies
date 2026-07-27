@@ -209,7 +209,6 @@ const OutpostOrColonyDialog = (props: MyGameProps) => {
       title={`Claim ${tileName}`}
       subtitle={`Your fleet has reached ${tileName}. Choose how to establish your presence.`}
       mood="discovery"
-      width={480}
     >
       {/* Garrison Strength banner */}
       <Box

@@ -1,10 +1,12 @@
 /**
- * DecisionRouter — non-modal decision panels that float over the map
- * (via GameLayout's decision slot) instead of blocking it as dialogs.
+ * DecisionRouter — non-modal decision panels, pinned to the top of the
+ * action column (via GameLayout's decision slot) instead of blocking the
+ * screen as dialogs or covering the map as floating cards.
  *
- * Combat prompts live here: the player needs to SEE the battle tile and
- * the surrounding board to decide. Takeover ceremonies (battle results,
- * elections, round summaries) stay in DialogRouter.
+ * Everything the game actively waits on lands in one place, and the map
+ * stays whole — which matters most for combat, where the player needs to
+ * see the battle tile. Takeover ceremonies (battle results, elections,
+ * round summaries) stay in DialogRouter.
  */
 import { memo, lazy, Suspense } from "react";
 import { MyGameProps, phaseGroup } from "@eots/game";

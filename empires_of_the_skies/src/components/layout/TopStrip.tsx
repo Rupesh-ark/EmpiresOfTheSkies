@@ -103,7 +103,7 @@ const MiniHeresyTrack = ({ playerInfo }: { playerInfo: Record<string, PlayerInfo
                     width: 11,
                     height: 11,
                     borderRadius: "50%",
-                    background: `radial-gradient(circle at 34% 28%, rgba(255,255,255,0.9) 0%, ${p.colour} 42%, rgba(0,0,0,0.35) 130%)`,
+                    background: backgrounds.enamel(p.colour),
                     border: "1px solid rgba(0,0,0,0.55)",
                     boxShadow: "0 1px 2px rgba(0,0,0,0.7), inset 0 0 0 1px rgba(255,255,255,0.18)",
                     zIndex: i + 1,

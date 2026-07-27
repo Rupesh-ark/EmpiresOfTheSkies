@@ -28,7 +28,6 @@ const PickEventCardDialog = (props: MyGameProps) => {
       title="Choose an Event Card"
       subtitle="Pick one card to play face-down. All chosen cards will be shuffled and one will be revealed."
       mood="crisis"
-      width={780}
       actions={
         <GameButton
           variant="primary"

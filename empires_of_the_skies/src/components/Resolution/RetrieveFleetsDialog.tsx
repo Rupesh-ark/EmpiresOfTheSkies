@@ -97,7 +97,6 @@ const RetrieveFleetsDialog = (props: MyGameProps) => {
       title="Retrieve Fleets"
       subtitle="Select fleets to bring home. Toggle route options to leave skyship markers."
       mood="peacetime"
-      width={500}
       actions={
         <>
           <GameButton variant="ghost" onClick={() => props.moves.retrieveFleets([])}>

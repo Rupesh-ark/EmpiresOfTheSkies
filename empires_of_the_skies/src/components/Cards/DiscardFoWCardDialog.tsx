@@ -15,7 +15,6 @@ const DiscardFoWCardDialog = (props: MyGameProps) => {
       title="Discard Fortune of War Cards"
       subtitle={`Your hand exceeds ${maxCards} cards — click cards to discard (${hand.length} / ${maxCards})`}
       mood="battle"
-      width={520}
     >
       <Box sx={{ display: "flex", gap: "8px", flexWrap: "wrap", justifyContent: "center", py: "6px", pb: "14px" }}>
         {hand.map((card, i) => {
