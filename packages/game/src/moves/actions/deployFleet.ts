@@ -4,9 +4,14 @@ import { INVALID_MOVE } from "boardgame.io/core";
 import { removeGoldAmount, incrementActionsTaken } from "../../helpers/stateUtils.js";
 import { validateMove } from "../moveValidation.js";
 import { KINGDOM_LOCATION, MAX_SKYSHIPS_PER_FLEET } from "../../data/gameData.js";
-import log from "../../helpers/logger.js";
+import { bfsShortestPath } from "../../helpers/mapUtils.js";
 
-const dLog = log.child({ mod: "deploy-fleet" });
+const isUnladen = (
+  regimentCount: number,
+  levyCount: number,
+  eliteRegimentCount: number
+): boolean =>
+  regimentCount === 0 && levyCount === 0 && eliteRegimentCount === 0;
 
 const validateDeployFleet = (
   G: MyGameState,
@@ -20,6 +25,24 @@ const validateDeployFleet = (
 ): MoveError | null => {
   const base = validateMove(playerID, G, { costsCounsellor: true, costsGold: true });
   if (base) return base;
+
+  if (!Number.isInteger(selectedFleetIndex) || selectedFleetIndex < 0) {
+    return { code: "INVALID_FLEET", message: "Fleet index must be a non-negative integer" };
+  }
+  if (
+    !Array.isArray(destination) ||
+    destination.length !== 2 ||
+    !destination.every((coordinate) => Number.isInteger(coordinate) && coordinate >= 0)
+  ) {
+    return { code: "INVALID_DESTINATION", message: "Destination coordinates must be non-negative integers" };
+  }
+  if (
+    ![skyshipCount, regimentCount, levyCount, eliteRegimentCount].every(
+      (count) => Number.isInteger(count) && count >= 0
+    )
+  ) {
+    return { code: "INVALID_COUNT", message: "Fleet composition must use non-negative integers" };
+  }
 
   const currentPlayer = G.playerInfo[playerID];
   const fleet = currentPlayer.fleetInfo[selectedFleetIndex];
@@ -36,34 +59,11 @@ const validateDeployFleet = (
     fleet.location[0] === KINGDOM_LOCATION[0] &&
     fleet.location[1] === KINGDOM_LOCATION[1];
 
-  if (atHome) {
-    if (currentPlayer.resources.skyships < skyshipCount) {
-      return {
-        code: "INSUFFICIENT_SKYSHIPS",
-        message: `Not enough Skyships — need ${skyshipCount}, have ${currentPlayer.resources.skyships}`,
-      };
-    }
-    if (currentPlayer.resources.regiments < regimentCount) {
-      return {
-        code: "INSUFFICIENT_REGIMENTS",
-        message: `Not enough Regiments — need ${regimentCount}, have ${currentPlayer.resources.regiments}`,
-      };
-    }
-    if (currentPlayer.resources.levies < levyCount) {
-      return {
-        code: "INSUFFICIENT_LEVIES",
-        message: `Not enough Levies — need ${levyCount}, have ${currentPlayer.resources.levies}`,
-      };
-    }
-    if (currentPlayer.resources.eliteRegiments < eliteRegimentCount) {
-      return {
-        code: "INSUFFICIENT_ELITE_REGIMENTS",
-        message: `Not enough Elite Regiments — need ${eliteRegimentCount}, have ${currentPlayer.resources.eliteRegiments}`,
-      };
-    }
+  if (!atHome) {
+    return { code: "FLEET_NOT_AT_HOME", message: "Only fleets in the Kingdom can be deployed" };
   }
 
-  if (skyshipCount === 0) {
+  if (skyshipCount < 1) {
     return { code: "NO_SKYSHIPS_ASSIGNED", message: "A fleet must have at least 1 Skyship" };
   }
 
@@ -81,8 +81,33 @@ const validateDeployFleet = (
     };
   }
 
+  if (currentPlayer.resources.skyships < skyshipCount) {
+    return {
+      code: "INSUFFICIENT_SKYSHIPS",
+      message: `Not enough Skyships — need ${skyshipCount}, have ${currentPlayer.resources.skyships}`,
+    };
+  }
+  if (currentPlayer.resources.regiments < regimentCount) {
+    return {
+      code: "INSUFFICIENT_REGIMENTS",
+      message: `Not enough Regiments — need ${regimentCount}, have ${currentPlayer.resources.regiments}`,
+    };
+  }
+  if (currentPlayer.resources.levies < levyCount) {
+    return {
+      code: "INSUFFICIENT_LEVIES",
+      message: `Not enough Levies — need ${levyCount}, have ${currentPlayer.resources.levies}`,
+    };
+  }
+  if (currentPlayer.resources.eliteRegiments < eliteRegimentCount) {
+    return {
+      code: "INSUFFICIENT_ELITE_REGIMENTS",
+      message: `Not enough Elite Regiments — need ${eliteRegimentCount}, have ${currentPlayer.resources.eliteRegiments}`,
+    };
+  }
+
   const startCoords = fleet.location;
-  const unladen = regimentCount === 0 && levyCount === 0;
+  const unladen = isUnladen(regimentCount, levyCount, eliteRegimentCount);
   const [validDestinations] = findPossibleDestinations(G, startCoords, unladen);
   const isValidDest = validDestinations.some(
     (c) => c[0] === destination[0] && c[1] === destination[1]
@@ -97,39 +122,36 @@ const validateDeployFleet = (
 const deployFleet: MoveDefinition = {
   fn: ({ G, playerID, events }, ...args: any[]) => {
     const selectedFleetIndex = args[0];
-    const [x, y] = args[1];
+    const destination = args[1];
     const skyshipCount = args[2];
     const regimentCount = args[3];
     const levyCount = args[4];
     const eliteRegimentCount = args[5] ?? 0;
 
-    if (typeof levyCount !== 'number' || isNaN(levyCount)) {
-      dLog.warn({ levyCount }, "Invalid levyCount arg");
-      return INVALID_MOVE;
-    }
-    if (typeof skyshipCount !== 'number' || isNaN(skyshipCount) ||
-        typeof regimentCount !== 'number' || isNaN(regimentCount)) {
-      dLog.warn({ skyshipCount, regimentCount }, "Invalid troop counts");
-      return INVALID_MOVE;
-    }
+    if (validateDeployFleet(G, playerID, selectedFleetIndex, destination, skyshipCount, regimentCount, levyCount, eliteRegimentCount)) return INVALID_MOVE;
 
-    if (validateDeployFleet(G, playerID, selectedFleetIndex, [x, y], skyshipCount, regimentCount, levyCount, eliteRegimentCount)) return INVALID_MOVE;
-
+    const [x, y] = destination;
     const currentPlayer = G.playerInfo[playerID];
     const fleet = currentPlayer.fleetInfo[selectedFleetIndex];
 
     const startingCoords = fleet.location;
-    const unladen = regimentCount === 0 && levyCount === 0 && eliteRegimentCount === 0;
+    const unladen = isUnladen(regimentCount, levyCount, eliteRegimentCount);
 
     const [
       ,
       coordsCostingOneGold,
       coordsCostingTwoGold,
       coordsCostingThreeGold,
+      coordsCostingFourGold,
     ] = findPossibleDestinations(G, startingCoords, unladen);
 
     let cost = 0;
 
+    coordsCostingFourGold.forEach((coords) => {
+      if (doCoordsMatch(coords, [x, y])) {
+        cost = 4;
+      }
+    });
     coordsCostingThreeGold.forEach((coords) => {
       if (doCoordsMatch(coords, [x, y])) {
         cost = 3;
@@ -157,7 +179,15 @@ const deployFleet: MoveDefinition = {
     currentPlayer.resources.eliteRegiments -= eliteRegimentCount;
 
     G.playerInfo[playerID].fleetInfo[fleet.fleetId].location = [x, y];
-    fleet.travelHistory = [[x, y]];
+    fleet.travelHistory = [
+      ...bfsShortestPath(
+        KINGDOM_LOCATION,
+        [[x, y]],
+        G.mapState.currentTileArray,
+        G.mapState.discoveredTiles
+      ),
+      [x, y],
+    ];
 
     const otherFleetsOnOldTile = currentPlayer.fleetInfo.some(
       (f) => f.fleetId !== fleet.fleetId && f.location[0] === startingCoords[0] && f.location[1] === startingCoords[1] && f.skyships > 0

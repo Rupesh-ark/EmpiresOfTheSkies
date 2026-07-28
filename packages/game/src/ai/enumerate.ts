@@ -2,7 +2,7 @@ import { MOVE_DEFINITIONS } from "../moveDefinitions.js";
 import type { MyGameState } from "../types.js";
 import type { Ctx } from "boardgame.io";
 import type { AIMove } from "./types.js";
-import { getNeighbors, isValidRetreatDestination, tileKey, wouldPlacementConnectRoute } from "../helpers/mapUtils.js";
+import { getNeighbors, tileKey, wouldPlacementConnectRoute } from "../helpers/mapUtils.js";
 import { MAP_WIDTH, MAP_HEIGHT, KINGDOM_LOCATION, MAX_SKYSHIPS_PER_FLEET } from "../data/gameData.js";
 import { findPossibleDestinations } from "../helpers/helpers.js";
 import log from "../helpers/logger.js";
@@ -17,6 +17,28 @@ function tryValidate(moveName: string, G: MyGameState, playerID: string, ...args
   } catch {
     return false; // validate crashed = skip this move
   }
+}
+
+function sampleDestinationsByRing(
+  destinationGroups: [number, number][][],
+  limit: number
+): [number, number][] {
+  const rings = destinationGroups.slice(1);
+  const selected: [number, number][] = [];
+
+  for (let index = 0; selected.length < limit; index++) {
+    let addedDestination = false;
+    for (const ring of rings) {
+      const destination = ring[index];
+      if (!destination) continue;
+      selected.push(destination);
+      addedDestination = true;
+      if (selected.length === limit) break;
+    }
+    if (!addedDestination) break;
+  }
+
+  return selected;
 }
 
 /**
@@ -321,7 +343,11 @@ export function enumerateLegalMoves(G: MyGameState, ctx: Ctx, playerID: string):
       {
         const sentThisRound = G.playerInfo[playerID].agitatorsSentThisRound;
         for (const otherID of ctx.playOrder) {
-          if (otherID !== playerID && !sentThisRound.includes(otherID)) {
+          if (
+            otherID !== playerID &&
+            !sentThisRound.includes(otherID) &&
+            tryValidate("sendAgitators", G, playerID, otherID)
+          ) {
             moves.push({ move: "sendAgitators", args: [otherID] });
           }
         }
@@ -366,8 +392,11 @@ export function enumerateLegalMoves(G: MyGameState, ctx: Ctx, playerID: string):
           const maxSky = Math.min(res.skyships, MAX_SKYSHIPS_PER_FLEET);
 
           // Scout loadout destinations (unladen)
-          const [scoutDests] = findPossibleDestinations(G, KINGDOM_LOCATION, true);
-          for (const dest of scoutDests.slice(0, 10)) {
+          const scoutDests = sampleDestinationsByRing(
+            findPossibleDestinations(G, KINGDOM_LOCATION, true),
+            10
+          );
+          for (const dest of scoutDests) {
             if (tryValidate("deployFleet", G, playerID, fi, dest, 1, 0, 0, 0)) {
               moves.push({ move: "deployFleet", args: [fi, dest, 1, 0, 0, 0] });
             }
@@ -379,13 +408,16 @@ export function enumerateLegalMoves(G: MyGameState, ctx: Ctx, playerID: string):
           const safeElites = res.eliteRegiments || 0;
           const hasTroops = safeRegs > 0 || safeLevies > 0 || safeElites > 0;
           if (hasTroops && maxSky > 0) {
-            const [ladenDests] = findPossibleDestinations(G, KINGDOM_LOCATION, false);
+            const ladenDests = sampleDestinationsByRing(
+              findPossibleDestinations(G, KINGDOM_LOCATION, false),
+              10
+            );
             const troopCapacity = maxSky; // 1 troop per skyship
             const elites = Math.min(safeElites, troopCapacity);
             const regs = Math.min(safeRegs, troopCapacity - elites);
             const levs = Math.min(safeLevies, Math.max(0, troopCapacity - elites - regs));
 
-            for (const dest of ladenDests.slice(0, 10)) {
+            for (const dest of ladenDests) {
               if (tryValidate("deployFleet", G, playerID, fi, dest, maxSky, regs, levs, elites)) {
                 moves.push({ move: "deployFleet", args: [fi, dest, maxSky, regs, levs, elites] });
               }
@@ -671,13 +703,11 @@ export function enumerateLegalMoves(G: MyGameState, ctx: Ctx, playerID: string):
               battleState.attacker.id === playerID
                 ? battleState.defender.id
                 : battleState.attacker.id;
-            const battleLoc = G.mapState.currentBattle as [number, number];
+            // validRelocationTiles is the server-computed legal set — offer it verbatim
             for (const tile of G.validRelocationTiles) {
-              if (isValidRetreatDestination(G, battleLoc, tile as [number, number], defeatedPlayerID)) {
-                moves.push({ move: "relocateDefeatedFleet", args: [tile, defeatedPlayerID] });
-              }
+              moves.push({ move: "relocateDefeatedFleet", args: [tile, defeatedPlayerID] });
             }
-            // Fallback: if no valid tiles survive validation, retreat home
+            // Fallback: if no tiles were precomputed, retreat home
             if (moves.length === 0) {
               moves.push({ move: "relocateDefeatedFleet", args: [[...KINGDOM_LOCATION], defeatedPlayerID] });
             }

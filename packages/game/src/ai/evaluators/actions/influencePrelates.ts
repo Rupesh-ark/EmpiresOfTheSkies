@@ -12,17 +12,19 @@ import type { MoveEval, BotPersonality } from "../types.js";
 import { V2_CONFIG } from "../config.js";
 import { getBase } from "../archetypes.js";
 import { goldPressure, goldPressureReason, personalityBonus, roundAwareness, diminishingReturns } from "../common.js";
+import { getInfluencePrelateCost } from "../../../helpers/actionCosts.js";
+import { PlayerColour } from "../../../types.js";
 
-// Slot → kingdom colour mapping (mirrors influencePrelates.ts move code)
+// Slot → kingdom colour mapping
 const SLOT_TO_COLOUR: Record<number, string | null> = {
-  1: "red",    // Angland
-  2: "blue",   // Gallois
-  3: "yellow", // Normark
-  4: null,     // Zeeland (republic)
-  5: null,     // Venoa (republic)
-  6: "brown",  // Castillia
-  7: "white",  // Ostreich
-  8: "green",  // Constantium
+  1: PlayerColour.red,    // Angland
+  2: PlayerColour.blue,   // Gallois
+  3: PlayerColour.yellow, // Normark
+  4: null,                // Zeeland (republic)
+  5: null,                // Venoa (republic)
+  6: PlayerColour.brown,  // Castillia
+  7: PlayerColour.white,  // Ostreich
+  8: PlayerColour.green,  // Constantium
 };
 
 const INFLUENCE_PERSONALITY = {
@@ -31,20 +33,6 @@ const INFLUENCE_PERSONALITY = {
   kaBonus: 0.12,
   legacyBonus: 0.08,
 };
-
-function getSlotCost(G: MyGameState, playerID: string, slotIndex: number): number {
-  const boardSlot = slotIndex + 1;
-  const slotColour = SLOT_TO_COLOUR[boardSlot];
-  const playerColour = G.playerInfo[playerID].colour;
-
-  if (slotColour !== null && slotColour === playerColour) return 0;
-  if (slotColour === null) return 1;
-
-  for (const [, info] of Object.entries(G.playerInfo)) {
-    if (info.colour === slotColour) return info.cathedrals;
-  }
-  return 1;
-}
 
 function isOwnSlot(G: MyGameState, playerID: string, slotIndex: number): boolean {
   const boardSlot = slotIndex + 1;
@@ -73,7 +61,7 @@ export function evaluateInfluencePrelates(
 ): MoveEval {
   const player = G.playerInfo[playerID];
   const slotIndex = move.args[0] as number;
-  const cost = getSlotCost(G, playerID, slotIndex);
+  const cost = getInfluencePrelateCost(G, playerID, slotIndex + 1).cost;
   const gold = player.resources.gold;
   const slotsTaken = countSlotsTakenByPlayer(G, playerID);
 
@@ -88,10 +76,10 @@ export function evaluateInfluencePrelates(
     quality += V2_CONFIG.bonuses.republicSlotBonus;
     reasons.push("republic slot");
   } else {
-    // Rival slot — gold goes to them
+    // Rival slot — the bribe is paid to the bank
     if (cost >= 3) {
       quality -= V2_CONFIG.bonuses.rivalSlotHighPenalty * V2_CONFIG.penaltyScale;
-      reasons.push(`rival slot costs ${cost}g (to them)`);
+      reasons.push(`rival slot costs ${cost}g`);
     } else if (cost >= 1) {
       quality -= V2_CONFIG.bonuses.rivalSlotLowPenalty * V2_CONFIG.penaltyScale;
       reasons.push(`rival slot costs ${cost}g`);

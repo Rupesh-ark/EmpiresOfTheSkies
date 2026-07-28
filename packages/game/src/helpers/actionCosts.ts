@@ -43,15 +43,15 @@ export const getNextBuildingCost = (G: MyGameState, slot: BuildingSlotValue): nu
 export const CONVERT_MONARCH_GOLD_COST = 2;
 
 /**
- * Cost of influencing a Prelate slot (1-8), and who gets paid:
+ * Cost of influencing a Prelate slot (1-8), paid to the bank:
  * free on your own kingdom's slot; 1 gold for NPRs and absent kingdoms;
- * the owner's cathedral count (paid to them) for a rival's slot.
+ * the owner's cathedral count for a rival's slot.
  */
 export const getInfluencePrelateCost = (
   G: MyGameState,
   playerID: string,
   slotValue: number
-): { cost: number; recipientID: string | null } => {
+): { cost: number } => {
   const slotColourMap: Record<number, string | null> = {
     1: PlayerColour.red,
     2: PlayerColour.blue,
@@ -65,16 +65,14 @@ export const getInfluencePrelateCost = (
   const slotColour = slotColourMap[slotValue];
 
   if (slotColour !== null && slotColour === G.playerInfo[playerID].colour) {
-    return { cost: 0, recipientID: null };
+    return { cost: 0 };
   }
 
   let cost = 1;
-  let recipientID: string | null = null;
-  for (const [id, info] of Object.entries(G.playerInfo)) {
+  for (const info of Object.values(G.playerInfo)) {
     if (info.colour === slotColour) {
-      recipientID = id;
       cost = info.cathedrals;
     }
   }
-  return { cost, recipientID };
+  return { cost };
 };

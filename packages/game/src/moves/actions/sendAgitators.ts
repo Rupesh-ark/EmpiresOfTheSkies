@@ -1,6 +1,7 @@
 import { INVALID_MOVE } from "boardgame.io/core";
 import { MoveDefinition, MoveError } from "../../types.js";
-import { logEvent } from "../../helpers/stateUtils.js";
+import { logEvent, removeGoldAmount } from "../../helpers/stateUtils.js";
+import { validateMove } from "../moveValidation.js";
 
 const AGITATOR_COST = 2;
 
@@ -9,6 +10,12 @@ const validateSendAgitators = (
   playerID: string,
   targetID: string,
 ): MoveError | null => {
+  const base = validateMove(playerID, G, { costsGold: true });
+  if (base) return base;
+
+  if (G.playerInfo[playerID].resources.gold < AGITATOR_COST) {
+    return { code: "INSUFFICIENT_GOLD", message: `Sending agitators costs ${AGITATOR_COST} gold` };
+  }
   if (!targetID || !G.playerInfo[targetID]) {
     return { code: "INVALID_TARGET", message: "Must target a valid player" };
   }
@@ -27,7 +34,7 @@ const sendAgitators: MoveDefinition = {
 
     if (validateSendAgitators(G, playerID, targetID)) return INVALID_MOVE;
 
-    G.playerInfo[playerID].resources.gold -= AGITATOR_COST;
+    removeGoldAmount(G, playerID, AGITATOR_COST);
     G.playerInfo[targetID].freeDissenters += 1;
     G.playerInfo[playerID].agitatorsSentThisRound.push(targetID);
 

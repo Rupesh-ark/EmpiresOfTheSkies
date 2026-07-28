@@ -71,15 +71,6 @@ import respondToInfidelFleet from "./moves/events/respondToInfidelFleet.js";
 import commitDeferredBattleCard from "./moves/events/commitDeferredBattleCard.js";
 import acknowledgeRoundSummary from "./moves/reset/acknowledgeRoundSummary.js";
 
-const AERIAL_FOW_GUARD: MoveDefinition["validate"] = (G, playerID) => {
-  if (!G.battleState) return { code: "NO_BATTLE", message: "No active battle" };
-  const sub = G.step;
-  if (sub !== "aerial_resolve") return { code: "WRONG_STAGE", message: "Cannot pick/draw FoW card in this stage" };
-  const battler = Object.values(G.battleState).find((b) => b.id === playerID);
-  if (!battler) return { code: "NOT_IN_BATTLE", message: "You are not in this battle" };
-  return null;
-};
-
 const CONQUEST_FOW_GUARD: MoveDefinition["validate"] = (G, playerID) => {
   if (!G.conquestState) return { code: "NO_CONQUEST", message: "No active conquest" };
   const sub = G.step;
@@ -130,23 +121,8 @@ export const MOVE_DEFINITIONS: Record<string, MoveDefinition> = {
   doNotAttack,
   retaliate,
   evadeAttackingFleet,
-  drawCard: { ...drawCard, validate: AERIAL_FOW_GUARD },
-  pickCard: {
-    ...pickCard,
-    validate: (G, playerID, ...args) => {
-      const baseErr = AERIAL_FOW_GUARD(G, playerID);
-      if (baseErr) return baseErr;
-      const value = args[0];
-      if (typeof value !== 'number' || value < 0 || !Number.isInteger(value)) {
-        return { code: "INVALID_INDEX", message: "Invalid card index" };
-      }
-      const cards = G.playerInfo[playerID]?.resources?.fortuneCards;
-      if (!cards || value >= cards.length) {
-        return { code: "OUT_OF_BOUNDS", message: "Card index out of bounds" };
-      }
-      return null;
-    },
-  },
+  drawCard,
+  pickCard,
   relocateDefeatedFleet,
   plunder,
   doNotPlunder,

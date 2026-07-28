@@ -12,6 +12,7 @@ import { getBase } from "../archetypes.js";
 import { goldPressure, goldPressureReason, personalityBonus, diminishingReturns, heresyPressure, tradeRouteChainValue } from "../common.js";
 import { countActiveTradeRoutes } from "../../../helpers/mapUtils.js";
 import { KINGDOM_LOCATION } from "../../../data/gameData.js";
+import { findPossibleDestinations } from "../../../helpers/helpers.js";
 
 function clampEval(move: AIMove, quality: number, reason: string): MoveEval {
   quality = Math.max(0, Math.min(1, quality));
@@ -224,8 +225,20 @@ export function evaluateMoveFleet(
   // Args: [fleetIndex, [destX, destY]]
   const player = G.playerInfo[playerID];
   const gold = player.resources.gold;
+  const fleetIndex = move.args[0] as number;
   const dest = move.args[1] as [number, number];
-  const cost = 1; // 1-3g
+  const fleet = player.fleetInfo[fleetIndex];
+  const cost = fleet && dest
+    ? findPossibleDestinations(
+        G,
+        fleet.location,
+        fleet.regiments + fleet.levies + fleet.eliteRegiments === 0
+      )
+        .slice(1)
+        .findIndex((ring) =>
+          ring.some(([x, y]) => x === dest[0] && y === dest[1])
+        ) + 1
+    : 0;
   const reasons: string[] = [];
 
   let quality = getBase(personality.baseQualities, "moveFleet");

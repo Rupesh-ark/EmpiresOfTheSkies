@@ -2,7 +2,7 @@
  * V2 Evaluator: deployFleet
  *
  * Evaluates whether deploying a fleet to a destination is reasonable.
- * Cost: 1-3g based on distance. Also consumes skyships and troops from reserves.
+ * Cost: 1-4g based on distance. Also consumes skyships and troops from reserves.
  * This is a key economic move — fleets enable routes, conquest, and plunder.
  */
 import type { MyGameState } from "../../../types.js";
@@ -12,6 +12,8 @@ import { V2_CONFIG } from "../config.js";
 import { getBase } from "../archetypes.js";
 import { goldPressure, goldPressureReason, personalityBonus, roundAwareness, tradeRouteChainValue } from "../common.js";
 import { countActiveTradeRoutes, buildPlayerNetwork, tileKey, FAITHDOM_TILES, bfsReachable } from "../../../helpers/mapUtils.js";
+import { findPossibleDestinations } from "../../../helpers/helpers.js";
+import { KINGDOM_LOCATION } from "../../../data/gameData.js";
 
 const DEPLOY_PERSONALITY = {
   kaCards: ["elite_regiments", "sanctioned_piracy"],
@@ -57,11 +59,19 @@ export function evaluateDeployFleet(
   const dest = move.args[1] as [number, number];
   const skyshipCount = (move.args[2] as number) ?? 0;
   const regimentCount = (move.args[3] as number) ?? 0;
+  const levyCount = (move.args[4] as number) ?? 0;
   const eliteCount = (move.args[5] as number) ?? 0;
   const gold = player.resources.gold;
   const routes = countActiveTradeRoutes(G, playerID);
 
-  const estimatedCost = 1;
+  const hasTroops = regimentCount + levyCount + eliteCount > 0;
+  const estimatedCost = dest
+    ? findPossibleDestinations(G, KINGDOM_LOCATION, !hasTroops)
+        .slice(1)
+        .findIndex((ring) =>
+          ring.some(([x, y]) => x === dest[0] && y === dest[1])
+        ) + 1
+    : 0;
   const reasons: string[] = [];
   let quality = getBase(personality.baseQualities, "deployFleet");
 
@@ -71,7 +81,6 @@ export function evaluateDeployFleet(
   }
 
   // Troop loadout
-  const hasTroops = regimentCount + eliteCount > 0;
   const armySwords = regimentCount * 2 + eliteCount * 3 + skyshipCount;
 
   // Destination tile analysis

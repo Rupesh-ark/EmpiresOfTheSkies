@@ -30,7 +30,8 @@ export const findPossibleDestinations = (
   let coordinatesToSearch: number[][] = [startingCoords];
   let coordinatesToSearchNext: [number, number][] = [];
   let coordsGroupedByCost: [number, number][][] = [];
-  for (let i = 0; i < 3; i++) {
+  const visited = new Set<string>([`${startingCoords[0]},${startingCoords[1]}`]);
+  for (let i = 0; i < 4; i++) {
     coordinatesToSearch.forEach((coords) => {
       const [x, y] = coords;
       // Use mountain-aware neighbors from mapUtils for laden fleets,
@@ -43,6 +44,9 @@ export const findPossibleDestinations = (
           G.mapState.discoveredTiles[ny]?.[nx] &&
           (ny !== 0 || nx !== 4) // exclude home tile
         ) {
+          const key = `${nx},${ny}`;
+          if (visited.has(key)) return;
+          visited.add(key);
           availableGridLocations.push([nx, ny]);
           coordinatesToSearchNext.push([nx, ny]);
         }

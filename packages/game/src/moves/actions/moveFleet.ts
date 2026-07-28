@@ -3,6 +3,7 @@ import { findPossibleDestinations } from "../../helpers/helpers.js";
 import { INVALID_MOVE } from "boardgame.io/core";
 import { removeGoldAmount, incrementActionsTaken } from "../../helpers/stateUtils.js";
 import { validateMove } from "../moveValidation.js";
+import { bfsShortestPath } from "../../helpers/mapUtils.js";
 
 const validateMoveFleet = (
   G: MyGameState,
@@ -49,7 +50,10 @@ const moveFleet: MoveDefinition = {
     if (validateMoveFleet(G, playerID, fleetIndex, [x, y])) return INVALID_MOVE;
 
     const fleet = G.playerInfo[playerID].fleetInfo[fleetIndex];
-    const startingCoords = fleet.location;
+    const startingCoords: [number, number] = [
+      fleet.location[0],
+      fleet.location[1],
+    ];
 
     const unladen =
       fleet.regiments === 0 && fleet.levies === 0 && fleet.eliteRegiments === 0;
@@ -59,9 +63,13 @@ const moveFleet: MoveDefinition = {
       coordsCostingOneGold,
       coordsCostingTwoGold,
       coordsCostingThreeGold,
+      coordsCostingFourGold,
     ] = findPossibleDestinations(G, startingCoords, unladen);
 
     let cost = 0;
+    coordsCostingFourGold.forEach((coords) => {
+      if (coords[0] === x && coords[1] === y) cost = 4;
+    });
     coordsCostingThreeGold.forEach((coords) => {
       if (coords[0] === x && coords[1] === y) cost = 3;
     });
@@ -72,8 +80,14 @@ const moveFleet: MoveDefinition = {
       if (coords[0] === x && coords[1] === y) cost = 1;
     });
 
+    const intermediates = bfsShortestPath(
+      startingCoords,
+      [[x, y]],
+      G.mapState.currentTileArray,
+      G.mapState.discoveredTiles
+    );
     fleet.location = [x, y];
-    fleet.travelHistory.push([x, y]);
+    fleet.travelHistory.push(...intermediates, [x, y]);
 
     const otherFleetsOnOldTile = G.playerInfo[playerID].fleetInfo.some(
       (f) => f !== fleet && f.location[0] === startingCoords[0] && f.location[1] === startingCoords[1] && f.skyships > 0

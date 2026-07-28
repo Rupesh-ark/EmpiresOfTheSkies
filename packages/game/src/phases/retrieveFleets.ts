@@ -11,6 +11,12 @@ export const hasRetrievableFleet = (player: PlayerInfo): boolean =>
     (fleet) => fleet.skyships > 0 && (fleet.location[0] !== 4 || fleet.location[1] !== 0)
   );
 
+// Route-marker owners get a turn even with every fleet home — the retrieve
+// move is also where markers are reclaimed.
+const canActInRetrieve = (G: MyGameState, playerID: string): boolean =>
+  hasRetrievableFleet(G.playerInfo[playerID]) ||
+  Object.values(G.mapState.routeSkyships).some((owners) => owners.includes(playerID));
+
 const retrieveFleetsPhase: PhaseConfig<MyGameState> = {
   moves: wrapSet("retrieveFleets", "pass"),
   next: "scoring",
@@ -20,7 +26,7 @@ const retrieveFleetsPhase: PhaseConfig<MyGameState> = {
       player.passed = false;
     });
     context.G.step = "retrieve_fleets";
-    if (!Object.values(context.G.playerInfo).some(hasRetrievableFleet)) {
+    if (!Object.keys(context.G.playerInfo).some((id) => canActInRetrieve(context.G, id))) {
       context.events.endPhase();
     }
   },
@@ -29,7 +35,7 @@ const retrieveFleetsPhase: PhaseConfig<MyGameState> = {
       playOrder: ({ G }) => G.turnOrder,
       first: ({ G }) => {
         const index = G.turnOrder.findIndex((playerID) =>
-          hasRetrievableFleet(G.playerInfo[playerID])
+          canActInRetrieve(G, playerID)
         );
         return index === -1 ? 0 : index;
       },
@@ -38,8 +44,7 @@ const retrieveFleetsPhase: PhaseConfig<MyGameState> = {
     onBegin: (context) => {
       const playerID = context.ctx.currentPlayer;
       const player = context.G.playerInfo[playerID];
-      const hasRetrievableFleets = hasRetrievableFleet(player);
-      if (!hasRetrievableFleets || player.passed) {
+      if (!canActInRetrieve(context.G, playerID) || player.passed) {
         player.passed = true;
         if (allPlayersPassed(context.G)) {
           context.events.endPhase();

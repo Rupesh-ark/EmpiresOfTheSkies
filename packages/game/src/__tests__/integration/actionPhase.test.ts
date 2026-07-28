@@ -17,6 +17,8 @@ import recruitRegiments from "../../moves/actions/recruitRegiments.js";
 import foundFactory from "../../moves/actions/foundFactory.js";
 import trainTroops from "../../moves/actions/trainTroops.js";
 import deployFleet from "../../moves/actions/deployFleet.js";
+import moveFleet from "../../moves/actions/moveFleet.js";
+import influencePrelates from "../../moves/actions/influencePrelates.js";
 import purchaseSkyships from "../../moves/actions/purchaseSkyships.js";
 import pass from "../../moves/pass.js";
 import {
@@ -318,6 +320,75 @@ describe("actionPhase — multiple fleet dispatches per round", () => {
     const result = deployFleet.validate?.(G, "0", 0, [3, 0], 2, 1, 0, 0);
     expect(result).not.toBeNull();
     expect(result?.code).toBe("ALREADY_DISPATCHED");
+  });
+});
+
+describe("actionPhase — fleet movement range and cost", () => {
+  function buildMovementState() {
+    const G = buildInitialG([
+      buildPlayer("0", {
+        resources: buildResources({ gold: 10, counsellors: 4 }),
+        fleetInfo: [
+          buildFleet(0, {
+            location: [4, 0],
+            skyships: 1,
+            regiments: 0,
+            levies: 0,
+            eliteRegiments: 0,
+          }),
+        ],
+      }),
+      buildPlayer("1"),
+    ]);
+
+    // A discovered corridor: [0,0] is four squares away; [1,0] is five.
+    for (const x of [5, 6, 7, 0, 1]) {
+      G.mapState.discoveredTiles[0][x] = true;
+    }
+    G.mapState.battleMap[0][4].push("0");
+    return G;
+  }
+
+  it("allows moving exactly four squares for four gold", () => {
+    const G = buildMovementState();
+    const events = buildEvents();
+
+    moveFleet.fn(
+      { G, ctx: buildCtx("0"), playerID: "0", events },
+      0,
+      [0, 0]
+    );
+
+    expect(G.playerInfo["0"].fleetInfo[0].location).toEqual([0, 0]);
+    expect(G.playerInfo["0"].resources.gold).toBe(6);
+  });
+
+  it("does not allow moving five squares", () => {
+    const G = buildMovementState();
+
+    expect(moveFleet.validate?.(G, "0", 0, [1, 0])).toMatchObject({
+      code: "INVALID_DESTINATION",
+    });
+  });
+});
+
+describe("actionPhase — Influence Prelates bribes", () => {
+  it("pays a rival's cathedral-count bribe to the bank", () => {
+    const G = buildInitialG([
+      buildPlayer("0", {
+        resources: buildResources({ gold: 10, counsellors: 4 }),
+      }),
+      buildPlayer("1", {
+        cathedrals: 3,
+        resources: buildResources({ gold: 5 }),
+      }),
+    ]);
+
+    influencePrelates.fn({ G, playerID: "0" }, 7);
+
+    expect(G.playerInfo["0"].resources.gold).toBe(7);
+    expect(G.playerInfo["1"].resources.gold).toBe(5);
+    expect(G.boardState.influencePrelates[8]).toBe("0");
   });
 });
 

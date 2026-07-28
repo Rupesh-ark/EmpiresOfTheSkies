@@ -18,6 +18,8 @@ import {
   MAP_WIDTH, MAP_HEIGHT,
 } from "../../data/gameData.js";
 import { evaluatePosition } from "./StateEvaluator.js";
+import { findPossibleDestinations } from "../../helpers/helpers.js";
+import { getInfluencePrelateCost } from "../../helpers/actionCosts.js";
 
 // BattleMap helpers
 
@@ -57,13 +59,24 @@ export function applyMove(G: MyGameState, playerID: string, move: AIMove): void 
       const regs = (move.args[3] as number) ?? 0;
       const levs = (move.args[4] as number) ?? 0;
       const elites = (move.args[5] as number) ?? 0;
+      const fleet = player.fleetInfo[fleetIdx];
+      const movementCost = fleet
+        ? findPossibleDestinations(
+            G,
+            fleet.location,
+            regs + levs + elites === 0
+          )
+            .slice(1)
+            .findIndex((ring) =>
+              ring.some(([x, y]) => x === dest[0] && y === dest[1])
+            ) + 1
+        : 0;
       player.resources.skyships -= sky;
       player.resources.regiments -= regs;
       player.resources.levies -= levs;
       player.resources.eliteRegiments -= elites;
-      player.resources.gold -= 1; // approximate 1-3g
+      player.resources.gold -= movementCost;
       player.actionsTakenThisRound += 1;
-      const fleet = player.fleetInfo[fleetIdx];
       if (fleet) {
         // Remove from old battle map position
         const [oldX, oldY] = fleet.location;
@@ -82,15 +95,25 @@ export function applyMove(G: MyGameState, playerID: string, move: AIMove): void 
     case "moveFleet": {
       const fleetIdx = move.args[0] as number;
       const dest = move.args[1] as [number, number];
-      player.resources.gold -= 1;
-      player.actionsTakenThisRound += 1;
       const fleet = player.fleetInfo[fleetIdx];
       if (fleet) {
+        const movementCost =
+          findPossibleDestinations(
+            G,
+            fleet.location,
+            fleet.regiments + fleet.levies + fleet.eliteRegiments === 0
+          )
+            .slice(1)
+            .findIndex((ring) =>
+              ring.some(([x, y]) => x === dest[0] && y === dest[1])
+            ) + 1;
+        player.resources.gold -= movementCost;
         const [oldX, oldY] = fleet.location;
         removeBattleMapPresence(G, playerID, oldX, oldY);
         fleet.location = dest;
         addBattleMapPresence(G, playerID, dest[0], dest[1]);
       }
+      player.actionsTakenThisRound += 1;
       break;
     }
 
@@ -209,15 +232,14 @@ export function applyMove(G: MyGameState, playerID: string, move: AIMove): void 
     }
 
     case "influencePrelates": {
-      // Cost: 0g for own kingdom slot, target's cathedrals for others
       const prelateSlot = move.args[0] as number;
       const prelateAction = move.args[1] as string;
       if (prelateAction === "advance") {
-        // Approximate: own kingdom costs 0, others cost 1-3g
-        const targetPID = String(prelateSlot);
-        if (targetPID !== playerID && G.playerInfo[targetPID]) {
-          player.resources.gold -= G.playerInfo[targetPID].cathedrals || 1;
-        }
+        player.resources.gold -= getInfluencePrelateCost(
+          G,
+          playerID,
+          prelateSlot + 1
+        ).cost;
       }
       player.actionsTakenThisRound += 1;
       break;

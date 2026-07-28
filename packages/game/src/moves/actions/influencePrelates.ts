@@ -2,7 +2,6 @@ import { MyGameState, MoveError, MoveDefinition } from "../../types.js";
 import { validateMove } from "../moveValidation.js";
 import { INVALID_MOVE } from "boardgame.io/core";
 import {
-  addGoldAmount,
   removeGoldAmount,
   incrementActionsTaken,
 } from "../../helpers/stateUtils.js";
@@ -32,10 +31,7 @@ const influencePrelates: MoveDefinition = {
 
     if (validateInfluencePrelates(G, playerID, args[0])) return INVALID_MOVE;
 
-    const { cost, recipientID } = getInfluencePrelateCost(G, playerID, value);
-    if (recipientID) {
-      addGoldAmount(G, recipientID, cost);
-    }
+    const { cost } = getInfluencePrelateCost(G, playerID, value);
     removeGoldAmount(G, playerID, cost);
 
     incrementActionsTaken(G, playerID);

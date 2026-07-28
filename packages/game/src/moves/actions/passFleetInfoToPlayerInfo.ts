@@ -1,6 +1,6 @@
 import { MyGameState, MoveError, MoveDefinition } from "../../types.js";
 import { INVALID_MOVE } from "boardgame.io/core";
-import { KINGDOM_LOCATION } from "../../data/gameData.js";
+import { KINGDOM_LOCATION, MAX_SKYSHIPS_PER_FLEET } from "../../data/gameData.js";
 import log from "../../helpers/logger.js";
 
 const pfLog = log.child({ mod: "pass-fleet-info" });
@@ -35,6 +35,13 @@ const validatePassFleetInfo = (
 
   if (skyshipCount < 0 || regimentCount < 0 || levyCount < 0 || eliteRegimentCount < 0) {
     return { code: "NEGATIVE_VALUE", message: "Fleet values cannot be negative" };
+  }
+
+  if (skyshipCount > MAX_SKYSHIPS_PER_FLEET) {
+    return {
+      code: "FLEET_SIZE_EXCEEDED",
+      message: `A fleet may carry at most ${MAX_SKYSHIPS_PER_FLEET} Skyships`,
+    };
   }
 
   if (skyshipCount < regimentCount + levyCount + eliteRegimentCount) {

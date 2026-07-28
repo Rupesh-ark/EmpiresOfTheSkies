@@ -1,27 +1,47 @@
-import { MoveDefinition } from "../../types.js";
+import { MoveDefinition, MoveError, MyGameState } from "../../types.js";
 import { nextAfterGroundDecision, nextAfterConquest } from "../../helpers/resolutionSequencer.js";
 import { INVALID_MOVE } from "boardgame.io/core";
-import log from "../../helpers/logger.js";
 import { toBuildingOwner } from "../../helpers/stateUtils.js";
 
-const gtLog = log.child({ mod: "garrison-troops" });
+const validateGarrisonTroops = (
+  G: MyGameState,
+  _playerID: string,
+  troopCounts: unknown
+): MoveError | null => {
+  if (G.step !== "ground_garrison" && G.step !== "conquest_garrison") {
+    return { code: "WRONG_STAGE", message: "Troops can only be garrisoned at the garrison step" };
+  }
+  if (!Array.isArray(troopCounts) || troopCounts.length < 2) {
+    return { code: "INVALID_TROOPS", message: "Garrison troop counts are required" };
+  }
+
+  const [regiments, levies, eliteRegiments = 0] = troopCounts;
+  if (
+    ![regiments, levies, eliteRegiments].every(
+      (count) => Number.isInteger(count) && count >= 0
+    )
+  ) {
+    return { code: "INVALID_TROOPS", message: "Garrison troop counts must be non-negative integers" };
+  }
+
+  const available = G.troopsAvailableForGarrison;
+  if (
+    regiments > available.regiments ||
+    levies > available.levies ||
+    eliteRegiments > available.elites
+  ) {
+    return { code: "TROOPS_UNAVAILABLE", message: "Cannot garrison more troops than are available at this battle" };
+  }
+
+  return null;
+};
 
 const garrisonTroops: MoveDefinition = {
   fn: ({ G, ctx, playerID, events }, ...args) => {
-    // Defensive: validate args
-    if (!Array.isArray(args[0]) || args[0].length < 1) {
-      gtLog.warn({ args }, "Invalid args");
-      return INVALID_MOVE;
-    }
-    
+    if (validateGarrisonTroops(G, playerID, args[0])) return INVALID_MOVE;
+
     const [x, y] = G.mapState.currentBattle;
-    let [regiments, levies, eliteRegiments = 0] = args[0];
-    
-    // Sanitize NaN values
-    regiments = (typeof regiments === 'number' && !isNaN(regiments)) ? regiments : 0;
-    levies = (typeof levies === 'number' && !isNaN(levies)) ? levies : 0;
-    eliteRegiments = (typeof eliteRegiments === 'number' && !isNaN(eliteRegiments)) ? eliteRegiments : 0;
-    
+    const [regiments, levies, eliteRegiments = 0] = args[0];
     const troopInfo: GarrisonTroopsInfo = {
       regiments: regiments,
       levies: levies,
@@ -75,6 +95,7 @@ const garrisonTroops: MoveDefinition = {
     }
   },
   errorMessage: "Cannot garrison troops right now",
+  validate: validateGarrisonTroops,
 };
 
 type GarrisonTroopsInfo = {

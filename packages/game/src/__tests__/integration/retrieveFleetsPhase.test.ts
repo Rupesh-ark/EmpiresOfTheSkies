@@ -52,3 +52,25 @@ describe("retrieveFleets phase", () => {
     expect(hasRetrievableFleet(player)).toBe(expected);
   });
 });
+
+describe("retrieveFleets phase — route-marker owners", () => {
+  it("gives a marker-only player a turn instead of skipping the phase", () => {
+    const G = buildInitialG([
+      buildPlayer("0", {
+        fleetInfo: [buildFleet(0, { location: [4, 0], skyships: 3 })],
+      }),
+      buildPlayer("1", {
+        fleetInfo: [buildFleet(0, { location: [4, 0], skyships: 0 })],
+      }),
+    ]);
+    G.mapState.routeSkyships["2,2"] = ["1"];
+    const endPhase = vi.fn();
+    const events = { endPhase, endTurn: vi.fn() } as unknown as EventsAPI;
+
+    retrieveFleetsPhase.onBegin!({ G, ctx: buildCtx("0"), events } as any);
+    expect(endPhase).not.toHaveBeenCalled();
+
+    const order = retrieveFleetsPhase.turn!.order!;
+    expect(order.first({ G } as any)).toBe(1);
+  });
+});
