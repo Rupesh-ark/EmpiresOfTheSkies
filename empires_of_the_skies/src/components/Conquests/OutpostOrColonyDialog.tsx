@@ -265,19 +265,21 @@ const OutpostOrColonyDialog = (props: MyGameProps) => {
         </Box>
       </Box>
 
-      {/* Option cards */}
+      {/* Option cards — no outpost re-claim on a tile you already hold */}
       <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
-        <OptionCard
-          icon={<GiWatchtower size={22} />}
-          title="Establish Outpost"
-          description="Diplomatic claim — score 1 VP and open a basic trade route."
-          lootNode={<LootChips loot={tile.loot.outpost} />}
-          onClick={() => props.moves.constructOutpost()}
-          accentColor={tokens.ui.success}
-        />
+        {!hasOutpost && (
+          <OptionCard
+            icon={<GiWatchtower size={22} />}
+            title="Establish Outpost"
+            description="Diplomatic claim — score 1 VP, but your heresy advances one space."
+            lootNode={<LootChips loot={tile.loot.outpost} />}
+            onClick={() => props.moves.constructOutpost()}
+            accentColor={tokens.ui.success}
+          />
+        )}
         <OptionCard
           icon={<IconRegiment size={22} />}
-          title="Attempt Conquest"
+          title={hasOutpost ? "Attempt Conquest — upgrade to Colony" : "Attempt Conquest"}
           description={`Battle the garrison to establish a colony. Greater spoils, but defeat means stranded troops are lost.`}
           lootNode={<LootChips loot={tile.loot.colony} />}
           warning={

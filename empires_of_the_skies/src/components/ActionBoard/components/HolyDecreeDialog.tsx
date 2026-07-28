@@ -45,7 +45,7 @@ const DECREES: DecreeOption[] = [
   {
     key: "inquisition",
     label: "Inquisition",
-    description: "Target kingdom releases all imprisoned dissenters. Their heresy advances 2 spaces.",
+    description: "Pay 2 Gold: a rival kingdom releases all imprisoned dissenters and its heresy advances 2 spaces.",
     needsTarget: true,
     icon: GiHandcuffs,
     accent: tokens.ui.warning,
@@ -223,8 +223,6 @@ const HolyDecreeDialog = (props: HolyDecreeDialogProps) => {
   const blessTargets = targetsFor("bless monarch");
   const inquisitionTargets = targetsFor("inquisition");
 
-  const inquisitionDisabled = inquisitionTargets.length === 0;
-
   // Track which targeted decree is waiting for a target pick
   const [pendingDecree, setPendingDecree] = useState<DecreeKey | null>(null);
 
@@ -282,34 +280,47 @@ const HolyDecreeDialog = (props: HolyDecreeDialogProps) => {
       cancelLabel="Cancel"
       onCancel={() => { setPendingDecree(null); props.setOpen(false); }}
     >
-      {/* Targeted decrees */}
+      {/* Targeted decrees — disabled when the validator accepts no target */}
       <Box sx={{ display: "flex", flexDirection: "column", gap: "6px", mb: "8px" }}>
         {DECREES.slice(0, 3).map((d) => {
-          const disabled = d.key === "inquisition" ? inquisitionDisabled : false;
+          const targets =
+            d.key === "curse monarch" ? curseTargets :
+            d.key === "bless monarch" ? blessTargets :
+            inquisitionTargets;
+          const rejection =
+            targets.length === 0 && props.playerID && validate
+              ? validate(props.G, props.playerID, d.key, Object.keys(props.G.playerInfo)[0])
+              : null;
           return (
             <DecreeCard
               key={d.key}
               decree={d}
               selected={pendingDecree === d.key}
-              disabled={disabled}
-              disabledReason={d.key === "inquisition" ? "No player has prisoners" : undefined}
+              disabled={targets.length === 0}
+              disabledReason={rejection?.message ?? (targets.length === 0 ? "No legal target" : undefined)}
               onSelect={() => handleDecreeClick(d.key)}
             />
           );
         })}
       </Box>
 
-      {/* Dogma decrees (side by side) */}
+      {/* Dogma decrees (side by side) — the decree consumes an action, so
+          even the untargeted ones can be unaffordable */}
       <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px" }}>
-        {DECREES.slice(3).map((d) => (
-          <DecreeCard
-            key={d.key}
-            decree={d}
-            selected={pendingDecree === d.key}
-            disabled={false}
-            onSelect={() => handleDecreeClick(d.key)}
-          />
-        ))}
+        {DECREES.slice(3).map((d) => {
+          const rejection =
+            props.playerID && validate ? validate(props.G, props.playerID, d.key) : null;
+          return (
+            <DecreeCard
+              key={d.key}
+              decree={d}
+              selected={pendingDecree === d.key}
+              disabled={!!rejection}
+              disabledReason={rejection?.message}
+              onSelect={() => handleDecreeClick(d.key)}
+            />
+          );
+        })}
       </Box>
 
       {/* Target picker (only when multiple targets) */}
