@@ -3,6 +3,9 @@ import { MyGameProps } from "@eots/game";
 import FortuneOfWarCardDisplay from "../PlayerBoard/FortuneOfWarCardDisplay";
 import { DialogShell } from "@/components/atoms/DialogShell";
 import { GameButton } from "@/components/atoms/GameButton";
+import { fowCardSrc } from "@/assets/fowCardArt";
+import { NO_EFFECT_CARD } from "@/assets/fortuneOfWarCards";
+import { tokens } from "@/theme";
 
 const DrawOrPickCardDialog = (props: MyGameProps) => {
   const [currentCard, setCurrentCard] = useState(0);
@@ -45,6 +48,11 @@ const DrawOrPickCardDialog = (props: MyGameProps) => {
   const hand = props.G.playerInfo[props.playerID ?? props.ctx.currentPlayer]
     .resources.fortuneCards;
 
+  // eots42: the attacker picks and reveals first — show the defender what
+  // they are answering before they choose.
+  const attackerCard =
+    bs && bs.defender.id === props.playerID ? bs.attacker.fowCard : undefined;
+
   return (
     <DialogShell
       open={isOpen}
@@ -54,6 +62,31 @@ const DrawOrPickCardDialog = (props: MyGameProps) => {
       size="sm"
       hideActions
     >
+      {attackerCard && (
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+          <img
+            src={fowCardSrc(attackerCard.sword, attackerCard.shield) ?? NO_EFFECT_CARD}
+            alt={
+              attackerCard.sword > 0
+                ? `${attackerCard.sword} Swords`
+                : attackerCard.shield > 0
+                  ? `${attackerCard.shield} Shields`
+                  : "No Effect"
+            }
+            style={{ width: 68 }}
+          />
+          <span style={{ fontFamily: tokens.font.body, fontSize: tokens.fontSize.sm, color: tokens.ui.text }}>
+            The attacker has revealed{" "}
+            <strong>
+              {attackerCard.sword > 0
+                ? `${attackerCard.sword} Sword${attackerCard.sword > 1 ? "s" : ""}`
+                : attackerCard.shield > 0
+                  ? `${attackerCard.shield} Shield${attackerCard.shield > 1 ? "s" : ""}`
+                  : "No Effect"}
+            </strong>
+          </span>
+        </div>
+      )}
       <div style={{ display: "flex", flexDirection: "row" }}>
         {hand.map((_, index) => (
           <div

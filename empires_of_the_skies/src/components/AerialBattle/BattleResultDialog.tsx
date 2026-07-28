@@ -145,9 +145,10 @@ const CombatantCard = ({
     <Typography sx={{ fontSize: "0.85rem", mb: 0.5 }}>
       {swords} Swords / {shields} Shields
     </Typography>
+    {/* Totals above already include the card — say so, don't imply addition */}
     {fow && (fow.sword > 0 || fow.shield > 0) && (
       <Typography sx={{ fontSize: "0.8rem", color: tokens.ui.textMuted }}>
-        FoW: {fow.sword > 0 ? `+${fow.sword}S` : ""}{fow.sword > 0 && fow.shield > 0 ? " " : ""}{fow.shield > 0 ? `+${fow.shield}Sh` : ""}
+        incl. Fortune of War: {fow.sword > 0 ? `${fow.sword}S` : ""}{fow.sword > 0 && fow.shield > 0 ? " " : ""}{fow.shield > 0 ? `${fow.shield}Sh` : ""}
       </Typography>
     )}
     <Typography sx={{ fontSize: "0.8rem", color: tokens.ui.textMuted, mt: 0.5 }}>

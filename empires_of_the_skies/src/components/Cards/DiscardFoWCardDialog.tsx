@@ -1,4 +1,4 @@
-import { MyGameProps } from "@eots/game";
+import { MyGameProps, FOW_HAND_MAX } from "@eots/game";
 import { Typography, Box } from "@mui/material";
 import { DecisionPanel } from "@/components/atoms/DecisionPanel";
 import { tokens } from "@/theme";
@@ -7,7 +7,7 @@ const DiscardFoWCardDialog = (props: MyGameProps) => {
   if (props.G.step !== "discard_fow" || props.ctx.currentPlayer !== props.playerID || !props.playerID) return null;
 
   const hand = props.G.playerInfo[props.playerID].resources.fortuneCards;
-  const maxCards = 4;
+  const maxCards = FOW_HAND_MAX;
 
   return (
     <DecisionPanel
