@@ -249,7 +249,9 @@ export function applyMove(G: MyGameState, playerID: string, move: AIMove): void 
       const paymentType = move.args[1] as string;
       const count = (move.args[2] as number) ?? 1;
       if (paymentType === "gold") player.resources.gold -= 2;
-      else if (paymentType === "counsellor") player.resources.counsellors -= 1;
+      else if (paymentType === "counsellor" || paymentType === "execute") {
+        player.resources.counsellors -= 1;
+      }
       if (paymentType === "execute") {
         player.resources.victoryPoints -= count;
         player.prisoners -= count;
@@ -273,7 +275,8 @@ export function applyMove(G: MyGameState, playerID: string, move: AIMove): void 
 
     case "convertMonarch": {
       player.resources.gold -= 2;
-      player.resources.victoryPoints -= 5;
+      player.resources.counsellors -= 1;
+      player.actionsTakenThisRound += 1;
       player.hereticOrOrthodox = player.hereticOrOrthodox === "orthodox" ? "heretic" : "orthodox";
       break;
     }
@@ -312,7 +315,18 @@ export function applyMove(G: MyGameState, playerID: string, move: AIMove): void 
     }
 
     case "issueHolyDecree": {
-      player.resources.gold -= 2;
+      const decreeType = move.args[0] as string;
+      const targetID = move.args[1] as string | undefined;
+      if (decreeType === "inquisition") {
+        player.resources.gold -= 2;
+        const target = targetID ? G.playerInfo[targetID] : undefined;
+        if (target) {
+          target.prisoners = 0;
+          target.heresyTracker = Math.min(HERESY_MAX, target.heresyTracker + 2);
+        }
+      }
+      player.actionsTakenThisRound += 1;
+      G.boardState.issueHolyDecree = true;
       break;
     }
 

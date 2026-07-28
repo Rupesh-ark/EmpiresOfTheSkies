@@ -193,10 +193,8 @@ export function enumerateLegalMoves(G: MyGameState, ctx: Ctx, playerID: string):
         }
       }
 
-      // Pass is only valid on the first flip, not during cascade
-      if (!ctx.numMoves || ctx.numMoves === 0) {
-        moves.push({ move: "pass", args: [] });
-      }
+      // eots42:124 permits declining another flip during a chain cascade.
+      moves.push({ move: "pass", args: [] });
       return moves;
     }
 
@@ -278,12 +276,32 @@ export function enumerateLegalMoves(G: MyGameState, ctx: Ctx, playerID: string):
         "drawFoWCards",
         "buildSkyships",
         "conscriptLevies",
-        "issueHolyDecree",
       ] as const) {
         if (tryValidate(moveName, G, playerID)) {
           moves.push({ move: moveName, args: [] });
         } else {
           failedValidations.push(moveName);
+        }
+      }
+
+      // Holy Decree choices and targets must be explicit; a no-arg decree is
+      // not a legal action.
+      {
+        const decreeCandidates: AIMove[] = [
+          { move: "issueHolyDecree", args: ["reform dogma"] },
+          { move: "issueHolyDecree", args: ["confirm dogma"] },
+        ];
+        for (const targetID of Object.keys(G.playerInfo)) {
+          decreeCandidates.push(
+            { move: "issueHolyDecree", args: ["curse monarch", targetID] },
+            { move: "issueHolyDecree", args: ["bless monarch", targetID] },
+            { move: "issueHolyDecree", args: ["inquisition", targetID] },
+          );
+        }
+        for (const candidate of decreeCandidates) {
+          if (tryValidate(candidate.move, G, playerID, ...candidate.args)) {
+            moves.push(candidate);
+          }
         }
       }
 
@@ -296,14 +314,14 @@ export function enumerateLegalMoves(G: MyGameState, ctx: Ctx, playerID: string):
           if (capacity > 0) {
             for (const paymentType of ["gold", "counsellor"] as const) {
               for (let c = 1; c <= capacity; c++) {
-                if (tryValidate("punishDissenters", G, playerID, slotIndex, paymentType, ctx.numPlayers, c)) {
+                if (tryValidate("punishDissenters", G, playerID, slotIndex, paymentType, c)) {
                   moves.push({ move: "punishDissenters", args: [slotIndex, paymentType, c] });
                 }
               }
             }
           }
           for (let c = 1; c <= pInfo.prisoners; c++) {
-            if (tryValidate("punishDissenters", G, playerID, slotIndex, "execute", ctx.numPlayers, c)) {
+            if (tryValidate("punishDissenters", G, playerID, slotIndex, "execute", c)) {
               moves.push({ move: "punishDissenters", args: [slotIndex, "execute", c] });
             }
           }
@@ -676,14 +694,8 @@ export function enumerateLegalMoves(G: MyGameState, ctx: Ctx, playerID: string):
         if (!rivalOwns && !alreadyFailed) {
           conquestMoves.push({ move: "coloniseLand", args: [] });
         }
-        const conquestPlayer = G.playerInfo[playerID];
-        for (const fleet of conquestPlayer.fleetInfo) {
-          const isAtHome =
-            fleet.location[0] === KINGDOM_LOCATION[0] &&
-            fleet.location[1] === KINGDOM_LOCATION[1];
-          if (!isAtHome && fleet.skyships > 0) {
-            conquestMoves.push({ move: "constructOutpost", args: [fleet.location] });
-          }
+        if (tryValidate("constructOutpost", G, playerID)) {
+          conquestMoves.push({ move: "constructOutpost", args: [] });
         }
         return conquestMoves;
       } else if (G.step === "election") {

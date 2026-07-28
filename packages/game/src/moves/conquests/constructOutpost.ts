@@ -3,6 +3,12 @@ import { increaseHeresyWithinMove, addVPAmount, logEvent, toBuildingOwner } from
 import { humanizeTileName } from "../../helpers/helpers.js";
 import { PRICE_MARKER_MIN } from "../../data/gameData.js";
 import { computeGarrisonTroops } from "../../helpers/resolveBattle.js";
+import {
+  FAITHDOM_TILES,
+  bfsReachable,
+  buildPlayerNetwork,
+  isBuildingConnected,
+} from "../../helpers/mapUtils.js";
 
 const GOODS: GoodKey[] = ["mithril", "dragonScales", "krakenSkin", "magicDust", "stickyIchor", "pipeweed"];
 
@@ -12,17 +18,32 @@ const constructOutpost: MoveDefinition = {
     const currentPlayer = G.playerInfo[playerID];
     const currentBuilding = G.mapState.buildings[y][x];
     const currentTile = G.mapState.currentTileArray[y][x];
+    const isFirstClaim = !currentBuilding.buildings;
+    const reachableRoute = bfsReachable(
+      FAITHDOM_TILES,
+      buildPlayerNetwork(G, playerID),
+      G.mapState.currentTileArray
+    );
+    const hasEstablishedRoute = isBuildingConnected(
+      x,
+      y,
+      reachableRoute,
+      G.mapState.currentTileArray
+    );
 
     currentBuilding.player = toBuildingOwner(currentPlayer);
     currentBuilding.buildings = "outpost";
 
-    // Move price markers left for outpost goods ("To Claim" rule)
-    GOODS.forEach((good) => {
-      const qty = currentTile.loot.outpost[good];
-      if (qty > 0) {
-        G.mapState.goodsPriceMarkers[good] = Math.max(PRICE_MARKER_MIN, G.mapState.goodsPriceMarkers[good] - qty);
-      }
-    });
+    // eots42:453: price markers move only on the first claim and only when
+    // the ownership skyship completes an established route to Faithdom.
+    if (isFirstClaim && hasEstablishedRoute) {
+      GOODS.forEach((good) => {
+        const qty = currentTile.loot.outpost[good];
+        if (qty > 0) {
+          G.mapState.goodsPriceMarkers[good] = Math.max(PRICE_MARKER_MIN, G.mapState.goodsPriceMarkers[good] - qty);
+        }
+      });
+    }
 
     currentPlayer.resources.victoryPoints += 1;
     increaseHeresyWithinMove(G, playerID);

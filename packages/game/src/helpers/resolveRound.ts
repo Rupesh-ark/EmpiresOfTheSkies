@@ -92,7 +92,10 @@ const hasTradeAccess = (G: MyGameState, playerID: string): boolean => {
 // D7: final round bonus — 1 VP per 5 Gold
 const applyFinalRoundBonus = (G: MyGameState) => {
   Object.values(G.playerInfo).forEach((player) => {
-    player.resources.victoryPoints += Math.floor(player.resources.gold / FINAL_ROUND_GOLD_PER_VP);
+    player.resources.victoryPoints += Math.max(
+      0,
+      Math.floor(player.resources.gold / FINAL_ROUND_GOLD_PER_VP)
+    );
   });
 };
 
@@ -100,7 +103,11 @@ const scoreHeresyTrackVP = (G: MyGameState) => {
   Object.values(G.playerInfo).forEach((player) => {
     const h = player.heresyTracker;
     const vp = player.hereticOrOrthodox === "orthodox" ? -h : h;
-    player.resources.victoryPoints += vp;
+    if (vp < 0) {
+      removeVPAmount(G, player.id, Math.abs(vp));
+    } else {
+      player.resources.victoryPoints += vp;
+    }
     if (vp !== 0) {
       logEvent(G, `Heresy VP: ${player.kingdomName} ${vp > 0 ? "+" : ""}${vp} VP`);
     }
@@ -126,10 +133,14 @@ export const sellGoodsPhaseEffects = (G: MyGameState, random: RandomAPI): void =
   const goodsKeys = Object.keys(G.mapState.goodsPriceMarkers) as Array<
     keyof typeof G.mapState.goodsPriceMarkers
   >;
+  const accruedGoldGains = G.tradeGainsThisRound;
   const tradeGainsMap: Record<string, number> = {};
 
   Object.values(G.playerInfo).forEach((player) => {
     const canTrade = hasTradeAccess(G, player.id);
+    if (canTrade && (accruedGoldGains[player.id] ?? 0) > 0) {
+      tradeGainsMap[player.id] = accruedGoldGains[player.id];
+    }
     let saleGold = 0;
     let goodsSold = 0;
 
@@ -139,7 +150,10 @@ export const sellGoodsPhaseEffects = (G: MyGameState, random: RandomAPI): void =
         player.resources.gold += G.mapState.goodsPriceMarkers[good] * quantity;
         saleGold += G.mapState.goodsPriceMarkers[good] * quantity;
         goodsSold += quantity;
-        // D3: only eligible players enter the trade VP ranking
+        // eots42:474,1268 includes held Land/Legend Gold and Goods in Trade
+        // Gains. Goods already include plunder/smuggler gains; accruedGoldGains
+        // records route and Legend-plunder Gold without counting other income.
+        // D3: only eligible players enter the trade VP ranking.
         if (canTrade) {
           tradeGainsMap[player.id] = (tradeGainsMap[player.id] ?? 0) + quantity;
         }

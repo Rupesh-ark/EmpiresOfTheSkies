@@ -20,6 +20,8 @@ const validatePunishDissenters = (
   const base = validateMove(playerID, G, {
     costsCounsellor: true,
     costsGold: paymentType === "gold",
+    spendsExtraCounsellor:
+      paymentType === "counsellor" || paymentType === "execute",
   });
   if (base) return base;
 
@@ -76,6 +78,10 @@ const punishDissenters: MoveDefinition = {
     const playerInfo = G.playerInfo[playerID];
 
     if (paymentType === "execute") {
+      // Keep the legacy mutually-exclusive execute shape, but execution is the
+      // action's outcome, not free payment: it pays the counsellor option.
+      // Mixed imprisonment/execution remains intentionally deferred.
+      spendCounsellor(G, playerID);
       for (let i = 0; i < count; i++) {
         playerInfo.prisoners -= 1;
         removeVPAmount(G, playerID, PUNISH_EXECUTE_VP_COST);

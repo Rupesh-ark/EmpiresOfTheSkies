@@ -95,6 +95,38 @@ describe("conquest outpost — constructOutpost validation", () => {
     expect(result).toBe("INVALID_MOVE");
   });
 
+  it("fails when the claiming player already has a counter on the tile", () => {
+    const G = buildConquestG();
+    G.mapState.buildings[2][2].player = G.playerInfo["0"];
+    G.mapState.buildings[2][2].buildings = "outpost";
+
+    const { result } = callMoveDef(MOVE_DEFINITIONS.constructOutpost, G, "0");
+
+    // eots42:449 — no more than one Outpost/Colony counter may occupy a Land.
+    expect(result).toBe("INVALID_MOVE");
+  });
+
+  it("moves a price marker only for a first claim with an established route", () => {
+    const connected = buildConquestG();
+    connected.mapState.currentTileArray[2][2].loot.outpost.mithril = 1;
+    callMoveDef(MOVE_DEFINITIONS.constructOutpost, connected, "0");
+    // [2,2] is adjacent to Faithdom at [3,1], so its ownership ship completes the route.
+    expect(connected.mapState.goodsPriceMarkers.mithril).toBe(1);
+
+    const disconnected = buildConquestG();
+    disconnected.mapState.currentTileArray[2][2].loot.outpost.mithril = 1;
+    disconnected.mapState.currentTileArray[2][2].blocked = ["NE"];
+    callMoveDef(MOVE_DEFINITIONS.constructOutpost, disconnected, "0");
+    expect(disconnected.mapState.goodsPriceMarkers.mithril).toBe(2);
+
+    const reclaimed = buildConquestG();
+    reclaimed.mapState.currentTileArray[2][2].loot.outpost.mithril = 1;
+    reclaimed.mapState.buildings[2][2].buildings = "outpost";
+    callMoveDef(MOVE_DEFINITIONS.constructOutpost, reclaimed, "0");
+    // eots42:453 — marker movement requires BOTH a route and the first claim.
+    expect(reclaimed.mapState.goodsPriceMarkers.mithril).toBe(2);
+  });
+
   it("does not treat a claim in the same row as ownership of the target tile", () => {
     const G = buildConquestG();
 

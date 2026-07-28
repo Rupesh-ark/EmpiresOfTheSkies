@@ -1,6 +1,7 @@
 import { MyGameState } from "../types.js";
 import { sortPlayersInPlayerOrder } from "./helpers.js";
 import type { EventsAPI } from "../types.js";
+import { toBuildingOwner } from "./stateUtils.js";
 
 const computeDefendersAtBattle = (G: MyGameState, nextPlayer: string): void => {
   const [x, y] = G.mapState.currentBattle;
@@ -95,6 +96,22 @@ export const findNextGroundBattle = (
         G.mapState.buildings[y][x].player?.id !== G.mapState.battleMap[y][x][0]
       ) {
         const nextPlayer = G.mapState.battleMap[y][x][0];
+        const building = G.mapState.buildings[y][x];
+        const defenderStrength =
+          (building.garrisonedRegiments ?? 0) +
+          (building.garrisonedLevies ?? 0) +
+          (building.garrisonedEliteRegiments ?? 0);
+        if (defenderStrength === 0) {
+          // eots42:693 treats an undefended counter as Yielded: mirror today's
+          // yield ownership transfer with no fight/VP. Yield-vs-claim semantics
+          // have a separate open audit finding, so do not redesign them here.
+          building.garrisonedRegiments = 0;
+          building.garrisonedLevies = 0;
+          building.garrisonedEliteRegiments = 0;
+          building.player = toBuildingOwner(G.playerInfo[nextPlayer]);
+          G.battleState = undefined;
+          continue;
+        }
         G.mapState.currentBattle = [x, y];
         G.step = "ground_attack_or_pass";
         computeDefendersAtBattle(G, nextPlayer);
@@ -128,6 +145,10 @@ export const findNextConquest = (
         G.mapState.currentTileArray[y][x].type === "land" &&
         G.mapState.battleMap[y][x].length === 1 &&
         (
+          // Virgin land, or the attacker's own outpost: eots42:416 requires the
+          // attacker to control the outpost if there is one — conquering it is
+          // the upgrade path to a colony. The re-claim VP farm is blocked in
+          // constructOutpost, not here.
           !G.mapState.buildings[y][x].player ||
           (G.mapState.buildings[y][x].player?.id === G.mapState.battleMap[y][x][0] &&
            G.mapState.buildings[y][x].buildings === "outpost")

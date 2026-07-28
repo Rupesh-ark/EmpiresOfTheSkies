@@ -14,7 +14,11 @@ const validateConvertMonarch = (
   G: MyGameState,
   playerID: string
 ): MoveError | null => {
-  const base = validateMove(playerID, G, { costsCounsellor: true, costsGold: true });
+  const base = validateMove(playerID, G, {
+    costsCounsellor: true,
+    costsGold: true,
+    spendsExtraCounsellor: true,
+  });
   if (base) return base;
 
   if (G.eventState.cannotConvertThisRound.includes(playerID)) {

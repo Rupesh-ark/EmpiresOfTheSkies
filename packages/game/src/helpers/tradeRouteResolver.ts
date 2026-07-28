@@ -44,6 +44,8 @@ export const grantTradeRouteGoods = (G: MyGameState): void => {
 
       if (loot.gold) {
         G.playerInfo[playerID].resources.gold += loot.gold;
+        G.tradeGainsThisRound[playerID] =
+          (G.tradeGainsThisRound[playerID] ?? 0) + loot.gold;
         goldGained += loot.gold;
       }
 

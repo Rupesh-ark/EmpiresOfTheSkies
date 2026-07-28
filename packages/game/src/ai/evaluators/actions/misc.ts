@@ -655,9 +655,10 @@ export function evaluateIssueHolyDecree(
   move: AIMove,
   personality: BotPersonality,
 ): MoveEval {
-  // Only archprelate can do this. Costs counsellor + gold.
+  // Only Inquisition adds a gold cost; every decree places a Counsellor.
   const player = G.playerInfo[playerID];
   const gold = player.resources.gold;
+  const isInquisition = move.args[0] === "inquisition";
   const reasons: string[] = [];
 
   let quality = getBase(personality.baseQualities, "issueHolyDecree");
@@ -672,9 +673,11 @@ export function evaluateIssueHolyDecree(
     reasons.push(`${totalRivalDissenters} rival dissenters`);
   }
 
-  quality += goldPressure(gold, 2);
-  const gpReason = goldPressureReason(gold, 2);
-  if (gpReason) reasons.push(gpReason);
+  if (isInquisition) {
+    quality += goldPressure(gold, 2);
+    const gpReason = goldPressureReason(gold, 2);
+    if (gpReason) reasons.push(gpReason);
+  }
 
   const pb = personalityBonus(personality, {
     kaCards: ["patriarch_of_the_church"],

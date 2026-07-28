@@ -2,12 +2,7 @@ import { MoveDefinition, MyGameState, MoveError } from "../types.js";
 import { INVALID_MOVE } from "boardgame.io/core";
 import { allPlayersPassed } from "../helpers/stateUtils.js";
 
-const validatePass = (G: MyGameState, _playerID: string): MoveError | null => {
-  if (G.mustContinueDiscovery) {
-    return { code: "MUST_CONTINUE", message: "You must continue discovering (Ocean/Legend tile flipped)" };
-  }
-  return null;
-};
+const validatePass = (_G: MyGameState, _playerID: string): MoveError | null => null;
 
 const pass: MoveDefinition = {
   fn: ({ G, ctx, playerID, events }, ...args: any[]) => {
@@ -17,6 +12,7 @@ const pass: MoveDefinition = {
     }
     G.playerInfo[playerID].passed = true;
     if (ctx.phase === "discovery") {
+      G.mustContinueDiscovery = false;
       G.firstTurnOfRound = false;
     }
 

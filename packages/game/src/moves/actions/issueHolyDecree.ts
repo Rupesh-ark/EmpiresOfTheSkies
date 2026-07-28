@@ -3,12 +3,24 @@ import {
   addVPAmount,
   advanceAllHeresyTrackers,
   increaseHeresyWithinMove,
+  incrementActionsTaken,
+  removeGoldAmount,
   removeVPAmount,
   retreatAllHeresyTrackers,
   logEvent,
 } from "../../helpers/stateUtils.js";
 import { INVALID_MOVE } from "boardgame.io/core";
 import { blessingOrCurseVPAmount } from "../../helpers/helpers.js";
+import { validateMove } from "../moveValidation.js";
+
+const INQUISITION_GOLD_COST = 2;
+const DECREE_TYPES = [
+  "curse monarch",
+  "bless monarch",
+  "reform dogma",
+  "confirm dogma",
+  "inquisition",
+] as const;
 
 const validateIssueHolyDecree = (
   G: MyGameState,
@@ -16,14 +28,26 @@ const validateIssueHolyDecree = (
   value: string,
   targetID?: string
 ): MoveError | null => {
+  const base = validateMove(playerID, G, {
+    costsCounsellor: true,
+    costsGold: value === "inquisition",
+  });
+  if (base) return base;
+
   if (!G.playerInfo[playerID].isArchprelate) {
     return { code: "NOT_ARCHPRELATE", message: "Only the Archprelate can issue a Holy Decree" };
   }
   if (G.boardState.issueHolyDecree) {
     return { code: "ALREADY_DECREED", message: "A Holy Decree has already been issued this round" };
   }
+  if (!DECREE_TYPES.includes(value as (typeof DECREE_TYPES)[number])) {
+    return { code: "INVALID_DECREE", message: "Must choose a valid Holy Decree" };
+  }
 
   if (value === "curse monarch") {
+    if (!targetID || !G.playerInfo[targetID]) {
+      return { code: "INVALID_TARGET", message: "Must target a player" };
+    }
     const allPlayers = Object.values(G.playerInfo);
     const heretics = allPlayers.filter((p) => p.hereticOrOrthodox === "heretic");
     if (heretics.length > 0) {
@@ -40,6 +64,9 @@ const validateIssueHolyDecree = (
   }
 
   if (value === "bless monarch") {
+    if (!targetID || !G.playerInfo[targetID]) {
+      return { code: "INVALID_TARGET", message: "Must target a player" };
+    }
     if (G.playerInfo[targetID!]?.hereticOrOrthodox !== "orthodox") {
       return { code: "INVALID_BLESS_TARGET", message: "Can only bless an Orthodox monarch" };
     }
@@ -55,6 +82,11 @@ const validateIssueHolyDecree = (
     if (!targetID || !G.playerInfo[targetID]) {
       return { code: "INVALID_TARGET", message: "Must target a player" };
     }
+    if (targetID === playerID) {
+      return { code: "SELF_TARGET", message: "Cannot Inquisition your own Kingdom" };
+    }
+    // eots42:183 — action costs may run into debt; validateMove's costsGold
+    // already applies the Lenders-Refuse-Credit gate, so no floor check here.
     if (G.playerInfo[targetID].prisoners <= 0) {
       return { code: "NO_PRISONERS", message: "Target has no imprisoned Dissenters" };
     }
@@ -92,6 +124,7 @@ const issueHolyDecree: MoveDefinition = {
         break;
       }
       case "inquisition": {
+        removeGoldAmount(G, playerID, INQUISITION_GOLD_COST);
         const target = G.playerInfo[id];
         const released = target.prisoners;
         target.prisoners = 0;
@@ -106,6 +139,7 @@ const issueHolyDecree: MoveDefinition = {
     }
 
     G.boardState.issueHolyDecree = true;
+    incrementActionsTaken(G, playerID);
     G.playerInfo[playerID].turnComplete = true;
   },
   errorMessage: "Cannot issue a Holy Decree right now",

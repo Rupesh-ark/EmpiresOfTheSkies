@@ -78,6 +78,8 @@ describe("battle phase entry", () => {
     G.mapState.currentTileArray[TARGET[1]][TARGET[0]].type = "land";
     G.mapState.battleMap[TARGET[1]][TARGET[0]] = ["0"];
     G.mapState.buildings[TARGET[1]][TARGET[0]].player = G.playerInfo["1"];
+    // eots42:693 — only a garrisoned building creates a ground battle.
+    G.mapState.buildings[TARGET[1]][TARGET[0]].garrisonedRegiments = 1;
     const events = stubEvents();
 
     beginPhase(groundBattlesPhase, G, events);
@@ -86,6 +88,29 @@ describe("battle phase entry", () => {
     expect(G.step).toBe("ground_attack_or_pass");
     expect(events.endTurn).not.toHaveBeenCalled();
     expect(events.endPhase).not.toHaveBeenCalled();
+  });
+
+  it("treats an undefended rival building as yielded without awarding VP", () => {
+    const G = buildInitialG();
+    G.mapState.currentTileArray[TARGET[1]][TARGET[0]].type = "land";
+    G.mapState.battleMap[TARGET[1]][TARGET[0]] = ["0"];
+    G.mapState.buildings[TARGET[1]][TARGET[0]] = {
+      player: G.playerInfo["1"],
+      buildings: "outpost",
+      fort: [],
+      garrisonedRegiments: 0,
+      garrisonedLevies: 0,
+      garrisonedEliteRegiments: 0,
+    };
+    const vpBefore = G.playerInfo["0"].resources.victoryPoints;
+    const events = stubEvents();
+
+    beginPhase(groundBattlesPhase, G, events);
+
+    // eots42:693 — undefended counters Yield: ownership transfers, no fight/VP.
+    expect(G.mapState.buildings[TARGET[1]][TARGET[0]].player?.id).toBe("0");
+    expect(G.playerInfo["0"].resources.victoryPoints).toBe(vpBefore);
+    expect(events.endPhase).toHaveBeenCalledOnce();
   });
 
   it("groundBattles ends an empty phase from onBegin", () => {
@@ -118,6 +143,49 @@ describe("battle phase entry", () => {
     beginPhase(conquestsPhase, G, events);
 
     expect(events.endPhase).toHaveBeenCalledOnce();
+  });
+
+  it("offers conquest on the player's own outpost — the colony upgrade path", () => {
+    // eots42:416 — a conquest attempt REQUIRES controlling the outpost if one
+    // exists; success flips it to a colony. The re-claim VP farm is blocked in
+    // constructOutpost instead.
+    const G = buildInitialG();
+    G.mapState.currentTileArray[TARGET[1]][TARGET[0]].type = "land";
+    G.mapState.battleMap[TARGET[1]][TARGET[0]] = ["0"];
+    G.mapState.buildings[TARGET[1]][TARGET[0]] = {
+      player: G.playerInfo["0"],
+      buildings: "outpost",
+      fort: [],
+      garrisonedRegiments: 1,
+      garrisonedLevies: 0,
+      garrisonedEliteRegiments: 0,
+    };
+    const events = stubEvents();
+
+    beginPhase(conquestsPhase, G, events);
+
+    expect(events.endPhase).not.toHaveBeenCalled();
+    expect(G.mapState.currentBattle).toEqual([TARGET[0], TARGET[1]]);
+  });
+
+  it("does not offer conquest on the player's own colony", () => {
+    const G = buildInitialG();
+    G.mapState.currentTileArray[TARGET[1]][TARGET[0]].type = "land";
+    G.mapState.battleMap[TARGET[1]][TARGET[0]] = ["0"];
+    G.mapState.buildings[TARGET[1]][TARGET[0]] = {
+      player: G.playerInfo["0"],
+      buildings: "colony",
+      fort: [],
+      garrisonedRegiments: 1,
+      garrisonedLevies: 0,
+      garrisonedEliteRegiments: 0,
+    };
+    const events = stubEvents();
+
+    beginPhase(conquestsPhase, G, events);
+
+    expect(events.endPhase).toHaveBeenCalledOnce();
+    expect(G.step).toBe("default");
   });
 });
 

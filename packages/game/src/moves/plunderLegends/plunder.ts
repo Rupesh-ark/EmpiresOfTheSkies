@@ -16,6 +16,14 @@ const plunder: MoveDefinition = {
       const lootNameAsResource = lootName as keyof typeof currentTile.loot.colony;
       currentPlayer.resources[lootNameAsResource] += lootAmount;
     });
+    // eots42:474 and glossary line 1268 explicitly include Legend-plundered
+    // Gold in Trade Gains; track only that Gold here so taxes/other income do
+    // not enter the ranking.
+    const plunderedGold = currentTile.loot.colony.gold;
+    if (plunderedGold > 0) {
+      G.tradeGainsThisRound[playerID] =
+        (G.tradeGainsThisRound[playerID] ?? 0) + plunderedGold;
+    }
     GOODS.forEach((good) => {
       const qty = currentTile.loot.colony[good];
       if (qty > 0) {

@@ -97,7 +97,8 @@ describe("round effects phases", () => {
     expect(G.failedConquests).toEqual([]);
     expect(G.playerInfo["0"].resources.victoryPoints).toBe(10);
     sellGoodsPhaseEffects(G, random);
-    expect(G.tradeGainsThisRound).toEqual({ "0": 3 });
+    // eots42:474,587-616,1268 — Trade Gains rank route Gold as well as Goods.
+    expect(G.tradeGainsThisRound).toEqual({ "0": 4 });
     piracyPhaseEffects(G);
     factoryIncomePhaseEffects(G);
     expect(G.playerInfo["1"].heresyTracker).toBe(0);
@@ -138,6 +139,31 @@ describe("round effects phases", () => {
 
     expect(endGame).toHaveBeenCalledOnce();
     expect(endGame).toHaveBeenCalledWith({ ranking: ["0", "1", "3", "2"] });
+  });
+
+  it("uses Gold as well as Goods when ranking Trade Gains", () => {
+    const G = buildInitialG([
+      buildPlayer("0", {
+        heresyTracker: 0,
+        resources: buildResources({ victoryPoints: 10 }),
+      }),
+      buildPlayer("1", {
+        heresyTracker: 0,
+        resources: buildResources({ victoryPoints: 10 }),
+      }),
+    ]);
+    // The trade/sell phases produced 4 total gains for P0 (including route
+    // Gold) versus 3 Goods for P1.
+    G.tradeGainsThisRound = { "0": 4, "1": 3 };
+
+    scoringPhaseEffects(
+      G,
+      { endGame: vi.fn() } as unknown as EventsAPI
+    );
+
+    // eots42:474,587-616 — route Gold can determine Trade Gains placement.
+    expect(G.playerInfo["0"].resources.victoryPoints).toBe(13);
+    expect(G.playerInfo["1"].resources.victoryPoints).toBe(12);
   });
 
   it.each(PHASES)("%s ends automatically", (_name, phase) => {

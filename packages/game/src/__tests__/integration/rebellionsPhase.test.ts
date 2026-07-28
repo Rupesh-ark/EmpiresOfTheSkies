@@ -23,6 +23,8 @@ const addMapGroundBattle = (G: MyGameState) => {
   G.mapState.currentTileArray[TARGET[1]][TARGET[0]].type = "land";
   G.mapState.battleMap[TARGET[1]][TARGET[0]] = ["0"];
   G.mapState.buildings[TARGET[1]][TARGET[0]].player = G.playerInfo["1"];
+  // eots42:693 — an undefended counter is Yielded, not selected for battle.
+  G.mapState.buildings[TARGET[1]][TARGET[0]].garrisonedRegiments = 1;
 };
 
 describe("rebellions phase", () => {
