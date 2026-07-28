@@ -207,6 +207,9 @@ describe("aerial: attacker initiates → defender retaliates → battle resolves
     // Attacker gets a powerful sword card; defender gets nothing special
     G.battleState!.attacker.fowCard = { name: "Charge", sword: 4, shield: 0 };
     G.battleState!.defender.fowCard = { name: "NoEffect", sword: 0, shield: 0 };
+    // eots42:669 — keep incoming hits below the four-Skyship survival margin;
+    // five Skyship losses would also strand every troop aboard.
+    G.playerInfo["1"].fleetInfo[0].regiments = 3;
 
     const vp0Before = G.playerInfo["0"].resources.victoryPoints;
     const vp1Before = G.playerInfo["1"].resources.victoryPoints;
@@ -214,9 +217,10 @@ describe("aerial: attacker initiates → defender retaliates → battle resolves
     // Step 4: resolve
     resolveBattleAndReturnWinner(G, events, buildCtxForPhase("0"));
 
-    // Player 0 has 5 skyships + 10 regiments + FoW sword 4 → sword=29 vs defender shield=3
-    // Player 1 has 3 skyships + 5 regiments → sword=13 vs attacker shield=5+0=5
-    // Attacker losses = 13-5=8, Defender losses = 29-3=26 → attacker wins decisively
+    // eots42:636,669 — Player 0 has 5 skyships + 10 regiments + FoW sword 4
+    // → sword=29 vs defender shield=3.
+    // Player 1 has 3 skyships + 3 regiments → sword=9 vs attacker shield=5+0=5.
+    // Attacker losses = 9-5=4, Defender losses = 29-3=26 → attacker survives.
     expect(G.playerInfo["0"].resources.victoryPoints).toBe(vp0Before + 1);
     // Loser does not gain VP
     expect(G.playerInfo["1"].resources.victoryPoints).toBe(vp1Before);
@@ -491,6 +495,9 @@ describe("full chain: aerial attack → retaliate → resolve → ground attack 
     // Assign FoW cards: attacker gets a big sword card, defender gets nothing
     G.battleState!.attacker.fowCard = { name: "Blitz", sword: 5, shield: 0 };
     G.battleState!.defender.fowCard = { name: "NoEffect", sword: 0, shield: 0 };
+    // eots42:669 — four hits remove four Skyships; the surviving Skyship keeps
+    // one troop aboard, so the attacker remains the survivor.
+    G.playerInfo["1"].fleetInfo[0].regiments = 3;
 
     const vp0BeforeAerial = G.playerInfo["0"].resources.victoryPoints;
 
@@ -504,6 +511,7 @@ describe("full chain: aerial attack → retaliate → resolve → ground attack 
     // Phase 2: Ground battle (set up manually as aerial left only attacker at tile)
     // After aerial win, simulate that attacker now faces the defender's building
     // Reset battleMap so only player 0 remains at the tile for the ground phase
+    G.mapState.currentBattle = [0, 0];
     G.mapState.battleMap[0][0] = ["0"];
     // Rebuild defender's garrison (the building still belongs to player 1)
     G.mapState.buildings[0][0].player = G.playerInfo["1"];
@@ -539,6 +547,7 @@ describe("full chain: aerial attack → retaliate → resolve → ground attack 
     expect(G.battleState).toBeUndefined();
 
     // Phase 3: Conquest — place outpost, garrison troops
+    G.mapState.currentBattle = [0, 0];
     G.mapState.buildings[0][0].buildings = undefined;
     G.mapState.buildings[0][0].garrisonedRegiments = 0;
     G.mapState.buildings[0][0].garrisonedLevies = 0;
@@ -555,7 +564,8 @@ describe("full chain: aerial attack → retaliate → resolve → ground attack 
     expect(G.playerInfo["0"].resources.victoryPoints).toBe(vp0BeforeOutpost + 1);
     expect(G.step).toBe("conquest_garrison");
 
-    // Garrison 2 regiments
+    // eots42:669 — after four Skyship losses, capacity cleanup leaves one
+    // surviving Regiment aboard the one surviving Skyship.
     garrisonTroops.fn(
       {
         G,
@@ -564,9 +574,9 @@ describe("full chain: aerial attack → retaliate → resolve → ground attack 
         events,
         random: buildRandom(),
       },
-      [2, 0]
+      [1, 0]
     );
-    expect(G.mapState.buildings[0][0].garrisonedRegiments).toBe(2);
+    expect(G.mapState.buildings[0][0].garrisonedRegiments).toBe(1);
 
     // Final consistency: building owned by player 0 with troops garrisoned
     expect(G.mapState.buildings[0][0].player?.id).toBe("0");

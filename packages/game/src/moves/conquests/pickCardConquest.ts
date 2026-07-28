@@ -9,6 +9,7 @@ const pickCardConquest: MoveDefinition = {
 
     if (G.conquestState) {
       G.conquestState.fowCard = card;
+      G.conquestState.fowSource = "hand";
     }
 
     G.playerInfo[playerID].resources.fortuneCards.splice(value, 1);

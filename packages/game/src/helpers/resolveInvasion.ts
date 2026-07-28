@@ -163,8 +163,8 @@ export const resolveGrandArmyBattle = (G: MyGameState, shuffle: <T>(arr: T[]) =>
   );
 
   // Simulate FoW draws
-  const fowArmy = drawFortuneOfWarCard(G, shuffle);
-  const fowInfidel = drawFortuneOfWarCard(G, shuffle);
+  const fowArmy = drawFortuneOfWarCard(G, shuffle, { redrawNoEffect: false });
+  const fowInfidel = drawFortuneOfWarCard(G, shuffle, { redrawNoEffect: false });
 
   // Grand Army = attacker, Infidel = defender
   const { hitsOnDefender: hitsOnInfidel, hitsOnAttacker: hitsOnArmy } = calculateCombat(

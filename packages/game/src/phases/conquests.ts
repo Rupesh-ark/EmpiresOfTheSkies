@@ -27,7 +27,7 @@ const conquestsPhase: PhaseConfig<MyGameState> = {
   next: "trade",
   onBegin: (context) => {
     phaseLog.info({ round: context.G.round }, "conquests");
-    context.G.mapState.currentBattle = [0, 0];
+    context.G.mapState.currentBattle = [-1, 0];
     context.G.battleState = undefined;
     findNextConquest(context.G, context.events, true);
   },

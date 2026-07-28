@@ -159,7 +159,8 @@ export const sortPlayersInPlayerOrder = (
 
 export const drawFortuneOfWarCard = (
   G: MyGameState,
-  shuffle: <T>(arr: T[]) => T[]
+  shuffle: <T>(arr: T[]) => T[],
+  options: { redrawNoEffect: boolean }
 ): FortuneOfWarCardInfo => {
   if (G.cardDecks.fortuneOfWarCards.length === 0) {
     resetFortuneOfWarCardDeck(G, shuffle);
@@ -167,16 +168,19 @@ export const drawFortuneOfWarCard = (
   const card = G.cardDecks.fortuneOfWarCards.splice(0, 1)[0];
   G.cardDecks.discardedFortuneOfWarCards.push(card);
 
-  // No Effect → discard, reshuffle discard into deck, draw again
+  // eots42:636,665 — No Effect always reshuffles the discard pile, but only
+  // acquisition into a player's hand redraws it.
   const isNoEffect = card.sword === 0 && card.shield === 0;
   if (isNoEffect) {
     resetFortuneOfWarCardDeck(G, shuffle);
-    // Guard against infinite loop if all remaining cards are No Effect
-    const hasRealCard = G.cardDecks.fortuneOfWarCards.some(
-      (c) => c.sword !== 0 || c.shield !== 0
-    );
-    if (hasRealCard) {
-      return drawFortuneOfWarCard(G, shuffle);
+    if (options.redrawNoEffect) {
+      // Guard against infinite recursion if all remaining cards are No Effect.
+      const hasRealCard = G.cardDecks.fortuneOfWarCards.some(
+        (c) => c.sword !== 0 || c.shield !== 0
+      );
+      if (hasRealCard) {
+        return drawFortuneOfWarCard(G, shuffle, options);
+      }
     }
   }
   return card;
@@ -251,8 +255,9 @@ export const checkIfCurrentPlayerIsInCurrentBattle = (
   events: EventsAPI
 ) => {
   const [x, y] = G.mapState.currentBattle;
+  const playersAtBattle = G.mapState.battleMap[y]?.[x] ?? [];
 
-  if (G.mapState.battleMap[y][x].length > 0) {
+  if (playersAtBattle.length > 0) {
     // Battle sub-stage routing
     // Each sub-stage has a specific player who should act. Route to them.
     // Uses ctx.phase to disambiguate shared G.step values, and

@@ -2,11 +2,14 @@ import { MoveDefinition } from "../../types.js";
 import { drawFortuneOfWarCard } from "../../helpers/helpers.js";
 import { resolveConquest } from "../../helpers/resolveBattle.js";
 
-// No-effect cards are handled by drawFortuneOfWarCard (reshuffle + redraw).
+// eots42:636 — battle No Effect cards reshuffle but do not redraw.
 const drawCardConquest: MoveDefinition = {
   fn: ({ G, ctx, events, random }, ...args) => {
     if (G.conquestState) {
-      G.conquestState.fowCard = drawFortuneOfWarCard(G, random.Shuffle);
+      G.conquestState.fowCard = drawFortuneOfWarCard(G, random.Shuffle, {
+        redrawNoEffect: false,
+      });
+      G.conquestState.fowSource = "deck";
     }
 
     resolveConquest(G, events, ctx, random);

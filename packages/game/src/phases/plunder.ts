@@ -20,7 +20,7 @@ const plunderPhase: PhaseConfig<MyGameState> = {
   next: "groundBattles",
   onBegin: (context) => {
     phaseLog.info({ round: context.G.round }, "plunder");
-    context.G.mapState.currentBattle = [0, 0];
+    context.G.mapState.currentBattle = [-1, 0];
     context.G.battleState = undefined;
     findNextPlunder(context.G, context.events, true);
   },

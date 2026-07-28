@@ -41,8 +41,9 @@ const resolveFaerieUprising = (
   const defSwords = defRegiments * 2 + defLevies;
   const defShields = hasFortAt(G, x, y) ? defRegiments + defLevies : 0;
 
-  const fowLand = drawFortuneOfWarCard(G, shuffle);
-  const fowDefender = fowCard ?? drawFortuneOfWarCard(G, shuffle);
+  const fowLand = drawFortuneOfWarCard(G, shuffle, { redrawNoEffect: false });
+  const fowDefender =
+    fowCard ?? drawFortuneOfWarCard(G, shuffle, { redrawNoEffect: false });
 
   const { hitsOnDefender, hitsOnAttacker: hitsOnLand } = calculateCombat(
     { swords: landSwords, shields: landShields, fowSword: fowLand.sword, fowShield: fowLand.shield },
@@ -110,8 +111,9 @@ const resolveHeadstrongCommander = (
   const landShields = land.shield;
 
   // Headstrong Commander: player's FoW card helps the attacker (their own troops)
-  const fowAttacker = fowCard ?? drawFortuneOfWarCard(G, shuffle);
-  const fowLand = drawFortuneOfWarCard(G, shuffle);
+  const fowAttacker =
+    fowCard ?? drawFortuneOfWarCard(G, shuffle, { redrawNoEffect: false });
+  const fowLand = drawFortuneOfWarCard(G, shuffle, { redrawNoEffect: false });
 
   // Player garrison = attacker, Land = defender
   const { hitsOnDefender: hitsOnLand, hitsOnAttacker } = calculateCombat(
@@ -187,8 +189,9 @@ const resolveInfidelsInvadeFaerie = (
   const defSwords = defRegiments * 2 + defLevies;
   const defShields = hasFortAt(G, x, y) ? defRegiments + defLevies : 0;
 
-  const fowHost = drawFortuneOfWarCard(G, shuffle);
-  const fowDefender = fowCard ?? drawFortuneOfWarCard(G, shuffle);
+  const fowHost = drawFortuneOfWarCard(G, shuffle, { redrawNoEffect: false });
+  const fowDefender =
+    fowCard ?? drawFortuneOfWarCard(G, shuffle, { redrawNoEffect: false });
 
   const { hitsOnDefender, hitsOnAttacker: hitsOnHost } = calculateCombat(
     { swords: host.swords, shields: host.shields, fowSword: fowHost.sword, fowShield: fowHost.shield },

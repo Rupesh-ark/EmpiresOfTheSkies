@@ -172,7 +172,7 @@ const MyGame: Game<MyGameState> = {
       mostRecentlyDiscoveredTile: [4, 0],
       discoveredRaces: [],
       battleMap: initialBattleMapState(),
-      currentBattle: [0, 0],
+      currentBattle: [-1, 0],
       goodsPriceMarkers: {
         mithril: 4,
         dragonScales: 3,

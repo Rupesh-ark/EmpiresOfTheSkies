@@ -40,7 +40,32 @@ export function nextAfterAerialDecision(
   events: EventsAPI,
   lastAttackerID: string
 ): void {
+  const originalAttackerID = G.battleState?.attacker.id ?? lastAttackerID;
+  const wasEvasion = G.battleState?.defender.decision === "evade";
   G.battleState = undefined;
+
+  if (wasEvasion) {
+    const [x, y] = G.mapState.currentBattle;
+    const challengedPairs =
+      G.aerialChallenges?.tile[0] === x &&
+      G.aerialChallenges.tile[1] === y
+        ? G.aerialChallenges.pairs
+        : [];
+    const unchallengedRivals = (G.mapState.battleMap[y]?.[x] ?? []).filter(
+      (id) =>
+        id !== originalAttackerID &&
+        !challengedPairs.includes(`${originalAttackerID}>${id}`)
+    );
+
+    if (unchallengedRivals.length > 0) {
+      // eots42:366 — an evasion leaves the serial challenge with the original
+      // attacker. The challenged-pair set only grows, preventing a loop.
+      G.step = "aerial_attack_or_pass";
+      G.possibleDefenders = unchallengedRivals;
+      events.endTurn({ next: originalAttackerID });
+      return;
+    }
+  }
 
   const nextPlayer = getNextPlayerAtTile(G, lastAttackerID);
   if (nextPlayer) {

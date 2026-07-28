@@ -18,7 +18,9 @@ const drawFoWCards: MoveDefinition = {
     if (validateDrawFoWCards(G, playerID)) return INVALID_MOVE;
 
     for (let i = 0; i < FOW_CARDS_DRAWN; i++) {
-      const card = drawFortuneOfWarCard(G, random.Shuffle);
+      const card = drawFortuneOfWarCard(G, random.Shuffle, {
+        redrawNoEffect: true,
+      });
       G.playerInfo[playerID].resources.fortuneCards.push({
         ...card,
         flipped: true,

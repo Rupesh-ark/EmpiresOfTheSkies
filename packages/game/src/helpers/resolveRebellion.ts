@@ -280,8 +280,10 @@ export const resolveRebellionWithTroops = (
   }
 
   // Rebel always draws from deck; defender uses hand card if provided
-  const fowRebel = drawFortuneOfWarCard(G, shuffle);
-  const fowDefender = rebellion.fowCard ?? drawFortuneOfWarCard(G, shuffle);
+  const fowRebel = drawFortuneOfWarCard(G, shuffle, { redrawNoEffect: false });
+  const fowDefender =
+    rebellion.fowCard ??
+    drawFortuneOfWarCard(G, shuffle, { redrawNoEffect: false });
 
   const { defenderWins, hitsOnDefender } = calculateBattle(
     counterSwords,
@@ -372,8 +374,10 @@ export const resolveRebellionWithTroopsAndRivals = (
   }
 
   // Rebel always draws from deck; defender uses hand card if provided
-  const fowRebel = drawFortuneOfWarCard(G, shuffle);
-  const fowDefender = rebellion.fowCard ?? drawFortuneOfWarCard(G, shuffle);
+  const fowRebel = drawFortuneOfWarCard(G, shuffle, { redrawNoEffect: false });
+  const fowDefender =
+    rebellion.fowCard ??
+    drawFortuneOfWarCard(G, shuffle, { redrawNoEffect: false });
 
   // Use combined swords for battle calculation
   const totalDefShields = fortPresent ? defReg + defLev : 0;

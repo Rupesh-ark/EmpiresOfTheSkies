@@ -10,6 +10,11 @@ import { nextAfterAerialDecision, nextAfterGroundDecision, nextAfterConquest } f
 import { calculateCombat } from "./combatMath.js";
 import { fleetCombatValues } from "./fleetUtils.js";
 import { computeRetreatDestinations } from "./mapUtils.js";
+import {
+  apportionBattleLosses,
+  type BattleLossMode,
+  type BattleLosses,
+} from "./battleLosses.js";
 import log from "./logger.js";
 
 const battleLog = log.child({ mod: "resolve-battle" });
@@ -160,61 +165,42 @@ const trimFleetCapacity = (fleet: FleetInfo): void => {
   }
 };
 
-/**
- * Applies `totalLosses` hit-points to a list of fleets using standard loss
- * priority (odd-hit rule → levies → outnumbering skyships → regiments →
- * elites) and then trims each fleet to skyship capacity.
- *
- * @param applyOddHitRule  Pass `true` for aerial/ground fleet combats.
- *                         Pass `false` for conquest (garrison absorbs first,
- *                         no odd-hit parity requirement on the fleet portion).
- * @returns remaining unabsorbed loss points (should be ≤ 0 when fleets are
- *          fully destroyed before absorbing all hits).
- */
-const applyFleetLosses = (
-  fleets: FleetInfo[],
-  totalLosses: number,
-  applyOddHitRule: boolean
-): number => {
-  let remaining = totalLosses;
+type CombatUnit = "levies" | "skyships" | "regiments" | "eliteRegiments";
 
-  // Odd-hit rule: first hit must go to a levy or skyship
-  if (applyOddHitRule && totalLosses % 2 === 1) {
+const applyLossCountsToFleets = (
+  fleets: FleetInfo[],
+  losses: Pick<BattleLosses, CombatUnit>
+): void => {
+  const units: CombatUnit[] = [
+    "levies",
+    "skyships",
+    "regiments",
+    "eliteRegiments",
+  ];
+
+  for (const unit of units) {
+    let remaining = losses[unit];
     for (const fleet of fleets) {
       if (remaining <= 0) break;
-      if (fleet.levies > 0) {
-        fleet.levies -= 1;
-        remaining -= 1;
-        break;
-      } else if (fleet.skyships > 0) {
-        fleet.skyships -= 1;
-        remaining -= 1;
-        break;
-      }
+      const removed = Math.min(fleet[unit], remaining);
+      fleet[unit] -= removed;
+      remaining -= removed;
     }
   }
 
-  // Main loss loop: levies → outnumbering skyships → regiments → elites
-  fleets.forEach((fleet) => {
-    while (remaining > 0 && fleetUnitCount(fleet) > 0) {
-      if (fleet.skyships > fleet.regiments + fleet.levies + fleet.eliteRegiments && fleet.skyships > 0) {
-        fleet.skyships -= 1;
-        remaining -= 1;
-      } else if (fleet.levies > 0) {
-        fleet.levies -= 1;
-        remaining -= 1;
-      } else if (fleet.regiments > 0) {
-        fleet.regiments -= 1;
-        remaining -= 2;
-      } else if (fleet.eliteRegiments > 0) {
-        fleet.eliteRegiments -= 1;
-        remaining -= 3;
-      }
-    }
-    trimFleetCapacity(fleet);
-  });
+  // eots42:669 — troops in excess of surviving Skyships cannot remain aboard.
+  fleets.forEach(trimFleetCapacity);
+};
 
-  return remaining;
+/** Applies rulebook-apportioned hits to a list of fleets. */
+const applyFleetLosses = (
+  fleets: FleetInfo[],
+  totalLosses: number,
+  mode: BattleLossMode
+): BattleLosses => {
+  const losses = apportionBattleLosses(snapshotFleets(fleets), totalLosses, mode);
+  applyLossCountsToFleets(fleets, losses);
+  return losses;
 };
 
 /**
@@ -322,6 +308,7 @@ export const resolveBattleAndReturnWinner = (
   attackerShieldValue += G.battleState?.attacker.fowCard?.shield ?? 0;
   if (
     G.battleState?.attacker.fowCard &&
+    G.battleState.attacker.fowSource === "hand" &&
     G.playerInfo[G.battleState.attacker.id].resources.advantageCard === "improved_training"
   ) {
     if (G.battleState.attacker.fowCard.sword > 0) attackerSwordValue += 1;
@@ -353,6 +340,7 @@ export const resolveBattleAndReturnWinner = (
   defenderShieldValue += G.battleState?.defender.fowCard?.shield ?? 0;
   if (
     G.battleState?.defender.fowCard &&
+    G.battleState.defender.fowSource === "hand" &&
     G.playerInfo[G.battleState.defender.id].resources.advantageCard === "improved_training"
   ) {
     if (G.battleState.defender.fowCard.sword > 0) defenderSwordValue += 1;
@@ -375,34 +363,31 @@ export const resolveBattleAndReturnWinner = (
   const garrisonSnapRegiments = G.step === "ground_resolve" ? (G.mapState.buildings[y][x].garrisonedRegiments ?? 0) : 0;
   const garrisonSnapElite = G.step === "ground_resolve" ? (G.mapState.buildings[y][x].garrisonedEliteRegiments ?? 0) : 0;
 
-  applyFleetLosses(attackerFleets, attackerLosses, true);
+  applyFleetLosses(
+    attackerFleets,
+    attackerLosses,
+    G.step === "ground_resolve" ? "ground" : "aerial"
+  );
 
   if (G.step === "ground_resolve") {
     const currentBuilding = G.mapState.buildings[y][x];
-    let defenderLossesCopy = defenderLosses;
-    if (defenderLosses % 2 === 1 && (currentBuilding.garrisonedLevies ?? 0) > 0) {
-      currentBuilding.garrisonedLevies! -= 1;
-      defenderLossesCopy -= 1;
-    }
-    while (
-      defenderLossesCopy > 0 &&
-      (currentBuilding.garrisonedRegiments > 0 ||
-        currentBuilding.garrisonedLevies > 0 ||
-        (currentBuilding.garrisonedEliteRegiments ?? 0) > 0)
-    ) {
-      if (currentBuilding.garrisonedLevies > 0) {
-        currentBuilding.garrisonedLevies -= 1;
-        defenderLossesCopy -= 1;
-      } else if (currentBuilding.garrisonedRegiments > 0) {
-        currentBuilding.garrisonedRegiments -= 1;
-        defenderLossesCopy -= 2;
-      } else if ((currentBuilding.garrisonedEliteRegiments ?? 0) > 0) {
-        currentBuilding.garrisonedEliteRegiments -= 1;
-        defenderLossesCopy -= 3;
-      }
-    }
+    const losses = apportionBattleLosses(
+      {
+        levies: currentBuilding.garrisonedLevies ?? 0,
+        skyships: 0,
+        regiments: currentBuilding.garrisonedRegiments ?? 0,
+        eliteRegiments: currentBuilding.garrisonedEliteRegiments ?? 0,
+      },
+      defenderLosses,
+      "ground"
+    );
+    currentBuilding.garrisonedLevies -= losses.levies;
+    currentBuilding.garrisonedRegiments -= losses.regiments;
+    currentBuilding.garrisonedEliteRegiments =
+      (currentBuilding.garrisonedEliteRegiments ?? 0) -
+      losses.eliteRegiments;
   } else {
-    applyFleetLosses(defenderFleets, defenderLosses, true);
+    applyFleetLosses(defenderFleets, defenderLosses, "aerial");
   }
 
   let attackerLossDetail: string;
@@ -605,9 +590,11 @@ export const resolveConquest = (
   let attackerSwordValue = baseAttackerSword;
   let attackerShieldValue = baseAttackerShield;
 
-  let attackerGarrisonedRegiments = G.mapState.buildings[y][x].garrisonedRegiments;
-  let attackerGarrisonedLevies = G.mapState.buildings[y][x].garrisonedLevies;
-  let attackerGarrisonedEliteRegiments = G.mapState.buildings[y][x].garrisonedEliteRegiments ?? 0;
+  const conquestBuilding = G.mapState.buildings[y][x];
+  let attackerGarrisonedRegiments = conquestBuilding.garrisonedRegiments;
+  let attackerGarrisonedLevies = conquestBuilding.garrisonedLevies;
+  let attackerGarrisonedEliteRegiments =
+    conquestBuilding.garrisonedEliteRegiments ?? 0;
 
   attackerSwordValue += attackerGarrisonedRegiments * 2;
   attackerSwordValue += attackerGarrisonedLevies;
@@ -615,8 +602,18 @@ export const resolveConquest = (
 
   attackerSwordValue += G.conquestState?.fowCard?.sword ?? 0;
   attackerShieldValue += G.conquestState?.fowCard?.shield ?? 0;
+  if (
+    G.conquestState?.fowCard &&
+    G.conquestState.fowSource === "hand" &&
+    G.playerInfo[attackerID].resources.advantageCard === "improved_training"
+  ) {
+    if (G.conquestState.fowCard.sword > 0) attackerSwordValue += 1;
+    if (G.conquestState.fowCard.shield > 0) attackerShieldValue += 1;
+  }
 
-  const defenderCard = drawFortuneOfWarCard(G, random.Shuffle);
+  const defenderCard = drawFortuneOfWarCard(G, random.Shuffle, {
+    redrawNoEffect: false,
+  });
 
   const defenderSwordValue =
     G.mapState.currentTileArray[y][x].sword + defenderCard.sword;
@@ -631,36 +628,51 @@ export const resolveConquest = (
     { swords: attackerSwordValue, shields: attackerShieldValue, fowSword: 0, fowShield: 0 },
     { swords: defenderSwordValue, shields: defenderShieldValue, fowSword: 0, fowShield: 0 },
   );
-  let attackerLossesCopy = attackerLosses;
-
   const conquestGarrisonSnapLevies = attackerGarrisonedLevies;
   const conquestGarrisonSnapRegiments = attackerGarrisonedRegiments;
   const conquestGarrisonSnapElite = attackerGarrisonedEliteRegiments;
   const conquestFleetSnap = snapshotFleets(attackerFleets);
 
-  if (attackerLossesCopy > attackerGarrisonedLevies) {
-    attackerLossesCopy -= attackerGarrisonedLevies;
-    attackerGarrisonedLevies = 0;
-  } else {
-    attackerGarrisonedLevies -= attackerLossesCopy;
-    attackerLossesCopy = 0;
-  }
-  if (attackerLossesCopy > attackerGarrisonedRegiments * 2) {
-    attackerLossesCopy -= attackerGarrisonedRegiments * 2;
-    attackerGarrisonedRegiments = 0;
-  } else {
-    attackerGarrisonedRegiments -= Math.ceil(attackerLossesCopy / 2);
-    attackerLossesCopy = 0;
-  }
-  if (attackerLossesCopy > attackerGarrisonedEliteRegiments * 3) {
-    attackerLossesCopy -= attackerGarrisonedEliteRegiments * 3;
-    attackerGarrisonedEliteRegiments = 0;
-  } else {
-    attackerGarrisonedEliteRegiments -= Math.ceil(attackerLossesCopy / 3);
-    attackerLossesCopy = 0;
-  }
+  const conquestLosses = apportionBattleLosses(
+    {
+      levies: attackerGarrisonedLevies + conquestFleetSnap.levies,
+      skyships: conquestFleetSnap.skyships,
+      regiments: attackerGarrisonedRegiments + conquestFleetSnap.regiments,
+      eliteRegiments:
+        attackerGarrisonedEliteRegiments +
+        conquestFleetSnap.eliteRegiments,
+    },
+    attackerLosses,
+    "conquest"
+  );
 
-  applyFleetLosses(attackerFleets, attackerLossesCopy, false);
+  const garrisonLevyLosses = Math.min(
+    attackerGarrisonedLevies,
+    conquestLosses.levies
+  );
+  attackerGarrisonedLevies -= garrisonLevyLosses;
+  const garrisonRegimentLosses = Math.min(
+    attackerGarrisonedRegiments,
+    conquestLosses.regiments
+  );
+  attackerGarrisonedRegiments -= garrisonRegimentLosses;
+  const garrisonEliteLosses = Math.min(
+    attackerGarrisonedEliteRegiments,
+    conquestLosses.eliteRegiments
+  );
+  attackerGarrisonedEliteRegiments -= garrisonEliteLosses;
+
+  applyLossCountsToFleets(attackerFleets, {
+    levies: conquestLosses.levies - garrisonLevyLosses,
+    skyships: conquestLosses.skyships,
+    regiments: conquestLosses.regiments - garrisonRegimentLosses,
+    eliteRegiments: conquestLosses.eliteRegiments - garrisonEliteLosses,
+  });
+
+  conquestBuilding.garrisonedLevies = attackerGarrisonedLevies;
+  conquestBuilding.garrisonedRegiments = attackerGarrisonedRegiments;
+  conquestBuilding.garrisonedEliteRegiments =
+    attackerGarrisonedEliteRegiments;
 
   const conquestFleetAfter = snapshotFleets(attackerFleets);
   const conquestLossDetail = formatLosses({
@@ -701,10 +713,12 @@ export const resolveConquest = (
   if (attackerHits < tileStrength || remainingAttackers < 1) {
     logEvent(G, `Conquest failed: ${conquestPlayerName} loses outpost at ${landName}`);
     G.battleResult = { ...conquestResultBase, winner: landName, outcome: "Conquest failed — outpost lost" };
-    const currentBuilding = G.mapState.buildings[y][x];
+    const currentBuilding = conquestBuilding;
     if (currentBuilding.garrisonedRegiments > 0) {
       attackerFleets.forEach((fleet) => {
-        const difference = fleet.skyships - (fleet.levies + fleet.regiments);
+        const difference =
+          fleet.skyships -
+          (fleet.levies + fleet.regiments + fleet.eliteRegiments);
         if (difference > 0) {
           const lowerAmount = Math.min(
             difference,
@@ -717,14 +731,32 @@ export const resolveConquest = (
     }
     if (currentBuilding.garrisonedLevies > 0) {
       attackerFleets.forEach((fleet) => {
-        const difference = fleet.skyships - (fleet.levies + fleet.regiments);
+        const difference =
+          fleet.skyships -
+          (fleet.levies + fleet.regiments + fleet.eliteRegiments);
         if (difference > 0) {
           const lowerAmount = Math.min(
             difference,
             currentBuilding.garrisonedLevies
           );
-          fleet.regiments += lowerAmount;
+          fleet.levies += lowerAmount;
           currentBuilding.garrisonedLevies -= lowerAmount;
+        }
+      });
+    }
+    if ((currentBuilding.garrisonedEliteRegiments ?? 0) > 0) {
+      attackerFleets.forEach((fleet) => {
+        const difference =
+          fleet.skyships -
+          (fleet.levies + fleet.regiments + fleet.eliteRegiments);
+        if (difference > 0) {
+          const lowerAmount = Math.min(
+            difference,
+            currentBuilding.garrisonedEliteRegiments ?? 0
+          );
+          fleet.eliteRegiments += lowerAmount;
+          currentBuilding.garrisonedEliteRegiments =
+            (currentBuilding.garrisonedEliteRegiments ?? 0) - lowerAmount;
         }
       });
     }
@@ -744,7 +776,7 @@ export const resolveConquest = (
     logEvent(G, `Conquest succeeded: ${conquestPlayerName} colonises ${landName} (+1 VP)`);
     G.battleResult = { ...conquestResultBase, winner: conquestPlayerName, outcome: `${conquestPlayerName} colonises ${landName} (+1 VP)` };
     const currentPlayer = G.playerInfo[attackerID];
-    const currentBuilding = G.mapState.buildings[y][x];
+    const currentBuilding = conquestBuilding;
     const currentTile = G.mapState.currentTileArray[y][x];
 
     currentPlayer.resources.victoryPoints += 1;

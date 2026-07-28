@@ -127,7 +127,7 @@ function buildMapState(overrides: Partial<MapState> = {}): MapState {
     ),
     mostRecentlyDiscoveredTile: [],
     discoveredRaces: [],
-    currentBattle: [0, 0],
+    currentBattle: [-1, 0],
     goodsPriceMarkers: {
       mithril: 2,
       dragonScales: 2,

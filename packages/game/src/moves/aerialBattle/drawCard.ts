@@ -23,7 +23,7 @@ export const validateAerialCardSelection = (
   return null;
 };
 
-// No-effect cards are handled by drawFortuneOfWarCard (reshuffle + redraw).
+// eots42:636 — battle No Effect cards reshuffle but do not redraw.
 const drawCard: MoveDefinition = {
   fn: ({ G, ctx, playerID, events, random }, ...args) => {
     if (validateAerialCardSelection(G, playerID)) return INVALID_MOVE;
@@ -31,7 +31,9 @@ const drawCard: MoveDefinition = {
     if (G.battleState) {
       Object.values(G.battleState).forEach((battler) => {
         if (battler.id === playerID) {
-          battler.fowCard = drawFortuneOfWarCard(G, random.Shuffle);
+          battler.fowCard = drawFortuneOfWarCard(G, random.Shuffle, {
+            redrawNoEffect: false,
+          });
           battler.fowSource = "deck";
         }
       });

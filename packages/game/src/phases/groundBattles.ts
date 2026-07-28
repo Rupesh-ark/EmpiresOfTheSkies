@@ -31,7 +31,7 @@ const groundBattlesPhase: PhaseConfig<MyGameState> = {
   next: "conquests",
   onBegin: (context) => {
     phaseLog.info({ round: context.G.round }, "ground-battles");
-    context.G.mapState.currentBattle = [0, 0];
+    context.G.mapState.currentBattle = [-1, 0];
     context.G.battleState = undefined;
     // Resolve all deferred battles before any map ground battle.
     if (!setupNextDeferredBattle(context.G, context.events, true)) {

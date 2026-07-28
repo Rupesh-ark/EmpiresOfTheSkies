@@ -34,7 +34,7 @@ const aerialBattlesPhase: PhaseConfig<MyGameState> = {
   next: "plunder",
   onBegin: (context) => {
     phaseLog.info({ round: context.G.round }, "aerial-battles");
-    context.G.mapState.currentBattle = [0, 0];
+    context.G.mapState.currentBattle = [-1, 0];
     context.G.battleState = undefined;
     findNextBattle(context.G, context.events, true);
   },

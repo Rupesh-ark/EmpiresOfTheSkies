@@ -72,7 +72,7 @@ describe("ground battles deferred-event ordering", () => {
 
     expect(deferredG.currentDeferredBattle?.event.card).toBe("treacherous_creatures");
     expect(deferredG.step).toBe("deferred_battle");
-    expect(deferredG.mapState.currentBattle).toEqual([0, 0]);
+    expect(deferredG.mapState.currentBattle).toEqual([-1, 0]);
     expect(groundBattlesPhase.turn!.order!.first({ G: deferredG } as any)).toBe(2);
 
     const mapG = buildThreePlayerG();

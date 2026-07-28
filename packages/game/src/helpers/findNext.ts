@@ -36,7 +36,7 @@ export const findNextBattle = (
       }
     }
   }
-  G.mapState.currentBattle = [0, 0];
+  G.mapState.currentBattle = [-1, 0];
   if (onExhausted) {
     onExhausted(G, events);
   } else {
@@ -69,7 +69,7 @@ export const findNextPlunder = (
       }
     }
   }
-  G.mapState.currentBattle = [0, 0];
+  G.mapState.currentBattle = [-1, 0];
   if (onExhausted) {
     onExhausted(G, events);
   } else {
@@ -120,7 +120,7 @@ export const findNextGroundBattle = (
       }
     }
   }
-  G.mapState.currentBattle = [0, 0];
+  G.mapState.currentBattle = [-1, 0];
   if (onExhausted) {
     onExhausted(G, events);
   } else {
@@ -162,7 +162,7 @@ export const findNextConquest = (
       }
     }
   }
-  G.mapState.currentBattle = [0, 0];
+  G.mapState.currentBattle = [-1, 0];
   if (onExhausted) {
     onExhausted(G, events);
   } else {

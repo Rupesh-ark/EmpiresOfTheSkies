@@ -105,9 +105,11 @@ const resolveCombat = (
   const playerSwords = playerSkyships; // 1 sword per skyship
   const playerShields = playerSkyships; // 1 shield per skyship
 
-  const fowInfidel = drawFortuneOfWarCard(G, shuffle);
+  const fowInfidel = drawFortuneOfWarCard(G, shuffle, { redrawNoEffect: false });
   // Use player's hand card if provided, otherwise draw from deck
-  const fowPlayer = playerFoWCard ?? drawFortuneOfWarCard(G, shuffle);
+  const fowPlayer =
+    playerFoWCard ??
+    drawFortuneOfWarCard(G, shuffle, { redrawNoEffect: false });
 
   // Infidel Fleet = attacker, Player = defender
   const { hitsOnDefender: hitsOnPlayer, hitsOnAttacker: hitsOnInfidel } = calculateCombat(
