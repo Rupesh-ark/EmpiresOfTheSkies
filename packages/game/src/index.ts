@@ -21,6 +21,7 @@ export * from "./data/resolutionSequence.js";
 
 export { MOVE_DEFINITIONS } from "./moveDefinitions.js";
 export * from "./helpers/actionCosts.js";
+export { isRebelOccupied, getOccupyingCounter } from "./helpers/occupation.js";
 export { fleetCombatValues } from "./helpers/fleetUtils.js";
 
 export * from "./ai/index.js";

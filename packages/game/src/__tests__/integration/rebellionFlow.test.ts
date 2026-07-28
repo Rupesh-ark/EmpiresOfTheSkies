@@ -18,6 +18,7 @@
 import { describe, it, expect, vi } from "vitest";
 import commitRebellionTroops from "../../moves/events/commitRebellionTroops.js";
 import contributeToRebellion from "../../moves/events/contributeToRebellion.js";
+import acceptRebellionSupport from "../../moves/events/acceptRebellionSupport.js";
 import {
   buildInitialG,
   buildPlayer,
@@ -69,6 +70,7 @@ function callCommit(
     { G, ctx, playerID, events, random: buildRandom() },
     regiments,
     levies,
+    0,
     undefined
   );
   return { result, events };
@@ -93,6 +95,25 @@ function callContribute(
     side,
     regiments,
     levies
+  );
+  return { result, events };
+}
+
+function callSupportDecision(
+  G: ReturnType<typeof buildInitialG>,
+  playerID: string,
+  accept: boolean,
+  playOrder: string[]
+) {
+  const events = stubEvents();
+  const ctx = {
+    ...buildCtx(playerID, playOrder.length),
+    playOrder,
+    currentPlayer: playerID,
+  };
+  const result = acceptRebellionSupport.fn(
+    { G, ctx, playerID, events, random: buildRandom() },
+    accept
   );
   return { result, events };
 }
@@ -233,6 +254,8 @@ describe("rebellionFlow — rival supports defender", () => {
     const { result } = callContribute(G, "1", "defender", 2, 0, ["0", "1"]);
 
     expect(result).not.toBe(INVALID_MOVE);
+    expect(G.step).toBe("rebellion_accept_support");
+    callSupportDecision(G, "0", true, ["0", "1"]);
     expect(G.currentRebellion).toBeNull();
   });
 
@@ -301,6 +324,7 @@ describe("rebellionFlow — 3-player chain: all rivals must contribute before re
     callCommit(G, "0", 3, 0, ["0", "1", "2"]);
     callContribute(G, "1", "defender", 1, 0, ["0", "1", "2"]);
     callContribute(G, "2", "rebel", 0, 0, ["0", "1", "2"]);
+    callSupportDecision(G, "0", true, ["0", "1", "2"]);
 
     // All rivals have contributed → resolved
     expect(G.currentRebellion).toBeNull();

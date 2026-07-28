@@ -13,7 +13,8 @@ const commitRebellionTroops: MoveDefinition = {
   fn: ({ G, ctx, playerID, events, random }, ...args) => {
     const regiments: number = args[0];
     const levies: number = args[1];
-    const fowCardIndex: number | undefined = args[2];
+    const skyships: number = args[2];
+    const fowCardIndex: number | undefined = args[3];
 
     // Defensive: validate args are valid numbers
     if (typeof levies !== 'number' || isNaN(levies)) {
@@ -24,6 +25,10 @@ const commitRebellionTroops: MoveDefinition = {
       crLog.warn({ regiments }, "Invalid regiments arg");
       return INVALID_MOVE;
     }
+    if (typeof skyships !== "number" || isNaN(skyships)) {
+      crLog.warn({ skyships }, "Invalid skyships arg");
+      return INVALID_MOVE;
+    }
 
     const rebellion = G.currentRebellion;
     if (!rebellion) return INVALID_MOVE;
@@ -32,14 +37,17 @@ const commitRebellionTroops: MoveDefinition = {
     const player = G.playerInfo[playerID];
 
     // Validate player has enough troops
-    if (regiments < 0 || levies < 0) return INVALID_MOVE;
+    if (regiments < 0 || levies < 0 || skyships < 0) {
+      return INVALID_MOVE;
+    }
     if (regiments > player.resources.regiments) return INVALID_MOVE;
     if (levies > player.resources.levies) return INVALID_MOVE;
+    if (skyships > player.resources.skyships) return INVALID_MOVE;
 
     const kingdom = player.kingdomName;
     logEvent(
       G,
-      `${kingdom} commits ${regiments} regiments and ${levies} levies against the rebellion`
+      `${kingdom} commits ${regiments} regiments, ${levies} levies and ${skyships} skyships against the rebellion`
     );
 
     // Pull FoW card from hand if provided
@@ -56,14 +64,27 @@ const commitRebellionTroops: MoveDefinition = {
     // Store defender's commitment for the rival support stage
     rebellion.defenderRegiments = regiments;
     rebellion.defenderLevies = levies;
+    rebellion.defenderSkyships = skyships;
+    rebellion.defenderEliteRegiments = 0;
     rebellion.rivalContributions = {};
 
     // If only 1 player (no rivals), resolve immediately
     const rivals = ctx.playOrder.filter(
       (id) => id !== rebellion.event.targetPlayerID
     );
-    if (rivals.length === 0) {
-      resolveRebellionWithTroops(G, rebellion, regiments, levies, random.Shuffle);
+    rebellion.eligibleRivals = rivals;
+    if (
+      regiments + levies + skyships === 0 ||
+      rivals.length === 0
+    ) {
+      resolveRebellionWithTroops(
+        G,
+        rebellion,
+        regiments,
+        levies,
+        skyships,
+        random.Shuffle
+      );
       G.currentRebellion = null;
 
       nextAfterRebellion(G, events);

@@ -26,13 +26,17 @@ const groundBattlesPhase: PhaseConfig<MyGameState> = {
     "drawCard",
     "pickCard",
     "relocateDefeatedFleet",
-    "commitDeferredBattleCard"
+    "commitDeferredBattleCard",
+    "contributeToRebellion",
+    "acceptRebellionSupport",
+    "commitOccupationBattleCard"
   ),
   next: "conquests",
   onBegin: (context) => {
     phaseLog.info({ round: context.G.round }, "ground-battles");
     context.G.mapState.currentBattle = [-1, 0];
     context.G.battleState = undefined;
+    context.G.currentOccupationBattle = null;
     // Resolve all deferred battles before any map ground battle.
     if (!setupNextDeferredBattle(context.G, context.events, true)) {
       findNextGroundBattle(context.G, context.events, true);
@@ -42,16 +46,20 @@ const groundBattlesPhase: PhaseConfig<MyGameState> = {
     order: {
       playOrder: ({ G }) => G.turnOrder,
       first: ({ G }) => {
-        if (G.step !== "deferred_battle") return firstFleetOwnerPosition(G);
         const target = getResolutionTarget(G);
-        if (target === null) return 0;
+        if (target === null) return firstFleetOwnerPosition(G);
         const position = G.turnOrder.indexOf(target);
         return position === -1 ? 0 : position;
       },
       next: ({ ctx }) => (ctx.playOrderPos + 1) % ctx.playOrder.length,
     },
     onBegin: (context) => {
-      if (context.G.step === "deferred_battle") {
+      if (
+        context.G.step === "deferred_battle" ||
+        context.G.step === "rebellion_rival_support" ||
+        context.G.step === "rebellion_accept_support" ||
+        context.G.step === "occupation_battle"
+      ) {
         const target = getResolutionTarget(context.G);
         if (target && target !== context.ctx.currentPlayer) {
           context.events.endTurn({ next: target });

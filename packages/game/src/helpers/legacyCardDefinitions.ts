@@ -1,5 +1,6 @@
 import { MyGameState, PlayerInfo, LegacyCardInfo, LegacyCardName } from "../types.js";
 import { bfsReachable, FAITHDOM_TILES, tileKey } from "./mapUtils.js";
+import { isRebelOccupied } from "./occupation.js";
 
 // Each resolver returns the raw VP earned — no state mutation.
 // resolveCardWithAlignmentPenalty applies the halving penalty before committing.
@@ -19,7 +20,13 @@ const tradeRouteGoods = (player: PlayerInfo, G: MyGameState): number => {
   for (let y = 0; y < 4; y++) {
     for (let x = 0; x < 8; x++) {
       const building = G.mapState.buildings[y][x];
-      if (building.player?.id !== player.id || !building.buildings) continue;
+      if (
+        building.player?.id !== player.id ||
+        !building.buildings ||
+        isRebelOccupied(building)
+      ) {
+        continue;
+      }
 
       const routeNetwork = new Set(network);
       routeNetwork.add(tileKey(x, y));
@@ -53,7 +60,13 @@ export const CARD_RESOLVERS: Record<LegacyCardName, CardResolver> = {
     let vp = 0;
     G.mapState.buildings.forEach((row) =>
       row.forEach((tile) => {
-        if (tile.player?.id === player.id && tile.buildings === "colony") vp += 6;
+        if (
+          tile.player?.id === player.id &&
+          tile.buildings === "colony" &&
+          !isRebelOccupied(tile)
+        ) {
+          vp += 6;
+        }
       })
     );
     return vp;
@@ -66,7 +79,9 @@ export const CARD_RESOLVERS: Record<LegacyCardName, CardResolver> = {
       row.forEach((tile) => {
         if (
           tile.player?.id === player.id &&
-          (tile.buildings === "outpost" || tile.buildings === "colony")
+          (tile.buildings === "outpost" ||
+            tile.buildings === "colony") &&
+          !isRebelOccupied(tile)
         )
           count++;
       })
@@ -91,7 +106,13 @@ export const CARD_RESOLVERS: Record<LegacyCardName, CardResolver> = {
       G.mapState.buildings.forEach((row) =>
         row.forEach((tile) => {
           if (tile.player?.id !== p.id) return;
-          if (type === "fort" ? tile.fort.includes(p.id) : tile.buildings === type) n++;
+          if (type === "fort") {
+            if (tile.fort.includes(p.id)) n++;
+            return;
+          }
+          if (!isRebelOccupied(tile) && tile.buildings === type) {
+            n++;
+          }
         })
       );
       return n;
@@ -102,7 +123,14 @@ export const CARD_RESOLVERS: Record<LegacyCardName, CardResolver> = {
       for (let y = 0; y < 4; y++) {
         for (let x = 0; x < 8; x++) {
           const b = G.mapState.buildings[y][x];
-          if (!b.player || b.player.id !== p.id || !b.buildings) continue;
+          if (
+            !b.player ||
+            b.player.id !== p.id ||
+            !b.buildings ||
+            isRebelOccupied(b)
+          ) {
+            continue;
+          }
           const loot = G.mapState.currentTileArray[y][x].loot[b.buildings];
           n +=
             loot.mithril +

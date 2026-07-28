@@ -1,5 +1,6 @@
 import { MoveDefinition, MyGameState, MoveError } from "../../types.js";
 import { humanizeTileName } from "../../helpers/helpers.js";
+import { isRebelOccupied } from "../../helpers/occupation.js";
 
 const validateCheckAndPlaceFort = (G: MyGameState, playerID: string, coords: [number, number]): MoveError | null => {
   const [x, y] = coords;
@@ -9,7 +10,8 @@ const validateCheckAndPlaceFort = (G: MyGameState, playerID: string, coords: [nu
   }
   const hasBuilding =
     tileInfo.player?.id === playerID &&
-    (tileInfo.buildings === "colony" || tileInfo.buildings === "outpost");
+    (tileInfo.buildings === "colony" || tileInfo.buildings === "outpost") &&
+    !isRebelOccupied(tileInfo);
   const noFortYet = !tileInfo.fort.includes(playerID);
   const hasGarrisonedTroops =
     tileInfo.garrisonedRegiments > 0 || tileInfo.garrisonedLevies > 0;

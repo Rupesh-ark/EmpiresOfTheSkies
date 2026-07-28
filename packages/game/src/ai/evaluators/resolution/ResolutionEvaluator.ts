@@ -300,8 +300,9 @@ function evaluateRebellion(
   if (move.move === "commitRebellionTroops") {
     const regs = (move.args[0] as number) ?? 0;
     const levs = (move.args[1] as number) ?? 0;
-    if (regs + levs === 0) return simpleEval(move, V2_CONFIG.resolution.rebellionPassBase, "commit no troops");
-    return simpleEval(move, V2_CONFIG.resolution.rebellionCommitBase, `commit ${regs}r ${levs}l to rebellion`);
+    const skyships = (move.args[2] as number) ?? 0;
+    if (regs + levs + skyships === 0) return simpleEval(move, V2_CONFIG.resolution.rebellionPassBase, "commit no troops");
+    return simpleEval(move, V2_CONFIG.resolution.rebellionCommitBase, `commit ${regs}r ${levs}l ${skyships}s to rebellion`);
   }
   if (move.move === "contributeToRebellion") {
     const side = move.args[0] as string;
@@ -406,7 +407,11 @@ export function evaluateResolution(
       result = evaluateRetrieveFleets(G, playerID, move, personality);
     } else if (sub === "infidel_fleet_combat") {
       result = evaluateInfidelFleet(G, playerID, move, personality);
-    } else if (sub === "rebellion" || sub === "rebellion_rival_support") {
+    } else if (
+      sub === "rebellion" ||
+      sub === "rebellion_rival_support" ||
+      sub === "rebellion_accept_support"
+    ) {
       result = evaluateRebellion(G, playerID, move, personality);
     } else if (
       sub === "invasion_nominate" ||
@@ -416,7 +421,10 @@ export function evaluateResolution(
       sub === "invasion_buyoff"
     ) {
       result = evaluateInvasion(G, playerID, move, personality);
-    } else if (sub === "deferred_battle") {
+    } else if (
+      sub === "deferred_battle" ||
+      sub === "occupation_battle"
+    ) {
       result = evaluateDeferredBattle(G, playerID, move, personality);
     } else {
       // Fallback for any unhandled sub-stage

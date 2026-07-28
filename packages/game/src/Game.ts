@@ -251,6 +251,7 @@ const MyGame: Game<MyGameState> = {
       currentInvasion: null,
       infidelFleetCombat: null,
       currentDeferredBattle: null,
+      currentOccupationBattle: null,
       pendingDeal: undefined,
       mercyGold: {},
       _matchID: `game_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
@@ -269,7 +270,7 @@ const MyGame: Game<MyGameState> = {
         dynasticMarriage: null,
         lendersRefuseCredit: [],
         nprHeretic: [],
-        skipTaxesNextRound: false,
+        skipTaxesNextRound: [],
         cannotConvertThisRound: [],
         grandInfidelDies: false,
         royalPatronageActive: false,
@@ -278,7 +279,7 @@ const MyGame: Game<MyGameState> = {
       },
     };
   },
-  moves: wrapSet("discoverTile", "alterPlayerOrder", "recruitCounsellors", "recruitRegiments", "purchaseSkyships", "foundBuildings", "increaseHeresy", "increaseOrthodoxy", "checkAndPlaceFort", "punishDissenters", "convertMonarch", "influencePrelates", "trainTroops", "drawFoWCards", "confirmAction", "flipCards", "buildSkyships", "conscriptLevies", "passFleetInfoToPlayerInfo", "deployFleet", "enableDispatchButtons", "issueHolyDecree", "garrisonTransfer", "pass", "attackOtherPlayersFleet", "evadeAttackingFleet", "doNotAttack", "retaliate", "drawCard", "pickCard", "relocateDefeatedFleet", "plunder", "doNotPlunder", "attackPlayersBuilding", "doNotGroundAttack", "defendGroundAttack", "garrisonTroops", "yieldToAttacker", "chooseEventCard", "resolveEventChoice", "commitRebellionTroops", "nominateCaptainGeneral", "contributeToGrandArmy", "commitInvasionFoW", "respondToInfidelFleet", "contributeToRebellion", "offerBuyoffGold"),
+  moves: wrapSet("discoverTile", "alterPlayerOrder", "recruitCounsellors", "recruitRegiments", "purchaseSkyships", "foundBuildings", "increaseHeresy", "increaseOrthodoxy", "checkAndPlaceFort", "punishDissenters", "convertMonarch", "influencePrelates", "trainTroops", "drawFoWCards", "confirmAction", "flipCards", "buildSkyships", "conscriptLevies", "passFleetInfoToPlayerInfo", "deployFleet", "enableDispatchButtons", "issueHolyDecree", "garrisonTransfer", "pass", "attackOtherPlayersFleet", "evadeAttackingFleet", "doNotAttack", "retaliate", "drawCard", "pickCard", "relocateDefeatedFleet", "plunder", "doNotPlunder", "attackPlayersBuilding", "doNotGroundAttack", "defendGroundAttack", "garrisonTroops", "yieldToAttacker", "chooseEventCard", "resolveEventChoice", "commitRebellionTroops", "nominateCaptainGeneral", "contributeToGrandArmy", "commitInvasionFoW", "respondToInfidelFleet", "contributeToRebellion", "acceptRebellionSupport", "commitOccupationBattleCard", "offerBuyoffGold"),
   phases: {
     setup: {
       start: true,
@@ -406,22 +407,25 @@ const MyGame: Game<MyGameState> = {
         phaseLog.info({ round: context.G.round }, "taxes");
         context.G.step = "default";
 
-        // Peasant REBELLION loss: skip taxes this round
-        if (context.G.eventState.skipTaxesNextRound) {
-          logEvent(context.G, "Taxes skipped due to Peasant Rebellion");
-          context.G.eventState.skipTaxesNextRound = false;
-          context.events.endPhase();
-          return;
-        }
-
         const taxMod = context.G.eventState.taxModifier;
+        const taxSkips = new Set(
+          context.G.eventState.skipTaxesNextRound
+        );
         context.ctx.playOrder.forEach((id, index) => {
+          if (taxSkips.has(id)) {
+            logEvent(
+              context.G,
+              `${context.G.playerInfo[id].kingdomName} skips Gather Taxes due to Peasant Rebellion`
+            );
+            return;
+          }
           let income = getGoldIncomeForPlayer(index) + taxMod;
           if (context.G.playerInfo[id].resources.advantageCard === "more_efficient_taxation") {
             income += 2;
           }
           context.G.playerInfo[id].resources.gold += Math.max(0, income);
         });
+        context.G.eventState.skipTaxesNextRound = [];
         calculateMercy(context.G);
         logEvent(context.G, `Taxes collected${taxMod !== 0 ? ` (modifier: ${taxMod > 0 ? "+" : ""}${taxMod})` : ""}`);
         context.events.endPhase();

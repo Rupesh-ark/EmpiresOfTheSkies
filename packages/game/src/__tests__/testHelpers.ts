@@ -214,6 +214,7 @@ export function buildInitialG(
     infidelFleetCombat: null,
     pendingDeal: undefined,
     currentDeferredBattle: null,
+    currentOccupationBattle: null,
     mercyGold: {},
     _matchID: `game_${Date.now()}_test`,
     eventState: {
@@ -231,7 +232,7 @@ export function buildInitialG(
       dynasticMarriage: null,
       lendersRefuseCredit: [],
       nprHeretic: [],
-      skipTaxesNextRound: false,
+      skipTaxesNextRound: [],
       cannotConvertThisRound: [],
       grandInfidelDies: false,
       royalPatronageActive: false,

@@ -448,6 +448,8 @@ export function applyMove(G: MyGameState, playerID: string, move: AIMove): void 
     case "offerBuyoffGold":
     case "respondToInfidelFleet":
     case "commitDeferredBattleCard":
+    case "commitOccupationBattleCard":
+    case "acceptRebellionSupport":
     case "relocateDefeatedFleet":
     case "drawCard":
     case "pickCard":

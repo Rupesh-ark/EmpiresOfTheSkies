@@ -1,7 +1,10 @@
 /** Shared handoffs for interactive resolution work. */
 
 import { MyGameState } from "../types.js";
-import { setupNextRebellion } from "./resolveRebellion.js";
+import {
+  setupColonialRebellion,
+  setupNextRebellion,
+} from "./resolveRebellion.js";
 import { getDeferredBattleDescription } from "./resolveDeferredBattles.js";
 import { checkForInvasion, getArchprelateForNomination } from "./resolveInvasion.js";
 import type { EventsAPI } from "../types.js";
@@ -20,9 +23,11 @@ export const setupNextDeferredBattle = (
   events: EventsAPI,
   skipEndTurn = false
 ): boolean => {
-  // Find next non-rebellion deferred event
+  // Colonial REBELLION is the one rebellion resolved here (eots42:73).
   const idx = G.eventState.deferredEvents.findIndex(
-    (e) => !e.card.endsWith("_rebellion")
+    (e) =>
+      !e.card.endsWith("_rebellion") ||
+      e.card === "colonial_rebellion"
   );
 
   if (idx >= 0) {
@@ -31,8 +36,29 @@ export const setupNextDeferredBattle = (
       event,
       description: getDeferredBattleDescription(G, event),
     };
-    G.step = "deferred_battle";
-    if (!skipEndTurn) events.endTurn({ next: event.targetPlayerID });
+    if (event.card === "colonial_rebellion") {
+      const rebellion = setupColonialRebellion(G, event);
+      const rival = rebellion?.eligibleRivals?.[0];
+      const hasGarrison =
+        (rebellion?.defenderRegiments ?? 0) +
+          (rebellion?.defenderLevies ?? 0) +
+          (rebellion?.defenderEliteRegiments ?? 0) >
+        0;
+      if (rival && hasGarrison) {
+        G.step = "rebellion_rival_support";
+        if (!skipEndTurn) events.endTurn({ next: rival });
+      } else {
+        G.step = "deferred_battle";
+        if (!skipEndTurn) {
+          events.endTurn({ next: event.targetPlayerID });
+        }
+      }
+    } else {
+      G.step = "deferred_battle";
+      if (!skipEndTurn) {
+        events.endTurn({ next: event.targetPlayerID });
+      }
+    }
     return true;
   }
 
@@ -70,6 +96,20 @@ export const getResolutionTarget = (G: MyGameState): string | null => {
 
     case "rebellion":
       return G.currentRebellion?.event.targetPlayerID ?? null;
+
+    case "rebellion_rival_support":
+      return (
+        G.currentRebellion?.eligibleRivals?.find(
+          (id) =>
+            !G.currentRebellion?.rivalContributions?.[id]
+        ) ?? null
+      );
+
+    case "rebellion_accept_support":
+      return G.currentRebellion?.event.targetPlayerID ?? null;
+
+    case "occupation_battle":
+      return G.currentOccupationBattle?.attackerPlayerID ?? null;
 
     case "invasion_nominate":
       return Object.values(G.playerInfo).find((p) => p.isArchprelate)?.id ?? null;

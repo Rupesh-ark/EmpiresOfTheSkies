@@ -14,6 +14,7 @@ import { MyGameState, DeferredEvent } from "../types.js";
 import { addVPAmount, logEvent } from "./stateUtils.js";
 import { drawFortuneOfWarCard, hasFortAt, humanizeTileName } from "./helpers.js";
 import { calculateCombat } from "./combatMath.js";
+import { returnInfidelHostCounter } from "./counterPools.js";
 
 // Faerie Uprising
 
@@ -203,10 +204,16 @@ const resolveInfidelsInvadeFaerie = (
 
   if (defenderWins) {
     addVPAmount(G, targetPlayerID, 1);
-    G.infidelHostPool.push(host);
+    returnInfidelHostCounter(G, host, shuffle);
     logEvent(G, `${kingdom} repels the Infidels! +1 VP`);
   } else {
-    tile.rebelCounter = host.swords;
+    tile.rebelCounter = {
+      kind: "infidel_host",
+      counter: host,
+    };
+    tile.garrisonedRegiments = 0;
+    tile.garrisonedLevies = 0;
+    tile.garrisonedEliteRegiments = 0;
     logEvent(G, `Infidels seize ${kingdom}'s ${tile.buildings} at ${landName}! Trade gains lost`);
   }
 
@@ -271,6 +278,8 @@ export const getDeferredBattleDescription = (
       return `Headstrong Commander! ${kingdom}'s garrison at ${landName} attempts conquest against the land.`;
     case "infidels_invade_faerie":
       return `Infidels Invade! A Host counter attacks ${kingdom}'s settlement at ${landName}.`;
+    case "colonial_rebellion":
+      return `Colonial Rebellion at ${landName}! The colony garrison defends against rebels.`;
     default:
       return `Battle at ${landName}`;
   }

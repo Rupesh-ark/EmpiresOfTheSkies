@@ -1,5 +1,6 @@
 import { FleetInfo, MyGameState, TileInfoProps } from "../types.js";
 import { MAP_WIDTH, MAP_HEIGHT } from "../data/gameData.js";
+import { isRebelOccupied } from "./occupation.js";
 
 export const FAITHDOM_TILES: [number, number][] = [
   [3, 0],
@@ -286,7 +287,9 @@ export const getPlayerBuildings = (
       const building = G.mapState.buildings[y][x];
       if (
         building.player?.id === playerID &&
-        (building.buildings === "outpost" || building.buildings === "colony")
+        (building.buildings === "outpost" ||
+          building.buildings === "colony") &&
+        !isRebelOccupied(building)
       ) {
         result.push([x, y]);
       }
@@ -409,7 +412,13 @@ export const getRoutePlacementTiles = (
     if (claimed.has(key)) continue;
     if (mode === "trail") {
       const building = G.mapState.buildings[y]?.[x];
-      if (building?.player?.id === playerID && building?.buildings) continue;
+      if (
+        building?.player?.id === playerID &&
+        building?.buildings &&
+        !isRebelOccupied(building)
+      ) {
+        continue;
+      }
     }
     if ((G.mapState.routeSkyships[key] ?? []).includes(playerID)) continue;
     claimed.add(key);

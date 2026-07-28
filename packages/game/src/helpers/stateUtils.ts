@@ -1,6 +1,7 @@
 import { MyGameState, MapBuildingOwner, PlayerInfo } from "../types.js";
 import { MAX_SKYSHIPS, MAX_REGIMENTS, HERESY_MAX, HERESY_MIN } from "../data/gameData.js";
 import { getRepublicInfluence } from "./republicUtils.js";
+import { isRebelOccupied } from "./occupation.js";
 
 export { HERESY_MAX, HERESY_MIN };
 
@@ -235,6 +236,10 @@ export const validateOutpostTransfer = (
   }
 
   const cell = G.mapState.buildings[y][x];
+
+  if (isRebelOccupied(cell)) {
+    return "Cannot transfer a rebel-occupied building";
+  }
 
   if (
     !cell.player ||

@@ -14,6 +14,7 @@ import { CARD_RESOLVERS, resolveCardWithAlignmentPenalty } from "./legacyCardDef
 import { hasAnyOutpost, hasAnyColony } from "./helpers.js";
 import { tileKey } from "./mapUtils.js";
 import { BUILDING_SELL_PRICE } from "../data/gameData.js";
+import { isRebelOccupied } from "./occupation.js";
 
 const HERESY_EVENT_STEPS = 4;
 const CROPS_TAX_MODIFIER = 3;
@@ -104,7 +105,7 @@ export const EVENT_CARD_DEFS: Record<EventCardName, EventCardDef> = {
   peasant_rebellion: {
     displayName: "Peasant REBELLION",
     description: "Common People Rise Up Against Heavy Taxation",
-    effect: "Rebellion targets the player with the most gold. Commit troops to defend or surrender.",
+    effect: "Rebellion targets the current last player in IPO. Commit troops to defend or surrender.",
     isBattle: true,
   },
   patrons_of_the_arts: {
@@ -212,7 +213,7 @@ export const EVENT_CARD_DEFS: Record<EventCardName, EventCardDef> = {
   colonial_rebellion: {
     displayName: "Colonial REBELLION",
     description: "Colonists Rise Up Against Royal Authority",
-    effect: "A colony rebels. Its owner must commit troops to defend or lose the colony. Void if no colonies.",
+    effect: "The fewest-VP player marks any colony; its garrison defends during ground battles. Void if no colonies.",
     isBattle: true,
   },
   colonial_prelates: {
@@ -981,15 +982,16 @@ export const getBattleEventTarget = (
       return { card, targetPlayerID: turnOrder[turnOrder.length - 1] };
 
     case "orthodox_rebellion": {
-      // Target: heretic player with leftmost heresy (most heretical), IPO
-      let maxHeresy = -Infinity;
+      // eots42:985: "leftmost" is the lowest tracker position. IPO order
+      // supplies the tie-break because equal values do not replace target.
+      let minHeresy = Infinity;
       let target: string | null = null;
       for (const id of turnOrder) {
         if (
           G.playerInfo[id].hereticOrOrthodox === "heretic" &&
-          G.playerInfo[id].heresyTracker > maxHeresy
+          G.playerInfo[id].heresyTracker < minHeresy
         ) {
-          maxHeresy = G.playerInfo[id].heresyTracker;
+          minHeresy = G.playerInfo[id].heresyTracker;
           target = id;
         }
       }
@@ -1013,15 +1015,22 @@ export const getBattleEventTarget = (
     }
 
     case "colonial_rebellion": {
-      // Target: fewest VP player chooses one of their own colonies
-      // Auto-pick: weakest colony (lowest total trade goods)
-      const targetID = playerWithFewestVP(G, turnOrder);
+      // eots42:959 says the fewest-VP player chooses "one Colony", without
+      // limiting ownership. When no dialog is needed, choose the weakest
+      // unoccupied colony from the whole map. targetPlayerID is its owner,
+      // because that player defends the ground battle.
+      const chooserPlayerID = playerWithFewestVP(G, turnOrder);
       let bestTile: [number, number] | null = null;
+      let ownerID: string | null = null;
       let minValue = Infinity;
       for (let y = 0; y < G.mapState.buildings.length; y++) {
         for (let x = 0; x < G.mapState.buildings[y].length; x++) {
           const tile = G.mapState.buildings[y][x];
-          if (tile.player?.id === targetID && tile.buildings === "colony") {
+          if (
+            tile.player &&
+            tile.buildings === "colony" &&
+            !isRebelOccupied(tile)
+          ) {
             const loot = G.mapState.currentTileArray[y][x].loot.colony;
             const value =
               loot.mithril + loot.dragonScales + loot.krakenSkin +
@@ -1029,12 +1038,18 @@ export const getBattleEventTarget = (
             if (value < minValue) {
               minValue = value;
               bestTile = [x, y];
+              ownerID = tile.player.id;
             }
           }
         }
       }
-      return bestTile
-        ? { card, targetPlayerID: targetID, targetTile: bestTile }
+      return bestTile && ownerID
+        ? {
+            card,
+            targetPlayerID: ownerID,
+            targetTile: bestTile,
+            chooserPlayerID,
+          }
         : null;
     }
 
@@ -1045,7 +1060,11 @@ export const getBattleEventTarget = (
       for (let y = 0; y < G.mapState.buildings.length; y++) {
         for (let x = 0; x < G.mapState.buildings[y].length; x++) {
           const tile = G.mapState.buildings[y][x];
-          if (tile.buildings === "colony" && tile.player) {
+          if (
+            tile.buildings === "colony" &&
+            tile.player &&
+            !isRebelOccupied(tile)
+          ) {
             const land = G.mapState.currentTileArray[y][x];
             if (land.sword > maxStrength) {
               maxStrength = land.sword;
@@ -1093,7 +1112,8 @@ export const getBattleEventTarget = (
           const tile = G.mapState.buildings[y][x];
           if (
             tile.player?.id === targetID &&
-            (tile.buildings === "outpost" || tile.buildings === "colony")
+            (tile.buildings === "outpost" || tile.buildings === "colony") &&
+            !isRebelOccupied(tile)
           ) {
             return { card, targetPlayerID: targetID, targetTile: [x, y] };
           }
@@ -1197,13 +1217,18 @@ export const prepareEventChoice = (
     }
 
     case "colonial_rebellion": {
-      // Player needs to choose which of their colonies to risk
+      // eots42:959: the fewest-VP player may mark ANY unoccupied Colony.
+      // targetPlayerID identifies the chooser at this pre-battle step.
       const targetID = playerWithFewestVP(G, turnOrder);
       const colonies: [number, number][] = [];
       for (let y = 0; y < G.mapState.buildings.length; y++) {
         for (let x = 0; x < G.mapState.buildings[y].length; x++) {
           const tile = G.mapState.buildings[y][x];
-          if (tile.player?.id === targetID && tile.buildings === "colony") {
+          if (
+            tile.player &&
+            tile.buildings === "colony" &&
+            !isRebelOccupied(tile)
+          ) {
             colonies.push([x, y]);
           }
         }

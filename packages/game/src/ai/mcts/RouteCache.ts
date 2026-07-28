@@ -6,6 +6,7 @@
  */
 import type { MyGameState } from "../../types.js";
 import { tileKey, buildPlayerNetwork, bfsReachable, getNeighbors, FAITHDOM_TILES } from "../../helpers/mapUtils.js";
+import { isRebelOccupied } from "../../helpers/occupation.js";
 
 interface CacheEntry {
   routes: Record<string, number>;
@@ -26,7 +27,9 @@ function getBuildingKey(G: MyGameState): string {
     for (let x = 0; x < row.length; x++) {
       const cell = row[x];
       if (cell?.buildings && cell.player) {
-        parts.push(`${tileKey(x,y)}:${cell.player.id}:${cell.buildings}`);
+        parts.push(
+          `${tileKey(x,y)}:${cell.player.id}:${cell.buildings}:${isRebelOccupied(cell) ? "occupied" : "active"}`
+        );
       }
     }
   }
@@ -55,6 +58,7 @@ function computeRoutesForPlayer(G: MyGameState, playerID: string): number {
       const building = G.mapState.buildings[y][x];
       if (building.player?.id !== playerID || !building.buildings) continue;
       if (building.buildings !== "outpost" && building.buildings !== "colony") continue;
+      if (isRebelOccupied(building)) continue;
 
       const key = tileKey(x, y);
       if (reachable.has(key)) {

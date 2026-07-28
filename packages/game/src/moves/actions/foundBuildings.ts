@@ -13,6 +13,7 @@ import {
   MAX_PALACES,
   MAX_SHIPYARDS,
 } from "../../data/gameData.js";
+import { isRebelOccupied } from "../../helpers/occupation.js";
 
 const validateFoundBuildings = (
   G: MyGameState,
@@ -58,7 +59,8 @@ const validateFoundBuildings = (
       row.some((tile, x) => {
         const hasBuilding =
           tile.player?.id === playerID &&
-          (tile.buildings === "colony" || tile.buildings === "outpost");
+          (tile.buildings === "colony" || tile.buildings === "outpost") &&
+          !isRebelOccupied(tile);
         const hasTroops =
           tile.garrisonedRegiments > 0 ||
           tile.garrisonedLevies > 0 ||
@@ -190,7 +192,8 @@ const foundFort = (
     row.forEach((tile, x) => {
       const hasBuilding =
         tile.player?.id === playerID &&
-        (tile.buildings === "colony" || tile.buildings === "outpost");
+        (tile.buildings === "colony" || tile.buildings === "outpost") &&
+        !isRebelOccupied(tile);
       const hasTroops =
         tile.garrisonedRegiments > 0 ||
         tile.garrisonedLevies > 0 ||

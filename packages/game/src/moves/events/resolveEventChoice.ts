@@ -1,6 +1,5 @@
 import { INVALID_MOVE } from "boardgame.io/core";
 import { EventCardName, LegacyCardInfo, MoveDefinition } from "../../types.js";
-import { getBattleEventTarget } from "../../helpers/eventCardDefinitions.js";
 import { addVPAmount, removeVPAmount, logEvent } from "../../helpers/stateUtils.js";
 import { humanizeTileName } from "../../helpers/helpers.js";
 import { BUILDING_SELL_PRICE } from "../../data/gameData.js";
@@ -68,15 +67,26 @@ const CHOICE_HANDLERS: Partial<Record<EventCardName, ChoiceHandler>> = {
       return false;
     }
 
-    const target = getBattleEventTarget(choice.card, G, ctx.playOrder);
-    if (target) {
-      target.targetTile = tile;
-      G.eventState.deferredEvents.push(target);
-    }
+    const colony = G.mapState.buildings[tile[1]][tile[0]];
+    if (!colony.player || colony.buildings !== "colony") return false;
+
+    // The chosen coordinate is the modelled rebellion marker. The physical
+    // chooser Skyship is not removed from a reserve or Fleet: targetTile plus
+    // chooserPlayerID preserves the rules-relevant choice without inventing a
+    // second Skyship-piece inventory.
+    G.eventState.deferredEvents.push({
+      card: choice.card,
+      targetPlayerID: colony.player.id,
+      targetTile: tile,
+      chooserPlayerID: choice.targetPlayerID,
+    });
 
     const land = G.mapState.currentTileArray[tile[1]][tile[0]];
     const landName = humanizeTileName(land.name);
-    logEvent(G, `Colonial Rebellion: ${G.playerInfo[choice.targetPlayerID].kingdomName} risks colony at ${landName}`);
+    logEvent(
+      G,
+      `Colonial Rebellion: ${G.playerInfo[choice.targetPlayerID].kingdomName} marks ${G.playerInfo[colony.player.id].kingdomName}'s colony at ${landName}`
+    );
     return true;
   },
 

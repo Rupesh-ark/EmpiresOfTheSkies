@@ -37,6 +37,8 @@ export type GameStep =
   | "discard_fow"
   | "rebellion"
   | "rebellion_rival_support"
+  | "rebellion_accept_support"
+  | "occupation_battle"
   | "aerial_attack_or_pass"
   | "aerial_attack_or_evade"
   | "aerial_resolve"
@@ -104,14 +106,21 @@ export interface MyGameState {
   currentRebellion: {
     event: DeferredEvent;
     counterSwords: number;
-      defenderRegiments?: number;
+    defenderRegiments?: number;
     defenderLevies?: number;
+    defenderSkyships?: number;
+    defenderEliteRegiments?: number;
     fowCard?: FortuneOfWarCardInfo;
     rivalContributions?: Record<string, {
       side: "defender" | "rebel";
       regiments: number;
       levies: number;
+      skyships: number;
+      eliteRegiments: number;
+      source: "kingdom" | "fleet";
     }>;
+    eligibleRivals?: string[];
+    defenderSupportAccepted?: boolean;
   } | null;
   currentInvasion: {
     totalHostSwords: number;
@@ -137,6 +146,10 @@ export interface MyGameState {
   currentDeferredBattle: {
     event: DeferredEvent;
     description: string;
+  } | null;
+  currentOccupationBattle: {
+    attackerPlayerID: string;
+    tile: [number, number];
   } | null;
   mercyGold: Record<string, number>;
   _matchID?: string;
@@ -230,8 +243,23 @@ export type MapBuildingInfo = {
   garrisonedRegiments: number;
   garrisonedLevies: number;
   garrisonedEliteRegiments: number;
-  rebelCounter?: number;
+  /**
+   * A counter occupying a seized building. Numeric values are accepted for
+   * backwards compatibility with matches saved before counter identity was
+   * preserved.
+   */
+  rebelCounter?: number | OccupyingCounter;
 };
+
+export type OccupyingCounter =
+  | {
+      kind: "rebels";
+      swords: number;
+    }
+  | {
+      kind: "infidel_host";
+      counter: InfidelHostCounter;
+    };
 
 export type PlayerInfo = {
   id: string;
@@ -369,8 +397,11 @@ export type InfidelHostCounter = {
 
 export type DeferredEvent = {
   card: EventCardName;
+  /** The building owner / battle defender for battle events. */
   targetPlayerID: string;
   targetTile?: [number, number];
+  /** Player who selected the tile when that differs from its owner. */
+  chooserPlayerID?: string;
 };
 
 export type EventChoice = {
@@ -398,7 +429,7 @@ export type EventState = {
   dynasticMarriage: [string, string] | null;
   lendersRefuseCredit: string[];
   nprHeretic: string[];
-  skipTaxesNextRound: boolean;
+  skipTaxesNextRound: string[];
   cannotConvertThisRound: string[];
   grandInfidelDies: boolean;
   royalPatronageActive: boolean;

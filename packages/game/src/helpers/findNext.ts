@@ -2,6 +2,7 @@ import { MyGameState } from "../types.js";
 import { sortPlayersInPlayerOrder } from "./helpers.js";
 import type { EventsAPI } from "../types.js";
 import { toBuildingOwner } from "./stateUtils.js";
+import { isRebelOccupied } from "./occupation.js";
 
 const computeDefendersAtBattle = (G: MyGameState, nextPlayer: string): void => {
   const [x, y] = G.mapState.currentBattle;
@@ -89,6 +90,36 @@ export const findNextGroundBattle = (
         x <= G.mapState.currentBattle[0]
       ) {
         continue;
+      } else if (
+        G.mapState.currentTileArray[y][x].type === "land" &&
+        G.mapState.battleMap[y][x].length === 1 &&
+        isRebelOccupied(G.mapState.buildings[y][x])
+      ) {
+        const attackerPlayerID = G.mapState.battleMap[y][x][0];
+        const hasForce = G.playerInfo[
+          attackerPlayerID
+        ].fleetInfo.some(
+          (fleet) =>
+            fleet.location[0] === x &&
+            fleet.location[1] === y &&
+            fleet.skyships +
+              fleet.regiments +
+              fleet.levies +
+              fleet.eliteRegiments >
+              0
+        );
+        if (!hasForce) continue;
+        G.mapState.currentBattle = [x, y];
+        G.battleState = undefined;
+        G.currentOccupationBattle = {
+          attackerPlayerID,
+          tile: [x, y],
+        };
+        G.step = "occupation_battle";
+        if (!skipEndTurn) {
+          events.endTurn({ next: attackerPlayerID });
+        }
+        return;
       } else if (
         G.mapState.currentTileArray[y][x].type === "land" &&
         G.mapState.battleMap[y][x].length === 1 &&

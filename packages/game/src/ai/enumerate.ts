@@ -740,32 +740,109 @@ export function enumerateLegalMoves(G: MyGameState, ctx: Ctx, playerID: string):
           // Draw from deck (no card index = undefined)
           moves.push({ move: "commitDeferredBattleCard", args: [] });
         }
+      } else if (G.step === "occupation_battle") {
+        const occupation = G.currentOccupationBattle;
+        if (
+          occupation?.attackerPlayerID === playerID
+        ) {
+          const cards =
+            G.playerInfo[playerID].resources.fortuneCards;
+          for (let i = 0; i < cards.length; i++) {
+            moves.push({
+              move: "commitOccupationBattleCard",
+              args: [i],
+            });
+          }
+          moves.push({
+            move: "commitOccupationBattleCard",
+            args: [],
+          });
+          moves.push({
+            move: "commitOccupationBattleCard",
+            args: ["pass"],
+          });
+        }
       } else if (G.step === "rebellion") {
         const rebellion = G.currentRebellion;
         if (rebellion && rebellion.event.targetPlayerID === playerID) {
-          // Target player commits troops: (regiments, levies, fowCardIndex?)
+          // Target commits Kingdom reserves:
+          // (regiments, levies, skyships, fowCardIndex?)
           const player = G.playerInfo[playerID];
           const regs = player.resources.regiments;
           const levs = player.resources.levies;
+          const skyships = player.resources.skyships;
           // Commit all
-          moves.push({ move: "commitRebellionTroops", args: [regs, levs] });
+          moves.push({
+            move: "commitRebellionTroops",
+            args: [regs, levs, skyships],
+          });
           // Commit half
-          moves.push({ move: "commitRebellionTroops", args: [Math.ceil(regs / 2), Math.ceil(levs / 2)] });
+          moves.push({
+            move: "commitRebellionTroops",
+            args: [
+              Math.ceil(regs / 2),
+              Math.ceil(levs / 2),
+              Math.ceil(skyships / 2),
+            ],
+          });
           // Commit none
-          moves.push({ move: "commitRebellionTroops", args: [0, 0] });
+          moves.push({
+            move: "commitRebellionTroops",
+            args: [0, 0, 0],
+          });
         }
       } else if (G.step === "rebellion_rival_support") {
-        // Rivals choose to support defender or rebels
-        // contributeToRebellion(side, regiments, levies) — max 3 troops total
+        const rebellion = G.currentRebellion;
         const player = G.playerInfo[playerID];
-        const regs = Math.min(player.resources.regiments, 3);
-        // Stay out
-        moves.push({ move: "contributeToRebellion", args: ["defender", 0, 0] });
-        moves.push({ move: "contributeToRebellion", args: ["rebel", 0, 0] });
-        // Commit troops (up to 3 max)
-        if (regs > 0) {
-          moves.push({ move: "contributeToRebellion", args: ["defender", regs, 0] });
-          moves.push({ move: "contributeToRebellion", args: ["rebel", regs, 0] });
+        if (
+          rebellion?.eligibleRivals?.includes(playerID)
+        ) {
+          moves.push({
+            move: "contributeToRebellion",
+            args: ["abstain", 0, 0],
+          });
+          if (
+            rebellion.event.card === "colonial_rebellion"
+          ) {
+            // eots42:79: the sole rival commits every Fleet at
+            // the affected tile; counts are derived server-side.
+            moves.push({
+              move: "contributeToRebellion",
+              args: ["defender", 0, 0],
+            });
+            moves.push({
+              move: "contributeToRebellion",
+              args: ["rebel", 0, 0],
+            });
+          } else {
+            const regs = Math.min(
+              player.resources.regiments,
+              3
+            );
+            if (regs > 0) {
+              moves.push({
+                move: "contributeToRebellion",
+                args: ["defender", regs, 0],
+              });
+              moves.push({
+                move: "contributeToRebellion",
+                args: ["rebel", regs, 0],
+              });
+            }
+          }
+        }
+      } else if (G.step === "rebellion_accept_support") {
+        if (
+          G.currentRebellion?.event.targetPlayerID === playerID
+        ) {
+          moves.push({
+            move: "acceptRebellionSupport",
+            args: [true],
+          });
+          moves.push({
+            move: "acceptRebellionSupport",
+            args: [false],
+          });
         }
       } else if (G.step === "invasion_nominate") {
         // Only the Archprelate can nominate — others have no move

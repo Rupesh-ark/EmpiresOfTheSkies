@@ -6,6 +6,7 @@ import { fortuneOfWarCards, ASSIGNABLE_KINGDOMS } from "../data/gameData.js";
 import { getNeighbors, getPassableNeighbors } from "./mapUtils.js";
 import { Ctx } from "boardgame.io";
 import type { EventsAPI } from "../types.js";
+import { isRebelOccupied } from "./occupation.js";
 
 export const fullResetFortuneOfWarCardDeck = (): FortuneOfWarCardInfo[] => {
   return [...fortuneOfWarCards];
@@ -212,6 +213,7 @@ export const hasOutpostAt = (
 ): boolean => {
   const tile = G.mapState.buildings[y]?.[x];
   if (tile?.buildings !== "outpost") return false;
+  if (isRebelOccupied(tile)) return false;
   if (playerID && tile.player?.id !== playerID) return false;
   return true;
 };
@@ -225,6 +227,7 @@ export const hasColonyAt = (
 ): boolean => {
   const tile = G.mapState.buildings[y]?.[x];
   if (tile?.buildings !== "colony") return false;
+  if (isRebelOccupied(tile)) return false;
   if (playerID && tile.player?.id !== playerID) return false;
   return true;
 };

@@ -2,6 +2,7 @@ import { MoveDefinition, MyGameState, MoveError } from "../../types.js";
 import { INVALID_MOVE } from "boardgame.io/core";
 import { humanizeTileName } from "../../helpers/helpers.js";
 import log from "../../helpers/logger.js";
+import { isRebelOccupied } from "../../helpers/occupation.js";
 
 const gLog = log.child({ mod: "garrison-transfer" });
 
@@ -37,7 +38,8 @@ const validateGarrisonTransfer = (
   if (
     !building ||
     (building.buildings !== "outpost" && building.buildings !== "colony") ||
-    building.player?.id !== playerID
+    building.player?.id !== playerID ||
+    isRebelOccupied(building)
   ) {
     return {
       code: "NO_BUILDING",

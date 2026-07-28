@@ -8,7 +8,11 @@ import { wrapSet } from "../helpers/wrapSet.js";
 const phaseLog = log.child({ mod: "phase" });
 
 const rebellionsPhase: PhaseConfig<MyGameState> = {
-  moves: wrapSet("commitRebellionTroops", "contributeToRebellion"),
+  moves: wrapSet(
+    "commitRebellionTroops",
+    "contributeToRebellion",
+    "acceptRebellionSupport"
+  ),
   next: "aerialBattles",
   onBegin: (context) => {
     phaseLog.info({ round: context.G.round }, "rebellions");
@@ -30,7 +34,16 @@ const rebellionsPhase: PhaseConfig<MyGameState> = {
       next: ({ ctx }) => (ctx.playOrderPos + 1) % ctx.playOrder.length,
     },
     onBegin: (context) => {
-      if (context.G.step === "rebellion_rival_support") return;
+      if (
+        context.G.step === "rebellion_rival_support" ||
+        context.G.step === "rebellion_accept_support"
+      ) {
+        const target = getResolutionTarget(context.G);
+        if (target && target !== context.ctx.currentPlayer) {
+          context.events.endTurn({ next: target });
+        }
+        return;
+      }
 
       const target = getResolutionTarget(context.G);
       if (target && target !== context.ctx.currentPlayer) {

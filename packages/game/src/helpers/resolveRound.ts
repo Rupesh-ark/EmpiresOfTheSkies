@@ -7,6 +7,7 @@ import { grantTradeRouteGoods } from "./tradeRouteResolver.js";
 import { countActiveTradeRoutes } from "./mapUtils.js";
 import { removeVPAmount, increaseHeresyWithinMove, logEvent } from "./stateUtils.js";
 import { FINAL_ROUND_GOLD_PER_VP, DEBT_PENALTY_DIVISOR, TRADE_VP_SCHEDULE, PRICE_MARKER_MAX } from "../data/gameData.js";
+import { isRebelOccupied } from "./occupation.js";
 
 const ALL_GOODS: GoodKey[] = ["mithril", "dragonScales", "krakenSkin", "magicDust", "stickyIchor", "pipeweed"];
 
@@ -80,7 +81,9 @@ const hasTradeAccess = (G: MyGameState, playerID: string): boolean => {
     for (const cell of row) {
       if (
         cell.player?.id === playerID &&
-        (cell.buildings === "outpost" || cell.buildings === "colony")
+        (cell.buildings === "outpost" ||
+          cell.buildings === "colony") &&
+        !isRebelOccupied(cell)
       ) {
         return true;
       }

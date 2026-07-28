@@ -3,6 +3,7 @@ import { logEvent } from "./stateUtils.js";
 import { drawFortuneOfWarCard } from "./helpers.js";
 import { calculateCombat } from "./combatMath.js";
 import { INFIDEL_EMPIRE_LOCATION, KINGDOM_LOCATION } from "../data/gameData.js";
+import { returnInfidelHostCounter } from "./counterPools.js";
 
 const getPlayerMilitaryPower = (G: MyGameState, playerID: string): number => {
   const player = G.playerInfo[playerID];
@@ -304,9 +305,11 @@ export const executeInfidelFleetCombat = (
   };
 
   if (infidelFleetDestroyed && G.infidelFleet) {
-    if (!G.infidelHostPool.some((host) => host.isFleet)) {
-      G.infidelHostPool.push(G.infidelFleet.counter);
-    }
+    returnInfidelHostCounter(
+      G,
+      G.infidelFleet.counter,
+      shuffle
+    );
     G.infidelFleet = null;
   }
 

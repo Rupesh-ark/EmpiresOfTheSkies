@@ -1,13 +1,15 @@
 /**
- * resolveRebellion.ts
+ * Rebellion setup and battle resolution.
  *
- * Resolves rebellion battles during the Resolution phase.
- * Interactive stages (defender troop commitment, rival support) are handled
- * by moves in moves/events/commitRebellionTroops and contributeToRebellion.
- * This file provides the resolution logic called after interactive input.
+ * Kingdom rebellions are resolved in the rebellions phase. Colonial
+ * REBELLION is prepared and resolved from the ground-battle segment.
  */
 
-import { MyGameState, LegacyCardInfo } from "../types.js";
+import type {
+  FleetInfo,
+  FortuneOfWarCardInfo,
+  MyGameState,
+} from "../types.js";
 import {
   addVPAmount,
   increaseHeresyWithinMove,
@@ -16,432 +18,688 @@ import {
 } from "./stateUtils.js";
 import { calculateCombat } from "./combatMath.js";
 import { drawFortuneOfWarCard, hasFortAt } from "./helpers.js";
-import { CARD_RESOLVERS, resolveCardWithAlignmentPenalty } from "./legacyCardDefinitions.js";
+import { resolveCardWithAlignmentPenalty } from "./legacyCardDefinitions.js";
 import { KINGDOM_LOCATION } from "../data/gameData.js";
+import { apportionBattleLosses } from "./battleLosses.js";
+import { returnContingentCounter } from "./counterPools.js";
 
-// Battle math
+type Shuffle = <T>(items: T[]) => T[];
+type ActiveRebellion = NonNullable<MyGameState["currentRebellion"]>;
+type Contribution =
+  NonNullable<ActiveRebellion["rivalContributions"]>[string];
 
-type BattleResult = {
-  defenderWins: boolean;
-  /** Hits landed on defender troops */
-  hitsOnDefender: number;
-  /** Hits landed on rebel counter */
-  hitsOnRebel: number;
+type Force = {
+  regiments: number;
+  levies: number;
+  skyships: number;
+  eliteRegiments: number;
 };
 
-/**
- * Auto-resolve a rebellion battle.
- *
- * Rebel (attacker): contingent counter swords + 1 simulated FoW card
- * Defender: kingdom regiments (2S each) + levies (1S each) + 1 simulated FoW card
- * Fort at colony/kingdom: +1 shield per defending regiment/levy
- */
-const calculateBattle = (
-  rebelSwords: number,
-  defenderRegiments: number,
-  defenderLevies: number,
-  hasFort: boolean,
-  fowRebel: { sword: number; shield: number },
-  fowDefender: { sword: number; shield: number }
-): BattleResult => {
-  // Defender attack strength
-  const defenderBaseSwords = defenderRegiments * 2 + defenderLevies * 1;
-  const defenderBaseShields = hasFort ? defenderRegiments + defenderLevies : 0;
+const forceStrength = (force: Force): number =>
+  force.regiments * 2 +
+  force.levies +
+  force.skyships +
+  force.eliteRegiments * 3;
 
-  // Rebel = attacker, Defender = defender
-  const { hitsOnDefender, hitsOnAttacker: hitsOnRebel } = calculateCombat(
-    { swords: rebelSwords, shields: 0, fowSword: fowRebel.sword, fowShield: fowRebel.shield },
-    { swords: defenderBaseSwords, shields: defenderBaseShields, fowSword: fowDefender.sword, fowShield: fowDefender.shield },
-  );
+const forceShields = (force: Force): number => force.skyships;
 
-  // Defender total HP (each regiment absorbs 2 hits, each levy absorbs 1)
-  const defenderHP = defenderRegiments * 2 + defenderLevies;
-  // Rebel HP = counter swords value
-  const rebelHP = rebelSwords;
+const forceHitCapacity = (force: Force): number =>
+  force.regiments * 2 +
+  force.levies +
+  force.skyships +
+  force.eliteRegiments * 2;
 
-  // Rebels must eliminate ALL defenders to win; defender wins ties (B7)
-  const rebelsEliminated = hitsOnRebel >= rebelHP;
-  const defendersEliminated = hitsOnDefender >= defenderHP;
+const forceSize = (force: Force): number =>
+  force.regiments +
+  force.levies +
+  force.skyships +
+  force.eliteRegiments;
 
-  const defenderWins = !defendersEliminated || rebelsEliminated;
+const contributionForce = (contribution: Contribution): Force => ({
+  regiments: contribution.regiments,
+  levies: contribution.levies,
+  skyships: contribution.skyships,
+  eliteRegiments: contribution.eliteRegiments,
+});
 
-  return { defenderWins, hitsOnDefender, hitsOnRebel };
+const primaryForce = (rebellion: ActiveRebellion): Force => ({
+  regiments: rebellion.defenderRegiments ?? 0,
+  levies: rebellion.defenderLevies ?? 0,
+  skyships: rebellion.defenderSkyships ?? 0,
+  eliteRegiments: rebellion.defenderEliteRegiments ?? 0,
+});
+
+const lossMode = (force: Force): "aerial" | "ground" =>
+  // A committed Skyship absorbs one hit. Troop-only forces retain the ground
+  // odd-hit rule.
+  force.skyships > 0 ? "aerial" : "ground";
+
+const applyLossesToForce = (force: Force, hits: number): Force => {
+  const losses = apportionBattleLosses(force, hits, lossMode(force));
+  return {
+    regiments: losses.regiments,
+    levies: losses.levies,
+    skyships: losses.skyships,
+    eliteRegiments: losses.eliteRegiments,
+  };
 };
 
-/**
- * Apply hit damage to a player's kingdom troops.
- * Levies are lost first (1 hit each), then regiments (2 hits each).
- * Odd remaining hit is wasted per odd hit rule (B5).
- */
-const applyTroopLosses = (
+const reduceContribution = (
+  contribution: Contribution,
+  losses: Force
+): void => {
+  contribution.regiments -= losses.regiments;
+  contribution.levies -= losses.levies;
+  contribution.skyships -= losses.skyships;
+  contribution.eliteRegiments -= losses.eliteRegiments;
+};
+
+const trimFleetCapacity = (fleet: FleetInfo): void => {
+  while (
+    fleet.regiments + fleet.levies + fleet.eliteRegiments >
+    fleet.skyships
+  ) {
+    if (fleet.levies > 0) fleet.levies -= 1;
+    else if (fleet.regiments > 0) fleet.regiments -= 1;
+    else if (fleet.eliteRegiments > 0) fleet.eliteRegiments -= 1;
+    else break;
+  }
+};
+
+const applyFleetContributionLosses = (
   G: MyGameState,
   playerID: string,
-  hits: number
+  tile: [number, number],
+  losses: Force
 ): void => {
-  const player = G.playerInfo[playerID];
-  const leviesLost = Math.min(hits, player.resources.levies);
-  player.resources.levies -= leviesLost;
-  hits -= leviesLost;
-
-  const regimentsLost = Math.min(
-    Math.floor(hits / 2),
-    player.resources.regiments
+  const [x, y] = tile;
+  const fleets = G.playerInfo[playerID].fleetInfo.filter(
+    (fleet) => fleet.location[0] === x && fleet.location[1] === y
   );
-  player.resources.regiments -= regimentsLost;
+  const unitOrder: (keyof Force)[] = [
+    "levies",
+    "skyships",
+    "regiments",
+    "eliteRegiments",
+  ];
+
+  for (const unit of unitOrder) {
+    let remaining = losses[unit];
+    for (const fleet of fleets) {
+      if (remaining <= 0) break;
+      const removed = Math.min(fleet[unit], remaining);
+      fleet[unit] -= removed;
+      remaining -= removed;
+    }
+  }
+  fleets.forEach(trimFleetCapacity);
+
+  const anySurvivors = fleets.some(
+    (fleet) =>
+      fleet.skyships +
+        fleet.regiments +
+        fleet.levies +
+        fleet.eliteRegiments >
+      0
+  );
+  for (const fleet of fleets) {
+    if (
+      fleet.skyships +
+        fleet.regiments +
+        fleet.levies +
+        fleet.eliteRegiments ===
+      0
+    ) {
+      fleet.location = [...KINGDOM_LOCATION];
+      fleet.travelHistory = [];
+    }
+  }
+  if (!anySurvivors) {
+    const occupants = G.mapState.battleMap[y]?.[x];
+    const index = occupants?.indexOf(playerID) ?? -1;
+    if (index >= 0) occupants.splice(index, 1);
+  }
 };
 
-// Per-card outcome handlers
+const applyPrimaryLosses = (
+  G: MyGameState,
+  rebellion: ActiveRebellion,
+  hits: number
+): Force => {
+  const force = primaryForce(rebellion);
+  const losses = applyLossesToForce(force, hits);
+  const { event } = rebellion;
+
+  if (event.card === "colonial_rebellion" && event.targetTile) {
+    const [x, y] = event.targetTile;
+    const building = G.mapState.buildings[y][x];
+    building.garrisonedRegiments -= losses.regiments;
+    building.garrisonedLevies -= losses.levies;
+    building.garrisonedEliteRegiments -= losses.eliteRegiments;
+  } else {
+    const resources = G.playerInfo[event.targetPlayerID].resources;
+    // Only the selected commitment is apportioned, so these deductions can
+    // never spill into the uncommitted Kingdom reserve.
+    resources.regiments -= losses.regiments;
+    resources.levies -= losses.levies;
+    resources.skyships -= losses.skyships;
+  }
+
+  return losses;
+};
+
+const applyContributionLosses = (
+  G: MyGameState,
+  rebellion: ActiveRebellion,
+  playerID: string,
+  contribution: Contribution,
+  hits: number
+): Force => {
+  const losses = applyLossesToForce(contributionForce(contribution), hits);
+  reduceContribution(contribution, losses);
+  if (
+    contribution.source === "fleet" &&
+    rebellion.event.targetTile
+  ) {
+    applyFleetContributionLosses(
+      G,
+      playerID,
+      rebellion.event.targetTile,
+      losses
+    );
+  }
+  return losses;
+};
+
+const orderedContributions = (
+  G: MyGameState,
+  rebellion: ActiveRebellion,
+  side: "defender" | "rebel"
+): [string, Contribution][] => {
+  const ipo = new Map(
+    G.turnOrder.map((playerID, index) => [playerID, index])
+  );
+  return Object.entries(rebellion.rivalContributions ?? {})
+    .filter(([, contribution]) => contribution.side === side)
+    .sort(
+      ([aID, a], [bID, b]) =>
+        forceSize(contributionForce(b)) -
+          forceSize(contributionForce(a)) ||
+        (ipo.get(aID) ?? Number.MAX_SAFE_INTEGER) -
+          (ipo.get(bID) ?? Number.MAX_SAFE_INTEGER)
+    );
+};
+
+const returnKingdomContributionSurvivors = (
+  G: MyGameState,
+  rebellion: ActiveRebellion
+): void => {
+  for (const [playerID, contribution] of Object.entries(
+    rebellion.rivalContributions ?? {}
+  )) {
+    if (contribution.source !== "kingdom") continue;
+    const resources = G.playerInfo[playerID].resources;
+    resources.regiments += contribution.regiments;
+    resources.levies += contribution.levies;
+    resources.skyships += contribution.skyships;
+    resources.eliteRegiments += contribution.eliteRegiments;
+  }
+};
+
+export const hasOfferedDefenderSupport = (
+  rebellion: ActiveRebellion
+): boolean =>
+  Object.values(rebellion.rivalContributions ?? {}).some(
+    (contribution) =>
+      contribution.side === "defender" &&
+      forceSize(contributionForce(contribution)) > 0
+  );
+
+export const refuseDefenderSupport = (
+  G: MyGameState,
+  rebellion: ActiveRebellion
+): void => {
+  for (const [playerID, contribution] of Object.entries(
+    rebellion.rivalContributions ?? {}
+  )) {
+    if (contribution.side !== "defender") continue;
+    if (contribution.source === "kingdom") {
+      const resources = G.playerInfo[playerID].resources;
+      resources.regiments += contribution.regiments;
+      resources.levies += contribution.levies;
+      resources.skyships += contribution.skyships;
+      resources.eliteRegiments += contribution.eliteRegiments;
+    }
+    delete rebellion.rivalContributions![playerID];
+  }
+  rebellion.defenderSupportAccepted = false;
+};
+
+const returnColonialGarrison = (
+  G: MyGameState,
+  targetPlayerID: string,
+  tile: [number, number]
+): void => {
+  const [x, y] = tile;
+  const building = G.mapState.buildings[y][x];
+  const resources = G.playerInfo[targetPlayerID].resources;
+  resources.regiments += building.garrisonedRegiments;
+  resources.levies += building.garrisonedLevies;
+  resources.eliteRegiments += building.garrisonedEliteRegiments;
+  building.garrisonedRegiments = 0;
+  building.garrisonedLevies = 0;
+  building.garrisonedEliteRegiments = 0;
+};
 
 const resolvePretenderRebellion = (
   G: MyGameState,
   targetID: string,
   defenderWins: boolean,
-  shuffle: <T>(arr: T[]) => T[]
+  shuffle: Shuffle
 ): void => {
   if (defenderWins) {
     addVPAmount(G, targetID, 1);
-  } else {
-    // Score current legacy card, reshuffle it, draw 1 new card
-    const player = G.playerInfo[targetID];
-    const currentCard = player.resources.legacyCard;
-    if (currentCard) {
-      resolveCardWithAlignmentPenalty(player, G, currentCard);
-      G.cardDecks.legacyDeck.push(currentCard);
-      player.resources.legacyCard = undefined;
-    }
-    // Draw 1 new card — shuffle deck then pop for deterministic PRNG
-    if (G.cardDecks.legacyDeck.length > 0) {
-      G.cardDecks.legacyDeck = shuffle(G.cardDecks.legacyDeck);
-      player.resources.legacyCard = G.cardDecks.legacyDeck.pop()!;
-    }
+    return;
+  }
+
+  const player = G.playerInfo[targetID];
+  const currentCard = player.resources.legacyCard;
+  if (currentCard) {
+    resolveCardWithAlignmentPenalty(player, G, currentCard);
+    G.cardDecks.legacyDeck.push(currentCard);
+    player.resources.legacyCard = undefined;
+  }
+  if (G.cardDecks.legacyDeck.length > 0) {
+    G.cardDecks.legacyDeck = shuffle(G.cardDecks.legacyDeck);
+    player.resources.legacyCard = G.cardDecks.legacyDeck.pop()!;
   }
 };
 
-const resolvePeasantRebellion = (
-  G: MyGameState,
-  targetID: string,
-  defenderWins: boolean
-): void => {
-  if (defenderWins) {
-    addVPAmount(G, targetID, 1);
-  } else {
-    G.eventState.skipTaxesNextRound = true;
-  }
-};
-
-const resolveOrthodoxRebellion = (
-  G: MyGameState,
-  targetID: string,
-  defenderWins: boolean
-): void => {
-  if (defenderWins) {
-    addVPAmount(G, targetID, 1);
-    increaseOrthodoxyWithinMove(G, targetID); // retreat heresy 1
-  } else {
-    // Convert monarch to Orthodox, free prisoners, can't convert back this round
-    G.playerInfo[targetID].hereticOrOrthodox = "orthodox";
-    G.playerInfo[targetID].prisoners = 0;
-    G.eventState.cannotConvertThisRound.push(targetID);
-  }
-};
-
-const resolveHereticRebellion = (
-  G: MyGameState,
-  targetID: string,
-  defenderWins: boolean
-): void => {
-  if (defenderWins) {
-    addVPAmount(G, targetID, 1);
-    increaseHeresyWithinMove(G, targetID); // advance heresy 1
-  } else {
-    // Convert monarch to Heretic, free prisoners, can't convert back this round
-    G.playerInfo[targetID].hereticOrOrthodox = "heretic";
-    G.playerInfo[targetID].prisoners = 0;
-    G.eventState.cannotConvertThisRound.push(targetID);
-  }
-};
-
-const resolveColonialRebellion = (
-  G: MyGameState,
-  targetID: string,
-  defenderWins: boolean,
-  counterSwords: number,
-  tile?: [number, number]
-): void => {
-  if (defenderWins) {
-    addVPAmount(G, targetID, 1);
-  } else if (tile) {
-    const [x, y] = tile;
-    // Rebel counter stays on the colony — mark it as occupied
-    G.mapState.buildings[y][x].rebelCounter = counterSwords;
-  }
-};
-
-/** Apply the win/lose effect for the specific rebellion card */
 const applyOutcome = (
   G: MyGameState,
-  card: string,
-  targetID: string,
+  rebellion: ActiveRebellion,
   defenderWins: boolean,
-  counterSwords: number,
-  targetTile?: [number, number],
-  shuffle?: <T>(arr: T[]) => T[]
+  shuffle: Shuffle
 ): void => {
+  const {
+    event: { card, targetPlayerID, targetTile },
+    counterSwords,
+  } = rebellion;
+
   switch (card) {
     case "pretender_rebellion":
-      resolvePretenderRebellion(G, targetID, defenderWins, shuffle!);
+      resolvePretenderRebellion(
+        G,
+        targetPlayerID,
+        defenderWins,
+        shuffle
+      );
       break;
     case "peasant_rebellion":
-      resolvePeasantRebellion(G, targetID, defenderWins);
+      if (defenderWins) {
+        addVPAmount(G, targetPlayerID, 1);
+      } else if (
+        !G.eventState.skipTaxesNextRound.includes(targetPlayerID)
+      ) {
+        G.eventState.skipTaxesNextRound.push(targetPlayerID);
+      }
       break;
     case "orthodox_rebellion":
-      resolveOrthodoxRebellion(G, targetID, defenderWins);
+      if (defenderWins) {
+        addVPAmount(G, targetPlayerID, 1);
+        increaseOrthodoxyWithinMove(G, targetPlayerID);
+      } else {
+        G.playerInfo[targetPlayerID].hereticOrOrthodox = "orthodox";
+        G.playerInfo[targetPlayerID].prisoners = 0;
+        G.eventState.cannotConvertThisRound.push(targetPlayerID);
+      }
       break;
     case "heretic_rebellion":
-      resolveHereticRebellion(G, targetID, defenderWins);
+      if (defenderWins) {
+        addVPAmount(G, targetPlayerID, 1);
+        increaseHeresyWithinMove(G, targetPlayerID);
+      } else {
+        G.playerInfo[targetPlayerID].hereticOrOrthodox = "heretic";
+        G.playerInfo[targetPlayerID].prisoners = 0;
+        G.eventState.cannotConvertThisRound.push(targetPlayerID);
+      }
       break;
     case "colonial_rebellion":
-      resolveColonialRebellion(G, targetID, defenderWins, counterSwords, targetTile);
+      if (defenderWins) {
+        addVPAmount(G, targetPlayerID, 1);
+      } else if (targetTile) {
+        returnColonialGarrison(G, targetPlayerID, targetTile);
+        const [x, y] = targetTile;
+        G.mapState.buildings[y][x].rebelCounter = {
+          kind: "rebels",
+          swords: counterSwords,
+        };
+      }
       break;
   }
-};
 
-/** Return counter to pool unless Colonial REBELLION where rebels won */
-const returnCounter = (
-  G: MyGameState,
-  card: string,
-  defenderWins: boolean,
-  counterSwords: number
-): void => {
-  if (card === "colonial_rebellion" && !defenderWins) {
-    // Counter stays on the colony tile — don't return to pool
-    return;
+  if (card !== "colonial_rebellion" || defenderWins) {
+    returnContingentCounter(G, counterSwords, shuffle);
   }
-  G.contingentPool.push(counterSwords);
 };
 
-// Interactive rebellion helpers
-
-/**
- * Find the next rebellion in deferredEvents, draw a contingent counter,
- * and set G.currentRebellion. Returns true if a rebellion was set up,
- * false if no rebellions remain.
- */
-export const setupNextRebellion = (G: MyGameState): boolean => {
-  const idx = G.eventState.deferredEvents.findIndex((e) =>
-    e.card.endsWith("_rebellion")
-  );
-  if (idx === -1) return false;
-
-  const event = G.eventState.deferredEvents.splice(idx, 1)[0];
-
-  if (G.contingentPool.length === 0) {
-    logEvent(G, "No contingent counters left \u2014 rebellion cannot occur");
-    return false;
-  }
-
-  const counterSwords = G.contingentPool.pop()!;
-  const kingdom = G.playerInfo[event.targetPlayerID].kingdomName;
-  logEvent(G, `Rebellion in ${kingdom}! Rebel force: ${counterSwords} swords`);
-
-  G.currentRebellion = { event, counterSwords };
-  return true;
-};
-
-/**
- * Resolve a rebellion with the player's chosen troop commitment.
- * Called from the commitRebellionTroops move.
- */
-export const resolveRebellionWithTroops = (
+const resolveBattle = (
   G: MyGameState,
-  rebellion: MyGameState["currentRebellion"] & {},
-  regiments: number,
-  levies: number,
-  shuffle: <T>(arr: T[]) => T[]
+  rebellion: ActiveRebellion,
+  shuffle: Shuffle
 ): void => {
   const { event, counterSwords } = rebellion;
-  const { card, targetPlayerID, targetTile } = event;
-  const kingdom = G.playerInfo[targetPlayerID].kingdomName;
+  const target = G.playerInfo[event.targetPlayerID];
+  const defender = primaryForce(rebellion);
 
-  // If no troops committed, rebels auto-win
-  if (regiments === 0 && levies === 0) {
-    logEvent(G, `${kingdom} surrenders \u2014 rebels win automatically`);
-    applyOutcome(G, card, targetPlayerID, false, counterSwords, targetTile, shuffle);
-    returnCounter(G, card, false, counterSwords);
+  // eots42:75: declining the selected force ends the procedure before rival
+  // assistance. For Colonial REBELLION the selected force is the garrison.
+  if (forceSize(defender) === 0) {
+    logEvent(
+      G,
+      `${target.kingdomName} surrenders — rebels win automatically`
+    );
+    applyOutcome(G, rebellion, false, shuffle);
+    returnKingdomContributionSurvivors(G, rebellion);
     return;
   }
 
-  // Check for fort — colonial rebellions use the colony tile, others use Kingdom
-  let fortPresent = false;
-  if (card === "colonial_rebellion" && targetTile) {
-    fortPresent = hasFortAt(G, targetTile[0], targetTile[1]);
-  } else {
-    fortPresent = hasFortAt(G, KINGDOM_LOCATION[0], KINGDOM_LOCATION[1]);
+  const defenderAllies = orderedContributions(
+    G,
+    rebellion,
+    "defender"
+  );
+  const rebelAllies = orderedContributions(G, rebellion, "rebel");
+  const defenderForces = [
+    defender,
+    ...defenderAllies.map(([, contribution]) =>
+      contributionForce(contribution)
+    ),
+  ];
+  const rebelForces = rebelAllies.map(([, contribution]) =>
+    contributionForce(contribution)
+  );
+
+  const fortPresent =
+    event.card === "colonial_rebellion" && event.targetTile
+      ? hasFortAt(G, event.targetTile[0], event.targetTile[1])
+      : hasFortAt(G, KINGDOM_LOCATION[0], KINGDOM_LOCATION[1]);
+
+  const totalDefenderSwords = defenderForces.reduce(
+    (sum, force) => sum + forceStrength(force),
+    0
+  );
+  const totalRebelSwords =
+    counterSwords +
+    rebelForces.reduce((sum, force) => sum + forceStrength(force), 0);
+
+  // eots42:80 says Regiment; the quick-reference footnote at eots42:678 says
+  // defending Regiment or Levy. Preserve the engine's levy-inclusive reading.
+  // Elite Regiments are Regiments; Fleet-borne assistance does not receive a
+  // Fort shield.
+  const fortShields = (force: Force): number =>
+    fortPresent
+      ? force.regiments +
+        force.levies +
+        force.eliteRegiments
+      : 0;
+  let totalFortShields = fortShields(defender);
+  for (const [, contribution] of defenderAllies) {
+    if (contribution.source === "kingdom") {
+      totalFortShields += fortShields(
+        contributionForce(contribution)
+      );
+    }
   }
 
-  // Rebel always draws from deck; defender uses hand card if provided
-  const fowRebel = drawFortuneOfWarCard(G, shuffle, { redrawNoEffect: false });
-  const fowDefender =
+  const defenderShields =
+    totalFortShields +
+    defenderForces.reduce((sum, force) => sum + forceShields(force), 0);
+  const rebelShields = rebelForces.reduce(
+    (sum, force) => sum + forceShields(force),
+    0
+  );
+
+  const rebelFoW = drawFortuneOfWarCard(G, shuffle, {
+    redrawNoEffect: false,
+  });
+  const defenderFoW =
     rebellion.fowCard ??
     drawFortuneOfWarCard(G, shuffle, { redrawNoEffect: false });
 
-  const { defenderWins, hitsOnDefender } = calculateBattle(
-    counterSwords,
-    regiments,
-    levies,
-    fortPresent,
-    fowRebel,
-    fowDefender
+  const {
+    hitsOnDefender,
+    hitsOnAttacker: hitsOnRebels,
+  } = calculateCombat(
+    {
+      swords: totalRebelSwords,
+      shields: rebelShields,
+      fowSword: rebelFoW.sword,
+      fowShield: rebelFoW.shield,
+    },
+    {
+      swords: totalDefenderSwords,
+      shields: defenderShields,
+      fowSword: defenderFoW.sword,
+      fowShield: defenderFoW.shield,
+    }
   );
 
-  // Apply troop losses — remove from player's kingdom resources
-  if (hitsOnDefender > 0) {
-    applyTroopLosses(G, targetPlayerID, hitsOnDefender);
+  const defenderHP = defenderForces.reduce(
+    (sum, force) => sum + forceHitCapacity(force),
+    0
+  );
+  const rebelHP =
+    counterSwords +
+    rebelForces.reduce(
+      (sum, force) => sum + forceHitCapacity(force),
+      0
+    );
+  const rebelsEliminated = hitsOnRebels >= rebelHP;
+  const defendersEliminated = hitsOnDefender >= defenderHP;
+  const defenderWins = !defendersEliminated || rebelsEliminated;
+
+  // eots42:81: the selected defender and its allies form one loss pool,
+  // ranked largest-to-smallest with ties resolved in IPO.
+  const ipo = new Map(
+    G.turnOrder.map((playerID, index) => [playerID, index])
+  );
+  const defenderLossOrder: {
+    playerID: string;
+    force: Force;
+    contribution?: Contribution;
+  }[] = [
+    {
+      playerID: event.targetPlayerID,
+      force: defender,
+    },
+    ...defenderAllies.map(([playerID, contribution]) => ({
+      playerID,
+      force: contributionForce(contribution),
+      contribution,
+    })),
+  ];
+  defenderLossOrder.sort(
+    (a, b) =>
+      forceSize(b.force) -
+        forceSize(a.force) ||
+      (ipo.get(a.playerID) ?? Number.MAX_SAFE_INTEGER) -
+        (ipo.get(b.playerID) ?? Number.MAX_SAFE_INTEGER)
+  );
+
+  let remainingDefenderHits = hitsOnDefender;
+  for (const entry of defenderLossOrder) {
+    if (remainingDefenderHits <= 0) break;
+    const forceHits = Math.min(
+      remainingDefenderHits,
+      forceHitCapacity(entry.force)
+    );
+    if (entry.contribution) {
+      applyContributionLosses(
+        G,
+        rebellion,
+        entry.playerID,
+        entry.contribution,
+        forceHits
+      );
+    } else {
+      applyPrimaryLosses(G, rebellion, forceHits);
+    }
+    remainingDefenderHits -= forceHits;
   }
 
-  const defenderSwords = regiments * 2 + levies;
-  const defenderShields = fortPresent ? regiments + levies : 0;
+  // Rebel losses fall on the printed counter first, then external forces in
+  // the same largest-to-smallest order.
+  let remainingRebelHits = Math.max(0, hitsOnRebels - counterSwords);
+  for (const [playerID, contribution] of rebelAllies) {
+    if (remainingRebelHits <= 0) break;
+    const contributionHits = Math.min(
+      remainingRebelHits,
+      forceHitCapacity(contributionForce(contribution))
+    );
+    applyContributionLosses(
+      G,
+      rebellion,
+      playerID,
+      contribution,
+      contributionHits
+    );
+    remainingRebelHits -= contributionHits;
+  }
 
   logEvent(
     G,
     defenderWins
-      ? `${kingdom} defeats the rebels!`
-      : `Rebels overwhelm ${kingdom}'s defenders!`
+      ? `${target.kingdomName} defeats the rebels!`
+      : `Rebels overwhelm ${target.kingdomName}'s defenders!`
   );
 
   G.battleResult = {
-    battleType: "Rebellion",
+    battleType:
+      event.card === "colonial_rebellion"
+        ? "Colonial Rebellion"
+        : "Rebellion",
     attackerName: "Rebels",
-    defenderName: kingdom,
-    attackerSwords: counterSwords,
-    attackerShields: 0,
-    defenderSwords,
+    defenderName: target.kingdomName,
+    attackerSwords: totalRebelSwords,
+    attackerShields: rebelShields,
+    defenderSwords: totalDefenderSwords,
     defenderShields,
-    attackerFoW: fowRebel,
-    defenderFoW: fowDefender,
-    attackerLosses: "—",
-    defenderLosses: hitsOnDefender > 0 ? `${hitsOnDefender} hits absorbed` : "none",
-    winner: defenderWins ? kingdom : "Rebels",
-    outcome: defenderWins ? `${kingdom} defeats the rebels!` : `Rebels overwhelm ${kingdom}!`,
+    attackerFoW: rebelFoW,
+    defenderFoW,
+    attackerLosses:
+      hitsOnRebels > 0 ? `${hitsOnRebels} hits absorbed` : "none",
+    defenderLosses:
+      hitsOnDefender > 0
+        ? `${hitsOnDefender} hits absorbed`
+        : "none",
+    winner: defenderWins ? target.kingdomName : "Rebels",
+    outcome: defenderWins
+      ? `${target.kingdomName} defeats the rebels!`
+      : `Rebels overwhelm ${target.kingdomName}!`,
   };
 
-  applyOutcome(G, card, targetPlayerID, defenderWins, counterSwords, targetTile, shuffle);
-  returnCounter(G, card, defenderWins, counterSwords);
+  applyOutcome(G, rebellion, defenderWins, shuffle);
+  // eots42:81: every surviving external force returns, including allies on
+  // the losing side. Fleet contributions remain in their original Fleets.
+  returnKingdomContributionSurvivors(G, rebellion);
 };
 
 /**
- * Resolve a rebellion including rival contributions from both sides.
- * Rival troops add to the defender or rebel swords totals.
+ * Find the next Kingdom rebellion, draw its counter, and enter commitment.
+ * Colonial REBELLION is deliberately left for the ground-battle segment.
  */
+export const setupNextRebellion = (G: MyGameState): boolean => {
+  const index = G.eventState.deferredEvents.findIndex(
+    (event) =>
+      event.card.endsWith("_rebellion") &&
+      event.card !== "colonial_rebellion"
+  );
+  if (index === -1) return false;
+
+  const event = G.eventState.deferredEvents.splice(index, 1)[0];
+  if (G.contingentPool.length === 0) {
+    logEvent(G, "No contingent counters left — rebellion cannot occur");
+    return false;
+  }
+
+  const counterSwords = G.contingentPool.pop()!;
+  logEvent(
+    G,
+    `Rebellion in ${G.playerInfo[event.targetPlayerID].kingdomName}! Rebel force: ${counterSwords} swords`
+  );
+  G.currentRebellion = { event, counterSwords };
+  return true;
+};
+
+export const getColonialRebellionRival = (
+  G: MyGameState,
+  event: ActiveRebellion["event"]
+): string | null => {
+  if (!event.targetTile) return null;
+  const [x, y] = event.targetTile;
+  const rivals = G.turnOrder.filter(
+    (playerID) =>
+      playerID !== event.targetPlayerID &&
+      G.playerInfo[playerID].fleetInfo.some(
+        (fleet) =>
+          fleet.location[0] === x &&
+          fleet.location[1] === y &&
+          fleet.skyships > 0
+      )
+  );
+  // eots42:79: assistance is available only when no other rival Fleet is
+  // present. Multiple Fleets belonging to the sole rival form one force.
+  return rivals.length === 1 ? rivals[0] : null;
+};
+
+/** Prepare the selected colony's garrison and rebel counter for ground combat. */
+export const setupColonialRebellion = (
+  G: MyGameState,
+  event: ActiveRebellion["event"]
+): ActiveRebellion | null => {
+  if (!event.targetTile || G.contingentPool.length === 0) return null;
+  const [x, y] = event.targetTile;
+  const building = G.mapState.buildings[y][x];
+  const rebellion: ActiveRebellion = {
+    event,
+    counterSwords: G.contingentPool.pop()!,
+    defenderRegiments: building.garrisonedRegiments,
+    defenderLevies: building.garrisonedLevies,
+    defenderSkyships: 0,
+    defenderEliteRegiments: building.garrisonedEliteRegiments,
+    rivalContributions: {},
+    eligibleRivals: [],
+  };
+  const rival = getColonialRebellionRival(G, event);
+  if (rival) rebellion.eligibleRivals = [rival];
+  G.currentRebellion = rebellion;
+  logEvent(
+    G,
+    `Colonial Rebellion at ${G.mapState.currentTileArray[y][x].name}! Rebel force: ${rebellion.counterSwords} swords`
+  );
+  return rebellion;
+};
+
+export const resolveRebellionWithTroops = (
+  G: MyGameState,
+  rebellion: ActiveRebellion,
+  regiments: number,
+  levies: number,
+  skyships: number,
+  shuffle: Shuffle
+): void => {
+  rebellion.defenderRegiments = regiments;
+  rebellion.defenderLevies = levies;
+  rebellion.defenderSkyships = skyships;
+  rebellion.defenderEliteRegiments = 0;
+  resolveBattle(G, rebellion, shuffle);
+};
+
 export const resolveRebellionWithTroopsAndRivals = (
   G: MyGameState,
-  rebellion: MyGameState["currentRebellion"] & {},
-  shuffle: <T>(arr: T[]) => T[]
+  rebellion: ActiveRebellion,
+  shuffle: Shuffle
 ): void => {
-  const { event, counterSwords, defenderRegiments, defenderLevies, rivalContributions } = rebellion;
-  const { card, targetPlayerID, targetTile } = event;
-  const kingdom = G.playerInfo[targetPlayerID].kingdomName;
-
-  const defReg = defenderRegiments ?? 0;
-  const defLev = defenderLevies ?? 0;
-
-  // Sum rival contributions per side
-  let rivalDefenderSwords = 0;
-  let rivalRebelSwords = 0;
-  for (const [, contrib] of Object.entries(rivalContributions ?? {})) {
-    const swords = contrib.regiments * 2 + contrib.levies;
-    if (contrib.side === "defender") rivalDefenderSwords += swords;
-    else rivalRebelSwords += swords;
-  }
-
-  const totalDefenderSwords = defReg * 2 + defLev + rivalDefenderSwords;
-  const totalRebelSwords = counterSwords + rivalRebelSwords;
-
-  if (totalDefenderSwords === 0 && defReg === 0 && defLev === 0) {
-    logEvent(G, `${kingdom} surrenders \u2014 rebels win automatically`);
-    applyOutcome(G, card, targetPlayerID, false, counterSwords, targetTile, shuffle);
-    returnCounter(G, card, false, counterSwords);
-    returnRivalTroops(G, false, rivalContributions ?? {});
-    return;
-  }
-
-  // Check for fort — colonial rebellions use the colony tile, others use Kingdom
-  let fortPresent = false;
-  if (card === "colonial_rebellion" && targetTile) {
-    fortPresent = hasFortAt(G, targetTile[0], targetTile[1]);
-  } else {
-    fortPresent = hasFortAt(G, KINGDOM_LOCATION[0], KINGDOM_LOCATION[1]);
-  }
-
-  // Rebel always draws from deck; defender uses hand card if provided
-  const fowRebel = drawFortuneOfWarCard(G, shuffle, { redrawNoEffect: false });
-  const fowDefender =
-    rebellion.fowCard ??
-    drawFortuneOfWarCard(G, shuffle, { redrawNoEffect: false });
-
-  // Use combined swords for battle calculation
-  const totalDefShields = fortPresent ? defReg + defLev : 0;
-  const { hitsOnDefender, hitsOnAttacker: hitsOnRebel } = calculateCombat(
-    { swords: totalRebelSwords, shields: 0, fowSword: fowRebel.sword, fowShield: fowRebel.shield },
-    { swords: totalDefenderSwords, shields: totalDefShields, fowSword: fowDefender.sword, fowShield: fowDefender.shield },
-  );
-
-  const defenderHP = defReg * 2 + defLev + rivalDefenderSwords;
-  const rebelHP = counterSwords + rivalRebelSwords;
-
-  const rebelsEliminated = hitsOnRebel >= rebelHP;
-  const defendersEliminated = hitsOnDefender >= defenderHP;
-  const defenderWins = !defendersEliminated || rebelsEliminated;
-
-  if (hitsOnDefender > 0) {
-    applyTroopLosses(G, targetPlayerID, Math.min(hitsOnDefender, defReg * 2 + defLev));
-  }
-
-  logEvent(G, defenderWins
-    ? `${kingdom} defeats the rebels! (${totalDefenderSwords}S vs ${totalRebelSwords}S)`
-    : `Rebels overwhelm the defenders! (${totalRebelSwords}S vs ${totalDefenderSwords}S)`
-  );
-
-  G.battleResult = {
-    battleType: "Rebellion",
-    attackerName: "Rebels",
-    defenderName: kingdom,
-    attackerSwords: totalRebelSwords,
-    attackerShields: 0,
-    defenderSwords: totalDefenderSwords,
-    defenderShields: totalDefShields,
-    attackerFoW: fowRebel,
-    defenderFoW: fowDefender,
-    attackerLosses: "—",
-    defenderLosses: hitsOnDefender > 0 ? `${hitsOnDefender} hits absorbed` : "none",
-    winner: defenderWins ? kingdom : "Rebels",
-    outcome: defenderWins
-      ? `${kingdom} defeats the rebels!`
-      : `Rebels overwhelm ${kingdom}!`,
-  };
-
-  applyOutcome(G, card, targetPlayerID, defenderWins, counterSwords, targetTile, shuffle);
-  returnCounter(G, card, defenderWins, counterSwords);
-  returnRivalTroops(G, defenderWins, rivalContributions ?? {});
-};
-
-/**
- * Return surviving rival troops to their kingdoms.
- * Troops on the winning side survive and return in full.
- * Troops on the losing side are lost (they were overrun).
- */
-const returnRivalTroops = (
-  G: MyGameState,
-  defenderWins: boolean,
-  rivalContributions: Record<string, { side: string; regiments: number; levies: number }>
-): void => {
-  const winningSide = defenderWins ? "defender" : "rebel";
-  for (const [playerID, contrib] of Object.entries(rivalContributions)) {
-    if (contrib.side === winningSide) {
-      // Winning side — return all troops
-      G.playerInfo[playerID].resources.regiments += contrib.regiments;
-      G.playerInfo[playerID].resources.levies += contrib.levies;
-    }
-    // Losing side — troops are lost (already deducted on commit)
-  }
+  resolveBattle(G, rebellion, shuffle);
 };

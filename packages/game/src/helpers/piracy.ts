@@ -1,6 +1,7 @@
 import { MyGameState } from "../types.js";
 import { FAITHDOM_TILES, tileKey, bfsReachable, bfsWithDistance, buildPlayerNetwork } from "./mapUtils.js";
 import { logEvent } from "./stateUtils.js";
+import { isRebelOccupied } from "./occupation.js";
 
 // Gold value of a route: tile loot goods × current price markers + flat gold
 const getTileRouteValue = (
@@ -48,7 +49,13 @@ export const enactPiracy = (G: MyGameState): void => {
 
     G.mapState.buildings.forEach((row, y) => {
       row.forEach((cell, x) => {
-        if (cell.player?.id !== playerID || !cell.buildings) return;
+        if (
+          cell.player?.id !== playerID ||
+          !cell.buildings ||
+          isRebelOccupied(cell)
+        ) {
+          return;
+        }
 
         const outpostKey = tileKey(x, y);
         const network = new Set(playerNetwork);

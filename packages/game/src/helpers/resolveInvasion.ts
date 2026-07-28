@@ -22,6 +22,10 @@ import {
   SECOND_LARGEST_VP,
   TIED_LARGEST_VP,
 } from "../data/gameData.js";
+import {
+  returnContingentCounter,
+  returnInfidelHostCounter,
+} from "./counterPools.js";
 
 type Shuffle = <T>(arr: T[]) => T[];
 
@@ -204,11 +208,16 @@ const drawCombatCard = (
 ): FortuneOfWarCardInfo =>
   drawFortuneOfWarCard(G, shuffle, { redrawNoEffect: false });
 
-const returnDestroyedInfidelFleet = (G: MyGameState): void => {
+const returnDestroyedInfidelFleet = (
+  G: MyGameState,
+  shuffle: Shuffle
+): void => {
   if (!G.infidelFleet) return;
-  if (!G.infidelHostPool.some((host) => host.isFleet)) {
-    G.infidelHostPool.push(G.infidelFleet.counter);
-  }
+  returnInfidelHostCounter(
+    G,
+    G.infidelFleet.counter,
+    shuffle
+  );
   G.infidelFleet = null;
 };
 
@@ -335,7 +344,7 @@ const resolveAerialCombat = (
   if (playersWin) {
     if (hitsOnInfidel >= infidelStrength) {
       logEvent(G, "Infidel Fleet destroyed in the invasion aerial battle");
-      returnDestroyedInfidelFleet(G);
+      returnDestroyedInfidelFleet(G, shuffle);
     } else if (G.infidelFleet) {
       G.infidelFleet.location = [...INFIDEL_EMPIRE_LOCATION];
       G.infidelFleet.active = false;
@@ -577,20 +586,25 @@ const applyShame = (
   }
 };
 
-const returnInvasionCounters = (G: MyGameState): void => {
+const returnInvasionCounters = (
+  G: MyGameState,
+  shuffle: Shuffle
+): void => {
   for (const host of G.accumulatedHosts) {
-    if (!host.isFleet) G.infidelHostPool.push(host);
+    if (!host.isFleet) {
+      returnInfidelHostCounter(G, host, shuffle);
+    }
   }
   G.accumulatedHosts = [];
 
   const contingents = G.currentInvasion?.nprContingents ?? [];
   for (const contingent of contingents) {
-    G.contingentPool.push(contingent.swords);
+    returnContingentCounter(G, contingent.swords, shuffle);
   }
   if (G.currentInvasion) G.currentInvasion.nprContingents = [];
 
   if (G.infidelFleet?.destroyed) {
-    returnDestroyedInfidelFleet(G);
+    returnDestroyedInfidelFleet(G, shuffle);
   } else if (G.infidelFleet) {
     G.infidelFleet.location = [...INFIDEL_EMPIRE_LOCATION];
   }
@@ -700,7 +714,7 @@ const resolveGroundCombat = (
   };
 
   applyShame(G, contributions);
-  returnInvasionCounters(G);
+  returnInvasionCounters(G, shuffle);
 
   if (grandArmyWins) {
     G.currentInvasion = null;
@@ -761,7 +775,9 @@ export const beginGrandArmyBattle = (
     resolveAerialCombat(G, shuffle);
   } else {
     invasion.aerialOutcome = "skipped";
-    if (G.infidelFleet?.destroyed) returnDestroyedInfidelFleet(G);
+    if (G.infidelFleet?.destroyed) {
+      returnDestroyedInfidelFleet(G, shuffle);
+    }
   }
 
   return advanceToGroundCombat(G, shuffle);

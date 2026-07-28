@@ -64,12 +64,14 @@ import resolveEventChoice from "./moves/events/resolveEventChoice.js";
 import immediateElectionVote from "./moves/events/immediateElectionVote.js";
 import commitRebellionTroops from "./moves/events/commitRebellionTroops.js";
 import contributeToRebellion from "./moves/events/contributeToRebellion.js";
+import acceptRebellionSupport from "./moves/events/acceptRebellionSupport.js";
 import nominateCaptainGeneral from "./moves/events/nominateCaptainGeneral.js";
 import contributeToGrandArmy from "./moves/events/contributeToGrandArmy.js";
 import commitInvasionFoW from "./moves/events/commitInvasionFoW.js";
 import offerBuyoffGold from "./moves/events/offerBuyoffGold.js";
 import respondToInfidelFleet from "./moves/events/respondToInfidelFleet.js";
 import commitDeferredBattleCard from "./moves/events/commitDeferredBattleCard.js";
+import commitOccupationBattleCard from "./moves/groundBattle/commitOccupationBattleCard.js";
 import acknowledgeRoundSummary from "./moves/reset/acknowledgeRoundSummary.js";
 
 const CONQUEST_FOW_GUARD: MoveDefinition["validate"] = (G, playerID) => {
@@ -176,11 +178,13 @@ export const MOVE_DEFINITIONS: Record<string, MoveDefinition> = {
   immediateElectionVote,
   commitRebellionTroops,
   contributeToRebellion,
+  acceptRebellionSupport,
   nominateCaptainGeneral,
   contributeToGrandArmy,
   commitInvasionFoW,
   offerBuyoffGold,
   respondToInfidelFleet,
   commitDeferredBattleCard,
+  commitOccupationBattleCard,
   acknowledgeRoundSummary,
 };
