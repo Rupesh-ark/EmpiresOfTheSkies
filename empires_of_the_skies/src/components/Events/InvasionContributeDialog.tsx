@@ -11,15 +11,21 @@ const InvasionContributeDialog = (props: MyGameProps) => {
 
   const [regiments, setRegiments] = useState(0);
   const [levies, setLevies] = useState(0);
+  const [skyships, setSkyships] = useState(0);
 
   if (!invasion || invasion.phase !== "contribute" || !isMyTurn || !player) return null;
 
   const maxRegiments = player.resources.regiments;
   const maxLevies = player.resources.levies;
-  const totalSwords = regiments * 2 + levies;
+  const maxSkyships = player.resources.skyships;
+  const totalSwords = regiments * 2 + levies + skyships;
+  const totalUnits = regiments + levies + skyships;
 
   const otherContributions = Object.entries(invasion.contributions).map(
-    ([id, c]) => ({ kingdom: props.G.playerInfo[id].kingdomName, swords: c.regiments * 2 + c.levies })
+    ([id, c]) => ({
+      kingdom: props.G.playerInfo[id].kingdomName,
+      swords: c.regiments * 2 + c.levies + (c.skyships ?? 0),
+    })
   );
   const captainGeneral = Object.values(props.G.playerInfo).find((p) => p.isCaptainGeneral);
 
@@ -30,11 +36,11 @@ const InvasionContributeDialog = (props: MyGameProps) => {
       mood="crisis"
       actions={
         <>
-          <GameButton variant="ghost" onClick={() => props.moves.contributeToGrandArmy(0, 0)}>
+          <GameButton variant="ghost" onClick={() => props.moves.contributeToGrandArmy(0, 0, 0)}>
             Contribute Nothing
           </GameButton>
-          <GameButton variant="primary" onClick={() => props.moves.contributeToGrandArmy(regiments, levies)}>
-            Contribute Troops
+          <GameButton variant="primary" onClick={() => props.moves.contributeToGrandArmy(regiments, levies, skyships)}>
+            Contribute Forces
           </GameButton>
         </>
       }
@@ -55,8 +61,15 @@ const InvasionContributeDialog = (props: MyGameProps) => {
       <Slider value={regiments} onChange={(_, v) => setRegiments(v as number)} min={0} max={maxRegiments} step={1} marks valueLabelDisplay="auto" disabled={maxRegiments === 0} sx={{ mb: 2 }} />
       <Typography variant="subtitle2" sx={{ mb: 1 }}>Commit Levies ({levies} of {maxLevies})</Typography>
       <Slider value={levies} onChange={(_, v) => setLevies(v as number)} min={0} max={maxLevies} step={1} marks valueLabelDisplay="auto" disabled={maxLevies === 0} sx={{ mb: 2 }} />
-      <Chip label={`Your contribution: ${totalSwords} Swords`} color="primary" variant="outlined" sx={{ fontWeight: "bold" }} />
-      {totalSwords === 0 && <Typography variant="body2" color="error" sx={{ mt: 1 }}>Contributing nothing shames your realm — heresy penalty applies!</Typography>}
+      <Typography variant="subtitle2" sx={{ mb: 1 }}>Commit Skyships ({skyships} of {maxSkyships})</Typography>
+      <Slider value={skyships} onChange={(_, v) => setSkyships(v as number)} min={0} max={maxSkyships} step={1} marks valueLabelDisplay="auto" disabled={maxSkyships === 0} sx={{ mb: 1 }} />
+      {skyships > 0 && (
+        <Typography variant="body2" sx={{ mb: 2, color: "text.secondary" }}>
+          Skyships fight the Infidel Fleet first if one is active; survivors join the ground battle.
+        </Typography>
+      )}
+      <Chip label={`Your contribution: ${totalUnits} units · ${totalSwords} Swords`} color="primary" variant="outlined" sx={{ fontWeight: "bold" }} />
+      {totalUnits === 0 && <Typography variant="body2" color="error" sx={{ mt: 1 }}>Contributing nothing shames your realm — heresy penalty applies!</Typography>}
     </DecisionPanel>
   );
 };

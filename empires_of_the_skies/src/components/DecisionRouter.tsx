@@ -25,6 +25,7 @@ const RebellionRivalSupportDialog = lazy(() => import("./Events/RebellionRivalSu
 const InvasionNominateDialog = lazy(() => import("./Events/InvasionNominateDialog").then(m => ({ default: m.default })));
 const InvasionContributeDialog = lazy(() => import("./Events/InvasionContributeDialog").then(m => ({ default: m.default })));
 const InvasionBuyoffDialog = lazy(() => import("./Events/InvasionBuyoffDialog").then(m => ({ default: m.default })));
+const InvasionFoWDialog = lazy(() => import("./Events/InvasionFoWDialog").then(m => ({ default: m.default })));
 const OutpostOrColonyDialog = lazy(() => import("./Conquests/OutpostOrColonyDialog").then(m => ({ default: m.default })));
 const RetrieveFleetsDialog = lazy(() => import("./Resolution/RetrieveFleetsDialog").then(m => ({ default: m.default })));
 
@@ -104,6 +105,14 @@ export const DecisionRouter = memo((props: MyGameProps) => {
       {sub === "invasion_contribute" && (
         <Suspense fallback={null}>
           <InvasionContributeDialog {...props} />
+        </Suspense>
+      )}
+
+      {(sub === "invasion_aerial_fow" || sub === "invasion_ground_fow") && (
+        <Suspense fallback={null}>
+          {/* Keyed per stage: a hand selection from the aerial stage must not
+              survive the splice into the ground stage's fresh decision. */}
+          <InvasionFoWDialog key={sub} {...props} />
         </Suspense>
       )}
 
