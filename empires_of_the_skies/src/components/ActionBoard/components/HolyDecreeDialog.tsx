@@ -1,5 +1,5 @@
 import { Box, Typography } from "@mui/material";
-import { MyGameProps, findMostHereticalKingdoms, findMostOrthodoxKingdoms } from "@eots/game";
+import { MyGameProps, MOVE_DEFINITIONS } from "@eots/game";
 import { useState } from "react";
 import type { IconType } from "react-icons";
 import { DialogShell } from "@/components/atoms/DialogShell";
@@ -29,7 +29,7 @@ const DECREES: DecreeOption[] = [
   {
     key: "curse monarch",
     label: "Curse a Heretic",
-    description: "Reduce a heretic monarch's VP by the number of orthodox kingdoms \u00F7 3 (rounded down).",
+    description: "Reduce a heretic monarch's VP by the number of orthodox realms \u00F7 3 (rounded up, max 3).",
     needsTarget: true,
     icon: GiDeathSkull,
     accent: tokens.ui.danger,
@@ -37,7 +37,7 @@ const DECREES: DecreeOption[] = [
   {
     key: "bless monarch",
     label: "Bless the Faithful",
-    description: "Grant VP to the least heretical orthodox monarch, equal to orthodox count \u00F7 3.",
+    description: "Grant VP to the least heretical orthodox monarch, equal to orthodox realms \u00F7 3 (rounded up, max 3).",
     needsTarget: true,
     icon: GiAngelWings,
     accent: tokens.ui.success,
@@ -210,13 +210,20 @@ const TargetPicker = ({
 // Main dialog
 
 const HolyDecreeDialog = (props: HolyDecreeDialogProps) => {
-  const mostHereticalKingdoms = findMostHereticalKingdoms(props.G);
-  const mostOrthodoxKingdoms = findMostOrthodoxKingdoms(props.G);
-  const playersWithPrisoners = Object.entries(props.G.playerInfo)
-    .filter(([, p]) => p.prisoners > 0)
-    .map(([id]) => id);
+  // Target lists come from the same validator the server runs, so the dialog
+  // can never offer a target the move would reject, nor hide a legal one.
+  const validate = MOVE_DEFINITIONS.issueHolyDecree?.validate;
+  const targetsFor = (key: DecreeKey): string[] =>
+    props.playerID && validate
+      ? Object.keys(props.G.playerInfo).filter(
+          (id) => validate(props.G, props.playerID!, key, id) === null
+        )
+      : [];
+  const curseTargets = targetsFor("curse monarch");
+  const blessTargets = targetsFor("bless monarch");
+  const inquisitionTargets = targetsFor("inquisition");
 
-  const inquisitionDisabled = playersWithPrisoners.length === 0;
+  const inquisitionDisabled = inquisitionTargets.length === 0;
 
   // Track which targeted decree is waiting for a target pick
   const [pendingDecree, setPendingDecree] = useState<DecreeKey | null>(null);
@@ -240,9 +247,9 @@ const HolyDecreeDialog = (props: HolyDecreeDialogProps) => {
 
     // Get valid targets for this decree
     const targets =
-      key === "curse monarch" ? mostHereticalKingdoms :
-      key === "bless monarch" ? mostOrthodoxKingdoms :
-      playersWithPrisoners;
+      key === "curse monarch" ? curseTargets :
+      key === "bless monarch" ? blessTargets :
+      inquisitionTargets;
 
     if (targets.length === 1) {
       // Only one valid target — fire immediately
@@ -260,9 +267,9 @@ const HolyDecreeDialog = (props: HolyDecreeDialogProps) => {
   };
 
   const pendingTargets =
-    pendingDecree === "curse monarch" ? mostHereticalKingdoms :
-    pendingDecree === "bless monarch" ? mostOrthodoxKingdoms :
-    pendingDecree === "inquisition" ? playersWithPrisoners :
+    pendingDecree === "curse monarch" ? curseTargets :
+    pendingDecree === "bless monarch" ? blessTargets :
+    pendingDecree === "inquisition" ? inquisitionTargets :
     [];
 
   return (

@@ -7,11 +7,14 @@ import {
   MORE_PRISONS_BONUS,
   PUNISH_GOLD_COST,
   PUNISH_EXECUTE_VP_COST,
+  MOVE_DEFINITIONS,
 } from "@eots/game";
 import { Stack, Typography } from "@mui/material";
 import { DialogShell } from "@/components/atoms/DialogShell";
 import { GameButton } from "@/components/atoms/GameButton";
-import { clearMoves, getAvailableActions } from "@/utils/gameHelpers";
+import { clearMoves } from "@/utils/gameHelpers";
+
+type PaymentType = "gold" | "counsellor" | "execute";
 
 const PunishDissentersRow = (props: ActionBoardProps) => {
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -22,13 +25,20 @@ const PunishDissentersRow = (props: ActionBoardProps) => {
     player?.resources.advantageCard === "more_prisons"
       ? BASE_PRISONERS + MORE_PRISONS_BONUS
       : BASE_PRISONERS;
-  const prisonCapacity = player ? maxPrisoners - player.prisoners : 0;
-  const prisonFull = prisonCapacity <= 0;
-  const hasActionAvailable = player ? getAvailableActions(player) > 0 : false;
-  const canSpendCounsellor = player ? player.resources.counsellors >= 1 : false;
-  const hasPrisoners = player ? player.prisoners > 0 : false;
 
-  const handlePay = (paymentType: "gold" | "counsellor" | "execute") => {
+  // Same validator the server runs — per payment type and count, so button
+  // states and reasons can't drift from what the move will actually accept.
+  const rejectionFor = (paymentType: PaymentType, n: number) =>
+    props.playerID
+      ? MOVE_DEFINITIONS.punishDissenters?.validate?.(props.G, props.playerID, 0, paymentType, n) ?? null
+      : { code: "NO_PLAYER", message: "Spectators cannot act" };
+
+  const anyPaymentLegal = (["gold", "counsellor", "execute"] as PaymentType[]).some(
+    (p) => rejectionFor(p, 1) === null
+  );
+  const rowRejection = anyPaymentLegal ? null : rejectionFor("gold", 1);
+
+  const handlePay = (paymentType: PaymentType) => {
     props.moves.punishDissenters(0, paymentType, count);
     setDialogOpen(false);
     setCount(1);
@@ -47,6 +57,8 @@ const PunishDissentersRow = (props: ActionBoardProps) => {
           setCount(1);
           setDialogOpen(true);
         }}
+        disabled={!!rowRejection}
+        disabledReason={rowRejection?.message}
         playerInfo={props.G.playerInfo}
         accent="#7f1d1d"
         bgImage={BTN_BG.punishDissenters}
@@ -74,15 +86,20 @@ const PunishDissentersRow = (props: ActionBoardProps) => {
           ))}
         </Stack>
         <Stack spacing={1.5}>
-          <GameButton variant="secondary" fullWidth disabled={!hasActionAvailable || prisonFull || count > prisonCapacity} onClick={() => handlePay("gold")}>
-            Imprison {count} ({PUNISH_GOLD_COST} Gold){!hasActionAvailable ? " — no actions" : prisonFull ? " — prison full" : count > prisonCapacity ? ` — room for ${prisonCapacity}` : ""}
-          </GameButton>
-          <GameButton variant="secondary" fullWidth disabled={!hasActionAvailable || !canSpendCounsellor || prisonFull || count > prisonCapacity} onClick={() => handlePay("counsellor")}>
-            Imprison {count} (1 Counsellor){!hasActionAvailable ? " — no actions" : !canSpendCounsellor ? " — no counsellors" : prisonFull ? " — prison full" : count > prisonCapacity ? ` — room for ${prisonCapacity}` : ""}
-          </GameButton>
-          <GameButton variant="danger" fullWidth disabled={!hasPrisoners || count > (player?.prisoners ?? 0)} onClick={() => handlePay("execute")}>
-            Execute {count} (-{PUNISH_EXECUTE_VP_COST * count} VP){!hasPrisoners ? " — no prisoners" : count > (player?.prisoners ?? 0) ? ` — only ${player?.prisoners}` : ""}
-          </GameButton>
+          {(
+            [
+              { paymentType: "gold" as const, variant: "secondary" as const, label: `Imprison ${count} (${PUNISH_GOLD_COST} Gold)` },
+              { paymentType: "counsellor" as const, variant: "secondary" as const, label: `Imprison ${count} (1 Counsellor)` },
+              { paymentType: "execute" as const, variant: "danger" as const, label: `Execute ${count} (-${PUNISH_EXECUTE_VP_COST * count} VP)` },
+            ]
+          ).map(({ paymentType, variant, label }) => {
+            const rejection = rejectionFor(paymentType, count);
+            return (
+              <GameButton key={paymentType} variant={variant} fullWidth disabled={!!rejection} onClick={() => handlePay(paymentType)}>
+                {label}{rejection ? ` — ${rejection.message.toLowerCase()}` : ""}
+              </GameButton>
+            );
+          })}
         </Stack>
       </DialogShell>
     </>

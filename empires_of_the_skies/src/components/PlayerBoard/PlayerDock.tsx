@@ -13,11 +13,12 @@ import { tokens, backgrounds } from "@/theme";
 import {
   MyGameProps, KINGDOM_LOCATION, findPossibleDestinations, phaseGroup,
   KA_CARD_DEFS, LEGACY_CARD_DEFS, EVENT_CARD_DEFS, PlayerFortuneOfWarCardInfo, EventCardName, FOW_HAND_MAX,
-  MAX_SHIPYARDS,
+  MAX_SHIPYARDS, MOVE_DEFINITIONS,
 } from "@eots/game";
 import popeLogo from "@/boards_and_assets/action_board/pope_logo.webp";
 import captainGeneralLogo from "@/boards_and_assets/action_board/captain_general.webp";
-import { SWORD_CARDS, SHIELD_CARDS, NO_EFFECT_CARD, FOW_CARD_BACK } from "@/assets/fortuneOfWarCards";
+import { NO_EFFECT_CARD, FOW_CARD_BACK } from "@/assets/fortuneOfWarCards";
+import { fowCardSrc } from "@/assets/fowCardArt";
 import { LEGACY_CARD_IMAGES } from "@/assets/legacyCards";
 import { KA_CARD_IMAGES } from "@/assets/kingdomAdvantage";
 import { EVENT_ICONS } from "@/components/Events/eventCardIcons";
@@ -28,6 +29,7 @@ import { KingdomActions } from "./board";
 import { GameButton } from "@/components/atoms/GameButton";
 import { useMapSelection } from "@/contexts/MapSelectionContext";
 import { FleetTransferDialog } from "@/components/WorldMap/FleetTransferDialog";
+import { buildMovementCostMap } from "@/utils/gameHelpers";
 
 interface PlayerDockProps extends MyGameProps {
   onOpenFleetLocation?: (location: number[]) => void;
@@ -62,11 +64,9 @@ export const PlayerDock = memo((props: PlayerDockProps) => {
     if (!fleet) return;
 
     const isLaden = fleet.regiments > 0 || fleet.levies > 0 || fleet.eliteRegiments > 0;
-    const [allDests, within1, within2, within3] = findPossibleDestinations(props.G, fleet.location, !isLaden);
-    const costMap = new Map<string, number>();
-    for (const [x, y] of within3) costMap.set(`${x},${y}`, 3);
-    for (const [x, y] of within2) costMap.set(`${x},${y}`, 2);
-    for (const [x, y] of within1) costMap.set(`${x},${y}`, 1);
+    const destinationGroups = findPossibleDestinations(props.G, fleet.location, !isLaden);
+    const allDests = destinationGroups[0];
+    const costMap = buildMovementCostMap(destinationGroups);
 
     startSelection({
       tiles: allDests,
@@ -107,6 +107,12 @@ export const PlayerDock = memo((props: PlayerDockProps) => {
               shipyards={viewInfo.shipyards}
               counsellorLocations={viewInfo.playerBoardCounsellorLocations}
               moves={props.moves}
+              currentLevies={viewInfo.resources.levies}
+              validateLevyAmount={(n) =>
+                props.playerID
+                  ? MOVE_DEFINITIONS.conscriptLevies?.validate?.(props.G, props.playerID, n)?.message ?? null
+                  : null
+              }
             />
           }
           fortuneCards={viewInfo.resources.fortuneCards}
@@ -138,9 +144,18 @@ export const PlayerDock = memo((props: PlayerDockProps) => {
           <Box sx={{ display: "flex", alignItems: "center", gap: `${tokens.spacing.sm}px` }}>
             <SectionHeader label="Fleets" />
             {homeFleets.length > 0 && (
-              <Tooltip title="Load and unload fleets at Home Waters" placement="top" arrow>
+              <Tooltip
+                title={isMyActionsTurn ? "Load and unload fleets in your Kingdom" : "Available on your Actions turn"}
+                placement="top"
+                arrow
+              >
                 <span>
-                  <GameButton variant="ghost" size="sm" onClick={() => setManageFleetsOpen(true)}>
+                  <GameButton
+                    variant="ghost"
+                    size="sm"
+                    disabled={!isMyActionsTurn}
+                    onClick={() => setManageFleetsOpen(true)}
+                  >
                     Manage
                   </GameButton>
                 </span>
@@ -261,11 +276,8 @@ const Identity = ({ viewInfo }: { viewInfo: ViewInfo }) => (
 // Cards — flat 2×2 category grid built for the dock's height.
 // Full art opens in the lightbox on click (no drawers, no cropped images).
 
-const getFoWCardImage = (card: PlayerFortuneOfWarCardInfo): string => {
-  if (card.sword > 0) return SWORD_CARDS[card.sword] ?? NO_EFFECT_CARD;
-  if (card.shield > 0) return SHIELD_CARDS[card.shield] ?? NO_EFFECT_CARD;
-  return NO_EFFECT_CARD;
-};
+const getFoWCardImage = (card: PlayerFortuneOfWarCardInfo): string =>
+  fowCardSrc(card.sword, card.shield) ?? NO_EFFECT_CARD;
 
 interface CardPreview {
   src: string;

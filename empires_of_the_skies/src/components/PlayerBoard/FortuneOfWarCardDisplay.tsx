@@ -1,5 +1,6 @@
 import { MyGameProps } from "@eots/game";
-import { FOW_CARD_BACK as fortuneOfWarCardBack, SWORD_CARDS, SHIELD_CARDS, NO_EFFECT_CARD } from "@/assets/fortuneOfWarCards";
+import { FOW_CARD_BACK as fortuneOfWarCardBack, NO_EFFECT_CARD } from "@/assets/fortuneOfWarCards";
+import { fowCardSrc } from "@/assets/fowCardArt";
 
 const FortuneOfWarCardDisplay = (props: FortuneOfWarCardDisplayProps) => {
   const defaultImage = fortuneOfWarCardBack;
@@ -13,9 +14,7 @@ const FortuneOfWarCardDisplay = (props: FortuneOfWarCardDisplayProps) => {
   if (card) {
     opacity = 1;
     if (card.flipped) {
-      if (card.sword > 0) displayImage = SWORD_CARDS[card.sword];
-      else if (card.shield > 0) displayImage = SHIELD_CARDS[card.shield];
-      else displayImage = NO_EFFECT_CARD;
+      displayImage = fowCardSrc(card.sword, card.shield) ?? NO_EFFECT_CARD;
     } else {
       displayImage = defaultImage;
     }

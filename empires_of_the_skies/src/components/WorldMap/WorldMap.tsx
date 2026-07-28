@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/useToast";
 import { getLocationPresentation } from "@/utils/locationLabels";
 import { GameButton } from "@/components/atoms/GameButton";
 import { useMapSelection } from "@/contexts/MapSelectionContext";
+import { buildMovementCostMap } from "@/utils/gameHelpers";
 import type { FleetDragState } from "./fleetDragTypes";
 
 const BATTLE_RESOLUTION_SUBS = new Set([
@@ -250,16 +251,13 @@ const WorldMap = (props: WorldMapProps) => {
 
     const fleet = playerInfo.fleetInfo[fleetIndex];
     const isLaden = fleet.regiments > 0 || fleet.levies > 0 || fleet.eliteRegiments > 0;
-    const [allDests, within1, within2, within3] = findPossibleDestinations(
+    const destinationGroups = findPossibleDestinations(
       props.G,
       fleet.location,
       !isLaden
     );
-
-    const costMap = new Map<string, number>();
-    for (const [x, y] of within3) costMap.set(`${x},${y}`, 3);
-    for (const [x, y] of within2) costMap.set(`${x},${y}`, 2);
-    for (const [x, y] of within1) costMap.set(`${x},${y}`, 1);
+    const allDests = destinationGroups[0];
+    const costMap = buildMovementCostMap(destinationGroups);
 
     setFleetDragState({
       fleetId,

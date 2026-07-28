@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Box, Tooltip, Typography, Dialog, DialogTitle, DialogContent, DialogActions } from "@mui/material";
 import { tokens, backgrounds } from "@/theme";
-import { MyGameProps } from "@eots/game";
+import { MyGameProps, MAX_LEVIES, LEVY_GROUP_SIZE } from "@eots/game";
 import { GamePanel } from "@/components/atoms/GamePanel";
 import { GameButton } from "@/components/atoms/GameButton";
 import { SectionHeader } from "./SectionHeader";
@@ -71,68 +71,84 @@ interface LevyDialogProps {
   open: boolean;
   levyCount: number;
   onClose: () => void;
-  onConscript: () => void;
+  onConscript: (amount: number) => void;
   onSetLevyCount: (count: number) => void;
+  currentLevies?: number;
+  /** Same validator the server runs — returns the rejection message, or null. */
+  validateLevyAmount?: (n: number) => string | null;
 }
 
-const ConscriptLeviesDialog = ({ open, levyCount, onClose, onConscript, onSetLevyCount }: LevyDialogProps) => (
-  <Dialog
-    open={open}
-    onClose={onClose}
-    PaperProps={{
-      sx: {
-        backgroundColor: tokens.ui.surface,
-        border: `1px solid ${tokens.ui.borderMedium}`,
-        borderRadius: `${tokens.radius.lg}px`,
-      },
-    }}
-  >
-    <DialogTitle sx={{ fontFamily: tokens.font.display, color: tokens.ui.gold, pb: 1 }}>
-      Conscript Levies
-    </DialogTitle>
-    <DialogContent>
-      <Typography sx={{ fontFamily: tokens.font.body, color: tokens.ui.text, fontSize: tokens.fontSize.sm, mb: 2 }}>
-        Choose how many levies to raise (in batches of 3). Costs 1 Victory Point per 3 levies.
-      </Typography>
-      <Box sx={{ display: "flex", alignItems: "center", gap: `${tokens.spacing.md}px`, justifyContent: "center" }}>
-        <GameButton
-          variant="ghost"
-          size="sm"
-          onClick={() => onSetLevyCount(Math.max(3, levyCount - 3))}
-          disabled={levyCount <= 3}
-        >
-          −
-        </GameButton>
-        <Typography
-          sx={{
-            fontFamily: tokens.font.body,
-            fontSize: tokens.fontSize.lg,
-            color: tokens.ui.text,
-            fontWeight: 700,
-            minWidth: 40,
-            textAlign: "center",
-          }}
-        >
-          {levyCount}
+const ConscriptLeviesDialog = ({ open, levyCount, onClose, onConscript, onSetLevyCount, currentLevies, validateLevyAmount }: LevyDialogProps) => {
+  const maxAmount = Math.max(1, MAX_LEVIES - (currentLevies ?? 0));
+  const amount = Math.min(Math.max(1, levyCount), maxAmount);
+  const vpCost = Math.ceil(amount / LEVY_GROUP_SIZE);
+  const rejection = validateLevyAmount?.(amount) ?? null;
+
+  return (
+    <Dialog
+      open={open}
+      onClose={onClose}
+      PaperProps={{
+        sx: {
+          backgroundColor: tokens.ui.surface,
+          border: `1px solid ${tokens.ui.borderMedium}`,
+          borderRadius: `${tokens.radius.lg}px`,
+        },
+      }}
+    >
+      <DialogTitle sx={{ fontFamily: tokens.font.display, color: tokens.ui.gold, pb: 1 }}>
+        Conscript Levies
+      </DialogTitle>
+      <DialogContent>
+        <Typography sx={{ fontFamily: tokens.font.body, color: tokens.ui.text, fontSize: tokens.fontSize.sm, mb: 2 }}>
+          Choose how many levies to raise — any number up to the {MAX_LEVIES}-levy supply.
+          Costs 1 Victory Point per {LEVY_GROUP_SIZE} levies, or part thereof.
         </Typography>
-        <GameButton
-          variant="ghost"
-          size="sm"
-          onClick={() => onSetLevyCount(Math.min(12, levyCount + 3))}
-          disabled={levyCount >= 12}
-        >
-          +
+        <Box sx={{ display: "flex", alignItems: "center", gap: `${tokens.spacing.md}px`, justifyContent: "center" }}>
+          <GameButton
+            variant="ghost"
+            size="sm"
+            onClick={() => onSetLevyCount(amount - 1)}
+            disabled={amount <= 1}
+          >
+            −
+          </GameButton>
+          <Typography
+            sx={{
+              fontFamily: tokens.font.body,
+              fontSize: tokens.fontSize.lg,
+              color: tokens.ui.text,
+              fontWeight: 700,
+              minWidth: 40,
+              textAlign: "center",
+            }}
+          >
+            {amount}
+          </Typography>
+          <GameButton
+            variant="ghost"
+            size="sm"
+            onClick={() => onSetLevyCount(amount + 1)}
+            disabled={amount >= maxAmount}
+          >
+            +
+          </GameButton>
+        </Box>
+        {rejection && (
+          <Typography sx={{ fontFamily: tokens.font.body, color: tokens.ui.danger, fontSize: tokens.fontSize.xs, mt: 1, textAlign: "center" }}>
+            {rejection}
+          </Typography>
+        )}
+      </DialogContent>
+      <DialogActions sx={{ px: 3, pb: 2, gap: 1 }}>
+        <GameButton variant="ghost" onClick={onClose}>Cancel</GameButton>
+        <GameButton variant="primary" onClick={() => onConscript(amount)} disabled={!!rejection}>
+          Conscript {amount} {amount === 1 ? "Levy" : "Levies"} (−{vpCost} VP)
         </GameButton>
-      </Box>
-    </DialogContent>
-    <DialogActions sx={{ px: 3, pb: 2, gap: 1 }}>
-      <GameButton variant="ghost" onClick={onClose}>Cancel</GameButton>
-      <GameButton variant="primary" onClick={onConscript}>
-        Conscript {levyCount} Levies
-      </GameButton>
-    </DialogActions>
-  </Dialog>
-);
+      </DialogActions>
+    </Dialog>
+  );
+};
 
 interface KingdomActionsProps {
   colour: string;
@@ -154,6 +170,9 @@ interface KingdomActionsProps {
    * Fleets its hulls crew — while the dialogs stay defined in one place.
    */
   only?: ("skyships" | "levies" | "train")[];
+  currentLevies?: number;
+  /** Same validator the server runs — returns the rejection message, or null. */
+  validateLevyAmount?: (n: number) => string | null;
 }
 
 export const KingdomActions = ({
@@ -163,6 +182,8 @@ export const KingdomActions = ({
   moves,
   layout = "column",
   only,
+  currentLevies,
+  validateLevyAmount,
 }: KingdomActionsProps) => {
   const [buildDialogOpen, setBuildDialogOpen] = useState(false);
   const [levyDialogOpen, setLevyDialogOpen] = useState(false);
@@ -177,9 +198,9 @@ export const KingdomActions = ({
     setBuildDialogOpen(false);
   };
 
-  const handleConscriptLevies = () => {
+  const handleConscriptLevies = (amount: number) => {
     moves.enableDispatchButtons(true);
-    moves.conscriptLevies(levyCount);
+    moves.conscriptLevies(amount);
     setLevyDialogOpen(false);
     setLevyCount(3);
   };
@@ -321,6 +342,8 @@ export const KingdomActions = ({
         onClose={() => setLevyDialogOpen(false)}
         onConscript={handleConscriptLevies}
         onSetLevyCount={setLevyCount}
+        currentLevies={currentLevies}
+        validateLevyAmount={validateLevyAmount}
       />
       )}
     </>

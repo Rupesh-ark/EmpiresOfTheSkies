@@ -331,7 +331,12 @@ export const WorldMapTile = memo((props: worldMapTileProps) => {
   const isKingdomTile = xLocation === 4 && yLocation === 0;
   const buildingHere = props.G.mapState.buildings[yLocation]?.[xLocation];
   const myBuildingHere = buildingHere?.player?.id === myPlayerID && (buildingHere.buildings === "outpost" || buildingHere.buildings === "colony");
-  const showManageFleets = myFleetsHere.length >= 2 || (myFleetsHere.length >= 1 && (isKingdomTile || myBuildingHere));
+  // Transfer moves are only legal in the actions phase on your own turn —
+  // out of phase the server rejects them while the dialog closes as if fine.
+  const isMyActionsTurn = props.ctx.phase === "actions" && props.ctx.currentPlayer === myPlayerID;
+  const showManageFleets =
+    isMyActionsTurn &&
+    (myFleetsHere.length >= 2 || (myFleetsHere.length >= 1 && (isKingdomTile || myBuildingHere)));
 
   // Droppable zone
   const droppableId = `map-tile-${xLocation}-${yLocation}`;

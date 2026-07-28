@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { MyGameProps } from "@eots/game";
+import { MyGameProps, MOVE_DEFINITIONS } from "@eots/game";
 import { Typography } from "@mui/material";
 import { KingdomButton } from "../shared/KingdomButton";
 import { DecisionPanel } from "@/components/atoms/DecisionPanel";
@@ -11,7 +11,12 @@ const AttackOrPassDiaLog = (props: AerialBattleDialogProps) => {
   const [x, y] = props.G.mapState.currentBattle;
   const [open, setOpen] = useState(true);
 
-  const possibleDefenders = props.G.possibleDefenders ?? [];
+  // The server list excludes only the attacker; the validator also rejects
+  // already-challenged pairs after an evasion — filter with the same rule.
+  const validate = MOVE_DEFINITIONS.attackOtherPlayersFleet?.validate;
+  const possibleDefenders = (props.G.possibleDefenders ?? []).filter(
+    (id) => !props.playerID || !validate || validate(props.G, props.playerID, id) === null
+  );
 
   const [currentKingdom, setCurrentKingdom] = useState(possibleDefenders[0]);
   const buttons = possibleDefenders.map((currentItem) => (

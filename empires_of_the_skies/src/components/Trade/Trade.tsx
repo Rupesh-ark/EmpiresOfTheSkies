@@ -131,6 +131,12 @@ const Trade = (props: MyGameProps) => {
   const untargetedRivals = rivals.filter((r) => !agitatorsSentThisRound.includes(r.id));
   const allRivalsTargeted = rivals.length > 0 && untargetedRivals.length === 0;
 
+  // The engine registers these moves only in the actions phase on your own
+  // turn — the server rejects them anywhere else, so don't offer live buttons.
+  const isMyActionsTurn =
+    props.ctx.phase === "actions" && props.ctx.currentPlayer === props.playerID;
+  const outOfTurnReason = "On your Actions turn";
+
   const routeStatuses = useRouteStatuses(props);
 
   return (
@@ -153,6 +159,8 @@ const Trade = (props: MyGameProps) => {
             <CompactAction
               label={`Sell Skyships (${skyships})`}
               price={`${SKYSHIP_SELL_PRICE}g each`}
+              disabled={!isMyActionsTurn}
+              disabledReason={outOfTurnReason}
               onClick={() => { setSkyshipAmount(1); setSellSkyshipsOpen(true); }}
             />
           )}
@@ -161,6 +169,8 @@ const Trade = (props: MyGameProps) => {
             <CompactAction
               label={`Sell Cathedral (${cathedrals})`}
               price={`${BUILDING_SELL_PRICE}g`}
+              disabled={!isMyActionsTurn}
+              disabledReason={outOfTurnReason}
               onClick={() => props.moves.sellBuilding("cathedral")}
             />
           )}
@@ -169,6 +179,8 @@ const Trade = (props: MyGameProps) => {
             <CompactAction
               label={`Sell Palace (${palaces})`}
               price={`${BUILDING_SELL_PRICE}g`}
+              disabled={!isMyActionsTurn}
+              disabledReason={outOfTurnReason}
               onClick={() => props.moves.sellBuilding("palace")}
             />
           )}
@@ -178,8 +190,8 @@ const Trade = (props: MyGameProps) => {
               <CompactAction
                 label="Send Agitators"
                 price="2g"
-                disabled={allRivalsTargeted}
-                disabledReason="All sent this round"
+                disabled={!isMyActionsTurn || allRivalsTargeted}
+                disabledReason={!isMyActionsTurn ? outOfTurnReason : "All sent this round"}
                 onClick={() => { setAgitatorTarget(null); setAgitatorsOpen(true); }}
               />
               {freeDissenters > 0 && (

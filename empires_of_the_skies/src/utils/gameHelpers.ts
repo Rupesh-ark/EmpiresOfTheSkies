@@ -15,3 +15,17 @@ export const clearMoves = (props: MyGameProps) => {
  */
 export const getAvailableActions = (player: PlayerInfo): number =>
   Math.max(0, player.resources.counsellors - player.actionsTakenThisRound);
+
+/**
+ * Gold cost per destination from findPossibleDestinations output
+ * ([allTiles, ring1, ring2, ...] — cost = ring index, nearest ring wins).
+ */
+export const buildMovementCostMap = (
+  destinationGroups: [number, number][][]
+): Map<string, number> => {
+  const costMap = new Map<string, number>();
+  for (let ring = destinationGroups.length - 1; ring >= 1; ring--) {
+    for (const [x, y] of destinationGroups[ring]) costMap.set(`${x},${y}`, ring);
+  }
+  return costMap;
+};
