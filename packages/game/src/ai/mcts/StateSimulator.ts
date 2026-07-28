@@ -441,6 +441,7 @@ export function applyMove(G: MyGameState, playerID: string, move: AIMove): void 
     case "vote":
     case "retrieveFleets":
     case "contributeToGrandArmy":
+    case "commitInvasionFoW":
     case "contributeToRebellion":
     case "commitRebellionTroops":
     case "nominateCaptainGeneral":

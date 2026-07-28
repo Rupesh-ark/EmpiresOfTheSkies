@@ -48,6 +48,20 @@ describe("invasion-check phase", () => {
       setup: (_G: MyGameState) => {},
     },
     {
+      sub: "invasion_aerial_fow" as const,
+      expected: 1,
+      setup: (G: MyGameState) => {
+        G.playerInfo["0"].isCaptainGeneral = true;
+      },
+    },
+    {
+      sub: "invasion_ground_fow" as const,
+      expected: 1,
+      setup: (G: MyGameState) => {
+        G.playerInfo["0"].isCaptainGeneral = true;
+      },
+    },
+    {
       sub: "invasion_buyoff" as const,
       expected: 0,
       setup: (_G: MyGameState) => {},

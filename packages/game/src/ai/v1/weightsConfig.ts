@@ -110,6 +110,7 @@ export const AI_CONFIG = {
     commitRebellionTroops:     { base: 0.1, military: 0.2, threats: 0.15 },
     contributeToRebellion:     { base: 0.05, military: 0.15 },
     contributeToGrandArmy:     { base: 0.1, military: 0.2, religion: 0.1 },
+    commitInvasionFoW:         { base: 0.15, military: 0.15 },
     nominateCaptainGeneral:    { base: 0.1, military: 0.15, religion: 0.1 },
     offerBuyoffGold:           { base: 0.1, economy: 0.15 },
     immediateElectionVote:     { base: 0.1, religion: 0.2 },

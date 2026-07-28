@@ -785,9 +785,33 @@ export function enumerateLegalMoves(G: MyGameState, ctx: Ctx, playerID: string):
         // Contribute all
         moves.push({ move: "contributeToGrandArmy", args: [regs, levs, sky] });
         // Contribute half
-        moves.push({ move: "contributeToGrandArmy", args: [Math.ceil(regs / 2), Math.ceil(levs / 2), 0] });
+        moves.push({
+          move: "contributeToGrandArmy",
+          args: [
+            Math.ceil(regs / 2),
+            Math.ceil(levs / 2),
+            Math.ceil(sky / 2),
+          ],
+        });
+        // Fleet-only participation is legal and avoids Shame
+        if (sky > 0) {
+          moves.push({
+            move: "contributeToGrandArmy",
+            args: [0, 0, sky],
+          });
+        }
         // Contribute nothing
         moves.push({ move: "contributeToGrandArmy", args: [0, 0, 0] });
+      } else if (
+        G.step === "invasion_aerial_fow" ||
+        G.step === "invasion_ground_fow"
+      ) {
+        if (!G.playerInfo[playerID].isCaptainGeneral) return [];
+        const cards = G.playerInfo[playerID].resources.fortuneCards;
+        for (let i = 0; i < cards.length; i++) {
+          moves.push({ move: "commitInvasionFoW", args: [i] });
+        }
+        moves.push({ move: "commitInvasionFoW", args: ["draw"] });
       } else if (G.step === "invasion_buyoff") {
         // Each player offers gold toward the buy-off
         const player = G.playerInfo[playerID];

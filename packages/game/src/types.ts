@@ -54,6 +54,8 @@ export type GameStep =
   | "deferred_battle"
   | "invasion_nominate"
   | "invasion_contribute"
+  | "invasion_aerial_fow"
+  | "invasion_ground_fow"
   | "invasion_buyoff"
   | "retrieve_fleets"
   | "round_summary";
@@ -114,10 +116,19 @@ export interface MyGameState {
   currentInvasion: {
     totalHostSwords: number;
     contributions: Record<string, { regiments: number; levies: number; skyships: number }>;
-    phase: "nominate" | "contribute" | "buyoff";
+    phase: "nominate" | "contribute" | "aerial_fow" | "ground_fow" | "buyoff";
     buyoffCost?: number;
     buyoffOffered?: Record<string, number>;
     eligibleCaptainGenerals: string[];
+    nprContingents?: { realm: string; swords: number }[];
+    survivingSkyships?: Record<string, number>;
+    forceRanking?: {
+      largest: string[];
+      secondLargest: string[];
+      smallest: string[];
+      secondSmallest: string[];
+    };
+    aerialOutcome?: "players" | "infidel" | "skipped";
   } | null;
   infidelFleetCombat: {
     targetPlayerID: string;

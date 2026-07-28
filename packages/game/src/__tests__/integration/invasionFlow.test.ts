@@ -19,9 +19,14 @@
 import { describe, it, expect, vi } from "vitest";
 import nominateCaptainGeneral from "../../moves/events/nominateCaptainGeneral.js";
 import contributeToGrandArmy from "../../moves/events/contributeToGrandArmy.js";
+import commitInvasionFoW from "../../moves/events/commitInvasionFoW.js";
 import offerBuyoffGold from "../../moves/events/offerBuyoffGold.js";
 import { checkForInvasion } from "../../helpers/resolveInvasion.js";
-import { INFIDEL_EMPIRE_LOCATION } from "../../data/gameData.js";
+import {
+  ASSIGNABLE_KINGDOMS,
+  INFIDEL_EMPIRE_LOCATION,
+} from "../../data/gameData.js";
+import { enumerateLegalMoves } from "../../ai/enumerate.js";
 import {
   buildInitialG,
   buildPlayer,
@@ -71,7 +76,8 @@ function callContribute(
   playerID: string,
   regiments: number,
   levies: number,
-  playOrder: string[]
+  playOrder: string[],
+  skyships = 0
 ) {
   const events = stubEvents();
   const ctx = {
@@ -83,7 +89,26 @@ function callContribute(
     { G, ctx, playerID, events, random: buildRandom() },
     regiments,
     levies,
-    0
+    skyships
+  );
+  return { result, events };
+}
+
+function callCommitInvasionFoW(
+  G: ReturnType<typeof buildInitialG>,
+  playerID: string,
+  selection: number | "draw",
+  playOrder: string[]
+) {
+  const events = stubEvents();
+  const ctx = {
+    ...buildCtx(playerID, playOrder.length),
+    playOrder,
+    currentPlayer: playerID,
+  };
+  const result = commitInvasionFoW.fn(
+    { G, ctx, playerID, events, random: buildRandom() },
+    selection
   );
   return { result, events };
 }
@@ -235,6 +260,864 @@ describe("invasionFlow — all players contribute troops", () => {
   });
 });
 
+describe("invasionFlow — corrected ground battle and casualties", () => {
+  it("wins by surviving even when the Host is not wiped out", () => {
+    const G = buildInitialG([
+      buildPlayer("0", {
+        isCaptainGeneral: true,
+        resources: buildResources({ regiments: 4 }),
+      }),
+      buildPlayer("1"),
+    ]);
+    G.currentInvasion = {
+      ...buildInvasion(5),
+      phase: "contribute",
+    };
+    G.contingentPool = [];
+    G.accumulatedHosts = [
+      {
+        swords: 5,
+        shields: 20,
+        isFleet: false,
+        isInvasionTrigger: true,
+      },
+    ];
+    G.cardDecks.fortuneOfWarCards = [
+      { name: "Host shield", sword: 0, shield: 1 },
+      { name: "Army shield", sword: 0, shield: 1 },
+    ];
+
+    callContribute(G, "0", 4, 0, ["0", "1"]);
+    callContribute(G, "1", 0, 0, ["0", "1"]);
+
+    expect(G.battleResult).toMatchObject({
+      winner: "Grand Army",
+      attackerLosses: "none",
+      defenderSwords: 8,
+    });
+    expect(G.currentInvasion).toBeNull();
+  });
+
+  it("applies victory casualties largest-first, with an NPR later than an IPO-tied player force", () => {
+    const G = buildInitialG([
+      buildPlayer("0", {
+        isCaptainGeneral: true,
+        resources: buildResources({ levies: 2 }),
+      }),
+      buildPlayer("1", {
+        resources: buildResources({ regiments: 1 }),
+      }),
+    ]);
+    G.currentInvasion = {
+      ...buildInvasion(2),
+      phase: "contribute",
+    };
+    // One strength-2 NPR force ties player 0's two-unit force for size.
+    G.contingentPool = [2];
+    G.accumulatedHosts = [
+      {
+        swords: 2,
+        shields: 20,
+        isFleet: false,
+        isInvasionTrigger: true,
+      },
+    ];
+    G.cardDecks.fortuneOfWarCards = [
+      { name: "Host sword", sword: 1, shield: 0 },
+      { name: "Army shield", sword: 0, shield: 1 },
+    ];
+
+    callContribute(G, "0", 0, 2, ["0", "1"]);
+    callContribute(G, "1", 1, 0, ["0", "1"]);
+
+    expect(G.battleResult?.winner).toBe("Grand Army");
+    expect(G.playerInfo["0"].resources.levies).toBe(0);
+    expect(G.playerInfo["1"].resources.regiments).toBe(1);
+    expect(G.contingentPool).toContain(2);
+  });
+
+  it("annihilates every contributed unit and returns NPR contingents on defeat", () => {
+    const G = buildInitialG([
+      buildPlayer("0", {
+        isCaptainGeneral: true,
+        resources: buildResources({
+          regiments: 2,
+          levies: 1,
+          skyships: 2,
+        }),
+      }),
+      buildPlayer("1", {
+        resources: buildResources({
+          regiments: 1,
+          levies: 2,
+          skyships: 1,
+        }),
+      }),
+    ]);
+    G.currentInvasion = {
+      ...buildInvasion(20),
+      phase: "contribute",
+    };
+    G.contingentPool = [2];
+    G.accumulatedHosts = [
+      {
+        swords: 20,
+        shields: 20,
+        isFleet: false,
+        isInvasionTrigger: true,
+      },
+    ];
+    G.cardDecks.fortuneOfWarCards = [
+      { name: "Host sword", sword: 1, shield: 0 },
+      { name: "Army shield", sword: 0, shield: 1 },
+    ];
+
+    callContribute(G, "0", 2, 1, ["0", "1"], 2);
+    callContribute(G, "1", 1, 2, ["0", "1"], 1);
+
+    expect(G.battleResult?.winner).toBe("Infidel Host");
+    expect(G.currentInvasion?.phase).toBe("buyoff");
+    expect(G.playerInfo["0"].resources).toMatchObject({
+      regiments: 0,
+      levies: 0,
+      skyships: 0,
+    });
+    expect(G.playerInfo["1"].resources).toMatchObject({
+      regiments: 0,
+      levies: 0,
+      skyships: 0,
+    });
+    expect(G.contingentPool).toEqual([2]);
+  });
+
+  it("ranks player forces by unit count, so three Levies outrank two Regiments", () => {
+    const G = buildInitialG([
+      buildPlayer("0", {
+        resources: buildResources({ regiments: 2 }),
+      }),
+      buildPlayer("1", {
+        isCaptainGeneral: true,
+        resources: buildResources({ levies: 3 }),
+      }),
+    ]);
+    G.currentInvasion = {
+      ...buildInvasion(1),
+      phase: "contribute",
+    };
+    G.contingentPool = [];
+    G.accumulatedHosts = [
+      {
+        swords: 1,
+        shields: 20,
+        isFleet: false,
+        isInvasionTrigger: true,
+      },
+    ];
+    G.cardDecks.fortuneOfWarCards = [
+      { name: "Host shield", sword: 0, shield: 1 },
+      { name: "Army shield", sword: 0, shield: 1 },
+    ];
+
+    callContribute(G, "0", 2, 0, ["0", "1"]);
+    callContribute(G, "1", 0, 3, ["0", "1"]);
+
+    expect(G.playerInfo["0"].resources.victoryPoints).toBe(12);
+    expect(G.playerInfo["1"].resources.victoryPoints).toBe(18);
+  });
+
+  it("awards 4VP to each tied-largest player force", () => {
+    const G = buildInitialG([
+      buildPlayer("0", {
+        isCaptainGeneral: true,
+        resources: buildResources({ levies: 2 }),
+      }),
+      buildPlayer("1", {
+        resources: buildResources({ levies: 2 }),
+      }),
+    ]);
+    G.currentInvasion = {
+      ...buildInvasion(1),
+      phase: "contribute",
+    };
+    G.contingentPool = [];
+    G.accumulatedHosts = [
+      {
+        swords: 1,
+        shields: 20,
+        isFleet: false,
+        isInvasionTrigger: true,
+      },
+    ];
+    G.cardDecks.fortuneOfWarCards = [
+      { name: "Host shield", sword: 0, shield: 1 },
+      { name: "Army shield", sword: 0, shield: 1 },
+    ];
+
+    callContribute(G, "0", 0, 2, ["0", "1"]);
+    callContribute(G, "1", 0, 2, ["0", "1"]);
+
+    expect(G.playerInfo["0"].resources.victoryPoints).toBe(17);
+    expect(G.playerInfo["1"].resources.victoryPoints).toBe(14);
+  });
+
+  it("awards 5VP to a unique largest force and 4VP to each tied-second force", () => {
+    const G = buildInitialG([
+      buildPlayer("0", {
+        isCaptainGeneral: true,
+        resources: buildResources({ levies: 3 }),
+      }),
+      buildPlayer("1", {
+        resources: buildResources({ levies: 2 }),
+      }),
+      buildPlayer("2", {
+        resources: buildResources({ levies: 2 }),
+      }),
+    ]);
+    G.currentInvasion = {
+      ...buildInvasion(1),
+      phase: "contribute",
+    };
+    G.contingentPool = [];
+    G.accumulatedHosts = [
+      {
+        swords: 1,
+        shields: 20,
+        isFleet: false,
+        isInvasionTrigger: true,
+      },
+    ];
+    G.cardDecks.fortuneOfWarCards = [
+      { name: "Host shield", sword: 0, shield: 1 },
+      { name: "Army shield", sword: 0, shield: 1 },
+    ];
+
+    callContribute(G, "0", 0, 3, ["0", "1", "2"]);
+    callContribute(G, "1", 0, 2, ["0", "1", "2"]);
+    callContribute(G, "2", 0, 2, ["0", "1", "2"]);
+
+    expect(G.playerInfo["0"].resources.victoryPoints).toBe(18);
+    expect(G.playerInfo["1"].resources.victoryPoints).toBe(14);
+    expect(G.playerInfo["2"].resources.victoryPoints).toBe(14);
+  });
+
+  it("deducts 5VP from a unique smallest force and 4VP from each tied-second-smallest force", () => {
+    const G = buildInitialG([
+      buildPlayer("0", {
+        isCaptainGeneral: true,
+        resources: buildResources({ levies: 1 }),
+      }),
+      buildPlayer("1", {
+        resources: buildResources({ levies: 2 }),
+      }),
+      buildPlayer("2", {
+        resources: buildResources({ levies: 2 }),
+      }),
+    ]);
+    G.currentInvasion = {
+      ...buildInvasion(10),
+      phase: "contribute",
+    };
+    G.contingentPool = [];
+    G.accumulatedHosts = [
+      {
+        swords: 10,
+        shields: 20,
+        isFleet: false,
+        isInvasionTrigger: true,
+      },
+    ];
+    G.cardDecks.fortuneOfWarCards = [
+      { name: "Host sword", sword: 1, shield: 0 },
+      { name: "Army shield", sword: 0, shield: 1 },
+    ];
+
+    callContribute(G, "0", 0, 1, ["0", "1", "2"]);
+    callContribute(G, "1", 0, 2, ["0", "1", "2"]);
+    callContribute(G, "2", 0, 2, ["0", "1", "2"]);
+
+    expect(G.battleResult?.winner).toBe("Infidel Host");
+    expect(G.playerInfo["0"].resources.victoryPoints).toBe(2);
+    expect(G.playerInfo["1"].resources.victoryPoints).toBe(6);
+    expect(G.playerInfo["2"].resources.victoryPoints).toBe(6);
+  });
+
+  it("does not Shame a fleet-only contributor", () => {
+    const G = buildInitialG([
+      buildPlayer("0", {
+        isCaptainGeneral: true,
+        heresyTracker: 0,
+        resources: buildResources({ skyships: 1 }),
+      }),
+      buildPlayer("1", {
+        resources: buildResources({ regiments: 1 }),
+      }),
+    ]);
+    G.currentInvasion = {
+      ...buildInvasion(1),
+      phase: "contribute",
+    };
+    G.contingentPool = [];
+    G.accumulatedHosts = [
+      {
+        swords: 1,
+        shields: 20,
+        isFleet: false,
+        isInvasionTrigger: true,
+      },
+    ];
+    G.cardDecks.fortuneOfWarCards = [
+      { name: "Host shield", sword: 0, shield: 1 },
+      { name: "Army shield", sword: 0, shield: 1 },
+    ];
+
+    callContribute(G, "0", 0, 0, ["0", "1"], 1);
+    callContribute(G, "1", 1, 0, ["0", "1"]);
+
+    expect(G.playerInfo["0"].heresyTracker).toBe(0);
+  });
+});
+
+describe("invasionFlow — NPR realm scaling", () => {
+  it.each([
+    [2, 4],
+    [4, 2],
+    [6, 0],
+  ])(
+    "draws %i-player Grand Army contingents only for the %i unseated Kingdom slots",
+    (playerCount, expectedNprCount) => {
+      const players = ASSIGNABLE_KINGDOMS.slice(0, playerCount).map(
+        (kingdomName, index) =>
+          buildPlayer(String(index), {
+            kingdomName,
+            isCaptainGeneral: index === 0,
+            resources: buildResources({
+              fortuneCards:
+                index === 0
+                  ? [
+                      {
+                        name: "Pause ground",
+                        sword: 1,
+                        shield: 0,
+                        flipped: false,
+                      },
+                    ]
+                  : [],
+            }),
+          })
+      );
+      const playOrder = players.map((player) => player.id);
+      const G = buildInitialG(players);
+      G.currentInvasion = {
+        ...buildInvasion(1),
+        phase: "contribute",
+        eligibleCaptainGenerals: playOrder,
+      };
+      G.contingentPool = [1, 2, 3, 4, 5, 6];
+      G.accumulatedHosts = [
+        {
+          swords: 1,
+          shields: 0,
+          isFleet: false,
+          isInvasionTrigger: true,
+        },
+      ];
+
+      for (const playerID of playOrder) {
+        callContribute(G, playerID, 0, 0, playOrder);
+      }
+
+      expect(G.currentInvasion?.phase).toBe("ground_fow");
+      expect(G.currentInvasion?.nprContingents).toHaveLength(
+        expectedNprCount
+      );
+      expect(G.contingentPool).toHaveLength(6 - expectedNprCount);
+    }
+  );
+});
+
+describe("invasionFlow — aerial invasion stage", () => {
+  const fleetCounter = {
+    swords: 3,
+    shields: 0,
+    isFleet: true,
+    isInvasionTrigger: false,
+  };
+
+  const buildAerialG = () => {
+    const G = buildInitialG([
+      buildPlayer("0", {
+        isCaptainGeneral: true,
+        resources: buildResources({
+          skyships: 2,
+          fortuneCards: [
+            {
+              name: "Hand strike",
+              sword: 3,
+              shield: 0,
+              flipped: false,
+            },
+            {
+              name: "Ground reserve",
+              sword: 1,
+              shield: 0,
+              flipped: false,
+            },
+          ],
+        }),
+      }),
+    ]);
+    G.currentInvasion = {
+      ...buildInvasion(1),
+      phase: "contribute",
+      eligibleCaptainGenerals: ["0"],
+    };
+    G.contingentPool = [];
+    G.accumulatedHosts = [
+      {
+        swords: 1,
+        shields: 0,
+        isFleet: false,
+        isInvasionTrigger: true,
+      },
+    ];
+    G.infidelFleet = {
+      counter: { ...fleetCounter },
+      location: [...INFIDEL_EMPIRE_LOCATION],
+      active: true,
+      destroyed: false,
+    };
+    G.cardDecks.fortuneOfWarCards = [
+      { name: "Fleet sword", sword: 2, shield: 0 },
+      { name: "Wing shield", sword: 0, shield: 1 },
+    ];
+    return G;
+  };
+
+  it("lets the Captain-General's hand card win where drawing loses, and consumes no player deck card", () => {
+    const handG = buildAerialG();
+    callContribute(handG, "0", 0, 0, ["0"], 2);
+    expect(handG.currentInvasion?.phase).toBe("aerial_fow");
+    callCommitInvasionFoW(handG, "0", 0, ["0"]);
+
+    const drawG = buildAerialG();
+    callContribute(drawG, "0", 0, 0, ["0"], 2);
+    callCommitInvasionFoW(drawG, "0", "draw", ["0"]);
+
+    expect(handG.currentInvasion?.aerialOutcome).toBe("players");
+    expect(drawG.currentInvasion?.aerialOutcome).toBe("infidel");
+    expect(handG.cardDecks.fortuneOfWarCards).toHaveLength(1);
+    expect(drawG.cardDecks.fortuneOfWarCards).toHaveLength(0);
+  });
+
+  it("returns surviving skyships to contributors when the fleet wing loses", () => {
+    const G = buildInitialG([
+      buildPlayer("0", {
+        isCaptainGeneral: true,
+        resources: buildResources({
+          skyships: 5,
+          fortuneCards: [
+            {
+              name: "Keep ground choice open",
+              sword: 1,
+              shield: 0,
+              flipped: false,
+            },
+          ],
+        }),
+      }),
+    ]);
+    G.currentInvasion = {
+      ...buildInvasion(1),
+      phase: "contribute",
+      eligibleCaptainGenerals: ["0"],
+    };
+    G.contingentPool = [];
+    G.accumulatedHosts = [
+      {
+        swords: 1,
+        shields: 0,
+        isFleet: false,
+        isInvasionTrigger: true,
+      },
+    ];
+    G.infidelFleet = {
+      counter: {
+        ...fleetCounter,
+        shields: 4,
+      },
+      location: [...INFIDEL_EMPIRE_LOCATION],
+      active: true,
+      destroyed: false,
+    };
+    G.cardDecks.fortuneOfWarCards = [
+      { name: "Fleet sword", sword: 4, shield: 0 },
+      { name: "Wing shield", sword: 0, shield: 1 },
+    ];
+
+    callContribute(G, "0", 0, 0, ["0"], 5);
+    callCommitInvasionFoW(G, "0", "draw", ["0"]);
+
+    expect(G.currentInvasion?.aerialOutcome).toBe("infidel");
+    expect(G.currentInvasion?.survivingSkyships?.["0"]).toBe(0);
+    expect(G.playerInfo["0"].resources.skyships).toBe(4);
+    expect(G.currentInvasion?.phase).toBe("ground_fow");
+  });
+
+  it("allocates fleet-wing losses largest-contributor-first, then earliest IPO", () => {
+    const G = buildInitialG([
+      buildPlayer("0", {
+        isCaptainGeneral: true,
+        resources: buildResources({
+          skyships: 1,
+          fortuneCards: [
+            {
+              name: "Aerial strike",
+              sword: 1,
+              shield: 0,
+              flipped: false,
+            },
+            {
+              name: "Ground reserve",
+              sword: 1,
+              shield: 0,
+              flipped: false,
+            },
+          ],
+        }),
+      }),
+      buildPlayer("1", {
+        resources: buildResources({ skyships: 1 }),
+      }),
+      buildPlayer("2", {
+        resources: buildResources({ skyships: 2 }),
+      }),
+    ]);
+    G.currentInvasion = {
+      ...buildInvasion(1),
+      phase: "contribute",
+      eligibleCaptainGenerals: ["0", "1"],
+    };
+    G.contingentPool = [];
+    G.accumulatedHosts = [
+      {
+        swords: 1,
+        shields: 0,
+        isFleet: false,
+        isInvasionTrigger: true,
+      },
+    ];
+    G.infidelFleet = {
+      counter: {
+        ...fleetCounter,
+        shields: 5,
+      },
+      location: [...INFIDEL_EMPIRE_LOCATION],
+      active: true,
+      destroyed: false,
+    };
+    G.cardDecks.fortuneOfWarCards = [
+      { name: "Fleet strike", sword: 4, shield: 0 },
+    ];
+
+    callContribute(G, "0", 0, 0, ["0", "1", "2"], 1);
+    callContribute(G, "1", 0, 0, ["0", "1", "2"], 1);
+    callContribute(G, "2", 0, 0, ["0", "1", "2"], 2);
+    callCommitInvasionFoW(G, "0", 0, ["0", "1", "2"]);
+
+    expect(G.currentInvasion?.aerialOutcome).toBe("infidel");
+    expect(G.playerInfo["0"].resources.skyships).toBe(0);
+    expect(G.playerInfo["1"].resources.skyships).toBe(1);
+    expect(G.playerInfo["2"].resources.skyships).toBe(0);
+    expect(G.currentInvasion?.phase).toBe("ground_fow");
+  });
+
+  it("flips a surviving Infidel Fleet after the player wing wins", () => {
+    const G = buildInitialG([
+      buildPlayer("0", {
+        isCaptainGeneral: true,
+        resources: buildResources({
+          skyships: 5,
+          fortuneCards: [
+            {
+              name: "Aerial shield",
+              sword: 0,
+              shield: 1,
+              flipped: false,
+            },
+            {
+              name: "Ground reserve",
+              sword: 1,
+              shield: 0,
+              flipped: false,
+            },
+          ],
+        }),
+      }),
+    ]);
+    G.currentInvasion = {
+      ...buildInvasion(1),
+      phase: "contribute",
+      eligibleCaptainGenerals: ["0"],
+    };
+    G.contingentPool = [];
+    G.accumulatedHosts = [
+      {
+        swords: 1,
+        shields: 0,
+        isFleet: false,
+        isInvasionTrigger: true,
+      },
+    ];
+    G.infidelFleet = {
+      counter: {
+        ...fleetCounter,
+        shields: 3,
+      },
+      location: [...INFIDEL_EMPIRE_LOCATION],
+      active: true,
+      destroyed: false,
+    };
+    G.cardDecks.fortuneOfWarCards = [
+      { name: "Fleet strike", sword: 3, shield: 0 },
+    ];
+
+    callContribute(G, "0", 0, 0, ["0"], 5);
+    callCommitInvasionFoW(G, "0", 0, ["0"]);
+
+    expect(G.currentInvasion?.aerialOutcome).toBe("players");
+    expect(G.infidelFleet).toMatchObject({
+      location: INFIDEL_EMPIRE_LOCATION,
+      active: false,
+      destroyed: false,
+    });
+    expect(G.currentInvasion?.phase).toBe("ground_fow");
+  });
+
+  it("ignores Infidel Fleet losses when it wins an annihilating equal-loss tie", () => {
+    const G = buildInitialG([
+      buildPlayer("0", {
+        isCaptainGeneral: true,
+        resources: buildResources({
+          skyships: 3,
+          fortuneCards: [
+            {
+              name: "Aerial no effect",
+              sword: 0,
+              shield: 0,
+              flipped: false,
+            },
+            {
+              name: "Ground reserve",
+              sword: 1,
+              shield: 0,
+              flipped: false,
+            },
+          ],
+        }),
+      }),
+    ]);
+    G.currentInvasion = {
+      ...buildInvasion(1),
+      phase: "contribute",
+      eligibleCaptainGenerals: ["0"],
+    };
+    G.contingentPool = [];
+    G.accumulatedHosts = [
+      {
+        swords: 1,
+        shields: 0,
+        isFleet: false,
+        isInvasionTrigger: true,
+      },
+    ];
+    G.infidelFleet = {
+      counter: { ...fleetCounter },
+      location: [...INFIDEL_EMPIRE_LOCATION],
+      active: true,
+      destroyed: false,
+    };
+    G.cardDecks.fortuneOfWarCards = [
+      { name: "Fleet strike", sword: 3, shield: 0 },
+    ];
+
+    callContribute(G, "0", 0, 0, ["0"], 3);
+    callCommitInvasionFoW(G, "0", 0, ["0"]);
+
+    expect(G.currentInvasion?.aerialOutcome).toBe("infidel");
+    expect(G.playerInfo["0"].resources.skyships).toBe(0);
+    expect(G.infidelFleet).toMatchObject({
+      location: INFIDEL_EMPIRE_LOCATION,
+      active: true,
+      destroyed: false,
+    });
+    expect(
+      G.infidelHostPool.some((counter) => counter.isFleet)
+    ).toBe(false);
+    expect(G.currentInvasion?.phase).toBe("ground_fow");
+  });
+
+  it("adds a victorious fleet wing's surviving skyships to the ground host", () => {
+    const G = buildInitialG([
+      buildPlayer("0", {
+        isCaptainGeneral: true,
+        resources: buildResources({ skyships: 5 }),
+      }),
+    ]);
+    G.currentInvasion = {
+      ...buildInvasion(1),
+      phase: "contribute",
+      eligibleCaptainGenerals: ["0"],
+    };
+    G.contingentPool = [];
+    G.accumulatedHosts = [
+      {
+        swords: 1,
+        shields: 20,
+        isFleet: false,
+        isInvasionTrigger: true,
+      },
+    ];
+    G.infidelFleet = {
+      counter: { ...fleetCounter },
+      location: [...INFIDEL_EMPIRE_LOCATION],
+      active: true,
+      destroyed: false,
+    };
+    G.cardDecks.fortuneOfWarCards = [
+      { name: "Fleet shield", sword: 0, shield: 1 },
+      { name: "Wing shield", sword: 0, shield: 1 },
+      { name: "Host shield", sword: 0, shield: 1 },
+      { name: "Army shield", sword: 0, shield: 1 },
+    ];
+
+    callContribute(G, "0", 0, 0, ["0"], 5);
+
+    expect(G.infidelFleet).toBeNull();
+    expect(G.battleResult).toMatchObject({
+      battleType: "Infidel Invasion",
+      defenderSwords: 5,
+      defenderShields: 5,
+    });
+    expect(G.playerInfo["0"].resources.skyships).toBe(5);
+  });
+
+  it("resolves the separate ground FoW hand-or-draw decision", () => {
+    const G = buildInitialG([
+      buildPlayer("0", {
+        isCaptainGeneral: true,
+        resources: buildResources({
+          fortuneCards: [
+            {
+              name: "Ground defence",
+              sword: 0,
+              shield: 3,
+              flipped: false,
+            },
+          ],
+        }),
+      }),
+    ]);
+    G.currentInvasion = {
+      ...buildInvasion(1),
+      phase: "contribute",
+      eligibleCaptainGenerals: ["0"],
+    };
+    G.contingentPool = [1];
+    G.accumulatedHosts = [
+      {
+        swords: 1,
+        shields: 0,
+        isFleet: false,
+        isInvasionTrigger: true,
+      },
+    ];
+    G.cardDecks.fortuneOfWarCards = [
+      { name: "Host shield", sword: 0, shield: 1 },
+    ];
+
+    callContribute(G, "0", 0, 0, ["0"]);
+    expect(G.currentInvasion?.phase).toBe("ground_fow");
+
+    const { events } = callCommitInvasionFoW(G, "0", 0, ["0"]);
+
+    expect(G.currentInvasion).toBeNull();
+    expect(G.playerInfo["0"].resources.fortuneCards).toHaveLength(0);
+    expect(events.endPhase).toHaveBeenCalledOnce();
+  });
+
+  it.each([
+    {
+      state: "destroyed",
+      active: false,
+      destroyed: true,
+      expectedPhase: "ground_fow",
+      expectedFleet: null,
+    },
+    {
+      state: "flipped",
+      active: false,
+      destroyed: false,
+      expectedPhase: "ground_fow",
+      expectedFleet: "present",
+    },
+    {
+      state: "active",
+      active: true,
+      destroyed: false,
+      expectedPhase: "aerial_fow",
+      expectedFleet: "present",
+    },
+  ] as const)(
+    "carries a $state prior-combat Infidel Fleet into invasion setup correctly",
+    ({ active, destroyed, expectedPhase, expectedFleet }) => {
+      const G = buildAerialG();
+      G.infidelFleet!.active = active;
+      G.infidelFleet!.destroyed = destroyed;
+
+      callContribute(G, "0", 0, 0, ["0"], 2);
+
+      expect(G.currentInvasion?.phase).toBe(expectedPhase);
+      expect(G.currentInvasion?.aerialOutcome).toBe(
+        expectedPhase === "ground_fow" ? "skipped" : undefined
+      );
+      if (expectedFleet === null) {
+        expect(G.infidelFleet).toBeNull();
+        expect(
+          G.infidelHostPool.some((counter) => counter.isFleet)
+        ).toBe(true);
+      } else {
+        expect(G.infidelFleet).not.toBeNull();
+      }
+    }
+  );
+
+  it.each([
+    ["aerial_fow", "invasion_aerial_fow"],
+    ["ground_fow", "invasion_ground_fow"],
+  ] as const)(
+    "AI enumerates every hand index plus draw for the %s decision",
+    (phase, step) => {
+      const G = buildAerialG();
+      G.currentInvasion!.phase = phase;
+      G.step = step;
+      const ctx = {
+        ...buildCtx("0", 1),
+        phase: "invasionCheck",
+      };
+
+      const moves = enumerateLegalMoves(G, ctx, "0").filter(
+        (move) => move.move === "commitInvasionFoW"
+      );
+
+      expect(moves.map((move) => move.args)).toEqual([
+        [0],
+        [1],
+        ["draw"],
+      ]);
+    }
+  );
+});
+
 // Test 3: Contributing 0 troops is valid
 
 describe("invasionFlow — contributing 0 troops is valid", () => {
@@ -254,6 +1137,32 @@ describe("invasionFlow — contributing 0 troops is valid", () => {
     const { result } = callContribute(G, "0", 0, 0, ["0", "1"]);
     expect(result).not.toBe(INVALID_MOVE);
   });
+
+  it.each([-1, 1.5, Number.NaN, Number.POSITIVE_INFINITY])(
+    "rejects invalid skyship contribution %s",
+    (skyships) => {
+      const G = buildInitialG([
+        buildPlayer("0", {
+          resources: buildResources({ skyships: 3 }),
+        }),
+        buildPlayer("1"),
+      ]);
+      G.currentInvasion = {
+        ...buildInvasion(),
+        phase: "contribute",
+      };
+
+      const { result } = callContribute(
+        G,
+        "0",
+        0,
+        0,
+        ["0", "1"],
+        skyships
+      );
+      expect(result).toBe(INVALID_MOVE);
+    }
+  );
 });
 
 // Test 4: Buyoff phase after Grand Army loses

@@ -1,40 +1,51 @@
 import { INVALID_MOVE } from "boardgame.io/core";
 import { MoveDefinition } from "../../types.js";
 import { logEvent } from "../../helpers/stateUtils.js";
-import { resolveGrandArmyBattle } from "../../helpers/resolveInvasion.js";
+import { beginGrandArmyBattle } from "../../helpers/resolveInvasion.js";
 
 const contributeToGrandArmy: MoveDefinition = {
   fn: ({ G, ctx, playerID, events, random }, ...args) => {
-    const regiments: number = args[0] ?? 0;
-    const levies: number = args[1] ?? 0;
-    const skyships: number = args[2] ?? 0;
+    const regiments: unknown = args[0] ?? 0;
+    const levies: unknown = args[1] ?? 0;
+    const skyships: unknown = args[2] ?? 0;
 
     if (!G.currentInvasion) return INVALID_MOVE;
     if (G.currentInvasion.phase !== "contribute") return INVALID_MOVE;
+    if (G.currentInvasion.contributions[playerID] !== undefined) {
+      return INVALID_MOVE;
+    }
 
     const player = G.playerInfo[playerID];
 
-    // Validate
-    if (regiments < 0 || levies < 0 || skyships < 0) return INVALID_MOVE;
-    if (regiments > player.resources.regiments) return INVALID_MOVE;
-    if (levies > player.resources.levies) return INVALID_MOVE;
-    if (skyships > player.resources.skyships) return INVALID_MOVE;
+    if (
+      !Number.isInteger(regiments) ||
+      !Number.isInteger(levies) ||
+      !Number.isInteger(skyships)
+    ) {
+      return INVALID_MOVE;
+    }
+    const regimentCount = regiments as number;
+    const levyCount = levies as number;
+    const skyshipCount = skyships as number;
+    if (regimentCount < 0 || levyCount < 0 || skyshipCount < 0) {
+      return INVALID_MOVE;
+    }
+    if (regimentCount > player.resources.regiments) return INVALID_MOVE;
+    if (levyCount > player.resources.levies) return INVALID_MOVE;
+    if (skyshipCount > player.resources.skyships) return INVALID_MOVE;
 
-    // Record contribution — coerce to numbers to prevent NaN in battle resolution
-    const safeRegs = Number(regiments) || 0;
-    const safeLevs = Number(levies) || 0;
-    const safeSky = Number(skyships) || 0;
     G.currentInvasion.contributions[playerID] = {
-      regiments: safeRegs,
-      levies: safeLevs,
-      skyships: safeSky,
+      regiments: regimentCount,
+      levies: levyCount,
+      skyships: skyshipCount,
     };
 
-    const totalSwords = regiments * 2 + levies + skyships;
-    const parts = [];
-    if (regiments > 0) parts.push(`${regiments} regiments`);
-    if (levies > 0) parts.push(`${levies} levies`);
-    if (skyships > 0) parts.push(`${skyships} skyships`);
+    const totalSwords =
+      regimentCount * 2 + levyCount + skyshipCount;
+    const parts: string[] = [];
+    if (regimentCount > 0) parts.push(`${regimentCount} regiments`);
+    if (levyCount > 0) parts.push(`${levyCount} levies`);
+    if (skyshipCount > 0) parts.push(`${skyshipCount} skyships`);
     logEvent(
       G,
       `${player.kingdomName} contributes ${parts.join(", ") || "nothing"} (${totalSwords} swords) to the Grand Army`
@@ -46,18 +57,12 @@ const contributeToGrandArmy: MoveDefinition = {
     );
 
     if (allContributed) {
-      // Resolve the battle — returns buyoff cost (0 if won)
-      const buyoffCost = resolveGrandArmyBattle(G, random.Shuffle);
-
-      if (buyoffCost > 0 && G.currentInvasion) {
-        // Army lost — transition to interactive buyoff
-        G.currentInvasion.phase = "buyoff";
-        G.currentInvasion.buyoffCost = buyoffCost;
-        G.currentInvasion.buyoffOffered = {};
-        G.step = "invasion_buyoff";
+      const result = beginGrandArmyBattle(G, random.Shuffle);
+      if (result.status === "awaiting_fow") {
+        events.endTurn({ next: result.playerID });
+      } else if (result.status === "defeat") {
         events.endTurn({ next: ctx.playOrder[0] });
       } else {
-        // Army won — proceed to retrieve fleets
         events.endPhase();
       }
     } else {

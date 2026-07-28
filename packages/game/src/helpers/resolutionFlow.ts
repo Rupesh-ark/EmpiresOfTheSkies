@@ -74,6 +74,10 @@ export const getResolutionTarget = (G: MyGameState): string | null => {
     case "invasion_nominate":
       return Object.values(G.playerInfo).find((p) => p.isArchprelate)?.id ?? null;
 
+    case "invasion_aerial_fow":
+    case "invasion_ground_fow":
+      return G.turnOrder.find((id) => G.playerInfo[id].isCaptainGeneral) ?? null;
+
     default:
       return null; // retrieve fleets, rebellion_rival_support, etc. use normal turn order
   }

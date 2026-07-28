@@ -12,6 +12,7 @@ const invasionCheckPhase: PhaseConfig<MyGameState> = {
     "respondToInfidelFleet",
     "nominateCaptainGeneral",
     "contributeToGrandArmy",
+    "commitInvasionFoW",
     "offerBuyoffGold"
   ),
   next: "retrieveFleets",

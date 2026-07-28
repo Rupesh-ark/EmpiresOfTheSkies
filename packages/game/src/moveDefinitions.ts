@@ -66,6 +66,7 @@ import commitRebellionTroops from "./moves/events/commitRebellionTroops.js";
 import contributeToRebellion from "./moves/events/contributeToRebellion.js";
 import nominateCaptainGeneral from "./moves/events/nominateCaptainGeneral.js";
 import contributeToGrandArmy from "./moves/events/contributeToGrandArmy.js";
+import commitInvasionFoW from "./moves/events/commitInvasionFoW.js";
 import offerBuyoffGold from "./moves/events/offerBuyoffGold.js";
 import respondToInfidelFleet from "./moves/events/respondToInfidelFleet.js";
 import commitDeferredBattleCard from "./moves/events/commitDeferredBattleCard.js";
@@ -177,6 +178,7 @@ export const MOVE_DEFINITIONS: Record<string, MoveDefinition> = {
   contributeToRebellion,
   nominateCaptainGeneral,
   contributeToGrandArmy,
+  commitInvasionFoW,
   offerBuyoffGold,
   respondToInfidelFleet,
   commitDeferredBattleCard,

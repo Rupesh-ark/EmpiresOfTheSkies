@@ -322,9 +322,23 @@ function evaluateInvasion(
   if (move.move === "contributeToGrandArmy") {
     const regs = (move.args[0] as number) ?? 0;
     const levs = (move.args[1] as number) ?? 0;
-    const total = regs + levs;
+    const skyships = (move.args[2] as number) ?? 0;
+    const total = regs + levs + skyships;
     if (total === 0) return simpleEval(move, V2_CONFIG.resolution.invasionContributeNoneBase, "contribute nothing");
-    return simpleEval(move, V2_CONFIG.resolution.invasionContributeBase, `contribute ${total} troops to Grand Army`);
+    return simpleEval(move, V2_CONFIG.resolution.invasionContributeBase, `contribute ${total} units to Grand Army`);
+  }
+  if (move.move === "commitInvasionFoW") {
+    if (move.args[0] === "draw") {
+      return simpleEval(move, V2_CONFIG.resolution.deferredDrawBase, "draw random FoW for invasion");
+    }
+    const cardIndex = move.args[0] as number;
+    const card = _G.playerInfo[_playerID].resources.fortuneCards[cardIndex];
+    const value = card ? card.sword + card.shield : 0;
+    return simpleEval(
+      move,
+      V2_CONFIG.resolution.deferredCardBase + (value >= 6 ? V2_CONFIG.resolution.deferredCardHighBonus : 0),
+      `commit invasion card ${cardIndex}`
+    );
   }
   if (move.move === "offerBuyoffGold") {
     const gold = (move.args[0] as number) ?? 0;
@@ -394,7 +408,13 @@ export function evaluateResolution(
       result = evaluateInfidelFleet(G, playerID, move, personality);
     } else if (sub === "rebellion" || sub === "rebellion_rival_support") {
       result = evaluateRebellion(G, playerID, move, personality);
-    } else if (sub === "invasion_nominate" || sub === "invasion_contribute" || sub === "invasion_buyoff") {
+    } else if (
+      sub === "invasion_nominate" ||
+      sub === "invasion_contribute" ||
+      sub === "invasion_aerial_fow" ||
+      sub === "invasion_ground_fow" ||
+      sub === "invasion_buyoff"
+    ) {
       result = evaluateInvasion(G, playerID, move, personality);
     } else if (sub === "deferred_battle") {
       result = evaluateDeferredBattle(G, playerID, move, personality);

@@ -621,6 +621,9 @@ export function estimateMoveValue(
     case "contributeToGrandArmy":
       return computeMoveValue("contributeToGrandArmy", weights);
 
+    case "commitInvasionFoW":
+      return computeMoveValue("commitInvasionFoW", weights);
+
     case "nominateCaptainGeneral":
       return computeMoveValue("nominateCaptainGeneral", weights);
 
