@@ -1,6 +1,6 @@
 import { INVALID_MOVE } from "boardgame.io/core";
 import { MoveDefinition } from "../../types.js";
-import { isValidRetreatDestination } from "../../helpers/mapUtils.js";
+import { FAITHDOM_TILES } from "../../helpers/mapUtils.js";
 import { forceRetrieveFleets } from "../../helpers/resolveBattle.js";
 import { nextAfterAerialDecision } from "../../helpers/resolutionSequencer.js";
 
@@ -27,34 +27,54 @@ const relocateDefeatedFleet: MoveDefinition = {
     const defeatedPlayer = args[1];
     const [x, y] = G.mapState.currentBattle;
 
-    // Special case: [4, 0] means "retreat home" — no valid tiles available
-    const isRetreatHome = destination[0] === 4 && destination[1] === 0;
+    if (
+      !Array.isArray(destination) ||
+      destination.length < 2 ||
+      typeof destination[0] !== "number" ||
+      typeof destination[1] !== "number"
+    ) {
+      return INVALID_MOVE;
+    }
+
+    // Stay-put wins over the Faithdom check: a battle fought inside the
+    // Faithdom region offers its own square as a destination, and choosing it
+    // must keep the fleets in place, not force-retrieve them home.
+    const isStayPut = destination[0] === x && destination[1] === y;
+    const isRetreatHome =
+      !isStayPut &&
+      FAITHDOM_TILES.some(
+        ([fx, fy]) => fx === destination[0] && fy === destination[1]
+      );
+    const isOfferedDestination = G.validRelocationTiles.some(
+      ([tx, ty]) => tx === destination[0] && ty === destination[1]
+    );
+
+    if (!isRetreatHome && !isOfferedDestination) {
+      return INVALID_MOVE;
+    }
 
     if (isRetreatHome) {
       forceRetrieveFleets(G, defeatedPlayer, x, y);
     } else {
-      // Validate retreat destination
-      if (
-        !isValidRetreatDestination(
-          G,
-          [x, y] as [number, number],
-          destination as [number, number],
-          defeatedPlayer
-        )
-      ) {
-        return INVALID_MOVE;
-      }
-
       G.playerInfo[defeatedPlayer].fleetInfo.forEach((fleet) => {
         if (fleet.location[0] === x && fleet.location[1] === y) {
-          fleet.location = destination;
-          G.mapState.battleMap[y][x].splice(
-            G.mapState.battleMap[y][x].indexOf(defeatedPlayer),
-            1
-          );
-          G.mapState.battleMap[destination[1]][destination[0]].push(defeatedPlayer);
+          fleet.location = [...destination];
         }
       });
+
+      if (destination[0] !== x || destination[1] !== y) {
+        const originPlayers = G.mapState.battleMap[y][x];
+        const defeatedPlayerIndex = originPlayers.indexOf(defeatedPlayer);
+        if (defeatedPlayerIndex >= 0) {
+          originPlayers.splice(defeatedPlayerIndex, 1);
+        }
+
+        const destinationPlayers =
+          G.mapState.battleMap[destination[1]][destination[0]];
+        if (!destinationPlayers.includes(defeatedPlayer)) {
+          destinationPlayers.push(defeatedPlayer);
+        }
+      }
     }
 
     // Advance: next player at this tile, or next tile, or plunder
@@ -64,7 +84,9 @@ const relocateDefeatedFleet: MoveDefinition = {
   successLog: (G, _pid, destination, defeatedPlayer) => {
     const k = G.playerInfo[defeatedPlayer]?.kingdomName ?? "A fleet";
     const [dx, dy] = destination ?? [];
-    if (dx === 4 && dy === 0) return `${k}'s fleet retreats home`;
+    if (FAITHDOM_TILES.some(([fx, fy]) => fx === dx && fy === dy)) {
+      return `${k}'s fleet retreats home`;
+    }
     return `${k}'s fleet withdraws to [${dx}, ${dy}]`;
   },
 };

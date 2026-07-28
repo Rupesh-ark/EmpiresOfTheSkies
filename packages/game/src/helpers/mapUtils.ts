@@ -129,6 +129,9 @@ export function bfsShortestPath(
   start: [number, number],
   targets: [number, number][],
   tileArray: TileInfoProps[][],
+  // When given, the path may only traverse discovered tiles — required when
+  // the path stands in for a route a fleet legally flew.
+  discoveredTiles?: boolean[][],
 ): [number, number][] {
   const startKey = tileKey(start[0], start[1]);
   const targetSet = new Set(targets.map(([x, y]) => tileKey(x, y)));
@@ -142,6 +145,7 @@ export function bfsShortestPath(
     const [cx, cy] = queue.shift()!;
     const curKey = tileKey(cx, cy);
     for (const [nx, ny] of getPassableNeighbors(cx, cy, tileArray)) {
+      if (discoveredTiles && !discoveredTiles[ny]?.[nx]) continue;
       const nk = tileKey(nx, ny);
       if (visited.has(nk)) continue;
       visited.set(nk, curKey);
@@ -163,41 +167,95 @@ export function bfsShortestPath(
 }
 
 /**
- * Validates a retreat/evasion destination.
- * rules: destination must be discovered, adjacent (or same tile or Faithdom),
- * and free of unfriendly fleets (Faithdom is always safe).
+ * Computes the legal destinations for a retreating or evading fleet.
+ *
+ * The fleet may stay at the battle, use an adjacent Faithdom tile, or move to
+ * an adjacent discovered tile without rival fleets. If no such normal
+ * adjacent tile exists, the nearest BFS ring with discovered empty tiles is
+ * offered instead.
  */
-export const isValidRetreatDestination = (
+export const computeRetreatDestinations = (
   G: MyGameState,
   battleLocation: [number, number],
-  destination: [number, number],
-  retreatingPlayerID: string
-): boolean => {
-  const [dx, dy] = destination;
+  retreatingPlayerID: string,
+): [number, number][] => {
   const [bx, by] = battleLocation;
-
-  // Same tile is always valid (staying put)
-  if (dx === bx && dy === by) return true;
-
-  // Faithdom tiles are always valid (safe haven)
-  if (FAITHDOM_TILES.some(([fx, fy]) => fx === dx && fy === dy)) return true;
-
-  // Must be discovered
-  if (!G.mapState.discoveredTiles[dy]?.[dx]) return false;
-
-  // Must be adjacent to battle location and not blocked by mountains
-  const neighbors = getPassableNeighbors(bx, by, G.mapState.currentTileArray);
-  const isAdjacent = neighbors.some(([nx, ny]) => nx === dx && ny === dy);
-  if (!isAdjacent) return false;
-
-  // Must not contain unfriendly fleets
-  const playersAtDestination = G.mapState.battleMap[dy]?.[dx] ?? [];
-  const hasUnfriendlyFleet = playersAtDestination.some(
-    (pid) => pid !== retreatingPlayerID
+  const destinations: [number, number][] = [];
+  const destinationKeys = new Set<string>();
+  const faithdomKeys = new Set(
+    FAITHDOM_TILES.map(([x, y]) => tileKey(x, y))
   );
-  if (hasUnfriendlyFleet) return false;
 
-  return true;
+  const addDestination = (tile: [number, number]): void => {
+    const key = tileKey(tile[0], tile[1]);
+    if (!destinationKeys.has(key)) {
+      destinationKeys.add(key);
+      destinations.push(tile);
+    }
+  };
+
+  const isLaden = G.playerInfo[retreatingPlayerID]?.fleetInfo.some(
+    (fleet) =>
+      fleet.location[0] === bx &&
+      fleet.location[1] === by &&
+      fleet.regiments + fleet.levies + fleet.eliteRegiments > 0
+  ) ?? false;
+  const neighborsOf = (x: number, y: number): [number, number][] =>
+    isLaden
+      ? getPassableNeighbors(x, y, G.mapState.currentTileArray)
+      : getNeighbors(x, y);
+
+  addDestination([bx, by]);
+
+  const adjacentTiles = neighborsOf(bx, by);
+  for (const tile of adjacentTiles) {
+    if (faithdomKeys.has(tileKey(tile[0], tile[1]))) {
+      addDestination(tile);
+    }
+  }
+
+  const adjacentRetreatTiles = adjacentTiles.filter(([x, y]) => {
+    if (!G.mapState.discoveredTiles[y]?.[x]) return false;
+    return !(G.mapState.battleMap[y]?.[x] ?? []).some(
+      (playerID) => playerID !== retreatingPlayerID
+    );
+  });
+  adjacentRetreatTiles.forEach(addDestination);
+
+  if (adjacentRetreatTiles.length === 0) {
+    const visited = new Set<string>([tileKey(bx, by)]);
+    let ring: [number, number][] = [[bx, by]];
+
+    while (ring.length > 0) {
+      const nextRing: [number, number][] = [];
+      for (const [x, y] of ring) {
+        for (const tile of neighborsOf(x, y)) {
+          const [tx, ty] = tile;
+          const key = tileKey(tx, ty);
+          if (visited.has(key)) continue;
+          visited.add(key);
+          if (
+            faithdomKeys.has(key) ||
+            !G.mapState.discoveredTiles[ty]?.[tx]
+          ) {
+            continue;
+          }
+          nextRing.push(tile);
+        }
+      }
+
+      const emptyTiles = nextRing.filter(
+        ([x, y]) => (G.mapState.battleMap[y]?.[x] ?? []).length === 0
+      );
+      if (emptyTiles.length > 0) {
+        emptyTiles.forEach(addDestination);
+        break;
+      }
+      ring = nextRing;
+    }
+  }
+
+  return destinations;
 };
 
 // All tiles in a player's trade network: placed route skyship discs, plus

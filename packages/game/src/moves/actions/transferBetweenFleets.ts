@@ -1,6 +1,6 @@
 import { MoveDefinition, MyGameState, MoveError } from "../../types.js";
 import { INVALID_MOVE } from "boardgame.io/core";
-import { MAX_SKYSHIPS_PER_FLEET } from "../../data/gameData.js";
+import { KINGDOM_LOCATION, MAX_SKYSHIPS_PER_FLEET } from "../../data/gameData.js";
 import log from "../../helpers/logger.js";
 
 const tfLog = log.child({ mod: "transfer-fleets" });
@@ -42,7 +42,7 @@ const validateTransferBetweenFleets = (
   }
   const sourceTroopsAfter = sourceFleet.regiments - regiments + sourceFleet.levies - levies + sourceFleet.eliteRegiments - elite;
   const sourceSkyshipsAfter = sourceFleet.skyships - skyships;
-  if (sourceTroopsAfter > sourceSkyshipsAfter && sourceSkyshipsAfter > 0) {
+  if (sourceTroopsAfter > sourceSkyshipsAfter) {
     return { code: "SOURCE_TROOP_CAPACITY", message: "Source fleet can't hold remaining troops after transfer" };
   }
   return null;
@@ -81,6 +81,36 @@ const transferBetweenFleets: MoveDefinition = {
     targetFleet.regiments += regiments;
     targetFleet.levies += levies;
     targetFleet.eliteRegiments += eliteRegiments;
+
+    const sourceFleetIsEmpty =
+      sourceFleet.skyships === 0 &&
+      sourceFleet.regiments === 0 &&
+      sourceFleet.levies === 0 &&
+      sourceFleet.eliteRegiments === 0;
+    const sourceFleetIsAtKingdom =
+      sourceFleet.location[0] === KINGDOM_LOCATION[0] &&
+      sourceFleet.location[1] === KINGDOM_LOCATION[1];
+
+    if (sourceFleetIsEmpty && !sourceFleetIsAtKingdom) {
+      const oldLocation = [...sourceFleet.location];
+      sourceFleet.location = [...KINGDOM_LOCATION];
+      sourceFleet.travelHistory = [];
+
+      const playerHasAnotherFleetAtOldLocation = currentPlayer.fleetInfo.some(
+        (fleet) =>
+          fleet.location[0] === oldLocation[0] &&
+          fleet.location[1] === oldLocation[1]
+      );
+
+      if (!playerHasAnotherFleetAtOldLocation) {
+        const currentBattleMapTile =
+          G.mapState.battleMap[oldLocation[1]][oldLocation[0]];
+        const i = currentBattleMapTile.indexOf(playerID);
+        if (i >= 0) {
+          currentBattleMapTile.splice(i, 1);
+        }
+      }
+    }
   },
   errorMessage: "Cannot transfer between fleets",
   validate: validateTransferBetweenFleets,

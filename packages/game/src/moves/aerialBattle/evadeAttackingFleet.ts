@@ -1,8 +1,8 @@
 import { MoveDefinition } from "../../types.js";
-import { findPossibleDestinations } from "../../helpers/helpers.js";
 import { forceRetrieveFleets } from "../../helpers/resolveBattle.js";
 import { nextAfterAerialDecision } from "../../helpers/resolutionSequencer.js";
 import { clonePlayerInfo } from "../../helpers/cloneUtils.js";
+import { computeRetreatDestinations } from "../../helpers/mapUtils.js";
 import log from "../../helpers/logger.js";
 
 const evadeAttackingFleet: MoveDefinition = {
@@ -26,18 +26,14 @@ const evadeAttackingFleet: MoveDefinition = {
 
       // Compute valid relocation tiles for the evading fleet
       try {
-        const possibleTiles = findPossibleDestinations(G, G.mapState.currentBattle, true);
-        const emptyTiles: number[][] = [];
-        for (let i = 1; i < possibleTiles.length; i++) {
-          possibleTiles[i].forEach((tile) => {
-            if (emptyTiles.length === 0 || i === 1) {
-              if (G.mapState.battleMap[tile[1]]?.[tile[0]]?.length === 0) {
-                emptyTiles.push(tile);
-              }
-            }
-          });
-        }
-        G.validRelocationTiles = emptyTiles;
+        G.validRelocationTiles = computeRetreatDestinations(
+          G,
+          [
+            G.mapState.currentBattle[0],
+            G.mapState.currentBattle[1],
+          ],
+          playerID
+        );
       } catch (err) {
         log.warn({ err, battle: G.mapState.currentBattle }, "Failed to find possible destinations for evading fleet");
         G.validRelocationTiles = [];

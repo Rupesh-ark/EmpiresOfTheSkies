@@ -5,30 +5,34 @@ import { DialogShell } from "@/components/atoms/DialogShell";
 import { GameButton } from "@/components/atoms/GameButton";
 
 const DrawOrPickCardDialog = (props: MyGameProps) => {
-  const [x, y] = props.G.mapState.currentBattle;
   const [currentCard, setCurrentCard] = useState(0);
 
-  const inCurrentBattle =
-    props.G.mapState.battleMap[y] &&
-    props.G.mapState.battleMap[y][x].includes(
-      props.playerID ?? props.ctx.currentPlayer
-    );
+  // Visibility: battleState identity, not battleMap presence — a ground-battle
+  // defender has no fleet at the tile but must still commit a card.
+  const bs = props.G.battleState;
+  const isMyTurn = props.playerID === props.ctx.currentPlayer;
 
-  // Visibility
-  const isMyTurn = props.playerID === props.ctx.currentPlayer && inCurrentBattle;
+  // Mirrors the engine's ground_resolve/aerial_resolve routing: attacker
+  // commits first, then the defender.
+  const isMyCommit =
+    bs !== undefined &&
+    ((bs.attacker.id === props.playerID && !bs.attacker.fowCard) ||
+      (bs.defender.id === props.playerID &&
+        !!bs.attacker.fowCard &&
+        !bs.defender.fowCard));
 
   const isBattleReady =
-    props.G.battleState?.attacker.decision === "fight" &&
-    props.G.battleState?.defender.decision === "fight" &&
-    !props.G.battleState?.attacker.victorious &&
-    !props.G.battleState?.defender.victorious;
+    bs?.attacker.decision === "fight" &&
+    bs?.defender.decision === "fight" &&
+    !bs?.attacker.victorious &&
+    !bs?.defender.victorious;
 
   const isConquestDraw =
     props.G.step === "conquest_draw_or_pick" &&
     props.G.conquestState !== undefined &&
     props.G.conquestState.id === props.playerID;
 
-  const isOpen = isMyTurn && (isBattleReady || isConquestDraw);
+  const isOpen = isMyTurn && ((isBattleReady && isMyCommit) || isConquestDraw);
 
   // Move dispatch
   const isConquest = props.G.step === "conquest_draw_or_pick";

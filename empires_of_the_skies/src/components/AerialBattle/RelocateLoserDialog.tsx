@@ -25,6 +25,7 @@ const RelocateLoserDialog = (props: MyGameProps) => {
       (props.playerID === props.G.battleState?.attacker.id &&
         props.G.battleState?.defender.decision === "evade"));
 
+  const isEvasion = props.G.battleState?.defender.decision === "evade";
   const tilesKey = JSON.stringify(props.G.validRelocationTiles ?? []);
   const loserName = props.G.playerInfo[loser]?.kingdomName ?? "the defeated fleet";
   const { moves } = props;
@@ -32,9 +33,12 @@ const RelocateLoserDialog = (props: MyGameProps) => {
   useEffect(() => {
     if (!shouldPick) return;
     const tiles = props.G.validRelocationTiles ?? [];
+    const prompt = isEvasion
+      ? `Choose a highlighted tile for ${loserName}'s evading fleet — staying put is allowed`
+      : `Choose a highlighted tile for ${loserName}'s defeated fleet to retreat to — staying put is allowed`;
     startSelection({
       tiles,
-      prompt: `Choose an empty tile on the map to send ${loserName}'s defeated fleet to`,
+      prompt,
       confirmLabel: "Relocate",
       onConfirm: (coords) => moves.relocateDefeatedFleet(coords, loser),
     });

@@ -2,13 +2,14 @@ import { Ctx } from "boardgame.io";
 import type { EventsAPI } from "../types.js";
 import { FleetInfo, GoodKey, MyGameState, PlayerInfo } from "../types.js";
 // findNext functions no longer called directly — resolutionSequencer handles all transitions
-import { drawFortuneOfWarCard, findPossibleDestinations, humanizeTileName } from "./helpers.js";
+import { drawFortuneOfWarCard, humanizeTileName } from "./helpers.js";
 import type { RandomAPI } from "../types.js";
 import { increaseHeresyWithinMove, increaseOrthodoxyWithinMove, logEvent, toBuildingOwner } from "./stateUtils.js";
 import { PRICE_MARKER_MIN, KINGDOM_LOCATION } from "../data/gameData.js";
 import { nextAfterAerialDecision, nextAfterGroundDecision, nextAfterConquest } from "./resolutionSequencer.js";
 import { calculateCombat } from "./combatMath.js";
 import { fleetCombatValues } from "./fleetUtils.js";
+import { computeRetreatDestinations } from "./mapUtils.js";
 import log from "./logger.js";
 
 const battleLog = log.child({ mod: "resolve-battle" });
@@ -532,18 +533,20 @@ export const resolveBattleAndReturnWinner = (
       } else {
         // Pre-compute valid relocation tiles for the frontend
         try {
-          const possibleTiles = findPossibleDestinations(G, G.mapState.currentBattle, true);
-          const emptyTiles: number[][] = [];
-          for (let i = 1; i < possibleTiles.length; i++) {
-            possibleTiles[i].forEach((tile) => {
-              if (emptyTiles.length === 0 || i === 1) {
-                if (G.mapState.battleMap[tile[1]]?.[tile[0]]?.length === 0) {
-                  emptyTiles.push(tile);
-                }
-              }
-            });
+          const retreatingPlayerID = Object.values(G.battleState ?? {}).find(
+            (player) => player.victorious === false
+          )?.id;
+          if (!retreatingPlayerID) {
+            throw new Error("Battle loser is unavailable");
           }
-          G.validRelocationTiles = emptyTiles;
+          G.validRelocationTiles = computeRetreatDestinations(
+            G,
+            [
+              G.mapState.currentBattle[0],
+              G.mapState.currentBattle[1],
+            ],
+            retreatingPlayerID
+          );
         } catch (err) {
           log.warn({ err, battle: G.mapState.currentBattle }, "Failed to find possible destinations in battle resolution");
           G.validRelocationTiles = [];

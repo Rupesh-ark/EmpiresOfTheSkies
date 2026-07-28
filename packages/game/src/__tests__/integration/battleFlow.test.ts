@@ -34,7 +34,7 @@ import attackPlayersBuilding from "../../moves/groundBattle/attackPlayersBuildin
 import yieldToAttacker from "../../moves/groundBattle/yieldToAttacker.js";
 import garrisonTroops from "../../moves/groundBattle/garrisonTroops.js";
 import constructOutpost from "../../moves/conquests/constructOutpost.js";
-import { resolveBattleAndReturnWinner } from "../../helpers/resolveBattle.js";
+import { computeGarrisonTroops, resolveBattleAndReturnWinner } from "../../helpers/resolveBattle.js";
 import {
   buildInitialG,
   buildPlayer,
@@ -450,8 +450,10 @@ describe("ground: after ground win → constructOutpost + garrisonTroops", () =>
     G.mapState.buildings[0][0].garrisonedRegiments = 0;
     G.mapState.buildings[0][0].garrisonedLevies = 0;
     G.mapState.battleMap[0][0] = ["0"];
+    G.step = "conquest_garrison";
+    computeGarrisonTroops(G, "0");
     const events = stubEvents();
-    // Phase must be "conquest" so garrisonTroops calls findNextConquest
+    // The conquest phase uses the conquest sequencer after garrisoning.
     const ctx = buildCtxForPhase("0", "conquest");
 
     garrisonTroops.fn({ G, ctx, playerID: "0", events, random: buildRandom() }, [3, 0]);
