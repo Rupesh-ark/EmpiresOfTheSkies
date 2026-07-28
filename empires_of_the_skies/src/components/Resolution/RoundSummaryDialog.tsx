@@ -48,10 +48,13 @@ const RoundSummaryDialog = (props: MyGameProps) => {
         : `Crops Fail: ${mod} Gold to all taxes`,
     });
   }
-  if (props.G.eventState.skipTaxesNextRound) {
+  if (props.G.eventState.skipTaxesNextRound.length > 0) {
+    const skippedKingdoms = props.G.eventState.skipTaxesNextRound
+      .map((id) => props.G.playerInfo[id]?.kingdomName ?? id)
+      .join(", ");
     summaryItems.push({
       icon: <AttachMoney />,
-      text: "Taxes will be skipped next round (Peasant Rebellion)",
+      text: `${skippedKingdoms} will skip taxes next round (Peasant Rebellion)`,
     });
   }
 

@@ -26,6 +26,8 @@ const InvasionNominateDialog = lazy(() => import("./Events/InvasionNominateDialo
 const InvasionContributeDialog = lazy(() => import("./Events/InvasionContributeDialog").then(m => ({ default: m.default })));
 const InvasionBuyoffDialog = lazy(() => import("./Events/InvasionBuyoffDialog").then(m => ({ default: m.default })));
 const InvasionFoWDialog = lazy(() => import("./Events/InvasionFoWDialog").then(m => ({ default: m.default })));
+const RebellionAcceptSupportDialog = lazy(() => import("./Events/RebellionAcceptSupportDialog").then(m => ({ default: m.default })));
+const OccupationBattleDialog = lazy(() => import("./Events/OccupationBattleDialog").then(m => ({ default: m.default })));
 const OutpostOrColonyDialog = lazy(() => import("./Conquests/OutpostOrColonyDialog").then(m => ({ default: m.default })));
 const RetrieveFleetsDialog = lazy(() => import("./Resolution/RetrieveFleetsDialog").then(m => ({ default: m.default })));
 
@@ -93,6 +95,18 @@ export const DecisionRouter = memo((props: MyGameProps) => {
       {sub === "rebellion_rival_support" && (
         <Suspense fallback={null}>
           <RebellionRivalSupportDialog {...props} />
+        </Suspense>
+      )}
+
+      {sub === "rebellion_accept_support" && (
+        <Suspense fallback={null}>
+          <RebellionAcceptSupportDialog {...props} />
+        </Suspense>
+      )}
+
+      {sub === "occupation_battle" && (
+        <Suspense fallback={null}>
+          <OccupationBattleDialog {...props} />
         </Suspense>
       )}
 

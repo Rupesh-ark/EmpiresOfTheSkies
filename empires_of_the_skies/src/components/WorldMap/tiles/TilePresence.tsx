@@ -1,6 +1,7 @@
 import React from "react";
 import { Box, Typography } from "@mui/material";
 import { GiChessKnight, GiHelmet, GiShield, GiZeppelin, GiCrossedSwords, GiShieldBounces } from "react-icons/gi";
+import { isRebelOccupied, getOccupyingCounter } from "@eots/game";
 import type { MyGameState } from "@eots/game";
 import { IconColony, IconFort, IconOutpost } from "@/theme";
 
@@ -45,6 +46,20 @@ export const TilePresence: React.FC<TilePresenceProps> = ({ G, x, y }) => {
               <Typography sx={{ fontSize: "0.82rem", fontWeight: 600, color: "#3A2E22" }}>
                 {building.buildings === "outpost" ? "Outpost" : "Colony"}
               </Typography>
+              {isRebelOccupied(building) && (
+                <Typography
+                  sx={{
+                    fontSize: "0.7rem", fontWeight: 700, textTransform: "uppercase",
+                    letterSpacing: "0.05em", color: "#A82E22",
+                    px: 0.75, borderRadius: "3px",
+                    border: "1px solid rgba(168,46,34,0.45)",
+                    backgroundColor: "rgba(168,46,34,0.10)",
+                  }}
+                >
+                  {getOccupyingCounter(building)?.kind === "rebels" ? "Rebel-held" : "Infidel-held"}
+                  {" — no trade or VP until retaken"}
+                </Typography>
+              )}
               <Box sx={{
                 width: 8, height: 8, borderRadius: "50%",
                 backgroundColor: building.player.colour, flexShrink: 0,

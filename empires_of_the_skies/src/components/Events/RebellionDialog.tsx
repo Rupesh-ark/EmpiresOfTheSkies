@@ -9,6 +9,7 @@ const RebellionDialog = (props: MyGameProps) => {
   const rebellion = props.G.currentRebellion;
   const [regiments, setRegiments] = useState(0);
   const [levies, setLevies] = useState(0);
+  const [skyships, setSkyships] = useState(0);
   const [selectedFoW, setSelectedFoW] = useState<number | undefined>(undefined);
 
   if (!rebellion) return null;
@@ -18,9 +19,11 @@ const RebellionDialog = (props: MyGameProps) => {
   if (!player) return null;
   const maxRegiments = player.resources.regiments;
   const maxLevies = player.resources.levies;
+  const maxSkyships = player.resources.skyships;
   const def = EVENT_CARD_DEFS[rebellion.event.card];
 
-  const totalSwords = regiments * 2 + levies;
+  const totalSwords = regiments * 2 + levies + skyships;
+  const totalUnits = regiments + levies + skyships;
   const fowHand = player.resources.fortuneCards;
 
   return (
@@ -30,10 +33,13 @@ const RebellionDialog = (props: MyGameProps) => {
       mood="crisis"
       actions={
         <>
-          <GameButton variant="danger" onClick={() => props.moves.commitRebellionTroops(0, 0)}>
+          <GameButton variant="danger" onClick={() => props.moves.commitRebellionTroops(0, 0, 0)}>
             Surrender
           </GameButton>
-          <GameButton variant="primary" onClick={() => props.moves.commitRebellionTroops(regiments, levies, selectedFoW)}>
+          <GameButton
+            variant="primary"
+            onClick={() => props.moves.commitRebellionTroops(regiments, levies, skyships, selectedFoW)}
+          >
             {totalSwords > 0 ? "Defend!" : "Confirm Surrender"}
           </GameButton>
         </>
@@ -97,9 +103,24 @@ const RebellionDialog = (props: MyGameProps) => {
         sx={{ mb: 2 }}
       />
 
+      <Typography variant="subtitle2" sx={{ mb: 1 }}>
+        Commit Skyships ({skyships} of {maxSkyships})
+      </Typography>
+      <Slider
+        value={skyships}
+        onChange={(_, v) => setSkyships(v as number)}
+        min={0}
+        max={maxSkyships}
+        step={1}
+        marks
+        valueLabelDisplay="auto"
+        disabled={maxSkyships === 0}
+        sx={{ mb: 2 }}
+      />
+
       <FoWCardSelector fowHand={fowHand} selectedIndex={selectedFoW} onSelect={setSelectedFoW} />
 
-      {totalSwords === 0 && (
+      {totalUnits === 0 && (
         <Typography variant="body2" color="error" sx={{ mt: 1, mb: 1 }}>
           Committing no troops means the rebels win automatically!
         </Typography>
