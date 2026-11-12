@@ -1,0 +1,40 @@
+# Runtime config for the frontend image (deploy/web/Dockerfile).
+# HTTPS, the www redirect and hostname routing happen upstream (Cloudflare + the home server's
+# edge Caddy); this container only serves the built files on :80.
+{
+	admin off
+	auto_https off
+}
+
+:80 {
+	root * /srv
+	encode zstd gzip
+
+	# Hashed build assets are cached forever, but only when the file exists:
+	# a 404 must never be cached as immutable (Cloudflare would keep serving it).
+	@immutable {
+		path *.js *.css *.png *.jpg *.jpeg *.gif *.ico *.svg *.woff *.woff2 *.ttf *.eot *.otf *.webp *.glb *.gltf *.mp3 *.wasm
+		file
+	}
+	header @immutable Cache-Control "public, max-age=31536000, immutable"
+
+	@revalidate {
+		not {
+			path *.js *.css *.png *.jpg *.jpeg *.gif *.ico *.svg *.woff *.woff2 *.ttf *.eot *.otf *.webp *.glb *.gltf *.mp3 *.wasm
+			file
+		}
+	}
+	header @revalidate Cache-Control "no-cache, no-store, must-revalidate"
+
+	# SPA fallback for page routes only: a missing asset 404s instead of returning
+	# index.html under a year-long immutable cache header.
+	@spa_route {
+		not path *.js *.css *.png *.jpg *.jpeg *.gif *.ico *.svg *.woff *.woff2 *.ttf *.eot *.otf *.webp *.glb *.gltf *.mp3 *.wasm
+		not file
+	}
+	rewrite @spa_route /index.html
+
+	file_server {
+		precompressed br
+	}
+}
