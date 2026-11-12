@@ -1,0 +1,79 @@
+name: Publish web image
+
+# Builds the frontend and publishes it to GHCR as a Caddy image. The home server polls GHCR
+# and rolls out new :latest images by itself, so nothing here needs access to it.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'empires_of_the_skies/**'
+      - 'packages/game/**'
+      - 'vendor/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      - 'deploy/web/**'
+      - '.github/workflows/deploy-web.yml'
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # version comes from the "packageManager" field in the root package.json
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build frontend
+        run: pnpm --filter empires_of_the_skies build
+        env:
+          VITE_SERVER_URL: https://api.empiresofthesky.com
+
+      # Caddy serves the .br sidecars via `file_server { precompressed br }`;
+      # dynamic zstd/gzip covers clients without brotli support.
+      - name: Precompress assets with brotli
+        run: |
+          sudo apt-get install -y brotli > /dev/null 2>&1 || true
+          find empires_of_the_skies/dist -type f \( -name '*.js' -o -name '*.css' -o -name '*.html' -o -name '*.svg' -o -name '*.json' -o -name '*.txt' \) -exec brotli -k -q 11 {} +
+
+      - name: Stage image context
+        run: |
+          mkdir -p "$RUNNER_TEMP/image"
+          cp deploy/web/Dockerfile deploy/web/Caddyfile "$RUNNER_TEMP/image/"
+          cp -r empires_of_the_skies/dist "$RUNNER_TEMP/image/site"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push image
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ runner.temp }}/image
+          push: true
+          tags: |
+            ghcr.io/rupesh-ark/empiresoftheskies-web:latest
+            ghcr.io/rupesh-ark/empiresoftheskies-web:${{ github.sha }}
+          labels: |
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}

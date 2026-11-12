@@ -10,7 +10,7 @@ Developed as part of a dissertation on digital board game implementation, multip
 
 ## Live Demo
 
-- **Frontend** — [empires-of-the-skies-tan.vercel.app](https://empires-of-the-skies-tan.vercel.app)
+- **Play** — [empiresofthesky.com](https://empiresofthesky.com)
 
 ---
 
@@ -90,7 +90,7 @@ A deeper walkthrough — tracing any flow from UI click to state change and back
 | Multiplayer | boardgame.io server sync over SocketIO |
 | AI Tuning | Python, CMA-ES, Matplotlib |
 | Monorepo | pnpm workspaces |
-| Hosting | Vercel (frontend), VPS via Docker (backend) |
+| Hosting | Self-hosted: Docker images on GHCR, home server behind Cloudflare Tunnel |
 | Testing | Vitest |
 
 ---

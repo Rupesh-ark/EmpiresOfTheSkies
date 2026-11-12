@@ -1,3 +1,0 @@
-eots.rupeshpandey.dev {
-	reverse_proxy eots-server:8000
-}

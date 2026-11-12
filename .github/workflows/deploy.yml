@@ -1,4 +1,7 @@
-name: Deploy EOTS Server
+name: Publish server image
+
+# Builds the game server and publishes it to GHCR. The home server polls GHCR and
+# rolls out new :latest images by itself, so nothing here needs access to it.
 
 on:
   push:
@@ -6,15 +9,15 @@ on:
     paths:
       - 'server/**'
       - 'packages/game/**'
+      - 'vendor/**'
       - 'package.json'
       - 'pnpm-lock.yaml'
       - 'pnpm-workspace.yaml'
-      - 'server/Dockerfile'
-      - 'docker-compose.prod.yml'
       - '.github/workflows/deploy.yml'
+  workflow_dispatch:
 
 jobs:
-  deploy:
+  publish:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -42,28 +45,8 @@ jobs:
           tags: |
             ghcr.io/rupesh-ark/empiresoftheskies:latest
             ghcr.io/rupesh-ark/empiresoftheskies:${{ github.sha }}
+          labels: |
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-
-      - name: Copy docker-compose.prod.yml to VPS
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/deploy_key
-          chmod 600 ~/.ssh/deploy_key
-          ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts
-          scp -i ~/.ssh/deploy_key docker-compose.prod.yml ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/opt/empires-of-the-skies/
-          rm ~/.ssh/deploy_key
-
-      - name: Deploy to VPS
-        uses: appleboy/ssh-action@v1
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_SSH_KEY }}
-          script: |
-            cd /opt/empires-of-the-skies
-            echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-            docker compose -f docker-compose.prod.yml pull eots-server
-            docker compose -f docker-compose.prod.yml up -d eots-server
-            docker compose -f docker-compose.prod.yml up -d pg-backup
-            docker image prune -f
